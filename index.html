@@ -3,195 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>LayersOfPrague — Holešovice</title>
+  <title>LayersOfPrague — test</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="mindar-image-aframe.prod.js"></script>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{--gold:#c9a84c;--gold-lt:#e8c97a}
-    html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Georgia,serif;color:#fff;user-select:none;-webkit-tap-highlight-color:transparent}
-
-    /* Vlastní video element — ne A-Frame */
-    #cam-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
-
-    /* Overlay historická fotka */
-    #overlay-img{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;z-index:2;display:none;pointer-events:none}
-
-    /* A-Frame schovaný — jen pro tracking logiku */
-    #ar-scene-wrap{position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:0}
-
-    #hud{position:fixed;inset:0;z-index:10;pointer-events:none;display:flex;flex-direction:column}
-    #top-bar{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px 12px;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent)}
-    .logo{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
-    .logo span{display:block;font-size:10px;color:rgba(255,255,255,.38);margin-top:2px}
-    #status-pill{padding:5px 12px;border-radius:20px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);transition:all .4s;white-space:nowrap}
-    #status-pill.scanning{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.5);color:var(--gold);animation:pulse 2s infinite}
-    #status-pill.found{background:rgba(72,199,116,.2);border-color:rgba(72,199,116,.6);color:#48c774}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-    #middle{flex:1;display:flex;align-items:center;justify-content:center}
-    #scan-hint{text-align:center;padding:0 32px;font-size:13px;color:rgba(255,255,255,.4);line-height:1.7;transition:opacity .5s}
-    #scan-hint strong{display:block;font-weight:400;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
-    #bottom-panel{padding:0 20px 36px;background:linear-gradient(to top,rgba(0,0,0,.88),transparent);pointer-events:auto}
-    #place-info{margin-bottom:16px;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
-    #place-info.visible{opacity:1;transform:translateY(0)}
-    .place-name{font-size:20px;color:var(--gold-lt)}
-    .place-meta{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:4px}
-    #slider-row{display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .5s .2s}
-    #slider-row.visible{opacity:1}
-    .era{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.32);white-space:nowrap}
-    #opacity-slider{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:3px;background:linear-gradient(to right,var(--gold) var(--val,50%),rgba(255,255,255,.15) var(--val,50%));outline:none}
-    #opacity-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:2.5px solid var(--gold);box-shadow:0 0 8px rgba(201,168,76,.5)}
-    
-    #tracking-box {
-      display: none;
-      position: fixed;
-      inset: 15%;
-      border: 3px solid #48c774;
-      z-index: 6;
-      pointer-events: none;
-      border-radius: 4px;
-      box-shadow: 0 0 0 2000px rgba(0,0,0,0.3);
-      transition: opacity 0.3s;
-    }
-    #tracking-box.visible { display: block; }
-
-    #dbg{position:fixed;bottom:8px;left:8px;z-index:99;font-size:12px;color:yellow;max-width:95vw;word-break:break-all;pointer-events:none;line-height:1.4}
+    body { margin: 0; }
+    #dbg { position: fixed; bottom: 8px; left: 8px; z-index: 99; font-size: 14px; color: yellow; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px; }
   </style>
 </head>
 <body>
 
-<!-- Vlastní video element pro kameru -->
-<video id="cam-video" autoplay muted playsinline></video>
+<a-scene
+  mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; uiLoading: no; uiScanning: no; uiError: no;"
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
+  <a-assets>
+    <img id="card" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.png" />
+  </a-assets>
 
-<!-- Historická fotka overlay -->
-<img id="overlay-img" src="foto/1_holesovice_then.jpg" alt="Holešovice ~1900" />
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-<!-- A-Frame pro MindAR tracking — schovaný, jen logika -->
-<div id="ar-scene-wrap">
-  <a-scene
-    id="ar-scene"
-    embedded
-    mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; autoStart: true; uiLoading: no; uiScanning: no; uiError: no;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-  >
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-    <a-entity mindar-image-target="targetIndex: 0" id="ar-target"></a-entity>
-  </a-scene>
-</div>
+  <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
+    <a-plane src="#card" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
+  </a-entity>
+</a-scene>
 
-<!-- Tracking box -->
-<div id="tracking-box"></div>
-
-<!-- HUD -->
-<div id="hud">
-  <div id="top-bar">
-    <div class="logo">LayersOfPrague<span>AR Beta · Praha 7</span></div>
-    <div id="status-pill" class="scanning">Hledám fasádu…</div>
-  </div>
-  <div id="middle">
-    <div id="scan-hint"><strong>Namiřte na budovu dozorství</strong>Tudor trámy a obloukové okno</div>
-  </div>
-  <div id="bottom-panel">
-    <div id="place-info">
-      <div class="place-name">Přístavní dozorství</div>
-      <div class="place-meta">Holešovický přístav · nedatováno</div>
-    </div>
-    <div id="slider-row">
-      <span class="era">~1900</span>
-      <input type="range" id="opacity-slider" min="0" max="100" value="50" style="--val:50%"/>
-      <span class="era">2026</span>
-    </div>
-  </div>
-</div>
-
-<div id="dbg">načítám... [build 16 - card test]</div>
+<div id="dbg">načítám... [build 17 - pure aframe]</div>
 
 <script>
-  const dbg        = document.getElementById('dbg');
-  const log        = msg => { console.log(msg); dbg.textContent = msg; };
-  const camVideo   = document.getElementById('cam-video');
-  const overlayImg = document.getElementById('overlay-img');
-  const statusPill = document.getElementById('status-pill');
-  const placeInfo  = document.getElementById('place-info');
-  const sliderRow  = document.getElementById('slider-row');
-  const scanHint   = document.getElementById('scan-hint');
-  const slider     = document.getElementById('opacity-slider');
-  const arScene    = document.getElementById('ar-scene');
-  const arTarget   = document.getElementById('ar-target');
+  const dbg = document.getElementById('dbg');
+  const arScene = document.getElementById('ar-scene') || document.querySelector('a-scene');
+  const arTarget = document.getElementById('ar-target');
 
-  // Krok 1: Spusť kameru do našeho vlastního video elementu
-  async function startCamera() {
-    log('Spouštím kameru...');
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      camVideo.srcObject = stream;
-      await camVideo.play();
-      log('Kamera OK — spouštím tracking...');
-      startTracking(stream);
-    } catch(e) {
-      log('Kamera chyba: ' + e.message);
-    }
-  }
+  arScene.addEventListener('arReady', () => { dbg.textContent = 'AR ready — namiř na vizitku'; });
+  arScene.addEventListener('arError', (e) => { dbg.textContent = 'AR chyba: ' + JSON.stringify(e.detail); });
 
-  // Krok 2: Předej stream MindAR přes A-Frame
-  function startTracking(stream) {
-    log('arScene.hasLoaded: ' + arScene.hasLoaded);
-    // Počkej až A-Frame načte scénu
-    // Pokud uz loaded
-    if (arScene.hasLoaded) {
-      log('A-Frame uz loaded');
-      initMindAR();
-    } else {
-      arScene.addEventListener('loaded', () => { log('A-Frame loaded event'); initMindAR(); });
-    }
-  }
-
-  function initMindAR() {
-      log('A-Frame loaded — startAR...');
-      // Nastav video stream do MindAR systému
-      const sysKeys = Object.keys(arScene.systems || {}).join(',').substring(0,80);
-      log('sys: ' + sysKeys);
-      const mindARSystem = arScene.systems['mindar-image-system'];
-      if (mindARSystem) {
-        mindARSystem.video = camVideo;
-        mindARSystem.start();
-        log('MindAR spuštěn');
-      } else {
-        log('MindAR system nenalezen');
-      }
-    });
-  }
-
-  // Target events
-  arTarget.addEventListener('targetFound', () => {
-    log('TARGET NALEZEN!');
-    document.getElementById('tracking-box').classList.add('visible');
-    statusPill.textContent = 'Vrstva aktivní';
-    statusPill.className = 'found';
-    scanHint.style.opacity = '0';
-    overlayImg.style.display = 'block';
-    placeInfo.classList.add('visible');
-    sliderRow.classList.add('visible');
-  });
-
-  arTarget.addEventListener('targetLost', () => {
-    log('Hledám...');
-    document.getElementById('tracking-box').classList.remove('visible');
-    statusPill.textContent = 'Hledám fasádu…';
-    statusPill.className = 'scanning';
-    scanHint.style.opacity = '1';
-    overlayImg.style.display = 'none';
-  });
-
-  slider.addEventListener('input', e => {
-    const v = e.target.value;
-    slider.style.setProperty('--val', v + '%');
-    overlayImg.style.opacity = v / 100;
-  });
-
-  startCamera();
+  arTarget.addEventListener('targetFound', () => { dbg.textContent = 'NALEZENO!'; });
+  arTarget.addEventListener('targetLost',  () => { dbg.textContent = 'Hledám...'; });
 </script>
 </body>
 </html>
