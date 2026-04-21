@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Step Into the Past — Holešovice</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #c0392b;
+      --green: #48c774;
+      --gold: #c9a84c;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'EB Garamond', Georgia, serif;
+    }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+      color: #fff;
+      font-family: var(--mono);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Camera */
+    #cam { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+
+    /* Historical photo */
+    #hist-photo {
+      position: fixed;
+      left: 50%; top: 50%;
+      z-index: 2;
+      pointer-events: none;
+      transform-origin: center center;
+      transition: opacity 0.3s;
+    }
+
+    /* Crosshair */
+    #crosshair {
+      position: fixed; inset: 0; z-index: 3; pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ch-h { position: absolute; width: 100%; height: 1px; background: rgba(180,40,40,0.4); }
+    .ch-v { position: absolute; height: 100%; width: 1px; background: rgba(180,40,40,0.4); }
+    .ch-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(180,40,40,0.8); }
+
+    /* Top bar */
+    #top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+      padding: 14px 16px 10px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .logo { font-family: var(--serif); font-size: 15px; letter-spacing: 0.15em; color: var(--gold); }
+    .logo span { display: block; font-size: 10px; font-family: var(--mono); letter-spacing: 0.1em; color: rgba(255,255,255,0.3); margin-top: 2px; font-style: normal; }
+
+    #status-pill {
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 5px 10px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.3);
+      color: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      transition: all 0.4s;
+    }
+    #status-pill.gps-ok { border-color: rgba(72,199,116,0.5); color: var(--green); background: rgba(72,199,116,0.1); }
+    #status-pill.locked { border-color: rgba(201,168,76,0.5); color: var(--gold); background: rgba(201,168,76,0.1); animation: pulse 2s infinite; }
+    #status-pill.scored { border-color: rgba(72,199,116,0.6); color: var(--green); background: rgba(72,199,116,0.15); animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* Distance indicator */
+    #dist-bar {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      z-index: 10; text-align: center;
+      font-size: 11px; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.5);
+      background: rgba(0,0,0,0.3);
+      padding: 4px 12px; border-radius: 20px;
+      backdrop-filter: blur(4px);
+      transition: all 0.5s;
+    }
+    #dist-bar.close { color: var(--green); border: 1px solid rgba(72,199,116,0.3); }
+    #dist-bar.far { color: var(--red); }
+
+    /* Bottom panel */
+    #bottom-panel {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+      padding: 12px 16px 32px;
+    }
+
+    /* Opacity slider */
+    #slider-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; opacity: 0; transition: opacity 0.5s;
+    }
+    #slider-row.visible { opacity: 1; }
+    .era { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); white-space: nowrap; }
+    #opacity-slider {
+      -webkit-appearance: none; appearance: none; flex: 1; height: 2px; border-radius: 2px;
+      background: linear-gradient(to right, var(--gold) var(--val,77%), rgba(255,255,255,0.15) var(--val,77%));
+      outline: none;
+    }
+    #opacity-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; border: 2px solid var(--gold);
+    }
+
+    /* Lock button */
+    #btn-lock {
+      width: 100%; padding: 14px;
+      background: var(--gold); color: #000;
+      border: none; border-radius: 10px;
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s;
+      display: none;
+    }
+    #btn-lock.visible { display: block; }
+    #btn-lock:active { opacity: 0.8; }
+
+    /* Score overlay */
+    #score-overlay {
+      display: none; position: fixed; inset: 0; z-index: 20;
+      background: rgba(0,0,0,0.92);
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 32px;
+    }
+    #score-overlay.show { display: flex; }
+
+    .score-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+    .score-num {
+      font-family: var(--serif); font-size: 96px; line-height: 1;
+      color: var(--gold); margin-bottom: 4px;
+    }
+    .score-pct { font-size: 24px; color: rgba(255,255,255,0.4); }
+    .score-breakdown {
+      margin: 24px 0; width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 16px;
+    }
+    .score-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; font-size: 12px;
+    }
+    .score-row:last-child { margin-bottom: 0; }
+    .score-key { color: rgba(255,255,255,0.4); }
+    .score-val { color: var(--gold); font-weight: 600; }
+    .score-bar-wrap { flex: 1; margin: 0 12px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+    .score-bar { height: 100%; background: var(--gold); border-radius: 3px; transition: width 1s ease; }
+
+    .place-badge {
+      font-family: var(--serif); font-size: 18px;
+      color: rgba(255,255,255,0.6); margin-bottom: 20px; text-align: center;
+    }
+    .place-badge strong { color: #fff; }
+
+    .btn-share {
+      width: 100%; padding: 14px; margin-bottom: 10px;
+      background: var(--gold); color: #000;
+      border: none; border-radius: 10px;
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer;
+    }
+    .btn-retry {
+      width: 100%; padding: 12px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; color: rgba(255,255,255,0.5);
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    }
+
+    /* Leaderboard */
+    #leaderboard {
+      display: none; position: fixed; inset: 0; z-index: 30;
+      background: rgba(0,0,0,0.96);
+      padding: 28px 16px; overflow-y: auto;
+    }
+    #leaderboard.show { display: block; }
+    .lb-title { font-family: var(--serif); font-size: 22px; color: var(--gold); margin-bottom: 4px; }
+    .lb-sub { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+    .lb-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border-radius: 8px; margin-bottom: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    }
+    .lb-item.me { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
+    .lb-rank { font-size: 18px; width: 32px; text-align: center; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+    .lb-rank.top { color: var(--gold); font-weight: 600; }
+    .lb-info { flex: 1; }
+    .lb-name { font-size: 13px; color: #fff; margin-bottom: 2px; }
+    .lb-date { font-size: 10px; color: rgba(255,255,255,0.3); }
+    .lb-score { font-size: 18px; font-weight: 600; color: var(--gold); }
+    .lb-close {
+      width: 100%; padding: 12px; margin-top: 12px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; color: rgba(255,255,255,0.5);
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer;
+    }
+
+    /* Too far message */
+    #too-far {
+      display: none; position: fixed; inset: 0; z-index: 15;
+      align-items: center; justify-content: center; padding: 32px;
+    }
+    #too-far.show { display: flex; }
+    .too-far-box {
+      text-align: center; background: rgba(0,0,0,0.85);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+      padding: 28px 24px; backdrop-filter: blur(8px);
+    }
+    .too-far-icon { font-size: 36px; margin-bottom: 12px; }
+    .too-far-title { font-family: var(--serif); font-size: 20px; color: #fff; margin-bottom: 8px; }
+    .too-far-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.6; }
+    #too-far-dist { color: var(--red); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<video id="cam" autoplay muted playsinline></video>
+<img id="hist-photo" src="foto/701_holesovice_pristavni_dozorstvi_h.jpg" alt="" />
+
+<div id="crosshair">
+  <div class="ch-h"></div>
+  <div class="ch-v"></div>
+  <div class="ch-dot"></div>
+</div>
+
+<!-- Top bar -->
+<div id="top-bar">
+  <div class="logo">
+    LayersOfPrague
+    <span>Step Into the Past</span>
+  </div>
+  <div id="status-pill">GPS: čekám…</div>
+</div>
+
+<!-- Distance -->
+<div id="dist-bar">— m od místa</div>
+
+<!-- Bottom panel -->
+<div id="bottom-panel">
+  <div id="slider-row">
+    <span class="era">Minulost</span>
+    <input type="range" id="opacity-slider" min="0" max="100" value="77" style="--val:77%" />
+    <span class="era">Přítomnost</span>
+  </div>
+  <button id="btn-lock" onclick="lockAndScore()">📍 Zamknout polohu</button>
+</div>
+
+<!-- Score overlay -->
+<div id="score-overlay">
+  <div class="score-label">Tvoje skóre</div>
+  <div class="score-num" id="score-num">—</div>
+  <div class="score-pct">%</div>
+
+  <div class="score-breakdown">
+    <div class="score-row">
+      <span class="score-key">📍 GPS pozice</span>
+      <div class="score-bar-wrap"><div class="score-bar" id="bar-gps" style="width:0%"></div></div>
+      <span class="score-val" id="val-gps">—</span>
+    </div>
+    <div class="score-row">
+      <span class="score-key">🧭 Směr</span>
+      <div class="score-bar-wrap"><div class="score-bar" id="bar-dir" style="width:0%"></div></div>
+      <span class="score-val" id="val-dir">—</span>
+    </div>
+    <div class="score-row">
+      <span class="score-key">📐 Náklon</span>
+      <div class="score-bar-wrap"><div class="score-bar" id="bar-pitch" style="width:0%"></div></div>
+      <span class="score-val" id="val-pitch">—</span>
+    </div>
+  </div>
+
+  <div class="place-badge" id="place-badge">Načítám žebříček…</div>
+
+  <button class="btn-share" onclick="showLeaderboard()">🏆 Žebříček</button>
+  <button class="btn-retry" onclick="retry()">↺ Zkusit znovu</button>
+</div>
+
+<!-- Leaderboard -->
+<div id="leaderboard">
+  <div class="lb-title">Žebříček</div>
+  <div class="lb-sub">Přístavní dozorství · Holešovice</div>
+  <div id="lb-list"></div>
+  <button class="lb-close" onclick="document.getElementById('leaderboard').classList.remove('show')">← Zpět</button>
+</div>
+
+<!-- Too far -->
+<div id="too-far">
+  <div class="too-far-box">
+    <div class="too-far-icon">🗺</div>
+    <div class="too-far-title">Jsi daleko od místa</div>
+    <div class="too-far-text">Přibliž se na méně než 50 m<br>od budovy dozorství.<br><br>Vzdálenost: <span id="too-far-dist">—</span></div>
+  </div>
+</div>
+
+<script>
+  // ── Calibration data ──
+  const CALIB = {
+    photoId: "701_holesovice_pristavni_dozorstvi_h.jpg",
+    gps: { lat: 50.1054299, lng: 14.4559483 },
+    orientation: { heading: 136, pitch: 175 },
+    photo: { scaleVw: 70, offsetXvw: 0, offsetYvh: 0, perspectiveX: 0, perspectiveY: 8, opacity: 77 }
+  };
+
+  const MAX_DIST_M   = 50;   // max vzdálenost pro hru
+  const IDEAL_DIST_M = 15;   // ideální vzdálenost fotografa
+
+  // ── State ──
+  let gps = null, heading = null, pitch = null;
+  let locked = false;
+
+  // ── DOM ──
+  const cam          = document.getElementById('cam');
+  const histPhoto    = document.getElementById('hist-photo');
+  const statusPill   = document.getElementById('status-pill');
+  const distBar      = document.getElementById('dist-bar');
+  const sliderRow    = document.getElementById('slider-row');
+  const btnLock      = document.getElementById('btn-lock');
+  const opSlider     = document.getElementById('opacity-slider');
+  const scoreOverlay = document.getElementById('score-overlay');
+  const tooFar       = document.getElementById('too-far');
+
+  // ── Camera ──
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+  }).then(s => cam.srcObject = s).catch(() => {});
+
+  // ── Apply calibrated photo position ──
+  function applyCalib() {
+    const p = CALIB.photo;
+    histPhoto.style.width     = p.scaleVw + 'vw';
+    histPhoto.style.opacity   = p.opacity / 100;
+    histPhoto.style.transform = `translate(calc(-50% + ${p.offsetXvw}vw), calc(-50% + ${p.offsetYvh}vh)) perspective(800px) rotateX(${p.perspectiveY}deg) rotateY(${p.perspectiveX}deg)`;
+    opSlider.value = p.opacity;
+    opSlider.style.setProperty('--val', p.opacity + '%');
+  }
+  applyCalib();
+
+  // ── Opacity slider ──
+  opSlider.addEventListener('input', e => {
+    histPhoto.style.opacity = e.target.value / 100;
+    opSlider.style.setProperty('--val', e.target.value + '%');
+  });
+
+  // ── GPS ──
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(pos => {
+      gps = pos.coords;
+      const dist = Math.round(haversine(gps.latitude, gps.longitude, CALIB.gps.lat, CALIB.gps.lng));
+      updateDistUI(dist);
+      if (!locked) {
+        if (dist <= MAX_DIST_M) {
+          statusPill.textContent = dist + ' m · Zarovnej!';
+          statusPill.className = 'gps-ok';
+          tooFar.classList.remove('show');
+          sliderRow.classList.add('visible');
+          btnLock.classList.add('visible');
+        } else {
+          statusPill.textContent = dist + ' m od místa';
+          statusPill.className = '';
+          tooFar.classList.add('show');
+          document.getElementById('too-far-dist').textContent = dist + ' m';
+          sliderRow.classList.remove('visible');
+          btnLock.classList.remove('visible');
+        }
+      }
+    }, () => {
+      statusPill.textContent = 'GPS nedostupné';
+    }, { enableHighAccuracy: true, maximumAge: 3000 });
+  }
+
+  function updateDistUI(dist) {
+    distBar.textContent = dist + ' m od místa';
+    if (dist <= 20) { distBar.className = 'close'; }
+    else if (dist > MAX_DIST_M) { distBar.className = 'far'; }
+    else { distBar.className = ''; }
+  }
+
+  // ── Compass ──
+  function startOrientation() {
+    if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(p => { if (p === 'granted') listenOrientation(); }).catch(() => {});
+    } else { listenOrientation(); }
+  }
+  function listenOrientation() {
+    window.addEventListener('deviceorientation', e => {
+      if (e.alpha !== null) heading = Math.round(e.alpha);
+      if (e.beta  !== null) pitch   = Math.round(e.beta);
+    }, true);
+  }
+  startOrientation();
+
+  // ── Lock & Score ──
+  function lockAndScore() {
+    if (!gps) return;
+    locked = true;
+    statusPill.textContent = 'Zamčeno';
+    statusPill.className = 'locked';
+    btnLock.classList.remove('visible');
+
+    const dist    = haversine(gps.latitude, gps.longitude, CALIB.gps.lat, CALIB.gps.lng);
+    const headDiff = heading !== null ? angleDiff(heading, CALIB.orientation.heading) : 30;
+    const pitchDiff = pitch !== null ? Math.abs(pitch - CALIB.orientation.pitch) : 20;
+
+    // Score components (0-100)
+    const gpsScore   = Math.max(0, 100 - (dist / IDEAL_DIST_M) * 50);
+    const dirScore   = Math.max(0, 100 - (headDiff / 45) * 100);
+    const pitchScore = Math.max(0, 100 - (Math.min(pitchDiff, 30) / 30) * 100);
+
+    const total = Math.round(gpsScore * 0.4 + dirScore * 0.4 + pitchScore * 0.2);
+
+    // Animate score
+    setTimeout(() => {
+      document.getElementById('score-num').textContent = total;
+      document.getElementById('val-gps').textContent   = Math.round(gpsScore) + '%';
+      document.getElementById('val-dir').textContent   = Math.round(dirScore) + '%';
+      document.getElementById('val-pitch').textContent = Math.round(pitchScore) + '%';
+      setTimeout(() => {
+        document.getElementById('bar-gps').style.width   = gpsScore + '%';
+        document.getElementById('bar-dir').style.width   = dirScore + '%';
+        document.getElementById('bar-pitch').style.width = pitchScore + '%';
+      }, 100);
+
+      saveToLeaderboard(total);
+      scoreOverlay.classList.add('show');
+      statusPill.className = 'scored';
+    }, 400);
+  }
+
+  // ── Leaderboard (localStorage top 10) ──
+  const LB_KEY = 'lop_lb_holesovice_v1';
+
+  function saveToLeaderboard(score) {
+    let lb = getLeaderboard();
+    lb.push({ score, date: new Date().toLocaleDateString('cs-CZ'), me: true });
+    lb.sort((a, b) => b.score - a.score);
+    lb = lb.slice(0, 10);
+    try { localStorage.setItem(LB_KEY, JSON.stringify(lb)); } catch(e) {}
+
+    const myRank = lb.findIndex(e => e.me) + 1;
+    const badge  = document.getElementById('place-badge');
+    if (myRank === 1) badge.innerHTML = '🥇 <strong>1. místo!</strong> Nejlepší zarovnání!';
+    else if (myRank === 2) badge.innerHTML = '🥈 <strong>2. místo</strong>';
+    else if (myRank === 3) badge.innerHTML = '🥉 <strong>3. místo</strong>';
+    else badge.innerHTML = `<strong>${myRank}. místo</strong> z ${lb.length} měření`;
+  }
+
+  function getLeaderboard() {
+    try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); } catch(e) { return []; }
+  }
+
+  function showLeaderboard() {
+    const lb   = getLeaderboard();
+    const list = document.getElementById('lb-list');
+    list.innerHTML = '';
+    if (lb.length === 0) {
+      list.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:16px 0">Žádné záznamy</div>';
+    }
+    lb.forEach((e, i) => {
+      const div = document.createElement('div');
+      div.className = 'lb-item' + (e.me ? ' me' : '');
+      div.innerHTML = `
+        <div class="lb-rank ${i < 3 ? 'top' : ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</div>
+        <div class="lb-info">
+          <div class="lb-name">${e.me ? '⭐ Ty' : 'Návštěvník'}</div>
+          <div class="lb-date">${e.date}</div>
+        </div>
+        <div class="lb-score">${e.score}%</div>
+      `;
+      list.appendChild(div);
+    });
+    document.getElementById('leaderboard').classList.add('show');
+  }
+
+  function retry() {
+    locked = false;
+    scoreOverlay.classList.remove('show');
+    statusPill.className = 'gps-ok';
+    btnLock.classList.add('visible');
+    // Remove 'me' flag from last entry
+    let lb = getLeaderboard();
+    lb = lb.map(e => ({ ...e, me: false }));
+    try { localStorage.setItem(LB_KEY, JSON.stringify(lb)); } catch(e) {}
+  }
+
+  // ── Math helpers ──
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function angleDiff(a, b) {
+    const d = Math.abs(a - b) % 360;
+    return d > 180 ? 360 - d : d;
+  }
+</script>
+</body>
+</html>
