@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LoP Calibrator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=EB+Garamond:ital,wght@0,400;1,400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #c0392b;
+      --green: #48c774;
+      --bg: #0a0a0a;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'EB Garamond', Georgia, serif;
+    }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: #fff;
+      font-family: var(--mono);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    #cam { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+
+    #hist-photo {
+      position: fixed;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.5;
+      transform-origin: center center;
+      left: 50%; top: 50%;
+      width: 100vw;
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    #crosshair {
+      position: fixed; inset: 0; z-index: 3; pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ch-h { position: absolute; width: 100%; height: 1px; background: rgba(200,50,50,0.5); }
+    .ch-v { position: absolute; height: 100%; width: 1px; background: rgba(200,50,50,0.5); }
+    .ch-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(200,50,50,0.8); opacity: 1; }
+
+    /* ── Right sidebar ── */
+    #sidebar-left {
+      position: fixed;
+      top: 12px; left: 12px;
+      z-index: 10;
+    }
+    #sidebar-right {
+      position: fixed;
+      top: 12px; right: 12px;
+      z-index: 10;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #gps-pill {
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 0.04em;
+      text-align: left;
+      line-height: 1.5;
+      background: rgba(0,0,0,0.25);
+      padding: 4px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+    }
+    #gps-pill.waiting { color: rgba(255,255,255,0.3); }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.65);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s, color 0.2s;
+    }
+    .icon-btn:active { background: rgba(201,168,76,0.3); color: var(--gold); }
+    #btn-lock { background: rgba(0,0,0,0.65); color: var(--green); border-color: rgba(72,199,116,0.4); }
+    #btn-lock:active { background: rgba(72,199,116,0.25); }
+
+    /* ── Hidden panel (telefon, web, reset) ── */
+    #extra-btns {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      overflow: hidden;
+      max-width: 0;
+      max-height: 40px;
+      transition: max-width 0.4s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    #extra-btns.open {
+      max-width: 300px;
+      opacity: 1;
+    }
+    .extra-btn {
+      padding: 7px 12px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      white-space: nowrap;
+    }
+    .extra-btn:active { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Bottom sliders ── */
+    #controls {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      padding: 10px 14px 24px;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .ctrl-label {
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      width: 52px;
+      flex-shrink: 0;
+    }
+    .ctrl-slider {
+      -webkit-appearance: none; appearance: none;
+      flex: 1;
+      height: 2px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+    }
+    .ctrl-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+    }
+    .btn-step {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-step:active { background: rgba(201,168,76,0.25); color: var(--gold); }
+    .ctrl-val {
+      font-size: 10px;
+      color: var(--gold);
+      width: 40px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── Output panel ── */
+    #output-panel {
+      display: none;
+      position: fixed; inset: 0; z-index: 20;
+      background: rgba(0,0,0,0.96);
+      padding: 32px 20px;
+      overflow-y: auto;
+    }
+    #output-panel.show { display: block; }
+    .out-title { font-family: var(--serif); font-size: 22px; color: var(--gold); margin-bottom: 4px; }
+    .out-sub { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 24px; }
+    .out-block { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .out-block-title { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+    .out-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 12px; }
+    .out-key { color: rgba(255,255,255,0.4); }
+    .out-val { color: var(--gold); font-weight: 600; }
+    .out-code { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; font-size: 11px; line-height: 1.6; color: #7ec8e3; overflow-x: auto; white-space: pre; margin-top: 12px; }
+    .btn-dl { width: 100%; padding: 14px; background: var(--green); color: #000; border: none; border-radius: 8px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-weight: 600; margin-bottom: 10px; }
+    .btn-back { width: 100%; padding: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: rgba(255,255,255,0.5); font-family: var(--mono); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; }
+
+    /* Web picker */
+    #web-picker { display: none; position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,0.96); padding: 24px 16px; overflow-y: auto; }
+    #web-picker.show { display: block; }
+    .wp-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+    .wp-sub { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-bottom: 20px; }
+    .wp-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); margin-bottom: 10px; cursor: pointer; }
+    .wp-item:active { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+    .wp-thumb { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: rgba(255,255,255,0.05); }
+    .wp-name { font-size: 12px; color: #fff; margin-bottom: 2px; }
+    .wp-file { font-size: 10px; color: rgba(255,255,255,0.3); }
+    .wp-close { width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: rgba(255,255,255,0.5); font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; margin-top: 8px; }
+
+    #file-input { display: none; }
+  </style>
+</head>
+<body>
+
+<video id="cam" autoplay muted playsinline></video>
+<img id="hist-photo" src="" alt="" style="display:none" />
+
+<div id="crosshair">
+  <div class="ch-h"></div>
+  <div class="ch-v"></div>
+  <div class="ch-dot"></div>
+</div>
+
+<!-- GPS vlevo nahoře -->
+<div id="sidebar-left">
+  <div id="gps-pill" class="waiting">GPS: čekám…</div>
+</div>
+
+<!-- Tlačítka vpravo nahoře -->
+<div id="sidebar-right">
+  <div id="extra-btns">
+    <button class="extra-btn" onclick="document.getElementById('file-input').click()">📱 Telefon</button>
+    <button class="extra-btn" onclick="showWebPicker()">🌐 Web</button>
+    <button class="extra-btn" onclick="resetAll()">↺ Reset</button>
+  </div>
+  <button class="icon-btn" id="btn-lock" onclick="lockAndExport()">✓</button>
+  <button class="icon-btn" id="btn-gear" onclick="toggleExtra()">⚙</button>
+</div>
+
+<!-- Sliders -->
+<div id="controls">
+  <div class="ctrl-row">
+    <span class="ctrl-label">Průhlednost</span>
+    <button class="btn-step" onclick="step('sl-opacity','val-opacity',0,100,'%',-1)">‹</button>
+    <input type="range" class="ctrl-slider" id="sl-opacity" min="0" max="100" value="50" />
+    <button class="btn-step" onclick="step('sl-opacity','val-opacity',0,100,'%',1)">›</button>
+    <span class="ctrl-val" id="val-opacity">50%</span>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Velikost</span>
+    <button class="btn-step" onclick="step('sl-scale','val-scale',20,200,'%',-1)">‹</button>
+    <input type="range" class="ctrl-slider" id="sl-scale" min="20" max="200" value="100" />
+    <button class="btn-step" onclick="step('sl-scale','val-scale',20,200,'%',1)">›</button>
+    <span class="ctrl-val" id="val-scale">100%</span>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Posun X</span>
+    <button class="btn-step" onclick="step('sl-x','val-x',-50,50,'vw',-1)">‹</button>
+    <input type="range" class="ctrl-slider" id="sl-x" min="-50" max="50" value="0" />
+    <button class="btn-step" onclick="step('sl-x','val-x',-50,50,'vw',1)">›</button>
+    <span class="ctrl-val" id="val-x">0vw</span>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Posun Y</span>
+    <button class="btn-step" onclick="step('sl-y','val-y',-50,50,'vh',-1)">‹</button>
+    <input type="range" class="ctrl-slider" id="sl-y" min="-50" max="50" value="0" />
+    <button class="btn-step" onclick="step('sl-y','val-y',-50,50,'vh',1)">›</button>
+    <span class="ctrl-val" id="val-y">0vh</span>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Perspek. X</span>
+    <button class="btn-step" onclick="step('sl-px','val-px',-45,45,'°',-1)">‹</button>
+    <input type="range" class="ctrl-slider" id="sl-px" min="-45" max="45" value="0" />
+    <button class="btn-step" onclick="step('sl-px','val-px',-45,45,'°',1)">›</button>
+    <span class="ctrl-val" id="val-px">0°</span>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Perspek. Y</span>
+    <button class="btn-step" onclick="step('sl-py','val-py',-45,45,'°',-1)">‹</button>
+    <input type="range" class="ctrl-slider" id="sl-py" min="-45" max="45" value="0" />
+    <button class="btn-step" onclick="step('sl-py','val-py',-45,45,'°',1)">›</button>
+    <span class="ctrl-val" id="val-py">0°</span>
+  </div>
+</div>
+
+<!-- Output panel -->
+<div id="output-panel">
+  <div class="out-title">Kalibrace uložena</div>
+  <div class="out-sub">Step Into the Past · LayersOfPrague</div>
+  <div class="out-block">
+    <div class="out-block-title">📷 Fotografie</div>
+    <div class="out-row"><span class="out-key">Soubor</span><span class="out-val" id="o-photo-id">—</span></div>
+  </div>
+  <div class="out-block">
+    <div class="out-block-title">📍 GPS pozice</div>
+    <div class="out-row"><span class="out-key">Latitude</span><span class="out-val" id="o-lat">—</span></div>
+    <div class="out-row"><span class="out-key">Longitude</span><span class="out-val" id="o-lng">—</span></div>
+    <div class="out-row"><span class="out-key">Přesnost</span><span class="out-val" id="o-acc">—</span></div>
+  </div>
+  <div class="out-block">
+    <div class="out-block-title">🧭 Orientace</div>
+    <div class="out-row"><span class="out-key">Azimut</span><span class="out-val" id="o-azimut">—</span></div>
+    <div class="out-row"><span class="out-key">Náklon</span><span class="out-val" id="o-pitch">—</span></div>
+  </div>
+  <div class="out-block">
+    <div class="out-block-title">🖼 Pozice fotky</div>
+    <div class="out-row"><span class="out-key">Velikost</span><span class="out-val" id="o-scale">—</span></div>
+    <div class="out-row"><span class="out-key">Posun X</span><span class="out-val" id="o-x">—</span></div>
+    <div class="out-row"><span class="out-key">Posun Y</span><span class="out-val" id="o-y">—</span></div>
+    <div class="out-row"><span class="out-key">Perspektiva X</span><span class="out-val" id="o-px">—</span></div>
+    <div class="out-row"><span class="out-key">Perspektiva Y</span><span class="out-val" id="o-py">—</span></div>
+  </div>
+  <div class="out-block">
+    <div class="out-block-title">💾 JSON</div>
+    <div class="out-code" id="o-json"></div>
+  </div>
+  <button class="btn-dl" onclick="downloadJSON()">⬇ Stáhnout JSON</button>
+  <button class="btn-back" onclick="document.getElementById('output-panel').classList.remove('show')">← Zpět na kalibraci</button>
+</div>
+
+<!-- Web picker -->
+<div id="web-picker">
+  <div class="wp-title">Vybrat z webu</div>
+  <div class="wp-sub">Fotografie nahrané na GitHub</div>
+  <div id="wp-list"></div>
+  <button class="wp-close" onclick="document.getElementById('web-picker').classList.remove('show')">← Zpět</button>
+</div>
+
+<input type="file" id="file-input" accept="image/*" />
+
+<script>
+  let gps = null, heading = null, pitch = null, photoLoaded = false;
+  let extraOpen = false;
+
+  const cam       = document.getElementById('cam');
+  const histPhoto = document.getElementById('hist-photo');
+  const gpsPill   = document.getElementById('gps-pill');
+
+  // Camera
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } })
+    .then(s => { cam.srcObject = s; })
+    .catch(e => { gpsPill.textContent = 'Kamera: ' + e.message; });
+
+  // GPS
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(pos => {
+      gps = pos.coords;
+      gpsPill.className = '';
+      gpsPill.textContent = gps.latitude.toFixed(5) + ', ' + gps.longitude.toFixed(5) + ' ±' + Math.round(gps.accuracy) + 'm';
+    }, err => {
+      gpsPill.textContent = 'GPS chyba';
+    }, { enableHighAccuracy: true, maximumAge: 3000 });
+  }
+
+  // Compass
+  function startOrientation() {
+    if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(p => { if (p === 'granted') listenOrientation(); }).catch(() => {});
+    } else { listenOrientation(); }
+  }
+  function listenOrientation() {
+    window.addEventListener('deviceorientation', e => {
+      if (e.alpha !== null) heading = Math.round(e.alpha);
+      if (e.beta  !== null) pitch   = Math.round(e.beta);
+    }, true);
+  }
+  startOrientation();
+
+  // Update photo transform
+  function updatePhoto() {
+    if (!photoLoaded) return;
+    const scale   = document.getElementById('sl-scale').value;
+    const offsetX = document.getElementById('sl-x').value;
+    const offsetY = document.getElementById('sl-y').value;
+    const px      = document.getElementById('sl-px').value;
+    const py      = document.getElementById('sl-py').value;
+    const opacity = document.getElementById('sl-opacity').value / 100;
+    histPhoto.style.opacity   = opacity;
+    histPhoto.style.width     = scale + 'vw';
+    histPhoto.style.perspective = '800px';
+    histPhoto.style.transform = `translate(calc(-50% + ${offsetX}vw), calc(-50% + ${offsetY}vh)) perspective(800px) rotateX(${py}deg) rotateY(${px}deg)`;
+  }
+
+  // Bind sliders
+  ['opacity','scale','x','y','px','py'].forEach(id => {
+    const suffixes = { opacity:'%', scale:'%', x:'vw', y:'vh', px:'°', py:'°' };
+    document.getElementById('sl-' + id).addEventListener('input', e => {
+      document.getElementById('val-' + id).textContent = e.target.value + suffixes[id];
+      updatePhoto();
+    });
+  });
+
+  // Step buttons
+  function step(sliderId, valId, min, max, suffix, dir) {
+    const sl = document.getElementById(sliderId);
+    const val = document.getElementById(valId);
+    let v = Math.max(min, Math.min(max, parseFloat(sl.value) + dir));
+    sl.value = v;
+    val.textContent = v + suffix;
+    updatePhoto();
+  }
+
+  // Toggle extra buttons
+  function toggleExtra() {
+    extraOpen = !extraOpen;
+    document.getElementById('extra-btns').classList.toggle('open', extraOpen);
+    document.getElementById('btn-gear').style.color = extraOpen ? 'var(--gold)' : '';
+  }
+
+  // Reset
+  function resetAll() {
+    const defaults = { opacity: [50,'%'], scale: [100,'%'], x: [0,'vw'], y: [0,'vh'], px: [0,'°'], py: [0,'°'] };
+    Object.entries(defaults).forEach(([id, [v, s]]) => {
+      document.getElementById('sl-' + id).value = v;
+      document.getElementById('val-' + id).textContent = v + s;
+    });
+    updatePhoto();
+  }
+
+  // File load
+  document.getElementById('file-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    histPhoto.src = URL.createObjectURL(file);
+    histPhoto.style.display = 'block';
+    photoLoaded = true;
+    window.currentPhotoId = file.name;
+    updatePhoto();
+  });
+
+  // Web picker
+  const WEB_PHOTOS = [
+    { name: 'Holešovice — Přístavní dozorství', file: 'foto/1_holesovice_then.jpg' },
+  ];
+  function showWebPicker() {
+    const list = document.getElementById('wp-list');
+    list.innerHTML = '';
+    WEB_PHOTOS.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'wp-item';
+      item.innerHTML = `<img class="wp-thumb" src="${p.file}" /><div><div class="wp-name">${p.name}</div><div class="wp-file">${p.file}</div></div>`;
+      item.onclick = () => { histPhoto.src = p.file; histPhoto.style.display = 'block'; photoLoaded = true; window.currentPhotoId = p.file.split('/').pop(); updatePhoto(); document.getElementById('web-picker').classList.remove('show'); };
+      list.appendChild(item);
+    });
+    document.getElementById('web-picker').classList.add('show');
+  }
+
+  // Lock & Export
+  function lockAndExport() {
+    const data = {
+      photoId: window.currentPhotoId || 'neznama.jpg',
+      gps: gps ? { lat: gps.latitude, lng: gps.longitude, accuracy: Math.round(gps.accuracy) } : null,
+      orientation: { heading, pitch },
+      photo: {
+        scaleVw:    parseFloat(document.getElementById('sl-scale').value),
+        offsetXvw:  parseFloat(document.getElementById('sl-x').value),
+        offsetYvh:  parseFloat(document.getElementById('sl-y').value),
+        perspectiveX: parseFloat(document.getElementById('sl-px').value),
+        perspectiveY: parseFloat(document.getElementById('sl-py').value),
+        opacity:    parseFloat(document.getElementById('sl-opacity').value)
+      },
+      timestamp: new Date().toISOString()
+    };
+    document.getElementById('o-photo-id').textContent = data.photoId;
+    document.getElementById('o-lat').textContent    = gps ? gps.latitude.toFixed(7)  : '—';
+    document.getElementById('o-lng').textContent    = gps ? gps.longitude.toFixed(7) : '—';
+    document.getElementById('o-acc').textContent    = gps ? '±' + Math.round(gps.accuracy) + ' m' : '—';
+    document.getElementById('o-azimut').textContent = heading !== null ? heading + '°' : '—';
+    document.getElementById('o-pitch').textContent  = pitch   !== null ? pitch   + '°' : '—';
+    document.getElementById('o-scale').textContent  = data.photo.scaleVw + ' vw';
+    document.getElementById('o-x').textContent      = data.photo.offsetXvw + ' vw';
+    document.getElementById('o-y').textContent      = data.photo.offsetYvh + ' vh';
+    document.getElementById('o-px').textContent = data.photo.perspectiveX + '°';
+    document.getElementById('o-py').textContent = data.photo.perspectiveY + '°';
+    document.getElementById('o-json').textContent   = JSON.stringify(data, null, 2);
+    document.getElementById('output-panel').classList.add('show');
+  }
+
+  // Download JSON
+  function downloadJSON() {
+    const json = document.getElementById('o-json').textContent;
+    const filename = (window.currentPhotoId || 'calibration').replace(/\.[^.]+$/, '') + '_calibration.json';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    a.download = filename;
+    a.click();
+  }
+</script>
+</body>
+</html>
