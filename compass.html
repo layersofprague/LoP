@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kompas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans', sans-serif; background: #e8e4dc; }
+
+/* Mapa — horní 55% obrazovky, pevná, nerotuje */
+#cpMap { position: fixed; top: 0; left: 0; right: 0; height: 55%; z-index: 1; }
+
+/* Spodní panel */
+#panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 45%;
+  background: #f5f1ea;
+  border-top: 1px solid #e2ddd4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 10; padding: 16px;
+}
+
+/* Velký kompas */
+#compass {
+  position: relative;
+  width: min(160px, 38vw);
+  height: min(160px, 38vw);
+  flex-shrink: 0;
+}
+#roseEl  { position: absolute; inset: 0; transition: transform .2s ease-out; }
+#arrowEl { position: absolute; inset: 0; transition: transform .15s ease-out; }
+
+/* Vzdálenost */
+#distRow { display: flex; align-items: baseline; gap: 4px; }
+#distVal  { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: #2a2420; line-height: 1; }
+#distUnit { font-size: 16px; color: #8a857e; }
+#distSteps { font-size: 11px; color: #8a857e; text-transform: uppercase; letter-spacing: .06em; }
+
+/* Horní lišta nad mapou */
+#topBar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(20,18,14,.55) 0%, transparent 100%);
+  pointer-events: none;
+}
+#cpBack {
+  pointer-events: all; height: 34px; padding: 0 12px; border-radius: 17px;
+  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2);
+  color: white; font-size: 13px; font-family: inherit; cursor: pointer; flex-shrink: 0;
+}
+#cpName { font-size: 14px; font-weight: 500; color: white; text-shadow: 0 1px 4px rgba(0,0,0,.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Status */
+#cpStatus { font-size: 12px; color: #8a857e; text-align: center; }
+
+/* Proximity */
+#cpProximity {
+  display: none; width: 100%;
+  background: #b8922a; color: white; border: none; border-radius: 10px;
+  padding: 14px; text-align: center; font-size: 14px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="cpMap"></div>
+
+<div id="topBar">
+  <button id="cpBack">← Zpět</button>
+  <div id="cpName">—</div>
+</div>
+
+<div id="panel">
+
+  <!-- Kompasová růžice + šipka k cíli -->
+  <div id="compass">
+    <!-- Růžice — otáčí se s headingem (sever = kde je sever) -->
+    <svg id="roseEl" viewBox="0 0 160 160">
+      <circle cx="80" cy="80" r="76" fill="white" stroke="#e2ddd4" stroke-width="1.5"/>
+      <circle cx="80" cy="80" r="52" fill="none" stroke="#e2ddd4" stroke-width="1"/>
+      <!-- Čárky po 30° -->
+      <g stroke="#c8c3bb" stroke-width="1">
+        <line x1="80" y1="5"   x2="80" y2="16"/>
+        <line x1="80" y1="144" x2="80" y2="155"/>
+        <line x1="5"  y1="80"  x2="16" y2="80"/>
+        <line x1="144" y1="80" x2="155" y2="80"/>
+        <line x1="28" y1="17"  x2="34" y2="27"/>
+        <line x1="132" y1="133" x2="126" y2="143"/>
+        <line x1="143" y1="28" x2="133" y2="34"/>
+        <line x1="17" y1="132" x2="27" y2="126"/>
+        <line x1="132" y1="17" x2="126" y2="27"/>
+        <line x1="28" y1="133" x2="34" y2="143"/>
+        <line x1="17" y1="28"  x2="27" y2="34"/>
+        <line x1="143" y1="132" x2="133" y2="126"/>
+      </g>
+      <!-- Světové strany -->
+      <text x="80" y="21"  text-anchor="middle" fill="#e05a5a" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">N</text>
+      <text x="80" y="153" text-anchor="middle" fill="#8a857e" font-size="11" font-family="DM Sans,sans-serif">S</text>
+      <text x="153" y="84" text-anchor="middle" fill="#8a857e" font-size="11" font-family="DM Sans,sans-serif">E</text>
+      <text x="7"   y="84" text-anchor="middle" fill="#8a857e" font-size="11" font-family="DM Sans,sans-serif">W</text>
+    </svg>
+
+    <!-- Šipka k cíli — otáčí se na cíl -->
+    <div id="arrowEl">
+      <svg viewBox="0 0 160 160" width="100%" height="100%">
+        <polygon points="80,20 86,85 80,76 74,85" fill="#b8922a"/>
+        <polygon points="80,140 86,75 80,84 74,75" fill="rgba(184,146,42,.2)"/>
+        <circle cx="80" cy="80" r="5" fill="#2a2420" opacity=".5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Vzdálenost -->
+  <div style="text-align:center">
+    <div id="distRow"><span id="distVal">—</span><span id="distUnit"></span></div>
+    <div id="distSteps"></div>
+  </div>
+
+  <div id="cpStatus">Čeká na GPS…</div>
+  <button id="cpProximity" onclick="goToTarget()">Jsi na místě! Otevřít Steps into the Past →</button>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const TARGET = {
+  id:   params.get('id'),
+  lat:  parseFloat(params.get('lat')),
+  lng:  parseFloat(params.get('lng')),
+  name: params.get('name') || '—'
+};
+document.getElementById('cpName').textContent = TARGET.name;
+document.getElementById('cpBack').addEventListener('click', () => history.back());
+
+// ── MAPA — pevná, centrovaná na cíl ──
+const map = L.map('cpMap', {
+  zoomControl: false, attributionControl: false,
+  dragging: false, scrollWheelZoom: false,
+  touchZoom: false, doubleClickZoom: false
+});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 20
+}).addTo(map);
+map.setView([TARGET.lat, TARGET.lng], 17);
+map.whenReady(() => map.invalidateSize());
+
+// Cílový pin
+const tIcon = L.divIcon({
+  html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#6b7280;border:2px solid white;box-shadow:0 0 0 3px #b8922a,0 2px 12px rgba(184,146,42,.5);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:11px;font-weight:700;color:white">H</span></div>`,
+  className: '', iconSize: [34,34], iconAnchor: [17,34]
+});
+L.marker([TARGET.lat, TARGET.lng], { icon: tIcon }).addTo(map);
+let userMarker = null;
+
+// ── SENZORY ──
+let userPos = null, smoothH = null;
+const LP = 0.12;
+
+function lerpAngle(c, t) {
+  if (c === null) return t;
+  let d = t - c;
+  if (d >  180) d -= 360;
+  if (d < -180) d += 360;
+  return (c + LP * d + 360) % 360;
+}
+
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(pos => {
+    userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    const ll = L.latLng(userPos.lat, userPos.lng);
+    if (userMarker) userMarker.setLatLng(ll);
+    else userMarker = L.circleMarker(ll, { radius:9, color:'#2a6e5e', fillColor:'#2a6e5e', fillOpacity:.9, weight:2 }).addTo(map);
+    update();
+  }, () => { document.getElementById('cpStatus').textContent = 'GPS nedostupná.'; },
+  { enableHighAccuracy: true, maximumAge: 1500 });
+}
+
+function startOri() {
+  const h = e => {
+    let deg = null;
+    if      (e.webkitCompassHeading !== undefined) deg = e.webkitCompassHeading;
+    else if (e.absolute && e.alpha !== null)        deg = (360 - e.alpha) % 360;
+    else if (e.alpha !== null)                      deg = (360 - e.alpha) % 360;
+    if (deg !== null) { smoothH = lerpAngle(smoothH, deg); update(); }
+  };
+  window.addEventListener('deviceorientationabsolute', h, true);
+  window.addEventListener('deviceorientation', h, true);
+}
+if (typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function') {
+  DeviceOrientationEvent.requestPermission()
+    .then(s => { if (s === 'granted') startOri(); }).catch(() => startOri());
+} else { startOri(); }
+
+function toRad(d) { return d * Math.PI / 180; }
+function toDeg(r) { return r * 180 / Math.PI; }
+
+function calcBearing(a, b) {
+  const dL = toRad(b.lng - a.lng);
+  const y = Math.sin(dL) * Math.cos(toRad(b.lat));
+  const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) - Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(dL);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+function calcDist(a, b) {
+  const R = 6371000;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const aa = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+}
+
+function update() {
+  if (!userPos) return;
+  const dist = calcDist(userPos, TARGET);
+  const bear = calcBearing(userPos, TARGET);
+  const h = smoothH !== null ? smoothH : 0;
+
+  // Vzdálenost
+  if (dist < 1000) {
+    document.getElementById('distVal').textContent = Math.round(dist);
+    document.getElementById('distUnit').textContent = ' m';
+  } else {
+    document.getElementById('distVal').textContent = (dist/1000).toFixed(1).replace('.',',');
+    document.getElementById('distUnit').textContent = ' km';
+  }
+  const steps = Math.round(dist / 0.75);
+  document.getElementById('distSteps').textContent = steps < 10000 ? `≈ ${steps.toLocaleString('cs')} kroků` : '';
+
+  // Růžice rotuje s headingem — ukazuje kde je sever
+  // heading = kam míří telefon od severu → otočíme růžici o -h (sever se posune)
+  document.getElementById('roseEl').style.transform  = `rotate(${-h}deg)`;
+
+  // Šipka k cíli: absolutní bearing − heading = relativní směr
+  document.getElementById('arrowEl').style.transform = `rotate(${bear - h}deg)`;
+
+  document.getElementById('cpStatus').textContent = '';
+  if (dist <= 25) document.getElementById('cpProximity').style.display = 'block';
+}
+
+function goToTarget() {
+  window.location.href = `step-into-the-past.html?id=${TARGET.id}&lat=${TARGET.lat}&lng=${TARGET.lng}`;
+}
+</script>
+</body>
+</html>
