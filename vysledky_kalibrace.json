@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "note": "Průměr měření 1 a 3 (po kalibraci kompasu osmičkou)",
+  "savedAt": "2026-04-23T12:46:47.036Z",
+  "offsets": {
+    "yaw": -60.64,
+    "pitch": 1.55,
+    "roll": -1.27
+  },
+  "wallAzimut": 345.6027008419423,
+  "side": "a",
+  "referenceAzimut": 345.6027,
+  "measurements": [
+    {
+      "n": 1,
+      "alpha": 286.6,
+      "yaw": -58.96,
+      "pitch": 1.29,
+      "roll": -0.97,
+      "note": "před kalibrací osmičkou"
+    },
+    {
+      "n": 2,
+      "alpha": 38.3,
+      "yaw": 52.99,
+      "pitch": 1.8,
+      "roll": null,
+      "note": "outlier — nekalibrovaný kompas"
+    },
+    {
+      "n": 3,
+      "alpha": 283.5,
+      "yaw": -62.33,
+      "pitch": 1.56,
+      "roll": -1.57,
+      "note": "po kalibraci osmičkou"
+    }
+  ],
+  "quality": {
+    "yawConsistency": "±1.7° (měření 1 a 3)",
+    "pitchDeg": "1.6",
+    "rollDeg": "1.3"
+  }
+}
