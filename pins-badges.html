@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Piny — srdíčka & fajfky</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Inter', system-ui, sans-serif; background: #EEEFEB; color: #1a1a18; padding: 40px 28px 60px; }
+.wrap { max-width: 1100px; margin: 0 auto; }
+h1 { font-family: 'Fraunces', serif; font-weight: 400; font-size: clamp(28px, 4vw, 38px); letter-spacing: -.02em; margin-bottom: 6px; }
+h1 em { font-style: italic; color: #6a6a64; }
+.intro { color: #6a6a64; font-size: 14px; margin-bottom: 28px; max-width: 46em; line-height: 1.55; }
+h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; margin: 32px 0 12px; letter-spacing: -.01em; }
+h2 em { font-style: italic; color: #6a6a64; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.card { background: #fff; border: 1px solid #d6d7d1; border-radius: 14px; padding: 18px 20px 22px; }
+.k { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #9a9a94; margin-bottom: 4px; }
+.t { font-family: 'Fraunces', serif; font-weight: 400; font-size: 17px; letter-spacing: -.01em; margin-bottom: 3px; }
+.t em { font-style: italic; color: #6a6a64; }
+.d { font-size: 12px; color: #6a6a64; line-height: 1.5; margin-bottom: 14px; min-height: 36px; }
+
+/* showcase row - 3 pins, each with its accessory */
+.row { display: flex; gap: 22px; justify-content: center; align-items: center; padding: 14px 0 6px; }
+.pin-wrap { position: relative; }
+.pin { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #EEEFEB; box-shadow: 0 3px 10px rgba(26,24,20,.22); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #fff; position: relative; }
+.pin.hist { background: #4A4A48; }
+.pin.arch { background: #3B5F84; }
+.pin.fun  { background: #E0A020; }
+
+/* accessory base */
+.acc { position: absolute; display:flex; align-items:center; justify-content:center; }
+.cap { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #9a9a94; margin-top: 4px; text-align: center; letter-spacing: .05em; }
+
+/* ========= HEART variants ========= */
+/* H1 - silhouette red, mask from SVG (same as current prod) */
+.h1-acc { top: -6px; right: -6px; width: 16px; height: 16px;
+  background: #b04020;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M12 21s-7-5.5-9.5-10.5C.5 6 4 2.5 7.5 2.5c2 0 3.5 1 4.5 2.5 1-1.5 2.5-2.5 4.5-2.5 3.5 0 7 3.5 5 8C19 15.5 12 21 12 21z'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M12 21s-7-5.5-9.5-10.5C.5 6 4 2.5 7.5 2.5c2 0 3.5 1 4.5 2.5 1-1.5 2.5-2.5 4.5-2.5 3.5 0 7 3.5 5 8C19 15.5 12 21 12 21z'/></svg>") center/contain no-repeat;
+  filter: drop-shadow(0 0 1px #EEEFEB) drop-shadow(0 0 1px #EEEFEB);
+}
+/* H2 - outline heart on white badge */
+.h2-acc { top: -8px; right: -8px; width: 20px; height: 20px; background: #EEEFEB; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.h2-acc svg { width: 11px; height: 11px; color: #b04020; }
+/* H3 - filled heart on white badge */
+.h3-acc { top: -8px; right: -8px; width: 20px; height: 20px; background: #EEEFEB; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.h3-acc svg { width: 11px; height: 11px; fill: #b04020; color: #b04020; }
+/* H4 - heart inside pin top (pin is transparent where heart is?) - use "cut-out" look: heart outline white on pin */
+.h4-acc { top: 50%; left: 50%; transform: translate(-50%,-50%); width: 100%; height: 100%; pointer-events:none; }
+.h4-acc svg { position: absolute; top: 4px; right: 4px; width: 12px; height: 12px; color: rgba(255,255,255,.95); fill: rgba(255,255,255,.95); }
+/* H5 - small heart attached to bottom, like a pendant */
+.h5-acc { bottom: -10px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; }
+.h5-acc svg { width: 16px; height: 16px; fill: #b04020; filter: drop-shadow(0 1px 2px rgba(0,0,0,.25)); }
+/* H6 - outline red heart (no fill), plain */
+.h6-acc { top: -6px; right: -6px; width: 16px; height: 16px; }
+.h6-acc svg { width: 16px; height: 16px; color: #b04020; filter: drop-shadow(0 0 1px #EEEFEB) drop-shadow(0 0 1px #EEEFEB); }
+
+/* ========= CHECK variants ========= */
+/* C1 - solid green circle + white check (current style) */
+.c1-acc { top: -5px; right: -5px; width: 16px; height: 16px; border-radius: 50%; background: #3d7a4a; border: 1.5px solid #EEEFEB; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.c1-acc svg { width: 9px; height: 9px; color: #fff; }
+/* C2 - white circle + green check */
+.c2-acc { top: -5px; right: -5px; width: 16px; height: 16px; border-radius: 50%; background: #EEEFEB; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.c2-acc svg { width: 9px; height: 9px; color: #3d7a4a; }
+/* C3 - bold serifed check mark alone, no background (drop-shadow for contrast) */
+.c3-acc { top: -7px; right: -7px; width: 18px; height: 18px; }
+.c3-acc svg { width: 18px; height: 18px; color: #3d7a4a; stroke-width: 3; filter: drop-shadow(0 0 1.2px #EEEFEB) drop-shadow(0 0 1.2px #EEEFEB) drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+/* C4 - check inside pin on top-right corner */
+.c4-acc { top: 4px; right: 4px; width: 12px; height: 12px; }
+.c4-acc svg { width: 12px; height: 12px; color: rgba(255,255,255,.95); stroke-width: 3; }
+/* C5 - stamp style: serif × inside circle */
+.c5-acc { top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #3d7a4a; border: 1.5px solid #EEEFEB; display: flex; align-items: center; justify-content: center; }
+.c5-acc span { font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; color: #fff; line-height: 1; font-weight: 500; transform: translateY(-.5px); }
+/* C6 - subtle white bar under number "visited" - line through number */
+.c6-acc { position: absolute; top: 50%; left: 20%; right: 20%; height: 2px; background: rgba(255,255,255,.85); transform: translateY(-50%) rotate(-6deg); border-radius: 1px; }
+
+/* combo demo */
+.demo { background: #fff; border: 1px solid #d6d7d1; border-radius: 14px; padding: 22px 24px; margin-top: 22px; }
+.demo-row { display: flex; gap: 34px; justify-content: center; flex-wrap: wrap; padding-top: 12px; }
+.demo-item { text-align: center; }
+.demo-item .pin-wrap { margin: 0 auto; }
+.demo-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6a6a64; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Varianty <em>srdíček a fajfek</em></h1>
+  <p class="intro">Srdíčko = wishlist (místo, které chceš navštívit). Fajfka = navštíveno (máš AR snímek). 6 variant každého — posuzováno na všech třech kategoriích pinu.</p>
+
+  <h2>Srdíčka <em>— wishlist</em></h2>
+  <div class="grid">
+    <div class="card">
+      <div class="k">Heart 01 · aktuální</div>
+      <div class="t">Silueta přes roh</div>
+      <div class="d">Červené srdce volně vedle pinu s papírovým halo. Plakátové.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div><span class="acc h1-acc"></span></div>
+        <div class="pin-wrap"><div class="pin arch">02</div><span class="acc h1-acc"></span></div>
+        <div class="pin-wrap"><div class="pin fun">03</div><span class="acc h1-acc"></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Heart 02</div>
+      <div class="t">Obrys v bílé bublině</div>
+      <div class="d">Outline srdce v papírové kulaté plošce. Clean, jako notification badge.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc h2-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc h2-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc h2-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Heart 03</div>
+      <div class="t">Plné v bílé bublině</div>
+      <div class="d">Plné srdce v bublině. Víc "like" než plán, ale čitelné.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc h3-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc h3-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc h3-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Heart 04</div>
+      <div class="t">Uvnitř pinu</div>
+      <div class="d">Srdce v rohu pinu jako watermark. Diskrétní, nevystřeluje ze siluety.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc h4-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc h4-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc h4-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Heart 05</div>
+      <div class="t">Pendant pod pinem</div>
+      <div class="d">Srdce jako přívěšek dole pod pinem. Připomíná lokátor.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc h5-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc h5-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc h5-acc"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Heart 06</div>
+      <div class="t">Outline silueta</div>
+      <div class="d">Jen obrys srdce u rohu, dvojité papírové halo pro čitelnost.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc h6-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc h6-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc h6-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Fajfky <em>— navštíveno</em></h2>
+  <div class="grid">
+    <div class="card">
+      <div class="k">Check 01 · aktuální</div>
+      <div class="t">Zelený kruh + bílá fajfka</div>
+      <div class="d">Standardní badge. Jasně říká "hotovo".</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc c1-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc c1-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc c1-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Check 02</div>
+      <div class="t">Bílý kruh + zelená fajfka</div>
+      <div class="d">Inverzní — ladí s papírovou paletou, jemnější.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc c2-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc c2-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc c2-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Check 03</div>
+      <div class="t">Samotná fajfka</div>
+      <div class="d">Jen zelená fajfka, žádný podklad. Papírové halo. Nejvíc editorialní.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc c3-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc c3-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc c3-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Check 04</div>
+      <div class="t">Uvnitř pinu</div>
+      <div class="d">Fajfka na místě číslice v rohu. Subtle, jako razítko.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc c4-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc c4-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc c4-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Check 05</div>
+      <div class="t">Serifní ✓ v kruhu</div>
+      <div class="d">Místo univerzální fajfky serifová v italice — editorialní detail, dražší vzhled.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01</div>
+          <span class="acc c5-acc"><span>✓</span></span>
+        </div>
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc c5-acc"><span>✓</span></span>
+        </div>
+        <div class="pin-wrap"><div class="pin fun">03</div>
+          <span class="acc c5-acc"><span>✓</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">Check 06</div>
+      <div class="t">Škrtnutí číslice</div>
+      <div class="d">Místo badge vedle pinu — škrtnutá číslice. Jako na seznamu odškrtnutá položka.</div>
+      <div class="row">
+        <div class="pin-wrap"><div class="pin hist">01<span class="c6-acc"></span></div></div>
+        <div class="pin-wrap"><div class="pin arch">02<span class="c6-acc"></span></div></div>
+        <div class="pin-wrap"><div class="pin fun">03<span class="c6-acc"></span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Jak to vypadá <em>spolu</em></h2>
+  <p class="intro" style="margin-bottom: 0;">Na mapě uvidíš obojí vedle sebe — místo, které chceš (srdce), a místo, kde už jsi byl (fajfka). Výchozí kombinace: Heart 01 + Check 01.</p>
+  <div class="demo">
+    <div class="demo-row">
+      <div class="demo-item">
+        <div class="pin-wrap"><div class="pin hist">01</div><span class="acc h1-acc"></span></div>
+        <div class="demo-label">Plánuji<br/>(wishlist)</div>
+      </div>
+      <div class="demo-item">
+        <div class="pin-wrap"><div class="pin arch">02</div>
+          <span class="acc c1-acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+        </div>
+        <div class="demo-label">Navštíveno<br/>(s AR)</div>
+      </div>
+      <div class="demo-item">
+        <div class="pin-wrap"><div class="pin fun">03</div></div>
+        <div class="demo-label">Bez<br/>příznaku</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

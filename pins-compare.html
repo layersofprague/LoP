@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Piny — varianty modré a žluté</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Inter', system-ui, sans-serif; background: #EEEFEB; color: #1a1a18; padding: 40px 28px 60px; }
+.wrap { max-width: 1100px; margin: 0 auto; }
+h1 { font-family: 'Fraunces', serif; font-weight: 400; font-size: clamp(28px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 6px; }
+h1 em { font-style: italic; color: #6a6a64; }
+.intro { color: #6a6a64; font-size: 14px; margin-bottom: 32px; max-width: 44em; line-height: 1.55; }
+h2.section-h { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; margin: 30px 0 14px; letter-spacing: -.01em; }
+h2.section-h em { font-style: italic; color: #6a6a64; }
+.palette { background: #fff; border: 1px solid #d6d7d1; border-radius: 14px; padding: 22px 24px 24px; margin-bottom: 16px; }
+.p-kick { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #9a9a94; }
+.p-title { font-family: 'Fraunces', serif; font-weight: 400; font-size: 20px; letter-spacing: -.01em; margin-bottom: 3px; }
+.p-title em { font-style: italic; color: #6a6a64; }
+.p-desc { font-size: 12.5px; color: #6a6a64; margin-bottom: 16px; line-height: 1.5; }
+.hero-pins { display: flex; gap: 22px; justify-content: center; padding: 18px 0 14px; }
+.hero-pin { width: 48px; height: 48px; border-radius: 50%; border: 3px solid #EEEFEB; box-shadow: 0 3px 14px rgba(26,24,20,.22); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: #fff; }
+.hexes { display: flex; gap: 14px; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #3a3a36; margin-top: 4px; }
+.hexes span { display: inline-block; min-width: 66px; text-align: center; }
+.map-strip { margin-top: 14px; height: 100px; border-radius: 10px; background: #EEEFEB; position: relative; overflow: hidden; border: 1px solid #d6d7d1;
+  background-image:
+    radial-gradient(ellipse 300px 60px at 20% 80%, #dce4e8 0%, transparent 100%),
+    radial-gradient(ellipse 400px 80px at 75% 40%, #dce4e8 0%, transparent 100%),
+    linear-gradient(90deg, transparent 12%, #fff 12%, #fff 13.4%, transparent 13.4%, transparent 42%, #fff 42%, #fff 43.2%, transparent 43.2%, transparent 68%, #fff 68%, #fff 69.4%, transparent 69.4%),
+    linear-gradient(180deg, transparent 30%, #fff 30%, #fff 32%, transparent 32%, transparent 72%, #fff 72%, #fff 73.6%, transparent 73.6%),
+    linear-gradient(32deg, transparent 48%, #fff 48%, #fff 49%, transparent 49%);
+}
+.map-pin { position:absolute; transform: translate(-50%,-50%); }
+.pin { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #EEEFEB; box-shadow: 0 2px 6px rgba(26,24,20,.22); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: #fff; }
+.map-strip .map-pin:nth-child(1) { left: 11%; top: 62%; }
+.map-strip .map-pin:nth-child(2) { left: 27%; top: 35%; }
+.map-strip .map-pin:nth-child(3) { left: 42%; top: 58%; }
+.map-strip .map-pin:nth-child(4) { left: 56%; top: 28%; }
+.map-strip .map-pin:nth-child(5) { left: 68%; top: 68%; }
+.map-strip .map-pin:nth-child(6) { left: 82%; top: 38%; }
+.map-strip .map-pin:nth-child(7) { left: 93%; top: 62%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Varianty <em>modré a žluté</em></h1>
+  <p class="intro">Historie zůstává grafitová <strong>#4A4A48</strong>. Dole pak 4 varianty modré (architektura) a 4 varianty žluté (zajímavosti) — v kontextu všech tří pinů na mapě.</p>
+
+  <h2 class="section-h">Architektura — <em>varianty modré</em></h2>
+
+  <section class="palette">
+    <div class="p-kick">Modrá 01 · aktuální</div>
+    <div class="p-title">Kobalt <em>— #1F4060</em></div>
+    <div class="p-desc">Klasická hluboká kobaltová. Trochu rezervovaná.</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#1F4060">A</div>
+      <div class="hero-pin" style="background:#E0A020">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">07</div></div>
+    </div>
+  </section>
+
+  <section class="palette">
+    <div class="p-kick">Modrá 02</div>
+    <div class="p-title">Pruská <em>— #264866</em></div>
+    <div class="p-desc">Chladnější, jemně zelenější. Evokuje starý pruský modrotisk (cyanotype).</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#264866">A</div>
+      <div class="hero-pin" style="background:#E0A020">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#264866">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#264866">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#264866">07</div></div>
+    </div>
+  </section>
+
+  <section class="palette">
+    <div class="p-kick">Modrá 03</div>
+    <div class="p-title">Ultramarín <em>— #1E3582</em></div>
+    <div class="p-desc">Sytější, tmavě fialovo-modrá. Nejvýraznější, plakátová.</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#1E3582">A</div>
+      <div class="hero-pin" style="background:#E0A020">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1E3582">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1E3582">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1E3582">07</div></div>
+    </div>
+  </section>
+
+  <section class="palette">
+    <div class="p-kick">Modrá 04</div>
+    <div class="p-title">Denim <em>— #3B5F84</em></div>
+    <div class="p-desc">Světlejší středně modrá. Měkčí, přívětivější.</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#3B5F84">A</div>
+      <div class="hero-pin" style="background:#E0A020">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#3B5F84">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#3B5F84">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#3B5F84">07</div></div>
+    </div>
+  </section>
+
+  <h2 class="section-h">Zajímavosti — <em>varianty žluté</em></h2>
+
+  <section class="palette">
+    <div class="p-kick">Žlutá 01 · aktuální</div>
+    <div class="p-title">Jantar <em>— #E0A020</em></div>
+    <div class="p-desc">Sytá zlatavá. Jasná na bílém papíru, čitelná.</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#1F4060">A</div>
+      <div class="hero-pin" style="background:#E0A020">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#E0A020">07</div></div>
+    </div>
+  </section>
+
+  <section class="palette">
+    <div class="p-kick">Žlutá 02</div>
+    <div class="p-title">Mosaz <em>— #B8902E</em></div>
+    <div class="p-desc">Tlumenější, méně svítivá. Muzejní, klidnější na mapě.</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#1F4060">A</div>
+      <div class="hero-pin" style="background:#B8902E">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#B8902E">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#B8902E">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#B8902E">07</div></div>
+    </div>
+  </section>
+
+  <section class="palette">
+    <div class="p-kick">Žlutá 03</div>
+    <div class="p-title">Safron <em>— #EBAE18</em></div>
+    <div class="p-desc">Výraznější než jantar, teplejší. Plakátová čitelnost.</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#1F4060">A</div>
+      <div class="hero-pin" style="background:#EBAE18">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#EBAE18">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#EBAE18">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#EBAE18">07</div></div>
+    </div>
+  </section>
+
+  <section class="palette">
+    <div class="p-kick">Žlutá 04</div>
+    <div class="p-title">Hořčice <em>— #C48418</em></div>
+    <div class="p-desc">Tmavší, víc k oranžové. Zemitější, méně "svítivá".</div>
+    <div class="hero-pins">
+      <div class="hero-pin" style="background:#4A4A48">H</div>
+      <div class="hero-pin" style="background:#1F4060">A</div>
+      <div class="hero-pin" style="background:#C48418">I</div>
+    </div>
+    <div class="map-strip">
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">01</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">02</div></div>
+      <div class="map-pin"><div class="pin" style="background:#C48418">03</div></div>
+      <div class="map-pin"><div class="pin" style="background:#4A4A48">04</div></div>
+      <div class="map-pin"><div class="pin" style="background:#1F4060">05</div></div>
+      <div class="map-pin"><div class="pin" style="background:#C48418">06</div></div>
+      <div class="map-pin"><div class="pin" style="background:#C48418">07</div></div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
