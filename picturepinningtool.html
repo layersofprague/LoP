@@ -137,7 +137,8 @@
       <div id="map-bottom">
         <div class="mode-btns">
           <div class="mode-btn active" id="mode-btn-a" onclick="setMapMode('a')">🟡 Fasáda A</div>
-          <div class="mode-btn" id="mode-btn-b" onclick="setMapMode('b')">🔵 Fasáda B (volitelná)</div>
+          <div class="mode-btn" id="mode-btn-b" onclick="setMapMode('b')">🔵 Fasáda B</div>
+          <div class="mode-btn" id="mode-btn-c" onclick="setMapMode('c')" style="color:rgba(72,199,116,0.6)">🟢 Fasáda C</div>
           <div class="mode-btn btn-danger" onclick="resetMap()" style="flex:0.5">↺</div>
         </div>
         <div class="facade-section">
@@ -152,6 +153,13 @@
           <div class="points-row">
             <div class="point-chip facade-b-chip" id="chip-b1"><div class="chip-label">Bod 1</div><div class="chip-val" id="cv-b1">—</div></div>
             <div class="point-chip facade-b-chip" id="chip-b2"><div class="chip-label">Bod 2</div><div class="chip-val" id="cv-b2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--green)"></div>Fasáda C (volitelná)</div>
+          <div class="points-row">
+            <div class="point-chip" id="chip-c1" style="border-color:rgba(72,199,116,0.3)"><div class="chip-label" style="color:rgba(72,199,116,0.6)">Bod 1</div><div class="chip-val" id="cv-c1">—</div></div>
+            <div class="point-chip" id="chip-c2" style="border-color:rgba(72,199,116,0.3)"><div class="chip-label" style="color:rgba(72,199,116,0.6)">Bod 2</div><div class="chip-val" id="cv-c2">—</div></div>
           </div>
         </div>
         <div class="btn-row" style="margin-top:8px">
@@ -262,6 +270,7 @@ const S = {
   mapMode: 'a',
   facadeA: [null, null],  // [{lat,lng}, {lat,lng}]
   facadeB: [null, null],
+  facadeC: [null, null],
   lines: [],              // {x1,y1,x2,y2,group:'h'|'v'|'b'}
   lineTool: 'h',
   vp: { h: null, v: null, b: null },
@@ -300,6 +309,9 @@ function setMapMode(m) {
   S.mapMode = m;
   document.getElementById('mode-btn-a').className = 'mode-btn' + (m==='a' ? ' active' : '');
   document.getElementById('mode-btn-b').className = 'mode-btn' + (m==='b' ? ' active-b' : '');
+  document.getElementById('mode-btn-c').className = 'mode-btn' + (m==='c' ? ' active' : '') + (m==='c' ? '' : '');
+  if(m==='c') document.getElementById('mode-btn-c').style.cssText += ';background:rgba(72,199,116,0.15);border-color:#48c774;color:#48c774';
+  else { const el=document.getElementById('mode-btn-c'); el.style.background=''; el.style.borderColor=''; el.style.color='rgba(72,199,116,0.6)'; }
   updateMapHint();
 }
 
@@ -323,14 +335,14 @@ function updateMapHint() {
 function onMapClick(e) {
   const { lat, lng } = e.latlng;
   const m = S.mapMode;
-  const arr = m === 'a' ? S.facadeA : S.facadeB;
+  const arr = m === 'a' ? S.facadeA : m === 'b' ? S.facadeB : S.facadeC;
   const idx = arr[0] ? 1 : 0;
   if (arr[0] && arr[1]) return; // both set
 
   arr[idx] = { lat, lng };
 
   // Marker
-  const color = m === 'a' ? '#c9a84c' : '#4a9eff';
+  const color = m === 'a' ? '#c9a84c' : m === 'b' ? '#4a9eff' : '#48c774';
   const label = m === 'a' ? `A${idx+1}` : `B${idx+1}`;
   const mk = L.circleMarker([lat,lng], { radius:7, color, fillColor:color, fillOpacity:0.9, weight:2 })
     .bindTooltip(label, { permanent:true, direction:'top', offset:[0,-10] }).addTo(map);
@@ -357,9 +369,9 @@ function checkMapComplete() {
 }
 
 function resetMap() {
-  S.facadeA = [null,null]; S.facadeB = [null,null];
+  S.facadeA = [null,null]; S.facadeB = [null,null]; S.facadeC = [null,null];
   mapLayers.forEach(l => map.removeLayer(l)); mapLayers = [];
-  ['a1','a2','b1','b2'].forEach(id => {
+  ['a1','a2','b1','b2','c1','c2'].forEach(id => {
     document.getElementById('chip-'+id).classList.remove('set');
     document.getElementById('cv-'+id).textContent = '—';
   });
