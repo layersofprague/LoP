@@ -2353,15 +2353,27 @@ function initMap() {
     m.on('click', () => openSheet(loc.id));
     m.on('mouseover', () => {
       const c = CAT[loc.cat];
+      const compassUrl = `compass.html?lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}`;
+      const wBtn = isWished(loc.id);
       rt.innerHTML = `
         <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
-          <div style="position:absolute;bottom:8px;left:10px;color:#fff;font-family:'Fraunces',serif;font-style:italic;font-size:18px;">${loc.name[0]}</div>
           <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>
         </div>
         <div class="rt-tip-body">
-          <div class="rt-tip-kick">${c.name} · ${loc.distance}</div>
-          <div class="rt-tip-title">${loc.name}</div>
-          <div class="rt-tip-sub">${loc.area}</div>
+          <div class="rt-tip-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">
+            <span>${loc.name}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${loc.distance}</span>
+          </div>
+          <div class="rt-tip-sub" style="display:flex;gap:6px;margin-top:6px;">
+            <a href="${compassUrl}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-decoration:none;" onclick="event.stopPropagation()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              Kompas
+            </a>
+            <button id="rtWishBtn_${loc.id}" onclick="rtToggleWish(${loc.id}, this); event.stopPropagation();" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:${wBtn ? 'var(--accent)' : 'var(--paper-2)'};border:1px solid ${wBtn ? 'var(--accent)' : 'var(--rule)'};border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:${wBtn ? '#fff' : 'var(--ink-2)'};cursor:pointer;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+              ${wBtn ? 'V plánu' : 'Plán'}
+            </button>
+          </div>
         </div>`;
       const rect = m.getElement().getBoundingClientRect();
       rt.style.left = (rect.left + rect.width/2 - 100) + 'px';
@@ -2388,6 +2400,18 @@ function initMap() {
   buildChips();
   updateWishBadge();
 
+}
+
+/* ═══════════════ TOOLTIP WISHLIST TOGGLE ═══════════════ */
+function rtToggleWish(id, btn) {
+  const now = toggleWish(id);
+  btn.style.background = now ? 'var(--accent)' : 'var(--paper-2)';
+  btn.style.borderColor = now ? 'var(--accent)' : 'var(--rule)';
+  btn.style.color = now ? '#fff' : 'var(--ink-2)';
+  btn.querySelector('svg').setAttribute('fill', now ? 'currentColor' : 'none');
+  btn.querySelector('svg').nextSibling.textContent = now ? 'V plánu' : 'Plán';
+  rebuildMarkers();
+  updateWishBadge();
 }
 
 /* ═══════════════ LOCATE ME — skutečná GPS ═══════════════ */
