@@ -16,7 +16,7 @@
   --rule:#cbcec5;--accent:#b04020;--ok:#3d7a4a;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:#e8e4dc;font-family:'JetBrains Mono',monospace;-webkit-font-smoothing:antialiased}
-#cpMap{position:fixed;inset:0;z-index:1}
+#cpMap{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1}
 
 /* Top bar */
 #topBar{
@@ -76,7 +76,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#e8e4dc;font-family:
 #recenterBtn.locked{color:var(--ok)}
 
 /* North pin */
-#northPin{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:15;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:1px;opacity:.7}
+#northPin{position:fixed;top:58px;left:0;right:0;z-index:15;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:1px;opacity:.7}
 
 /* Cal menu */
 #calMenu{display:none;position:fixed;bottom:80px;right:60px;z-index:50;width:min(260px,calc(100vw - 32px));background:var(--paper);border:1px solid var(--rule);border-radius:12px;box-shadow:0 8px 24px rgba(26,24,20,.15);padding:12px}
@@ -264,12 +264,10 @@ function initMap() {
 // Position compass wrap just above distWrap
 function positionCompass() {
   const wrap = document.getElementById('compassWrap');
-  const distWrap = document.getElementById('distWrap');
-  const dRect = distWrap.getBoundingClientRect();
-  // Bottom of compass = top of distWrap gradient area
-  const compassH = 96;
-  const bottom = window.innerHeight - dRect.top + 8;
-  wrap.style.bottom = bottom + 'px';
+  const bottom = document.getElementById('bottom');
+  // Use offsetHeight which is available after paint
+  const bh = bottom.offsetHeight || 160;
+  wrap.style.bottom = (bh + 4) + 'px';
 }
 
 // ── SENSORS ──
@@ -399,8 +397,9 @@ function loop(){
 window.addEventListener('load',()=>{
   loadCalibration();
   initMap();
-  positionCompass();
   loop();
+  // positionCompass after paint so offsetHeight is correct
+  requestAnimationFrame(()=>requestAnimationFrame(positionCompass));
 });
 window.addEventListener('resize', positionCompass);
 </script>
