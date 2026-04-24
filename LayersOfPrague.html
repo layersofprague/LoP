@@ -1918,7 +1918,7 @@ const LOCATIONS = [
     tip:"Střídání stráže probíhá každou hodinu, slavnostní verze každý den v poledne.",
     facts:[ { k:"Rozloha", v:"70 000 m²" }, { k:"První zmínka", v:"9. stol." } ]
   },
-  { id:5, name:"Holešovický přístav", titleAlt:"Maniny, které uměli lodě", sub:"Holešovice, Praha 7", area:"Přístavní dozorství", lat:50.10543, lng:14.45595, cat:"hist", num:701,
+  { id:5, name:"Holešovický přístav", titleAlt:"Maniny, které uměli lodě", sub:"Holešovice, Praha 7", area:"Přístavní dozorství", lat:50.10543, lng:14.45595, cat:"hist", num:"H001", photoThen:"https://layersofprague.github.io/LoP/foto/h_001ove.jpg",
     yearThen:"~1930", yearNow:"2026", distance:"4.8 km",
     lede:"Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl v letech 1892–1894 umělým vyhloubením bazénu 750 m dlouhého. Secesní budovy přístavního dozorství postavil roku 1906 architekt František Sander. V 90. letech lodní provoz ustal; dnes část areálu tvoří rezidence Prague Marina.",
     steps:[
@@ -2048,17 +2048,27 @@ function toggleFilter() {
   bar.classList.toggle('open');
 }
 
+function pinLabel(num) {
+  const s = String(num);
+  const m = s.match(/^([A-Z]+)(\d+)$/);
+  if (m) {
+    return '<span style="display:flex;flex-direction:column;align-items:center;line-height:1;gap:1px"><span style="font-size:11px;font-weight:700">' + m[1] + '</span><span style="font-size:7px;font-weight:600;opacity:.85">' + m[2] + '</span></span>';
+  }
+  return s;
+}
+
 function pinIconHTML(loc) {
   const visited = loc.visited ? 'visited' : '';
   const wished = isWished(loc.id) ? 'wished' : '';
   const style = TWEAKS.pinStyle;
+  const lbl = pinLabel(loc.num);
   if (style === 'drop') {
-    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:32px; height:32px;"><span style="transform:rotate(45deg)">${loc.num}</span></div>`;
+    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:32px; height:32px;"><span style="transform:rotate(45deg)">${lbl}</span></div>`;
   }
   if (style === 'tag') {
-    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:4px; width:34px; height:26px; font-size:11px;">${loc.num}</div>`;
+    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:4px; width:34px; height:26px; font-size:11px;">${lbl}</div>`;
   }
-  return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}">${loc.num}</div>`;
+  return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}">${lbl}</div>`;
 }
 
 function makeIcon(loc) {
@@ -2343,13 +2353,14 @@ function initMap() {
     m.on('click', () => openSheet(loc.id));
     m.on('mouseover', () => {
       const c = CAT[loc.cat];
+      const tipImg = loc.photoThen
+        ? `<img src="${loc.photoThen}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="${loc.name}"/>`
+        : `<div style="position:absolute;inset:0;background:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'  width=\'100\' height=\'100\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.8\' numOctaves=\'3\'/></filter><rect width=\'100\' height=\'100\' filter=\'url(%23n)\' opacity=\'0.2\'/></svg>');mix-blend-mode:overlay;"></div>
+          <div style="position:absolute;bottom:8px;left:10px;color:#fff;font-family:'Fraunces',serif;font-style:italic;font-size:18px;">${loc.name[0]}</div>
+          <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>`;
       rt.innerHTML = `
-        <div class="rt-tip-img" style="background:
-          linear-gradient(135deg, ${c.color}aa, ${c.color}) ;
-          position:relative;">
-          <div style="position:absolute; inset:0; background: url(&quot;data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence baseFrequency='0.8' numOctaves='3'/></filter><rect width='100' height='100' filter='url(%23n)' opacity='0.2'/></svg>&quot;); mix-blend-mode: overlay;"></div>
-          <div style="position:absolute; bottom:8px; left:10px; color: #fff; font-family: 'Fraunces', serif; font-style: italic; font-size: 18px;">${loc.name[0]}</div>
-          <div style="position:absolute; top:8px; right:10px; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(255,255,255,.7); letter-spacing: .1em;">№ ${loc.num}</div>
+        <div class="rt-tip-img" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
+          ${tipImg}
         </div>
         <div class="rt-tip-body">
           <div class="rt-tip-kick">${c.name} · ${loc.distance}</div>
