@@ -1918,7 +1918,7 @@ const LOCATIONS = [
     tip:"Střídání stráže probíhá každou hodinu, slavnostní verze každý den v poledne.",
     facts:[ { k:"Rozloha", v:"70 000 m²" }, { k:"První zmínka", v:"9. stol." } ]
   },
-  { id:5, name:"Holešovický přístav", titleAlt:"Maniny, které uměli lodě", sub:"Holešovice, Praha 7", area:"Přístavní dozorství", lat:50.10543, lng:14.45595, cat:"hist", num:"H001", photoThen:"https://layersofprague.github.io/LoP/foto/h_001ove.jpg",
+  { id:5, name:"Holešovický přístav", titleAlt:"Maniny, které uměli lodě", sub:"Holešovice, Praha 7", area:"Přístavní dozorství", lat:50.10543, lng:14.45595, cat:"hist", num:"H001", photoThen:"https://layersofprague.github.io/LoP/foto/h_001ove.jpg", photoThumb:"https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg",
     yearThen:"~1930", yearNow:"2026", distance:"4.8 km",
     lede:"Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl v letech 1892–1894 umělým vyhloubením bazénu 750 m dlouhého. Secesní budovy přístavního dozorství postavil roku 1906 architekt František Sander. V 90. letech lodní provoz ustal; dnes část areálu tvoří rezidence Prague Marina.",
     steps:[
@@ -2353,14 +2353,10 @@ function initMap() {
     m.on('click', () => openSheet(loc.id));
     m.on('mouseover', () => {
       const c = CAT[loc.cat];
-      const tipImg = loc.photoThen
-        ? `<img src="${loc.photoThen}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="${loc.name}"/>`
-        : `<div style="position:absolute;inset:0;background:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'  width=\'100\' height=\'100\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.8\' numOctaves=\'3\'/></filter><rect width=\'100\' height=\'100\' filter=\'url(%23n)\' opacity=\'0.2\'/></svg>');mix-blend-mode:overlay;"></div>
-          <div style="position:absolute;bottom:8px;left:10px;color:#fff;font-family:'Fraunces',serif;font-style:italic;font-size:18px;">${loc.name[0]}</div>
-          <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>`;
       rt.innerHTML = `
-        <div class="rt-tip-img" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
-          ${tipImg}
+        <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
+          <div style="position:absolute;bottom:8px;left:10px;color:#fff;font-family:'Fraunces',serif;font-style:italic;font-size:18px;">${loc.name[0]}</div>
+          <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>
         </div>
         <div class="rt-tip-body">
           <div class="rt-tip-kick">${c.name} · ${loc.distance}</div>
@@ -2371,6 +2367,18 @@ function initMap() {
       rt.style.left = (rect.left + rect.width/2 - 100) + 'px';
       rt.style.top = (rect.top - 135) + 'px';
       rt.classList.add('visible');
+      // Lazy-load photo only for this pin, only now
+      if (loc.photoThen) {
+        const imgEl = new Image();
+        imgEl.onload = () => {
+          const box = document.getElementById('rtTipImg');
+          if (box) {
+            imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+            box.insertBefore(imgEl, box.firstChild);
+          }
+        };
+        imgEl.src = loc.photoThumb || loc.photoThen;
+      }
     });
     m.on('mouseout', () => setTimeout(() => rt.classList.remove('visible'), 80));
     rt.addEventListener('mouseenter', () => rt.classList.add('visible'));
@@ -2379,6 +2387,7 @@ function initMap() {
 
   buildChips();
   updateWishBadge();
+
 }
 
 /* ═══════════════ LOCATE ME — skutečná GPS ═══════════════ */
@@ -2438,8 +2447,10 @@ function openSheet(id) {
   hero.innerHTML = `
     <div class="sl-base"><div style="position:absolute; inset:0; background:
       linear-gradient(180deg, #3a2f24 0%, #5a4834 40%, #8c7456 70%, #b8a284 100%);"></div></div>
-    <div class="sl-top" id="slTop"><div style="position:absolute; inset:0; background:
-      linear-gradient(180deg, #1a1814 0%, #3a342c 35%, #6b6558 70%, #9b9484 100%); filter: sepia(.5) contrast(1.1);"></div></div>
+    <div class="sl-top" id="slTop">${loc.photoThen
+      ? `<img src="${loc.photoThen}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;" alt="${loc.name}"/>`
+      : `<div style="position:absolute;inset:0;background:linear-gradient(180deg,#1a1814 0%,#3a342c 35%,#6b6558 70%,#9b9484 100%);filter:sepia(.5) contrast(1.1);"></div>`
+    }</div>
     <div class="sl-divider" id="slDiv"></div>
     <div class="sl-handle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9 4 12l4 3M16 9l4 3-4 3M4 12h16"/></svg>
