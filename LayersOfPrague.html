@@ -2390,7 +2390,7 @@ function locateMe() {
       // přidej modrý puntík
       window._userMarker = L.circleMarker(loc, {
         radius: 8,
-        fillColor: '#3B5F84',
+        fillColor: '#b04020',
         color: '#fff',
         weight: 2.5,
         fillOpacity: 0.95,
@@ -2398,6 +2398,7 @@ function locateMe() {
       }).addTo(window._map);
 
       window._map.setView(loc, 16);
+      setTimeout(() => window._map.invalidateSize(), 100);
       if (btn) btn.style.opacity = '1';
       applyFilter();
     },
