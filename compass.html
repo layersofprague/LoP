@@ -486,7 +486,14 @@ navigator.geolocation && navigator.geolocation.watchPosition(
     setStatus('gps', 'GPS aktivní');
     update();
   },
-  () => setStatus('warn', 'GPS nedostupná'),
+  err => {
+    const msgs = {
+      1: 'Poloha blokována — povol v 🔒 adresním řádku',
+      2: 'Polohu nelze určit',
+      3: 'Vypršel časový limit GPS'
+    };
+    setStatus('warn', msgs[err.code] || 'GPS nedostupná');
+  },
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
 
