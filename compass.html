@@ -2,131 +2,229 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kompas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Kompas · LoP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans', sans-serif; background: #e8e4dc; }
-
-/* Mapa — horní 55% obrazovky, pevná, nerotuje */
-#cpMap { position: fixed; top: 0; left: 0; right: 0; height: 55%; z-index: 1; }
-
-/* Spodní panel */
-#panel {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  height: 45%;
-  background: #f5f1ea;
-  border-top: 1px solid #e2ddd4;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 16px; z-index: 10; padding: 16px;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --paper: #eeefeb;
+  --paper-2: #e6e7e2;
+  --paper-3: #dadcd4;
+  --ink: #1a1a18;
+  --ink-2: #3a3a36;
+  --ink-3: #6a6a64;
+  --ink-4: #9a9a94;
+  --rule: #cbcec5;
+  --accent: #b04020;
+  --ok: #3d7a4a;
+  --gold: #b8922a;
+  --mono: 'JetBrains Mono', monospace;
+  --serif: 'Fraunces', serif;
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Velký kompas */
-#compass {
-  position: relative;
-  width: min(160px, 38vw);
-  height: min(160px, 38vw);
-  flex-shrink: 0;
-}
-#roseEl  { position: absolute; inset: 0; transition: transform .2s ease-out; }
-#arrowEl { position: absolute; inset: 0; transition: transform .15s ease-out; }
-
-/* Vzdálenost */
-#distRow { display: flex; align-items: baseline; gap: 4px; }
-#distVal  { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: #2a2420; line-height: 1; }
-#distUnit { font-size: 16px; color: #8a857e; }
-#distSteps { font-size: 11px; color: #8a857e; text-transform: uppercase; letter-spacing: .06em; }
-
-/* Horní lišta nad mapou */
+/* ── TOP BAR ── */
 #topBar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 20;
-  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
-  background: linear-gradient(180deg, rgba(20,18,14,.55) 0%, transparent 100%);
-  pointer-events: none;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
 }
 #cpBack {
-  pointer-events: all; height: 34px; padding: 0 12px; border-radius: 17px;
-  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2);
-  color: white; font-size: 13px; font-family: inherit; cursor: pointer; flex-shrink: 0;
+  flex-shrink: 0;
+  height: 34px; padding: 0 12px; border-radius: 17px;
+  background: var(--paper-2); border: 1px solid var(--rule);
+  color: var(--ink-2); font-size: 12px;
+  font-family: var(--mono); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
 }
-#cpName { font-size: 14px; font-weight: 500; color: white; text-shadow: 0 1px 4px rgba(0,0,0,.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#cpBack svg { width: 12px; height: 12px; }
+#cpName {
+  flex: 1;
+  font-family: var(--serif);
+  font-size: 16px; font-weight: 500;
+  color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#calBadge {
+  flex-shrink: 0;
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 10px;
+  border: 1px solid var(--rule);
+  color: var(--ink-4);
+  display: flex; align-items: center; gap: 4px;
+}
+#calBadge.ok { color: var(--ok); border-color: rgba(61,122,74,.4); background: rgba(61,122,74,.06); }
+#calBadge.off { color: var(--ink-4); }
 
-/* Status */
-#cpStatus { font-size: 12px; color: #8a857e; text-align: center; }
+/* ── MAP ── */
+#mapWrap {
+  position: fixed; top: 57px; left: 0; right: 0;
+  height: 38vh;
+  border-bottom: 1px solid var(--rule);
+  transition: height .35s cubic-bezier(.22,.8,.36,1);
+}
+#mapWrap.collapsed { height: 0; border-bottom: none; }
+#cpMap { width: 100%; height: 100%; }
 
-/* Proximity */
-#cpProximity {
-  display: none; width: 100%;
-  background: #b8922a; color: white; border: none; border-radius: 10px;
-  padding: 14px; text-align: center; font-size: 14px; font-weight: 500;
-  font-family: inherit; cursor: pointer;
+/* ── MAP TOGGLE ── */
+#mapToggle {
+  position: fixed; z-index: 15;
+  left: 50%; transform: translateX(-50%);
+  top: calc(57px + 38vh - 1px);
+  transition: top .35s cubic-bezier(.22,.8,.36,1);
+  width: 48px; height: 22px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: none;
+  border-radius: 0 0 24px 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--ink-3);
+}
+#mapToggle.collapsed {
+  top: 56px;
+  border-top: 1px solid var(--rule);
+  border-radius: 0 0 24px 24px;
+}
+#mapToggle svg { width: 12px; height: 12px; transition: transform .3s; }
+#mapToggle.collapsed svg { transform: rotate(180deg); }
+
+/* ── INSTRUMENT PANEL ── */
+#panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  top: calc(57px + 38vh + 21px);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 20px 24px;
+  gap: 12px;
+  overflow: hidden;
+  transition: top .35s cubic-bezier(.22,.8,.36,1);
+}
+#panel.expanded {
+  top: calc(57px + 21px);
+}
+
+/* Compass canvas wrap */
+#compassWrap {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+canvas#compassCanvas {
+  max-width: min(260px, 80vw);
+  max-height: min(260px, 80vw);
+  width: 100%; height: auto;
+  aspect-ratio: 1;
+}
+
+/* Distance row */
+#distWrap {
+  display: flex; align-items: baseline; gap: 8px;
+  flex-shrink: 0;
+}
+#distVal {
+  font-family: var(--serif);
+  font-size: 48px; font-weight: 400; line-height: 1;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+#distUnit { font-size: 16px; color: var(--ink-3); }
+#distSteps {
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-4);
+  flex-shrink: 0;
+}
+
+/* Status row */
+#statusRow {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-4);
+  flex-shrink: 0;
+}
+#statusDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-4);
+}
+#statusDot.gps { background: var(--ok); }
+#statusDot.warn { background: var(--gold); }
+
+/* Proximity CTA */
+#proximityBtn {
+  display: none;
+  width: 100%; padding: 16px;
+  border-radius: 12px; border: none;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  cursor: pointer;
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(176,64,32,.4); }
+  50% { box-shadow: 0 0 0 8px rgba(176,64,32,0); }
 }
 </style>
 </head>
 <body>
 
-<div id="cpMap"></div>
-
 <div id="topBar">
-  <button id="cpBack">← Zpět</button>
+  <button id="cpBack" onclick="history.back()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+    Zpět
+  </button>
   <div id="cpName">—</div>
+  <div id="calBadge">
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+    <span id="calBadgeTxt">nekalibrováno</span>
+  </div>
 </div>
 
+<div id="mapWrap">
+  <div id="cpMap"></div>
+</div>
+
+<button id="mapToggle" onclick="toggleMap()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
 <div id="panel">
-
-  <!-- Kompasová růžice + šipka k cíli -->
-  <div id="compass">
-    <!-- Růžice — otáčí se s headingem (sever = kde je sever) -->
-    <svg id="roseEl" viewBox="0 0 160 160">
-      <circle cx="80" cy="80" r="76" fill="white" stroke="#e2ddd4" stroke-width="1.5"/>
-      <circle cx="80" cy="80" r="52" fill="none" stroke="#e2ddd4" stroke-width="1"/>
-      <!-- Čárky po 30° -->
-      <g stroke="#c8c3bb" stroke-width="1">
-        <line x1="80" y1="5"   x2="80" y2="16"/>
-        <line x1="80" y1="144" x2="80" y2="155"/>
-        <line x1="5"  y1="80"  x2="16" y2="80"/>
-        <line x1="144" y1="80" x2="155" y2="80"/>
-        <line x1="28" y1="17"  x2="34" y2="27"/>
-        <line x1="132" y1="133" x2="126" y2="143"/>
-        <line x1="143" y1="28" x2="133" y2="34"/>
-        <line x1="17" y1="132" x2="27" y2="126"/>
-        <line x1="132" y1="17" x2="126" y2="27"/>
-        <line x1="28" y1="133" x2="34" y2="143"/>
-        <line x1="17" y1="28"  x2="27" y2="34"/>
-        <line x1="143" y1="132" x2="133" y2="126"/>
-      </g>
-      <!-- Světové strany -->
-      <text x="80" y="21"  text-anchor="middle" fill="#e05a5a" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">N</text>
-      <text x="80" y="153" text-anchor="middle" fill="#8a857e" font-size="11" font-family="DM Sans,sans-serif">S</text>
-      <text x="153" y="84" text-anchor="middle" fill="#8a857e" font-size="11" font-family="DM Sans,sans-serif">E</text>
-      <text x="7"   y="84" text-anchor="middle" fill="#8a857e" font-size="11" font-family="DM Sans,sans-serif">W</text>
-    </svg>
-
-    <!-- Šipka k cíli — otáčí se na cíl -->
-    <div id="arrowEl">
-      <svg viewBox="0 0 160 160" width="100%" height="100%">
-        <polygon points="80,20 86,85 80,76 74,85" fill="#b8922a"/>
-        <polygon points="80,140 86,75 80,84 74,75" fill="rgba(184,146,42,.2)"/>
-        <circle cx="80" cy="80" r="5" fill="#2a2420" opacity=".5"/>
-      </svg>
-    </div>
+  <div id="compassWrap">
+    <canvas id="compassCanvas" width="520" height="520"></canvas>
   </div>
 
-  <!-- Vzdálenost -->
-  <div style="text-align:center">
-    <div id="distRow"><span id="distVal">—</span><span id="distUnit"></span></div>
-    <div id="distSteps"></div>
+  <div id="distWrap">
+    <span id="distVal">—</span>
+    <span id="distUnit"></span>
+    <span id="distSteps"></span>
   </div>
 
-  <div id="cpStatus">Čeká na GPS…</div>
-  <button id="cpProximity" onclick="goToTarget()">Jsi na místě! Otevřít Steps into the Past →</button>
+  <div id="statusRow">
+    <span id="statusDot"></span>
+    <span id="statusTxt">Čeká na GPS…</span>
+  </div>
+
+  <button id="proximityBtn" onclick="goToTarget()">
+    Jsi na místě — otevřít AR →
+  </button>
 </div>
 
 <script>
+// ── PARAMS ──
 const params = new URLSearchParams(location.search);
 const TARGET = {
   id:   params.get('id'),
@@ -135,116 +233,312 @@ const TARGET = {
   name: params.get('name') || '—'
 };
 document.getElementById('cpName').textContent = TARGET.name;
-document.getElementById('cpBack').addEventListener('click', () => history.back());
 
-// ── MAPA — pevná, centrovaná na cíl ──
-const map = L.map('cpMap', {
-  zoomControl: false, attributionControl: false,
-  dragging: false, scrollWheelZoom: false,
-  touchZoom: false, doubleClickZoom: false
-});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  subdomains: 'abcd', maxZoom: 20
-}).addTo(map);
-map.setView([TARGET.lat, TARGET.lng], 17);
-map.whenReady(() => map.invalidateSize());
+// ── CALIBRATION ──
+let yawOffset = 0;
+(function loadCalibration() {
+  try {
+    const disabled = localStorage.getItem('lop_sensor_calibration_disabled');
+    const cal = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null');
+    const badge = document.getElementById('calBadge');
+    const txt = document.getElementById('calBadgeTxt');
+    if (cal && disabled !== '1') {
+      yawOffset = cal.offsets?.yaw || 0;
+      badge.classList.add('ok');
+      const d = new Date(cal.savedAt);
+      txt.textContent = 'kalibrováno ' + d.toLocaleDateString('cs-CZ');
+    } else if (cal && disabled === '1') {
+      txt.textContent = 'kalibrace vypnuta';
+    } else {
+      txt.textContent = 'nekalibrováno';
+    }
+  } catch(e) {}
+})();
 
-// Cílový pin
-const tIcon = L.divIcon({
-  html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#6b7280;border:2px solid white;box-shadow:0 0 0 3px #b8922a,0 2px 12px rgba(184,146,42,.5);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:11px;font-weight:700;color:white">H</span></div>`,
-  className: '', iconSize: [34,34], iconAnchor: [17,34]
-});
-L.marker([TARGET.lat, TARGET.lng], { icon: tIcon }).addTo(map);
-let userMarker = null;
+// ── MAP ──
+let map, userMarker = null, mapVisible = true;
 
-// ── SENZORY ──
-let userPos = null, smoothH = null;
-const LP = 0.12;
+function initMap() {
+  map = L.map('cpMap', {
+    zoomControl: false, attributionControl: false,
+    dragging: true, scrollWheelZoom: false,
+    touchZoom: true, doubleClickZoom: false
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd', maxZoom: 20
+  }).addTo(map);
 
-function lerpAngle(c, t) {
-  if (c === null) return t;
-  let d = t - c;
-  if (d >  180) d -= 360;
-  if (d < -180) d += 360;
-  return (c + LP * d + 360) % 360;
+  // Target pin
+  const tIcon = L.divIcon({
+    html: `<div style="width:30px;height:30px;border-radius:50%;background:#1a1a18;border:2px solid #eeefeb;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#eeefeb;">${TARGET.id || '?'}</div>`,
+    className: '', iconSize: [30,30], iconAnchor: [15,15]
+  });
+  L.marker([TARGET.lat, TARGET.lng], { icon: tIcon }).addTo(map);
+  map.setView([TARGET.lat, TARGET.lng], 17);
+  setTimeout(() => map.invalidateSize(), 200);
 }
 
-if (navigator.geolocation) {
-  navigator.geolocation.watchPosition(pos => {
+function toggleMap() {
+  mapVisible = !mapVisible;
+  document.getElementById('mapWrap').classList.toggle('collapsed', !mapVisible);
+  document.getElementById('mapToggle').classList.toggle('collapsed', !mapVisible);
+  document.getElementById('panel').classList.toggle('expanded', !mapVisible);
+  document.getElementById('mapToggle').style.top = mapVisible
+    ? 'calc(57px + 38vh - 1px)'
+    : '56px';
+  setTimeout(() => map && map.invalidateSize(), 370);
+}
+
+// ── SENSORS ──
+let userPos = null;
+let smoothH = null;
+const LP = 0.12;
+
+function lerpAngle(cur, target) {
+  if (cur === null) return target;
+  let d = target - cur;
+  if (d >  180) d -= 360;
+  if (d < -180) d += 360;
+  return (cur + LP * d + 360) % 360;
+}
+
+// GPS
+navigator.geolocation && navigator.geolocation.watchPosition(
+  pos => {
     userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     const ll = L.latLng(userPos.lat, userPos.lng);
     if (userMarker) userMarker.setLatLng(ll);
-    else userMarker = L.circleMarker(ll, { radius:9, color:'#2a6e5e', fillColor:'#2a6e5e', fillOpacity:.9, weight:2 }).addTo(map);
+    else userMarker = L.circleMarker(ll, {
+      radius: 8, color: '#fff', fillColor: '#b04020',
+      fillOpacity: .95, weight: 2
+    }).addTo(map);
+    setStatus('gps', 'GPS aktivní');
     update();
-  }, () => { document.getElementById('cpStatus').textContent = 'GPS nedostupná.'; },
-  { enableHighAccuracy: true, maximumAge: 1500 });
+  },
+  () => setStatus('warn', 'GPS nedostupná'),
+  { enableHighAccuracy: true, maximumAge: 1500 }
+);
+
+// Orientation
+function startOrientation() {
+  const handler = e => {
+    let raw = null;
+    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+    else if (e.absolute && e.alpha !== null) raw = (360 - e.alpha) % 360;
+    else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
+    if (raw !== null) {
+      // Apply calibration offset
+      const corrected = (raw - yawOffset + 360) % 360;
+      smoothH = lerpAngle(smoothH, corrected);
+    }
+  };
+  window.addEventListener('deviceorientationabsolute', handler, true);
+  window.addEventListener('deviceorientation', handler, true);
 }
 
-function startOri() {
-  const h = e => {
-    let deg = null;
-    if      (e.webkitCompassHeading !== undefined) deg = e.webkitCompassHeading;
-    else if (e.absolute && e.alpha !== null)        deg = (360 - e.alpha) % 360;
-    else if (e.alpha !== null)                      deg = (360 - e.alpha) % 360;
-    if (deg !== null) { smoothH = lerpAngle(smoothH, deg); update(); }
-  };
-  window.addEventListener('deviceorientationabsolute', h, true);
-  window.addEventListener('deviceorientation', h, true);
-}
 if (typeof DeviceOrientationEvent !== 'undefined' &&
     typeof DeviceOrientationEvent.requestPermission === 'function') {
-  DeviceOrientationEvent.requestPermission()
-    .then(s => { if (s === 'granted') startOri(); }).catch(() => startOri());
-} else { startOri(); }
+  // iOS 13+ — needs user gesture; trigger on first touch
+  const unlock = () => {
+    DeviceOrientationEvent.requestPermission()
+      .then(s => { if (s === 'granted') startOrientation(); })
+      .catch(() => startOrientation());
+    document.removeEventListener('touchstart', unlock);
+  };
+  document.addEventListener('touchstart', unlock, { once: true });
+} else {
+  startOrientation();
+}
 
+// ── MATH ──
 function toRad(d) { return d * Math.PI / 180; }
 function toDeg(r) { return r * 180 / Math.PI; }
 
 function calcBearing(a, b) {
   const dL = toRad(b.lng - a.lng);
   const y = Math.sin(dL) * Math.cos(toRad(b.lat));
-  const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) - Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(dL);
+  const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat))
+          - Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(dL);
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
 
 function calcDist(a, b) {
   const R = 6371000;
   const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
-  const aa = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+  const h = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
 }
 
-function update() {
-  if (!userPos) return;
-  const dist = calcDist(userPos, TARGET);
-  const bear = calcBearing(userPos, TARGET);
-  const h = smoothH !== null ? smoothH : 0;
+// ── CANVAS COMPASS ──
+const canvas = document.getElementById('compassCanvas');
+const ctx = canvas.getContext('2d');
+const S = 520; // canvas resolution
 
-  // Vzdálenost
+function drawCompass(heading, bearing, hasFix) {
+  ctx.clearRect(0, 0, S, S);
+  const cx = S/2, cy = S/2, R = S/2 - 12;
+
+  // Outer ring
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
+  ctx.strokeStyle = '#cbcec5'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Inner ring
+  ctx.beginPath(); ctx.arc(cx, cy, R * .62, 0, Math.PI*2);
+  ctx.strokeStyle = '#e6e7e2'; ctx.lineWidth = 1; ctx.stroke();
+
+  // Tick marks — rotated with heading (rose rotates, showing where north is)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-heading * Math.PI / 180);
+  for (let i = 0; i < 72; i++) {
+    const a = i * 5 * Math.PI / 180;
+    const isMajor = i % 9 === 0;
+    const isMid = i % 3 === 0;
+    const inner = isMajor ? R - 22 : isMid ? R - 14 : R - 9;
+    ctx.beginPath();
+    ctx.moveTo(Math.sin(a) * inner, -Math.cos(a) * inner);
+    ctx.lineTo(Math.sin(a) * R, -Math.cos(a) * R);
+    ctx.strokeStyle = isMajor ? '#6a6a64' : isMid ? '#b8bcb0' : '#dadcd4';
+    ctx.lineWidth = isMajor ? 1.5 : 1;
+    ctx.stroke();
+  }
+
+  // Cardinal labels — rotate with rose
+  const cardinals = [['N', 0, '#b04020'], ['E', 90, '#6a6a64'], ['S', 180, '#6a6a64'], ['W', 270, '#6a6a64']];
+  cardinals.forEach(([l, d, color]) => {
+    const a = d * Math.PI / 180;
+    const r = R - 34;
+    ctx.fillStyle = color;
+    ctx.font = `600 ${l === 'N' ? 22 : 17}px JetBrains Mono`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(l, Math.sin(a) * r, -Math.cos(a) * r);
+  });
+
+  ctx.restore();
+
+  // Target bearing arrow — fixed, pointing to target relative to heading
+  if (hasFix) {
+    const relBear = (bearing - heading + 360) % 360;
+    const ra = relBear * Math.PI / 180;
+    const arrowR = R * .52;
+    const tipX = cx + Math.sin(ra) * arrowR;
+    const tipY = cy - Math.cos(ra) * arrowR;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(ra);
+
+    // Arrow body
+    const grad = ctx.createLinearGradient(0, -arrowR * .85, 0, arrowR * .35);
+    grad.addColorStop(0, '#1a1a18');
+    grad.addColorStop(1, 'rgba(26,26,24,.0)');
+    ctx.beginPath();
+    ctx.moveTo(0, -arrowR * .85);   // tip
+    ctx.lineTo(8, -arrowR * .45);
+    ctx.lineTo(4, -arrowR * .45);
+    ctx.lineTo(4, arrowR * .35);
+    ctx.lineTo(-4, arrowR * .35);
+    ctx.lineTo(-4, -arrowR * .45);
+    ctx.lineTo(-8, -arrowR * .45);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Tail (opposite, faded)
+    ctx.beginPath();
+    ctx.moveTo(0, arrowR * .45);
+    ctx.lineTo(5, arrowR * .35);
+    ctx.lineTo(3, arrowR * .35);
+    ctx.lineTo(3, arrowR * .42);
+    ctx.lineTo(-3, arrowR * .42);
+    ctx.lineTo(-3, arrowR * .35);
+    ctx.lineTo(-5, arrowR * .35);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(26,26,24,.12)';
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // Center cap
+  ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#cbcec5'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Center dot
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2);
+  ctx.fillStyle = hasFix ? '#1a1a18' : '#cbcec5';
+  ctx.fill();
+
+  // Heading readout at top
+  const h = Math.round(heading);
+  ctx.fillStyle = '#1a1a18';
+  ctx.font = '500 22px JetBrains Mono';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(h + '°', cx, 28);
+
+  // Bearing readout — small, above center
+  if (hasFix) {
+    ctx.fillStyle = '#6a6a64';
+    ctx.font = '400 13px JetBrains Mono';
+    ctx.fillText('→ ' + Math.round(bearing) + '°', cx, 52);
+  }
+}
+
+// ── UPDATE LOOP ──
+function update() {
+  if (!userPos) {
+    drawCompass(smoothH || 0, 0, false);
+    return;
+  }
+
+  const dist = calcDist(userPos, TARGET);
+  const bearing = calcBearing(userPos, TARGET);
+  const heading = smoothH !== null ? smoothH : 0;
+
+  // Compass
+  drawCompass(heading, bearing, true);
+
+  // Distance
   if (dist < 1000) {
     document.getElementById('distVal').textContent = Math.round(dist);
-    document.getElementById('distUnit').textContent = ' m';
+    document.getElementById('distUnit').textContent = 'm';
   } else {
-    document.getElementById('distVal').textContent = (dist/1000).toFixed(1).replace('.',',');
-    document.getElementById('distUnit').textContent = ' km';
+    document.getElementById('distVal').textContent = (dist/1000).toFixed(1).replace('.', ',');
+    document.getElementById('distUnit').textContent = 'km';
   }
   const steps = Math.round(dist / 0.75);
-  document.getElementById('distSteps').textContent = steps < 10000 ? `≈ ${steps.toLocaleString('cs')} kroků` : '';
+  document.getElementById('distSteps').textContent =
+    steps < 9999 ? '≈ ' + steps.toLocaleString('cs') + ' kroků' : '';
 
-  // Růžice rotuje s headingem — ukazuje kde je sever
-  // heading = kam míří telefon od severu → otočíme růžici o -h (sever se posune)
-  document.getElementById('roseEl').style.transform  = `rotate(${-h}deg)`;
+  // Proximity
+  if (dist <= 25) {
+    document.getElementById('proximityBtn').style.display = 'block';
+  }
+}
 
-  // Šipka k cíli: absolutní bearing − heading = relativní směr
-  document.getElementById('arrowEl').style.transform = `rotate(${bear - h}deg)`;
-
-  document.getElementById('cpStatus').textContent = '';
-  if (dist <= 25) document.getElementById('cpProximity').style.display = 'block';
+function setStatus(type, txt) {
+  document.getElementById('statusDot').className = type;
+  document.getElementById('statusTxt').textContent = txt;
 }
 
 function goToTarget() {
   window.location.href = `step-into-the-past.html?id=${TARGET.id}&lat=${TARGET.lat}&lng=${TARGET.lng}`;
 }
+
+// ── ANIMATION LOOP ──
+function loop() {
+  if (smoothH !== null || userPos) update();
+  requestAnimationFrame(loop);
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  initMap();
+  drawCompass(0, 0, false);
+  loop();
+});
 </script>
 </body>
 </html>
