@@ -107,9 +107,9 @@ html, body {
   position: fixed; bottom: 0; left: 0; right: 0;
   top: calc(57px + 38vh + 21px);
   display: flex; flex-direction: column; align-items: center;
-  padding: 12px 20px 24px;
-  gap: 12px;
-  overflow: hidden;
+  padding: 12px 20px 20px;
+  gap: 10px;
+  overflow: visible;
   transition: top .35s cubic-bezier(.22,.8,.36,1);
 }
 #panel.expanded {
@@ -118,16 +118,15 @@ html, body {
 
 /* Compass canvas wrap */
 #compassWrap {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex; align-items: center; justify-content: center;
   width: 100%;
-  min-height: 0;
+  min-height: 120px;
 }
 canvas#compassCanvas {
-  max-width: min(260px, 80vw);
-  max-height: min(260px, 80vw);
-  width: 100%; height: auto;
-  aspect-ratio: 1;
+  display: block;
+  width: min(240px, calc(100vw - 40px));
+  height: min(240px, calc(100vw - 40px));
 }
 
 /* Distance row */
@@ -659,20 +658,9 @@ function drawCompass(heading, bearing, hasFix) {
 }
 
 // ── UPDATE LOOP ──
-function update() {
-  if (!userPos) {
-    drawCompass(smoothH || 0, 0, false);
-    return;
-  }
-
+function updateDistAndProximity() {
+  if (!userPos) return;
   const dist = calcDist(userPos, TARGET);
-  const bearing = calcBearing(userPos, TARGET);
-  const heading = smoothH !== null ? smoothH : 0;
-
-  // Compass
-  drawCompass(heading, bearing, true);
-
-  // Distance
   if (dist < 1000) {
     document.getElementById('distVal').textContent = Math.round(dist);
     document.getElementById('distUnit').textContent = 'm';
@@ -683,11 +671,7 @@ function update() {
   const steps = Math.round(dist / 0.75);
   document.getElementById('distSteps').textContent =
     steps < 9999 ? '≈ ' + steps.toLocaleString('cs') + ' kroků' : '';
-
-  // Proximity
-  if (dist <= 25) {
-    document.getElementById('proximityBtn').style.display = 'block';
-  }
+  if (dist <= 25) document.getElementById('proximityBtn').style.display = 'block';
 }
 
 function setStatus(type, txt) {
@@ -701,7 +685,12 @@ function goToTarget() {
 
 // ── ANIMATION LOOP ──
 function loop() {
-  if (smoothH !== null || userPos) update();
+  // Always draw — shows rose even without GPS
+  const h = smoothH !== null ? smoothH : 0;
+  const hasFix = userPos !== null;
+  const bearing = hasFix ? calcBearing(userPos, TARGET) : 0;
+  drawCompass(h, bearing, hasFix);
+  if (hasFix) updateDistAndProximity();
   requestAnimationFrame(loop);
 }
 
