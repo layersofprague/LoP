@@ -245,8 +245,15 @@ let yawOffset = 0;
     if (cal && disabled !== '1') {
       yawOffset = cal.offsets?.yaw || 0;
       badge.classList.add('ok');
-      const d = new Date(cal.savedAt);
-      txt.textContent = 'kalibrováno ' + d.toLocaleDateString('cs-CZ');
+      // v2: show yaw consistency if available
+      const consistency = cal.quality?.yawConsistency;
+      if (consistency) {
+        txt.textContent = 'kal. ' + consistency;
+      } else {
+        const d = new Date(cal.savedAt);
+        txt.textContent = 'kal. ' + d.toLocaleDateString('cs-CZ');
+      }
+      badge.title = `yaw: ${yawOffset > 0 ? '+' : ''}${yawOffset.toFixed(1)}°  pitch: ${cal.offsets?.pitch?.toFixed(1) ?? '—'}°  roll: ${cal.offsets?.roll?.toFixed(1) ?? '—'}°`;
     } else if (cal && disabled === '1') {
       txt.textContent = 'kalibrace vypnuta';
     } else {
