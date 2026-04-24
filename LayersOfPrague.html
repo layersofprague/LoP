@@ -24,15 +24,15 @@
   --rule-2: #b8bcb0;
 
   /* categories */
-  --cat-hist: #4A4A48;      /* grafit — historie (B/W fotka) */
+  --cat-hist: #4A4A48;
   --cat-hist-soft: #c9c9c4;
-  --cat-arch: #3B5F84;      /* denim — architektura */
+  --cat-arch: #3B5F84;
   --cat-arch-soft: #c6d2df;
-  --cat-fun:  #E0A020;      /* jantar — zajímavosti */
+  --cat-fun:  #E0A020;
   --cat-fun-soft: #f0d8a0;
 
   /* accents */
-  --accent: #b04020;         /* terracotta akcent pro progress/tracky */
+  --accent: #b04020;
   --ok: #3d7a4a;
 
   /* motion */
@@ -59,7 +59,6 @@ a { color: inherit; text-decoration: none; }
   display: flex; flex-direction: column;
   background: var(--paper);
 }
-/* Top bar — stays across all views */
 #topbar {
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: space-between;
@@ -109,7 +108,7 @@ a { color: inherit; text-decoration: none; }
   width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
 }
 
-/* ═══════════════ NAV — bottom on mobile, side on desktop ═══════════════ */
+/* ═══════════════ NAV ═══════════════ */
 #nav {
   flex: 0 0 auto;
   display: flex;
@@ -166,7 +165,6 @@ a { color: inherit; text-decoration: none; }
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   background: var(--paper-2);
 }
-/* slide-down search in topbar */
 #topSearch {
   position: absolute; top: 100%; left: 0; right: 0;
   background: var(--paper);
@@ -213,7 +211,6 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Inter', sans-serif !important;
 }
 
-/* Map header — sits over map */
 .map-header {
   position: absolute; top: 8px; left: 14px; right: 14px;
   z-index: 400;
@@ -245,7 +242,6 @@ a { color: inherit; text-decoration: none; }
 }
 .map-chips::-webkit-scrollbar { display: none; }
 
-/* Collapsible filter bar */
 .filter-bar {
   background: var(--paper);
   border: 1px solid var(--rule);
@@ -319,7 +315,6 @@ a { color: inherit; text-decoration: none; }
   display: flex; gap: 6px; flex-wrap: wrap;
 }
 
-/* Era timeline */
 .filter-timeline {
   position: relative;
   height: 70px;
@@ -374,7 +369,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
 }
 
-/* Distance slider */
 .filter-range-input {
   appearance: none; -webkit-appearance: none;
   width: 100%; height: 4px; border-radius: 2px;
@@ -459,7 +453,6 @@ a { color: inherit; text-decoration: none; }
 .chip.all { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .chip.all .chip-count { color: rgba(255,255,255,.55); }
 
-/* Map bottom — location puck + route hint */
 .map-puck-wrap {
   position: absolute; right: 14px; bottom: 110px; z-index: 400;
   display: flex; flex-direction: column; gap: 8px;
@@ -471,10 +464,10 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 3px 14px rgba(26,24,20,.1);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
+  transition: opacity .3s;
 }
 .map-puck svg { width: 20px; height: 20px; }
 
-/* Suggestion card above nav */
 .map-hint {
   position: absolute; bottom: 16px; left: 14px; right: 14px;
   z-index: 400;
@@ -531,7 +524,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-3);
 }
 
-/* Custom markers — numbered editorial pins */
 .lop-pin {
   width: 30px; height: 30px; border-radius: 50%;
   border: 2px solid var(--paper);
@@ -569,7 +561,6 @@ a { color: inherit; text-decoration: none; }
   filter: drop-shadow(0 0 1px var(--paper)) drop-shadow(0 0 1px var(--paper));
 }
 
-/* Rich map tooltip */
 .rt-tip {
   position: fixed; z-index: 900;
   width: 200px;
@@ -601,7 +592,7 @@ a { color: inherit; text-decoration: none; }
   margin-top: 3px;
 }
 
-/* ═══════════════ MODAL / PLACE SHEET ═══════════════ */
+/* ═══════════════ SHEET ═══════════════ */
 .sheet {
   position: absolute; inset: 0; z-index: 30;
   opacity: 0; pointer-events: none;
@@ -612,7 +603,6 @@ a { color: inherit; text-decoration: none; }
 }
 .sheet.open { opacity: 1; pointer-events: all; }
 
-/* Sheet top — photo hero with slider */
 .sheet-hero {
   position: relative;
   flex-shrink: 0;
@@ -711,7 +701,6 @@ a { color: inherit; text-decoration: none; }
 }
 .sheet-ar-cta .arc-dist.ok { background: rgba(61,122,74,.3); color: #9fd4a8; }
 
-/* Sheet body */
 .sheet-body {
   flex: 1;
   overflow-y: auto;
@@ -755,7 +744,6 @@ a { color: inherit; text-decoration: none; }
   font-size: 11px; color: var(--ink-3);
 }
 
-/* action row */
 .sheet-actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -782,7 +770,6 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .01em;
 }
 
-/* lede / description */
 .sheet-lede {
   font-family: 'Fraunces', serif;
   font-size: 17px; line-height: 1.55;
@@ -802,7 +789,6 @@ a { color: inherit; text-decoration: none; }
 .sheet-lede.cat-arch::first-letter { color: var(--cat-arch); }
 .sheet-lede.cat-fun::first-letter  { color: var(--cat-fun); }
 
-/* section */
 .sheet-section { margin-bottom: 22px; }
 .sec-head {
   display: flex; align-items: baseline; justify-content: space-between;
@@ -824,7 +810,6 @@ a { color: inherit; text-decoration: none; }
 .sec-body { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
 .sec-body strong { color: var(--ink); font-weight: 600; }
 
-/* steps — numbered list editorial style */
 .steps { display: flex; flex-direction: column; gap: 0; }
 .step {
   display: flex; gap: 14px;
@@ -855,7 +840,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-2);
 }
 
-/* tip */
 .tip {
   margin: 20px 0;
   padding: 14px 16px 14px 18px;
@@ -876,7 +860,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-2);
 }
 
-/* gallery */
 .gallery {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -906,7 +889,6 @@ a { color: inherit; text-decoration: none; }
   font-size: 9px; color: var(--ink-3);
 }
 
-/* meta facts panel */
 .facts {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -934,7 +916,6 @@ a { color: inherit; text-decoration: none; }
 }
 .fact-v.mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
 
-/* nav btns in sheet */
 .nav-btn {
   display: flex; align-items: center; gap: 10px;
   width: 100%;
@@ -956,7 +937,6 @@ a { color: inherit; text-decoration: none; }
   position: absolute; inset: 0;
   overflow: hidden;
   background: #0d0b08;
-  /* simulated camera using a gradient + subtle noise */
 }
 .ar-camera::before {
   content: '';
@@ -970,7 +950,6 @@ a { color: inherit; text-decoration: none; }
   content: '';
   position: absolute; inset: 0;
   background:
-    /* simulated scene lines */
     linear-gradient(180deg, transparent 0%, transparent 55%, rgba(26,24,20,.5) 100%),
     linear-gradient(90deg, rgba(26,24,20,.3) 0%, transparent 30%, transparent 70%, rgba(26,24,20,.3) 100%);
 }
@@ -983,7 +962,6 @@ a { color: inherit; text-decoration: none; }
       #9d927d 92%, #a89d85 100%);
 }
 .ar-scene::before {
-  /* "building" silhouettes */
   content: '';
   position: absolute;
   left: 5%; right: 3%; bottom: 18%;
@@ -1004,7 +982,6 @@ a { color: inherit; text-decoration: none; }
   mix-blend-mode: overlay;
 }
 
-/* ghost photo layer — simulates "duch historie" fade-in */
 .ar-ghost {
   position: absolute;
   left: 50%; top: 50%;
@@ -1045,7 +1022,6 @@ a { color: inherit; text-decoration: none; }
   opacity: .5;
 }
 
-/* AR top bar */
 .ar-top {
   position: absolute; top: 0; left: 0; right: 0;
   z-index: 10;
@@ -1090,7 +1066,6 @@ a { color: inherit; text-decoration: none; }
   align-self: flex-start;
 }
 
-/* AR reticle */
 .ar-reticle {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%,-50%);
@@ -1102,7 +1077,6 @@ a { color: inherit; text-decoration: none; }
 .ar-reticle svg { width: 100%; height: 100%; }
 .ar-reticle.locked { opacity: 0; }
 
-/* AR compass/hint */
 .ar-compass {
   position: absolute; top: 76px; left: 50%;
   transform: translateX(-50%);
@@ -1121,7 +1095,6 @@ a { color: inherit; text-decoration: none; }
 .ar-compass.locked { opacity: 0; }
 .ar-compass svg { width: 12px; height: 12px; }
 
-/* AR bottom panel */
 .ar-bottom {
   position: absolute; bottom: 0; left: 0; right: 0;
   z-index: 10;
@@ -1210,7 +1183,6 @@ a { color: inherit; text-decoration: none; }
   max-width: 34em;
 }
 
-/* progress banner */
 .progress-card {
   background: var(--ink);
   color: var(--paper);
@@ -1262,7 +1234,6 @@ a { color: inherit; text-decoration: none; }
 }
 .pc-bar-fill { height: 100%; background: var(--cat-fun); border-radius: 3px; transition: width .6s var(--ease); }
 
-/* category label for list */
 .rs-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
@@ -1274,7 +1245,6 @@ a { color: inherit; text-decoration: none; }
 }
 .rs-label span.ct { color: var(--ink-4); }
 
-/* route cards */
 .route-card {
   display: grid;
   grid-template-columns: 96px 1fr;
@@ -1552,7 +1522,6 @@ a { color: inherit; text-decoration: none; }
       <div id="map"></div>
 
       <div class="map-header">
-        <!-- Collapsible filter bar -->
         <div class="filter-bar" id="filterBar">
           <button class="filter-head" id="filterHead" onclick="toggleFilter()">
             <span class="filter-head-lead">
@@ -1570,14 +1539,10 @@ a { color: inherit; text-decoration: none; }
           </button>
           <div class="filter-panel" id="filterPanel">
             <div class="filter-panel-inner">
-              <!-- categories -->
               <div class="filter-row">
                 <div class="filter-lbl"><span>Kategorie</span></div>
-                <div class="filter-chips" id="mapChips">
-                  <!-- populated by JS -->
-                </div>
+                <div class="filter-chips" id="mapChips"></div>
               </div>
-              <!-- period / styles timeline -->
               <div class="filter-row">
                 <div class="filter-lbl">
                   <span>Období</span>
@@ -1585,7 +1550,6 @@ a { color: inherit; text-decoration: none; }
                 </div>
                 <div class="filter-timeline" id="eraTimeline"></div>
               </div>
-              <!-- distance -->
               <div class="filter-row">
                 <div class="filter-lbl">
                   <span>Vzdálenost od vás</span>
@@ -1602,7 +1566,7 @@ a { color: inherit; text-decoration: none; }
       </div>
 
       <div class="map-puck-wrap">
-        <button class="map-puck" title="Moje poloha" onclick="locateMe()">
+        <button class="map-puck" id="locateBtn" title="Moje poloha" onclick="locateMe()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
         </button>
       </div>
@@ -1805,7 +1769,7 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <script>
-/* ═══════════════ TWEAKS (edit mode protocol) ═══════════════ */
+/* ═══════════════ TWEAKS ═══════════════ */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accentColor": "#b04020",
   "paperMode": "cool",
@@ -2066,7 +2030,6 @@ const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'f
 const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
 const FILTER_OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
-/* Historical eras — approx. Prague architecture years */
 const ERAS = [
   { id:'rom', name:'Románský',    from: 1000, to: 1230 },
   { id:'got', name:'Gotika',      from: 1230, to: 1500 },
@@ -2078,7 +2041,7 @@ const ERAS = [
 ];
 const ERA_START = 1000, ERA_END = 2000;
 const ERA_STATE = { from: ERA_START, to: ERA_END };
-const DIST_STATE = { max: null }; // null = unlimited, km
+const DIST_STATE = { max: null };
 
 function toggleFilter() {
   const bar = document.getElementById('filterBar');
@@ -2164,7 +2127,6 @@ function buildChips() {
   initDistSlider();
 }
 
-/* ─── Era timeline (range slider) ─── */
 const eraPct = (y) => ((y - ERA_START) / (ERA_END - ERA_START)) * 100;
 const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
 
@@ -2175,28 +2137,23 @@ function buildEraTimeline() {
   const html = [];
   html.push('<div class="ft-track"></div>');
   html.push(`<div class="ft-fill" id="eraFill"></div>`);
-  // era dividers
   ERAS.slice(1).forEach(e => {
     html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`);
   });
-  // era labels
   ERAS.forEach(e => {
     const mid = (e.from + e.to) / 2;
     const w = eraPct(e.to) - eraPct(e.from);
     html.push(`<span class="ft-lbl" data-era="${e.id}" style="left:${eraPct(mid)}%; max-width: calc(${w}% - 4px)">${e.name}</span>`);
   });
-  // year ticks
   years.forEach(y => {
     html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`);
     html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y}</span>`);
   });
-  // handles
   html.push(`<div class="ft-h" id="eraHFrom" data-which="from"></div>`);
   html.push(`<div class="ft-h" id="eraHTo" data-which="to"></div>`);
   el.innerHTML = html.join('');
   renderEra();
 
-  // drag logic
   const hs = el.querySelectorAll('.ft-h');
   hs.forEach(h => {
     const onDown = (ev) => {
@@ -2245,7 +2202,6 @@ function renderEra() {
   }
   document.getElementById('eraFromV').textContent = ERA_STATE.from;
   document.getElementById('eraToV').textContent = ERA_STATE.to;
-  // label on/off
   document.querySelectorAll('.ft-lbl').forEach(lbl => {
     const era = ERAS.find(e => e.id === lbl.dataset.era);
     const overlap = era.to > ERA_STATE.from && era.from < ERA_STATE.to;
@@ -2253,7 +2209,6 @@ function renderEra() {
   });
 }
 
-/* ─── Distance slider ─── */
 function initDistSlider() {
   const slider = document.getElementById('distSlider');
   const label = document.getElementById('distV');
@@ -2264,7 +2219,6 @@ function initDistSlider() {
       DIST_STATE.max = null;
       label.textContent = 'libovolná';
     } else {
-      // map 0..99 to 0.2..5.0 km
       const km = 0.2 + (v / 100) * 4.8;
       DIST_STATE.max = km;
       label.textContent = '< ' + km.toFixed(1) + ' km';
@@ -2296,12 +2250,10 @@ function resetFilters() {
 }
 
 function locYear(loc) {
-  // Prefer year of construction/origin from facts; fall back to yearThen (photo date)
   const parseYearOrCentury = (s) => {
     const v = String(s);
     const y = v.match(/\d{3,4}/);
     if (y) return parseInt(y[0]);
-    // Century like "9. stol." → middle of century
     const c = v.match(/(\d{1,2})\.\s*stol/i);
     if (c) return (parseInt(c[1]) - 1) * 100 + 50;
     return null;
@@ -2342,14 +2294,12 @@ function applyFilter() {
     if (visActive && !loc.visited) {
       if (order[FILTER.visited] > order[s]) s = FILTER.visited;
     }
-    // Era filter — hide if year falls outside range
     if (eraActive) {
       const y = locYear(loc);
       if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) {
         s = 'hide';
       }
     }
-    // Distance filter — hide if too far
     if (distActive) {
       const d = haversineKm(window._userLatLng, [loc.lat, loc.lng]);
       if (d > DIST_STATE.max) s = 'hide';
@@ -2375,8 +2325,8 @@ function initMap() {
     zoomControl: false
   });
   window._map = map;
-  // default mock user location for distance filter
-  if (!window._userLatLng) window._userLatLng = [50.0820, 14.4180];
+  // user location will be set by locateMe()
+
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -2420,12 +2370,48 @@ function initMap() {
   updateWishBadge();
 }
 
+/* ═══════════════ LOCATE ME — skutečná GPS ═══════════════ */
 function locateMe() {
-  // Mock location near Charles Bridge for demo
-  const mockLoc = [50.0820, 14.4180];
-  window._userLatLng = mockLoc;
-  if (window._map) window._map.setView(mockLoc, 16);
-  applyFilter();
+  if (!navigator.geolocation) {
+    alert('Geolokace není podporována tímto prohlížečem.');
+    return;
+  }
+  const btn = document.getElementById('locateBtn');
+  if (btn) btn.style.opacity = '0.5';
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const loc = [pos.coords.latitude, pos.coords.longitude];
+      window._userLatLng = loc;
+
+      // odstraň starý marker polohy
+      if (window._userMarker) window._userMarker.remove();
+
+      // přidej modrý puntík
+      window._userMarker = L.circleMarker(loc, {
+        radius: 8,
+        fillColor: '#3B5F84',
+        color: '#fff',
+        weight: 2.5,
+        fillOpacity: 0.95,
+        zIndexOffset: 1000
+      }).addTo(window._map);
+
+      window._map.setView(loc, 16);
+      if (btn) btn.style.opacity = '1';
+      applyFilter();
+    },
+    (err) => {
+      if (btn) btn.style.opacity = '1';
+      const msgs = {
+        1: 'Přístup k poloze byl zamítnut. Zkontroluj oprávnění v prohlížeči.',
+        2: 'Polohu se nepodařilo určit.',
+        3: 'Vypršel časový limit pro určení polohy.'
+      };
+      alert('GPS chyba: ' + (msgs[err.code] || err.message));
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 }
 
 /* ═══════════════ SHEET ═══════════════ */
@@ -2436,7 +2422,6 @@ function openSheet(id) {
   const c = CAT[loc.cat];
   const wished = isWished(id);
 
-  // Hero — slider
   const hero = document.getElementById('sheetHero');
   hero.innerHTML = `
     <div class="sl-base"><div style="position:absolute; inset:0; background:
@@ -2462,7 +2447,6 @@ function openSheet(id) {
   `;
   initHeroSlider();
 
-  // Body
   const gallery = Array.from({length:6}).map((_,i) =>
     `<div class="gallery-thumb"><div class="gt-stripes"></div><div class="gt-meta">${String(i+1).padStart(2,'0')}</div></div>`
   ).join('');
@@ -2572,7 +2556,6 @@ function sheetToggleWish(id) {
   updateWishBadge();
 }
 
-/* hero slider */
 function initHeroSlider() {
   const hero = document.getElementById('sheetHero');
   const top = document.getElementById('slTop');
@@ -2601,7 +2584,7 @@ function initHeroSlider() {
   }, { passive: true });
 }
 
-/* ═══════════════ AR — "ghost" simulation ═══════════════ */
+/* ═══════════════ AR ═══════════════ */
 let arState = 'aligning';
 function openArFor(id) {
   const loc = LOCATIONS.find(l => l.id === id);
@@ -2618,7 +2601,6 @@ function simulateAR() {
   const btn = document.getElementById('arLockBtn');
   const compassLbl = document.getElementById('arCompassLbl');
 
-  // Reset
   ghost.classList.remove('active');
   status.textContent = '● GPS 12 m';
   status.style.background = 'rgba(61,122,74,.25)';
@@ -2639,7 +2621,6 @@ function simulateAR() {
     compassLbl.textContent = `Zamiř na jihozápad · ${Math.round(angle)}°`;
   }, 80);
 
-  // After 1.5s, simulate fade-in
   clearTimeout(window._arGhost1);
   window._arGhost1 = setTimeout(() => {
     ghost.classList.add('active');
