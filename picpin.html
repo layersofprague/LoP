@@ -1,594 +1,445 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Picture Pinning</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body>
-  <div id="root"></div>
-
-<script type="text/babel">
-const { useState, useRef, useEffect, useCallback } = React;
-
-// ────────────────────────────────────────────────────────────────────────────
-const PHASES = ['load', 'align', 'offset', 'anchored'];
-const LABELS = {
-  load:     '01 — NAČÍST',
-  align:    '02 — ZAROVNAT',
-  offset:   '03 — VZDÁLENOST',
-  anchored: '04 — UKOTVENO',
-};
-
-// ────────────────────────────────────────────────────────────────────────────
-// CSS
-// ────────────────────────────────────────────────────────────────────────────
-const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Picture Pinning</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: #060606; }
+html, body { background: #060606; width: 100%; height: 100%; overflow: hidden; }
 
-.app {
-  font-family: 'JetBrains Mono', monospace;
-  background: #060606;
-  color: #C9D1D9;
-  min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  user-select: none;
-}
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 16px;
-  background: rgba(6,6,6,.97);
-  border-bottom: 1px solid #141414;
-  position: sticky; top: 0; z-index: 50;
-  backdrop-filter: blur(8px);
-}
-.phase-lbl {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 17px; letter-spacing: .12em; color: #F59E0B;
-}
-.dots { display: flex; gap: 6px; align-items: center; }
-.dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #1A1A1A; border: 1px solid #262626;
-  transition: all .3s;
-}
-.dot.done  { background: #2D2D2D; border-color: #444; }
-.dot.active{ background: #F59E0B; border-color: #F59E0B; box-shadow: 0 0 6px #F59E0B55; }
-
-.vp {
-  position: relative; width: 100%;
-  height: 56vw; min-height: 220px; max-height: 55vh;
-  overflow: hidden; background: #090909; flex-shrink: 0;
-}
-.vp::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: repeating-linear-gradient(0deg,
-    transparent, transparent 3px,
-    rgba(0,0,0,.08) 3px, rgba(0,0,0,.08) 4px);
-  z-index: 2;
-}
-video.feed {
-  display: block;
-  position: absolute; top: 0; left: 0;
+/* ── CAMERA — přesně stejný vzor jako step-into-the-past.html ── */
+#cam {
+  position: fixed; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-}
-.ov-img {
-  position: absolute; top: 50%; left: 50%;
-  pointer-events: none;
-  max-width: 95%; max-height: 90%;
   z-index: 1;
+  display: none;
 }
-.xhair {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 36px; height: 36px; pointer-events: none; z-index: 3;
-}
-.xhair::before, .xhair::after {
-  content: ''; position: absolute; background: rgba(245,158,11,.45);
-}
-.xhair::before { width: 1px; height: 100%; left: 50%; top: 0; }
-.xhair::after  { height: 1px; width: 100%; top: 50%; left: 0; }
-.badge {
-  position: absolute; font-size: 9px; letter-spacing: .1em;
-  padding: 3px 8px; border-radius: 3px;
-  font-family: 'JetBrains Mono', monospace; z-index: 4;
-}
-.badge.tl { top: 10px; left: 10px; }
-.badge.tr { top: 10px; right: 10px; }
-.badge.green { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.35); color: #10B981; }
-.badge.amber { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); color: #F59E0B; }
-.badge.red   { background: rgba(220,38,38,.15); border: 1px solid rgba(220,38,38,.3);  color: #EF4444; }
-.cam-ph {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px; color: #333; font-size: 12px; letter-spacing: .1em; z-index: 3;
-}
+#cam.on { display: block; }
 
-.panel {
-  flex: 1; overflow-y: auto;
-  padding: 14px 16px;
-  display: flex; flex-direction: column; gap: 12px;
+/* ── OVERLAY ── */
+#ov {
+  position: fixed; inset: 0; z-index: 2;
+  display: none;
+  align-items: center; justify-content: center;
+  pointer-events: none;
 }
-.sec {
-  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
-  color: #2D3748; padding-bottom: 6px; border-bottom: 1px solid #0F0F0F;
-}
-hr.div { border: none; border-top: 1px solid #0D0D0D; }
+#ov.on { display: flex; }
+#ov img { max-width: 95vw; max-height: 90vh; transform-origin: center center; }
 
+/* scanlines */
+#sl {
+  position: fixed; inset: 0; z-index: 3; pointer-events: none; display: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.07) 3px, rgba(0,0,0,.07) 4px);
+}
+#sl.on { display: block; }
+
+/* crosshair */
+#xh {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 40px; height: 40px; z-index: 4; pointer-events: none; display: none;
+}
+#xh.on { display: block; }
+#xh::before, #xh::after { content: ''; position: absolute; background: rgba(245,158,11,.5); }
+#xh::before { width: 1px; height: 100%; left: 50%; }
+#xh::after  { height: 1px; width: 100%; top: 50%; }
+
+/* floating badges */
+.fb {
+  position: fixed; z-index: 11; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; padding: 3px 8px; border-radius: 3px; display: none;
+}
+.fb.on { display: block; }
+#b-live   { top:52px; right:10px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); color:#F59E0B; }
+#b-anchor { top:52px; left:10px;  background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.35); color:#10B981; }
+#b-err    { top:52px; left:10px;  background:rgba(220,38,38,.15);  border:1px solid rgba(220,38,38,.3);  color:#EF4444; }
+
+/* ── LOAD SCREEN ── */
+#scr-load {
+  position: fixed; inset: 0; z-index: 20; background: #060606;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center;
+  gap: 20px; padding: 28px 20px;
+  font-family: 'JetBrains Mono', monospace; color: #C9D1D9;
+  max-width: 480px; margin: 0 auto;
+}
+#scr-load.off { display: none; }
+.hero { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: .95; color: #F59E0B; text-align: center; }
+.hero-s { text-align: center; font-size: 10px; letter-spacing: .18em; color: #2D3748; line-height: 2; text-transform: uppercase; margin-top: 6px; }
+.fz {
+  border: 1px dashed #1C1C1C; border-radius: 6px; padding: 26px 16px;
+  text-align: center; cursor: pointer; position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; transition: border-color .2s;
+}
+.fz:hover { border-color: rgba(245,158,11,.3); }
+.fz input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.fz-icon { font-size: 26px; }
+.fz-lbl  { font-size: 11px; letter-spacing: .1em; color: #4B5563; text-transform: uppercase; }
+#prev { width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px; border: 1px solid #111; display: none; }
+.gs {
+  display: flex; align-items: center; gap: 5px; font-size: 9px; letter-spacing: .1em;
+  padding: 4px 8px; border-radius: 4px; border: 1px solid #1A1A1A; color: #374151;
+  cursor: pointer; width: fit-content;
+}
+.gs.ok { color: #10B981; border-color: rgba(16,185,129,.25); }
+.gdot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.gs.ok .gdot { animation: blink 1.8s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── UI OVERLAY ── */
+#ui {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  font-family: 'JetBrains Mono', monospace; color: #C9D1D9;
+  pointer-events: none; max-width: 480px; margin: 0 auto;
+}
+#ui * { pointer-events: auto; }
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: rgba(6,6,6,.92);
+  border-bottom: 1px solid #141414; backdrop-filter: blur(8px); flex-shrink: 0;
+}
+.plbl { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: .12em; color: #F59E0B; }
+.dots { display: flex; gap: 6px; align-items: center; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #1A1A1A; border: 1px solid #262626; transition: all .3s; }
+.dot.done   { background: #2D2D2D; border-color: #444; }
+.dot.active { background: #F59E0B; border-color: #F59E0B; box-shadow: 0 0 6px #F59E0B55; }
+#gyro-tb { display: flex; align-items: center; gap: 5px; font-size: 9px; letter-spacing: .1em; padding: 4px 8px; border-radius: 4px; border: 1px solid #1A1A1A; color: #374151; cursor: pointer; }
+#gyro-tb.ok { color: #10B981; border-color: rgba(16,185,129,.25); }
+
+.spacer { flex: 1; pointer-events: none; }
+
+/* bottom panel */
+#panel {
+  background: rgba(6,6,6,.94); border-top: 1px solid #141414;
+  overflow-y: auto; max-height: 55vh; backdrop-filter: blur(10px); flex-shrink: 0; display: none;
+}
+#panel.on { display: block; }
+.pi { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.sec { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: #2D3748; padding-bottom: 6px; border-bottom: 1px solid #0F0F0F; }
+hr.dv { border: none; border-top: 1px solid #0D0D0D; }
+
+/* sliders */
 .ctrl { display: flex; flex-direction: column; gap: 5px; }
-.ctrl-hd {
-  display: flex; justify-content: space-between;
-  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
-}
-.ctrl-k { color: #4B5563; }
-.ctrl-v { color: #F59E0B; font-weight: 500; }
-.ctrl-tr { display: flex; align-items: center; gap: 5px; }
-input[type=range].rng {
-  -webkit-appearance: none; appearance: none;
-  flex: 1; height: 2px; background: #1A1A1A;
-  border-radius: 1px; outline: none; cursor: pointer;
-}
-input[type=range].rng::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-  background: #F59E0B; cursor: pointer;
-  border: 2px solid #060606; box-shadow: 0 0 8px rgba(245,158,11,.35);
-}
-input[type=range].rng::-moz-range-thumb {
-  width: 16px; height: 16px; border-radius: 50%;
-  background: #F59E0B; cursor: pointer; border: 2px solid #060606;
-}
-.sb {
-  width: 32px; height: 32px; background: #0E0E0E;
-  border: 1px solid #1C1C1C; color: #6B7280; border-radius: 4px;
-  cursor: pointer; font-size: 18px; line-height: 1;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace; transition: all .1s;
-}
+.ch { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.ck { color: #4B5563; } .cv { color: #F59E0B; font-weight: 500; }
+.ct { display: flex; align-items: center; gap: 5px; }
+input[type=range].rng { -webkit-appearance: none; appearance: none; flex: 1; height: 2px; background: #1A1A1A; border-radius: 1px; outline: none; cursor: pointer; }
+input[type=range].rng::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #F59E0B; cursor: pointer; border: 2px solid #060606; box-shadow: 0 0 8px rgba(245,158,11,.35); }
+.sb { width: 32px; height: 32px; background: #0E0E0E; border: 1px solid #1C1C1C; color: #6B7280; border-radius: 4px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .1s; }
 .sb:active { background: #1A1400; color: #F59E0B; border-color: rgba(245,158,11,.3); }
 .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-.btn {
-  padding: 13px 20px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px; letter-spacing: .1em;
-  cursor: pointer; border-radius: 5px; border: none;
-  width: 100%; transition: all .15s;
-}
+/* buttons */
+.btn { padding: 13px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .1em; cursor: pointer; border-radius: 5px; border: none; width: 100%; transition: all .15s; }
 .btn:active { transform: scale(.97); }
-.btn-p  { background: #F59E0B; color: #060606; }
-.btn-p:active { background: #D97706; }
-.btn-s  { background: transparent; color: #6B7280; border: 1px solid #1C1C1C; font-size: 17px; }
-.btn-s:hover { border-color: #333; color: #9CA3AF; }
-.btn-ok { background: #10B981; color: #060606; }
-.btn-r  { display: flex; gap: 8px; }
-.btn-r > .btn { flex: 1; }
+.bp { background: #F59E0B; color: #060606; } .bp:active { background: #D97706; }
+.bs { background: transparent; color: #6B7280; border: 1px solid #1C1C1C; font-size: 17px; }
+.bok { background: #10B981; color: #060606; }
+.br { display: flex; gap: 8px; } .br > .btn { flex: 1; }
 
-.ls {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: stretch; justify-content: center;
-  gap: 20px; padding: 28px 20px;
-}
-.hero {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 52px; line-height: .95; letter-spacing: .02em;
-  color: #F59E0B; text-align: center;
-}
-.hero-s {
-  text-align: center; font-size: 10px;
-  letter-spacing: .18em; color: #2D3748;
-  line-height: 2; text-transform: uppercase; margin-top: 6px;
-}
-.fz {
-  border: 1px dashed #1C1C1C; border-radius: 6px;
-  padding: 26px 16px; text-align: center;
-  cursor: pointer; transition: all .2s; position: relative;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-}
-.fz:hover { border-color: rgba(245,158,11,.3); background: #0A0A0A; }
-.fz input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-.fz-icon { font-size: 26px; }
-.fz-lbl  { font-size: 11px; letter-spacing: .1em; color: #4B5563; text-transform: uppercase; }
-.prev    { width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px; border: 1px solid #111; }
-
-.gs {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 9px; letter-spacing: .1em;
-  padding: 4px 8px; border-radius: 4px; border: 1px solid; cursor: pointer;
-}
-.gs.ok  { color: #10B981; border-color: rgba(16,185,129,.25); }
-.gs.off { color: #374151; border-color: #1A1A1A; }
-.gs-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-.gs.ok .gs-dot { animation: blink 1.8s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-.db {
-  background: #0A0A0A; border: 1px solid #111;
-  border-radius: 5px; padding: 12px;
-  font-size: 10px; line-height: 2; letter-spacing: .05em;
-}
+/* data box */
+.db { background: #0A0A0A; border: 1px solid #111; border-radius: 5px; padding: 12px; font-size: 10px; line-height: 2; letter-spacing: .05em; }
 .dr { display: flex; justify-content: space-between; }
-.dk { color: #374151; }
-.dv { color: #10B981; }
+.dk { color: #374151; } .dv { color: #10B981; }
 
+/* distance */
 .di-row { display: flex; align-items: center; gap: 8px; }
-.di {
-  flex: 1; background: #0E0E0E; border: 1px solid #1C1C1C;
-  color: #E5E7EB; font-family: 'JetBrains Mono', monospace;
-  font-size: 22px; padding: 10px 12px; border-radius: 5px;
-  outline: none; text-align: center; min-width: 0;
-}
+.di { flex: 1; background: #0E0E0E; border: 1px solid #1C1C1C; color: #E5E7EB; font-family: 'JetBrains Mono', monospace; font-size: 22px; padding: 10px 12px; border-radius: 5px; outline: none; text-align: center; min-width: 0; }
 .di:focus { border-color: rgba(245,158,11,.3); }
 .ug { display: flex; gap: 4px; }
-.ub {
-  padding: 8px 12px; background: #0E0E0E;
-  border: 1px solid #1C1C1C; color: #4B5563;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
-  cursor: pointer; border-radius: 4px; transition: all .15s;
-}
+.ub { padding: 8px 12px; background: #0E0E0E; border: 1px solid #1C1C1C; color: #4B5563; font-family: 'JetBrains Mono', monospace; font-size: 12px; cursor: pointer; border-radius: 4px; transition: all .15s; }
 .ub.on { border-color: rgba(245,158,11,.3); color: #F59E0B; background: #120F00; }
-`;
+</style>
+</head>
+<body>
 
-// ────────────────────────────────────────────────────────────────────────────
-// SLIDER
-// ────────────────────────────────────────────────────────────────────────────
-function Slider({ label, val, min, max, step = 1, unit = '', set }) {
-  const a = d => set(v => Math.min(max, Math.max(min, v + d)));
-  return (
-    <div className="ctrl">
-      <div className="ctrl-hd">
-        <span className="ctrl-k">{label}</span>
-        <span className="ctrl-v">{val}{unit}</span>
+<!-- KAMERA — přesně jako step-into-the-past.html -->
+<video id="cam" autoplay muted playsinline></video>
+
+<!-- OVERLAY -->
+<div id="ov"><img id="ov-photo" src="" alt=""></div>
+
+<!-- SCANLINES + CROSSHAIR -->
+<div id="sl"></div>
+<div id="xh"></div>
+
+<!-- BADGES -->
+<div class="fb" id="b-live">β0.0° γ0.0°</div>
+<div class="fb" id="b-anchor">● UKOTVENO</div>
+<div class="fb" id="b-err"></div>
+
+<!-- ── LOAD SCREEN ── -->
+<div id="scr-load">
+  <div>
+    <div class="hero">PICTURE<br>PINNING</div>
+    <div class="hero-s">Historické fotografie<br>ukotvené v prostoru</div>
+  </div>
+  <label class="fz">
+    <input type="file" accept="image/*" id="file-input">
+    <div class="fz-icon" id="fz-icon">🗂</div>
+    <div class="fz-lbl" id="fz-lbl">Načíst historickou fotografii</div>
+  </label>
+  <img id="prev" alt="náhled">
+  <div class="gs" id="gs-load" onclick="reqGyro()"><div class="gdot"></div><span id="gs-load-txt">BEZ GYRA</span></div>
+  <button class="btn bp" id="btn-start" style="display:none" onclick="startCam()">SPUSTIT KAMERU →</button>
+</div>
+
+<!-- ── UI ── -->
+<div id="ui">
+  <div id="topbar">
+    <div class="plbl" id="plbl">PICTURE PIN</div>
+    <div id="gyro-tb" onclick="reqGyro()"><div class="gdot"></div>BEZ GYRA</div>
+    <div class="dots" id="dots-row" style="display:none">
+      <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div id="panel">
+
+    <!-- ALIGN -->
+    <div class="pi" id="pa" style="display:none">
+      <div class="sec">Překryv</div>
+      <div class="ctrl"><div class="ch"><span class="ck">Průhlednost</span><span class="cv" id="v-opa">50%</span></div><div class="ct"><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button></div></div>
+      <div class="ctrl"><div class="ch"><span class="ck">Velikost</span><span class="cv" id="v-sz">100%</span></div><div class="ct"><button class="sb" onclick="stp('sz',-1)">−</button><input type="range" class="rng" id="s-sz" min="10" max="300" value="100" oninput="upd('sz',this.value,'%')"><button class="sb" onclick="stp('sz',1)">+</button></div></div>
+      <hr class="dv">
+      <div class="sec">Poloha</div>
+      <div class="g2">
+        <div class="ctrl"><div class="ch"><span class="ck">Pos X</span><span class="cv" id="v-px">0px</span></div><div class="ct"><button class="sb" onclick="stp('px',-1)">−</button><input type="range" class="rng" id="s-px" min="-500" max="500" value="0" oninput="upd('px',this.value,'px')"><button class="sb" onclick="stp('px',1)">+</button></div></div>
+        <div class="ctrl"><div class="ch"><span class="ck">Pos Y</span><span class="cv" id="v-py">0px</span></div><div class="ct"><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button></div></div>
       </div>
-      <div className="ctrl-tr">
-        <button className="sb" onClick={() => a(-step)}>−</button>
-        <input type="range" className="rng" min={min} max={max} step={step} value={val}
-               onChange={e => set(Number(e.target.value))} />
-        <button className="sb" onClick={() => a(step)}>+</button>
+      <hr class="dv">
+      <div class="sec">Perspektiva</div>
+      <div class="g2">
+        <div class="ctrl"><div class="ch"><span class="ck">Naklon X</span><span class="cv" id="v-rx">0°</span></div><div class="ct"><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button></div></div>
+        <div class="ctrl"><div class="ch"><span class="ck">Naklon Y</span><span class="cv" id="v-ry">0°</span></div><div class="ct"><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button></div></div>
+      </div>
+      <hr class="dv">
+      <div class="br"><button class="btn bs" onclick="goBack()">← ZPĚT</button><button class="btn bp" onclick="doFix()">FIX ROVINU ⊕</button></div>
+    </div>
+
+    <!-- OFFSET -->
+    <div class="pi" id="po" style="display:none">
+      <div class="sec">Vzdálenost od budovy</div>
+      <div style="font-size:11px;color:#374151;line-height:1.9;letter-spacing:.05em">Zadejte přibližnou vzdálenost.<br>Ovlivní měřítko fotografie v prostoru.</div>
+      <div class="di-row">
+        <button class="sb" onclick="dstStp(-1)">−</button>
+        <input type="number" class="di" id="di" value="20" min="1" oninput="dst=Math.max(1,+this.value)">
+        <button class="sb" onclick="dstStp(1)">+</button>
+        <div class="ug">
+          <button class="ub on" id="ub-m" onclick="setU('m')">m</button>
+          <button class="ub" id="ub-km" onclick="setU('km')">km</button>
+        </div>
+      </div>
+      <div class="sec">Zaznamenaná rovina</div>
+      <div class="db" id="plane-db">—</div>
+      <div class="sec">Doladění obrazu</div>
+      <div class="ctrl"><div class="ch"><span class="ck">Průhlednost</span><span class="cv" id="v2-opa">50%</span></div><div class="ct"><button class="sb" onclick="stp2('opa',-1)">−</button><input type="range" class="rng" id="s2-opa" min="0" max="100" value="50" oninput="upd2('opa',this.value,'%')"><button class="sb" onclick="stp2('opa',1)">+</button></div></div>
+      <div class="ctrl"><div class="ch"><span class="ck">Velikost</span><span class="cv" id="v2-sz">100%</span></div><div class="ct"><button class="sb" onclick="stp2('sz',-1)">−</button><input type="range" class="rng" id="s2-sz" min="10" max="300" value="100" oninput="upd2('sz',this.value,'%')"><button class="sb" onclick="stp2('sz',1)">+</button></div></div>
+      <div class="g2">
+        <div class="ctrl"><div class="ch"><span class="ck">Pos X</span><span class="cv" id="v2-px">0px</span></div><div class="ct"><button class="sb" onclick="stp2('px',-1)">−</button><input type="range" class="rng" id="s2-px" min="-500" max="500" value="0" oninput="upd2('px',this.value,'px')"><button class="sb" onclick="stp2('px',1)">+</button></div></div>
+        <div class="ctrl"><div class="ch"><span class="ck">Pos Y</span><span class="cv" id="v2-py">0px</span></div><div class="ct"><button class="sb" onclick="stp2('py',-1)">−</button><input type="range" class="rng" id="s2-py" min="-500" max="500" value="0" oninput="upd2('py',this.value,'px')"><button class="sb" onclick="stp2('py',1)">+</button></div></div>
+      </div>
+      <div class="g2">
+        <div class="ctrl"><div class="ch"><span class="ck">Naklon X</span><span class="cv" id="v2-rx">0°</span></div><div class="ct"><button class="sb" onclick="stp2('rx',-1)">−</button><input type="range" class="rng" id="s2-rx" min="-60" max="60" value="0" oninput="upd2('rx',this.value,'°')"><button class="sb" onclick="stp2('rx',1)">+</button></div></div>
+        <div class="ctrl"><div class="ch"><span class="ck">Naklon Y</span><span class="cv" id="v2-ry">0°</span></div><div class="ct"><button class="sb" onclick="stp2('ry',-1)">−</button><input type="range" class="rng" id="s2-ry" min="-60" max="60" value="0" oninput="upd2('ry',this.value,'°')"><button class="sb" onclick="stp2('ry',1)">+</button></div></div>
+      </div>
+      <hr class="dv">
+      <div class="br"><button class="btn bs" onclick="setPhase('align')">← ZAROVNAT</button><button class="btn bp" onclick="doAnchor()">UKOTVIT ◎</button></div>
+    </div>
+
+    <!-- ANCHORED -->
+    <div class="pi" id="panch" style="display:none">
+      <div class="sec">Ukotvená fotografie</div>
+      <div class="db" id="anch-db">—</div>
+      <div class="br">
+        <button class="btn bs" onclick="doReset()">RESET</button>
+        <button class="btn bp" id="btn-copy" onclick="doCopy()">KOPÍROVAT JSON</button>
       </div>
     </div>
-  );
+
+  </div>
+</div>
+
+<script>
+const TR = {opa:50, sz:100, px:0, py:0, rx:0, ry:0};
+const KEYS = {opa:{min:0,max:100,u:'%'}, sz:{min:10,max:300,u:'%'}, px:{min:-500,max:500,u:'px'}, py:{min:-500,max:500,u:'px'}, rx:{min:-60,max:60,u:'°'}, ry:{min:-60,max:60,u:'°'}};
+let phase='load', gyroOk=false, ori={a:0,b:0,g:0}, refOri=null, dst=20, dstU='m', anchData=null, rafId=null;
+
+const $  = id => document.getElementById(id);
+const on = (el, cls, add) => el.classList[add?'add':'remove'](cls);
+
+// ── GYRO ──────────────────────────────────────────────────────────────────
+if ('DeviceOrientationEvent' in window) {
+  gyroOk = true; syncGyroBadges();
+  window.addEventListener('deviceorientation', e => {
+    ori = {a:e.alpha||0, b:e.beta||0, g:e.gamma||0};
+    if (phase==='align'||phase==='offset') $('b-live').textContent = `β${ori.b.toFixed(1)}° γ${ori.g.toFixed(1)}°`;
+  }, true);
+}
+async function reqGyro() {
+  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    if (await DeviceOrientationEvent.requestPermission() === 'granted') { gyroOk=true; syncGyroBadges(); }
+  }
+}
+function syncGyroBadges() {
+  const txt = gyroOk ? 'GYRO OK' : 'BEZ GYRA';
+  const cls = gyroOk ? 'ok' : '';
+  for (const id of ['gyro-tb','gs-load']) {
+    const el = $(id); if (!el) continue;
+    el.className = (id==='gyro-tb' ? '' : 'gs ') + cls;
+    el.innerHTML = `<div class="gdot"></div>${txt}`;
+  }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// MAIN
-// ────────────────────────────────────────────────────────────────────────────
-function PicPin() {
-  const [phase, setPhase]       = useState('load');
-  const [photo, setPhoto]       = useState(null);
-  const [camErr, setCamErr]     = useState(null);
-  const [camReady, setCamReady] = useState(false);
-
-  const [opa, setOpa] = useState(50);
-  const [sz,  setSz]  = useState(100);
-  const [px,  setPx]  = useState(0);
-  const [py,  setPy]  = useState(0);
-  const [rx,  setRx]  = useState(0);
-  const [ry,  setRy]  = useState(0);
-
-  const [gyro, setGyro] = useState(false);
-  const [live, setLive] = useState({ a: 0, b: 0, g: 0 });
-  const oriRef = useRef({ a: 0, b: 0, g: 0 });
-  const refRef = useRef(null);
-
-  const [delta, setDelta] = useState({ dx: 0, dy: 0 });
-  const rafRef = useRef(null);
-
-  const [dist, setDist]     = useState(20);
-  const [unit, setUnit]     = useState('m');
-  const [anchor, setAnchor] = useState(null);
-  const [copied, setCopied] = useState(false);
-
-  const vidRef    = useRef(null);
-  const streamRef = useRef(null);
-
-  // ── Camera ──────────────────────────────────────────────────────────────
-  const startCam = useCallback(async () => {
-    setCamErr(null);
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCamErr('Kamera vyžaduje HTTPS nebo localhost');
-      return;
-    }
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }
-      });
-      streamRef.current = s;
-      if (vidRef.current) {
-        vidRef.current.srcObject = s;
-        await vidRef.current.play();
-      }
-      setCamReady(true);
-    } catch (e) {
-      setCamErr(`${e.name}: ${e.message}`);
-    }
-  }, []);
-
-  const stopCam = useCallback(() => {
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
-    setCamReady(false);
-  }, []);
-
-  // ── Gyro ────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!('DeviceOrientationEvent' in window)) return;
-    setGyro(true);
-    const h = ({ alpha: a, beta: b, gamma: g }) => {
-      const o = { a: a ?? 0, b: b ?? 0, g: g ?? 0 };
-      oriRef.current = o;
-      setLive(o);
-    };
-    window.addEventListener('deviceorientation', h, true);
-    return () => window.removeEventListener('deviceorientation', h, true);
-  }, []);
-
-  const reqGyro = async () => {
-    if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
-      if (await DeviceOrientationEvent.requestPermission() === 'granted') setGyro(true);
-    }
-  };
-
-  // ── AR RAF loop ──────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (phase !== 'anchored') return;
-    const ppd = () => window.innerWidth / 65;
-    const loop = () => {
-      if (refRef.current) {
-        const r = refRef.current, c = oriRef.current, p = ppd();
-        setDelta({ dx: -(c.g - r.g) * p, dy: (c.b - r.b) * p });
-      }
-      rafRef.current = requestAnimationFrame(loop);
-    };
-    rafRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [phase]);
-
-  useEffect(() => () => { stopCam(); cancelAnimationFrame(rafRef.current); }, []);
-
-  // ── Handlers ─────────────────────────────────────────────────────────────
-  const doFix = () => { refRef.current = { ...oriRef.current }; setPhase('offset'); };
-
-  const doAnchor = () => {
-    setAnchor({
-      refOri: { ...refRef.current },
-      distM: unit === 'm' ? dist : dist * 1000,
-      tr: { opa, sz, px, py, rx, ry },
-      ts: new Date().toISOString(),
-    });
-    setDelta({ dx: 0, dy: 0 });
-    setPhase('anchored');
-  };
-
-  const doCopy = async () => {
-    try { await navigator.clipboard.writeText(JSON.stringify(anchor, null, 2)); } catch {}
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const doReset = () => {
-    stopCam();
-    setPhase('load'); setAnchor(null); setDelta({ dx: 0, dy: 0 });
-    refRef.current = null;
-    setOpa(50); setSz(100); setPx(0); setPy(0); setRx(0); setRy(0);
-  };
-
-  // ── Overlay style ─────────────────────────────────────────────────────────
-  const ovStyle = (ar = false) => ({
-    transform: `translate(calc(-50% + ${px + (ar ? delta.dx : 0)}px), calc(-50% + ${py + (ar ? delta.dy : 0)}px)) scale(${sz / 100}) perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`,
-    opacity: opa / 100,
-    transition: ar ? 'transform 60ms linear' : 'none',
+// ── KAMERA (přesně jako step-into-the-past.html) ──────────────────────────
+function startCam() {
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: {ideal:1920}, height: {ideal:1080} }
+  }).then(s => {
+    $('cam').srcObject = s;
+    on($('cam'),'on',true);
+    on($('sl'),'on',true);
+    on($('scr-load'),'off',true);
+    setPhase('align');
+  }).catch(e => {
+    $('b-err').textContent = e.name+': '+e.message;
+    on($('b-err'),'on',true);
   });
-
-  const pi = PHASES.indexOf(phase);
-
-  // ── Shared slider group ───────────────────────────────────────────────────
-  const SG = () => (
-    <>
-      <div className="sec">Překryv</div>
-      <Slider label="Průhlednost" val={opa} min={0}   max={100} step={1} unit="%" set={setOpa} />
-      <Slider label="Velikost"    val={sz}  min={10}  max={300} step={1} unit="%" set={setSz}  />
-      <hr className="div" />
-      <div className="sec">Poloha</div>
-      <div className="g2">
-        <Slider label="Pos X" val={px} min={-500} max={500} step={1} unit="px" set={setPx} />
-        <Slider label="Pos Y" val={py} min={-500} max={500} step={1} unit="px" set={setPy} />
-      </div>
-      <hr className="div" />
-      <div className="sec">Perspektiva</div>
-      <div className="g2">
-        <Slider label="Naklon X" val={rx} min={-60} max={60} step={1} unit="°" set={setRx} />
-        <Slider label="Naklon Y" val={ry} min={-60} max={60} step={1} unit="°" set={setRy} />
-      </div>
-    </>
-  );
-
-  // ── RENDER ────────────────────────────────────────────────────────────────
-  return (
-    <div className="app">
-      <style>{CSS}</style>
-
-      {/* TOP BAR */}
-      {phase === 'load' ? (
-        <div className="topbar">
-          <div className="phase-lbl">PICTURE PIN</div>
-          <div className={`gs ${gyro ? 'ok' : 'off'}`} onClick={reqGyro}>
-            <div className="gs-dot" />{gyro ? 'GYRO OK' : 'BEZ GYRA'}
-          </div>
-        </div>
-      ) : (
-        <div className="topbar">
-          <div className="phase-lbl">{LABELS[phase]}</div>
-          <div className="dots">
-            {PHASES.map((p, i) => (
-              <div key={p} className={`dot${i < pi ? ' done' : ''}${i === pi ? ' active' : ''}`} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* CAMERA VIEWPORT */}
-      {phase !== 'load' && (
-        <div className="vp">
-          <video ref={vidRef} className="feed" autoPlay playsInline muted
-                 onLoadedMetadata={() => vidRef.current?.play()} />
-          {!camReady && !camErr && (
-            <div className="cam-ph"><span style={{ fontSize: 22 }}>📷</span><span>Inicializace...</span></div>
-          )}
-          {camErr && <div className="badge tl red">{camErr}</div>}
-          {photo && <img src={photo} alt="" className="ov-img" style={ovStyle(phase === 'anchored')} />}
-          {phase === 'align' && <div className="xhair" />}
-          {phase === 'anchored' && <div className="badge tl green">● UKOTVENO</div>}
-          {(phase === 'align' || phase === 'offset') && gyro && (
-            <div className="badge tr amber">β{live.b.toFixed(1)}° γ{live.g.toFixed(1)}°</div>
-          )}
-        </div>
-      )}
-
-      {/* ── LOAD ── */}
-      {phase === 'load' && (
-        <div className="ls">
-          <div>
-            <div className="hero">PICTURE<br />PINNING</div>
-            <div className="hero-s">Historické fotografie<br />ukotvené v prostoru</div>
-          </div>
-          <label className="fz">
-            <input type="file" accept="image/*"
-                   onChange={e => { const f = e.target.files[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
-            <div className="fz-icon">{photo ? '✓' : '🗂'}</div>
-            <div className="fz-lbl">
-              {photo ? 'Fotografie načtena — klikněte pro změnu' : 'Načíst historickou fotografii'}
-            </div>
-          </label>
-          {photo && <img src={photo} alt="náhled" className="prev" />}
-          {photo && (
-            <button className="btn btn-p" onClick={async () => { await startCam(); setPhase('align'); }}>
-              SPUSTIT KAMERU →
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── ALIGN ── */}
-      {phase === 'align' && (
-        <div className="panel">
-          <SG />
-          <hr className="div" />
-          <div className="btn-r">
-            <button className="btn btn-s" onClick={() => { setPhase('load'); stopCam(); }}>← ZPĚT</button>
-            <button className="btn btn-p" onClick={doFix}>FIX ROVINU ⊕</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── OFFSET ── */}
-      {phase === 'offset' && (
-        <div className="panel">
-          <div className="sec">Vzdálenost od budovy</div>
-          <div style={{ fontSize: 11, color: '#374151', lineHeight: 1.9, letterSpacing: '.05em' }}>
-            Zadejte přibližnou vzdálenost od fotografované budovy.<br />
-            Ovlivní měřítko fotografie v prostoru.
-          </div>
-          <div className="di-row">
-            <button className="sb" onClick={() => setDist(d => Math.max(1, d - 1))}>−</button>
-            <input type="number" className="di" value={dist} min={1}
-                   onChange={e => setDist(Math.max(1, Number(e.target.value)))} />
-            <button className="sb" onClick={() => setDist(d => d + 1)}>+</button>
-            <div className="ug">
-              <button className={`ub${unit === 'm'  ? ' on' : ''}`} onClick={() => setUnit('m')}>m</button>
-              <button className={`ub${unit === 'km' ? ' on' : ''}`} onClick={() => setUnit('km')}>km</button>
-            </div>
-          </div>
-
-          {refRef.current && (
-            <>
-              <div className="sec">Zaznamenaná rovina</div>
-              <div className="db">
-                {[
-                  ['Azimut α', `${Number(refRef.current.a).toFixed(2)}°`],
-                  ['Náklon β', `${Number(refRef.current.b).toFixed(2)}°`],
-                  ['Rotace γ', `${Number(refRef.current.g).toFixed(2)}°`],
-                ].map(([k, v]) => (
-                  <div key={k} className="dr">
-                    <span className="dk">{k}</span>
-                    <span className="dv">{v}</span>
-                  </div>
-                ))}
-                {!gyro && (
-                  <div style={{ color: '#4B5563', fontSize: 10, marginTop: 6 }}>
-                    ⚠ Gyroskop nedostupný — AR tracking nebude funkční
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          <div className="sec">Doladění obrazu</div>
-          <SG />
-          <hr className="div" />
-          <div className="btn-r">
-            <button className="btn btn-s" onClick={() => setPhase('align')}>← ZAROVNAT</button>
-            <button className="btn btn-p" onClick={doAnchor}>UKOTVIT ◎</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── ANCHORED ── */}
-      {phase === 'anchored' && (
-        <div className="panel">
-          <div className="sec">Ukotvená fotografie</div>
-          {anchor && (
-            <div className="db">
-              {[
-                ['Vzdálenost',  `${anchor.distM} m`],
-                ['Orient. β',   `${Number(anchor.refOri?.b).toFixed(2)}°`],
-                ['Orient. γ',   `${Number(anchor.refOri?.g).toFixed(2)}°`],
-                ['Průhlednost', `${anchor.tr.opa}%`],
-                ['Měřítko',     `${anchor.tr.sz}%`],
-                ['Ukotveno',    new Date(anchor.ts).toLocaleTimeString('cs-CZ')],
-              ].map(([k, v]) => (
-                <div key={k} className="dr">
-                  <span className="dk">{k}</span>
-                  <span className="dv">{v}</span>
-                </div>
-              ))}
-              {gyro && (
-                <div className="dr" style={{ marginTop: 4, borderTop: '1px solid #111', paddingTop: 4 }}>
-                  <span className="dk">AR delta</span>
-                  <span className="dv">Δx {delta.dx.toFixed(1)}px  Δy {delta.dy.toFixed(1)}px</span>
-                </div>
-              )}
-            </div>
-          )}
-          {!gyro && (
-            <div style={{ fontSize: 10, color: '#4B5563', lineHeight: 1.8, letterSpacing: '.05em' }}>
-              ⚠ Gyroskop nedostupný. AR tracking nefunguje.<br />
-              Na iOS klikněte «BEZ GYRA» v liště pro povolení.
-            </div>
-          )}
-          <div className="btn-r">
-            <button className="btn btn-s" onClick={doReset}>RESET</button>
-            <button className={`btn ${copied ? 'btn-ok' : 'btn-p'}`} onClick={doCopy}>
-              {copied ? '✓ ZKOPÍROVÁNO' : 'KOPÍROVAT JSON'}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
-// ── Mount ──────────────────────────────────────────────────────────────────
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<PicPin />);
+// ── FÁZE ──────────────────────────────────────────────────────────────────
+const PLBLS = {align:'02 — ZAROVNAT', offset:'03 — VZDÁLENOST', anchored:'04 — UKOTVENO'};
+const PIDX  = {align:1, offset:2, anchored:3};
+
+function setPhase(p) {
+  phase = p;
+  $('plbl').textContent = PLBLS[p];
+  $('gyro-tb').style.display = 'none';
+  on($('dots-row'),'on',false); $('dots-row').style.display='flex';
+  for (let i=0;i<4;i++) {
+    const d=$('d'+i); d.className='dot'+(i<PIDX[p]?' done':'')+(i===PIDX[p]?' active':'');
+  }
+  on($('panel'),'on',true);
+  $('pa').style.display    = p==='align'    ? 'flex':'none';
+  $('po').style.display    = p==='offset'   ? 'flex':'none';
+  $('panch').style.display = p==='anchored' ? 'flex':'none';
+
+  // overlay
+  on($('ov'),'on', !!$('ov-photo').src && $('ov-photo').src !== window.location.href);
+  applyTR();
+
+  on($('xh'),'on', p==='align');
+  on($('b-live'),'on', (p==='align'||p==='offset') && gyroOk);
+  on($('b-anchor'),'on', p==='anchored');
+  on($('b-err'),'on',false);
+
+  if (p==='offset') fillOffset();
+  if (p==='anchored') { stopAR(); startAR(); fillAnch(); }
+  if (p!=='anchored') stopAR();
+}
+
+// ── TRANSFORM ─────────────────────────────────────────────────────────────
+function applyTR(dx,dy) {
+  const img = $('ov-photo');
+  img.style.opacity   = TR.opa/100;
+  img.style.transform = `translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
+  img.style.transition = dx!==undefined ? 'transform 60ms linear':'none';
+}
+
+// ── SLIDERS ───────────────────────────────────────────────────────────────
+function upd(k,v,u)  { TR[k]=+v; $('v-'+k).textContent=v+u; syncS2(k,v,u); applyTR(); }
+function upd2(k,v,u) { TR[k]=+v; $('v2-'+k).textContent=v+u; $('v-'+k).textContent=v+u; $('s-'+k).value=v; applyTR(); }
+function syncS2(k,v,u) { const e=$('s2-'+k),f=$('v2-'+k); if(e)e.value=v; if(f)f.textContent=v+u; }
+function stp(k,d)  { const e=$('s-'+k),m=KEYS[k]; const v=Math.min(m.max,Math.max(m.min,TR[k]+d)); e.value=v; upd(k,v,m.u); }
+function stp2(k,d) { const e=$('s2-'+k),m=KEYS[k]; const v=Math.min(m.max,Math.max(m.min,TR[k]+d)); e.value=v; upd2(k,v,m.u); }
+
+// ── DISTANCE ──────────────────────────────────────────────────────────────
+function dstStp(d) { dst=Math.max(1,dst+d); $('di').value=dst; }
+function setU(u) { dstU=u; $('ub-m').className='ub'+(u==='m'?' on':''); $('ub-km').className='ub'+(u==='km'?' on':''); }
+
+// ── OFFSET PANEL ──────────────────────────────────────────────────────────
+function fillOffset() {
+  $('plane-db').innerHTML = refOri ? `
+    <div class="dr"><span class="dk">Azimut α</span><span class="dv">${refOri.a.toFixed(2)}°</span></div>
+    <div class="dr"><span class="dk">Náklon β</span><span class="dv">${refOri.b.toFixed(2)}°</span></div>
+    <div class="dr"><span class="dk">Rotace γ</span><span class="dv">${refOri.g.toFixed(2)}°</span></div>
+  ` : '—';
+  // sync slider copies
+  for (const k of Object.keys(KEYS)) {
+    const e=$('s2-'+k),f=$('v2-'+k);
+    if(e){e.value=TR[k];} if(f){f.textContent=TR[k]+KEYS[k].u;}
+  }
+}
+
+// ── AR ─────────────────────────────────────────────────────────────────────
+function startAR() {
+  if (!gyroOk||!refOri) return;
+  const ppd = window.innerWidth/65;
+  function loop() {
+    const dx=-(ori.g-refOri.g)*ppd, dy=(ori.b-refOri.b)*ppd;
+    applyTR(dx,dy);
+    const el=$('ar-d'); if(el) el.textContent=`Δx ${dx.toFixed(1)}px  Δy ${dy.toFixed(1)}px`;
+    rafId=requestAnimationFrame(loop);
+  }
+  rafId=requestAnimationFrame(loop);
+}
+function stopAR() { if(rafId){cancelAnimationFrame(rafId);rafId=null;} }
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────
+function doFix() { refOri={...ori}; setPhase('offset'); }
+
+function doAnchor() {
+  anchData={ refOri:{...refOri}, distM:dstU==='m'?dst:dst*1000, tr:{...TR}, ts:new Date().toISOString() };
+  setPhase('anchored');
+}
+
+function fillAnch() {
+  $('anch-db').innerHTML = `
+    <div class="dr"><span class="dk">Vzdálenost</span><span class="dv">${anchData.distM} m</span></div>
+    <div class="dr"><span class="dk">Orient. β</span><span class="dv">${anchData.refOri.b.toFixed(2)}°</span></div>
+    <div class="dr"><span class="dk">Orient. γ</span><span class="dv">${anchData.refOri.g.toFixed(2)}°</span></div>
+    <div class="dr"><span class="dk">Průhlednost</span><span class="dv">${anchData.tr.opa}%</span></div>
+    <div class="dr"><span class="dk">Měřítko</span><span class="dv">${anchData.tr.sz}%</span></div>
+    <div class="dr"><span class="dk">Ukotveno</span><span class="dv">${new Date(anchData.ts).toLocaleTimeString('cs-CZ')}</span></div>
+    ${gyroOk?'<div class="dr" style="margin-top:4px;border-top:1px solid #111;padding-top:4px"><span class="dk">AR delta</span><span class="dv" id="ar-d">—</span></div>':''}
+  `;
+}
+
+async function doCopy() {
+  try { await navigator.clipboard.writeText(JSON.stringify(anchData,null,2)); } catch(e){}
+  const b=$('btn-copy'); b.textContent='✓ ZKOPÍROVÁNO'; b.className='btn bok';
+  setTimeout(()=>{ b.textContent='KOPÍROVAT JSON'; b.className='btn bp'; },2000);
+}
+
+function goBack() {
+  stopAR();
+  const c=$('cam'); if(c.srcObject) c.srcObject.getTracks().forEach(t=>t.stop()); c.srcObject=null;
+  on(c,'on',false); on($('sl'),'on',false); on($('ov'),'on',false);
+  on($('panel'),'on',false); on($('b-live'),'on',false); on($('b-anchor'),'on',false);
+  $('dots-row').style.display='none'; $('gyro-tb').style.display='';
+  $('plbl').textContent='PICTURE PIN'; on($('scr-load'),'off',false); phase='load';
+}
+
+function doReset() {
+  Object.assign(TR,{opa:50,sz:100,px:0,py:0,rx:0,ry:0});
+  for(const k of Object.keys(KEYS)){const e=$('s-'+k);if(e)e.value=TR[k];}
+  refOri=null; anchData=null; dst=20; dstU='m';
+  goBack();
+}
+
+// ── FILE INPUT ─────────────────────────────────────────────────────────────
+$('file-input').addEventListener('change', function(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  $('ov-photo').src=url;
+  $('prev').src=url; $('prev').style.display='block';
+  $('fz-icon').textContent='✓';
+  $('fz-lbl').textContent='Fotografie načtena — klikněte pro změnu';
+  $('btn-start').style.display='block';
+});
 </script>
 </body>
 </html>

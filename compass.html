@@ -110,19 +110,11 @@ function lerpAngle(c, t) {
   return (c + LP * d + 360) % 360;
 }
 
-// Pan so userPos sits at anchor within the oversized map
+// mapWrap is centered on anchor, so Leaflet map center = anchor.
+// To show user at anchor: simply center map on user.
 function keepUserAtAnchor() {
   if (!userPos) return;
-  const z  = map.getZoom();
-  const sz = map.getSize(); // size of mapWrap
-  const uPx = map.project([userPos.lat, userPos.lng], z);
-  // Anchor relative to mapWrap: anchor screen coords minus mapWrap offset
-  const wrapRect = wrap.getBoundingClientRect();
-  const localAX = AX - wrapRect.left;
-  const localAY = AY - wrapRect.top;
-  const cx = uPx.x - (localAX - sz.x / 2);
-  const cy = uPx.y - (localAY - sz.y / 2);
-  map.setView(map.unproject(L.point(cx, cy), z), z, { animate: false });
+  map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
 }
 
 // Rotate mapWrap around anchor
