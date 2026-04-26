@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Mapa test</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a18; }
+
+/* Clip wrapper — screen size, hides the oversized map edges */
+#clip {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+/* Map container — bigger than screen so rotated corners are always covered.
+   Centered on anchor (50%, ANCHOR_Y px from top).
+   Size = screen diagonal × 1.1 to be safe. Set in JS. */
+#mapWrap {
+  position: absolute;
+  /* centered on anchor — adjusted in JS */
+  transform-origin: 50% 50%;
+  background: #e8e4dc;
+}
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* User dot — in #clip, outside #mapWrap, always at anchor */
+#userDot {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #b04020;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px rgba(176,64,32,.3), 0 2px 8px rgba(0,0,0,.4);
+  z-index: 100;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+#dbg {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: rgba(26,24,20,.75); color: #fff;
+  font-family: monospace; font-size: 13px;
+  padding: 8px 16px; border-radius: 8px;
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+<div id="clip">
+  <div id="mapWrap">
+    <div id="map"></div>
+  </div>
+  <div id="userDot"></div>
+</div>
+<div id="dbg">GPS: čeká… | —°</div>
+
+<script>
+// Anchor: horizontally centered, 120px from bottom
+const AX = window.innerWidth / 2;
+const AY = window.innerHeight - 120;
+
+// Map wrap size: screen diagonal × 1.5 so rotation never shows edge
+const diag = Math.ceil(Math.sqrt(window.innerWidth**2 + window.innerHeight**2) * 1.5);
+const wrap = document.getElementById('mapWrap');
+wrap.style.width  = diag + 'px';
+wrap.style.height = diag + 'px';
+// Center mapWrap on anchor
+wrap.style.left = (AX - diag/2) + 'px';
+wrap.style.top  = (AY - diag/2) + 'px';
+
+// Place user dot at anchor
+const dot = document.getElementById('userDot');
+dot.style.left = AX + 'px';
+dot.style.top  = AY + 'px';
+
+// Init Leaflet inside the oversized container
+const map = L.map('map', {
+  zoomControl: false,
+  attributionControl: false,
+  touchZoom: true,
+  dragging: true
+});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd',
+  maxZoom: 20,
+  keepBuffer: 3
+}).addTo(map);
+map.setView([50.083, 14.42], 16);
+[100, 400, 800].forEach(t => setTimeout(() => map.invalidateSize(), t));
+
+let userPos = null;
+let smoothH = null;
+let lastH   = 0;
+const LP = 0.1;
+
+function lerpAngle(c, t) {
+  if (c === null) return t;
+  let d = t - c; if (d > 180) d -= 360; if (d < -180) d += 360;
+  return (c + LP * d + 360) % 360;
+}
+
+// Pan so userPos sits at anchor within the oversized map
+function keepUserAtAnchor() {
+  if (!userPos) return;
+  const z  = map.getZoom();
+  const sz = map.getSize(); // size of mapWrap
+  const uPx = map.project([userPos.lat, userPos.lng], z);
+  // Anchor relative to mapWrap: anchor screen coords minus mapWrap offset
+  const wrapRect = wrap.getBoundingClientRect();
+  const localAX = AX - wrapRect.left;
+  const localAY = AY - wrapRect.top;
+  const cx = uPx.x - (localAX - sz.x / 2);
+  const cy = uPx.y - (localAY - sz.y / 2);
+  map.setView(map.unproject(L.point(cx, cy), z), z, { animate: false });
+}
+
+// Rotate mapWrap around anchor
+function rotateMap(h) {
+  // transformOrigin is center of mapWrap (50% 50%)
+  // We want rotation around AX,AY on screen
+  // Since mapWrap is centered on AX,AY, transform-origin: 50% 50% = AX,AY. Perfect.
+  wrap.style.transform = 'rotate(' + (-h) + 'deg)';
+  lastH = h;
+}
+
+// GPS
+navigator.geolocation && navigator.geolocation.watchPosition(
+  pos => {
+    userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    keepUserAtAnchor();
+    document.getElementById('dbg').textContent =
+      'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
+  },
+  err => { document.getElementById('dbg').textContent = 'GPS chyba ' + err.code; },
+  { enableHighAccuracy: true, maximumAge: 1500 }
+);
+
+// Orientation
+function startOri() {
+  function handle(e) {
+    let raw = null;
+    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+    else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
+    if (raw !== null) smoothH = lerpAngle(smoothH, raw);
+  }
+  window.addEventListener('deviceorientationabsolute', handle, true);
+  window.addEventListener('deviceorientation', handle, true);
+}
+if (typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function') {
+  document.addEventListener('touchstart', function u() {
+    DeviceOrientationEvent.requestPermission()
+      .then(s => { if (s === 'granted') startOri(); }).catch(() => startOri());
+    document.removeEventListener('touchstart', u);
+  }, { once: true });
+} else { startOri(); }
+
+// Loop
+function loop() {
+  const h = smoothH !== null ? smoothH : 0;
+  if (Math.abs(lastH - h) > 0.3) {
+    rotateMap(h);
+    if (userPos) keepUserAtAnchor();
+  }
+  if (userPos) {
+    document.getElementById('dbg').textContent =
+      'GPS ✓ | ' + Math.round(h) + '°';
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
