@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Mapa test</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
+#app { position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
+#map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+
+/* User dot — outside mapPane, always at anchor */
+#userDot {
+  position: absolute;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #b04020;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  z-index: 50;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+#dbg {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 60;
+  background: rgba(26,24,20,.7); color: #fff;
+  font-family: monospace; font-size: 13px;
+  padding: 8px 14px; border-radius: 8px;
+  text-align: center; white-space: nowrap;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map"></div>
+  <div id="userDot"></div>
+  <div id="dbg">GPS: čeká… | —°</div>
+</div>
+
+<script>
+const ANCHOR_X = window.innerWidth / 2;
+const ANCHOR_Y = window.innerHeight - 120;
+
+// Position user dot at anchor (CSS, not inside mapPane)
+const dot = document.getElementById('userDot');
+dot.style.left = ANCHOR_X + 'px';
+dot.style.top  = ANCHOR_Y + 'px';
+
+// Map — keepBuffer=4 loads tiles in a larger area around viewport
+// This pre-loads tiles that become visible after rotation
+const map = L.map('map', {
+  zoomControl: false,
+  attributionControl: false,
+  touchZoom: true,
+  dragging: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd',
+  maxZoom: 20,
+  keepBuffer: 6   // load tiles 6 tiles outside current viewport (default is 2)
+}).addTo(map);
+
+map.setView([50.083, 14.42], 16);
+[100, 300, 700].forEach(t => setTimeout(() => map.invalidateSize(), t));
+
+let userPos = null;
+let smoothH  = null;
+let lastH    = 0;
+const LP = 0.1;
+
+function lerpAngle(c, t) {
+  if (c === null) return t;
+  let d = t - c;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return (c + LP * d + 360) % 360;
+}
+
+function keepUserAtAnchor() {
+  if (!userPos) return;
+  const z  = map.getZoom();
+  const sz = map.getSize();
+  const uPx = map.project([userPos.lat, userPos.lng], z);
+  const cx  = uPx.x - (ANCHOR_X - sz.x / 2);
+  const cy  = uPx.y - (ANCHOR_Y - sz.y / 2);
+  map.setView(map.unproject(L.point(cx, cy), z), z, { animate: false });
+}
+
+function rotateMap(h) {
+  // Rotate only the tile pane — markers pane stays upright
+  const tilePane   = map.getPanes().tilePane;
+  const shadowPane = map.getPanes().shadowPane;
+  if (!tilePane) return;
+  tilePane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
+  tilePane.style.transform = 'rotate(' + (-h) + 'deg)';
+  // Also rotate overlayPane (polylines etc) but not markerPane
+  const overlayPane = map.getPanes().overlayPane;
+  if (overlayPane) {
+    overlayPane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
+    overlayPane.style.transform = 'rotate(' + (-h) + 'deg)';
+  }
+  lastH = h;
+}
+
+// GPS
+navigator.geolocation && navigator.geolocation.watchPosition(
+  pos => {
+    userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    keepUserAtAnchor();
+  },
+  err => { document.getElementById('dbg').textContent = 'GPS chyba: ' + err.code; },
+  { enableHighAccuracy: true, maximumAge: 1500 }
+);
+
+// Orientation
+function startOri() {
+  function handle(e) {
+    let raw = null;
+    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+    else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
+    if (raw !== null) smoothH = lerpAngle(smoothH, raw);
+  }
+  window.addEventListener('deviceorientationabsolute', handle, true);
+  window.addEventListener('deviceorientation', handle, true);
+}
+if (typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function') {
+  document.addEventListener('touchstart', function u() {
+    DeviceOrientationEvent.requestPermission()
+      .then(s => { if (s === 'granted') startOri(); }).catch(() => startOri());
+    document.removeEventListener('touchstart', u);
+  }, { once: true });
+} else { startOri(); }
+
+// Loop
+function loop() {
+  const h = smoothH !== null ? smoothH : 0;
+  if (Math.abs(lastH - h) > 0.3) {
+    rotateMap(h);
+    if (userPos) keepUserAtAnchor();
+  }
+  document.getElementById('dbg').textContent =
+    (userPos ? 'GPS ✓' : 'GPS čeká') + ' | ' + Math.round(h) + '°';
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
