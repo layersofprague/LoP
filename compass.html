@@ -163,7 +163,7 @@ function loop() {
   const h = smoothH !== null ? smoothH : 0;
   if (Math.abs(lastH - h) > 0.3) {
     rotateMap(h);
-    if (userPos) keepUserAtAnchor();
+    // No setView here — rotation is pure CSS, map center stays on user
   }
   if (userPos) {
     document.getElementById('dbg').textContent =
