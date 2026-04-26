@@ -12,22 +12,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 #app { position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
 
-/* Fixed user dot on screen — always bottom center */
+/* User dot — outside mapPane, always at anchor */
 #userDot {
   position: absolute;
-  left: 50%;
-  bottom: 120px;
-  transform: translate(-50%, 50%);
   width: 18px; height: 18px;
   border-radius: 50%;
   background: #b04020;
   border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
   z-index: 50;
   pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 
-/* Debug overlay */
 #dbg {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
   z-index: 60;
@@ -42,30 +39,39 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 <div id="app">
   <div id="map"></div>
   <div id="userDot"></div>
-  <div id="dbg">GPS: čeká… | heading: —°</div>
+  <div id="dbg">GPS: čeká… | —°</div>
 </div>
 
 <script>
-// Anchor point on screen where the user always appears
 const ANCHOR_X = window.innerWidth / 2;
 const ANCHOR_Y = window.innerHeight - 120;
 
-// Init map centered on Prague as fallback
+// Position user dot at anchor (CSS, not inside mapPane)
+const dot = document.getElementById('userDot');
+dot.style.left = ANCHOR_X + 'px';
+dot.style.top  = ANCHOR_Y + 'px';
+
+// Map — keepBuffer=4 loads tiles in a larger area around viewport
+// This pre-loads tiles that become visible after rotation
 const map = L.map('map', {
   zoomControl: false,
   attributionControl: false,
   touchZoom: true,
   dragging: true
 });
+
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  subdomains: 'abcd', maxZoom: 20
+  subdomains: 'abcd',
+  maxZoom: 20,
+  keepBuffer: 6   // load tiles 6 tiles outside current viewport (default is 2)
 }).addTo(map);
+
 map.setView([50.083, 14.42], 16);
-[100, 300, 600].forEach(t => setTimeout(() => map.invalidateSize(), t));
+[100, 300, 700].forEach(t => setTimeout(() => map.invalidateSize(), t));
 
 let userPos = null;
-let smoothH = null;
-let lastH = 0;
+let smoothH  = null;
+let lastH    = 0;
 const LP = 0.1;
 
 function lerpAngle(c, t) {
@@ -76,26 +82,30 @@ function lerpAngle(c, t) {
   return (c + LP * d + 360) % 360;
 }
 
-// Pan map so that userPos appears at ANCHOR
 function keepUserAtAnchor() {
   if (!userPos) return;
-  const z = map.getZoom();
+  const z  = map.getZoom();
   const sz = map.getSize();
   const uPx = map.project([userPos.lat, userPos.lng], z);
-  // Desired map center: shift so userPos lands at ANCHOR
-  const cx = uPx.x - (ANCHOR_X - sz.x / 2);
-  const cy = uPx.y - (ANCHOR_Y - sz.y / 2);
-  const center = map.unproject(L.point(cx, cy), z);
-  map.setView(center, z, { animate: false });
+  const cx  = uPx.x - (ANCHOR_X - sz.x / 2);
+  const cy  = uPx.y - (ANCHOR_Y - sz.y / 2);
+  map.setView(map.unproject(L.point(cx, cy), z), z, { animate: false });
 }
 
-// Rotate map pane around the ANCHOR point
-function rotateMap(heading) {
-  const pane = map.getPanes().mapPane;
-  if (!pane) return;
-  pane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
-  pane.style.transform = 'rotate(' + (-heading) + 'deg)';
-  lastH = heading;
+function rotateMap(h) {
+  // Rotate only the tile pane — markers pane stays upright
+  const tilePane   = map.getPanes().tilePane;
+  const shadowPane = map.getPanes().shadowPane;
+  if (!tilePane) return;
+  tilePane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
+  tilePane.style.transform = 'rotate(' + (-h) + 'deg)';
+  // Also rotate overlayPane (polylines etc) but not markerPane
+  const overlayPane = map.getPanes().overlayPane;
+  if (overlayPane) {
+    overlayPane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
+    overlayPane.style.transform = 'rotate(' + (-h) + 'deg)';
+  }
+  lastH = h;
 }
 
 // GPS
@@ -103,49 +113,40 @@ navigator.geolocation && navigator.geolocation.watchPosition(
   pos => {
     userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     keepUserAtAnchor();
-    document.getElementById('dbg').textContent =
-      'GPS: ' + pos.coords.accuracy.toFixed(0) + 'm | heading: ' + Math.round(smoothH || 0) + '°';
   },
-  err => {
-    document.getElementById('dbg').textContent = 'GPS chyba: ' + err.code;
-  },
+  err => { document.getElementById('dbg').textContent = 'GPS chyba: ' + err.code; },
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
 
 // Orientation
 function startOri() {
+  function handle(e) {
+    let raw = null;
+    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+    else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
+    if (raw !== null) smoothH = lerpAngle(smoothH, raw);
+  }
   window.addEventListener('deviceorientationabsolute', handle, true);
   window.addEventListener('deviceorientation', handle, true);
-}
-function handle(e) {
-  let raw = null;
-  if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
-  else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
-  if (raw !== null) smoothH = lerpAngle(smoothH, raw);
 }
 if (typeof DeviceOrientationEvent !== 'undefined' &&
     typeof DeviceOrientationEvent.requestPermission === 'function') {
   document.addEventListener('touchstart', function u() {
     DeviceOrientationEvent.requestPermission()
-      .then(s => { if (s === 'granted') startOri(); })
-      .catch(() => startOri());
+      .then(s => { if (s === 'granted') startOri(); }).catch(() => startOri());
     document.removeEventListener('touchstart', u);
   }, { once: true });
-} else {
-  startOri();
-}
+} else { startOri(); }
 
 // Loop
 function loop() {
   const h = smoothH !== null ? smoothH : 0;
   if (Math.abs(lastH - h) > 0.3) {
     rotateMap(h);
-    if (userPos) keepUserAtAnchor(); // re-anchor after rotation
+    if (userPos) keepUserAtAnchor();
   }
-  if (userPos) {
-    document.getElementById('dbg').textContent =
-      'GPS ✓ | heading: ' + Math.round(h) + '°';
-  }
+  document.getElementById('dbg').textContent =
+    (userPos ? 'GPS ✓' : 'GPS čeká') + ' | ' + Math.round(h) + '°';
   requestAnimationFrame(loop);
 }
 loop();
