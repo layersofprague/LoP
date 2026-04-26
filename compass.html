@@ -3,291 +3,152 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Kompas · LoP</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Mapa test</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --paper:#eeefeb;--paper-2:#e6e7e2;
-  --ink:#1a1a18;--ink-2:#3a3a36;--ink-3:#6a6a64;--ink-4:#9a9a94;
-  --rule:#cbcec5;--accent:#b04020;--ok:#3d7a4a;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
+#app { position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
+#map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+
+/* Fixed user dot on screen — always bottom center */
+#userDot {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translate(-50%, 50%);
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #b04020;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  z-index: 50;
+  pointer-events: none;
 }
-html,body{width:100%;height:100%;overflow:hidden;background:var(--paper);font-family:'JetBrains Mono',monospace;-webkit-font-smoothing:antialiased}
 
-/* Stejná struktura jako LayersOfPrague.html */
-#app{position:fixed;top:0;left:0;right:0;bottom:0}
-#cpMap{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--paper-2)}
-.leaflet-container{background:var(--paper-2);font-family:'JetBrains Mono',monospace}
-
-/* Overlays */
-#topBar{
-  position:absolute;top:0;left:0;right:0;z-index:20;
-  display:flex;align-items:center;gap:10px;padding:10px 14px;
-  background:linear-gradient(180deg,rgba(238,239,235,.96) 55%,rgba(238,239,235,0));
+/* Debug overlay */
+#dbg {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 60;
+  background: rgba(26,24,20,.7); color: #fff;
+  font-family: monospace; font-size: 13px;
+  padding: 8px 14px; border-radius: 8px;
+  text-align: center; white-space: nowrap;
 }
-#cpBack{height:32px;padding:0 12px;border-radius:16px;background:rgba(238,239,235,.9);border:1px solid var(--rule);color:var(--ink-2);font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px;flex-shrink:0}
-#cpName{flex:1;font-family:'Fraunces',serif;font-size:16px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#calBadge{flex-shrink:0;cursor:pointer;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:10px;border:1px solid var(--rule);color:var(--ink-4);background:rgba(238,239,235,.9);display:flex;align-items:center;gap:4px;white-space:nowrap}
-#calBadge.ok{color:var(--ok);border-color:rgba(61,122,74,.4)}
-
-/* Bottom */
-#bottom{
-  position:absolute;bottom:0;left:0;right:0;z-index:20;
-  background:linear-gradient(0deg,var(--paper) 60%,rgba(238,239,235,0));
-  padding:0 16px 28px;
-}
-#distWrap{display:flex;flex-direction:column;align-items:center;padding-top:44px;margin-bottom:6px}
-#distRow{display:flex;align-items:baseline;gap:6px}
-#distVal{font-family:'Fraunces',serif;font-size:56px;font-weight:400;line-height:1;letter-spacing:-.02em;color:var(--ink)}
-#distUnit{font-size:18px;color:var(--ink-3)}
-#distSteps{font-size:10px;color:var(--ink-4);letter-spacing:.06em;margin-top:2px}
-#statusRow{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);margin-bottom:4px}
-#statusDot{width:5px;height:5px;border-radius:50%;background:var(--ink-4);flex-shrink:0}
-#statusDot.gps{background:var(--ok)}
-#statusDot.warn{background:var(--accent)}
-#proximityBtn{display:none;width:100%;padding:14px;border-radius:10px;border:none;background:var(--ink);color:var(--paper);font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-top:6px}
-
-/* Compass — bottom left */
-#compassWrap{position:absolute;left:14px;bottom:160px;z-index:25;width:96px;height:96px;filter:drop-shadow(0 2px 8px rgba(26,24,20,.15));pointer-events:none}
-#compassCanvas{display:block;width:96px;height:96px}
-
-/* North pin */
-#northPin{position:absolute;top:58px;left:0;right:0;z-index:15;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:1px;opacity:.7}
-
-/* Map buttons */
-.map-btn{position:absolute;right:14px;z-index:25;width:40px;height:40px;border-radius:50%;background:rgba(238,239,235,.92);border:1px solid var(--rule);box-shadow:0 2px 10px rgba(26,24,20,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-3);transition:all .2s}
-.map-btn.active{background:var(--ok);border-color:var(--ok);color:#fff}
-.map-btn svg{width:18px;height:18px}
-#calToggle{bottom:32px}
-#recenterBtn{bottom:80px}
-#recenterBtn.locked{color:var(--ok)}
-
-/* Cal menu */
-#calMenu{display:none;position:absolute;bottom:80px;right:60px;z-index:50;width:260px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;box-shadow:0 8px 24px rgba(26,24,20,.15);padding:12px}
-.cm-title{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4);margin-bottom:8px}
-#calMenuStatus{padding:9px 10px;border-radius:8px;font-size:11px;background:var(--paper-2);border:1px solid var(--rule);color:var(--ink-2);margin-bottom:8px;line-height:1.5}
-.cm-btn{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--paper-2);color:var(--ink-2);font-family:inherit;font-size:11px;font-weight:500;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.cm-btn:last-child{margin-bottom:0}
-.cm-btn svg{width:13px;height:13px;flex-shrink:0}
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="cpMap"></div>
-
-  <div id="northPin">
-    <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:11px solid #b04020"></div>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#b04020">N</span>
-  </div>
-
-  <div id="topBar">
-    <button id="cpBack" onclick="history.back()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
-      Zpět
-    </button>
-    <div id="cpName">—</div>
-    <div id="calBadge" onclick="toggleCalMenu()">
-      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-      <span id="calBadgeTxt">kal</span>
-    </div>
-  </div>
-
-  <div id="compassWrap">
-    <canvas id="compassCanvas" width="192" height="192"></canvas>
-  </div>
-
-  <div id="bottom">
-    <div id="distWrap">
-      <div id="distRow"><span id="distVal">—</span><span id="distUnit"></span></div>
-      <div id="distSteps"></div>
-    </div>
-    <div id="statusRow"><span id="statusDot"></span><span id="statusTxt">Čeká na GPS…</span></div>
-    <button id="proximityBtn" onclick="goToTarget()">Jsi na místě — otevřít AR →</button>
-  </div>
-
-  <button class="map-btn" id="recenterBtn" onclick="recenter()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-  </button>
-  <button class="map-btn" id="calToggle" onclick="toggleCalCorrection()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-  </button>
-
-  <div id="calMenu">
-    <div class="cm-title">Kalibrace kompasu</div>
-    <div id="calMenuStatus">—</div>
-    <button class="cm-btn" onclick="document.getElementById('calFileInput').click();toggleCalMenu()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Načíst ze souboru (.json)
-    </button>
-    <button class="cm-btn" onclick="loadFromGitHub()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-      Admin: načíst z webu
-    </button>
-  </div>
+  <div id="map"></div>
+  <div id="userDot"></div>
+  <div id="dbg">GPS: čeká… | heading: —°</div>
 </div>
 
-<input type="file" id="calFileInput" accept=".json" style="display:none" onchange="loadCalFromFile(this)"/>
-
 <script>
-const params=new URLSearchParams(location.search);
-const TARGET={id:params.get('id'),num:params.get('num')||params.get('id')||'?',lat:parseFloat(params.get('lat')),lng:parseFloat(params.get('lng')),name:params.get('name')||'—'};
-document.getElementById('cpName').textContent=TARGET.name;
+// Anchor point on screen where the user always appears
+const ANCHOR_X = window.innerWidth / 2;
+const ANCHOR_Y = window.innerHeight - 120;
 
-const CAL_REMOTE_URL='https://raw.githubusercontent.com/layersofprague/LoP/main/vysledky_kalibrace.json';
-let yawOffset=0;
-function getCal(){try{return JSON.parse(localStorage.getItem('lop_sensor_calibration')||'null')}catch(e){return null}}
-function loadCalibration(){
-  const badge=document.getElementById('calBadge'),txt=document.getElementById('calBadgeTxt');
-  const disabled=localStorage.getItem('lop_sensor_calibration_disabled')==='1',cal=getCal();
-  if(cal&&!disabled){yawOffset=cal.offsets?.yaw||0;badge.classList.add('ok');txt.textContent=cal.quality?.yawConsistency||new Date(cal.savedAt).toLocaleDateString('cs-CZ');}
-  else if(cal&&disabled){yawOffset=0;badge.classList.remove('ok');txt.textContent='vypnuto';}
-  else{yawOffset=0;badge.classList.remove('ok');txt.textContent='nekalibrováno';}
-  updateToggleBtn();
-}
-function applyAndSave(cal){localStorage.setItem('lop_sensor_calibration',JSON.stringify(cal));localStorage.removeItem('lop_sensor_calibration_disabled');loadCalibration();updateCalMenuStatus();}
-function loadCalFromFile(input){const file=input.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{applyAndSave(JSON.parse(ev.target.result))}catch(e){alert('Chyba: '+e.message)}input.value='';};r.readAsText(file);}
-function loadFromGitHub(){if(!confirm('Načíst kalibraci z webu?\n\n'+CAL_REMOTE_URL))return;document.getElementById('calBadgeTxt').textContent='…';fetch(CAL_REMOTE_URL+'?t='+Date.now()).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(cal=>{applyAndSave(cal);document.getElementById('calMenu').style.display='none';}).catch(e=>{alert('Chyba: '+e.message);loadCalibration();});}
-function toggleCalCorrection(){const d=localStorage.getItem('lop_sensor_calibration_disabled')==='1';if(d)localStorage.removeItem('lop_sensor_calibration_disabled');else localStorage.setItem('lop_sensor_calibration_disabled','1');loadCalibration();updateCalMenuStatus();}
-function updateToggleBtn(){const btn=document.getElementById('calToggle');if(!btn)return;const cal=getCal(),d=localStorage.getItem('lop_sensor_calibration_disabled')==='1';btn.classList.toggle('active',!!(cal&&!d));}
-function toggleCalMenu(){const m=document.getElementById('calMenu');const open=m.style.display==='block';m.style.display=open?'none':'block';if(!open){updateCalMenuStatus();setTimeout(()=>document.addEventListener('click',function h(e){if(!m.contains(e.target)&&!document.getElementById('calBadge').contains(e.target)){m.style.display='none';}document.removeEventListener('click',h);},50);}}
-function updateCalMenuStatus(){const d=localStorage.getItem('lop_sensor_calibration_disabled')==='1',cal=getCal(),el=document.getElementById('calMenuStatus');if(!cal){el.textContent='Žádná kalibrace v paměti.';}else if(d){el.innerHTML='<span style="color:var(--accent)">Korekce vypnuta</span><br><small style="color:var(--ink-4)">yaw '+(cal.offsets.yaw||0).toFixed(1)+'°</small>';}else{const c=cal.quality?.yawConsistency||'';el.innerHTML='<span style="color:var(--ok)">Aktivní</span> — yaw '+((cal.offsets.yaw||0)>0?'+':'')+(cal.offsets.yaw||0).toFixed(1)+'°'+(c?'<br><small style="color:var(--ink-4)">'+c+'</small>':'');}}
+// Init map centered on Prague as fallback
+const map = L.map('map', {
+  zoomControl: false,
+  attributionControl: false,
+  touchZoom: true,
+  dragging: true
+});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 20
+}).addTo(map);
+map.setView([50.083, 14.42], 16);
+[100, 300, 600].forEach(t => setTimeout(() => map.invalidateSize(), t));
 
-// MAP
-let map,userMarker=null,isLocked=true,initialFitDone=false;
+let userPos = null;
+let smoothH = null;
+let lastH = 0;
+const LP = 0.1;
 
-function getUserAnchorPx(){
-  // User should appear just above the distance display
-  const bh=document.getElementById('bottom').offsetHeight||160;
-  return{x:window.innerWidth/2, y:window.innerHeight-bh-10};
-}
-function panToAnchor(animated){
-  if(!map||!userPos)return;
-  const z=map.getZoom(),ap=getUserAnchorPx(),sz=map.getSize();
-  const uPx=map.project([userPos.lat,userPos.lng],z);
-  const cPx=L.point(uPx.x-(ap.x-sz.x/2), uPx.y-(ap.y-sz.y/2));
-  map.setView(map.unproject(cPx,z),z,{animate:!!animated,duration:.4});
-}
-function recenter(){
-  isLocked=true;
-  document.getElementById('recenterBtn').classList.add('locked');
-  if(userPos)panToAnchor(true);
-}
-function fitBoth(){
-  if(!userPos||isNaN(TARGET.lat))return;
-  const bounds=L.latLngBounds([[userPos.lat,userPos.lng],[TARGET.lat,TARGET.lng]]);
-  map.fitBounds(bounds,{padding:[60,80],maxZoom:17,animate:false});
-  setTimeout(()=>panToAnchor(false),80);
-  initialFitDone=true;
-}
-function positionCompass(){
-  const bh=document.getElementById('bottom').offsetHeight||160;
-  document.getElementById('compassWrap').style.bottom=(bh+8)+'px';
+function lerpAngle(c, t) {
+  if (c === null) return t;
+  let d = t - c;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return (c + LP * d + 360) % 360;
 }
 
-function initMap(){
-  map=L.map('cpMap',{zoomControl:false,attributionControl:false,touchZoom:true,dragging:true});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
-  if(!isNaN(TARGET.lat)&&!isNaN(TARGET.lng)){
-    const n=String(TARGET.num),m=n.match(/^([A-Z]+)(\d+)$/);
-    const ph=m?'<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;color:#eeefeb"><span style="font-size:11px;font-weight:700;line-height:1">'+m[1]+'</span><span style="font-size:7px;opacity:.8;line-height:1">'+m[2]+'</span></div>':'<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;color:#eeefeb">'+n+'</div>';
-    L.marker([TARGET.lat,TARGET.lng],{icon:L.divIcon({html:ph,className:'',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(map);
-    map.setView([TARGET.lat,TARGET.lng],15);
-  }
-  map.on('dragstart zoomstart',()=>{isLocked=false;document.getElementById('recenterBtn').classList.remove('locked');});
-  // Multiple invalidateSize calls to ensure tiles load
-  [100,300,600].forEach(t=>setTimeout(()=>map.invalidateSize(),t));
+// Pan map so that userPos appears at ANCHOR
+function keepUserAtAnchor() {
+  if (!userPos) return;
+  const z = map.getZoom();
+  const sz = map.getSize();
+  const uPx = map.project([userPos.lat, userPos.lng], z);
+  // Desired map center: shift so userPos lands at ANCHOR
+  const cx = uPx.x - (ANCHOR_X - sz.x / 2);
+  const cy = uPx.y - (ANCHOR_Y - sz.y / 2);
+  const center = map.unproject(L.point(cx, cy), z);
+  map.setView(center, z, { animate: false });
 }
 
-// SENSORS
-let userPos=null,smoothH=null;
-const LP=0.1;
-function lerpAngle(c,t){if(c===null)return t;let d=t-c;if(d>180)d-=360;if(d<-180)d+=360;return(c+LP*d+360)%360;}
-navigator.geolocation&&navigator.geolocation.watchPosition(
-  pos=>{
-    const acc=pos.coords.accuracy;
-    userPos={lat:pos.coords.latitude,lng:pos.coords.longitude};
-    if(map){
-      if(userMarker)userMarker.setLatLng([userPos.lat,userPos.lng]);
-      else userMarker=L.circleMarker([userPos.lat,userPos.lng],{radius:8,color:'#fff',fillColor:'#b04020',fillOpacity:.95,weight:2}).addTo(map);
-      if(!initialFitDone&&acc<80)fitBoth();
-      else if(isLocked)panToAnchor(false);
-    }
-    setStatus('gps',acc<20?'GPS aktivní':acc<80?'GPS ±'+Math.round(acc)+' m':'Čeká na přesný fix…');
-    updateDist();
+// Rotate map pane around the ANCHOR point
+function rotateMap(heading) {
+  const pane = map.getPanes().mapPane;
+  if (!pane) return;
+  pane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
+  pane.style.transform = 'rotate(' + (-heading) + 'deg)';
+  lastH = heading;
+}
+
+// GPS
+navigator.geolocation && navigator.geolocation.watchPosition(
+  pos => {
+    userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    keepUserAtAnchor();
+    document.getElementById('dbg').textContent =
+      'GPS: ' + pos.coords.accuracy.toFixed(0) + 'm | heading: ' + Math.round(smoothH || 0) + '°';
   },
-  err=>{const m={1:'Poloha blokována — povol v adresním řádku',2:'Polohu nelze určit',3:'Vypršel časový limit'};setStatus('warn',m[err.code]||'GPS nedostupná');},
-  {enableHighAccuracy:true,maximumAge:1500}
+  err => {
+    document.getElementById('dbg').textContent = 'GPS chyba: ' + err.code;
+  },
+  { enableHighAccuracy: true, maximumAge: 1500 }
 );
-function startOrientation(){
-  const h=e=>{let raw=null;if(e.webkitCompassHeading!==undefined)raw=e.webkitCompassHeading;else if(e.alpha!==null)raw=(360-e.alpha)%360;if(raw!==null)smoothH=lerpAngle(smoothH,(raw-yawOffset+360)%360);};
-  window.addEventListener('deviceorientationabsolute',h,true);
-  window.addEventListener('deviceorientation',h,true);
-}
-if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-  document.addEventListener('touchstart',function u(){DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')startOrientation();}).catch(()=>startOrientation());document.removeEventListener('touchstart',u);},{once:true});
-}else{startOrientation();}
 
-function toRad(d){return d*Math.PI/180}
-function toDeg(r){return r*180/Math.PI}
-function calcBearing(a,b){const dL=toRad(b.lng-a.lng);const y=Math.sin(dL)*Math.cos(toRad(b.lat));const x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(dL);return(toDeg(Math.atan2(y,x))+360)%360;}
-function calcDist(a,b){const R=6371000,dLat=toRad(b.lat-a.lat),dLng=toRad(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));}
-function updateDist(){
-  if(!userPos||isNaN(TARGET.lat))return;
-  const dist=calcDist(userPos,TARGET);
-  if(dist<1000){document.getElementById('distVal').textContent=Math.round(dist);document.getElementById('distUnit').textContent='m';}
-  else{document.getElementById('distVal').textContent=(dist/1000).toFixed(1).replace('.',',');document.getElementById('distUnit').textContent='km';}
-  const steps=Math.round(dist/0.75);
-  document.getElementById('distSteps').textContent=steps<9999?'≈ '+steps.toLocaleString('cs')+' kroků':'';
-  if(dist<=25)document.getElementById('proximityBtn').style.display='block';
+// Orientation
+function startOri() {
+  window.addEventListener('deviceorientationabsolute', handle, true);
+  window.addEventListener('deviceorientation', handle, true);
 }
-function setStatus(type,txt){document.getElementById('statusDot').className=type;document.getElementById('statusTxt').textContent=txt;}
-function goToTarget(){location.href='step-into-the-past.html?id='+TARGET.id+'&lat='+TARGET.lat+'&lng='+TARGET.lng;}
-
-// COMPASS
-const canvas=document.getElementById('compassCanvas');
-const ctx=canvas.getContext('2d');
-const S=192;
-function drawCompass(heading,bearing,hasFix){
-  ctx.clearRect(0,0,S,S);const cx=S/2,cy=S/2,R=S/2-4;
-  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle='rgba(238,239,235,0.85)';ctx.fill();ctx.strokeStyle='#cbcec5';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.save();ctx.translate(cx,cy);ctx.rotate(-heading*Math.PI/180);
-  for(let i=0;i<36;i++){const a=i*10*Math.PI/180,big=i%9===0;ctx.beginPath();ctx.moveTo(Math.sin(a)*(big?R-12:R-7),-Math.cos(a)*(big?R-12:R-7));ctx.lineTo(Math.sin(a)*R,-Math.cos(a)*R);ctx.strokeStyle=big?'#6a6a64':'#cbcec5';ctx.lineWidth=big?1.5:1;ctx.stroke();}
-  [['N',0,'#b04020',11],['E',90,'#9a9a94',9],['S',180,'#9a9a94',9],['W',270,'#9a9a94',9]].forEach(([l,d,col,sz])=>{const a=d*Math.PI/180,r=R-20;ctx.fillStyle=col;ctx.font='600 '+sz+'px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l,Math.sin(a)*r,-Math.cos(a)*r);});
-  ctx.restore();
-  if(hasFix&&!isNaN(bearing)){const ra=(bearing-heading)*Math.PI/180,aR=R*.5;ctx.save();ctx.translate(cx,cy);ctx.rotate(ra);const g=ctx.createLinearGradient(0,-aR,0,aR*.3);g.addColorStop(0,'#1a1a18');g.addColorStop(1,'rgba(26,26,24,0)');ctx.beginPath();ctx.moveTo(0,-aR);ctx.lineTo(5,-aR*.45);ctx.lineTo(3,-aR*.45);ctx.lineTo(3,aR*.25);ctx.lineTo(-3,aR*.25);ctx.lineTo(-3,-aR*.45);ctx.lineTo(-5,-aR*.45);ctx.closePath();ctx.fillStyle=g;ctx.fill();ctx.restore();}
-  ctx.beginPath();ctx.arc(cx,cy,9,0,Math.PI*2);ctx.fillStyle='rgba(238,239,235,.95)';ctx.fill();ctx.strokeStyle='#cbcec5';ctx.lineWidth=1;ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,3.5,0,Math.PI*2);ctx.fillStyle=hasFix?'#1a1a18':'#cbcec5';ctx.fill();
-  ctx.fillStyle='#1a1a18';ctx.font='600 11px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.round(heading)+'°',cx,11);
+function handle(e) {
+  let raw = null;
+  if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+  else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
+  if (raw !== null) smoothH = lerpAngle(smoothH, raw);
+}
+if (typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function') {
+  document.addEventListener('touchstart', function u() {
+    DeviceOrientationEvent.requestPermission()
+      .then(s => { if (s === 'granted') startOri(); })
+      .catch(() => startOri());
+    document.removeEventListener('touchstart', u);
+  }, { once: true });
+} else {
+  startOri();
 }
 
-let lastH=0;
-function rotateMapAroundUser(h){
-  if(!map||!userPos)return;
-  const pane=map.getPanes().mapPane;if(!pane)return;
-  const uPx=map.latLngToContainerPoint([userPos.lat,userPos.lng]);
-  pane.style.transformOrigin=uPx.x+'px '+uPx.y+'px';
-  pane.style.transform='rotate('+(-h)+'deg)';
-  lastH=h;
-}
-
-function loop(){
-  const h=smoothH!==null?smoothH:0;
-  const hasFix=userPos!==null&&!isNaN(TARGET.lat);
-  drawCompass(h,hasFix?calcBearing(userPos,TARGET):0,hasFix);
-  if(map&&userPos&&Math.abs(lastH-h)>0.3)rotateMapAroundUser(h);
+// Loop
+function loop() {
+  const h = smoothH !== null ? smoothH : 0;
+  if (Math.abs(lastH - h) > 0.3) {
+    rotateMap(h);
+    if (userPos) keepUserAtAnchor(); // re-anchor after rotation
+  }
+  if (userPos) {
+    document.getElementById('dbg').textContent =
+      'GPS ✓ | heading: ' + Math.round(h) + '°';
+  }
   requestAnimationFrame(loop);
 }
-
-window.addEventListener('load',()=>{
-  loadCalibration();
-  initMap();
-  loop();
-  requestAnimationFrame(()=>requestAnimationFrame(positionCompass));
-});
-window.addEventListener('resize',positionCompass);
+loop();
 </script>
 </body>
 </html>
