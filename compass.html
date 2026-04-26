@@ -8,103 +8,129 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
-#app { position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
-#map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a18; }
 
-/* User dot — outside mapPane, always at anchor */
+/* Clip wrapper — screen size, hides the oversized map edges */
+#clip {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+/* Map container — bigger than screen so rotated corners are always covered.
+   Centered on anchor (50%, ANCHOR_Y px from top).
+   Size = screen diagonal × 1.1 to be safe. Set in JS. */
+#mapWrap {
+  position: absolute;
+  /* centered on anchor — adjusted in JS */
+  transform-origin: 50% 50%;
+  background: #e8e4dc;
+}
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* User dot — in #clip, outside #mapWrap, always at anchor */
 #userDot {
   position: absolute;
-  width: 18px; height: 18px;
+  width: 20px; height: 20px;
   border-radius: 50%;
   background: #b04020;
   border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
-  z-index: 50;
+  box-shadow: 0 0 0 3px rgba(176,64,32,.3), 0 2px 8px rgba(0,0,0,.4);
+  z-index: 100;
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
 
 #dbg {
-  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-  z-index: 60;
-  background: rgba(26,24,20,.7); color: #fff;
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: rgba(26,24,20,.75); color: #fff;
   font-family: monospace; font-size: 13px;
-  padding: 8px 14px; border-radius: 8px;
-  text-align: center; white-space: nowrap;
+  padding: 8px 16px; border-radius: 8px;
+  white-space: nowrap;
 }
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="map"></div>
+<div id="clip">
+  <div id="mapWrap">
+    <div id="map"></div>
+  </div>
   <div id="userDot"></div>
-  <div id="dbg">GPS: čeká… | —°</div>
 </div>
+<div id="dbg">GPS: čeká… | —°</div>
 
 <script>
-const ANCHOR_X = window.innerWidth / 2;
-const ANCHOR_Y = window.innerHeight - 120;
+// Anchor: horizontally centered, 120px from bottom
+const AX = window.innerWidth / 2;
+const AY = window.innerHeight - 120;
 
-// Position user dot at anchor (CSS, not inside mapPane)
+// Map wrap size: screen diagonal × 1.5 so rotation never shows edge
+const diag = Math.ceil(Math.sqrt(window.innerWidth**2 + window.innerHeight**2) * 1.5);
+const wrap = document.getElementById('mapWrap');
+wrap.style.width  = diag + 'px';
+wrap.style.height = diag + 'px';
+// Center mapWrap on anchor
+wrap.style.left = (AX - diag/2) + 'px';
+wrap.style.top  = (AY - diag/2) + 'px';
+
+// Place user dot at anchor
 const dot = document.getElementById('userDot');
-dot.style.left = ANCHOR_X + 'px';
-dot.style.top  = ANCHOR_Y + 'px';
+dot.style.left = AX + 'px';
+dot.style.top  = AY + 'px';
 
-// Map — keepBuffer=4 loads tiles in a larger area around viewport
-// This pre-loads tiles that become visible after rotation
+// Init Leaflet inside the oversized container
 const map = L.map('map', {
   zoomControl: false,
   attributionControl: false,
   touchZoom: true,
   dragging: true
 });
-
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd',
   maxZoom: 20,
-  keepBuffer: 6   // load tiles 6 tiles outside current viewport (default is 2)
+  keepBuffer: 3
 }).addTo(map);
-
 map.setView([50.083, 14.42], 16);
-[100, 300, 700].forEach(t => setTimeout(() => map.invalidateSize(), t));
+[100, 400, 800].forEach(t => setTimeout(() => map.invalidateSize(), t));
 
 let userPos = null;
-let smoothH  = null;
-let lastH    = 0;
+let smoothH = null;
+let lastH   = 0;
 const LP = 0.1;
 
 function lerpAngle(c, t) {
   if (c === null) return t;
-  let d = t - c;
-  if (d > 180) d -= 360;
-  if (d < -180) d += 360;
+  let d = t - c; if (d > 180) d -= 360; if (d < -180) d += 360;
   return (c + LP * d + 360) % 360;
 }
 
+// Pan so userPos sits at anchor within the oversized map
 function keepUserAtAnchor() {
   if (!userPos) return;
   const z  = map.getZoom();
-  const sz = map.getSize();
+  const sz = map.getSize(); // size of mapWrap
   const uPx = map.project([userPos.lat, userPos.lng], z);
-  const cx  = uPx.x - (ANCHOR_X - sz.x / 2);
-  const cy  = uPx.y - (ANCHOR_Y - sz.y / 2);
+  // Anchor relative to mapWrap: anchor screen coords minus mapWrap offset
+  const wrapRect = wrap.getBoundingClientRect();
+  const localAX = AX - wrapRect.left;
+  const localAY = AY - wrapRect.top;
+  const cx = uPx.x - (localAX - sz.x / 2);
+  const cy = uPx.y - (localAY - sz.y / 2);
   map.setView(map.unproject(L.point(cx, cy), z), z, { animate: false });
 }
 
+// Rotate mapWrap around anchor
 function rotateMap(h) {
-  // Rotate only the tile pane — markers pane stays upright
-  const tilePane   = map.getPanes().tilePane;
-  const shadowPane = map.getPanes().shadowPane;
-  if (!tilePane) return;
-  tilePane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
-  tilePane.style.transform = 'rotate(' + (-h) + 'deg)';
-  // Also rotate overlayPane (polylines etc) but not markerPane
-  const overlayPane = map.getPanes().overlayPane;
-  if (overlayPane) {
-    overlayPane.style.transformOrigin = ANCHOR_X + 'px ' + ANCHOR_Y + 'px';
-    overlayPane.style.transform = 'rotate(' + (-h) + 'deg)';
-  }
+  // transformOrigin is center of mapWrap (50% 50%)
+  // We want rotation around AX,AY on screen
+  // Since mapWrap is centered on AX,AY, transform-origin: 50% 50% = AX,AY. Perfect.
+  wrap.style.transform = 'rotate(' + (-h) + 'deg)';
   lastH = h;
 }
 
@@ -113,8 +139,10 @@ navigator.geolocation && navigator.geolocation.watchPosition(
   pos => {
     userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     keepUserAtAnchor();
+    document.getElementById('dbg').textContent =
+      'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
   },
-  err => { document.getElementById('dbg').textContent = 'GPS chyba: ' + err.code; },
+  err => { document.getElementById('dbg').textContent = 'GPS chyba ' + err.code; },
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
 
@@ -145,8 +173,10 @@ function loop() {
     rotateMap(h);
     if (userPos) keepUserAtAnchor();
   }
-  document.getElementById('dbg').textContent =
-    (userPos ? 'GPS ✓' : 'GPS čeká') + ' | ' + Math.round(h) + '°';
+  if (userPos) {
+    document.getElementById('dbg').textContent =
+      'GPS ✓ | ' + Math.round(h) + '°';
+  }
   requestAnimationFrame(loop);
 }
 loop();

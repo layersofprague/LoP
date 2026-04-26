@@ -65,7 +65,7 @@ html, body { background: #060606; }
 
 .vp {
   position: relative; width: 100%;
-  aspect-ratio: 9/16; max-height: 55vh;
+  height: 56vw; min-height: 220px; max-height: 55vh;
   overflow: hidden; background: #090909; flex-shrink: 0;
 }
 .vp::after {
@@ -76,7 +76,10 @@ html, body { background: #060606; }
   z-index: 2;
 }
 video.feed {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
 }
 .ov-img {
   position: absolute; top: 50%; left: 50%;
@@ -435,7 +438,8 @@ function PicPin() {
       {/* CAMERA VIEWPORT */}
       {phase !== 'load' && (
         <div className="vp">
-          <video ref={vidRef} className="feed" autoPlay playsInline muted />
+          <video ref={vidRef} className="feed" autoPlay playsInline muted
+                 onLoadedMetadata={() => vidRef.current?.play()} />
           {!camReady && !camErr && (
             <div className="cam-ph"><span style={{ fontSize: 22 }}>📷</span><span>Inicializace...</span></div>
           )}
