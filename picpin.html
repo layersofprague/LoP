@@ -301,9 +301,6 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     <span style="color:rgba(255,255,255,.2)">|</span>
     <span>H:<span id="dbg-haxis" style="color:#EF4444">rα</span><span id="dbg-hsign" style="color:#EF4444">+</span></span>
     <span>V:<span id="dbg-vaxis" style="color:#EF4444">rα</span><span id="dbg-vsign" style="color:#EF4444">+</span></span>
-    <span style="color:rgba(255,255,255,.2)">|</span>
-    <span>γ<span id="dbg-gamma" style="color:#e879f9;margin-left:2px">0.0</span></span>
-    <span>r<span id="dbg-roll" style="color:#fff;margin-left:2px">0.0</span></span>
   </div>
 </div>
 
@@ -423,7 +420,6 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
       </div>
       <div class="br" style="margin-top:5px">
         <button class="btn bs" onclick="doReset()">RESET</button>
-        <button class="btn bs" onclick="rollHybrid=0" style="color:rgba(96,165,250,.8);border-color:rgba(96,165,250,.2)">⟳ ROLL ON</button>
         <button class="btn bg" id="btn-copy" onclick="doCopy()">ULOŽIT JSON</button>
       </div>
     </div>
@@ -507,14 +503,11 @@ let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
-let rollHybrid=0; // complementary filter
-let rollAlpha=0.7; // 0=pure compass, 1=pure gyro — lower = less lag/inertia
-let rollEnabled=false; // OFF by default — enable in step 4
-let rollGain=1.0; // multiplier, adjustable
-let rollSign=1;   // +1 or -1
 let yawCalibOffset=0;
 // Axis defaults: H=rβ+, V=rα+  (user confirmed working)
 let gyroHAxis='b', gyroVAxis='a', gyroHSign=1, gyroVSign=1;
+let rollHybrid=0;
+let rollAlpha=0.7;
 let rawRate={a:0,b:0,g:0}; // live debug values
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
@@ -579,16 +572,16 @@ window.addEventListener('devicemotion', e=>{
     if(dg) dg.textContent=rawRate.g.toFixed(1);
   }
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
-  // Hybrid roll: complementary filter active in anchored phase regardless of AR mode
-  if(dt>0 && phase==='anchored' && refOri!==null){
-    const compass_roll = ori.g - refOri.g; // absolute reference (gamma diff)
-    rollHybrid = rollAlpha * (rollHybrid + rawRate.a * dt) + (1-rollAlpha) * compass_roll;
-  }
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
     const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
     gyroAngles.x += hVal * dt;
     gyroAngles.y += vVal * dt;
+  }
+  // Complementary filter for roll: gyro speed + compass anchor
+  if(dt>0 && phase==='anchored' && refOri){
+    const compass_roll = ori.g - refOri.g;
+    rollHybrid = rollAlpha*(rollHybrid + rawRate.a*dt) + (1-rollAlpha)*compass_roll;
   }
   gyroLastT=now;
 },true);
@@ -812,7 +805,7 @@ function applyCalibTR(dx,dy){
   img.style.transition='none';
 }
 function startCalibAR(){
-  calibAngles={x:0,y:0}; calibLastT=null; rollHybrid=0;
+  calibAngles={x:0,y:0}; calibLastT=null;
   function loop(){
     const now=performance.now();
     if(calibLastT!==null){
@@ -830,7 +823,7 @@ function startCalibAR(){
   calibRafId=requestAnimationFrame(loop);
 }
 function resetCalibView(){
-  calibAngles={x:0,y:0}; calibLastT=null; rollHybrid=0;
+  calibAngles={x:0,y:0}; calibLastT=null;
   applyCalibTR(0,0);
 }
 
@@ -1015,12 +1008,7 @@ function startAR(){
     applyTR(dx, dy, rollHybrid);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
-    const dg=$('dbg-gamma'), dr=$('dbg-roll');
-    if(dg) dg.textContent=ori.g.toFixed(1);
-    if(dr) dr.textContent=rollHybrid.toFixed(1);
-    const dg2=$('dbg-gamma2'),dr2=$('dbg-roll2');
-    if(dg2) dg2.textContent=ori.g.toFixed(1);
-    if(dr2) dr2.textContent=rollHybrid.toFixed(1);
+
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
@@ -1126,15 +1114,6 @@ function doAnchor(){
 }
 
 function toggleRoll(){
-  rollEnabled=!rollEnabled;
-  rollHybrid=0;
-  const b=$('btn-roll-toggle');
-  if(b){
-    b.textContent=rollEnabled?'ON':'OFF';
-    b.style.color=rollEnabled?'rgba(96,165,250,.9)':'rgba(255,255,255,.3)';
-    b.style.borderColor=rollEnabled?'rgba(96,165,250,.4)':'rgba(96,165,250,.2)';
-    b.style.background=rollEnabled?'rgba(96,165,250,.1)':'rgba(255,255,255,.04)';
-  }
 }
 
 function fillAnch(){
