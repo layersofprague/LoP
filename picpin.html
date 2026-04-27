@@ -258,15 +258,30 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 </div>
 
 <!-- TOP BAR — no background -->
-<div id="topbar">
-  <div class="plbl" id="plbl">—</div>
-  <div id="ori-lbl"></div>
-  <div style="display:flex;align-items:center;gap:6px">
-    <div id="gyro-tb" onclick="reqGyro()"><div class="gdot"></div>GYRO</div>
-    <div class="dots">
-      <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
-      <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+<div id="topbar" style="flex-direction:column;gap:0;padding:4px 10px 2px">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="plbl" id="plbl">—</div>
+      <div id="orient-lbl" style="font-size:8px;letter-spacing:.06em;color:rgba(255,255,255,.3);
+        background:rgba(0,0,0,.3);padding:1px 5px;border-radius:3px">🟦 PORT</div>
     </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="gyro-tb" onclick="reqGyro()"><div class="gdot"></div>GYRO</div>
+      <div class="dots">
+        <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+        <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Debug gyro row — shown only in calib + anchored phases -->
+  <div id="dbg-topbar" style="display:none;align-items:center;gap:6px;font-size:8px;
+    letter-spacing:.06em;padding:1px 0 2px;color:rgba(255,255,255,.5)">
+    <span>rα<span id="dbg-a" style="color:#F59E0B;margin-left:2px">0.0</span></span>
+    <span>rβ<span id="dbg-b" style="color:#10B981;margin-left:2px">0.0</span></span>
+    <span>rγ<span id="dbg-g" style="color:#60a5fa;margin-left:2px">0.0</span></span>
+    <span style="color:rgba(255,255,255,.2)">|</span>
+    <span>H:<span id="dbg-haxis" style="color:#EF4444">rα</span><span id="dbg-hsign" style="color:#EF4444">+</span></span>
+    <span>V:<span id="dbg-vaxis" style="color:#EF4444">rα</span><span id="dbg-vsign" style="color:#EF4444">+</span></span>
   </div>
 </div>
 
@@ -279,6 +294,48 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
   </div>
   <div id="pbody">
 
+    <!-- KROK 1: KALIBRACE OS GYRA — foto visible, user sees live movement -->
+    <div id="pc" style="display:none">
+      <!-- opacity + size sliders so photo is clearly visible -->
+      <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="calibStp('opa',-1)">−</button><input type="range" class="rng" id="c-opa" min="0" max="100" value="60" oninput="calibUpd('opa',this.value)"><button class="sb" onclick="calibStp('opa',1)">+</button><span class="cv" id="cv-opa">60%</span></div>
+      <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="calibStp('sz',-1)">−</button><input type="range" class="rng" id="c-sz" min="10" max="300" value="80" oninput="calibUpd('sz',this.value)"><button class="sb" onclick="calibStp('sz',1)">+</button><span class="cv" id="cv-sz">80%</span></div>
+      <div style="font-size:7px;color:rgba(255,255,255,.25);letter-spacing:.05em;margin:3px 0 4px">
+        Pohybujte telefonem — foto se hýbe. Nastavte správné osy:
+      </div>
+      <!-- H axis -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:8px;color:rgba(255,255,255,.3);width:20px">H:</span>
+        <button class="ax-btn on" id="hax-a" onclick="setGyroAxis('h','a')">rα</button>
+        <button class="ax-btn" id="hax-b" onclick="setGyroAxis('h','b')">rβ</button>
+        <button class="ax-btn" id="hax-g" onclick="setGyroAxis('h','g')">rγ</button>
+        <button class="ax-btn" id="hsgn" onclick="flipSign('h')" style="margin-left:4px;color:rgba(245,158,11,.8)">+</button>
+      </div>
+      <!-- V axis -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:8px;color:rgba(255,255,255,.3);width:20px">V:</span>
+        <button class="ax-btn on" id="vax-a" onclick="setGyroAxis('v','a')">rα</button>
+        <button class="ax-btn" id="vax-b" onclick="setGyroAxis('v','b')">rβ</button>
+        <button class="ax-btn" id="vax-g" onclick="setGyroAxis('v','g')">rγ</button>
+        <button class="ax-btn" id="vsgn" onclick="flipSign('v')" style="margin-left:4px;color:rgba(245,158,11,.8)">+</button>
+      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.12);margin-bottom:4px;letter-spacing:.04em">
+        rα=rotace Z(roll) · rβ=rotace X(náklon) · rγ=rotace Y(pan)
+      </div>
+      <div style="display:flex;gap:4px;margin-bottom:4px">
+        <button id="btn-ar-mode" class="btn bs"
+          style="font-size:10px;padding:4px;color:rgba(16,185,129,.8);flex:1"
+          onclick="toggleARMode()">⟳ Gyro</button>
+        <button id="btn-calib" class="btn bs"
+          style="font-size:10px;padding:4px;color:rgba(255,255,255,.25);flex:1"
+          onclick="loadCalibJSON()">⊕ Kalib JSON</button>
+      </div>
+      <div class="br">
+        <button class="btn bs" onclick="goBack()">←</button>
+        <button class="btn bs" onclick="resetCalibView()" style="color:rgba(245,158,11,.7)">⟳ RESET POHLEDU</button>
+        <button class="btn bg" onclick="setPhase('align')">ZAROVNAT →</button>
+      </div>
+    </div>
+
     <!-- KROK 2: ZAROVNAT -->
     <div id="pa" style="display:none">
       <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button><span class="cv" id="v-opa">50%</span></div>
@@ -287,17 +344,8 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
       <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button><span class="cv" id="v-py">0</span></div>
       <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button><span class="cv" id="v-rx">0°</span></div>
       <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button><span class="cv" id="v-ry">0°</span></div>
-      <!-- AR mode toggle + calibration — tiny row above main buttons -->
-      <div style="display:flex;gap:4px;margin-top:5px">
-        <button id="btn-ar-mode" class="btn bs"
-          style="font-size:10px;padding:4px;color:rgba(16,185,129,.8);flex:1"
-          onclick="toggleARMode()" title="Přepnout režim AR sledování">⟳ Gyro</button>
-        <button id="btn-calib" class="btn bs"
-          style="font-size:10px;padding:4px;color:rgba(255,255,255,.25);flex:1"
-          onclick="loadCalibJSON()" title="Načíst kalibraci z JSON">⊕ Kalib</button>
-      </div>
       <div class="br">
-        <button class="btn bs" onclick="goBack()">←</button>
+        <button class="btn bs" onclick="setPhase('calib')">←</button>
         <button class="btn bg" onclick="doFix()">FIX ⊕</button>
       </div>
     </div>
@@ -318,8 +366,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none">
-      <div class="db" id="anch-db">—</div>
-      <!-- Porovnání + konfigurace os gyra -->
+      <!-- Porovnání + konfigurace os gyra — žádné zbytečné info -->
       <div style="margin-top:6px;border:1px solid rgba(255,255,255,.07);border-radius:5px;overflow:hidden">
         <!-- přepínač režimu -->
         <button id="btn-ar-mode2"
@@ -327,31 +374,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
             letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;
             background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border-bottom:1px solid rgba(255,255,255,.06)"
           onclick="toggleARMode()">⟳ GYRO — klepni pro 🧭 KOMPAS</button>
-        <!-- konfigurace os — viditelná jen v gyro režimu -->
-        <div id="gyro-cfg" style="padding:6px 8px;display:block">
-          <div style="font-size:7px;letter-spacing:.12em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:4px">
-            Konfigurace os gyra — otočte a sledujte, která osa reaguje
-          </div>
-          <!-- H axis -->
-          <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
-            <span style="font-size:8px;color:rgba(255,255,255,.25);width:24px">H:</span>
-            <button class="ax-btn" id="hax-a" onclick="setGyroAxis('h','a')">rα</button>
-            <button class="ax-btn" id="hax-b" onclick="setGyroAxis('h','b')">rβ</button>
-            <button class="ax-btn on" id="hax-g" onclick="setGyroAxis('h','g')">rγ</button>
-            <button class="ax-btn" id="hsgn" onclick="flipSign('h')" style="margin-left:4px;color:rgba(245,158,11,.7)">+</button>
-          </div>
-          <!-- V axis -->
-          <div style="display:flex;align-items:center;gap:4px">
-            <span style="font-size:8px;color:rgba(255,255,255,.25);width:24px">V:</span>
-            <button class="ax-btn" id="vax-a" onclick="setGyroAxis('v','a')">rα</button>
-            <button class="ax-btn on" id="vax-b" onclick="setGyroAxis('v','b')">rβ</button>
-            <button class="ax-btn" id="vax-g" onclick="setGyroAxis('v','g')">rγ</button>
-            <button class="ax-btn" id="vsgn" onclick="flipSign('v')" style="margin-left:4px;color:rgba(245,158,11,.7)">−</button>
-          </div>
-          <div style="font-size:7px;color:rgba(255,255,255,.15);margin-top:4px;letter-spacing:.05em">
-            rα=rotace Z (roll) · rβ=rotace X (náklon) · rγ=rotace Y (pan)
-          </div>
-        </div>
+
       </div>
       <div class="br" style="margin-top:5px">
         <button class="btn bs" onclick="doReset()">RESET</button>
@@ -534,7 +557,7 @@ function startCam(){
     on($('cam'),'on',true); on($('sl'),'on',true);
     on($('scr-load'),'off',true);
     $('topbar').style.display='flex';
-    setPhase('align');
+    setPhase('calib');
   }).catch(e=>{
     $('b-err').textContent=e.name+': '+e.message;
     on($('b-err'),'on',true);
@@ -551,9 +574,43 @@ function toggleC(){
 }
 
 // ── PHASE ─────────────────────────────────────────────────────────────────
-const PLBLS={align:'ZAROVNAT',offset:'VZDÁLENOST',anchored:'UKOTVENO'};
-const PIDX ={align:1,offset:2,anchored:3};
-const PCLR ={align:'rgba(220,38,38,.9)',offset:'rgba(220,38,38,.9)',anchored:'rgba(16,185,129,.9)'};
+const PLBLS={calib:'KALIBRACE OS',align:'ZAROVNAT',offset:'VZDÁLENOST',anchored:'UKOTVENO'};
+const PIDX ={calib:0,align:1,offset:2,anchored:3};
+const PCLR ={calib:'rgba(245,158,11,.9)',align:'rgba(220,38,38,.9)',offset:'rgba(220,38,38,.9)',anchored:'rgba(16,185,129,.9)'};
+
+// detect orientation for auto-axis switch
+function isLandscape(){ return window.innerWidth > window.innerHeight; }
+function applyDefaultAxes(){
+  if(isLandscape()){
+    // landscape: H=rα+, V=rβ-
+    gyroHAxis='a'; gyroHSign=1;
+    gyroVAxis='b'; gyroVSign=-1;
+  } else {
+    // portrait: H=rα+, V=rα+
+    gyroHAxis='a'; gyroHSign=1;
+    gyroVAxis='a'; gyroVSign=1;
+  }
+  syncAxisUI();
+}
+function syncAxisUI(){
+  ['a','b','g'].forEach(a=>{
+    const h=$('hax-'+a),v=$('vax-'+a);
+    if(h) h.className='ax-btn'+(a===gyroHAxis?' on':'');
+    if(v) v.className='ax-btn'+(a===gyroVAxis?' on':'');
+  });
+  const hs=$('hsgn'),vs=$('vsgn');
+  if(hs) hs.textContent=gyroHSign>0?'+':'−';
+  if(vs) vs.textContent=gyroVSign>0?'+':'−';
+  const dh=$('dbg-haxis'),dhs=$('dbg-hsign'),dv=$('dbg-vaxis'),dvs=$('dbg-vsign');
+  if(dh)  dh.textContent='r'+gyroHAxis;
+  if(dhs) dhs.textContent=gyroHSign>0?'+':'−';
+  if(dv)  dv.textContent='r'+gyroVAxis;
+  if(dvs) dvs.textContent=gyroVSign>0?'+':'−';
+  const olbl=$('orient-lbl');
+  if(olbl) olbl.textContent=isLandscape()?'⬛ LAND':'🟦 PORT';
+}
+window.addEventListener('resize',()=>{ applyDefaultAxes(); setTimeout(updateLayout,80); });
+window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ applyDefaultAxes(); updateLayout(); },120); });
 
 function setPhase(p){
   phase=p;
@@ -563,20 +620,24 @@ function setPhase(p){
     d.className='dot'+(i<PIDX[p]?' done':'')+(i===PIDX[p]?' active':'');}
   collapsed=false; $('pbody').style.display='block'; $('cbtn').textContent='▲';
   on($('panel'),'on',true);
+  $('pc').style.display   =p==='calib'   ?'block':'none';
   $('pa').style.display   =p==='align'   ?'block':'none';
   $('po').style.display   =p==='offset'  ?'block':'none';
   $('panch').style.display=p==='anchored'?'block':'none';
+  // overlay visible in all camera phases including calib
   on($('ov'),'on', !!$('ov-photo').src&&$('ov-photo').src!==location.href);
   applyTR();
   on($('xh'),'on',p==='align');
-  // orientation label in topbar only when camera active
-  on($('ori-lbl'),'on',(p==='align'||p==='offset')&&gyroOk);
   on($('b-anchor'),'on',p==='anchored');
   on($('b-err'),'on',false);
   if(p==='anchored'){stopAR();startAR();fillAnch();}
+  else if(p==='calib'){stopAR();startCalibAR();}
   else stopAR();
-  // Step 3: auto-open map immediately
+  // show gyro debug bar in topbar when in calib or anchored
+  const dbgtop=$('dbg-topbar');
+  if(dbgtop) dbgtop.style.display=(p==='calib'||p==='anchored')?'flex':'none';
   if(p==='offset') setTimeout(openMap,300);
+  applyDefaultAxes();
   setTimeout(updateLayout,60);
 }
 
@@ -586,6 +647,50 @@ function applyTR(dx,dy){
   img.style.opacity=TR.opa/100;
   img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
   img.style.transition=dx!==undefined?'transform 60ms linear':'none';
+}
+
+// ── CALIB PREVIEW ────────────────────────────────────────────────────────
+let calibAngles={x:0,y:0}, calibLastT=null, calibRafId=null;
+const calibTR={opa:60,sz:80}; // separate state so calib doesn't affect main TR
+
+function calibUpd(k,v){
+  calibTR[k]=+v; $('cv-'+k).textContent=v+(k==='opa'?'%':'%');
+  applyCalibTR(calibAngles.x,calibAngles.y);
+}
+function calibStp(k,d){
+  const limits={opa:[0,100],sz:[10,300]};
+  const [mn,mx]=limits[k];
+  calibTR[k]=Math.min(mx,Math.max(mn,calibTR[k]+d));
+  $('c-'+k).value=calibTR[k];
+  calibUpd(k, calibTR[k]);
+}
+function applyCalibTR(dx,dy){
+  const img=$('ov-photo');
+  const ppd=window.innerWidth/65;
+  img.style.opacity=calibTR.opa/100;
+  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;
+  img.style.transition='none';
+}
+function startCalibAR(){
+  calibAngles={x:0,y:0}; calibLastT=null;
+  function loop(){
+    const now=performance.now();
+    if(calibLastT!==null){
+      const dt=(now-calibLastT)/1000;
+      const hVal=gyroHAxis==='a'?rawRate.a:gyroHAxis==='b'?rawRate.b:rawRate.g;
+      const vVal=gyroVAxis==='a'?rawRate.a:gyroVAxis==='b'?rawRate.b:rawRate.g;
+      calibAngles.x+=hVal*dt;
+      calibAngles.y+=vVal*dt;
+    }
+    calibLastT=now;
+    applyCalibTR(gyroHSign*calibAngles.x, gyroVSign*calibAngles.y);
+    calibRafId=requestAnimationFrame(loop);
+  }
+  calibRafId=requestAnimationFrame(loop);
+}
+function resetCalibView(){
+  calibAngles={x:0,y:0}; calibLastT=null;
+  applyCalibTR(0,0);
 }
 
 // ── SLIDERS ───────────────────────────────────────────────────────────────
@@ -767,7 +872,10 @@ function startAR(){
   }
   rafId=requestAnimationFrame(loop);
 }
-function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
+function stopAR(){
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  if(calibRafId){cancelAnimationFrame(calibRafId);calibRafId=null;}
+}
 
 // Toggle AR mode compass ↔ gyro
 function toggleARMode(){
@@ -793,10 +901,7 @@ function toggleARMode(){
   }
   // restart AR with new mode (resets gyro integration from current position)
   if(phase==='anchored'){stopAR();startAR();}
-  // show/hide gyro config panel and debug overlay
-  const cfg=$('gyro-cfg'), dbg=$('gyro-dbg');
-  if(cfg) cfg.style.display = useGyroAR ? 'block' : 'none';
-  if(dbg) dbg.style.display = (useGyroAR && phase==='anchored') ? 'block' : 'none';
+  // debug row in topbar always visible in calib/anchored phases — no extra toggle needed
 }
 
 function setGyroAxis(hv, axis){
@@ -810,6 +915,7 @@ function setGyroAxis(hv, axis){
     const d=$('dbg-vaxis'); if(d) d.textContent='r'+axis;
   }
   if(phase==='anchored'){stopAR();startAR();}
+  else if(phase==='calib'){stopAR();startCalibAR();}
 }
 
 function flipSign(hv){
@@ -823,6 +929,7 @@ function flipSign(hv){
     const d=$('dbg-vsign'); if(d) d.textContent=gyroVSign>0?'+':'−';
   }
   if(phase==='anchored'){stopAR();startAR();}
+  else if(phase==='calib'){stopAR();startCalibAR();}
 }
 
 // Load calibration JSON and extract yaw offset
@@ -863,12 +970,8 @@ function doAnchor(){
 }
 
 function fillAnch(){
-  $('anch-db').innerHTML=`
-    <div class="dr"><span class="dk">Vzdálenost</span><span class="dv">${anchData.distM} m</span></div>
-    <div class="dr"><span class="dk">α yaw</span><span class="dv">${anchData.refOri.a.toFixed(1)}°</span></div>
-    <div class="dr"><span class="dk">β pitch</span><span class="dv">${anchData.refOri.b.toFixed(1)}°</span></div>
-    <div class="dr"><span class="dk">Opacita / Vel</span><span class="dv">${anchData.tr.opa}% / ${anchData.tr.sz}%</span></div>
-    ${gyroOk?'<div class="dr" style="margin-top:2px;border-top:1px solid rgba(255,255,255,.05);padding-top:2px"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':''}`;
+  // AR delta span used by startAR loop — inject minimal container
+  const ab=$('anch-db'); if(ab) ab.innerHTML=gyroOk?'<div class="dr"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':'';
 }
 
 async function doCopy(){
