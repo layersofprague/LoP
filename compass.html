@@ -162,16 +162,38 @@ navigator.geolocation && navigator.geolocation.watchPosition(
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
 
+var oriPaused = false;
+
+function getScreenAngle() {
+  if (screen.orientation && screen.orientation.angle !== undefined)
+    return screen.orientation.angle;
+  if (window.orientation !== undefined)
+    return window.orientation;
+  return 0;
+}
+
 function startOri() {
   function handle(e) {
+    if (oriPaused) return;
     var raw = null;
-    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
-    else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
+    if (e.webkitCompassHeading !== undefined) {
+      // iOS: already compensated for screen orientation
+      raw = e.webkitCompassHeading;
+    } else if (e.alpha !== null) {
+      // Android: alpha is relative to current screen orientation — correct it
+      raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
+    }
     if (raw !== null) smoothH = lerpAngle(smoothH, (raw - yawOffset + 360) % 360);
   }
   window.addEventListener('deviceorientationabsolute', handle, true);
   window.addEventListener('deviceorientation', handle, true);
 }
+
+// Pause orientation briefly on resize to avoid sensor glitch during rotation
+window.addEventListener('resize', function() {
+  oriPaused = true;
+  setTimeout(function() { oriPaused = false; }, 800);
+});
 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
   document.addEventListener('touchstart', function u() {
     DeviceOrientationEvent.requestPermission().then(function(s){ if (s==='granted') startOri(); }).catch(startOri);
