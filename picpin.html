@@ -423,7 +423,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
       </div>
       <div class="br" style="margin-top:5px">
         <button class="btn bs" onclick="doReset()">RESET</button>
-        <button class="btn bs" onclick="rollIntegrated=0" style="color:rgba(96,165,250,.8);border-color:rgba(96,165,250,.2)">⟳ ROLL</button>
+        <button class="btn bs" onclick="rollHybrid=0" style="color:rgba(96,165,250,.8);border-color:rgba(96,165,250,.2)">⟳ ROLL ON</button>
         <button class="btn bg" id="btn-copy" onclick="doCopy()">ULOŽIT JSON</button>
       </div>
     </div>
@@ -507,8 +507,7 @@ let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
-let rollIntegrated=0;
-let rollSmoothed=0;
+let rollHybrid=0; // complementary filter: 98% gyro + 2% compass gamma
 let rollEnabled=false; // OFF by default — enable in step 4
 let rollGain=1.0; // multiplier, adjustable
 let rollSign=1;   // +1 or -1
@@ -579,7 +578,11 @@ window.addEventListener('devicemotion', e=>{
     if(dg) dg.textContent=rawRate.g.toFixed(1);
   }
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
-  // rollIntegrated no longer used — replaced by gravity-referenced atan2 formula
+  // Hybrid roll: complementary filter active in anchored phase regardless of AR mode
+  if(dt>0 && phase==='anchored' && refOri!==null){
+    const compass_roll = ori.g - refOri.g; // absolute reference (gamma diff)
+    rollHybrid = 0.98 * (rollHybrid + rawRate.a * dt) + 0.02 * compass_roll;
+  }
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
     const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
@@ -778,14 +781,9 @@ function setPhase(p){
 // ── TRANSFORM ─────────────────────────────────────────────────────────────
 function applyTR(dx,dy,rollDeg){
   const img=$('ov-photo');
-  const ov=$('ov');
-  const roll = (rollDeg !== undefined && !isNaN(rollDeg)) ? rollDeg : 0;
-  // Roll on wrapper — isolated from position/scale transforms
-  ov.style.transform = `rotateZ(${roll}deg)`;  // roll already has correct sign from atan2
-  ov.style.transition = "none";
-  // Position + scale + manual tilts on img
+  const roll = rollDeg||0;
   img.style.opacity=TR.opa/100;
-  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
+  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) rotateZ(${-roll}deg) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
   img.style.transition=dx!==undefined?'transform 60ms linear':'none';
 }
 
@@ -813,7 +811,7 @@ function applyCalibTR(dx,dy){
   img.style.transition='none';
 }
 function startCalibAR(){
-  calibAngles={x:0,y:0}; calibLastT=null; rollIntegrated=0;
+  calibAngles={x:0,y:0}; calibLastT=null; rollHybrid=0;
   function loop(){
     const now=performance.now();
     if(calibLastT!==null){
@@ -831,7 +829,7 @@ function startCalibAR(){
   calibRafId=requestAnimationFrame(loop);
 }
 function resetCalibView(){
-  calibAngles={x:0,y:0}; calibLastT=null; rollIntegrated=0;
+  calibAngles={x:0,y:0}; calibLastT=null; rollHybrid=0;
   applyCalibTR(0,0);
 }
 
@@ -996,7 +994,7 @@ function startAR(){
   // Uses gyroHAxis/gyroVAxis/gyroHSign/gyroVSign — same vars set in calib step ✓
   if(!refOri) refOri={...ori}; // fallback: use current orientation if FIX was skipped
   // reset gyro integration from current anchor point
-  gyroAngles={x:0,y:0}; gyroLastT=null; rollIntegrated=0; rollSmoothed=0;
+  gyroAngles={x:0,y:0}; gyroLastT=null; rollHybrid=0;
   const ppd=window.innerWidth/65;
   function loop(){
     let dx,dy;
@@ -1013,15 +1011,15 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    applyTR(dx, dy, 0); // roll compensation disabled — causes more problems than solves
+    applyTR(dx, dy, rollHybrid);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
     const dg=$('dbg-gamma'), dr=$('dbg-roll');
     if(dg) dg.textContent=ori.g.toFixed(1);
-    if(dr) dr.textContent=rollSmoothed.toFixed(1);
+    if(dr) dr.textContent=rollHybrid.toFixed(1);
     const dg2=$('dbg-gamma2'),dr2=$('dbg-roll2');
     if(dg2) dg2.textContent=ori.g.toFixed(1);
-    if(dr2) dr2.textContent=rollVal.toFixed(1);
+    if(dr2) dr2.textContent=rollHybrid.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
@@ -1128,7 +1126,7 @@ function doAnchor(){
 
 function toggleRoll(){
   rollEnabled=!rollEnabled;
-  rollSmoothed=0;
+  rollHybrid=0;
   const b=$('btn-roll-toggle');
   if(b){
     b.textContent=rollEnabled?'ON':'OFF';
