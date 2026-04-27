@@ -576,13 +576,7 @@ window.addEventListener('devicemotion', e=>{
     if(dg) dg.textContent=rawRate.g.toFixed(1);
   }
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
-  if(dt>0 && phase==='anchored'){
-    // Cross-axis correction: tilting around X (H/beta) leaks into rotationRate.alpha
-    // Correction term: rawRate.b * sin(gamma_rad) removes this coupling
-    const g_rad = ori.g * Math.PI / 180;
-    const trueRoll = rawRate.a - rawRate.b * Math.sin(g_rad);
-    rollIntegrated += trueRoll * dt;
-  }
+  // rollIntegrated no longer used — replaced by gravity-referenced atan2 formula
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
     const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
@@ -784,7 +778,7 @@ function applyTR(dx,dy,rollDeg){
   const ov=$('ov');
   const roll = (rollDeg !== undefined && !isNaN(rollDeg)) ? rollDeg : 0;
   // Roll on wrapper — isolated from position/scale transforms
-  ov.style.transform = `rotateZ(${-roll}deg)`;
+  ov.style.transform = `rotateZ(${roll}deg)`;  // roll already has correct sign from atan2
   ov.style.transition = "none";
   // Position + scale + manual tilts on img
   img.style.opacity=TR.opa/100;
@@ -1016,14 +1010,23 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll: integrate rotationRate.alpha — only reliable method at beta≈90°
-    // gamma has gimbal singularity (20° real roll → 90° gamma change at beta=90°)
-    applyTR(dx, dy, rollIntegrated);
+    // Roll: gravity-referenced atan2 formula
+    // computeVisualRoll(β,γ) = atan2(-sin(γ)·sin(β), cos(γ))
+    // At γ=0 → 0 regardless of β (no coupling with forward tilt) ✓
+    // Tracks real roll without integration or drift ✓
+    const toR = Math.PI / 180;
+    const visualRoll = (b, g) =>
+      Math.atan2(-Math.sin(g*toR)*Math.sin(b*toR), Math.cos(g*toR)) / toR;
+    const roll = visualRoll(ori.b, ori.g) - visualRoll(refOri.b, refOri.g);
+    applyTR(dx, dy, roll);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
     const dg=$('dbg-gamma'), dr=$('dbg-roll');
     if(dg) dg.textContent=ori.g.toFixed(1);
-    if(dr) dr.textContent=rollIntegrated.toFixed(1);
+    const toRd = Math.PI/180;
+    const vR = (b,g) => Math.atan2(-Math.sin(g*toRd)*Math.sin(b*toRd), Math.cos(g*toRd))/toRd;
+    const rollDbg = refOri ? vR(ori.b,ori.g)-vR(refOri.b,refOri.g) : 0;
+    if(dr) dr.textContent=rollDbg.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
