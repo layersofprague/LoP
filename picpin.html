@@ -568,7 +568,7 @@ window.addEventListener('devicemotion', e=>{
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
   // Always integrate roll (rotationRate.alpha = rotation around device Z = screen normal)
   // regardless of AR mode — used for visual roll compensation
-  if(dt>0 && (phase==='anchored'||phase==='calib')){
+  if(dt>0 && phase==='anchored'){
     rollIntegrated += rawRate.a * dt;
   }
   if(useGyroAR && dt>0 && phase==='anchored'){
@@ -657,7 +657,7 @@ function drawCalibXh(){
   const svg=$('calib-xh'); if(!svg||!svg.classList.contains('on')) return;
   const W=window.innerWidth, H=window.innerHeight;
   const cx=W/2, cy=H/2;
-  const R=-rollIntegrated; // degrees, counter-rotate for display
+  const R=ori.g||0; // gravity-referenced roll — stable, shows actual phone tilt
   const FS=11; // font size px
   const TICK=18;
 
@@ -798,7 +798,7 @@ function applyCalibTR(dx,dy){
   const ppd=window.innerWidth/65;
   // Roll compensation in calib too — relative to calibAngles start
   img.style.opacity=calibTR.opa/100;
-  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) rotateZ(${-rollIntegrated}deg) scale(${calibTR.sz/100})`;
+  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;
   img.style.transition='none';
 }
 function startCalibAR(){
