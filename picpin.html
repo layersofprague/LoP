@@ -777,7 +777,7 @@ function applyTR(dx,dy,rollDeg){
   const ov=$('ov');
   const roll = (rollDeg !== undefined && !isNaN(rollDeg)) ? rollDeg : 0;
   // Roll on wrapper — isolated from position/scale transforms
-  ov.style.transform = `rotateZ(${-roll}deg)`;
+  ov.style.transform = `rotateZ(${roll}deg)`;
   ov.style.transition = dx!==undefined ? 'transform 60ms linear' : 'none';
   // Position + scale + manual tilts on img
   img.style.opacity=TR.opa/100;
