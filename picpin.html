@@ -413,6 +413,35 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none">
       <!-- Porovnání + konfigurace os gyra — žádné zbytečné info -->
+      <!-- Roll compensation controls -->
+      <div style="margin-top:6px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.15);border-radius:5px;padding:5px 8px">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+          <span style="font-size:8px;color:rgba(96,165,250,.5);letter-spacing:.1em;text-transform:uppercase">⟳ ROLL</span>
+          <button id="btn-roll-toggle" onclick="toggleRoll()"
+            style="font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid rgba(96,165,250,.2);
+            background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);cursor:pointer;
+            font-family:'JetBrains Mono',monospace">OFF</button>
+          <button onclick="rollSign*=-1;$('btn-roll-sgn').textContent=rollSign>0?'+γ':'-γ'"
+            id="btn-roll-sgn"
+            style="font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid rgba(96,165,250,.2);
+            background:rgba(255,255,255,.04);color:rgba(245,158,11,.7);cursor:pointer;
+            font-family:'JetBrains Mono',monospace">+γ</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:7px;color:rgba(255,255,255,.2);width:28px">gain</span>
+          <button class="sb" onclick="rollGain=Math.max(0.1,+(rollGain-0.1).toFixed(1));$('roll-gain-v').textContent=rollGain.toFixed(1)">−</button>
+          <input type="range" class="rng" min="0.1" max="3" step="0.1" value="1.0"
+            oninput="rollGain=+this.value;$('roll-gain-v').textContent=(+this.value).toFixed(1)"
+            style="flex:1">
+          <button class="sb" onclick="rollGain=Math.min(3,+(rollGain+0.1).toFixed(1));$('roll-gain-v').textContent=rollGain.toFixed(1)">+</button>
+          <span class="cv" id="roll-gain-v" style="color:rgba(96,165,250,.8)">1.0</span>
+        </div>
+        <div style="font-size:7px;color:rgba(255,255,255,.12);margin-top:3px;letter-spacing:.04em">
+          γ=<span id="dbg-gamma2" style="color:rgba(96,165,250,.6)">0.0</span>°
+          r=<span id="dbg-roll2" style="color:#fff">0.0</span>°
+        </div>
+      </div>
+
       <div style="margin-top:6px;border:1px solid rgba(255,255,255,.07);border-radius:5px;overflow:hidden">
         <!-- přepínač režimu -->
         <button id="btn-ar-mode2"
@@ -509,7 +538,10 @@ let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
 let rollIntegrated=0;
-let rollSmoothed=0; // low-pass filtered roll for stable display
+let rollSmoothed=0;
+let rollEnabled=false; // OFF by default — enable in step 4
+let rollGain=1.0; // multiplier, adjustable
+let rollSign=1;   // +1 or -1
 let yawCalibOffset=0;
 // Axis defaults: H=rβ+, V=rα+  (user confirmed working)
 let gyroHAxis='b', gyroVAxis='a', gyroHSign=1, gyroVSign=1;
@@ -1011,20 +1043,22 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll: simple smoothed gamma diff
-    // gamma is gravity-stabilised and linear for typical phone angles
-    // Smooth to prevent oscillation from magnetometer noise
-    const rawRoll = ori.g - refOri.g;
-    // Clamp to ±30° — prevents wild rotations from sensor jumps
-    const clampedRoll = Math.max(-30, Math.min(30, rawRoll));
-    // Exponential low-pass filter (α=0.15 → smooth but responsive)
-    rollSmoothed = rollSmoothed * 0.85 + clampedRoll * 0.15;
-    applyTR(dx, dy, rollSmoothed);
+    let rollVal = 0;
+    if(rollEnabled){
+      const rawRoll = ori.g - refOri.g;
+      const clamped = Math.max(-45, Math.min(45, rawRoll));
+      rollSmoothed = rollSmoothed * 0.8 + clamped * 0.2;
+      rollVal = rollSign * rollGain * rollSmoothed;
+    }
+    applyTR(dx, dy, rollVal);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
     const dg=$('dbg-gamma'), dr=$('dbg-roll');
     if(dg) dg.textContent=ori.g.toFixed(1);
     if(dr) dr.textContent=rollSmoothed.toFixed(1);
+    const dg2=$('dbg-gamma2'),dr2=$('dbg-roll2');
+    if(dg2) dg2.textContent=ori.g.toFixed(1);
+    if(dr2) dr2.textContent=rollVal.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
@@ -1127,6 +1161,18 @@ function doFix(){
 function doAnchor(){
   anchData={refOri:{...refOri},distM:dst,userLL,bldLL,tr:{...TR},ts:new Date().toISOString()};
   setPhase('anchored');
+}
+
+function toggleRoll(){
+  rollEnabled=!rollEnabled;
+  rollSmoothed=0;
+  const b=$('btn-roll-toggle');
+  if(b){
+    b.textContent=rollEnabled?'ON':'OFF';
+    b.style.color=rollEnabled?'rgba(96,165,250,.9)':'rgba(255,255,255,.3)';
+    b.style.borderColor=rollEnabled?'rgba(96,165,250,.4)':'rgba(96,165,250,.2)';
+    b.style.background=rollEnabled?'rgba(96,165,250,.1)':'rgba(255,255,255,.04)';
+  }
 }
 
 function fillAnch(){
