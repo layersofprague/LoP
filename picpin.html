@@ -154,10 +154,25 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 
 /* ── LANDSCAPE ── */
 @media (orientation:landscape){
+  /* Side panel */
   #panel.on{top:0;bottom:0;left:auto;right:0;width:40vw;max-height:100vh;
     border-top:none;border-left:1px solid rgba(255,255,255,.05)}
   #handle{display:none}
   #pbody.col{display:block}
+  /* Map overlay: mapa vlevo, ovládací prvky vpravo */
+  #map-ov{flex-direction:row}
+  #leafmap{flex:1;min-width:0}
+  #map-bar{
+    width:40vw;flex-shrink:0;max-height:100vh;overflow-y:auto;
+    border-top:none;border-left:1px solid rgba(255,255,255,.07);
+    padding:10px 10px 14px;
+    flex-direction:column;
+    justify-content:flex-start;
+    gap:8px;
+  }
+  /* In landscape map bar, stack everything vertically with more space */
+  .map-mode-row{flex-direction:column;gap:4px}
+  .map-pts{grid-template-columns:1fr}
 }
 
 /* ── STEP 3: distance display ── */
@@ -297,7 +312,15 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none">
       <div class="db" id="anch-db">—</div>
-      <div class="br" style="margin-top:6px">
+      <!-- Compare button — přepíná režim AR přímo při sledování -->
+      <button id="btn-ar-mode2"
+        style="width:100%;margin-top:6px;padding:8px;
+          font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.06em;
+          cursor:pointer;border-radius:4px;border:none;transition:all .15s;
+          background:rgba(16,185,129,.15);color:rgba(16,185,129,.85);
+          border:1px solid rgba(16,185,129,.25)"
+        onclick="toggleARMode()">⟳ GYRO — klepni pro porovnání s 🧭 KOMPAS</button>
+      <div class="br" style="margin-top:5px">
         <button class="btn bs" onclick="doReset()">RESET</button>
         <button class="btn bp" id="btn-copy" onclick="doCopy()">KOPÍROVAT JSON</button>
       </div>
@@ -426,13 +449,17 @@ window.addEventListener('orientationchange',()=>setTimeout(updateLayout,100));
   }, true);
 }());
 // DeviceMotionEvent — gyro integration for AR (reliable horizontal tracking)
+// rotationRate axes (portrait mode, phone upright):
+//   gamma = rotation around Y (long axis) = LEFT/RIGHT pan  ← horizontal
+//   beta  = rotation around X (short axis)= UP/DOWN tilt    ← vertical
+//   alpha = rotation around Z (screen axis)= roll           ← irrelevant for AR
 window.addEventListener('devicemotion', e=>{
   if(!e.rotationRate || !useGyroAR) return;
   const now=performance.now();
   if(gyroLastT!==null && phase==='anchored'){
     const dt=(now-gyroLastT)/1000;
-    gyroAngles.x += (e.rotationRate.alpha||0)*dt;
-    gyroAngles.y += (e.rotationRate.beta ||0)*dt;
+    gyroAngles.x += (e.rotationRate.gamma||0)*dt; // horizontal pan = gamma axis
+    gyroAngles.y += (e.rotationRate.beta ||0)*dt; // vertical tilt  = beta axis
   }
   gyroLastT=now;
 },true);
@@ -678,11 +705,13 @@ function startAR(){
       dx = -gyroAngles.x * ppd;
       dy =  gyroAngles.y * ppd;
     } else {
-      // COMPASS mode: use alpha (yaw) with beta-tilt correction
-      // cos(beta) reduces horizontal sensitivity at forward tilt (more accurate)
+      // COMPASS mode: alpha = compass heading (portrait pan)
+      // At high beta tilt (phone forward), gamma bleeds into horizontal — add correction
       const beta_r = refOri.b * Math.PI / 180;
       const alpha_d = angleDiff(ori.a + yawCalibOffset, refOri.a + yawCalibOffset);
-      dx = -alpha_d * Math.cos(beta_r) * ppd;
+      const gamma_d = ori.g - refOri.g;
+      // Combined: alpha contribution reduced at tilt, gamma adds in
+      dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
     applyTR(dx,dy);
@@ -697,11 +726,26 @@ function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
 // Toggle AR mode compass ↔ gyro
 function toggleARMode(){
   useGyroAR=!useGyroAR;
-  const b=$('btn-ar-mode');
-  b.textContent = useGyroAR ? '🧭 Kompas' : '⟳ Gyro';
-  b.style.color  = useGyroAR ? 'rgba(245,158,11,.8)' : 'rgba(16,185,129,.8)';
-  b.title = useGyroAR ? 'Režim: Gyroskop (resetuje se při FIX)' : 'Režim: Kompas (absolutní heading)';
-  // restart AR with new mode
+  // sync both buttons (step 2 + step 4)
+  const b=$('btn-ar-mode'), b2=$('btn-ar-mode2');
+  if(useGyroAR){
+    if(b){b.textContent='🧭 Kompas';b.style.color='rgba(245,158,11,.8)';}
+    if(b2){
+      b2.textContent='🧭 KOMPAS — klepni pro porovnání s ⟳ GYRO';
+      b2.style.background='rgba(245,158,11,.12)';
+      b2.style.color='rgba(245,158,11,.85)';
+      b2.style.borderColor='rgba(245,158,11,.25)';
+    }
+  } else {
+    if(b){b.textContent='⟳ Gyro';b.style.color='rgba(16,185,129,.8)';}
+    if(b2){
+      b2.textContent='⟳ GYRO — klepni pro porovnání s 🧭 KOMPAS';
+      b2.style.background='rgba(16,185,129,.15)';
+      b2.style.color='rgba(16,185,129,.85)';
+      b2.style.borderColor='rgba(16,185,129,.25)';
+    }
+  }
+  // restart AR with new mode (resets gyro integration from current position)
   if(phase==='anchored'){stopAR();startAR();}
 }
 
