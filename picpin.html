@@ -300,6 +300,9 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     <span style="color:rgba(255,255,255,.2)">|</span>
     <span>H:<span id="dbg-haxis" style="color:#EF4444">rα</span><span id="dbg-hsign" style="color:#EF4444">+</span></span>
     <span>V:<span id="dbg-vaxis" style="color:#EF4444">rα</span><span id="dbg-vsign" style="color:#EF4444">+</span></span>
+    <span style="color:rgba(255,255,255,.2)">|</span>
+    <span>γ<span id="dbg-gamma" style="color:#e879f9;margin-left:2px">0.0</span></span>
+    <span>r<span id="dbg-roll" style="color:#fff;margin-left:2px">0.0</span></span>
   </div>
 </div>
 
@@ -517,17 +520,17 @@ function updateLayout(){
   const open=!collapsed&&panel.classList.contains('on');
   if(ls&&open){
     const sw=window.innerWidth*.40;
-    ov.style.cssText='top:0;left:0;right:'+sw+'px;bottom:0;';
+    ov.style.top='0'; ov.style.left='0'; ov.style.right=sw+'px'; ov.style.bottom='0';
     xh.style.left=((window.innerWidth-sw)/2)+'px';
     xh.style.top='50%';
   } else if(!ls&&open){
     const ph=panel.offsetHeight;
     const tbh=$('topbar').offsetHeight||30;
-    ov.style.cssText='top:'+tbh+'px;left:0;right:0;bottom:'+ph+'px;';
+    ov.style.top=tbh+'px'; ov.style.left='0'; ov.style.right='0'; ov.style.bottom=ph+'px';
     xh.style.left='50%';
     xh.style.top=(tbh+(window.innerHeight-ph-tbh)/2)+'px';
   } else {
-    ov.style.cssText='top:0;left:0;right:0;bottom:0;';
+    ov.style.top='0'; ov.style.left='0'; ov.style.right='0'; ov.style.bottom='0';
     xh.style.left='50%'; xh.style.top='50%';
   }
 }
@@ -560,10 +563,14 @@ window.addEventListener('devicemotion', e=>{
   if(!e.rotationRate) return;
   const r=e.rotationRate;
   rawRate={a:r.alpha||0, b:r.beta||0, g:r.gamma||0};
-  const da=$('dbg-a'),db=$('dbg-b'),dg=$('dbg-g');
-  if(da) da.textContent=rawRate.a.toFixed(1);
-  if(db) db.textContent=rawRate.b.toFixed(1);
-  if(dg) dg.textContent=rawRate.g.toFixed(1);
+  // Throttle rotation-rate debug to 5x/sec so it's readable
+  if(!window._dbgT || now-window._dbgT > 200){
+    window._dbgT=now;
+    const da=$('dbg-a'),db=$('dbg-b'),dg=$('dbg-g');
+    if(da) da.textContent=rawRate.a.toFixed(1);
+    if(db) db.textContent=rawRate.b.toFixed(1);
+    if(dg) dg.textContent=rawRate.g.toFixed(1);
+  }
   const now=performance.now();
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
   // Always integrate roll (rotationRate.alpha = rotation around device Z = screen normal)
@@ -1007,7 +1014,11 @@ function startAR(){
     applyTR(dx, dy, roll);
     const el=$('ar-d');
     const roll_disp = ori.g - refOri.g;
-    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' γ'+ori.g.toFixed(1)+' r'+roll_disp.toFixed(1);
+    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
+    // Update gamma and roll in topbar debug (visible even when panel collapsed)
+    const dg=$('dbg-gamma'), dr=$('dbg-roll');
+    if(dg) dg.textContent=ori.g.toFixed(1);
+    if(dr) dr.textContent=roll_disp.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
