@@ -98,8 +98,8 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
   background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);
   color:rgba(255,255,255,.3);cursor:pointer;transition:all .3s}
 #gyro-tb.ok   {color:rgba(16,185,129,.8);border-color:rgba(16,185,129,.2)}
-#gyro-tb.gyro {color:rgba(220,38,38,.85);border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.07)}
-#gyro-tb.comp {color:rgba(16,185,129,.85);border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.07)}
+#gyro-tb.gyro {color:rgba(16,185,129,.85);border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.07)}
+#gyro-tb.comp {color:rgba(220,38,38,.85);border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.07)}
 /* gyro + orientation inline in topbar */
 #ori-lbl{font-size:8px;letter-spacing:.06em;color:rgba(16,185,129,.7);
   background:rgba(0,0,0,.3);padding:2px 5px;border-radius:3px;
@@ -377,8 +377,8 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
         <button id="btn-ar-mode2"
           style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;
             letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;
-            background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border-bottom:1px solid rgba(255,255,255,.06);border:1px solid rgba(16,185,129,.2)"
-          onclick="toggleARMode()">🧭 KOMPAS (výchozí) — klepni pro ⟳ GYRO</button>
+            background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border:1px solid rgba(16,185,129,.2)"
+          onclick="toggleARMode()">⟳ GYRO (výchozí) — klepni pro 🧭 KOMPAS</button>
 
       </div>
       <div class="br" style="margin-top:5px">
@@ -461,7 +461,7 @@ let userLL=null,bldLL=null,leafMap=null,userMark=null,bldMark=null,mapMode='user
 let accCircle=null; // GPS accuracy circle
 let userFromGPS=false; // false = manually placed
 // ── Gyro integration for AR ──
-let useGyroAR=false; // default: compass mode
+let useGyroAR=true; // default: gyro mode
 let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
@@ -911,19 +911,19 @@ function toggleARMode(){
     // now in GYRO — red, click to go back to compass
     if(b){b.textContent='⟳ Gyro';b.style.color='rgba(220,38,38,.8)';}
     if(b2){
-      b2.textContent='⟳ GYRO — klepni pro 🧭 KOMPAS (výchozí)';
-      b2.style.background='rgba(220,38,38,.1)';
-      b2.style.color='rgba(220,38,38,.9)';
-      b2.style.borderColor='rgba(220,38,38,.2)';
+      b2.textContent='⟳ GYRO (výchozí) — klepni pro 🧭 KOMPAS';
+      b2.style.background='rgba(16,185,129,.12)';
+      b2.style.color='rgba(16,185,129,.9)';
+      b2.style.borderColor='rgba(16,185,129,.2)';
     }
   } else {
     // now in COMPASS — green, click to switch to gyro
     if(b){b.textContent='🧭 Kompas';b.style.color='rgba(16,185,129,.8)';}
     if(b2){
-      b2.textContent='🧭 KOMPAS (výchozí) — klepni pro ⟳ GYRO';
-      b2.style.background='rgba(16,185,129,.12)';
-      b2.style.color='rgba(16,185,129,.85)';
-      b2.style.borderColor='rgba(16,185,129,.2)';
+      b2.textContent='🧭 KOMPAS — klepni pro ⟳ GYRO (výchozí)';
+      b2.style.background='rgba(220,38,38,.1)';
+      b2.style.color='rgba(220,38,38,.85)';
+      b2.style.borderColor='rgba(220,38,38,.2)';
     }
   }
   // restart AR with new mode (resets gyro integration from current position)
@@ -1003,15 +1003,15 @@ function fillAnch(){
   // Sync btn-ar-mode2 to current useGyroAR state (may differ from HTML default)
   const b2=$('btn-ar-mode2'); if(!b2) return;
   if(useGyroAR){
-    b2.textContent='⟳ GYRO — klepni pro 🧭 KOMPAS (výchozí)';
-    b2.style.background='rgba(220,38,38,.1)';
-    b2.style.color='rgba(220,38,38,.9)';
-    b2.style.borderColor='rgba(220,38,38,.2)';
-  } else {
-    b2.textContent='🧭 KOMPAS (výchozí) — klepni pro ⟳ GYRO';
+    b2.textContent='⟳ GYRO (výchozí) — klepni pro 🧭 KOMPAS';
     b2.style.background='rgba(16,185,129,.12)';
-    b2.style.color='rgba(16,185,129,.85)';
+    b2.style.color='rgba(16,185,129,.9)';
     b2.style.borderColor='rgba(16,185,129,.2)';
+  } else {
+    b2.textContent='🧭 KOMPAS — klepni pro ⟳ GYRO (výchozí)';
+    b2.style.background='rgba(220,38,38,.1)';
+    b2.style.color='rgba(220,38,38,.85)';
+    b2.style.borderColor='rgba(220,38,38,.2)';
   }
 }
 
