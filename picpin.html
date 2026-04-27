@@ -568,9 +568,7 @@ window.addEventListener('devicemotion', e=>{
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
   // Always integrate roll (rotationRate.alpha = rotation around device Z = screen normal)
   // regardless of AR mode — used for visual roll compensation
-  if(dt>0 && phase==='anchored'){
-    rollIntegrated += rawRate.a * dt;
-  }
+  // rollIntegrated no longer used — gravity-referenced gamma is more stable
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
     const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
@@ -1002,9 +1000,10 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll compensation: use integrated rotationRate.alpha (device Z rotation)
-    // More accurate than gamma diff — directly measures screen-normal rotation
-    applyTR(dx, dy, rollIntegrated);
+    // Roll compensation: gravity-referenced gamma diff
+    // Immune to cross-axis coupling from forward/backward tilt
+    const rollComp = ori.g - refOri.g;
+    applyTR(dx, dy, rollComp);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+' '+dy.toFixed(0)+' r'+rollIntegrated.toFixed(0);
     rafId=requestAnimationFrame(loop);
