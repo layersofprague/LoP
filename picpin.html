@@ -17,13 +17,13 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 /* ── OVERLAY IMAGE ── */
 #ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2;display:none;
   align-items:center;justify-content:center;pointer-events:none;
-  transition:top .2s,bottom .2s,right .2s;
-  will-change:transform;
-  transform-origin:center center;}
+  transition:top .2s,bottom .2s,right .2s;}
+/* Translation wrapper — moves photo to (px+dx, py+dy) from screen center */
+#ov-pos{display:flex;align-items:center;justify-content:center;transform-origin:center center;}
 #ov.on{display:flex}
 #ov img{
   max-width:95%;max-height:95%;
-  transform-origin:center center;
+  transform-origin:center center;/* roll rotates around photo center */
   -webkit-mask-image: radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%);
   mask-image: radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%);
 }
@@ -254,7 +254,11 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 <body>
 
 <video id="cam" autoplay muted playsinline></video>
-<div id="ov"><img id="ov-photo" src="" alt=""></div>
+<div id="ov">
+  <div id="ov-pos"><!-- positioned via translate(px+dx, py+dy) -->
+    <img id="ov-photo" src="" alt=""><!-- roll+scale+perspective -->
+  </div>
+</div>
 <div id="sl"></div>
 <div id="xh"></div>
 <div id="b-anchor">● UKOTVENO</div>
@@ -840,7 +844,9 @@ function applyCalibTR(dx,dy){
   const ppd=window.innerWidth/65;
   // Roll compensation in calib too — relative to calibAngles start
   img.style.opacity=calibTR.opa/100;
-  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;
+  const cpos=$('ov-pos');
+  if(cpos) cpos.style.transform=`translate(${dx*ppd}px,${dy*ppd}px)`;
+  img.style.transform=`scale(${calibTR.sz/100})`;
   img.style.transition='none';
 }
 function startCalibAR(){
