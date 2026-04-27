@@ -562,6 +562,7 @@ window.addEventListener('orientationchange',()=>setTimeout(updateLayout,100));
 //   alpha = rotation around Z (screen axis)= roll           ← irrelevant for AR
 window.addEventListener('devicemotion', e=>{
   if(!e.rotationRate) return;
+  const now=performance.now(); // MUST be first — used in throttle and dt
   const r=e.rotationRate;
   rawRate={a:r.alpha||0, b:r.beta||0, g:r.gamma||0};
   // Throttle rotation-rate debug to 5x/sec so it's readable
@@ -572,12 +573,9 @@ window.addEventListener('devicemotion', e=>{
     if(db) db.textContent=rawRate.b.toFixed(1);
     if(dg) dg.textContent=rawRate.g.toFixed(1);
   }
-  const now=performance.now();
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
-  // Always integrate roll (rotationRate.alpha = rotation around device Z = screen normal)
-  // regardless of AR mode — used for visual roll compensation
   if(dt>0 && phase==='anchored'){
-    rollIntegrated += rawRate.a * dt; // rotationRate.alpha = direct Z-axis rotation
+    rollIntegrated += rawRate.a * dt;
   }
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
