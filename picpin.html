@@ -96,8 +96,10 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 #gyro-tb{display:flex;align-items:center;gap:3px;font-size:8px;letter-spacing:.08em;
   padding:2px 5px;border-radius:3px;
   background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);
-  color:rgba(255,255,255,.3);cursor:pointer}
-#gyro-tb.ok{color:rgba(16,185,129,.8);border-color:rgba(16,185,129,.2)}
+  color:rgba(255,255,255,.3);cursor:pointer;transition:all .3s}
+#gyro-tb.ok   {color:rgba(16,185,129,.8);border-color:rgba(16,185,129,.2)}
+#gyro-tb.gyro {color:rgba(220,38,38,.85);border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.07)}
+#gyro-tb.comp {color:rgba(16,185,129,.85);border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.07)}
 /* gyro + orientation inline in topbar */
 #ori-lbl{font-size:8px;letter-spacing:.06em;color:rgba(16,185,129,.7);
   background:rgba(0,0,0,.3);padding:2px 5px;border-radius:3px;
@@ -544,11 +546,28 @@ async function reqGyro(){
 }
 function syncG(){
   const t=gyroOk?'OK':'—',c=gyroOk?'ok':'';
-  const el=$('gyro-tb'); el.className=c;
-  el.innerHTML='<div class="gdot"></div>GYRO '+t;
-  const gl=$('gs-load'); if(!gl)return;
-  gl.className='gs '+(gyroOk?'ok':'');
-  gl.innerHTML='<div class="gdot"></div>'+(gyroOk?'GYRO OK':'BEZ GYRA');
+  const gl=$('gs-load'); if(gl){
+    gl.className='gs '+(gyroOk?'ok':'');
+    gl.innerHTML='<div class="gdot"></div>'+(gyroOk?'GYRO OK':'BEZ GYRA');
+  }
+  // badge content depends on AR phase
+  syncARBadge();
+}
+function syncARBadge(){
+  const el=$('gyro-tb'); if(!el) return;
+  const active = ['calib','align','offset','anchored'].includes(phase);
+  if(!active || !gyroOk){
+    el.className=gyroOk?'ok':'';
+    el.innerHTML='<div class="gdot"></div>GYRO '+(gyroOk?'OK':'—');
+    return;
+  }
+  if(useGyroAR){
+    el.className='gyro';
+    el.innerHTML='<div class="gdot"></div>⟳ GYRO';
+  } else {
+    el.className='comp';
+    el.innerHTML='<div class="gdot"></div>🧭 KOMPAS';
+  }
 }
 
 // ── CAMERA ────────────────────────────────────────────────────────────────
@@ -638,6 +657,7 @@ function setPhase(p){
   if(dbgtop) dbgtop.style.display=(p==='calib'||p==='anchored')?'flex':'none';
   if(p==='offset') setTimeout(openMap,300);
   applyDefaultAxes();
+  syncARBadge();
   setTimeout(updateLayout,60);
 }
 
@@ -909,6 +929,7 @@ function toggleARMode(){
   // restart AR with new mode (resets gyro integration from current position)
   if(phase==='anchored'){stopAR();startAR();}
   // debug row in topbar always visible in calib/anchored phases — no extra toggle needed
+  syncARBadge();
 }
 
 function setGyroAxis(hv, axis){
