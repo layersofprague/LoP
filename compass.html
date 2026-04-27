@@ -143,26 +143,26 @@ loadCal();
 // ── SENSORS ──
 var userPos = null, smoothH = null, lastH = 0;
 
-// Circular median filter — buffer of last N raw samples
-var MEDIAN_N = 12;
-var headingBuf = [];
+// Two-stage smoothing: fast lerp into buffer, slow lerp to display
+var rawH = null;
+var LP_FAST = 0.25;  // raw → buffer (tracks movement)
+var LP_SLOW = 0.04;  // buffer → display (suppresses jitter)
 
 function addHeadingSample(raw) {
-  headingBuf.push(raw);
-  if (headingBuf.length > MEDIAN_N) headingBuf.shift();
-  if (headingBuf.length < 3) { smoothH = raw; return; }
-
-  // Circular median: normalize all samples relative to first
-  var ref = headingBuf[0];
-  var norm = headingBuf.map(function(v) {
-    var d = v - ref;
-    if (d > 180) d -= 360;
-    if (d < -180) d += 360;
-    return d;
-  });
-  norm.sort(function(a, b) { return a - b; });
-  var mid = norm[Math.floor(norm.length / 2)];
-  smoothH = (ref + mid + 360) % 360;
+  // Stage 1: fast lerp on raw value
+  if (rawH === null) { rawH = raw; }
+  else {
+    var d = raw - rawH;
+    if (d > 180) d -= 360; if (d < -180) d += 360;
+    rawH = (rawH + LP_FAST * d + 360) % 360;
+  }
+  // Stage 2: slow lerp rawH → smoothH
+  if (smoothH === null) { smoothH = rawH; }
+  else {
+    var d2 = rawH - smoothH;
+    if (d2 > 180) d2 -= 360; if (d2 < -180) d2 += 360;
+    smoothH = (smoothH + LP_SLOW * d2 + 360) % 360;
+  }
 }
 
 var lastPanLat = null, lastPanLng = null;
@@ -233,7 +233,7 @@ function rotateMap(h) {
 // ── LOOP ──
 function loop() {
   var h = smoothH !== null ? smoothH : 0;
-  if (Math.abs(lastH - h) > 3.0) rotateMap(h);
+  if (Math.abs(lastH - h) > 1.5) rotateMap(h);
   if (userPos) document.getElementById('dbg').textContent = 'GPS ✓ | ' + Math.round(h) + '°';
   requestAnimationFrame(loop);
 }
