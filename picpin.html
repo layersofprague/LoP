@@ -991,7 +991,7 @@ function closeMap(){on($('map-ov'),'on',false); updOffsetDst();}
 function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
 function startAR(){
   // Uses gyroHAxis/gyroVAxis/gyroHSign/gyroVSign — same vars set in calib step ✓
-  if(!gyroOk||!refOri) return;
+  if(!refOri) refOri={...ori}; // fallback: use current orientation if FIX was skipped
   // reset gyro integration from current anchor point
   gyroAngles={x:0,y:0}; gyroLastT=null; rollIntegrated=0;
   const ppd=window.innerWidth/65;
