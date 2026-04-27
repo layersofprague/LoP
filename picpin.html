@@ -393,16 +393,22 @@ new ResizeObserver(updateLayout).observe($('panel'));
 window.addEventListener('resize',updateLayout);
 window.addEventListener('orientationchange',()=>setTimeout(updateLayout,100));
 
-// ── GYRO ──────────────────────────────────────────────────────────────────
-if('DeviceOrientationEvent' in window){
+// ── GYRO — prefer deviceorientationabsolute (Chrome/Samsung spolehlivější) ──
+(function(){
+  if(!('DeviceOrientationEvent' in window)) return;
   gyroOk=true; syncG();
-  window.addEventListener('deviceorientation',e=>{
-    ori={a:e.alpha||0,b:e.beta||0,g:e.gamma||0};
+  const evtName = ('ondeviceorientationabsolute' in window)
+    ? 'deviceorientationabsolute' : 'deviceorientation';
+  window.addEventListener(evtName, e=>{
+    // alpha může být null na zařízeních bez kompasu — zachovat předchozí hodnotu
+    if(e.alpha != null) ori.a = e.alpha;
+    ori.b = e.beta  || 0;
+    ori.g = e.gamma || 0;
     const ol=$('ori-lbl');
     if(ol.classList.contains('on'))
       ol.textContent='α'+ori.a.toFixed(0)+'° β'+ori.b.toFixed(0)+'°';
-  },true);
-}
+  }, true);
+}());
 async function reqGyro(){
   if(typeof DeviceOrientationEvent?.requestPermission==='function')
     if(await DeviceOrientationEvent.requestPermission()==='granted'){gyroOk=true;syncG();}
@@ -502,9 +508,39 @@ function openMap(){
     leafMap.on('click',onMapClick);
     leafMap.setView([50.0835,14.4200],14);
   }
-  setMapMode('user');
-  locateMe();
   setTimeout(()=>leafMap.invalidateSize(),120);
+
+  // Obnoví stav tlačítka a markerů při opakovaném otevření
+  const ok=$('map-ok');
+  if(dst>0){
+    ok.disabled=false; ok.style.opacity='1'; ok.style.cursor='pointer';
+    const n=$('map-dst-num'); n.textContent=dst; n.className='map-dst-num ok';
+  } else {
+    ok.disabled=true; ok.style.opacity='.35'; ok.style.cursor='not-allowed';
+  }
+  // Znovu vykreslí existující markery (po reset/reinit mapy)
+  if(userLL && !userMark){
+    userMark=L.circleMarker(userLL,{radius:8,color:'#4a9eff',fillColor:'#4a9eff',fillOpacity:.9,weight:2,zIndexOffset:1000})
+      .bindTooltip('Já',{permanent:true,direction:'top',offset:[0,-10]}).addTo(leafMap);
+    $('mp-user-val').textContent=userLL[0].toFixed(5)+'\n'+userLL[1].toFixed(5);
+    $('mp-user-val').className='mp-val ok';
+    $('mp-user-nudge').style.display='flex';
+  }
+  if(bldLL && !bldMark){
+    bldMark=L.marker(bldLL,{icon:L.divIcon({
+      className:'',
+      html:'<div style="width:14px;height:14px;border-radius:50%;background:#EF4444;border:2px solid #fff;margin:-7px 0 0 -7px;box-shadow:0 0 4px rgba(0,0,0,.4)"></div>',
+      iconSize:[0,0]
+    })}).bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-14]}).addTo(leafMap);
+    $('mp-bld-val').textContent=bldLL[0].toFixed(5)+'\n'+bldLL[1].toFixed(5);
+    $('mp-bld-val').className='mp-val ok';
+    $('mp-bld-nudge').style.display='flex';
+  }
+  // Zoom na poslední known pozici
+  if(userLL) leafMap.setView(userLL, leafMap.getZoom() || 17);
+  setMapMode(bldLL ? 'bld' : 'user');
+  // GPS pouze pokud ještě nemáme polohu
+  if(!userLL) locateMe();
 }
 
 function setMapMode(m){
@@ -596,7 +632,7 @@ function startAR(){
   if(!gyroOk||!refOri) return;
   const ppd=window.innerWidth/65;
   function loop(){
-    const dx=-angleDiff(ori.a,refOri.a)*ppd, dy=(ori.b-refOri.b)*ppd;
+    const dx= angleDiff(ori.a,refOri.a)*ppd, dy=(ori.b-refOri.b)*ppd;
     applyTR(dx,dy);
     const el=$('ar-d'); if(el) el.textContent='Δ '+dx.toFixed(0)+' '+dy.toFixed(0);
     rafId=requestAnimationFrame(loop);
