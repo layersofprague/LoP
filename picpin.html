@@ -265,6 +265,15 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
       <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button><span class="cv" id="v-py">0</span></div>
       <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button><span class="cv" id="v-rx">0°</span></div>
       <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button><span class="cv" id="v-ry">0°</span></div>
+      <!-- AR mode toggle + calibration — tiny row above main buttons -->
+      <div style="display:flex;gap:4px;margin-top:5px">
+        <button id="btn-ar-mode" class="btn bs"
+          style="font-size:10px;padding:4px;color:rgba(16,185,129,.8);flex:1"
+          onclick="toggleARMode()" title="Přepnout režim AR sledování">⟳ Gyro</button>
+        <button id="btn-calib" class="btn bs"
+          style="font-size:10px;padding:4px;color:rgba(255,255,255,.25);flex:1"
+          onclick="loadCalibJSON()" title="Načíst kalibraci z JSON">⊕ Kalib</button>
+      </div>
       <div class="br">
         <button class="btn bs" onclick="goBack()">←</button>
         <button class="btn bg" onclick="doFix()">FIX ⊕</button>
@@ -365,6 +374,13 @@ const KEYS={opa:{min:0,max:100,u:'%'},sz:{min:10,max:300,u:'%'},
 let phase='load',gyroOk=false,ori={a:0,b:0,g:0},refOri=null;
 let dst=0,anchData=null,rafId=null,collapsed=false;
 let userLL=null,bldLL=null,leafMap=null,userMark=null,bldMark=null,mapMode='user';
+let accCircle=null; // GPS accuracy circle
+let userFromGPS=false; // false = manually placed
+// ── Gyro integration for AR ──
+let useGyroAR=false; // toggle: false=compass(alpha), true=gyro integration
+let gyroAngles={x:0,y:0}; // integrated from FIX point
+let gyroLastT=null;
+let yawCalibOffset=0; // loaded from calibration JSON
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
 
@@ -409,6 +425,18 @@ window.addEventListener('orientationchange',()=>setTimeout(updateLayout,100));
       ol.textContent='α'+ori.a.toFixed(0)+'° β'+ori.b.toFixed(0)+'°';
   }, true);
 }());
+// DeviceMotionEvent — gyro integration for AR (reliable horizontal tracking)
+window.addEventListener('devicemotion', e=>{
+  if(!e.rotationRate || !useGyroAR) return;
+  const now=performance.now();
+  if(gyroLastT!==null && phase==='anchored'){
+    const dt=(now-gyroLastT)/1000;
+    gyroAngles.x += (e.rotationRate.alpha||0)*dt;
+    gyroAngles.y += (e.rotationRate.beta ||0)*dt;
+  }
+  gyroLastT=now;
+},true);
+
 async function reqGyro(){
   if(typeof DeviceOrientationEvent?.requestPermission==='function')
     if(await DeviceOrientationEvent.requestPermission()==='granted'){gyroOk=true;syncG();}
@@ -520,18 +548,15 @@ function openMap(){
   }
   // Znovu vykreslí existující markery (po reset/reinit mapy)
   if(userLL && !userMark){
-    userMark=L.circleMarker(userLL,{radius:8,color:'#4a9eff',fillColor:'#4a9eff',fillOpacity:.9,weight:2,zIndexOffset:1000})
+    userMark=L.circleMarker(userLL,{radius:8,color:'#EF4444',fillColor:'#EF4444',fillOpacity:.85,weight:2,zIndexOffset:1000})
       .bindTooltip('Já',{permanent:true,direction:'top',offset:[0,-10]}).addTo(leafMap);
     $('mp-user-val').textContent=userLL[0].toFixed(5)+'\n'+userLL[1].toFixed(5);
     $('mp-user-val').className='mp-val ok';
     $('mp-user-nudge').style.display='flex';
   }
   if(bldLL && !bldMark){
-    bldMark=L.marker(bldLL,{icon:L.divIcon({
-      className:'',
-      html:'<div style="width:14px;height:14px;border-radius:50%;background:#EF4444;border:2px solid #fff;margin:-7px 0 0 -7px;box-shadow:0 0 4px rgba(0,0,0,.4)"></div>',
-      iconSize:[0,0]
-    })}).bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-14]}).addTo(leafMap);
+    bldMark=L.circleMarker(bldLL,{radius:9,color:'#10B981',fillColor:'#10B981',fillOpacity:.85,weight:2,zIndexOffset:900})
+      .bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-10]}).addTo(leafMap);
     $('mp-bld-val').textContent=bldLL[0].toFixed(5)+'\n'+bldLL[1].toFixed(5);
     $('mp-bld-val').className='mp-val ok';
     $('mp-bld-nudge').style.display='flex';
@@ -556,19 +581,27 @@ function locateMe(){
   if(!navigator.geolocation){$('mp-user-val').textContent='GPS nedostupné';return;}
   navigator.geolocation.getCurrentPosition(pos=>{
     const ll=[pos.coords.latitude,pos.coords.longitude];
-    setUserLL(ll);
+    setUserLL(ll, pos.coords.accuracy); // pass accuracy for circle
     if(leafMap) leafMap.setView(ll,17);
   },()=>{$('mp-user-val').textContent='GPS selhalo';});
 }
 
-function setUserLL(ll){
+function setUserLL(ll, accuracy){
   userLL=ll;
+  userFromGPS = (accuracy !== undefined);
   $('mp-user-val').textContent=ll[0].toFixed(5)+'\n'+ll[1].toFixed(5);
   $('mp-user-val').className='mp-val ok';
   $('mp-user-nudge').style.display='flex';
+  // Red marker (user position is always red)
   if(userMark) userMark.setLatLng(ll);
-  else userMark=L.circleMarker(ll,{radius:8,color:'#4a9eff',fillColor:'#4a9eff',fillOpacity:.9,weight:2,zIndexOffset:1000})
+  else userMark=L.circleMarker(ll,{radius:8,color:'#EF4444',fillColor:'#EF4444',fillOpacity:.85,weight:2,zIndexOffset:1000})
     .bindTooltip('Já',{permanent:true,direction:'top',offset:[0,-10]}).addTo(leafMap);
+  // GPS accuracy circle — shown only when from GPS, removed when manually placed
+  if(accCircle){accCircle.remove();accCircle=null;}
+  if(accuracy && accuracy<5000){
+    accCircle=L.circle(ll,{radius:accuracy,color:'#EF4444',fillColor:'#EF4444',
+      fillOpacity:.06,weight:1,dashArray:'4,4'}).addTo(leafMap);
+  }
   calcDist();
 }
 
@@ -578,18 +611,18 @@ function setBldLL(ll){
   $('mp-bld-val').className='mp-val ok';
   $('mp-bld-nudge').style.display='flex';
   if(bldMark) bldMark.setLatLng(ll);
-  else bldMark=L.marker(ll,{icon:L.divIcon({
-    className:'',
-    html:'<div style="width:14px;height:14px;border-radius:50%;background:#EF4444;border:2px solid #fff;margin:-7px 0 0 -7px;box-shadow:0 0 4px rgba(0,0,0,.4)"></div>',
-    iconSize:[0,0]
-  })}).bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-14]}).addTo(leafMap);
+  else bldMark=L.circleMarker(ll,{radius:9,color:'#10B981',fillColor:'#10B981',fillOpacity:.85,weight:2,zIndexOffset:900})
+    .bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-10]}).addTo(leafMap);
   calcDist();
 }
 
 function onMapClick(e){
   const ll=[e.latlng.lat,e.latlng.lng];
-  if(mapMode==='user') setUserLL(ll);
-  else setBldLL(ll);
+  if(mapMode==='user'){
+    // manual click: remove GPS accuracy circle
+    if(accCircle){accCircle.remove();accCircle=null;}
+    setUserLL(ll);
+  } else setBldLL(ll);
 }
 
 function nudge(who,axis,delta){
@@ -597,7 +630,11 @@ function nudge(who,axis,delta){
   if(!cur) return;
   const ll=[...cur];
   if(axis==='lat') ll[0]+=delta; else ll[1]+=delta;
-  if(who==='user') setUserLL(ll); else setBldLL(ll);
+  if(who==='user'){
+    // manual nudge: no accuracy circle (pass no accuracy param)
+    if(accCircle){accCircle.remove();accCircle=null;}
+    setUserLL(ll);
+  } else setBldLL(ll);
   if(leafMap) leafMap.panTo(ll);
 }
 
@@ -630,16 +667,67 @@ function closeMap()  {on($('map-ov'),'on',false); updOffsetDst();}
 function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
 function startAR(){
   if(!gyroOk||!refOri) return;
+  // reset gyro integration from current anchor point
+  gyroAngles={x:0,y:0}; gyroLastT=null;
   const ppd=window.innerWidth/65;
   function loop(){
-    const dx= angleDiff(ori.a,refOri.a)*ppd, dy=(ori.b-refOri.b)*ppd;
+    let dx,dy;
+    if(useGyroAR){
+      // GYRO mode: integrate rotationRate.alpha (yaw) and .beta (pitch)
+      // Most reliable for horizontal tracking — no magnetometer dependency
+      dx = -gyroAngles.x * ppd;
+      dy =  gyroAngles.y * ppd;
+    } else {
+      // COMPASS mode: use alpha (yaw) with beta-tilt correction
+      // cos(beta) reduces horizontal sensitivity at forward tilt (more accurate)
+      const beta_r = refOri.b * Math.PI / 180;
+      const alpha_d = angleDiff(ori.a + yawCalibOffset, refOri.a + yawCalibOffset);
+      dx = -alpha_d * Math.cos(beta_r) * ppd;
+      dy = (ori.b - refOri.b) * ppd;
+    }
     applyTR(dx,dy);
-    const el=$('ar-d'); if(el) el.textContent='Δ '+dx.toFixed(0)+' '+dy.toFixed(0);
+    const el=$('ar-d');
+    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ '+dx.toFixed(0)+' '+dy.toFixed(0);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
 }
 function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
+
+// Toggle AR mode compass ↔ gyro
+function toggleARMode(){
+  useGyroAR=!useGyroAR;
+  const b=$('btn-ar-mode');
+  b.textContent = useGyroAR ? '🧭 Kompas' : '⟳ Gyro';
+  b.style.color  = useGyroAR ? 'rgba(245,158,11,.8)' : 'rgba(16,185,129,.8)';
+  b.title = useGyroAR ? 'Režim: Gyroskop (resetuje se při FIX)' : 'Režim: Kompas (absolutní heading)';
+  // restart AR with new mode
+  if(phase==='anchored'){stopAR();startAR();}
+}
+
+// Load calibration JSON and extract yaw offset
+function loadCalibJSON(){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='.json,application/json';
+  inp.onchange=e=>{
+    const f=e.target.files[0]; if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(d.offsets && d.offsets.yaw!==undefined){
+          yawCalibOffset=-d.offsets.yaw; // invert: offsets.yaw is how much measured is off
+          const b=$('btn-calib');
+          b.textContent='⊕ Kalib: '+yawCalibOffset.toFixed(1)+'°';
+          b.style.color='rgba(16,185,129,.8)';
+          alert('Kalibrace načtena. Yaw offset: '+yawCalibOffset.toFixed(2)+'°\n(platí jen v režimu kompas)');
+        } else alert('JSON neobsahuje offsets.yaw');
+      }catch(e){alert('Chyba parsování JSON: '+e.message);}
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
 
 // ── ACTIONS ───────────────────────────────────────────────────────────────
 function doFix(){
