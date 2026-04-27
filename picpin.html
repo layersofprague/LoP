@@ -575,7 +575,9 @@ window.addEventListener('devicemotion', e=>{
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
   // Always integrate roll (rotationRate.alpha = rotation around device Z = screen normal)
   // regardless of AR mode — used for visual roll compensation
-  // rollIntegrated no longer used — gravity-referenced gamma is more stable
+  if(dt>0 && phase==='anchored'){
+    rollIntegrated += rawRate.a * dt; // rotationRate.alpha = direct Z-axis rotation
+  }
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
     const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
@@ -1009,16 +1011,14 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll: simple gamma diff — gravity-stabilised, no drift, no atan2 complexity
-    const roll = ori.g - refOri.g;
-    applyTR(dx, dy, roll);
+    // Roll: integrate rotationRate.alpha — only reliable method at beta≈90°
+    // gamma has gimbal singularity (20° real roll → 90° gamma change at beta=90°)
+    applyTR(dx, dy, rollIntegrated);
     const el=$('ar-d');
-    const roll_disp = ori.g - refOri.g;
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
-    // Update gamma and roll in topbar debug (visible even when panel collapsed)
     const dg=$('dbg-gamma'), dr=$('dbg-roll');
     if(dg) dg.textContent=ori.g.toFixed(1);
-    if(dr) dr.textContent=roll_disp.toFixed(1);
+    if(dr) dr.textContent=rollIntegrated.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
