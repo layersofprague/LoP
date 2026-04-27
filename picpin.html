@@ -15,37 +15,50 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 #cam.on{display:block}
 
 /* ── OVERLAY IMAGE ── */
-#ov{position:fixed;inset:0;z-index:2;display:none;align-items:center;justify-content:center;pointer-events:none}
+#ov{
+  position:fixed;z-index:2;display:none;
+  align-items:center;justify-content:center;pointer-events:none;
+  /* default: full screen; adjusted by JS */
+  top:0;left:0;right:0;bottom:0;
+  transition:top .25s,bottom .25s,right .25s;
+}
 #ov.on{display:flex}
-#ov img{max-width:95vw;max-height:90vh;transform-origin:center center}
+#ov img{max-width:95%;max-height:95%;transform-origin:center center}
 
 /* scanlines */
 #sl{position:fixed;inset:0;z-index:3;pointer-events:none;display:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px)}
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.05) 3px,rgba(0,0,0,.05) 4px)}
 #sl.on{display:block}
 
-/* crosshair */
-#xh{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:36px;height:36px;z-index:4;pointer-events:none;display:none}
+/* ── CROSSHAIR — RED ── */
+#xh{
+  position:fixed;z-index:4;pointer-events:none;display:none;
+  width:36px;height:36px;
+  /* default center; JS adjusts top/left */
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  transition:top .25s,left .25s;
+}
 #xh.on{display:block}
-#xh::before,#xh::after{content:'';position:absolute;background:rgba(245,158,11,.4)}
+#xh::before,#xh::after{content:'';position:absolute;background:rgba(220,38,38,.8)}
 #xh::before{width:1px;height:100%;left:50%}
-#xh::after{height:1px;width:100%;top:50%}
+#xh::after {height:1px;width:100%;top:50%}
 
 /* floating badges */
 .fb{position:fixed;z-index:11;font-size:9px;letter-spacing:.1em;padding:3px 7px;border-radius:3px;display:none}
 .fb.on{display:block}
-#b-live  {top:46px;right:8px;background:rgba(0,0,0,.35);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.75)}
-#b-anchor{top:46px;left:8px; background:rgba(0,0,0,.35);border:1px solid rgba(16,185,129,.25);color:#10B981}
-#b-err   {top:46px;left:8px; background:rgba(0,0,0,.45);border:1px solid rgba(220,38,38,.4); color:#EF4444}
+/* coordinates → green */
+#b-live  {top:40px;right:8px;background:rgba(0,0,0,.3);border:1px solid rgba(16,185,129,.25);color:rgba(16,185,129,.85)}
+#b-anchor{top:40px;left:8px; background:rgba(0,0,0,.3);border:1px solid rgba(16,185,129,.25);color:#10B981}
+#b-err   {top:40px;left:8px; background:rgba(0,0,0,.4);border:1px solid rgba(220,38,38,.4); color:#EF4444}
 
 /* ── LOAD SCREEN ── */
 #scr-load{position:fixed;inset:0;z-index:20;background:#060606;
   display:flex;flex-direction:column;align-items:stretch;justify-content:center;
   gap:16px;padding:28px 20px;color:#C9D1D9;max-width:480px;margin:0 auto}
 #scr-load.off{display:none}
-.hero{font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:.95;color:#F59E0B;text-align:center}
-.hero-s{text-align:center;font-size:10px;letter-spacing:.15em;color:#2D3748;line-height:2;text-transform:uppercase;margin-top:4px}
+.hero{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:.95;color:#F59E0B;text-align:center}
+.hero-s{text-align:center;font-size:9px;letter-spacing:.15em;color:#2D3748;line-height:2;text-transform:uppercase;margin-top:4px}
 .fz{border:1px dashed #1C1C1C;border-radius:6px;padding:20px 14px;text-align:center;cursor:pointer;
   position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .2s}
 .fz:hover{border-color:rgba(245,158,11,.3)}
@@ -65,89 +78,109 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 /* ── TOP BAR ── */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:10;
   display:none;align-items:center;justify-content:space-between;
-  padding:6px 12px;
-  background:rgba(0,0,0,.25);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.04);max-width:480px;margin:0 auto}
-.plbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;color:rgba(245,158,11,.8)}
+  padding:5px 12px;
+  background:rgba(0,0,0,.18);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.04);max-width:100%;margin:0}
+/* phase label: red for align, amber for offset, green for anchored — set via JS */
+.plbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;color:rgba(220,38,38,.85)}
 .dots{display:flex;gap:5px;align-items:center}
+/* dots → red active */
 .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);transition:all .3s}
 .dot.done  {background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.28)}
-.dot.active{background:#F59E0B;border-color:#F59E0B;box-shadow:0 0 4px #F59E0B55}
+.dot.active{background:#EF4444;border-color:#EF4444;box-shadow:0 0 4px rgba(239,68,68,.5)}
 #gyro-tb{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.1em;
   padding:2px 6px;border-radius:3px;border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.2);cursor:pointer}
 #gyro-tb.ok{color:rgba(16,185,129,.75);border-color:rgba(16,185,129,.18)}
 
-/* ── BOTTOM PANEL ── */
-#panel{position:fixed;bottom:0;left:0;right:0;z-index:10;
-  background:rgba(0,0,0,.38);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-top:1px solid rgba(255,255,255,.06);
-  max-width:480px;margin:0 auto;display:none;max-height:52vh;overflow-y:auto}
+/* ── BOTTOM PANEL — transparent ── */
+#panel{
+  position:fixed;bottom:0;left:0;right:0;z-index:10;
+  background:rgba(0,0,0,.08);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid rgba(255,255,255,.05);
+  max-width:100%;
+  display:none;
+  max-height:52vh;overflow-y:auto;
+  transition:right .25s,width .25s;
+}
 #panel.on{display:block}
-#handle{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 4px;cursor:pointer;user-select:none}
-#handle-bar{width:30px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);margin:0 auto}
-#cbtn{font-size:9px;color:rgba(255,255,255,.2);padding:2px 5px;border:1px solid rgba(255,255,255,.09);
+
+#handle{display:flex;align-items:center;justify-content:space-between;padding:5px 12px 3px;cursor:pointer;user-select:none}
+#handle-bar{width:28px;height:3px;border-radius:2px;background:rgba(255,255,255,.1);margin:0 auto}
+#cbtn{font-size:9px;color:rgba(255,255,255,.2);padding:2px 5px;border:1px solid rgba(255,255,255,.08);
   border-radius:3px;cursor:pointer;background:none;font-family:'JetBrains Mono',monospace}
 #pbody{padding:0 10px 10px}
 #pbody.col{display:none}
 
-.sec{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.18);margin:6px 0 3px}
-hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:5px 0}
+.sec{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.18);margin:5px 0 2px}
+hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:4px 0}
 
-/* ── SLIDERS — compact, 2-col grid ── */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}
+/* ── SLIDERS — single column ── */
 .ctrl{display:flex;align-items:center;gap:4px;padding:2px 0}
 .ck{font-size:7px;letter-spacing:.05em;text-transform:uppercase;
-  color:rgba(255,255,255,.28);width:36px;flex-shrink:0}
-.cv{font-size:8px;color:rgba(245,158,11,.75);width:28px;text-align:right;flex-shrink:0}
+  color:rgba(255,255,255,.28);width:42px;flex-shrink:0}
+/* values → red */
+.cv{font-size:8px;color:rgba(220,38,38,.85);width:30px;text-align:right;flex-shrink:0}
 input[type=range].rng{-webkit-appearance:none;appearance:none;flex:1;height:2px;
   background:rgba(255,255,255,.1);border-radius:1px;outline:none;cursor:pointer;min-width:0}
+/* thumb → red */
 input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
-  border-radius:50%;background:#F59E0B;cursor:pointer;
-  border:2px solid rgba(0,0,0,.5);box-shadow:0 0 5px rgba(245,158,11,.25)}
+  border-radius:50%;background:#EF4444;cursor:pointer;
+  border:2px solid rgba(0,0,0,.5);box-shadow:0 0 5px rgba(239,68,68,.3)}
 .sb{width:22px;height:22px;background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.09);color:rgba(255,255,255,.35);
+  border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);
   border-radius:3px;cursor:pointer;font-size:14px;line-height:1;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
-.sb:active{background:rgba(245,158,11,.12);color:#F59E0B;border-color:rgba(245,158,11,.25)}
+.sb:active{background:rgba(220,38,38,.12);color:#EF4444;border-color:rgba(220,38,38,.25)}
 
-/* ── ACTION BUTTONS — small pills ── */
-.br{display:flex;gap:5px;margin-top:7px}
+/* ── BUTTONS ── */
+.br{display:flex;gap:5px;margin-top:6px}
 .br>.btn{flex:1}
-.btn{padding:7px 6px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.06em;
+.btn{padding:7px 6px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.06em;
   cursor:pointer;border-radius:4px;border:none;width:100%;transition:all .15s}
 .btn:active{transform:scale(.97)}
-.bp{background:rgba(245,158,11,.7);color:#000}.bp:active{background:rgba(245,158,11,.88)}
-.bs{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);
-  border:1px solid rgba(255,255,255,.09);font-size:13px}
+.bp{background:rgba(245,158,11,.65);color:#000}.bp:active{background:rgba(245,158,11,.85)}
+.bg{background:rgba(16,185,129,.65);color:#000}.bg:active{background:rgba(16,185,129,.85)}
+.bs{background:rgba(255,255,255,.05);color:rgba(255,255,255,.28);
+  border:1px solid rgba(255,255,255,.08);font-size:12px}
 .bok{background:rgba(16,185,129,.65);color:#000}
 
 /* data box */
-.db{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);
-  border-radius:4px;padding:7px;font-size:9px;line-height:1.8;letter-spacing:.04em}
+.db{background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.06);
+  border-radius:4px;padding:6px;font-size:9px;line-height:1.8;letter-spacing:.04em}
 .dr{display:flex;justify-content:space-between}
 .dk{color:rgba(255,255,255,.22)}.dv{color:rgba(16,185,129,.75)}
 
-/* ── MAP OVERLAY (step 3) ── */
-#map-ov{position:fixed;inset:0;z-index:15;display:none;flex-direction:column;background:rgba(0,0,0,.15)}
+/* ── LANDSCAPE MODE ── */
+@media (orientation:landscape){
+  #panel.on{
+    top:0;bottom:0;left:auto;right:0;
+    width:42vw;max-height:100vh;
+    border-top:none;border-left:1px solid rgba(255,255,255,.06);
+    overflow-y:auto;
+  }
+  #handle{display:none} /* no collapse handle in landscape */
+  #pbody.col{display:block} /* always shown */
+}
+
+/* ── MAP OVERLAY ── */
+#map-ov{position:fixed;inset:0;z-index:15;display:none;flex-direction:column;background:rgba(0,0,0,.1)}
 #map-ov.on{display:flex}
 #leafmap{flex:1;cursor:crosshair}
-/* override leaflet cursor */
 #leafmap .leaflet-container{cursor:crosshair!important}
 #map-bar{
-  background:rgba(0,0,0,.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(0,0,0,.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   border-top:1px solid rgba(255,255,255,.07);padding:8px 12px;
-  display:flex;flex-direction:column;gap:7px;
-  max-width:480px;margin:0 auto;width:100%}
+  display:flex;flex-direction:column;gap:6px;width:100%}
 .mrow{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.06em}
 .mlbl{color:rgba(255,255,255,.3);flex-shrink:0}
 .mval{color:rgba(245,158,11,.8);flex:1}
 .mval.ok{color:rgba(16,185,129,.8)}
-/* distance fine tune row */
-.dst-row{display:flex;align-items:center;gap:6px}
+.dst-row{display:flex;align-items:center;gap:5px}
 .dst-num{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  color:#E5E7EB;font-size:17px;padding:6px 10px;border-radius:4px;outline:none;text-align:center;min-width:0}
+  color:#E5E7EB;font-size:16px;padding:5px 8px;border-radius:4px;outline:none;text-align:center;min-width:0}
 .dst-num:focus{border-color:rgba(245,158,11,.3)}
-#map-hint{font-size:9px;letter-spacing:.06em;color:rgba(255,255,255,.35);text-align:center;padding:2px 0}
+#map-hint{font-size:9px;letter-spacing:.06em;color:rgba(255,255,255,.35);text-align:center}
 </style>
 </head>
 <body>
@@ -186,7 +219,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:13px;h
   </div>
 </div>
 
-<!-- BOTTOM PANEL -->
+<!-- BOTTOM / SIDE PANEL -->
 <div id="panel">
   <div id="handle" onclick="toggleC()">
     <div style="width:24px"></div>
@@ -195,36 +228,31 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:13px;h
   </div>
   <div id="pbody">
 
-    <!-- ALIGN (2-col grid, small action buttons) -->
+    <!-- ALIGN — all sliders single column -->
     <div id="pa" style="display:none">
-      <div class="g2">
-        <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button><span class="cv" id="v-opa">50%</span></div>
-        <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp('sz',-1)">−</button><input type="range" class="rng" id="s-sz" min="10" max="300" value="100" oninput="upd('sz',this.value,'%')"><button class="sb" onclick="stp('sz',1)">+</button><span class="cv" id="v-sz">100%</span></div>
-        <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp('px',-1)">−</button><input type="range" class="rng" id="s-px" min="-500" max="500" value="0" oninput="upd('px',this.value,'px')"><button class="sb" onclick="stp('px',1)">+</button><span class="cv" id="v-px">0</span></div>
-        <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button><span class="cv" id="v-py">0</span></div>
-        <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button><span class="cv" id="v-rx">0°</span></div>
-        <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button><span class="cv" id="v-ry">0°</span></div>
-      </div>
+      <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button><span class="cv" id="v-opa">50%</span></div>
+      <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp('sz',-1)">−</button><input type="range" class="rng" id="s-sz" min="10" max="300" value="100" oninput="upd('sz',this.value,'%')"><button class="sb" onclick="stp('sz',1)">+</button><span class="cv" id="v-sz">100%</span></div>
+      <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp('px',-1)">−</button><input type="range" class="rng" id="s-px" min="-500" max="500" value="0" oninput="upd('px',this.value,'px')"><button class="sb" onclick="stp('px',1)">+</button><span class="cv" id="v-px">0</span></div>
+      <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button><span class="cv" id="v-py">0</span></div>
+      <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button><span class="cv" id="v-rx">0°</span></div>
+      <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button><span class="cv" id="v-ry">0°</span></div>
       <div class="br">
-        <button class="btn bs" style="font-size:11px;padding:5px" onclick="goBack()">←</button>
-        <button class="btn bp" onclick="doFix()">FIX ⊕</button>
+        <button class="btn bs" onclick="goBack()">←</button>
+        <button class="btn bg" onclick="doFix()">FIX ⊕</button>
       </div>
     </div>
 
-    <!-- OFFSET — just fine-tune + confirm; map is in separate overlay -->
+    <!-- OFFSET -->
     <div id="po" style="display:none">
-      <div class="sec">Doladění obrazu</div>
-      <div class="g2">
-        <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp2('opa',-1)">−</button><input type="range" class="rng" id="s2-opa" min="0" max="100" value="50" oninput="upd2('opa',this.value,'%')"><button class="sb" onclick="stp2('opa',1)">+</button><span class="cv" id="v2-opa">50%</span></div>
-        <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp2('sz',-1)">−</button><input type="range" class="rng" id="s2-sz" min="10" max="300" value="100" oninput="upd2('sz',this.value,'%')"><button class="sb" onclick="stp2('sz',1)">+</button><span class="cv" id="v2-sz">100%</span></div>
-        <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp2('px',-1)">−</button><input type="range" class="rng" id="s2-px" min="-500" max="500" value="0" oninput="upd2('px',this.value,'px')"><button class="sb" onclick="stp2('px',1)">+</button><span class="cv" id="v2-px">0</span></div>
-        <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp2('py',-1)">−</button><input type="range" class="rng" id="s2-py" min="-500" max="500" value="0" oninput="upd2('py',this.value,'px')"><button class="sb" onclick="stp2('py',1)">+</button><span class="cv" id="v2-py">0</span></div>
-        <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp2('rx',-1)">−</button><input type="range" class="rng" id="s2-rx" min="-60" max="60" value="0" oninput="upd2('rx',this.value,'°')"><button class="sb" onclick="stp2('rx',1)">+</button><span class="cv" id="v2-rx">0°</span></div>
-        <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp2('ry',-1)">−</button><input type="range" class="rng" id="s2-ry" min="-60" max="60" value="0" oninput="upd2('ry',this.value,'°')"><button class="sb" onclick="stp2('ry',1)">+</button><span class="cv" id="v2-ry">0°</span></div>
-      </div>
+      <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp2('opa',-1)">−</button><input type="range" class="rng" id="s2-opa" min="0" max="100" value="50" oninput="upd2('opa',this.value,'%')"><button class="sb" onclick="stp2('opa',1)">+</button><span class="cv" id="v2-opa">50%</span></div>
+      <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp2('sz',-1)">−</button><input type="range" class="rng" id="s2-sz" min="10" max="300" value="100" oninput="upd2('sz',this.value,'%')"><button class="sb" onclick="stp2('sz',1)">+</button><span class="cv" id="v2-sz">100%</span></div>
+      <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp2('px',-1)">−</button><input type="range" class="rng" id="s2-px" min="-500" max="500" value="0" oninput="upd2('px',this.value,'px')"><button class="sb" onclick="stp2('px',1)">+</button><span class="cv" id="v2-px">0</span></div>
+      <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp2('py',-1)">−</button><input type="range" class="rng" id="s2-py" min="-500" max="500" value="0" oninput="upd2('py',this.value,'px')"><button class="sb" onclick="stp2('py',1)">+</button><span class="cv" id="v2-py">0</span></div>
+      <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp2('rx',-1)">−</button><input type="range" class="rng" id="s2-rx" min="-60" max="60" value="0" oninput="upd2('rx',this.value,'°')"><button class="sb" onclick="stp2('rx',1)">+</button><span class="cv" id="v2-rx">0°</span></div>
+      <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp2('ry',-1)">−</button><input type="range" class="rng" id="s2-ry" min="-60" max="60" value="0" oninput="upd2('ry',this.value,'°')"><button class="sb" onclick="stp2('ry',1)">+</button><span class="cv" id="v2-ry">0°</span></div>
       <div class="br">
-        <button class="btn bs" style="font-size:11px;padding:5px" onclick="openMap()">📍 MAPA</button>
-        <button class="btn bs" style="font-size:11px;padding:5px" onclick="setPhase('align')">← ZPĚT</button>
+        <button class="btn bs" style="font-size:11px;padding:5px" onclick="openMap()">📍</button>
+        <button class="btn bs" onclick="setPhase('align')">← ZPĚT</button>
         <button class="btn bp" onclick="doAnchor()">UKOTVIT ◎</button>
       </div>
     </div>
@@ -232,7 +260,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:13px;h
     <!-- ANCHORED -->
     <div id="panch" style="display:none">
       <div class="db" id="anch-db">—</div>
-      <div class="br" style="margin-top:7px">
+      <div class="br" style="margin-top:6px">
         <button class="btn bs" onclick="doReset()">RESET</button>
         <button class="btn bp" id="btn-copy" onclick="doCopy()">KOPÍROVAT JSON</button>
       </div>
@@ -241,24 +269,24 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:13px;h
   </div>
 </div>
 
-<!-- MAP OVERLAY (step 3) -->
+<!-- MAP OVERLAY -->
 <div id="map-ov">
   <div id="leafmap"></div>
   <div id="map-bar">
     <div id="map-hint">Klikni na mapu pro označení budovy ✛</div>
     <div class="mrow">
       <span class="mlbl">Já:</span><span class="mval" id="m-gps">hledám GPS…</span>
-      <span class="mlbl">Budova:</span><span class="mval" id="m-bld">—</span>
+      <span class="mlbl" style="margin-left:8px">Budova:</span><span class="mval" id="m-bld">—</span>
     </div>
     <div class="dst-row">
       <button class="sb" onclick="dstStp(-1)">−</button>
-      <input type="number" class="dst-num" id="di" value="0" min="0" oninput="dst=Math.max(0,+this.value);updDstLbl()">
+      <input type="number" class="dst-num" id="di" value="0" min="0" oninput="dst=Math.max(0,+this.value)">
       <button class="sb" onclick="dstStp(1)">+</button>
-      <span style="font-size:10px;color:rgba(255,255,255,.35);margin-left:2px">m</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.3);margin-left:2px">m</span>
     </div>
     <div class="br" style="margin-top:0">
       <button class="btn bs" style="font-size:12px" onclick="closeMap()">← ZPĚT</button>
-      <button class="btn bp" id="map-confirm" onclick="confirmMap()">POTVRDIT ✓</button>
+      <button class="btn bg" onclick="confirmMap()">POTVRDIT ✓</button>
     </div>
   </div>
 </div>
@@ -271,6 +299,48 @@ let phase='load',gyroOk=false,ori={a:0,b:0,g:0},refOri=null,dst=0,anchData=null,
 let userLatLng=null,bldLatLng=null,leafMap=null,userMarker=null,bldMarker=null;
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
+
+// ── LAYOUT ADJUSTMENT ────────────────────────────────────────────────────
+// Repositions #ov and #xh so camera view is fully usable when panel is open
+function updateLayout(){
+  const ov=$('ov'), xh=$('xh'), panel=$('panel');
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const panelOpen = !collapsed && panel.classList.contains('on');
+
+  if(isLandscape && panelOpen){
+    // Panel is right sidebar (42vw wide via CSS media query)
+    const sideW = window.innerWidth * 0.42;
+    const remaining = window.innerWidth - sideW;
+    ov.style.right   = sideW + 'px';
+    ov.style.top     = '0';
+    ov.style.bottom  = '0';
+    ov.style.left    = '0';
+    xh.style.left    = (remaining / 2) + 'px';
+    xh.style.top     = '50%';
+  } else if(!isLandscape && panelOpen){
+    // Panel is bottom drawer — shift image up by half panel height
+    const ph = panel.offsetHeight;
+    const topbarH = $('topbar').offsetHeight || 34;
+    const visH = window.innerHeight - ph - topbarH;
+    const topOffset = topbarH + visH / 2;
+    ov.style.right  = '0';
+    ov.style.left   = '0';
+    ov.style.top    = topbarH + 'px';
+    ov.style.bottom = ph + 'px';
+    xh.style.left   = '50%';
+    xh.style.top    = topOffset + 'px';
+  } else {
+    // Default: full screen
+    ov.style.top='0'; ov.style.bottom='0'; ov.style.left='0'; ov.style.right='0';
+    xh.style.left='50%'; xh.style.top='50%';
+  }
+}
+
+// observe panel size changes (triggers when panel opens/closes/resizes)
+const ro = new ResizeObserver(updateLayout);
+ro.observe(document.getElementById('panel'));
+window.addEventListener('resize', updateLayout);
+window.addEventListener('orientationchange', ()=>setTimeout(updateLayout,100));
 
 // ── GYRO ──────────────────────────────────────────────────────────────────
 if('DeviceOrientationEvent' in window){
@@ -312,17 +382,25 @@ function startCam(){
 
 // ── PANEL COLLAPSE ────────────────────────────────────────────────────────
 function toggleC(){
+  const isLandscape = window.innerWidth > window.innerHeight;
+  if(isLandscape) return; // no collapse in landscape
   collapsed=!collapsed;
   $('pbody').style.display=collapsed?'none':'block';
   $('cbtn').textContent=collapsed?'▼':'▲';
+  setTimeout(updateLayout,50);
 }
 
 // ── PHASE ─────────────────────────────────────────────────────────────────
 const PLBLS={align:'ZAROVNAT',offset:'VZDÁLENOST',anchored:'UKOTVENO'};
 const PIDX ={align:1,offset:2,anchored:3};
+// Label colors per phase
+const PLBL_COLORS={align:'rgba(220,38,38,.85)',offset:'rgba(245,158,11,.8)',anchored:'rgba(16,185,129,.85)'};
+
 function setPhase(p){
   phase=p;
-  $('plbl').textContent=PLBLS[p];
+  const lbl=$('plbl');
+  lbl.textContent=PLBLS[p];
+  lbl.style.color=PLBL_COLORS[p];
   for(let i=0;i<4;i++){
     const d=$('d'+i);
     d.className='dot'+(i<PIDX[p]?' done':'')+(i===PIDX[p]?' active':'');
@@ -341,6 +419,7 @@ function setPhase(p){
   if(p==='offset') syncSliders2();
   if(p==='anchored'){stopAR();startAR();fillAnch();}
   if(p!=='anchored') stopAR();
+  setTimeout(updateLayout,60);
 }
 
 // ── TRANSFORM ─────────────────────────────────────────────────────────────
@@ -364,13 +443,12 @@ function syncSliders2(){
   }
 }
 
-// ── MAP (step 3) ──────────────────────────────────────────────────────────
+// ── MAP ───────────────────────────────────────────────────────────────────
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
   return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
 }
-
 function openMap(){
   on($('map-ov'),'on',true);
   if(!leafMap){
@@ -378,7 +456,6 @@ function openMap(){
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(leafMap);
     leafMap.on('click',onMapClick);
   }
-  // GPS
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
       userLatLng=[pos.coords.latitude,pos.coords.longitude];
@@ -393,39 +470,28 @@ function openMap(){
   }
   setTimeout(()=>leafMap.invalidateSize(),100);
 }
-
 function onMapClick(e){
   bldLatLng=[e.latlng.lat,e.latlng.lng];
   $('m-bld').textContent=bldLatLng[0].toFixed(5)+', '+bldLatLng[1].toFixed(5);
   $('m-bld').className='mval ok';
   if(bldMarker) bldMarker.remove();
   bldMarker=L.marker(bldLatLng,{
-    icon:L.divIcon({className:'',html:'<div style="width:14px;height:14px;border-radius:50%;background:#F59E0B;border:2px solid #000;margin:-7px 0 0 -7px"></div>',iconSize:[0,0]})
+    icon:L.divIcon({className:'',html:'<div style="width:14px;height:14px;border-radius:50%;background:#EF4444;border:2px solid #000;margin:-7px 0 0 -7px"></div>',iconSize:[0,0]})
   }).bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-12]}).addTo(leafMap);
   updateDist();
 }
-
 function updateDist(){
   if(userLatLng&&bldLatLng){
     dst=haversine(...userLatLng,...bldLatLng);
-    $('di').value=dst; updDstLbl();
+    $('di').value=dst;
   }
 }
-function updDstLbl(){$('di').value=dst;}
 function dstStp(d){dst=Math.max(0,dst+d);$('di').value=dst;}
-
-function confirmMap(){
-  on($('map-ov'),'on',false);
-}
-function closeMap(){
-  on($('map-ov'),'on',false);
-}
+function confirmMap(){on($('map-ov'),'on',false);}
+function closeMap()  {on($('map-ov'),'on',false);}
 
 // ── AR TRACKING ───────────────────────────────────────────────────────────
-// Oprava: horizontální pohyb = alpha (yaw/kompas), vertikální = beta (pitch)
-// Při pohybu telefonu doprava alpha roste → fotografie se pohybuje doleva (záporné dx)
 function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
-
 function startAR(){
   if(!gyroOk||!refOri) return;
   const ppd=window.innerWidth/65;
@@ -441,13 +507,18 @@ function startAR(){
 function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
 
 // ── ACTIONS ───────────────────────────────────────────────────────────────
-function doFix(){refOri={...ori};setPhase('offset');}
-
+function doFix(){
+  refOri={...ori};
+  // Flash green "ZAROVNÁNO" before transitioning
+  const lbl=$('plbl');
+  lbl.textContent='ZAROVNÁNO';
+  lbl.style.color='rgba(16,185,129,.9)';
+  setTimeout(()=>setPhase('offset'), 700);
+}
 function doAnchor(){
   anchData={refOri:{...refOri},distM:dst,tr:{...TR},ts:new Date().toISOString()};
   setPhase('anchored');
 }
-
 function fillAnch(){
   $('anch-db').innerHTML=`
     <div class="dr"><span class="dk">Vzdálenost</span><span class="dv">${anchData.distM} m</span></div>
@@ -455,15 +526,13 @@ function fillAnch(){
     <div class="dr"><span class="dk">β (pitch)</span><span class="dv">${anchData.refOri.b.toFixed(1)}°</span></div>
     <div class="dr"><span class="dk">Opacita</span><span class="dv">${anchData.tr.opa}%</span></div>
     <div class="dr"><span class="dk">Velikost</span><span class="dv">${anchData.tr.sz}%</span></div>
-    ${gyroOk?'<div class="dr" style="margin-top:3px;border-top:1px solid rgba(255,255,255,.05);padding-top:3px"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':''}`;
+    ${gyroOk?'<div class="dr" style="margin-top:2px;border-top:1px solid rgba(255,255,255,.05);padding-top:2px"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':''}`;
 }
-
 async function doCopy(){
   try{await navigator.clipboard.writeText(JSON.stringify(anchData,null,2));}catch(e){}
   const b=$('btn-copy');b.textContent='✓ OK';b.className='btn bok';
   setTimeout(()=>{b.textContent='KOPÍROVAT JSON';b.className='btn bp';},2000);
 }
-
 function goBack(){
   stopAR();
   const c=$('cam');
@@ -475,7 +544,6 @@ function goBack(){
   on($('scr-load'),'off',false);
   phase='load';
 }
-
 function doReset(){
   Object.assign(TR,{opa:50,sz:100,px:0,py:0,rx:0,ry:0});
   for(const k of Object.keys(KEYS)){const e=$('s-'+k);if(e)e.value=TR[k];}

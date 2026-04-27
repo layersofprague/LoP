@@ -81,23 +81,45 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a18; }
 <div id="dbg">GPS: čeká… | —°</div>
 
 <script>
-// Anchor: horizontally centered, 120px from bottom
-const AX = window.innerWidth / 2;
-const AY = window.innerHeight - 120;
+const params = new URLSearchParams(location.search);
+const TARGET = {
+  num: params.get('num') || params.get('id') || '?',
+  lat: parseFloat(params.get('lat')),
+  lng: parseFloat(params.get('lng')),
+  name: params.get('name') || ''
+};
 
-// Map wrap size: screen diagonal × 1.5 so rotation never shows edge
-const diag = Math.ceil(Math.sqrt(window.innerWidth**2 + window.innerHeight**2) * 1.5);
 const wrap = document.getElementById('mapWrap');
-wrap.style.width  = diag + 'px';
-wrap.style.height = diag + 'px';
-// Center mapWrap on anchor
-wrap.style.left = (AX - diag/2) + 'px';
-wrap.style.top  = (AY - diag/2) + 'px';
+const dot  = document.getElementById('userDot');
 
-// Place user dot at anchor
-const dot = document.getElementById('userDot');
-dot.style.left = AX + 'px';
-dot.style.top  = AY + 'px';
+let AX, AY, diag;
+
+function updateAnchor() {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  AX = window.innerWidth / 2;
+  AY = isLandscape
+    ? window.innerHeight - 60   // landscape: closer to bottom edge
+    : window.innerHeight - 120; // portrait: default
+
+  // Resize mapWrap to new diagonal
+  diag = Math.ceil(Math.sqrt(window.innerWidth**2 + window.innerHeight**2) * 1.5);
+  wrap.style.width  = diag + 'px';
+  wrap.style.height = diag + 'px';
+  wrap.style.left   = (AX - diag/2) + 'px';
+  wrap.style.top    = (AY - diag/2) + 'px';
+
+  // Move user dot
+  dot.style.left = AX + 'px';
+  dot.style.top  = AY + 'px';
+
+  // Re-center map on user
+  if (typeof map !== 'undefined' && userPos) {
+    map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+    setTimeout(() => map.invalidateSize(), 50);
+  }
+}
+
+updateAnchor();
 
 // Init Leaflet inside the oversized container
 const map = L.map('map', {
@@ -111,8 +133,21 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 20,
   keepBuffer: 3
 }).addTo(map);
-map.setView([50.083, 14.42], 16);
+// Center on target if available, else Prague
+if (!isNaN(TARGET.lat)) map.setView([TARGET.lat, TARGET.lng], 16);
+else map.setView([50.083, 14.42], 16);
 [100, 400, 800].forEach(t => setTimeout(() => map.invalidateSize(), t));
+
+// Target marker
+if (!isNaN(TARGET.lat)) {
+  const n = String(TARGET.num), m = n.match(/^([A-Z]+)(\d+)$/);
+  const pinHtml = m
+    ? '<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#fff"><span style="font-size:11px;font-weight:700;line-height:1">' + m[1] + '</span><span style="font-size:7px;opacity:.8;line-height:1">' + m[2] + '</span></div>'
+    : '<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;font-weight:700;color:#fff">' + n + '</div>';
+  L.marker([TARGET.lat, TARGET.lng], {
+    icon: L.divIcon({ html: pinHtml, className: '', iconSize: [34,34], iconAnchor: [17,17] })
+  }).addTo(map);
+}
 
 let userPos = null;
 let smoothH = null;
@@ -254,6 +289,11 @@ function loop() {
 }
 loadCal();
 loop();
+window.addEventListener('resize', () => {
+  updateAnchor();
+  // Re-apply rotation with new anchor
+  if (smoothH !== null) rotateMap(smoothH);
+});
 </script>
 </body>
 </html>
