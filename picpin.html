@@ -371,13 +371,13 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
         <button id="btn-ar-mode2"
           style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;
             letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;
-            background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border-bottom:1px solid rgba(255,255,255,.06)"
-          onclick="toggleARMode()">⟳ GYRO — klepni pro 🧭 KOMPAS</button>
+            background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border-bottom:1px solid rgba(255,255,255,.06);border:1px solid rgba(16,185,129,.2)"
+          onclick="toggleARMode()">🧭 KOMPAS (výchozí) — klepni pro ⟳ GYRO</button>
 
       </div>
       <div class="br" style="margin-top:5px">
         <button class="btn bs" onclick="doReset()">RESET</button>
-        <button class="btn bp" id="btn-copy" onclick="doCopy()">KOPÍROVAT JSON</button>
+        <button class="btn bg" id="btn-copy" onclick="doCopy()">ULOŽIT JSON</button>
       </div>
     </div>
 
@@ -456,6 +456,7 @@ let accCircle=null; // GPS accuracy circle
 let userFromGPS=false; // false = manually placed
 // ── Gyro integration for AR ──
 let useGyroAR=false; // default: compass mode
+let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
@@ -881,23 +882,24 @@ function stopAR(){
 // Toggle AR mode compass ↔ gyro
 function toggleARMode(){
   useGyroAR=!useGyroAR;
-  // sync both buttons (step 2 + step 4)
   const b=$('btn-ar-mode'), b2=$('btn-ar-mode2');
   if(useGyroAR){
-    if(b){b.textContent='🧭 Kompas';b.style.color='rgba(245,158,11,.8)';}
+    // now in GYRO — red, click to go back to compass
+    if(b){b.textContent='⟳ Gyro';b.style.color='rgba(220,38,38,.8)';}
     if(b2){
-      b2.textContent='🧭 KOMPAS — klepni pro porovnání s ⟳ GYRO';
-      b2.style.background='rgba(245,158,11,.12)';
-      b2.style.color='rgba(245,158,11,.85)';
-      b2.style.borderColor='rgba(245,158,11,.25)';
+      b2.textContent='⟳ GYRO — klepni pro 🧭 KOMPAS (výchozí)';
+      b2.style.background='rgba(220,38,38,.1)';
+      b2.style.color='rgba(220,38,38,.9)';
+      b2.style.borderColor='rgba(220,38,38,.2)';
     }
   } else {
-    if(b){b.textContent='⟳ Gyro';b.style.color='rgba(16,185,129,.8)';}
+    // now in COMPASS — green, click to switch to gyro
+    if(b){b.textContent='🧭 Kompas';b.style.color='rgba(16,185,129,.8)';}
     if(b2){
-      b2.textContent='⟳ GYRO — klepni pro porovnání s 🧭 KOMPAS';
-      b2.style.background='rgba(16,185,129,.15)';
+      b2.textContent='🧭 KOMPAS (výchozí) — klepni pro ⟳ GYRO';
+      b2.style.background='rgba(16,185,129,.12)';
       b2.style.color='rgba(16,185,129,.85)';
-      b2.style.borderColor='rgba(16,185,129,.25)';
+      b2.style.borderColor='rgba(16,185,129,.2)';
     }
   }
   // restart AR with new mode (resets gyro integration from current position)
@@ -976,9 +978,22 @@ function fillAnch(){
 }
 
 async function doCopy(){
-  try{await navigator.clipboard.writeText(JSON.stringify(anchData,null,2));}catch(e){}
-  const b=$('btn-copy'); b.textContent='✓ OK'; b.className='btn bok';
-  setTimeout(()=>{b.textContent='KOPÍROVAT JSON';b.className='btn bp';},2000);
+  const json=JSON.stringify(anchData,null,2);
+  const fname=photoFileName+'.json';
+  // Try file download first (works on most Android browsers)
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=fname;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){
+    // Fallback: clipboard
+    try{await navigator.clipboard.writeText(json);}catch(e2){}
+  }
+  const b=$('btn-copy'); b.textContent='✓ ULOŽENO'; b.className='btn bok';
+  setTimeout(()=>{b.textContent='ULOŽIT JSON';b.className='btn bg';},2000);
 }
 
 function goBack(){
@@ -1001,6 +1016,8 @@ function doReset(){
 // ── FILE INPUT ─────────────────────────────────────────────────────────────
 $('file-input').addEventListener('change',function(e){
   const f=e.target.files[0]; if(!f) return;
+  // store base name without extension for JSON export
+  photoFileName = f.name.replace(/\.[^.]+$/, '') || 'picpin';
   const url=URL.createObjectURL(f);
   $('ov-photo').src=url;
   $('prev').src=url; $('prev').style.display='block';

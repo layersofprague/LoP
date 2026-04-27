@@ -142,11 +142,27 @@ loadCal();
 
 // ── SENSORS ──
 var userPos = null, smoothH = null, lastH = 0;
-var LP = 0.07; // slower smoothing = less jitter
-function lerpAngle(c, t) {
-  if (c === null) return t;
-  var d = t - c; if (d > 180) d -= 360; if (d < -180) d += 360;
-  return (c + LP * d + 360) % 360;
+
+// Circular median filter — buffer of last N raw samples
+var MEDIAN_N = 12;
+var headingBuf = [];
+
+function addHeadingSample(raw) {
+  headingBuf.push(raw);
+  if (headingBuf.length > MEDIAN_N) headingBuf.shift();
+  if (headingBuf.length < 3) { smoothH = raw; return; }
+
+  // Circular median: normalize all samples relative to first
+  var ref = headingBuf[0];
+  var norm = headingBuf.map(function(v) {
+    var d = v - ref;
+    if (d > 180) d -= 360;
+    if (d < -180) d += 360;
+    return d;
+  });
+  norm.sort(function(a, b) { return a - b; });
+  var mid = norm[Math.floor(norm.length / 2)];
+  smoothH = (ref + mid + 360) % 360;
 }
 
 var lastPanLat = null, lastPanLng = null;
@@ -190,7 +206,7 @@ function startOri() {
       // Android: alpha is relative to current screen orientation — correct it
       raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
     }
-    if (raw !== null) smoothH = lerpAngle(smoothH, (raw - yawOffset + 360) % 360);
+    if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
   }
   window.addEventListener('deviceorientationabsolute', handle, true);
   window.addEventListener('deviceorientation', handle, true);
@@ -217,7 +233,7 @@ function rotateMap(h) {
 // ── LOOP ──
 function loop() {
   var h = smoothH !== null ? smoothH : 0;
-  if (Math.abs(lastH - h) > 1.0) rotateMap(h);
+  if (Math.abs(lastH - h) > 3.0) rotateMap(h);
   if (userPos) document.getElementById('dbg').textContent = 'GPS ✓ | ' + Math.round(h) + '°';
   requestAnimationFrame(loop);
 }
