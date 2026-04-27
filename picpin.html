@@ -18,8 +18,6 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 #ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2;display:none;
   align-items:center;justify-content:center;pointer-events:none;
   transition:top .2s,bottom .2s,right .2s;}
-/* Translation wrapper — moves photo to (px+dx, py+dy) from screen center */
-#ov-pos{display:flex;align-items:center;justify-content:center;transform-origin:center center;}
 #ov.on{display:flex}
 #ov img{
   max-width:95%;max-height:95%;
@@ -254,11 +252,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 <body>
 
 <video id="cam" autoplay muted playsinline></video>
-<div id="ov">
-  <div id="ov-pos"><!-- positioned via translate(px+dx, py+dy) -->
-    <img id="ov-photo" src="" alt=""><!-- roll+scale+perspective -->
-  </div>
-</div>
+<div id="ov"><img id="ov-photo" src="" alt=""></div>
 <div id="sl"></div>
 <div id="xh"></div>
 <div id="b-anchor">● UKOTVENO</div>
@@ -418,35 +412,6 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none">
       <!-- Porovnání + konfigurace os gyra — žádné zbytečné info -->
-      <!-- Roll compensation controls -->
-      <div style="margin-top:6px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.15);border-radius:5px;padding:5px 8px">
-        <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
-          <span style="font-size:8px;color:rgba(96,165,250,.5);letter-spacing:.1em;text-transform:uppercase">⟳ ROLL</span>
-          <button id="btn-roll-toggle" onclick="toggleRoll()"
-            style="font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid rgba(96,165,250,.2);
-            background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);cursor:pointer;
-            font-family:'JetBrains Mono',monospace">OFF</button>
-          <button onclick="rollSign*=-1;$('btn-roll-sgn').textContent=rollSign>0?'+γ':'-γ'"
-            id="btn-roll-sgn"
-            style="font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid rgba(96,165,250,.2);
-            background:rgba(255,255,255,.04);color:rgba(245,158,11,.7);cursor:pointer;
-            font-family:'JetBrains Mono',monospace">+γ</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <span style="font-size:7px;color:rgba(255,255,255,.2);width:28px">gain</span>
-          <button class="sb" onclick="rollGain=Math.max(0.1,+(rollGain-0.1).toFixed(1));$('roll-gain-v').textContent=rollGain.toFixed(1)">−</button>
-          <input type="range" class="rng" min="0.1" max="3" step="0.1" value="1.0"
-            oninput="rollGain=+this.value;$('roll-gain-v').textContent=(+this.value).toFixed(1)"
-            style="flex:1">
-          <button class="sb" onclick="rollGain=Math.min(3,+(rollGain+0.1).toFixed(1));$('roll-gain-v').textContent=rollGain.toFixed(1)">+</button>
-          <span class="cv" id="roll-gain-v" style="color:rgba(96,165,250,.8)">1.0</span>
-        </div>
-        <div style="font-size:7px;color:rgba(255,255,255,.12);margin-top:3px;letter-spacing:.04em">
-          γ=<span id="dbg-gamma2" style="color:rgba(96,165,250,.6)">0.0</span>°
-          r=<span id="dbg-roll2" style="color:#fff">0.0</span>°
-        </div>
-      </div>
-
       <div style="margin-top:6px;border:1px solid rgba(255,255,255,.07);border-radius:5px;overflow:hidden">
         <!-- přepínač režimu -->
         <button id="btn-ar-mode2"
@@ -537,7 +502,7 @@ let userLL=null,bldLL=null,leafMap=null,userMark=null,bldMark=null,mapMode='user
 let accCircle=null; // GPS accuracy circle
 let userFromGPS=false; // false = manually placed
 // ── Gyro integration for AR ──
-let useGyroAR=true; // default: gyro mode
+let useGyroAR=false; // default: compass (absolute reference → photo returns to anchor)
 let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
@@ -798,7 +763,7 @@ function setPhase(p){
   if(cxh){ cxh.classList[p==='calib'?'add':'remove']('on'); drawCalibXh(); }
   on($('b-anchor'),'on',p==='anchored');
   on($('b-err'),'on',false);
-  if(p==='anchored'){useGyroAR=true;stopAR();startAR();fillAnch();}
+  if(p==='anchored'){stopAR();startAR();fillAnch();}
   else if(p==='calib'){stopAR();startCalibAR();}
   else stopAR();
   // show gyro debug bar in topbar when in calib or anchored
@@ -844,9 +809,7 @@ function applyCalibTR(dx,dy){
   const ppd=window.innerWidth/65;
   // Roll compensation in calib too — relative to calibAngles start
   img.style.opacity=calibTR.opa/100;
-  const cpos=$('ov-pos');
-  if(cpos) cpos.style.transform=`translate(${dx*ppd}px,${dy*ppd}px)`;
-  img.style.transform=`scale(${calibTR.sz/100})`;
+  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;
   img.style.transition='none';
 }
 function startCalibAR(){
@@ -1050,14 +1013,7 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    let rollVal = 0;
-    if(rollEnabled){
-      const rawRoll = ori.g - refOri.g;
-      const clamped = Math.max(-45, Math.min(45, rawRoll));
-      rollSmoothed = rollSmoothed * 0.8 + clamped * 0.2;
-      rollVal = rollSign * rollGain * rollSmoothed;
-    }
-    applyTR(dx, dy, rollVal);
+    applyTR(dx, dy, 0); // roll compensation disabled — causes more problems than solves
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
     const dg=$('dbg-gamma'), dr=$('dbg-roll');
@@ -1073,7 +1029,7 @@ function startAR(){
 function stopAR(){
   if(rafId){cancelAnimationFrame(rafId);rafId=null;}
   if(calibRafId){cancelAnimationFrame(calibRafId);calibRafId=null;}
-  const ov=$('ov'); if(ov) ov.style.transform='';
+
 }
 
 // Toggle AR mode compass ↔ gyro
