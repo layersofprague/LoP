@@ -3,76 +3,44 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Mapa test</title>
+<title>Kompas · LoP</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a18; }
-
-/* Clip wrapper — screen size, hides the oversized map edges */
-#clip {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  overflow: hidden;
-}
-
-/* Map container — bigger than screen so rotated corners are always covered.
-   Centered on anchor (50%, ANCHOR_Y px from top).
-   Size = screen diagonal × 1.1 to be safe. Set in JS. */
-#mapWrap {
-  position: absolute;
-  /* centered on anchor — adjusted in JS */
-  transform-origin: 50% 50%;
-  background: #e8e4dc;
-}
-#map {
-  width: 100%;
-  height: 100%;
-}
-
-/* User dot — in #clip, outside #mapWrap, always at anchor */
+html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
+#clip { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+#mapWrap { position: absolute; transform-origin: 50% 50%; background: #e8e4dc; }
+#map { width: 100%; height: 100%; }
 #userDot {
-  position: absolute;
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: #b04020;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 3px rgba(176,64,32,.3), 0 2px 8px rgba(0,0,0,.4);
-  z-index: 100;
-  pointer-events: none;
+  position: absolute; z-index: 100; pointer-events: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #b04020; border: 3px solid #fff;
+  box-shadow: 0 0 0 3px rgba(176,64,32,.25), 0 2px 8px rgba(0,0,0,.4);
   transform: translate(-50%, -50%);
 }
-
+#calBtn {
+  position: absolute; bottom: 24px; right: 16px; z-index: 200;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(26,24,20,.65); border: 1px solid rgba(255,255,255,.25);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  transition: background .2s;
+}
 #dbg {
-  position: fixed;
-  bottom: 20px; left: 50%;
-  transform: translateX(-50%);
-  z-index: 200;
-  background: rgba(26,24,20,.75); color: #fff;
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 200; background: rgba(26,24,20,.75); color: #fff;
   font-family: monospace; font-size: 13px;
-  padding: 8px 16px; border-radius: 8px;
-  white-space: nowrap;
+  padding: 8px 16px; border-radius: 8px; white-space: nowrap;
 }
 </style>
 </head>
 <body>
 <div id="clip">
-  <div id="mapWrap">
-    <div id="map"></div>
-  </div>
+  <div id="mapWrap"><div id="map"></div></div>
   <div id="userDot"></div>
-  <!-- Cal file input -->
   <input type="file" id="calFile" accept=".json" style="display:none" onchange="importCal(this)"/>
-  <!-- Cal toggle — tap = toggle, long press = import -->
-  <button id="calBtn" ontouchstart="calTouchStart()" ontouchend="calTouchEnd()" onclick="toggleCal()" style="
-    position:absolute;bottom:24px;right:16px;z-index:200;
-    width:40px;height:40px;border-radius:50%;
-    background:rgba(26,24,20,.65);border:1px solid rgba(255,255,255,.25);
-    color:#fff;display:flex;align-items:center;justify-content:center;
-    cursor:pointer;transition:background .2s,border-color .2s;
-    box-shadow:0 2px 8px rgba(0,0,0,.3);
-  ">
+  <button id="calBtn" onclick="toggleCal()" ontouchstart="calTouchStart()" ontouchend="calTouchEnd()">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>
     </svg>
@@ -81,6 +49,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a18; }
 <div id="dbg">GPS: čeká… | —°</div>
 
 <script>
+// ── PARAMS ──
 const params = new URLSearchParams(location.search);
 const TARGET = {
   num: params.get('num') || params.get('id') || '?',
@@ -89,59 +58,42 @@ const TARGET = {
   name: params.get('name') || ''
 };
 
+// ── ANCHOR ──
 const wrap = document.getElementById('mapWrap');
 const dot  = document.getElementById('userDot');
+let AX = 0, AY = 0;
 
-let AX, AY, diag;
-
-function updateAnchor() {
-  const isLandscape = window.innerWidth > window.innerHeight;
+function setAnchor() {
+  const landscape = window.innerWidth > window.innerHeight;
   AX = window.innerWidth / 2;
-  AY = isLandscape
-    ? window.innerHeight - 60   // landscape: closer to bottom edge
-    : window.innerHeight - 120; // portrait: default
+  AY = landscape ? window.innerHeight - 60 : window.innerHeight - 120;
 
-  // Resize mapWrap to new diagonal
-  diag = Math.ceil(Math.sqrt(window.innerWidth**2 + window.innerHeight**2) * 1.5);
-  wrap.style.width  = diag + 'px';
-  wrap.style.height = diag + 'px';
-  wrap.style.left   = (AX - diag/2) + 'px';
-  wrap.style.top    = (AY - diag/2) + 'px';
+  const d = Math.ceil(Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight) * 1.5);
+  wrap.style.width  = d + 'px';
+  wrap.style.height = d + 'px';
+  wrap.style.left   = (AX - d / 2) + 'px';
+  wrap.style.top    = (AY - d / 2) + 'px';
 
-  // Move user dot
   dot.style.left = AX + 'px';
   dot.style.top  = AY + 'px';
-
-  // Re-center map on user
-  if (typeof map !== 'undefined' && userPos) {
-    map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
-    setTimeout(() => map.invalidateSize(), 50);
-  }
 }
+setAnchor(); // run before Leaflet init so #mapWrap has dimensions
 
-updateAnchor();
-
-// Init Leaflet inside the oversized container
-const map = L.map('map', {
-  zoomControl: false,
-  attributionControl: false,
-  touchZoom: true,
-  dragging: true
-});
+// ── MAP ──
+var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: true });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  subdomains: 'abcd',
-  maxZoom: 20,
-  keepBuffer: 3
+  subdomains: 'abcd', maxZoom: 20, keepBuffer: 4
 }).addTo(map);
-// Center on target if available, else Prague
-if (!isNaN(TARGET.lat)) map.setView([TARGET.lat, TARGET.lng], 16);
-else map.setView([50.083, 14.42], 16);
-[100, 400, 800].forEach(t => setTimeout(() => map.invalidateSize(), t));
 
-// Target marker
+// Center: target or Prague
+var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.42];
+map.setView(initCenter, 16);
+[100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
+
+// Target pin
 if (!isNaN(TARGET.lat)) {
-  const n = String(TARGET.num), m = n.match(/^([A-Z]+)(\d+)$/);
-  const pinHtml = m
+  var n = String(TARGET.num), m = n.match(/^([A-Z]+)(\d+)$/);
+  var pinHtml = m
     ? '<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#fff"><span style="font-size:11px;font-weight:700;line-height:1">' + m[1] + '</span><span style="font-size:7px;opacity:.8;line-height:1">' + m[2] + '</span></div>'
     : '<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;font-weight:700;color:#fff">' + n + '</div>';
   L.marker([TARGET.lat, TARGET.lng], {
@@ -149,133 +101,70 @@ if (!isNaN(TARGET.lat)) {
   }).addTo(map);
 }
 
-// Target from URL
-const params = new URLSearchParams(location.search);
-const TARGET = {
-  num: params.get('num') || params.get('id') || '?',
-  lat: parseFloat(params.get('lat')),
-  lng: parseFloat(params.get('lng')),
-};
-if (!isNaN(TARGET.lat)) {
-  map.setView([TARGET.lat, TARGET.lng], 16);
-  const n = String(TARGET.num), m = n.match(/^([A-Z]+)(\d+)$/);
-  const ph = m
-    ? '<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#fff"><span style="font-size:11px;font-weight:700;line-height:1">' + m[1] + '</span><span style="font-size:7px;opacity:.8;line-height:1">' + m[2] + '</span></div>'
-    : '<div style="width:34px;height:34px;border-radius:50%;background:#1a1a18;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;font-weight:700;color:#fff">' + n + '</div>';
-  L.marker([TARGET.lat, TARGET.lng], {
-    icon: L.divIcon({ html: ph, className: '', iconSize: [34,34], iconAnchor: [17,17] })
-  }).addTo(map);
-}
-
-let userPos = null;
-let smoothH = null;
-let lastH   = 0;
-const LP = 0.1;
-
 // ── CALIBRATION ──
-let yawOffset = 0;
-let calEnabled = false;
-
+var yawOffset = 0, calEnabled = false;
+function loadCal() {
+  try {
+    var disabled = localStorage.getItem('lop_cal_disabled') === '1';
+    var cal = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null');
+    if (cal && !disabled) { yawOffset = (cal.offsets && cal.offsets.yaw) || 0; calEnabled = true; }
+    else { yawOffset = 0; calEnabled = false; }
+  } catch(e) { yawOffset = 0; calEnabled = false; }
+  document.getElementById('calBtn').style.background = calEnabled ? '#3d7a4a' : 'rgba(26,24,20,.65)';
+}
+function toggleCal() {
+  var d = localStorage.getItem('lop_cal_disabled') === '1';
+  if (d) localStorage.removeItem('lop_cal_disabled'); else localStorage.setItem('lop_cal_disabled', '1');
+  loadCal();
+}
 function importCal(input) {
-  const file = input.files[0]; if (!file) return;
-  const r = new FileReader();
-  r.onload = ev => {
+  var file = input.files[0]; if (!file) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
     try {
-      const cal = JSON.parse(ev.target.result);
+      var cal = JSON.parse(ev.target.result);
       if (!cal.offsets) throw new Error('Chybí offsets');
       localStorage.setItem('lop_sensor_calibration', JSON.stringify(cal));
       localStorage.removeItem('lop_cal_disabled');
       loadCal();
-      // Flash confirm
-      const btn = document.getElementById('calBtn');
+      var btn = document.getElementById('calBtn');
       btn.style.background = '#b8922a';
-      setTimeout(() => updateCalBtn(), 800);
+      setTimeout(loadCal, 800);
     } catch(e) { alert('Chyba: ' + e.message); }
     input.value = '';
   };
   r.readAsText(file);
 }
+var calTimer = null;
+function calTouchStart() { calTimer = setTimeout(function(){ calTimer = null; document.getElementById('calFile').click(); }, 600); }
+function calTouchEnd() { if (calTimer) { clearTimeout(calTimer); calTimer = null; } }
+loadCal();
 
-let calPressTimer = null;
-function calTouchStart() {
-  calPressTimer = setTimeout(() => {
-    calPressTimer = null;
-    document.getElementById('calFile').click();
-  }, 600);
-}
-function calTouchEnd() {
-  if (calPressTimer) { clearTimeout(calPressTimer); calPressTimer = null; }
-}
-
-function loadCal() {
-  try {
-    const disabled = localStorage.getItem('lop_cal_disabled') === '1';
-    const cal = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null');
-    if (cal && !disabled) {
-      yawOffset = cal.offsets?.yaw || 0;
-      calEnabled = true;
-    } else {
-      yawOffset = 0;
-      calEnabled = false;
-    }
-  } catch(e) { yawOffset = 0; calEnabled = false; }
-  updateCalBtn();
-}
-
-function toggleCal() {
-  const disabled = localStorage.getItem('lop_cal_disabled') === '1';
-  if (disabled) localStorage.removeItem('lop_cal_disabled');
-  else localStorage.setItem('lop_cal_disabled', '1');
-  loadCal();
-}
-
-function updateCalBtn() {
-  const btn = document.getElementById('calBtn');
-  if (!btn) return;
-  const hasCal = !!JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null');
-  btn.style.background = calEnabled ? '#3d7a4a' : 'rgba(26,24,20,.65)';
-  btn.style.borderColor = calEnabled ? '#3d7a4a' : 'rgba(255,255,255,.25)';
-  btn.title = calEnabled ? 'Kalibrace zapnuta — podrž pro import' : (hasCal ? 'Kalibrace vypnuta — klikni pro zapnutí' : 'Podrž pro import kalibrace');
-}
-
+// ── SENSORS ──
+var userPos = null, smoothH = null, lastH = 0;
+var LP = 0.1;
 function lerpAngle(c, t) {
   if (c === null) return t;
-  let d = t - c; if (d > 180) d -= 360; if (d < -180) d += 360;
+  var d = t - c; if (d > 180) d -= 360; if (d < -180) d += 360;
   return (c + LP * d + 360) % 360;
 }
 
-// mapWrap is centered on anchor, so Leaflet map center = anchor.
-// To show user at anchor: simply center map on user.
-function keepUserAtAnchor() {
-  if (!userPos) return;
-  map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
-}
-
-// Rotate mapWrap around anchor
-function rotateMap(h) {
-  // transformOrigin is center of mapWrap (50% 50%)
-  // We want rotation around AX,AY on screen
-  // Since mapWrap is centered on AX,AY, transform-origin: 50% 50% = AX,AY. Perfect.
-  wrap.style.transform = 'rotate(' + (-h) + 'deg)';
-  lastH = h;
-}
-
-// GPS
 navigator.geolocation && navigator.geolocation.watchPosition(
-  pos => {
+  function(pos) {
     userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    keepUserAtAnchor();
-    document.getElementById('dbg').textContent =
-      'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
+    map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+    document.getElementById('dbg').textContent = 'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
   },
-  err => { document.getElementById('dbg').textContent = 'GPS chyba ' + err.code; },
+  function(err) {
+    var m = { 1: 'Poloha blokována', 2: 'Nelze určit', 3: 'Timeout' };
+    document.getElementById('dbg').textContent = 'GPS: ' + (m[err.code] || 'chyba');
+  },
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
 
-// Orientation
 function startOri() {
   function handle(e) {
-    let raw = null;
+    var raw = null;
     if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
     else if (e.alpha !== null) raw = (360 - e.alpha) % 360;
     if (raw !== null) smoothH = lerpAngle(smoothH, (raw - yawOffset + 360) % 360);
@@ -283,34 +172,39 @@ function startOri() {
   window.addEventListener('deviceorientationabsolute', handle, true);
   window.addEventListener('deviceorientation', handle, true);
 }
-if (typeof DeviceOrientationEvent !== 'undefined' &&
-    typeof DeviceOrientationEvent.requestPermission === 'function') {
+if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
   document.addEventListener('touchstart', function u() {
-    DeviceOrientationEvent.requestPermission()
-      .then(s => { if (s === 'granted') startOri(); }).catch(() => startOri());
+    DeviceOrientationEvent.requestPermission().then(function(s){ if (s==='granted') startOri(); }).catch(startOri);
     document.removeEventListener('touchstart', u);
   }, { once: true });
 } else { startOri(); }
 
-// Loop
+// ── ROTATION ──
+function rotateMap(h) {
+  wrap.style.transform = 'rotate(' + (-h) + 'deg)';
+  lastH = h;
+}
+
+// ── LOOP ──
 function loop() {
-  const h = smoothH !== null ? smoothH : 0;
-  if (Math.abs(lastH - h) > 0.3) {
-    rotateMap(h);
-    // No setView here — rotation is pure CSS, map center stays on user
-  }
-  if (userPos) {
-    document.getElementById('dbg').textContent =
-      'GPS ✓ | ' + Math.round(h) + '°';
-  }
+  var h = smoothH !== null ? smoothH : 0;
+  if (Math.abs(lastH - h) > 0.3) rotateMap(h);
+  if (userPos) document.getElementById('dbg').textContent = 'GPS ✓ | ' + Math.round(h) + '°';
   requestAnimationFrame(loop);
 }
-loadCal();
 loop();
-window.addEventListener('resize', () => {
-  updateAnchor();
-  // Re-apply rotation with new anchor
-  if (smoothH !== null) rotateMap(smoothH);
+
+// ── RESIZE ──
+window.addEventListener('resize', function() {
+  // Wait for browser to finish rotating before reading new dimensions
+  requestAnimationFrame(function() {
+    setAnchor();
+    rotateMap(smoothH !== null ? smoothH : 0);
+    // Re-center on user with new anchor
+    if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+    setTimeout(function() { map.invalidateSize(); }, 200);
+    setTimeout(function() { map.invalidateSize(); }, 600);
+  });
 });
 </script>
 </body>
