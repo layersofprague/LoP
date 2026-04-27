@@ -184,6 +184,13 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
   color:rgba(220,38,38,.85)}
 #dst-val.ok{color:rgba(16,185,129,.9)}
 
+/* ── AXIS SELECTOR BUTTONS ── */
+.ax-btn{font-size:8px;padding:2px 6px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);
+  border-radius:3px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .1s}
+.ax-btn.on{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:rgba(239,68,68,.9)}
+.ax-btn:active{background:rgba(255,255,255,.12)}
+
 /* ── MAP OVERLAY — fullscreen ── */
 #map-ov{position:fixed;inset:0;z-index:15;display:none;flex-direction:column}
 #map-ov.on{display:flex}
@@ -312,14 +319,40 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none">
       <div class="db" id="anch-db">—</div>
-      <!-- Compare button — přepíná režim AR přímo při sledování -->
-      <button id="btn-ar-mode2"
-        style="width:100%;margin-top:6px;padding:8px;
-          font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.06em;
-          cursor:pointer;border-radius:4px;border:none;transition:all .15s;
-          background:rgba(16,185,129,.15);color:rgba(16,185,129,.85);
-          border:1px solid rgba(16,185,129,.25)"
-        onclick="toggleARMode()">⟳ GYRO — klepni pro porovnání s 🧭 KOMPAS</button>
+      <!-- Porovnání + konfigurace os gyra -->
+      <div style="margin-top:6px;border:1px solid rgba(255,255,255,.07);border-radius:5px;overflow:hidden">
+        <!-- přepínač režimu -->
+        <button id="btn-ar-mode2"
+          style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;
+            letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;
+            background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border-bottom:1px solid rgba(255,255,255,.06)"
+          onclick="toggleARMode()">⟳ GYRO — klepni pro 🧭 KOMPAS</button>
+        <!-- konfigurace os — viditelná jen v gyro režimu -->
+        <div id="gyro-cfg" style="padding:6px 8px;display:block">
+          <div style="font-size:7px;letter-spacing:.12em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:4px">
+            Konfigurace os gyra — otočte a sledujte, která osa reaguje
+          </div>
+          <!-- H axis -->
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+            <span style="font-size:8px;color:rgba(255,255,255,.25);width:24px">H:</span>
+            <button class="ax-btn" id="hax-a" onclick="setGyroAxis('h','a')">rα</button>
+            <button class="ax-btn" id="hax-b" onclick="setGyroAxis('h','b')">rβ</button>
+            <button class="ax-btn on" id="hax-g" onclick="setGyroAxis('h','g')">rγ</button>
+            <button class="ax-btn" id="hsgn" onclick="flipSign('h')" style="margin-left:4px;color:rgba(245,158,11,.7)">+</button>
+          </div>
+          <!-- V axis -->
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:8px;color:rgba(255,255,255,.25);width:24px">V:</span>
+            <button class="ax-btn" id="vax-a" onclick="setGyroAxis('v','a')">rα</button>
+            <button class="ax-btn on" id="vax-b" onclick="setGyroAxis('v','b')">rβ</button>
+            <button class="ax-btn" id="vax-g" onclick="setGyroAxis('v','g')">rγ</button>
+            <button class="ax-btn" id="vsgn" onclick="flipSign('v')" style="margin-left:4px;color:rgba(245,158,11,.7)">−</button>
+          </div>
+          <div style="font-size:7px;color:rgba(255,255,255,.15);margin-top:4px;letter-spacing:.05em">
+            rα=rotace Z (roll) · rβ=rotace X (náklon) · rγ=rotace Y (pan)
+          </div>
+        </div>
+      </div>
       <div class="br" style="margin-top:5px">
         <button class="btn bs" onclick="doReset()">RESET</button>
         <button class="btn bp" id="btn-copy" onclick="doCopy()">KOPÍROVAT JSON</button>
@@ -400,10 +433,15 @@ let userLL=null,bldLL=null,leafMap=null,userMark=null,bldMark=null,mapMode='user
 let accCircle=null; // GPS accuracy circle
 let userFromGPS=false; // false = manually placed
 // ── Gyro integration for AR ──
-let useGyroAR=false; // toggle: false=compass(alpha), true=gyro integration
-let gyroAngles={x:0,y:0}; // integrated from FIX point
+let useGyroAR=false;
+let gyroAngles={x:0,y:0};
 let gyroLastT=null;
-let yawCalibOffset=0; // loaded from calibration JSON
+let yawCalibOffset=0;
+// Axis config — user-adjustable:
+// hAxis/vAxis: 'a'=alpha, 'b'=beta, 'g'=gamma
+// hSign/vSign: +1 or -1
+let gyroHAxis='g', gyroVAxis='b', gyroHSign=1, gyroVSign=-1;
+let rawRate={a:0,b:0,g:0}; // live debug values
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
 
@@ -454,12 +492,22 @@ window.addEventListener('orientationchange',()=>setTimeout(updateLayout,100));
 //   beta  = rotation around X (short axis)= UP/DOWN tilt    ← vertical
 //   alpha = rotation around Z (screen axis)= roll           ← irrelevant for AR
 window.addEventListener('devicemotion', e=>{
-  if(!e.rotationRate || !useGyroAR) return;
+  if(!e.rotationRate) return;
+  const r=e.rotationRate;
+  rawRate={a:r.alpha||0, b:r.beta||0, g:r.gamma||0};
+  // update debug display
+  const da=$('dbg-a'),db=$('dbg-b'),dg=$('dbg-g');
+  if(da) da.textContent=rawRate.a.toFixed(1);
+  if(db) db.textContent=rawRate.b.toFixed(1);
+  if(dg) dg.textContent=rawRate.g.toFixed(1);
+  if(!useGyroAR) return;
   const now=performance.now();
   if(gyroLastT!==null && phase==='anchored'){
     const dt=(now-gyroLastT)/1000;
-    gyroAngles.x += (e.rotationRate.gamma||0)*dt; // horizontal pan = gamma axis
-    gyroAngles.y += (e.rotationRate.beta ||0)*dt; // vertical tilt  = beta axis
+    const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
+    const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
+    gyroAngles.x += hVal * dt;
+    gyroAngles.y += vVal * dt;
   }
   gyroLastT=now;
 },true);
@@ -700,10 +748,8 @@ function startAR(){
   function loop(){
     let dx,dy;
     if(useGyroAR){
-      // GYRO mode: integrate rotationRate.alpha (yaw) and .beta (pitch)
-      // Most reliable for horizontal tracking — no magnetometer dependency
-      dx = -gyroAngles.x * ppd;
-      dy =  gyroAngles.y * ppd;
+      dx = gyroHSign * gyroAngles.x * ppd;
+      dy = gyroVSign * gyroAngles.y * ppd;
     } else {
       // COMPASS mode: alpha = compass heading (portrait pan)
       // At high beta tilt (phone forward), gamma bleeds into horizontal — add correction
@@ -746,6 +792,36 @@ function toggleARMode(){
     }
   }
   // restart AR with new mode (resets gyro integration from current position)
+  if(phase==='anchored'){stopAR();startAR();}
+  // show/hide gyro config panel and debug overlay
+  const cfg=$('gyro-cfg'), dbg=$('gyro-dbg');
+  if(cfg) cfg.style.display = useGyroAR ? 'block' : 'none';
+  if(dbg) dbg.style.display = (useGyroAR && phase==='anchored') ? 'block' : 'none';
+}
+
+function setGyroAxis(hv, axis){
+  if(hv==='h'){
+    gyroHAxis=axis;
+    ['a','b','g'].forEach(a=>{ const e=$('hax-'+a); if(e) e.className='ax-btn'+(a===axis?' on':''); });
+    const d=$('dbg-haxis'); if(d) d.textContent='r'+axis;
+  } else {
+    gyroVAxis=axis;
+    ['a','b','g'].forEach(a=>{ const e=$('vax-'+a); if(e) e.className='ax-btn'+(a===axis?' on':''); });
+    const d=$('dbg-vaxis'); if(d) d.textContent='r'+axis;
+  }
+  if(phase==='anchored'){stopAR();startAR();}
+}
+
+function flipSign(hv){
+  if(hv==='h'){
+    gyroHSign *= -1;
+    const b=$('hsgn'); if(b){ b.textContent=gyroHSign>0?'+':'−'; }
+    const d=$('dbg-hsign'); if(d) d.textContent=gyroHSign>0?'+':'−';
+  } else {
+    gyroVSign *= -1;
+    const b=$('vsgn'); if(b){ b.textContent=gyroVSign>0?'+':'−'; }
+    const d=$('dbg-vsign'); if(d) d.textContent=gyroVSign>0?'+':'−';
+  }
   if(phase==='anchored'){stopAR();startAR();}
 }
 
@@ -829,5 +905,17 @@ $('file-input').addEventListener('change',function(e){
   $('btn-start').style.display='block';
 });
 </script>
+<!-- GYRO DEBUG overlay -->
+<div id="gyro-dbg" style="position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
+  z-index:50;display:none;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;padding:6px 10px;font-size:9px;font-family:'JetBrains Mono',monospace;
+  color:rgba(255,255,255,.7);text-align:center;pointer-events:none;white-space:nowrap">
+  rα <span id="dbg-a" style="color:#F59E0B">0.0</span>
+  rβ <span id="dbg-b" style="color:#10B981">0.0</span>
+  rγ <span id="dbg-g" style="color:#60a5fa">0.0</span>
+  &nbsp;|&nbsp;
+  H:<span id="dbg-haxis" style="color:#EF4444">γ</span><span id="dbg-hsign" style="color:#EF4444">+</span>
+  V:<span id="dbg-vaxis" style="color:#EF4444">β</span><span id="dbg-vsign" style="color:#EF4444">-</span>
+</div>
 </body>
 </html>
