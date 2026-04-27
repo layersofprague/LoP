@@ -142,17 +142,24 @@ loadCal();
 
 // ── SENSORS ──
 var userPos = null, smoothH = null, lastH = 0;
-var LP = 0.1;
+var LP = 0.07; // slower smoothing = less jitter
 function lerpAngle(c, t) {
   if (c === null) return t;
   var d = t - c; if (d > 180) d -= 360; if (d < -180) d += 360;
   return (c + LP * d + 360) % 360;
 }
 
+var lastPanLat = null, lastPanLng = null;
 navigator.geolocation && navigator.geolocation.watchPosition(
   function(pos) {
     userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+    // Only pan if moved more than ~3m to suppress GPS noise
+    var dlat = Math.abs(userPos.lat - lastPanLat);
+    var dlng = Math.abs(userPos.lng - lastPanLng);
+    if (lastPanLat === null || dlat > 0.00003 || dlng > 0.00003) {
+      lastPanLat = userPos.lat; lastPanLng = userPos.lng;
+      map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+    }
     document.getElementById('dbg').textContent = 'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
   },
   function(err) {
@@ -210,7 +217,7 @@ function rotateMap(h) {
 // ── LOOP ──
 function loop() {
   var h = smoothH !== null ? smoothH : 0;
-  if (Math.abs(lastH - h) > 0.3) rotateMap(h);
+  if (Math.abs(lastH - h) > 1.0) rotateMap(h);
   if (userPos) document.getElementById('dbg').textContent = 'GPS ✓ | ' + Math.round(h) + '°';
   requestAnimationFrame(loop);
 }

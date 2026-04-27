@@ -81,11 +81,13 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 .plbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;
   color:rgba(220,38,38,.9);
   text-shadow:0 0 8px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.9)}
-.dots{display:flex;gap:5px;align-items:center}
-.dot{width:6px;height:6px;border-radius:50%;
-  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);transition:all .3s}
-.dot.done  {background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.4)}
-.dot.active{background:#EF4444;border-color:#EF4444;box-shadow:0 0 5px rgba(239,68,68,.6)}
+.dots{display:flex;align-items:center}
+/* step counter replaces dots */
+#step-counter{
+  font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.08em;
+  color:rgba(220,38,38,.8);
+  text-shadow:0 0 8px rgba(0,0,0,.8);
+}
 /* gyro badge */
 #gyro-tb{display:flex;align-items:center;gap:3px;font-size:8px;letter-spacing:.08em;
   padding:2px 5px;border-radius:3px;
@@ -267,10 +269,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
     </div>
     <div style="display:flex;align-items:center;gap:6px">
       <div id="gyro-tb" onclick="reqGyro()"><div class="gdot"></div>GYRO</div>
-      <div class="dots">
-        <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
-        <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
-      </div>
+      <div class="dots"><span id="step-counter">1/4</span></div>
     </div>
   </div>
   <!-- Debug gyro row — shown only in calib + anchored phases -->
@@ -332,7 +331,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
       <div class="br">
         <button class="btn bs" onclick="goBack()">←</button>
         <button class="btn bs" onclick="resetCalibView()" style="color:rgba(245,158,11,.7)">⟳ RESET POHLEDU</button>
-        <button class="btn bg" onclick="setPhase('align')">ZAROVNAT →</button>
+        <button class="btn bg" onclick="calibDone=true;setPhase('align')">ZAROVNAT →</button>
       </div>
     </div>
 
@@ -456,14 +455,13 @@ let userLL=null,bldLL=null,leafMap=null,userMark=null,bldMark=null,mapMode='user
 let accCircle=null; // GPS accuracy circle
 let userFromGPS=false; // false = manually placed
 // ── Gyro integration for AR ──
-let useGyroAR=false;
+let useGyroAR=false; // default: compass mode
+let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
 let yawCalibOffset=0;
-// Axis config — user-adjustable:
-// hAxis/vAxis: 'a'=alpha, 'b'=beta, 'g'=gamma
-// hSign/vSign: +1 or -1
-let gyroHAxis='g', gyroVAxis='b', gyroHSign=1, gyroVSign=-1;
+// Axis defaults: H=rβ+, V=rα+  (user confirmed working)
+let gyroHAxis='b', gyroVAxis='a', gyroHSign=1, gyroVSign=1;
 let rawRate={a:0,b:0,g:0}; // live debug values
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
@@ -581,13 +579,11 @@ const PCLR ={calib:'rgba(245,158,11,.9)',align:'rgba(220,38,38,.9)',offset:'rgba
 // detect orientation for auto-axis switch
 function isLandscape(){ return window.innerWidth > window.innerHeight; }
 function applyDefaultAxes(){
-  if(isLandscape()){
-    // landscape: H=rα+, V=rβ-
-    gyroHAxis='a'; gyroHSign=1;
-    gyroVAxis='b'; gyroVSign=-1;
-  } else {
-    // portrait: H=rα+, V=rα+
-    gyroHAxis='a'; gyroHSign=1;
+  // Only set defaults if user hasn't changed axes in calib step
+  // (applyDefaultAxes is called on phase change but NOT on resize/orientation
+  //  after calib has been done — preserve user's calibrated choice)
+  if(!calibDone){
+    gyroHAxis='b'; gyroHSign=1;
     gyroVAxis='a'; gyroVSign=1;
   }
   syncAxisUI();
@@ -609,15 +605,14 @@ function syncAxisUI(){
   const olbl=$('orient-lbl');
   if(olbl) olbl.textContent=isLandscape()?'⬛ LAND':'🟦 PORT';
 }
-window.addEventListener('resize',()=>{ applyDefaultAxes(); setTimeout(updateLayout,80); });
-window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ applyDefaultAxes(); updateLayout(); },120); });
+window.addEventListener('resize',()=>{ if(!calibDone) applyDefaultAxes(); setTimeout(updateLayout,80); });
+window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ if(!calibDone) applyDefaultAxes(); updateLayout(); },120); });
 
 function setPhase(p){
   phase=p;
   const lbl=$('plbl');
   lbl.textContent=PLBLS[p]; lbl.style.color=PCLR[p];
-  for(let i=0;i<4;i++){const d=$('d'+i);
-    d.className='dot'+(i<PIDX[p]?' done':'')+(i===PIDX[p]?' active':'');}
+  const sc=$('step-counter'); if(sc) sc.textContent=(PIDX[p]+1)+'/4';
   collapsed=false; $('pbody').style.display='block'; $('cbtn').textContent='▲';
   on($('panel'),'on',true);
   $('pc').style.display   =p==='calib'   ?'block':'none';
@@ -840,12 +835,18 @@ function updOffsetDst(){
   }
 }
 
-function confirmMap(){on($('map-ov'),'on',false); updOffsetDst();}
-function closeMap()  {on($('map-ov'),'on',false); updOffsetDst();}
+function confirmMap(){
+  on($('map-ov'),'on',false);
+  updOffsetDst();
+  // auto-advance to step 4 if distance is set
+  if(dst>0) setTimeout(doAnchor, 200);
+}
+function closeMap(){on($('map-ov'),'on',false); updOffsetDst();}
 
 // ── AR ────────────────────────────────────────────────────────────────────
 function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
 function startAR(){
+  // Uses gyroHAxis/gyroVAxis/gyroHSign/gyroVSign — same vars set in calib step ✓
   if(!gyroOk||!refOri) return;
   // reset gyro integration from current anchor point
   gyroAngles={x:0,y:0}; gyroLastT=null;
