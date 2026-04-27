@@ -17,7 +17,9 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 /* ── OVERLAY IMAGE ── */
 #ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2;display:none;
   align-items:center;justify-content:center;pointer-events:none;
-  transition:top .2s,bottom .2s,right .2s}
+  transition:top .2s,bottom .2s,right .2s;
+  will-change:transform;
+  transform-origin:center center;}
 #ov.on{display:flex}
 #ov img{
   max-width:95%;max-height:95%;transform-origin:center center;
@@ -575,7 +577,11 @@ window.addEventListener('devicemotion', e=>{
   }
   const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
   if(dt>0 && phase==='anchored'){
-    rollIntegrated += rawRate.a * dt;
+    // Cross-axis correction: tilting around X (H/beta) leaks into rotationRate.alpha
+    // Correction term: rawRate.b * sin(gamma_rad) removes this coupling
+    const g_rad = ori.g * Math.PI / 180;
+    const trueRoll = rawRate.a - rawRate.b * Math.sin(g_rad);
+    rollIntegrated += trueRoll * dt;
   }
   if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
