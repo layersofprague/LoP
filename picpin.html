@@ -767,11 +767,14 @@ function setPhase(p){
 // ── TRANSFORM ─────────────────────────────────────────────────────────────
 function applyTR(dx,dy,rollDeg){
   const img=$('ov-photo');
-  const roll = rollDeg||0;
-  // Roll compensation: counter-rotate to keep photo upright in world space
-  // Order: translate → roll-compensate → scale → perspective tilts
+  const ov=$('ov');
+  const roll = (rollDeg !== undefined && !isNaN(rollDeg)) ? rollDeg : 0;
+  // Roll on wrapper — isolated from position/scale transforms
+  ov.style.transform = `rotateZ(${-roll}deg)`;
+  ov.style.transition = dx!==undefined ? 'transform 60ms linear' : 'none';
+  // Position + scale + manual tilts on img
   img.style.opacity=TR.opa/100;
-  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) rotateZ(${-roll}deg) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
+  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
   img.style.transition=dx!==undefined?'transform 60ms linear':'none';
 }
 
@@ -999,20 +1002,12 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll compensation via rotation matrix — immune to beta (forward tilt) variation
-    // atan2(sin(g), cos(g)*sin(b)) extracts true screen roll from full orientation
-    const toR = Math.PI / 180;
-    const rollCur = Math.atan2(
-      Math.sin(ori.g * toR),
-      Math.cos(ori.g * toR) * Math.sin(ori.b * toR)
-    ) / toR;
-    const rollRef = Math.atan2(
-      Math.sin(refOri.g * toR),
-      Math.cos(refOri.g * toR) * Math.sin(refOri.b * toR)
-    ) / toR;
-    applyTR(dx, dy, rollCur - rollRef);
+    // Roll: simple gamma diff — gravity-stabilised, no drift, no atan2 complexity
+    const roll = ori.g - refOri.g;
+    applyTR(dx, dy, roll);
     const el=$('ar-d');
-    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+' '+dy.toFixed(0)+' r'+rollIntegrated.toFixed(0);
+    const roll_disp = ori.g - refOri.g;
+    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' γ'+ori.g.toFixed(1)+' r'+roll_disp.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
@@ -1020,6 +1015,7 @@ function startAR(){
 function stopAR(){
   if(rafId){cancelAnimationFrame(rafId);rafId=null;}
   if(calibRafId){cancelAnimationFrame(calibRafId);calibRafId=null;}
+  const ov=$('ov'); if(ov) ov.style.transform='';
 }
 
 // Toggle AR mode compass ↔ gyro
