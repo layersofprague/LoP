@@ -408,6 +408,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none">
+      <div class="pi">
       <!-- Porovnání + konfigurace os gyra — žádné zbytečné info -->
       <div style="margin-top:6px;border:1px solid rgba(255,255,255,.07);border-radius:5px;overflow:hidden">
         <!-- přepínač režimu -->
@@ -437,6 +438,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
         <button class="btn bs" onclick="doReset()">RESET</button>
         <button class="btn bg" id="btn-copy" onclick="doCopy()">ULOŽIT JSON</button>
       </div>
+      </div><!-- /pi -->
     </div>
 
   </div>
@@ -763,6 +765,7 @@ function setPhase(p){
   const sc=$('step-counter'); if(sc) sc.textContent=(PIDX[p]+1)+'/4';
   collapsed=false; $('pbody').style.display='block'; $('cbtn').textContent='▲';
   on($('panel'),'on',true);
+  $('panel').style.maxHeight=p==='anchored'?'70vh':'52vh';
   $('pc').style.display   =p==='calib'   ?'block':'none';
   $('pa').style.display   =p==='align'   ?'block':'none';
   $('po').style.display   =p==='offset'  ?'block':'none';
