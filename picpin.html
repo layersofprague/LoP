@@ -655,16 +655,15 @@ function drawCalibXh(){
   const svg=$('calib-xh'); if(!svg||!svg.classList.contains('on')) return;
   const W=window.innerWidth, H=window.innerHeight;
   const cx=W/2, cy=H/2;
-  const R=ori.g||0; // gravity-referenced roll — stable, shows actual phone tilt
   const FS=11; // font size px
   const TICK=18;
 
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   svg.setAttribute('width',W); svg.setAttribute('height',H);
 
-  // rotate entire SVG content around center by R degrees
+  // Fixed reference grid — no rotation, purely for visual reference
   svg.innerHTML=`
-  <g transform="rotate(${R},${cx},${cy})">
+  <g>
     <!-- H axis — RED -->
     <line x1="0" y1="${cy}" x2="${W}" y2="${cy}"
       stroke="#EF4444" stroke-width="1" stroke-opacity="0.55" stroke-dasharray="6,6"/>
@@ -1000,10 +999,18 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll compensation: gravity-referenced gamma diff
-    // Immune to cross-axis coupling from forward/backward tilt
-    const rollComp = ori.g - refOri.g;
-    applyTR(dx, dy, rollComp);
+    // Roll compensation via rotation matrix — immune to beta (forward tilt) variation
+    // atan2(sin(g), cos(g)*sin(b)) extracts true screen roll from full orientation
+    const toR = Math.PI / 180;
+    const rollCur = Math.atan2(
+      Math.sin(ori.g * toR),
+      Math.cos(ori.g * toR) * Math.sin(ori.b * toR)
+    ) / toR;
+    const rollRef = Math.atan2(
+      Math.sin(refOri.g * toR),
+      Math.cos(refOri.g * toR) * Math.sin(refOri.b * toR)
+    ) / toR;
+    applyTR(dx, dy, rollCur - rollRef);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+' '+dy.toFixed(0)+' r'+rollIntegrated.toFixed(0);
     rafId=requestAnimationFrame(loop);
