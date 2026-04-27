@@ -30,7 +30,7 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
   background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.05) 3px,rgba(0,0,0,.05) 4px)}
 #sl.on{display:block}
 
-/* crosshair — RED */
+/* crosshair — RED (align step) */
 #xh{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
   width:36px;height:36px;z-index:4;pointer-events:none;display:none;
   transition:top .2s,left .2s}
@@ -38,6 +38,11 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'Je
 #xh::before,#xh::after{content:'';position:absolute;background:rgba(220,38,38,.85)}
 #xh::before{width:1px;height:100%;left:50%}
 #xh::after {height:1px;width:100%;top:50%}
+
+/* calib axis crosshair — full screen SVG */
+#calib-xh{position:fixed;inset:0;z-index:4;pointer-events:none;display:none;
+  transition:transform .05s linear}
+#calib-xh.on{display:block}
 
 /* anchor badge */
 #b-anchor{position:fixed;top:34px;left:8px;z-index:11;font-size:9px;letter-spacing:.1em;
@@ -193,11 +198,14 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 #dst-val.ok{color:rgba(16,185,129,.9)}
 
 /* ── AXIS SELECTOR BUTTONS ── */
-.ax-btn{font-size:8px;padding:2px 6px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);
+.ax-btn{font-size:8px;padding:2px 6px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.28);
   border-radius:3px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .1s}
-.ax-btn.on{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:rgba(239,68,68,.9)}
-.ax-btn:active{background:rgba(255,255,255,.12)}
+/* H row active = red, V row active = green — set via JS syncAxisUI */
+.ax-btn.on-h{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#EF4444}
+.ax-btn.on-v{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.35);color:#10B981}
+.ax-btn.on  {background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#EF4444} /* fallback */
+.ax-btn:active{background:rgba(255,255,255,.1)}
 
 /* ── MAP OVERLAY — fullscreen ── */
 #map-ov{position:fixed;inset:0;z-index:15;display:none;flex-direction:column}
@@ -248,6 +256,11 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 <div id="xh"></div>
 <div id="b-anchor">● UKOTVENO</div>
 <div id="b-err"></div>
+
+<!-- CALIB AXIS CROSSHAIR — full screen, rotates with rollIntegrated -->
+<svg id="calib-xh" xmlns="http://www.w3.org/2000/svg">
+  <!-- drawn by JS in drawCalibXh() -->
+</svg>
 
 <!-- LOAD -->
 <div id="scr-load">
@@ -307,24 +320,45 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
       <div style="font-size:7px;color:rgba(255,255,255,.25);letter-spacing:.05em;margin:3px 0 4px">
         Pohybujte telefonem — foto se hýbe. Nastavte správné osy:
       </div>
-      <!-- H axis -->
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
-        <span style="font-size:8px;color:rgba(255,255,255,.3);width:20px">H:</span>
-        <button class="ax-btn on" id="hax-a" onclick="setGyroAxis('h','a')">rα</button>
-        <button class="ax-btn" id="hax-b" onclick="setGyroAxis('h','b')">rβ</button>
-        <button class="ax-btn" id="hax-g" onclick="setGyroAxis('h','g')">rγ</button>
-        <button class="ax-btn" id="hsgn" onclick="flipSign('h')" style="margin-left:4px;color:rgba(245,158,11,.8)">+</button>
+      <!-- H axis — RED -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;
+        background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);
+        border-radius:4px;padding:3px 5px">
+        <span style="font-size:8px;color:#EF4444;width:28px;font-weight:bold">→ H</span>
+        <button class="ax-btn" id="hax-a" onclick="setGyroAxis('h','a')"
+          style="border-color:rgba(239,68,68,.3)">rα</button>
+        <button class="ax-btn" id="hax-b" onclick="setGyroAxis('h','b')"
+          style="border-color:rgba(239,68,68,.3)">rβ</button>
+        <button class="ax-btn" id="hax-g" onclick="setGyroAxis('h','g')"
+          style="border-color:rgba(239,68,68,.3)">rγ</button>
+        <button class="ax-btn" id="hsgn" onclick="flipSign('h')"
+          style="margin-left:4px;color:#EF4444;border-color:rgba(239,68,68,.3)">+</button>
+        <span style="font-size:7px;color:rgba(239,68,68,.4);margin-left:2px" id="h-axis-lbl">rβ+</span>
       </div>
-      <!-- V axis -->
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
-        <span style="font-size:8px;color:rgba(255,255,255,.3);width:20px">V:</span>
-        <button class="ax-btn on" id="vax-a" onclick="setGyroAxis('v','a')">rα</button>
-        <button class="ax-btn" id="vax-b" onclick="setGyroAxis('v','b')">rβ</button>
-        <button class="ax-btn" id="vax-g" onclick="setGyroAxis('v','g')">rγ</button>
-        <button class="ax-btn" id="vsgn" onclick="flipSign('v')" style="margin-left:4px;color:rgba(245,158,11,.8)">+</button>
+      <!-- V axis — GREEN -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;
+        background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);
+        border-radius:4px;padding:3px 5px">
+        <span style="font-size:8px;color:#10B981;width:28px;font-weight:bold">↑ V</span>
+        <button class="ax-btn" id="vax-a" onclick="setGyroAxis('v','a')"
+          style="border-color:rgba(16,185,129,.3)">rα</button>
+        <button class="ax-btn" id="vax-b" onclick="setGyroAxis('v','b')"
+          style="border-color:rgba(16,185,129,.3)">rβ</button>
+        <button class="ax-btn" id="vax-g" onclick="setGyroAxis('v','g')"
+          style="border-color:rgba(16,185,129,.3)">rγ</button>
+        <button class="ax-btn" id="vsgn" onclick="flipSign('v')"
+          style="margin-left:4px;color:#10B981;border-color:rgba(16,185,129,.3)">+</button>
+        <span style="font-size:7px;color:rgba(16,185,129,.4);margin-left:2px" id="v-axis-lbl">rα+</span>
       </div>
-      <div style="font-size:7px;color:rgba(255,255,255,.12);margin-bottom:4px;letter-spacing:.04em">
-        rα=rotace Z(roll) · rβ=rotace X(náklon) · rγ=rotace Y(pan)
+      <!-- R (roll) — BLUE, display only -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;
+        background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.15);
+        border-radius:4px;padding:3px 5px">
+        <span style="font-size:8px;color:#60a5fa;width:28px;font-weight:bold">⟳ R</span>
+        <span style="font-size:7px;color:rgba(96,165,250,.5);letter-spacing:.04em">rα — vždy automaticky (Z osa displeje)</span>
+      </div>
+      <div style="font-size:7px;color:rgba(255,255,255,.1);margin-bottom:4px;letter-spacing:.04em">
+        rα=Z(roll) · rβ=X(náklon) · rγ=Y(pan)
       </div>
       <div style="display:flex;gap:4px;margin-bottom:4px">
         <div id="btn-ar-mode"
@@ -468,6 +502,7 @@ let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
+let rollIntegrated=0; // rotation around device Z (screen normal) — integrated from rotationRate.alpha
 let yawCalibOffset=0;
 // Axis defaults: H=rβ+, V=rα+  (user confirmed working)
 let gyroHAxis='b', gyroVAxis='a', gyroHSign=1, gyroVSign=1;
@@ -525,15 +560,18 @@ window.addEventListener('devicemotion', e=>{
   if(!e.rotationRate) return;
   const r=e.rotationRate;
   rawRate={a:r.alpha||0, b:r.beta||0, g:r.gamma||0};
-  // update debug display
   const da=$('dbg-a'),db=$('dbg-b'),dg=$('dbg-g');
   if(da) da.textContent=rawRate.a.toFixed(1);
   if(db) db.textContent=rawRate.b.toFixed(1);
   if(dg) dg.textContent=rawRate.g.toFixed(1);
-  if(!useGyroAR) return;
   const now=performance.now();
-  if(gyroLastT!==null && phase==='anchored'){
-    const dt=(now-gyroLastT)/1000;
+  const dt = gyroLastT!==null ? (now-gyroLastT)/1000 : 0;
+  // Always integrate roll (rotationRate.alpha = rotation around device Z = screen normal)
+  // regardless of AR mode — used for visual roll compensation
+  if(dt>0 && (phase==='anchored'||phase==='calib')){
+    rollIntegrated += rawRate.a * dt;
+  }
+  if(useGyroAR && dt>0 && phase==='anchored'){
     const hVal = gyroHAxis==='a'?rawRate.a : gyroHAxis==='b'?rawRate.b : rawRate.g;
     const vVal = gyroVAxis==='a'?rawRate.a : gyroVAxis==='b'?rawRate.b : rawRate.g;
     gyroAngles.x += hVal * dt;
@@ -614,15 +652,78 @@ function applyDefaultAxes(){
   }
   syncAxisUI();
 }
+// ── CALIB CROSSHAIR DRAW ─────────────────────────────────────────────────
+function drawCalibXh(){
+  const svg=$('calib-xh'); if(!svg||!svg.classList.contains('on')) return;
+  const W=window.innerWidth, H=window.innerHeight;
+  const cx=W/2, cy=H/2;
+  const R=-rollIntegrated; // degrees, counter-rotate for display
+  const FS=11; // font size px
+  const TICK=18;
+
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+
+  // rotate entire SVG content around center by R degrees
+  svg.innerHTML=`
+  <g transform="rotate(${R},${cx},${cy})">
+    <!-- H axis — RED -->
+    <line x1="0" y1="${cy}" x2="${W}" y2="${cy}"
+      stroke="#EF4444" stroke-width="1" stroke-opacity="0.55" stroke-dasharray="6,6"/>
+    <!-- H arrow right -->
+    <polygon points="${W-14},${cy-5} ${W-2},${cy} ${W-14},${cy+5}"
+      fill="#EF4444" fill-opacity="0.7"/>
+    <!-- H label right -->
+    <text x="${W-22}" y="${cy-8}" fill="#EF4444" fill-opacity="0.8"
+      font-size="${FS}" font-family="JetBrains Mono,monospace"
+      text-anchor="end">H (r${gyroHAxis}${gyroHSign>0?'+':'−'})</text>
+    <!-- H ticks -->
+    ${[-3,-2,-1,1,2,3].map(i=>`
+      <line x1="${cx+i*W/8}" y1="${cy-TICK}" x2="${cx+i*W/8}" y2="${cy+TICK}"
+        stroke="#EF4444" stroke-width="0.5" stroke-opacity="0.35"/>
+    `).join('')}
+
+    <!-- V axis — GREEN -->
+    <line x1="${cx}" y1="0" x2="${cx}" y2="${H}"
+      stroke="#10B981" stroke-width="1" stroke-opacity="0.55" stroke-dasharray="6,6"/>
+    <!-- V arrow up -->
+    <polygon points="${cx-5},14 ${cx},2 ${cx+5},14"
+      fill="#10B981" fill-opacity="0.7"/>
+    <!-- V label -->
+    <text x="${cx+8}" y="22" fill="#10B981" fill-opacity="0.8"
+      font-size="${FS}" font-family="JetBrains Mono,monospace">V (r${gyroVAxis}${gyroVSign>0?'+':'−'})</text>
+    <!-- V ticks -->
+    ${[-3,-2,-1,1,2,3].map(i=>`
+      <line x1="${cx-TICK}" y1="${cy+i*H/8}" x2="${cx+TICK}" y2="${cy+i*H/8}"
+        stroke="#10B981" stroke-width="0.5" stroke-opacity="0.35"/>
+    `).join('')}
+
+    <!-- Center dot -->
+    <circle cx="${cx}" cy="${cy}" r="4" fill="none"
+      stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
+
+    <!-- Roll indicator — BLUE arc -->
+    <circle cx="${cx}" cy="${cy}" r="38" fill="none"
+      stroke="#60a5fa" stroke-width="1" stroke-opacity="0.45" stroke-dasharray="4,8"/>
+    <!-- Roll label -->
+    <text x="${cx+42}" y="${cy+4}" fill="#60a5fa" fill-opacity="0.6"
+      font-size="${FS-1}" font-family="JetBrains Mono,monospace">R (rα auto)</text>
+  </g>`;
+}
+
 function syncAxisUI(){
   ['a','b','g'].forEach(a=>{
     const h=$('hax-'+a),v=$('vax-'+a);
-    if(h) h.className='ax-btn'+(a===gyroHAxis?' on':'');
-    if(v) v.className='ax-btn'+(a===gyroVAxis?' on':'');
+    if(h) h.className='ax-btn'+(a===gyroHAxis?' on-h':'');
+    if(v) v.className='ax-btn'+(a===gyroVAxis?' on-v':'');
   });
   const hs=$('hsgn'),vs=$('vsgn');
-  if(hs) hs.textContent=gyroHSign>0?'+':'−';
-  if(vs) vs.textContent=gyroVSign>0?'+':'−';
+  if(hs){hs.textContent=gyroHSign>0?'+':'−'; hs.className='ax-btn'+(gyroHSign>0?' on-h':' on-h');}
+  if(vs){vs.textContent=gyroVSign>0?'+':'−'; vs.className='ax-btn'+(gyroVSign>0?' on-v':' on-v');}
+  // summary labels
+  const hl=$('h-axis-lbl'),vl=$('v-axis-lbl');
+  if(hl) hl.textContent='r'+gyroHAxis+(gyroHSign>0?'+':'−');
+  if(vl) vl.textContent='r'+gyroVAxis+(gyroVSign>0?'+':'−');
   const dh=$('dbg-haxis'),dhs=$('dbg-hsign'),dv=$('dbg-vaxis'),dvs=$('dbg-vsign');
   if(dh)  dh.textContent='r'+gyroHAxis;
   if(dhs) dhs.textContent=gyroHSign>0?'+':'−';
@@ -630,6 +731,7 @@ function syncAxisUI(){
   if(dvs) dvs.textContent=gyroVSign>0?'+':'−';
   const olbl=$('orient-lbl');
   if(olbl) olbl.textContent=isLandscape()?'⬛ LAND':'🟦 PORT';
+  drawCalibXh();
 }
 window.addEventListener('resize',()=>{ if(!calibDone) applyDefaultAxes(); setTimeout(updateLayout,80); });
 window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ if(!calibDone) applyDefaultAxes(); updateLayout(); },120); });
@@ -649,6 +751,8 @@ function setPhase(p){
   on($('ov'),'on', !!$('ov-photo').src&&$('ov-photo').src!==location.href);
   applyTR();
   on($('xh'),'on',p==='align');
+  const cxh=$('calib-xh');
+  if(cxh){ cxh.classList[p==='calib'?'add':'remove']('on'); drawCalibXh(); }
   on($('b-anchor'),'on',p==='anchored');
   on($('b-err'),'on',false);
   if(p==='anchored'){useGyroAR=true;stopAR();startAR();fillAnch();}
@@ -664,10 +768,13 @@ function setPhase(p){
 }
 
 // ── TRANSFORM ─────────────────────────────────────────────────────────────
-function applyTR(dx,dy){
+function applyTR(dx,dy,rollDeg){
   const img=$('ov-photo');
+  const roll = rollDeg||0;
+  // Roll compensation: counter-rotate to keep photo upright in world space
+  // Order: translate → roll-compensate → scale → perspective tilts
   img.style.opacity=TR.opa/100;
-  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
+  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) rotateZ(${-roll}deg) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
   img.style.transition=dx!==undefined?'transform 60ms linear':'none';
 }
 
@@ -689,12 +796,13 @@ function calibStp(k,d){
 function applyCalibTR(dx,dy){
   const img=$('ov-photo');
   const ppd=window.innerWidth/65;
+  // Roll compensation in calib too — relative to calibAngles start
   img.style.opacity=calibTR.opa/100;
-  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;
+  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) rotateZ(${-rollIntegrated}deg) scale(${calibTR.sz/100})`;
   img.style.transition='none';
 }
 function startCalibAR(){
-  calibAngles={x:0,y:0}; calibLastT=null;
+  calibAngles={x:0,y:0}; calibLastT=null; rollIntegrated=0;
   function loop(){
     const now=performance.now();
     if(calibLastT!==null){
@@ -706,12 +814,13 @@ function startCalibAR(){
     }
     calibLastT=now;
     applyCalibTR(gyroHSign*calibAngles.x, gyroVSign*calibAngles.y);
+    drawCalibXh();
     calibRafId=requestAnimationFrame(loop);
   }
   calibRafId=requestAnimationFrame(loop);
 }
 function resetCalibView(){
-  calibAngles={x:0,y:0}; calibLastT=null;
+  calibAngles={x:0,y:0}; calibLastT=null; rollIntegrated=0;
   applyCalibTR(0,0);
 }
 
@@ -876,7 +985,7 @@ function startAR(){
   // Uses gyroHAxis/gyroVAxis/gyroHSign/gyroVSign — same vars set in calib step ✓
   if(!gyroOk||!refOri) return;
   // reset gyro integration from current anchor point
-  gyroAngles={x:0,y:0}; gyroLastT=null;
+  gyroAngles={x:0,y:0}; gyroLastT=null; rollIntegrated=0;
   const ppd=window.innerWidth/65;
   function loop(){
     let dx,dy;
@@ -893,9 +1002,11 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    applyTR(dx,dy);
+    // Roll compensation: use integrated rotationRate.alpha (device Z rotation)
+    // More accurate than gamma diff — directly measures screen-normal rotation
+    applyTR(dx, dy, rollIntegrated);
     const el=$('ar-d');
-    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ '+dx.toFixed(0)+' '+dy.toFixed(0);
+    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+' '+dy.toFixed(0)+' r'+rollIntegrated.toFixed(0);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
