@@ -508,7 +508,8 @@ let photoFileName='picpin'; // set from uploaded file
 let calibDone=false; // set true once user advances from calib step
 let gyroAngles={x:0,y:0};
 let gyroLastT=null;
-let rollIntegrated=0; // rotation around device Z (screen normal) — integrated from rotationRate.alpha
+let rollIntegrated=0;
+let rollSmoothed=0; // low-pass filtered roll for stable display
 let yawCalibOffset=0;
 // Axis defaults: H=rβ+, V=rα+  (user confirmed working)
 let gyroHAxis='b', gyroVAxis='a', gyroHSign=1, gyroVSign=1;
@@ -993,7 +994,7 @@ function startAR(){
   // Uses gyroHAxis/gyroVAxis/gyroHSign/gyroVSign — same vars set in calib step ✓
   if(!refOri) refOri={...ori}; // fallback: use current orientation if FIX was skipped
   // reset gyro integration from current anchor point
-  gyroAngles={x:0,y:0}; gyroLastT=null; rollIntegrated=0;
+  gyroAngles={x:0,y:0}; gyroLastT=null; rollIntegrated=0; rollSmoothed=0;
   const ppd=window.innerWidth/65;
   function loop(){
     let dx,dy;
@@ -1010,23 +1011,20 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    // Roll: gravity-referenced atan2 formula
-    // computeVisualRoll(β,γ) = atan2(-sin(γ)·sin(β), cos(γ))
-    // At γ=0 → 0 regardless of β (no coupling with forward tilt) ✓
-    // Tracks real roll without integration or drift ✓
-    const toR = Math.PI / 180;
-    const visualRoll = (b, g) =>
-      Math.atan2(-Math.sin(g*toR)*Math.sin(b*toR), Math.cos(g*toR)) / toR;
-    const roll = visualRoll(ori.b, ori.g) - visualRoll(refOri.b, refOri.g);
-    applyTR(dx, dy, roll);
+    // Roll: simple smoothed gamma diff
+    // gamma is gravity-stabilised and linear for typical phone angles
+    // Smooth to prevent oscillation from magnetometer noise
+    const rawRoll = ori.g - refOri.g;
+    // Clamp to ±30° — prevents wild rotations from sensor jumps
+    const clampedRoll = Math.max(-30, Math.min(30, rawRoll));
+    // Exponential low-pass filter (α=0.15 → smooth but responsive)
+    rollSmoothed = rollSmoothed * 0.85 + clampedRoll * 0.15;
+    applyTR(dx, dy, rollSmoothed);
     const el=$('ar-d');
     if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
     const dg=$('dbg-gamma'), dr=$('dbg-roll');
     if(dg) dg.textContent=ori.g.toFixed(1);
-    const toRd = Math.PI/180;
-    const vR = (b,g) => Math.atan2(-Math.sin(g*toRd)*Math.sin(b*toRd), Math.cos(g*toRd))/toRd;
-    const rollDbg = refOri ? vR(ori.b,ori.g)-vR(refOri.b,refOri.g) : 0;
-    if(dr) dr.textContent=rollDbg.toFixed(1);
+    if(dr) dr.textContent=rollSmoothed.toFixed(1);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
