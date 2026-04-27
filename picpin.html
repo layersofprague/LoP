@@ -327,9 +327,11 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
         rα=rotace Z(roll) · rβ=rotace X(náklon) · rγ=rotace Y(pan)
       </div>
       <div style="display:flex;gap:4px;margin-bottom:4px">
-        <button id="btn-ar-mode" class="btn bs"
-          style="font-size:10px;padding:4px;color:rgba(16,185,129,.8);flex:1"
-          onclick="toggleARMode()">⟳ Gyro</button>
+        <div id="btn-ar-mode"
+          style="font-size:10px;padding:4px;color:rgba(16,185,129,.8);flex:1;
+            background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);
+            border-radius:4px;text-align:center;letter-spacing:.05em;
+            font-family:'JetBrains Mono',monospace">⟳ GYRO aktivní</div>
         <button id="btn-calib" class="btn bs"
           style="font-size:10px;padding:4px;color:rgba(255,255,255,.25);flex:1"
           onclick="loadCalibJSON()">⊕ Kalib JSON</button>
@@ -649,7 +651,7 @@ function setPhase(p){
   on($('xh'),'on',p==='align');
   on($('b-anchor'),'on',p==='anchored');
   on($('b-err'),'on',false);
-  if(p==='anchored'){stopAR();startAR();fillAnch();}
+  if(p==='anchored'){useGyroAR=true;stopAR();startAR();fillAnch();}
   else if(p==='calib'){stopAR();startCalibAR();}
   else stopAR();
   // show gyro debug bar in topbar when in calib or anchored
@@ -906,7 +908,7 @@ function stopAR(){
 // Toggle AR mode compass ↔ gyro
 function toggleARMode(){
   useGyroAR=!useGyroAR;
-  const b=$('btn-ar-mode'), b2=$('btn-ar-mode2');
+  const b=null, b2=$('btn-ar-mode2'); // btn-ar-mode is display-only in calib step
   if(useGyroAR){
     // now in GYRO — red, click to go back to compass
     if(b){b.textContent='⟳ Gyro';b.style.color='rgba(220,38,38,.8)';}
