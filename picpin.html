@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Picture Pinning</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#000;width:100%;height:100%;overflow:hidden}
+html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'JetBrains Mono',monospace}
 
 /* ── CAMERA ── */
 #cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:none}
@@ -32,134 +33,121 @@ html,body{background:#000;width:100%;height:100%;overflow:hidden}
 #xh::after{height:1px;width:100%;top:50%}
 
 /* floating badges */
-.fb{position:fixed;z-index:11;font-family:'JetBrains Mono',monospace;
-  font-size:9px;letter-spacing:.1em;padding:3px 7px;border-radius:3px;display:none}
+.fb{position:fixed;z-index:11;font-size:9px;letter-spacing:.1em;padding:3px 7px;border-radius:3px;display:none}
 .fb.on{display:block}
-#b-live  {top:46px;right:8px;background:rgba(0,0,0,.4);border:1px solid rgba(245,158,11,.25);color:rgba(245,158,11,.8)}
-#b-anchor{top:46px;left:8px; background:rgba(0,0,0,.4);border:1px solid rgba(16,185,129,.3);color:#10B981}
-#b-err   {top:46px;left:8px; background:rgba(0,0,0,.5);border:1px solid rgba(220,38,38,.4); color:#EF4444}
+#b-live  {top:46px;right:8px;background:rgba(0,0,0,.35);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.75)}
+#b-anchor{top:46px;left:8px; background:rgba(0,0,0,.35);border:1px solid rgba(16,185,129,.25);color:#10B981}
+#b-err   {top:46px;left:8px; background:rgba(0,0,0,.45);border:1px solid rgba(220,38,38,.4); color:#EF4444}
 
 /* ── LOAD SCREEN ── */
-#scr-load{
-  position:fixed;inset:0;z-index:20;background:#060606;
+#scr-load{position:fixed;inset:0;z-index:20;background:#060606;
   display:flex;flex-direction:column;align-items:stretch;justify-content:center;
-  gap:18px;padding:28px 20px;
-  font-family:'JetBrains Mono',monospace;color:#C9D1D9;
-  max-width:480px;margin:0 auto}
+  gap:16px;padding:28px 20px;color:#C9D1D9;max-width:480px;margin:0 auto}
 #scr-load.off{display:none}
-.hero{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:.95;color:#F59E0B;text-align:center}
+.hero{font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:.95;color:#F59E0B;text-align:center}
 .hero-s{text-align:center;font-size:10px;letter-spacing:.15em;color:#2D3748;line-height:2;text-transform:uppercase;margin-top:4px}
-.fz{border:1px dashed #1C1C1C;border-radius:6px;padding:22px 14px;text-align:center;cursor:pointer;
-  position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;transition:border-color .2s}
+.fz{border:1px dashed #1C1C1C;border-radius:6px;padding:20px 14px;text-align:center;cursor:pointer;
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .2s}
 .fz:hover{border-color:rgba(245,158,11,.3)}
 .fz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.fz-icon{font-size:24px}.fz-lbl{font-size:10px;letter-spacing:.1em;color:#4B5563;text-transform:uppercase}
-#prev{width:100%;max-height:130px;object-fit:contain;border-radius:4px;border:1px solid #111;display:none}
+.fz-icon{font-size:22px}.fz-lbl{font-size:10px;letter-spacing:.1em;color:#4B5563;text-transform:uppercase}
+#prev{width:100%;max-height:120px;object-fit:contain;border-radius:4px;border:1px solid #111;display:none}
 .gs{display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:.1em;
-  padding:4px 8px;border-radius:4px;border:1px solid #1A1A1A;color:#374151;cursor:pointer;width:fit-content}
+  padding:3px 8px;border-radius:4px;border:1px solid #1A1A1A;color:#374151;cursor:pointer;width:fit-content}
 .gs.ok{color:#10B981;border-color:rgba(16,185,129,.25)}
 .gdot{width:5px;height:5px;border-radius:50%;background:currentColor}
 .gs.ok .gdot{animation:blink 1.8s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.btn-start{padding:11px;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.1em;
+.btn-start{padding:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.1em;
   cursor:pointer;border-radius:5px;border:none;background:#F59E0B;color:#000;width:100%;transition:all .15s}
 .btn-start:active{background:#D97706}
 
-/* ── TOP BAR (glass, minimal) ── */
-#topbar{
-  position:fixed;top:0;left:0;right:0;z-index:10;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px;
-  background:rgba(0,0,0,.3);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,255,255,.05);
-  font-family:'JetBrains Mono',monospace;
-  max-width:480px;margin:0 auto}
-.plbl{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.1em;color:rgba(245,158,11,.85)}
+/* ── TOP BAR ── */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:10;
+  display:none;align-items:center;justify-content:space-between;
+  padding:6px 12px;
+  background:rgba(0,0,0,.25);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.04);max-width:480px;margin:0 auto}
+.plbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;color:rgba(245,158,11,.8)}
 .dots{display:flex;gap:5px;align-items:center}
-.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);transition:all .3s}
-.dot.done  {background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3)}
-.dot.active{background:#F59E0B;border-color:#F59E0B;box-shadow:0 0 5px #F59E0B55}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);transition:all .3s}
+.dot.done  {background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.28)}
+.dot.active{background:#F59E0B;border-color:#F59E0B;box-shadow:0 0 4px #F59E0B55}
 #gyro-tb{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.1em;
-  padding:3px 7px;border-radius:3px;border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.25);cursor:pointer}
-#gyro-tb.ok{color:rgba(16,185,129,.8);border-color:rgba(16,185,129,.2)}
+  padding:2px 6px;border-radius:3px;border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.2);cursor:pointer}
+#gyro-tb.ok{color:rgba(16,185,129,.75);border-color:rgba(16,185,129,.18)}
 
-/* ── BOTTOM PANEL (glass drawer) ── */
-#panel{
-  position:fixed;bottom:0;left:0;right:0;z-index:10;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  border-top:1px solid rgba(255,255,255,.07);
-  font-family:'JetBrains Mono',monospace;color:#C9D1D9;
-  max-width:480px;margin:0 auto;
-  display:none;
-  max-height:50vh;overflow-y:auto}
+/* ── BOTTOM PANEL ── */
+#panel{position:fixed;bottom:0;left:0;right:0;z-index:10;
+  background:rgba(0,0,0,.38);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid rgba(255,255,255,.06);
+  max-width:480px;margin:0 auto;display:none;max-height:52vh;overflow-y:auto}
 #panel.on{display:block}
+#handle{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 4px;cursor:pointer;user-select:none}
+#handle-bar{width:30px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);margin:0 auto}
+#cbtn{font-size:9px;color:rgba(255,255,255,.2);padding:2px 5px;border:1px solid rgba(255,255,255,.09);
+  border-radius:3px;cursor:pointer;background:none;font-family:'JetBrains Mono',monospace}
+#pbody{padding:0 10px 10px}
+#pbody.col{display:none}
 
-/* collapse handle */
-#handle{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px 5px;cursor:pointer;user-select:none}
-#handle-bar{width:32px;height:3px;border-radius:2px;background:rgba(255,255,255,.15);margin:0 auto}
-#collapse-btn{font-size:9px;letter-spacing:.08em;color:rgba(255,255,255,.25);padding:2px 6px;
-  border:1px solid rgba(255,255,255,.1);border-radius:3px;cursor:pointer;background:none;
-  font-family:'JetBrains Mono',monospace}
+.sec{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.18);margin:6px 0 3px}
+hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:5px 0}
 
-#panel-body{padding:0 10px 10px}
-#panel-body.collapsed{display:none}
-
-/* compact section label */
-.sec{font-size:8px;letter-spacing:.18em;text-transform:uppercase;
-  color:rgba(255,255,255,.2);margin:8px 0 4px}
-
-/* compact slider */
-.ctrl{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-.ck{font-size:8px;letter-spacing:.06em;text-transform:uppercase;
-  color:rgba(255,255,255,.3);width:46px;flex-shrink:0}
-.cv{font-size:9px;color:rgba(245,158,11,.8);width:32px;text-align:right;flex-shrink:0}
+/* ── SLIDERS — compact, 2-col grid ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}
+.ctrl{display:flex;align-items:center;gap:4px;padding:2px 0}
+.ck{font-size:7px;letter-spacing:.05em;text-transform:uppercase;
+  color:rgba(255,255,255,.28);width:36px;flex-shrink:0}
+.cv{font-size:8px;color:rgba(245,158,11,.75);width:28px;text-align:right;flex-shrink:0}
 input[type=range].rng{-webkit-appearance:none;appearance:none;flex:1;height:2px;
-  background:rgba(255,255,255,.12);border-radius:1px;outline:none;cursor:pointer}
-input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  background:rgba(255,255,255,.1);border-radius:1px;outline:none;cursor:pointer;min-width:0}
+input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
   border-radius:50%;background:#F59E0B;cursor:pointer;
-  border:2px solid rgba(0,0,0,.6);box-shadow:0 0 6px rgba(245,158,11,.3)}
-.sb{width:24px;height:24px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);
-  border-radius:4px;cursor:pointer;font-size:15px;line-height:1;
+  border:2px solid rgba(0,0,0,.5);box-shadow:0 0 5px rgba(245,158,11,.25)}
+.sb{width:22px;height:22px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);color:rgba(255,255,255,.35);
+  border-radius:3px;cursor:pointer;font-size:14px;line-height:1;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
-.sb:active{background:rgba(245,158,11,.15);color:#F59E0B;border-color:rgba(245,158,11,.3)}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
-hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:6px 0}
+.sb:active{background:rgba(245,158,11,.12);color:#F59E0B;border-color:rgba(245,158,11,.25)}
 
-/* action buttons */
-.br{display:flex;gap:6px;margin-top:8px}
+/* ── ACTION BUTTONS — small pills ── */
+.br{display:flex;gap:5px;margin-top:7px}
 .br>.btn{flex:1}
-.btn{padding:9px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.08em;
-  cursor:pointer;border-radius:5px;border:none;width:100%;transition:all .15s}
+.btn{padding:7px 6px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.06em;
+  cursor:pointer;border-radius:4px;border:none;width:100%;transition:all .15s}
 .btn:active{transform:scale(.97)}
-.bp{background:rgba(245,158,11,.75);color:#000}.bp:active{background:rgba(245,158,11,.9)}
-.bs{background:rgba(255,255,255,.06);color:rgba(255,255,255,.35);
-  border:1px solid rgba(255,255,255,.1);font-size:14px}
-.bok{background:rgba(16,185,129,.7);color:#000}
+.bp{background:rgba(245,158,11,.7);color:#000}.bp:active{background:rgba(245,158,11,.88)}
+.bs{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);
+  border:1px solid rgba(255,255,255,.09);font-size:13px}
+.bok{background:rgba(16,185,129,.65);color:#000}
 
 /* data box */
-.db{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);
-  border-radius:4px;padding:8px;font-size:9px;line-height:1.9;letter-spacing:.04em}
+.db{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);
+  border-radius:4px;padding:7px;font-size:9px;line-height:1.8;letter-spacing:.04em}
 .dr{display:flex;justify-content:space-between}
-.dk{color:rgba(255,255,255,.25)}.dv{color:rgba(16,185,129,.8)}
+.dk{color:rgba(255,255,255,.22)}.dv{color:rgba(16,185,129,.75)}
 
-/* distance row */
-.di-row{display:flex;align-items:center;gap:6px}
-.di{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-  color:#E5E7EB;font-family:'JetBrains Mono',monospace;
-  font-size:18px;padding:7px 10px;border-radius:5px;outline:none;text-align:center;min-width:0}
-.di:focus{border-color:rgba(245,158,11,.3)}
-.ug{display:flex;gap:3px}
-.ub{padding:6px 9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;font-size:10px;
-  cursor:pointer;border-radius:4px;transition:all .15s}
-.ub.on{border-color:rgba(245,158,11,.35);color:rgba(245,158,11,.85);background:rgba(245,158,11,.08)}
+/* ── MAP OVERLAY (step 3) ── */
+#map-ov{position:fixed;inset:0;z-index:15;display:none;flex-direction:column;background:rgba(0,0,0,.15)}
+#map-ov.on{display:flex}
+#leafmap{flex:1;cursor:crosshair}
+/* override leaflet cursor */
+#leafmap .leaflet-container{cursor:crosshair!important}
+#map-bar{
+  background:rgba(0,0,0,.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid rgba(255,255,255,.07);padding:8px 12px;
+  display:flex;flex-direction:column;gap:7px;
+  max-width:480px;margin:0 auto;width:100%}
+.mrow{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.06em}
+.mlbl{color:rgba(255,255,255,.3);flex-shrink:0}
+.mval{color:rgba(245,158,11,.8);flex:1}
+.mval.ok{color:rgba(16,185,129,.8)}
+/* distance fine tune row */
+.dst-row{display:flex;align-items:center;gap:6px}
+.dst-num{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  color:#E5E7EB;font-size:17px;padding:6px 10px;border-radius:4px;outline:none;text-align:center;min-width:0}
+.dst-num:focus{border-color:rgba(245,158,11,.3)}
+#map-hint{font-size:9px;letter-spacing:.06em;color:rgba(255,255,255,.35);text-align:center;padding:2px 0}
 </style>
 </head>
 <body>
@@ -168,11 +156,11 @@ hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:6px 0}
 <div id="ov"><img id="ov-photo" src="" alt=""></div>
 <div id="sl"></div>
 <div id="xh"></div>
-<div class="fb" id="b-live">β0.0° γ0.0°</div>
+<div class="fb" id="b-live"></div>
 <div class="fb" id="b-anchor">● UKOTVENO</div>
 <div class="fb" id="b-err"></div>
 
-<!-- LOAD SCREEN -->
+<!-- LOAD -->
 <div id="scr-load">
   <div>
     <div class="hero">PICTURE<br>PINNING</div>
@@ -183,16 +171,16 @@ hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:6px 0}
     <div class="fz-icon" id="fz-icon">🗂</div>
     <div class="fz-lbl" id="fz-lbl">Načíst historickou fotografii</div>
   </label>
-  <img id="prev" alt="náhled">
-  <div class="gs" id="gs-load" onclick="reqGyro()"><div class="gdot"></div><span id="gs-load-txt">BEZ GYRA</span></div>
+  <img id="prev" alt="">
+  <div class="gs" id="gs-load" onclick="reqGyro()"><div class="gdot"></div><span>BEZ GYRA</span></div>
   <button class="btn-start" id="btn-start" style="display:none" onclick="startCam()">SPUSTIT KAMERU →</button>
 </div>
 
 <!-- TOP BAR -->
-<div id="topbar" style="display:none">
-  <div class="plbl" id="plbl">PICTURE PIN</div>
+<div id="topbar">
+  <div class="plbl" id="plbl">—</div>
   <div id="gyro-tb" onclick="reqGyro()"><div class="gdot"></div>BEZ GYRA</div>
-  <div class="dots" id="dots-row">
+  <div class="dots">
     <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
     <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
   </div>
@@ -200,56 +188,43 @@ hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:6px 0}
 
 <!-- BOTTOM PANEL -->
 <div id="panel">
-  <div id="handle" onclick="toggleCollapse()">
-    <div style="width:32px"></div>
+  <div id="handle" onclick="toggleC()">
+    <div style="width:24px"></div>
     <div id="handle-bar"></div>
-    <button id="collapse-btn">▲</button>
+    <button id="cbtn">▲</button>
   </div>
-  <div id="panel-body">
+  <div id="pbody">
 
-    <!-- ALIGN -->
+    <!-- ALIGN (2-col grid, small action buttons) -->
     <div id="pa" style="display:none">
-      <div class="sec">Obraz</div>
-      <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button><span class="cv" id="v-opa">50%</span></div>
-      <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp('sz',-1)">−</button><input type="range" class="rng" id="s-sz" min="10" max="300" value="100" oninput="upd('sz',this.value,'%')"><button class="sb" onclick="stp('sz',1)">+</button><span class="cv" id="v-sz">100%</span></div>
-      <hr class="dv">
       <div class="g2">
+        <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button><span class="cv" id="v-opa">50%</span></div>
+        <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp('sz',-1)">−</button><input type="range" class="rng" id="s-sz" min="10" max="300" value="100" oninput="upd('sz',this.value,'%')"><button class="sb" onclick="stp('sz',1)">+</button><span class="cv" id="v-sz">100%</span></div>
         <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp('px',-1)">−</button><input type="range" class="rng" id="s-px" min="-500" max="500" value="0" oninput="upd('px',this.value,'px')"><button class="sb" onclick="stp('px',1)">+</button><span class="cv" id="v-px">0</span></div>
         <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button><span class="cv" id="v-py">0</span></div>
         <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button><span class="cv" id="v-rx">0°</span></div>
         <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button><span class="cv" id="v-ry">0°</span></div>
       </div>
       <div class="br">
-        <button class="btn bs" onclick="goBack()">← ZPĚT</button>
+        <button class="btn bs" style="font-size:11px;padding:5px" onclick="goBack()">←</button>
         <button class="btn bp" onclick="doFix()">FIX ⊕</button>
       </div>
     </div>
 
-    <!-- OFFSET -->
+    <!-- OFFSET — just fine-tune + confirm; map is in separate overlay -->
     <div id="po" style="display:none">
-      <div class="sec">Vzdálenost</div>
-      <div class="di-row">
-        <button class="sb" onclick="dstStp(-1)">−</button>
-        <input type="number" class="di" id="di" value="20" min="1" oninput="dst=Math.max(1,+this.value)">
-        <button class="sb" onclick="dstStp(1)">+</button>
-        <div class="ug">
-          <button class="ub on" id="ub-m" onclick="setU('m')">m</button>
-          <button class="ub" id="ub-km" onclick="setU('km')">km</button>
-        </div>
-      </div>
-      <div class="db" id="plane-db" style="margin-top:6px">—</div>
-      <hr class="dv">
-      <div class="sec">Doladění</div>
-      <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp2('opa',-1)">−</button><input type="range" class="rng" id="s2-opa" min="0" max="100" value="50" oninput="upd2('opa',this.value,'%')"><button class="sb" onclick="stp2('opa',1)">+</button><span class="cv" id="v2-opa">50%</span></div>
-      <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp2('sz',-1)">−</button><input type="range" class="rng" id="s2-sz" min="10" max="300" value="100" oninput="upd2('sz',this.value,'%')"><button class="sb" onclick="stp2('sz',1)">+</button><span class="cv" id="v2-sz">100%</span></div>
+      <div class="sec">Doladění obrazu</div>
       <div class="g2">
+        <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp2('opa',-1)">−</button><input type="range" class="rng" id="s2-opa" min="0" max="100" value="50" oninput="upd2('opa',this.value,'%')"><button class="sb" onclick="stp2('opa',1)">+</button><span class="cv" id="v2-opa">50%</span></div>
+        <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp2('sz',-1)">−</button><input type="range" class="rng" id="s2-sz" min="10" max="300" value="100" oninput="upd2('sz',this.value,'%')"><button class="sb" onclick="stp2('sz',1)">+</button><span class="cv" id="v2-sz">100%</span></div>
         <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp2('px',-1)">−</button><input type="range" class="rng" id="s2-px" min="-500" max="500" value="0" oninput="upd2('px',this.value,'px')"><button class="sb" onclick="stp2('px',1)">+</button><span class="cv" id="v2-px">0</span></div>
         <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp2('py',-1)">−</button><input type="range" class="rng" id="s2-py" min="-500" max="500" value="0" oninput="upd2('py',this.value,'px')"><button class="sb" onclick="stp2('py',1)">+</button><span class="cv" id="v2-py">0</span></div>
         <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp2('rx',-1)">−</button><input type="range" class="rng" id="s2-rx" min="-60" max="60" value="0" oninput="upd2('rx',this.value,'°')"><button class="sb" onclick="stp2('rx',1)">+</button><span class="cv" id="v2-rx">0°</span></div>
         <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp2('ry',-1)">−</button><input type="range" class="rng" id="s2-ry" min="-60" max="60" value="0" oninput="upd2('ry',this.value,'°')"><button class="sb" onclick="stp2('ry',1)">+</button><span class="cv" id="v2-ry">0°</span></div>
       </div>
       <div class="br">
-        <button class="btn bs" onclick="setPhase('align')">← ZPĚT</button>
+        <button class="btn bs" style="font-size:11px;padding:5px" onclick="openMap()">📍 MAPA</button>
+        <button class="btn bs" style="font-size:11px;padding:5px" onclick="setPhase('align')">← ZPĚT</button>
         <button class="btn bp" onclick="doAnchor()">UKOTVIT ◎</button>
       </div>
     </div>
@@ -257,7 +232,7 @@ hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:6px 0}
     <!-- ANCHORED -->
     <div id="panch" style="display:none">
       <div class="db" id="anch-db">—</div>
-      <div class="br" style="margin-top:8px">
+      <div class="br" style="margin-top:7px">
         <button class="btn bs" onclick="doReset()">RESET</button>
         <button class="btn bp" id="btn-copy" onclick="doCopy()">KOPÍROVAT JSON</button>
       </div>
@@ -266,37 +241,66 @@ hr.dv{border:none;border-top:1px solid rgba(255,255,255,.05);margin:6px 0}
   </div>
 </div>
 
+<!-- MAP OVERLAY (step 3) -->
+<div id="map-ov">
+  <div id="leafmap"></div>
+  <div id="map-bar">
+    <div id="map-hint">Klikni na mapu pro označení budovy ✛</div>
+    <div class="mrow">
+      <span class="mlbl">Já:</span><span class="mval" id="m-gps">hledám GPS…</span>
+      <span class="mlbl">Budova:</span><span class="mval" id="m-bld">—</span>
+    </div>
+    <div class="dst-row">
+      <button class="sb" onclick="dstStp(-1)">−</button>
+      <input type="number" class="dst-num" id="di" value="0" min="0" oninput="dst=Math.max(0,+this.value);updDstLbl()">
+      <button class="sb" onclick="dstStp(1)">+</button>
+      <span style="font-size:10px;color:rgba(255,255,255,.35);margin-left:2px">m</span>
+    </div>
+    <div class="br" style="margin-top:0">
+      <button class="btn bs" style="font-size:12px" onclick="closeMap()">← ZPĚT</button>
+      <button class="btn bp" id="map-confirm" onclick="confirmMap()">POTVRDIT ✓</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const TR={opa:50,sz:100,px:0,py:0,rx:0,ry:0};
 const KEYS={opa:{min:0,max:100,u:'%'},sz:{min:10,max:300,u:'%'},px:{min:-500,max:500,u:'px'},py:{min:-500,max:500,u:'px'},rx:{min:-60,max:60,u:'°'},ry:{min:-60,max:60,u:'°'}};
-let phase='load',gyroOk=false,ori={a:0,b:0,g:0},refOri=null,dst=20,dstU='m',anchData=null,rafId=null,collapsed=false;
+let phase='load',gyroOk=false,ori={a:0,b:0,g:0},refOri=null,dst=0,anchData=null,rafId=null,collapsed=false;
+let userLatLng=null,bldLatLng=null,leafMap=null,userMarker=null,bldMarker=null;
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
 
-// GYRO
-if('DeviceOrientationEvent' in window){gyroOk=true;syncG();
+// ── GYRO ──────────────────────────────────────────────────────────────────
+if('DeviceOrientationEvent' in window){
+  gyroOk=true; syncG();
   window.addEventListener('deviceorientation',e=>{
     ori={a:e.alpha||0,b:e.beta||0,g:e.gamma||0};
-    if(phase==='align'||phase==='offset') $('b-live').textContent=`β${ori.b.toFixed(1)}° γ${ori.g.toFixed(1)}°`;
-  },true);}
+    if(phase==='align'||phase==='offset')
+      $('b-live').textContent=`α${ori.a.toFixed(0)}° β${ori.b.toFixed(0)}°`;
+  },true);
+}
 async function reqGyro(){
   if(typeof DeviceOrientationEvent?.requestPermission==='function')
     if(await DeviceOrientationEvent.requestPermission()==='granted'){gyroOk=true;syncG();}
 }
 function syncG(){
   const t=gyroOk?'GYRO OK':'BEZ GYRA',c=gyroOk?'ok':'';
-  for(const id of['gyro-tb','gs-load']){const el=$(id);if(!el)continue;
+  for(const id of['gyro-tb','gs-load']){
+    const el=$(id); if(!el) continue;
     el.className=(id==='gyro-tb'?'':' gs ')+c;
-    el.innerHTML=`<div class="gdot"></div>${t}`;}
+    el.innerHTML=`<div class="gdot"></div>${t}`;
+  }
 }
 
-// CAMERA
+// ── CAMERA ────────────────────────────────────────────────────────────────
 function startCam(){
   navigator.mediaDevices.getUserMedia({
     video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}
   }).then(s=>{
     $('cam').srcObject=s;
-    on($('cam'),'on',true);on($('sl'),'on',true);
+    on($('cam'),'on',true); on($('sl'),'on',true);
     on($('scr-load'),'off',true);
     $('topbar').style.display='flex';
     setPhase('align');
@@ -306,38 +310,40 @@ function startCam(){
   });
 }
 
-// COLLAPSE HANDLE
-function toggleCollapse(){
+// ── PANEL COLLAPSE ────────────────────────────────────────────────────────
+function toggleC(){
   collapsed=!collapsed;
-  $('panel-body').style.display=collapsed?'none':'block';
-  $('collapse-btn').textContent=collapsed?'▼':'▲';
+  $('pbody').style.display=collapsed?'none':'block';
+  $('cbtn').textContent=collapsed?'▼':'▲';
 }
 
-// PHASE
+// ── PHASE ─────────────────────────────────────────────────────────────────
 const PLBLS={align:'ZAROVNAT',offset:'VZDÁLENOST',anchored:'UKOTVENO'};
-const PIDX={align:1,offset:2,anchored:3};
+const PIDX ={align:1,offset:2,anchored:3};
 function setPhase(p){
   phase=p;
   $('plbl').textContent=PLBLS[p];
-  for(let i=0;i<4;i++){const d=$('d'+i);d.className='dot'+(i<PIDX[p]?' done':'')+(i===PIDX[p]?' active':'');}
+  for(let i=0;i<4;i++){
+    const d=$('d'+i);
+    d.className='dot'+(i<PIDX[p]?' done':'')+(i===PIDX[p]?' active':'');
+  }
+  collapsed=false; $('pbody').style.display='block'; $('cbtn').textContent='▲';
   on($('panel'),'on',true);
-  $('pa').style.display=p==='align'?'block':'none';
-  $('po').style.display=p==='offset'?'block':'none';
+  $('pa').style.display   =p==='align'   ?'block':'none';
+  $('po').style.display   =p==='offset'  ?'block':'none';
   $('panch').style.display=p==='anchored'?'block':'none';
-  // uncollapse on phase change
-  collapsed=false;$('panel-body').style.display='block';$('collapse-btn').textContent='▲';
-  on($('ov'),'on',!!$('ov-photo').src&&$('ov-photo').src!==window.location.href);
+  on($('ov'),'on', !!$('ov-photo').src && $('ov-photo').src!==window.location.href);
   applyTR();
-  on($('xh'),'on',p==='align');
-  on($('b-live'),'on',(p==='align'||p==='offset')&&gyroOk);
-  on($('b-anchor'),'on',p==='anchored');
+  on($('xh'),'on', p==='align');
+  on($('b-live'),'on', (p==='align'||p==='offset')&&gyroOk);
+  on($('b-anchor'),'on', p==='anchored');
   on($('b-err'),'on',false);
-  if(p==='offset')fillOffset();
+  if(p==='offset') syncSliders2();
   if(p==='anchored'){stopAR();startAR();fillAnch();}
-  if(p!=='anchored')stopAR();
+  if(p!=='anchored') stopAR();
 }
 
-// TRANSFORM
+// ── TRANSFORM ─────────────────────────────────────────────────────────────
 function applyTR(dx,dy){
   const img=$('ov-photo');
   img.style.opacity=TR.opa/100;
@@ -345,80 +351,144 @@ function applyTR(dx,dy){
   img.style.transition=dx!==undefined?'transform 60ms linear':'none';
 }
 
-// SLIDERS
-function upd(k,v,u){TR[k]=+v;$('v-'+k).textContent=v+u;syncS2(k,v,u);applyTR();}
+// ── SLIDERS ───────────────────────────────────────────────────────────────
+function upd(k,v,u) {TR[k]=+v;$('v-'+k).textContent=v+u;syncS2(k,v,u);applyTR();}
 function upd2(k,v,u){TR[k]=+v;$('v2-'+k).textContent=v+u;$('v-'+k).textContent=v+u;$('s-'+k).value=v;applyTR();}
 function syncS2(k,v,u){const e=$('s2-'+k),f=$('v2-'+k);if(e)e.value=v;if(f)f.textContent=v+u;}
-function stp(k,d){const e=$('s-'+k),m=KEYS[k];const v=Math.min(m.max,Math.max(m.min,TR[k]+d));e.value=v;upd(k,v,m.u);}
+function stp(k,d) {const e=$('s-'+k),m=KEYS[k];const v=Math.min(m.max,Math.max(m.min,TR[k]+d));e.value=v;upd(k,v,m.u);}
 function stp2(k,d){const e=$('s2-'+k),m=KEYS[k];const v=Math.min(m.max,Math.max(m.min,TR[k]+d));e.value=v;upd2(k,v,m.u);}
-
-// DISTANCE
-function dstStp(d){dst=Math.max(1,dst+d);$('di').value=dst;}
-function setU(u){dstU=u;$('ub-m').className='ub'+(u==='m'?' on':'');$('ub-km').className='ub'+(u==='km'?' on':'');}
-
-// OFFSET PANEL
-function fillOffset(){
-  $('plane-db').innerHTML=refOri?`
-    <div class="dr"><span class="dk">α</span><span class="dv">${refOri.a.toFixed(1)}°</span></div>
-    <div class="dr"><span class="dk">β</span><span class="dv">${refOri.b.toFixed(1)}°</span></div>
-    <div class="dr"><span class="dk">γ</span><span class="dv">${refOri.g.toFixed(1)}°</span></div>`:'—';
-  for(const k of Object.keys(KEYS)){const e=$('s2-'+k),f=$('v2-'+k);if(e)e.value=TR[k];if(f)f.textContent=TR[k]+KEYS[k].u;}
+function syncSliders2(){
+  for(const k of Object.keys(KEYS)){
+    const e=$('s2-'+k),f=$('v2-'+k);
+    if(e)e.value=TR[k]; if(f)f.textContent=TR[k]+KEYS[k].u;
+  }
 }
 
-// AR
+// ── MAP (step 3) ──────────────────────────────────────────────────────────
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+
+function openMap(){
+  on($('map-ov'),'on',true);
+  if(!leafMap){
+    leafMap=L.map('leafmap',{zoomControl:true,attributionControl:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(leafMap);
+    leafMap.on('click',onMapClick);
+  }
+  // GPS
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      userLatLng=[pos.coords.latitude,pos.coords.longitude];
+      $('m-gps').textContent=userLatLng[0].toFixed(5)+', '+userLatLng[1].toFixed(5);
+      $('m-gps').className='mval ok';
+      if(userMarker) userMarker.remove();
+      userMarker=L.circleMarker(userLatLng,{radius:8,color:'#4a9eff',fillColor:'#4a9eff',fillOpacity:.9,weight:2})
+        .bindTooltip('Já',{permanent:true,direction:'top',offset:[0,-10]}).addTo(leafMap);
+      leafMap.setView(userLatLng,17);
+      updateDist();
+    },()=>{$('m-gps').textContent='GPS nedostupné';});
+  }
+  setTimeout(()=>leafMap.invalidateSize(),100);
+}
+
+function onMapClick(e){
+  bldLatLng=[e.latlng.lat,e.latlng.lng];
+  $('m-bld').textContent=bldLatLng[0].toFixed(5)+', '+bldLatLng[1].toFixed(5);
+  $('m-bld').className='mval ok';
+  if(bldMarker) bldMarker.remove();
+  bldMarker=L.marker(bldLatLng,{
+    icon:L.divIcon({className:'',html:'<div style="width:14px;height:14px;border-radius:50%;background:#F59E0B;border:2px solid #000;margin:-7px 0 0 -7px"></div>',iconSize:[0,0]})
+  }).bindTooltip('Budova',{permanent:true,direction:'top',offset:[0,-12]}).addTo(leafMap);
+  updateDist();
+}
+
+function updateDist(){
+  if(userLatLng&&bldLatLng){
+    dst=haversine(...userLatLng,...bldLatLng);
+    $('di').value=dst; updDstLbl();
+  }
+}
+function updDstLbl(){$('di').value=dst;}
+function dstStp(d){dst=Math.max(0,dst+d);$('di').value=dst;}
+
+function confirmMap(){
+  on($('map-ov'),'on',false);
+}
+function closeMap(){
+  on($('map-ov'),'on',false);
+}
+
+// ── AR TRACKING ───────────────────────────────────────────────────────────
+// Oprava: horizontální pohyb = alpha (yaw/kompas), vertikální = beta (pitch)
+// Při pohybu telefonu doprava alpha roste → fotografie se pohybuje doleva (záporné dx)
+function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
+
 function startAR(){
-  if(!gyroOk||!refOri)return;
+  if(!gyroOk||!refOri) return;
   const ppd=window.innerWidth/65;
   function loop(){
-    const dx=-(ori.g-refOri.g)*ppd,dy=(ori.b-refOri.b)*ppd;
+    const dx=-angleDiff(ori.a,refOri.a)*ppd;
+    const dy=(ori.b-refOri.b)*ppd;
     applyTR(dx,dy);
-    const el=$('ar-d');if(el)el.textContent=`Δx ${dx.toFixed(1)}  Δy ${dy.toFixed(1)}`;
+    const el=$('ar-d'); if(el) el.textContent=`Δx ${dx.toFixed(0)}  Δy ${dy.toFixed(0)}`;
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
 }
 function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
 
-// ACTIONS
+// ── ACTIONS ───────────────────────────────────────────────────────────────
 function doFix(){refOri={...ori};setPhase('offset');}
+
 function doAnchor(){
-  anchData={refOri:{...refOri},distM:dstU==='m'?dst:dst*1000,tr:{...TR},ts:new Date().toISOString()};
+  anchData={refOri:{...refOri},distM:dst,tr:{...TR},ts:new Date().toISOString()};
   setPhase('anchored');
 }
+
 function fillAnch(){
   $('anch-db').innerHTML=`
     <div class="dr"><span class="dk">Vzdálenost</span><span class="dv">${anchData.distM} m</span></div>
-    <div class="dr"><span class="dk">β</span><span class="dv">${anchData.refOri.b.toFixed(1)}°</span></div>
-    <div class="dr"><span class="dk">γ</span><span class="dv">${anchData.refOri.g.toFixed(1)}°</span></div>
+    <div class="dr"><span class="dk">α (yaw)</span><span class="dv">${anchData.refOri.a.toFixed(1)}°</span></div>
+    <div class="dr"><span class="dk">β (pitch)</span><span class="dv">${anchData.refOri.b.toFixed(1)}°</span></div>
     <div class="dr"><span class="dk">Opacita</span><span class="dv">${anchData.tr.opa}%</span></div>
     <div class="dr"><span class="dk">Velikost</span><span class="dv">${anchData.tr.sz}%</span></div>
     ${gyroOk?'<div class="dr" style="margin-top:3px;border-top:1px solid rgba(255,255,255,.05);padding-top:3px"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':''}`;
 }
+
 async function doCopy(){
   try{await navigator.clipboard.writeText(JSON.stringify(anchData,null,2));}catch(e){}
   const b=$('btn-copy');b.textContent='✓ OK';b.className='btn bok';
   setTimeout(()=>{b.textContent='KOPÍROVAT JSON';b.className='btn bp';},2000);
 }
+
 function goBack(){
   stopAR();
-  const c=$('cam');if(c.srcObject)c.srcObject.getTracks().forEach(t=>t.stop());c.srcObject=null;
-  on(c,'on',false);on($('sl'),'on',false);on($('ov'),'on',false);
-  on($('panel'),'on',false);on($('b-live'),'on',false);on($('b-anchor'),'on',false);
+  const c=$('cam');
+  if(c.srcObject) c.srcObject.getTracks().forEach(t=>t.stop());
+  c.srcObject=null;
+  on(c,'on',false); on($('sl'),'on',false); on($('ov'),'on',false);
+  on($('panel'),'on',false); on($('b-live'),'on',false); on($('b-anchor'),'on',false);
   $('topbar').style.display='none';
-  on($('scr-load'),'off',false);phase='load';
+  on($('scr-load'),'off',false);
+  phase='load';
 }
+
 function doReset(){
   Object.assign(TR,{opa:50,sz:100,px:0,py:0,rx:0,ry:0});
   for(const k of Object.keys(KEYS)){const e=$('s-'+k);if(e)e.value=TR[k];}
-  refOri=null;anchData=null;dst=20;dstU='m';goBack();
+  refOri=null; anchData=null; dst=0; bldLatLng=null;
+  goBack();
 }
 
-// FILE INPUT
+// ── FILE INPUT ─────────────────────────────────────────────────────────────
 $('file-input').addEventListener('change',function(e){
-  const f=e.target.files[0];if(!f)return;
+  const f=e.target.files[0]; if(!f) return;
   const url=URL.createObjectURL(f);
   $('ov-photo').src=url;
-  $('prev').src=url;$('prev').style.display='block';
+  $('prev').src=url; $('prev').style.display='block';
   $('fz-icon').textContent='✓';
   $('fz-lbl').textContent='Načteno — změnit';
   $('btn-start').style.display='block';
