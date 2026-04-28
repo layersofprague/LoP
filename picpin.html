@@ -258,7 +258,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 <div id="b-anchor">● UKOTVENO</div>
 <div id="b-err"></div>
 
-<!-- CALIB AXIS CROSSHAIR — full screen, rotates with rollIntegrated -->
+<!-- CALIB AXIS CROSSHAIR — full screen -->
 <svg id="calib-xh" xmlns="http://www.w3.org/2000/svg">
   <!-- drawn by JS in drawCalibXh() -->
 </svg>
@@ -408,30 +408,21 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 
     <!-- KROK 4: UKOTVENO -->
     <div id="panch" style="display:none;padding:8px 10px 10px;display:none;flex-direction:column;gap:8px">
+      <!-- AOS status + request button -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+        <button id="aos-badge" onclick="reqAOS();syncAOSBadge()"
+          style="font-size:9px;padding:2px 8px;border-radius:3px;cursor:pointer;
+            border:1px solid rgba(255,255,255,.08);background:none;
+            color:rgba(255,255,255,.2);font-family:'JetBrains Mono',monospace">⊕ AOS —</button>
+        <span style="font-size:8px;color:rgba(255,255,255,.18);letter-spacing:.05em">
+          Kvaternion roll kompenzace</span>
+      </div>
       <!-- Přepínač gyro/kompas -->
       <button id="btn-ar-mode2"
         style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;
           letter-spacing:.06em;cursor:pointer;border-radius:4px;transition:all .15s;
           background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border:1px solid rgba(16,185,129,.2)"
         onclick="toggleARMode()">⟳ GYRO (výchozí) — klepni pro 🧭 KOMPAS</button>
-      <!-- Roll — komplementární filtr -->
-      <div style="background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.15);
-        border-radius:4px;padding:5px 7px">
-        <div style="font-size:7px;color:rgba(96,165,250,.5);letter-spacing:.1em;
-          text-transform:uppercase;margin-bottom:4px">⟳ ROLL kompenzace</div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <button class="sb" onclick="rollHybrid=0"
-            style="color:rgba(96,165,250,.7);border-color:rgba(96,165,250,.2);font-size:9px">0</button>
-          <span style="font-size:7px;color:rgba(255,255,255,.2)">gyro</span>
-          <button class="sb" onclick="setRollAlpha(rollAlpha-0.01)">−</button>
-          <input type="range" class="rng" id="roll-alpha-sl" min="0" max="1" step="0.01" value="0.70"
-            oninput="setRollAlpha(+this.value)" style="flex:1">
-          <button class="sb" onclick="setRollAlpha(rollAlpha+0.01)">+</button>
-          <span style="font-size:7px;color:rgba(255,255,255,.2)">komp</span>
-          <span id="roll-av" style="font-size:9px;color:rgba(96,165,250,.9);
-            width:28px;text-align:right;flex-shrink:0">0.70</span>
-        </div>
-      </div>
       <!-- Akce -->
       <div style="display:flex;gap:5px">
         <button class="btn bs" style="flex:1" onclick="doReset()">RESET</button>
@@ -521,11 +512,78 @@ let gyroLastT=null;
 let yawCalibOffset=0;
 // Axis defaults: H=rβ+, V=rα+  (user confirmed working)
 let gyroHAxis='b', gyroVAxis='a', gyroHSign=1, gyroVSign=1;
-let rollHybrid=0;
-let rollAlpha=0.7;
-let rawRate={a:0,b:0,g:0}; // live debug values
+let rawRate={a:0,b:0,g:0};
+// AbsoluteOrientationSensor — fusovaný kvaternion bez gimbal problému
+let aoSensor=null, aoOk=false;
+let qCur={x:0,y:0,z:0,w:1};  // aktuální kvaternion
+let qRef={x:0,y:0,z:0,w:1};  // referenční kvaternion (FIX)
+let rollFromQuat=0;            // extrahovný roll v °
 const $=id=>document.getElementById(id);
 const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
+
+// ── AbsoluteOrientationSensor (kvaternion) ──────────────────────────────────
+function initAOS(){
+  if(!('AbsoluteOrientationSensor' in window)) return;
+  try{
+    aoSensor = new AbsoluteOrientationSensor({frequency:60, referenceFrame:'device'});
+    aoSensor.addEventListener('reading', ()=>{
+      const q = aoSensor.quaternion; // [x,y,z,w]
+      qCur = {x:q[0], y:q[1], z:q[2], w:q[3]};
+    });
+    aoSensor.addEventListener('error', e=>{
+      console.warn('AOS error:', e.error);
+      aoOk=false;
+    });
+    aoSensor.start();
+    aoOk=true;
+    syncAOSBadge();
+  } catch(e){ console.warn('AOS init failed:', e); }
+}
+
+// Request permissions then init (required on some devices)
+async function reqAOS(){
+  try{
+    const p = await Promise.all([
+      navigator.permissions.query({name:'accelerometer'}),
+      navigator.permissions.query({name:'gyroscope'}),
+      navigator.permissions.query({name:'magnetometer'}),
+    ]);
+    if(p.every(r=>r.state==='granted'||r.state==='prompt')) initAOS();
+  } catch(e){ initAOS(); } // try anyway if permissions API unavailable
+}
+
+function syncAOSBadge(){
+  const b=$('aos-badge'); if(!b) return;
+  b.textContent = aoOk ? '⊕ AOS OK' : '⊕ AOS —';
+  b.style.color  = aoOk ? 'rgba(96,165,250,.9)' : 'rgba(255,255,255,.2)';
+  b.style.borderColor = aoOk ? 'rgba(96,165,250,.3)' : 'rgba(255,255,255,.08)';
+}
+
+// Quaternion math helpers
+function qMul(a,b){
+  return {
+    w: a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z,
+    x: a.w*b.x + a.x*b.w + a.y*b.z - a.z*b.y,
+    y: a.w*b.y - a.x*b.z + a.y*b.w + a.z*b.x,
+    z: a.w*b.z + a.x*b.y - a.y*b.x + a.z*b.w
+  };
+}
+function qConj(q){ return {x:-q.x, y:-q.y, z:-q.z, w:q.w}; }
+// Extract roll (Z axis rotation) from quaternion in degrees
+function qRoll(q){
+  // roll = atan2(2(wy+xz), 1-2(y²+x²)) ... but device axes may differ
+  // Using: roll around device Z = screen normal
+  const sinr = 2*(q.w*q.z + q.x*q.y);
+  const cosr = 1 - 2*(q.y*q.y + q.z*q.z);
+  return Math.atan2(sinr, cosr) * 180 / Math.PI;
+}
+// Relative roll between reference and current quaternion
+function relativeRoll(){
+  if(!aoOk) return 0;
+  // delta = qRef^-1 * qCur
+  const delta = qMul(qConj(qRef), qCur);
+  return qRoll(delta);
+}
 
 // ── LAYOUT ────────────────────────────────────────────────────────────────
 function updateLayout(){
@@ -593,11 +651,6 @@ window.addEventListener('devicemotion', e=>{
     gyroAngles.x += hVal * dt;
     gyroAngles.y += vVal * dt;
   }
-  // Complementary filter for roll: gyro speed + compass anchor
-  if(dt>0 && phase==='anchored' && refOri){
-    const compass_roll = ori.g - refOri.g;
-    rollHybrid = rollAlpha*(rollHybrid + rawRate.a*dt) + (1-rollAlpha)*compass_roll;
-  }
   gyroLastT=now;
 },true);
 
@@ -640,6 +693,7 @@ function startCam(){
     on($('cam'),'on',true); on($('sl'),'on',true);
     on($('scr-load'),'off',true);
     $('topbar').style.display='flex';
+    reqAOS();
     setPhase('calib');
   }).catch(e=>{
     $('b-err').textContent=e.name+': '+e.message;
@@ -1004,7 +1058,7 @@ function startAR(){
   // Uses gyroHAxis/gyroVAxis/gyroHSign/gyroVSign — same vars set in calib step ✓
   if(!refOri) refOri={...ori}; // fallback: use current orientation if FIX was skipped
   // reset gyro integration from current anchor point
-  gyroAngles={x:0,y:0}; gyroLastT=null; rollHybrid=0;
+  gyroAngles={x:0,y:0}; gyroLastT=null;
   const ppd=window.innerWidth/65;
   function loop(){
     let dx,dy;
@@ -1021,9 +1075,10 @@ function startAR(){
       dx = -(alpha_d * Math.cos(beta_r) - gamma_d * Math.sin(beta_r)) * ppd;
       dy = (ori.b - refOri.b) * ppd;
     }
-    applyTR(dx, dy, rollHybrid);
+    const roll = aoOk ? relativeRoll() : 0;
+    applyTR(dx, dy, roll);
     const el=$('ar-d');
-    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
+    if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+(aoOk?' r'+roll.toFixed(1):'');
 
     rafId=requestAnimationFrame(loop);
   }
@@ -1119,6 +1174,7 @@ function loadCalibJSON(){
 // ── ACTIONS ───────────────────────────────────────────────────────────────
 function doFix(){
   refOri={...ori};
+  qRef={...qCur}; // save quaternion reference
   const lbl=$('plbl');
   lbl.textContent='ZAROVNÁNO'; lbl.style.color='rgba(16,185,129,.9)';
   setTimeout(()=>setPhase('offset'),600);
@@ -1132,12 +1188,6 @@ function doAnchor(){
 function toggleRoll(){
 }
 
-function setRollAlpha(v){
-  rollAlpha = Math.round(Math.min(1, Math.max(0, v)) * 100) / 100;
-  const sl=$('roll-alpha-sl'), av=$('roll-av');
-  if(sl) sl.value = rollAlpha;
-  if(av) av.textContent = rollAlpha.toFixed(2);
-}
 function fillAnch(){
   // AR delta span used by startAR loop
   const ab=$('anch-db'); if(ab) ab.innerHTML=gyroOk?'<div class="dr"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':'';
