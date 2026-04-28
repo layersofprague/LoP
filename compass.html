@@ -144,7 +144,7 @@ if (!isNaN(TARGET.lat)) {
   var tMarker = L.marker([TARGET.lat, TARGET.lng], {
     icon: L.divIcon({ html: pinHtml, className: '', iconSize: [34,34], iconAnchor: [17,17] })
   }).addTo(map);
-  tMarker.on('click', function(e) { showTip(e, TARGET); });
+  tMarker.on('click', function(e) { L.DomEvent.stopPropagation(e); showTip(e, TARGET); });
 }
 
 // ── TOOLTIP ──
@@ -235,7 +235,7 @@ LOCATIONS.forEach(function(loc) {
   }).addTo(map);
   (function(mk,l){
     setTimeout(function(){ var el=mk.getElement(); if(el) el.style.opacity='0.2'; }, 150);
-    mk.on('click', function(e){ showTip(e, l); });
+    mk.on('click', function(e){ L.DomEvent.stopPropagation(e); showTip(e, l); });
   })(marker, loc);
 });
 
