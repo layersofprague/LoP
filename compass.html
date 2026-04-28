@@ -174,8 +174,10 @@ function showTip(e, loc) {
   // Store loc id for detail button
   tip.dataset.locId = loc.id !== undefined ? loc.id : '';
   // Position
-  var cx = e.originalEvent.clientX;
-  var cy = e.originalEvent.clientY;
+  var oe = e.originalEvent;
+  var touch = (oe.touches && oe.touches[0]) || (oe.changedTouches && oe.changedTouches[0]);
+  var cx = oe.clientX !== undefined ? oe.clientX : (touch ? touch.clientX : window.innerWidth/2);
+  var cy = oe.clientY !== undefined ? oe.clientY : (touch ? touch.clientY : window.innerHeight/2);
   var tipW = 200, tipH = 180;
   var left = Math.min(Math.max(cx - tipW/2, 8), window.innerWidth - tipW - 8);
   var top  = cy - tipH - 12;
@@ -362,8 +364,18 @@ function addHeadingSample(raw) {
 
 var isLocked = true; // false = user manually panned/zoomed, stop GPS following
 
+var relockTimer = null;
 map.on('dragstart zoomstart', function() {
   isLocked = false;
+  if (relockTimer) clearTimeout(relockTimer);
+});
+map.on('dragend zoomend', function() {
+  if (relockTimer) clearTimeout(relockTimer);
+  relockTimer = setTimeout(function() {
+    isLocked = true;
+    // Snap back to user position
+    if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: true });
+  }, 3000);
 });
 
 var lastPanLat = null, lastPanLng = null;
