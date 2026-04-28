@@ -34,8 +34,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
   <div id="userDot"></div>
   <input type="file" id="calFile" accept=".json" style="display:none" onchange="importCal(this)"/>
   <!-- Cal button top right -->
+  <button onclick="fitBoth()" style="position:absolute;top:12px;right:12px;z-index:200;
+    width:28px;height:28px;border-radius:50%;
+    background:rgba(238,239,235,.9);border:1px solid #cbcec5;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 4px rgba(26,24,20,.15);">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3a3a36" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+    </svg>
+  </button>
+
   <button id="calBtn" onclick="toggleCal()" ontouchstart="calTouchStart()" ontouchend="calTouchEnd()"
-    style="position:absolute;top:12px;right:12px;z-index:200;
+    style="position:absolute;top:12px;right:48px;z-index:200;
       height:28px;padding:0 10px;border-radius:14px;
       font-family:monospace;font-size:11px;font-weight:600;letter-spacing:.04em;
       border:none;cursor:pointer;white-space:nowrap;
@@ -237,6 +248,16 @@ function loadCal() {
   } catch(e) { yawOffset = 0; calEnabled = false; }
   updateCalBtn();
 }
+function fitBoth() {
+  if (!userPos || isNaN(TARGET.lat)) return;
+  isLocked = false;
+  var bounds = L.latLngBounds(
+    [userPos.lat, userPos.lng],
+    [TARGET.lat, TARGET.lng]
+  );
+  map.fitBounds(bounds, { padding: [60, 60], maxZoom: 17, animate: true });
+}
+
 function updateCalBtn() {
   var btn = document.getElementById('calBtn'); if (!btn) return;
   var cal = null;
@@ -339,6 +360,12 @@ function addHeadingSample(raw) {
   }
 }
 
+var isLocked = true; // false = user manually panned/zoomed, stop GPS following
+
+map.on('dragstart zoomstart', function() {
+  isLocked = false;
+});
+
 var lastPanLat = null, lastPanLng = null;
 navigator.geolocation && navigator.geolocation.watchPosition(
   function(pos) {
@@ -346,7 +373,7 @@ navigator.geolocation && navigator.geolocation.watchPosition(
     // Only pan if moved more than ~3m to suppress GPS noise
     var dlat = Math.abs(userPos.lat - lastPanLat);
     var dlng = Math.abs(userPos.lng - lastPanLng);
-    if (lastPanLat === null || dlat > 0.00003 || dlng > 0.00003) {
+    if (isLocked && (lastPanLat === null || dlat > 0.00003 || dlng > 0.00003)) {
       lastPanLat = userPos.lat; lastPanLng = userPos.lng;
       map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
     }
@@ -427,16 +454,28 @@ window.addEventListener('resize', function() {
   });
 });
 </script>
-<!-- Tooltip -->
-  <div id="tipBox" style="
-    display:none;position:fixed;z-index:1000;
-    width:200px;
-    background:#eeefeb;border:1px solid #cbcec5;border-radius:10px;
-    overflow:hidden;box-shadow:0 8px 24px rgba(26,24,20,.18);
-    pointer-events:auto;
-  ">
-    <div id="tipImg" style="width:100%;height:100px;background:linear-gradient(135deg,#4A4A48,#8a5a3a);position:relative;overflow:hidden;">
-      <div id="tipImgEl" style="position:absolute;inset:0;background-size:cover;background-position:center"></div>
+
+<!-- Tooltip (position:fixed, outside clip) -->
+<div id="tipBox" style="display:none;position:fixed;z-index:1000;width:200px;background:#eeefeb;border:1px solid #cbcec5;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(26,24,20,.18);pointer-events:auto;">
+  <div id="tipImg" style="width:100%;height:100px;position:relative;overflow:hidden;background:linear-gradient(135deg,#4A4A48,#8a5a3a);">
+    <div id="tipImgEl" style="position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center"></div>
+  </div>
+  <div style="padding:8px 10px 10px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:6px">
+      <div id="tipName" style="font-family:serif;font-size:14px;font-weight:500;color:#1a1a18;line-height:1.2"></div>
+      <div id="tipDist" style="font-family:monospace;font-size:10px;color:#9a9a94;white-space:nowrap;flex-shrink:0"></div>
     </div>
+    <div style="display:flex;gap:6px">
+      <button onclick="tipOpenDetail()" style="flex:1;padding:5px 6px;border-radius:6px;border:1px solid #cbcec5;background:#e6e7e2;font-family:monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#3a3a36;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Detail
+      </button>
+      <button onclick="hideTip()" style="flex:1;padding:5px 6px;border-radius:6px;border:1px solid #cbcec5;background:#e6e7e2;font-family:monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#3a3a36;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Zavřít
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
