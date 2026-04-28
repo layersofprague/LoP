@@ -2353,7 +2353,7 @@ function initMap() {
     m.on('click', () => openSheet(loc.id));
     m.on('mouseover', () => {
       const c = CAT[loc.cat];
-      const compassUrl = `compass.html?id=${loc.id}&num=${encodeURIComponent(loc.num)}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}`;
+      const compassUrl = `compass.html?id=${loc.id}&num=${encodeURIComponent(loc.num)}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
       const wBtn = isWished(loc.id);
       rt.innerHTML = `
         <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
