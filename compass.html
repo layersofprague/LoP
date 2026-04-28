@@ -41,18 +41,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
       border:none;cursor:pointer;white-space:nowrap;
       transition:background .2s,color .2s;">
   </button>
-
-  <!-- Tooltip -->
-  <div id="tipBox" style="
-    display:none;position:absolute;z-index:300;
-    width:200px;
-    background:#eeefeb;border:1px solid #cbcec5;border-radius:10px;
-    overflow:hidden;box-shadow:0 8px 24px rgba(26,24,20,.18);
-    pointer-events:auto;
-  ">
-    <div id="tipImg" style="width:100%;height:100px;background:linear-gradient(135deg,#4A4A48,#8a5a3a);position:relative;overflow:hidden;">
-      <div id="tipImgEl" style="position:absolute;inset:0;background-size:cover;background-position:center"></div>
-    </div>
     <div style="padding:8px 10px 10px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:6px">
         <div id="tipName" style="font-family:serif;font-size:14px;font-weight:500;color:#1a1a18;line-height:1.2"></div>
@@ -131,16 +119,17 @@ map.setView(initCenter, 16);
 // Target pin
 if (!isNaN(TARGET.lat)) {
   var n = String(TARGET.num), m = n.match(/^([A-Z]+)(\d+)$/);
-  // Target pin — circle with checkered fill (SVG pattern)
-  var pinHtml = '<svg width="34" height="34" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))">'
-    + '<defs><pattern id="chk" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">'
-    + '<rect width="4" height="4" fill="#1a1a18"/>'
-    + '<rect x="4" y="4" width="4" height="4" fill="#1a1a18"/>'
-    + '<rect x="4" y="0" width="4" height="4" fill="#fff"/>'
-    + '<rect x="0" y="4" width="4" height="4" fill="#fff"/>'
-    + '</pattern></defs>'
-    + '<circle cx="17" cy="17" r="15" fill="url(#chk)" stroke="#fff" stroke-width="2"/>'
-    + '</svg>';
+  // Target pin — CSS checkered circle
+  var pinHtml = '<div style="'
+    + 'width:34px;height:34px;border-radius:50%;'
+    + 'border:2px solid #fff;box-shadow:0 2px 6px rgba(26,24,20,.35);'
+    + 'background-image:linear-gradient(45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(-45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(45deg,transparent 75%,#1a1a18 75%),'
+    + 'linear-gradient(-45deg,transparent 75%,#1a1a18 75%);'
+    + 'background-size:8px 8px;background-color:#fff;'
+    + 'background-position:0 0,0 4px,4px -4px,-4px 0;'
+    + '"></div>'
   var tMarker = L.marker([TARGET.lat, TARGET.lng], {
     icon: L.divIcon({ html: pinHtml, className: '', iconSize: [34,34], iconAnchor: [17,17] })
   }).addTo(map);
@@ -231,10 +220,10 @@ LOCATIONS.forEach(function(loc) {
     icon: L.divIcon({ html: ph, className: '', iconSize: [30,30], iconAnchor: [15,15] }),
     zIndexOffset: -100
   }).addTo(map);
-  marker.on('add', function() {
-    var el = marker.getElement(); if (el) el.style.opacity = '0.2';
-  });
-  (function(l){ marker.on('click', function(e) { showTip(e, l); }); })(loc);
+  (function(mk,l){
+    setTimeout(function(){ var el=mk.getElement(); if(el) el.style.opacity='0.2'; }, 150);
+    mk.on('click', function(e){ showTip(e, l); });
+  })(marker, loc);
 });
 
 // ── CALIBRATION ──
@@ -438,5 +427,16 @@ window.addEventListener('resize', function() {
   });
 });
 </script>
+<!-- Tooltip -->
+  <div id="tipBox" style="
+    display:none;position:fixed;z-index:1000;
+    width:200px;
+    background:#eeefeb;border:1px solid #cbcec5;border-radius:10px;
+    overflow:hidden;box-shadow:0 8px 24px rgba(26,24,20,.18);
+    pointer-events:auto;
+  ">
+    <div id="tipImg" style="width:100%;height:100px;background:linear-gradient(135deg,#4A4A48,#8a5a3a);position:relative;overflow:hidden;">
+      <div id="tipImgEl" style="position:absolute;inset:0;background-size:cover;background-position:center"></div>
+    </div>
 </body>
 </html>
