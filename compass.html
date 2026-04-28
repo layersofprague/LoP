@@ -212,6 +212,39 @@ document.getElementById('clip').addEventListener('click', function(e) {
   if (tip && !tip.contains(e.target)) hideTip();
 });
 
+// ── OTHER LOCATIONS (dimmed) ──
+var LOCATIONS = [
+  { id:0, name:"Šítkovská věž", lat:50.0784, lng:14.4133, cat:"hist", num:101 },
+  { id:1, name:"Václavské náměstí", lat:50.0815, lng:14.4278, cat:"hist", num:102 },
+  { id:2, name:"Staroměstské nám.", lat:50.0875, lng:14.4213, cat:"arch", num:201 },
+  { id:3, name:"Národní divadlo", lat:50.0808, lng:14.4133, cat:"arch", num:202 },
+  { id:4, name:"Pražský hrad", lat:50.0911, lng:14.4016, cat:"fun", num:301 },
+  { id:5, name:"Holešovický přístav", lat:50.10543, lng:14.45595, cat:"hist", num:"H001" },
+  { id:6, name:"Letenské sady", lat:50.0939, lng:14.4224, cat:"fun", num:302 },
+  { id:7, name:"Tančící dům", lat:50.0754, lng:14.4141, cat:"arch", num:203 }
+];
+var CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
+
+LOCATIONS.forEach(function(loc) {
+  // Skip the target location
+  if (String(loc.id) === String(TARGET.id)) return;
+  var n = String(loc.num), m = n.match(/^([A-Z]+)(\d+)$/);
+  var col = CAT_COLOR[loc.cat] || '#4A4A48';
+  var ph = m
+    ? '<div style="width:30px;height:30px;border-radius:50%;background:' + col + ';border:2px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#fff"><span style="font-size:10px;font-weight:700;line-height:1">' + m[1] + '</span><span style="font-size:7px;opacity:.8;line-height:1">' + m[2] + '</span></div>'
+    : '<div style="width:30px;height:30px;border-radius:50%;background:' + col + ';border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;font-weight:700;color:#fff">' + n + '</div>';
+  var marker = L.marker([loc.lat, loc.lng], {
+    icon: L.divIcon({ html: ph, className: '', iconSize: [30,30], iconAnchor: [15,15] }),
+    opacity: 0.2,
+    zIndexOffset: -100
+  }).addTo(map);
+  // Also dim the icon element after render
+  marker.on('add', function() {
+    var el = marker.getElement();
+    if (el) el.style.opacity = '0.2';
+  });
+});
+
 // ── CALIBRATION ──
 var yawOffset = 0, calEnabled = false;
 function loadCal() {
