@@ -144,7 +144,7 @@ if (!isNaN(TARGET.lat)) {
   var tMarker = L.marker([TARGET.lat, TARGET.lng], {
     icon: L.divIcon({ html: pinHtml, className: '', iconSize: [34,34], iconAnchor: [17,17] })
   }).addTo(map);
-  tMarker.on('click', function(e) { L.DomEvent.stopPropagation(e); showTip(e, TARGET); });
+  tMarker.on('click', function(e) { L.DomEvent.stopPropagation(e); e.originalEvent.stopPropagation(); showTip(e, TARGET); });
 }
 
 // ── TOOLTIP ──
@@ -185,6 +185,8 @@ function showTip(e, loc) {
   tip.style.left = left + 'px';
   tip.style.top  = top  + 'px';
   tip.style.display = 'block';
+  tipJustShown = true;
+  setTimeout(function(){ tipJustShown = false; }, 300);
 }
 function hideTip() { document.getElementById('tipBox').style.display = 'none'; }
 function tipOpenDetail() {
@@ -202,8 +204,10 @@ function calcDistSimple(a, b) {
   var h = Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
   return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
 }
+var tipJustShown = false;
 // Close tip on map click
 document.getElementById('clip').addEventListener('click', function(e) {
+  if (tipJustShown) return;
   var tip = document.getElementById('tipBox');
   if (tip && !tip.contains(e.target)) hideTip();
 });
@@ -235,7 +239,7 @@ LOCATIONS.forEach(function(loc) {
   }).addTo(map);
   (function(mk,l){
     setTimeout(function(){ var el=mk.getElement(); if(el) el.style.opacity='0.2'; }, 150);
-    mk.on('click', function(e){ L.DomEvent.stopPropagation(e); showTip(e, l); });
+    mk.on('click', function(e){ L.DomEvent.stopPropagation(e); e.originalEvent.stopPropagation(); showTip(e, l); });
   })(marker, loc);
 });
 
