@@ -269,10 +269,6 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 
       <!-- KROK 3: UKOTVENO -->
       <div id="panch" style="display:none;flex-direction:column;gap:6px;padding:2px 0 4px">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
-          <button id="aos-badge" onclick="reqAOS()" style="font-size:9px;padding:2px 8px;border-radius:3px;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:none;color:rgba(255,255,255,.2);font-family:'JetBrains Mono',monospace">⊕ AOS —</button>
-          <span style="font-size:8px;color:rgba(255,255,255,.18);letter-spacing:.05em">Roll kompenzace</span>
-        </div>
         <button id="btn-ar-mode2" onclick="toggleARMode()" style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.06em;cursor:pointer;border-radius:4px;transition:all .15s;background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border:1px solid rgba(16,185,129,.2)">⟳ GYRO — klepni pro 🧭 KOMPAS</button>
         <div id="anch-db" class="db"></div>
         <div style="display:flex;gap:5px">
@@ -645,9 +641,9 @@ function startAR(){
     let dx,dy;
     if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
     else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
-    const roll=aoOk?relativeRoll():0;
+    const roll=aoOk&&phase==='calib'?relativeRoll():0;
     applyTR(dx,dy,roll);
-    const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+(aoOk?' r'+roll.toFixed(1):'');
+    const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
