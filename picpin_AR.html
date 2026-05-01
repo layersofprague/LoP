@@ -125,9 +125,10 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 .ax-btn.on-h{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#EF4444}
 .ax-btn.on-v{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.35);color:#10B981}
 .ax-btn:active{background:rgba(255,255,255,.1)}
+#ar-canvas{position:fixed;inset:0;z-index:3;display:none;pointer-events:none}
+#ar-canvas.on{display:block}
 #calib-xh{position:fixed;inset:0;z-index:4;pointer-events:none;display:none}
 #calib-xh.on{display:block}
-@media(orientation:landscape){
   #panel.on{top:0;bottom:0;left:auto;right:0;width:42vw;max-height:100vh;border-top:none;border-left:1px solid rgba(255,255,255,.05)}
   #handle{display:none}
 }
@@ -191,6 +192,7 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 <div id="ph-ar">
   <video id="cam" autoplay muted playsinline></video>
   <div id="ov"><img id="ov-photo" src="" alt=""></div>
+  <canvas id="ar-canvas"></canvas>
   <div id="sl"></div>
   <div id="xh"></div>
   <div id="b-anchor">● UKOTVENO</div>
@@ -660,28 +662,130 @@ function drawCalibXh(){
 }
 
 // AR RENDER
+// In step 2 (align): simple CSS transform
+// In step 3 (anchored): homography from GPS corners → matrix3d
 function applyTR(dx,dy,rollDeg){
   const img=$('ov-photo'),roll=rollDeg||0;
   img.style.opacity=TR.opa/100;
-  // Perspective distortion: photo appears to tilt as it moves off-center
-  // Vertical movement (dy) → rotateX: moving up = top recedes (negative rotateX)
-  // Horizontal movement (dx) → rotateY: moving right = right recedes (positive rotateY)
-  // Scale: ~0.04° per pixel of offset, stronger vertically
   const totalDy=(TR.py+(dy||0));
   const totalDx=(TR.px+(dx||0));
   const perspH=window.innerHeight, perspW=window.innerWidth;
-  const dynRx = TR.rx - (totalDy/perspH)*25; // up to ±25° from screen edge
-  const dynRy = TR.ry + (totalDx/perspW)*15; // up to ±15° from screen edge
+  const dynRx = TR.rx - (totalDy/perspH)*25;
+  const dynRy = TR.ry + (totalDx/perspW)*15;
   img.style.transform=`translate(${totalDx}px,${totalDy}px) rotateZ(${-roll}deg) scale(${TR.sz/100}) perspective(600px) rotateX(${dynRx}deg) rotateY(${dynRy}deg)`;
   img.style.transition=dx!==undefined?'transform 60ms linear':'none';
+  // Fade mask — always elliptical
+  img.style.webkitMaskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
+  img.style.maskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
 }
+
+// Apply homography matrix3d to image element
+// corners: [{x,y},{x,y},{x,y},{x,y}] in canvas pixels — TL,TR,BR,BL
+function applyHomography(corners){
+  const img=$('ov-photo');
+  if(!photoImg||!corners) return;
+  const W=photoImg.naturalWidth, H=photoImg.naturalHeight;
+  // Source corners (normalised 0-1)
+  const src=[[0,0],[1,0],[1,1],[0,1]];
+  // Destination corners in screen pixels
+  const dst=corners;
+  // Compute perspective transform matrix (3x3 homogeneous)
+  // Using standard DLT approach
+  const m=getPerspectiveTransform(src,dst,W,H);
+  if(!m) return;
+  img.style.opacity=TR.opa/100;
+  img.style.transform='none';
+  img.style.position='absolute';
+  img.style.left='0'; img.style.top='0';
+  img.style.width=W+'px'; img.style.height=H+'px';
+  img.style.transformOrigin='0 0';
+  img.style.transform=`matrix3d(${m.join(',')})`;
+  img.style.transition='transform 60ms linear';
+  img.style.webkitMaskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
+  img.style.maskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
+}
+
+// Compute CSS matrix3d from 4 source→dest point correspondences
+// src: normalised 0-1 coords, dst: screen pixels
+function getPerspectiveTransform(src, dst, W, H){
+  // Build 8x8 system Ax=b
+  const A=[], b=[];
+  for(let i=0;i<4;i++){
+    const sx=src[i][0]*W, sy=src[i][1]*H;
+    const dx=dst[i][0], dy=dst[i][1];
+    A.push([sx,sy,1,0,0,0,-dx*sx,-dx*sy]);
+    A.push([0,0,0,sx,sy,1,-dy*sx,-dy*sy]);
+    b.push(dx); b.push(dy);
+  }
+  const h=solveLinear8(A,b);
+  if(!h) return null;
+  const h11=h[0],h12=h[1],h13=h[2],h21=h[3],h22=h[4],h23=h[5],h31=h[6],h32=h[7],h33=1;
+  // CSS matrix3d is column-major 4x4
+  return [
+    h11, h21, 0, h31,
+    h12, h22, 0, h32,
+    0,   0,   1, 0,
+    h13, h23, 0, h33
+  ];
+}
+
+// Gaussian elimination for 8x8 system
+function solveLinear8(A,b){
+  const n=8;
+  const M=A.map((row,i)=>[...row,b[i]]);
+  for(let col=0;col<n;col++){
+    let maxR=col;
+    for(let r=col+1;r<n;r++) if(Math.abs(M[r][col])>Math.abs(M[maxR][col])) maxR=r;
+    [M[col],M[maxR]]=[M[maxR],M[col]];
+    if(Math.abs(M[col][col])<1e-10) return null;
+    for(let r=0;r<n;r++){
+      if(r===col) continue;
+      const f=M[r][col]/M[col][col];
+      for(let c=col;c<=n;c++) M[r][c]-=f*M[col][c];
+    }
+  }
+  return M.map((row,i)=>row[n]/row[i]);
+}
+
+// World-to-screen projection for a GPS+alt point
+// userPos: {lat,lng}, headingDeg: current compass heading
+// pointGPS: {lat,lng,alt}: world point
+// returns {x,y} screen coords or null if behind camera
+function worldToScreen(pointGPS, userPosW, headingDeg, heightM){
+  const R=6371000;
+  const fovH=60*Math.PI/180;
+  const W=window.innerWidth, H=window.innerHeight;
+  const fPx=(W/2)/Math.tan(fovH/2);
+  // Vector from user to point in metres (ENU frame: east=x, north=y, up=z)
+  const dLat=(pointGPS.lat-userPosW.lat)*Math.PI/180*R;
+  const dLng=(pointGPS.lng-userPosW.lng)*Math.PI/180*R*Math.cos(userPosW.lat*Math.PI/180);
+  const dAlt=(pointGPS.alt||0)-(heightM||1.6);
+  // Rotate ENU into camera frame (heading = yaw around Z)
+  const az=headingDeg*Math.PI/180;
+  const forward= dLat*Math.cos(az)+dLng*Math.sin(az);
+  const right  =-dLat*Math.sin(az)+dLng*Math.cos(az);
+  const up     = dAlt;
+  if(forward<0.5) return null; // behind or too close
+  const sx=W/2+right*fPx/forward;
+  const sy=H/2-up*fPx/forward;
+  return {x:sx, y:sy};
+}
+
 function upd(k,v,u){TR[k]=+v;$('v-'+k).textContent=v+u;applyTR();}
 function stp(k,d){const e=$('s-'+k),m=KEYS[k];const v=Math.min(m.max,Math.max(m.min,TR[k]+d));e.value=v;upd(k,v,m.u);}
 
 let calibAngles={x:0,y:0},calibLastT=null;
 function calibUpd(k,v){calibTR[k]=+v;$('cv-'+k).textContent=v+(k==='opa'?'%':'%');applyCalibTR(calibAngles.x,calibAngles.y);}
 function calibStp(k,d){const lim={opa:[0,100],sz:[10,300]};const[mn,mx]=lim[k];calibTR[k]=Math.min(mx,Math.max(mn,calibTR[k]+d));$('c-'+k).value=calibTR[k];calibUpd(k,calibTR[k]);}
-function applyCalibTR(dx,dy){const img=$('ov-photo'),ppd=window.innerWidth/65;img.style.opacity=calibTR.opa/100;img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;img.style.transition='none';}
+function applyCalibTR(dx,dy){
+  const img=$('ov-photo'),ppd=window.innerWidth/65;
+  img.style.opacity=calibTR.opa/100;
+  img.style.position='';img.style.left='';img.style.top='';img.style.width='';img.style.height='';img.style.transformOrigin='';
+  img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;
+  img.style.transition='none';
+  img.style.webkitMaskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
+  img.style.maskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
+}
 function startCalibAR(){
   calibAngles={x:0,y:0};calibLastT=null;
   function loop(){
@@ -694,17 +798,76 @@ function startCalibAR(){
 function resetCalibView(){calibAngles={x:0,y:0};calibLastT=null;applyCalibTR(0,0);}
 
 function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
+
 function startAR(){
   if(!refOri)refOri={...ori};
   gyroAngles={x:0,y:0};gyroLastT=null;
   const ppd=window.innerWidth/65;
+  // Reset img to normal flow for homography mode
+  const img=$('ov-photo');
+  img.style.position=''; img.style.left=''; img.style.top='';
+  img.style.width=''; img.style.height=''; img.style.transformOrigin='';
+  // Check if we have GPS corners for homography
+  const corners=calData&&calData.plane&&calData.plane.corners;
+  const hasHomography=!!corners&&!!userPos&&smoothH!==null;
+
   function loop(){
-    let dx,dy;
-    if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
-    else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
     const roll=computeRoll();
-    applyTR(dx,dy,roll);
-    const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' r'+roll.toFixed(1)+(rollEnabled?'':'[off]');
+
+    if(hasHomography&&userPos&&smoothH!==null){
+      // ── HOMOGRAPHY MODE ──
+      // Current heading: gyro integrates from reference, compass is absolute
+      let headingDeg;
+      if(useGyroAR){
+        // gyro gives delta from reference; reference was at refOri which had heading smoothH
+        headingDeg=((smoothH||0)+gyroHSign*gyroAngles.x*(180/Math.PI)+360)%360;
+      } else {
+        headingDeg=((smoothH||0)+yawCalibOffset+360)%360;
+      }
+      // Apply step2 px/py as screen-space offset in metres equivalent
+      const c=calData.plane.corners;
+      const userH=calData.photographer.heightM||1.6;
+      // Project each corner
+      const tl=worldToScreen(c.topLeft,    userPos, headingDeg, userH);
+      const tr=worldToScreen(c.topRight,   userPos, headingDeg, userH);
+      const br=worldToScreen(c.bottomRight,userPos, headingDeg, userH);
+      const bl=worldToScreen(c.bottomLeft, userPos, headingDeg, userH);
+      if(tl&&tr&&br&&bl){
+        // Apply TR.px/py as additional screen offset on all corners
+        const ox=TR.px, oy=TR.py;
+        const pts=[[tl.x+ox,tl.y+oy],[tr.x+ox,tr.y+oy],[br.x+ox,br.y+oy],[bl.x+ox,bl.y+oy]];
+        applyHomography(pts);
+        // Roll: rotate around centre of projected quad
+        const cx=(tl.x+tr.x+br.x+bl.x)/4+ox;
+        const cy=(tl.y+tr.y+br.y+bl.y)/4+oy;
+        if(roll!==0){
+          const r=-roll*Math.PI/180;
+          const cos=Math.cos(r),sin=Math.sin(r);
+          const rotated=pts.map(([px,py])=>{
+            const dx=px-cx,dy=py-cy;
+            return [cx+dx*cos-dy*sin, cy+dx*sin+dy*cos];
+          });
+          applyHomography(rotated);
+        }
+        const el=$('ar-d');if(el)el.textContent='⊞ homo r'+roll.toFixed(1);
+      } else {
+        // Some corners behind camera — fallback to simple transform
+        let dx,dy;
+        if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
+        else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
+        // Reset img to flow mode for applyTR
+        img.style.position='';img.style.left='';img.style.top='';img.style.width='';img.style.height='';img.style.transformOrigin='';
+        applyTR(dx,dy,roll);
+        const el=$('ar-d');if(el)el.textContent='⚠ fallback';
+      }
+    } else {
+      // ── FALLBACK: simple gyro/compass transform ──
+      let dx,dy;
+      if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
+      else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
+      applyTR(dx,dy,roll);
+      const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' r'+roll.toFixed(1)+(rollEnabled?'':'[off]');
+    }
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
