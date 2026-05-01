@@ -269,6 +269,11 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 
       <!-- KROK 3: UKOTVENO -->
       <div id="panch" style="display:none;flex-direction:column;gap:6px;padding:2px 0 4px">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <button id="aos-badge" onclick="reqAOS()" style="font-size:9px;padding:2px 8px;border-radius:3px;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:none;color:rgba(255,255,255,.2);font-family:'JetBrains Mono',monospace">⊕ AOS —</button>
+          <span style="font-size:8px;color:rgba(255,255,255,.18);letter-spacing:.04em;flex:1">Roll kompenzace</span>
+          <button id="roll-toggle" onclick="toggleRoll()" style="font-size:9px;padding:2px 10px;border-radius:3px;cursor:pointer;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.12);color:rgba(16,185,129,.8);font-family:'JetBrains Mono',monospace">I ●</button>
+        </div>
         <button id="btn-ar-mode2" onclick="toggleARMode()" style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.06em;cursor:pointer;border-radius:4px;transition:all .15s;background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border:1px solid rgba(16,185,129,.2)">⟳ GYRO — klepni pro 🧭 KOMPAS</button>
         <div id="anch-db" class="db"></div>
         <div style="display:flex;gap:5px">
@@ -306,7 +311,7 @@ let qCur={x:0,y:0,z:0,w:1},qRef={x:0,y:0,z:0,w:1};
 const calibTR={opa:60,sz:80};
 const TR={opa:50,sz:100,px:0,py:0,rx:0,ry:0};
 const KEYS={opa:{min:0,max:100,u:'%'},sz:{min:10,max:300,u:'%'},px:{min:-500,max:500,u:'px'},py:{min:-500,max:500,u:'px'},rx:{min:-60,max:60,u:'°'},ry:{min:-60,max:60,u:'°'}};
-let camStream=null;
+let rollEnabled=true;
 let _dbgT=0,oriPaused=false;
 
 function showPhase(id){
@@ -490,7 +495,43 @@ function syncAOSBadge(){const b=$('aos-badge');if(!b)return;b.textContent=aoOk?'
 function qMul(a,b){return{w:a.w*b.w-a.x*b.x-a.y*b.y-a.z*b.z,x:a.w*b.x+a.x*b.w+a.y*b.z-a.z*b.y,y:a.w*b.y-a.x*b.z+a.y*b.w+a.z*b.x,z:a.w*b.z+a.x*b.y-a.y*b.x+a.z*b.w};}
 function qConj(q){return{x:-q.x,y:-q.y,z:-q.z,w:q.w};}
 function qRoll(q){const s=2*(q.w*q.z+q.x*q.y),c=1-2*(q.y*q.y+q.z*q.z);return Math.atan2(s,c)*180/Math.PI;}
-function relativeRoll(){if(!aoOk)return 0;return qRoll(qMul(qConj(qRef),qCur));}
+
+// Roll compensation — prefer gamma from DeviceOrientation (direct, reliable)
+// AOS quaternion used as fallback for devices where gamma is unreliable
+function computeRoll(){
+  if(!rollEnabled) return 0;
+  if(refOri===null) return 0;
+  // Primary: gamma delta (rotation around Z/depth axis in portrait = visual roll)
+  // gamma range: -90..90, wraps at edges — take simple diff, clamp
+  let gammaDiff = ori.g - refOri.g;
+  if(gammaDiff > 90) gammaDiff -= 180;
+  if(gammaDiff < -90) gammaDiff += 180;
+  // Blend: at high beta (phone near-horizontal), gamma gets noisy — fade out
+  const betaRad = Math.abs(ori.b) * Math.PI / 180;
+  const gammaWeight = Math.max(0, 1 - Math.pow(Math.max(0,(Math.abs(ori.b)-60)/30),2));
+  const gammaRoll = gammaDiff * gammaWeight;
+  // AOS fallback: quaternion-based roll if AOS available and gamma unreliable
+  if(aoOk && gammaWeight < 0.5){
+    return qRoll(qMul(qConj(qRef),qCur));
+  }
+  return gammaRoll;
+}
+
+function toggleRoll(){
+  rollEnabled=!rollEnabled;
+  const btn=$('roll-toggle');if(!btn)return;
+  if(rollEnabled){
+    btn.textContent='I ●';
+    btn.style.background='rgba(16,185,129,.12)';
+    btn.style.color='rgba(16,185,129,.8)';
+    btn.style.borderColor='rgba(16,185,129,.3)';
+  } else {
+    btn.textContent='O ○';
+    btn.style.background='rgba(255,255,255,.04)';
+    btn.style.color='rgba(255,255,255,.25)';
+    btn.style.borderColor='rgba(255,255,255,.1)';
+  }
+}
 
 // AR PHASES
 const PLBLS={calib:'KALIBRACE OS',align:'ZAROVNAT',anchored:'UKOTVENO'};
@@ -641,9 +682,9 @@ function startAR(){
     let dx,dy;
     if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
     else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
-    const roll=aoOk&&phase==='calib'?relativeRoll():0;
+    const roll=computeRoll();
     applyTR(dx,dy,roll);
-    const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0);
+    const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' r'+roll.toFixed(1)+(rollEnabled?'':'[off]');
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
