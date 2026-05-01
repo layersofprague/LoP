@@ -2,376 +2,171 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>PicPin AR</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #0d0d0b;
-  --ink: #1a1a14;
-  --paper: #e8e4dc;
-  --paper2: #f0ece4;
-  --accent: #c9a84c;
-  --green: #48c774;
-  --red: #c0392b;
-  --blue: #4a9eff;
-  --mono: 'JetBrains Mono', 'Courier New', monospace;
-  --serif: 'Georgia', serif;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;width:100%;height:100%;overflow:hidden;font-family:'JetBrains Mono',monospace}
+#ph-import,#ph-nav,#ph-ar{position:fixed;inset:0;display:none;flex-direction:column}
+#ph-import.on,#ph-nav.on,#ph-ar.on{display:flex}
+/* IMPORT */
+#ph-import{background:#060606;align-items:center;justify-content:center;padding:24px 20px}
+.imp-card{width:100%;max-width:400px;display:flex;flex-direction:column;gap:0}
+.imp-hero{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:.95;color:#F59E0B;text-align:center}
+.imp-sub{text-align:center;font-size:9px;letter-spacing:.16em;color:#2D3748;line-height:2;text-transform:uppercase;margin-top:2px;margin-bottom:24px}
+.imp-zone{border:1px dashed #1C1C1C;border-radius:8px;padding:16px 14px;margin-bottom:9px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s;
+  background:rgba(255,255,255,.02)}
+.imp-zone:active{background:rgba(255,255,255,.05)}
+.imp-zone.done{border-color:rgba(16,185,129,.4);border-style:solid;background:rgba(16,185,129,.04)}
+.imp-zone.done .iz-icon{color:#10B981}
+.iz-icon{font-size:20px;flex-shrink:0}
+.iz-texts{flex:1}
+.iz-lbl{font-size:10px;color:rgba(255,255,255,.65);margin-bottom:2px;letter-spacing:.04em}
+.iz-val{font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.05em}
+.imp-zone.done .iz-val{color:rgba(16,185,129,.8)}
+.iz-chk{font-size:13px;color:#10B981;opacity:0;transition:opacity .2s}
+.imp-zone.done .iz-chk{opacity:1}
+.imp-go{width:100%;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:18px;
+  letter-spacing:.1em;cursor:pointer;border-radius:6px;border:none;
+  background:#F59E0B;color:#000;margin-top:16px;transition:all .15s}
+.imp-go:disabled{opacity:.3;cursor:not-allowed}
+.imp-go:not(:disabled):active{background:#D97706}
+.imp-note{margin-top:12px;font-size:9px;color:rgba(255,255,255,.15);text-align:center;line-height:1.8}
+/* NAV */
+#ph-nav{background:#e8e4dc}
+#nav-map{flex:1;position:relative;overflow:hidden;min-height:0}
+#leafmap{width:100%;height:100%}
+.leaflet-container{background:#f0efe9}
+#nav-dbg{position:absolute;top:10px;left:10px;z-index:500;background:rgba(26,24,20,.7);
+  color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:4px 10px;border-radius:20px;pointer-events:none}
+#nav-cal-btn{position:absolute;top:10px;right:10px;z-index:500;height:28px;padding:0 10px;
+  border-radius:14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;border:none;cursor:pointer}
+#nav-fit-btn{position:absolute;top:10px;right:110px;z-index:500;width:28px;height:28px;
+  border-radius:50%;background:rgba(238,239,235,.92);border:1px solid #cbcec5;
+  cursor:pointer;display:flex;align-items:center;justify-content:center}
+#nav-bottom{flex-shrink:0;background:#f0ece4;border-top:1px solid rgba(26,24,20,.1);padding:12px 16px 18px}
+#nav-dist{font-family:'Bebas Neue',sans-serif;font-size:44px;color:#1a1a14;line-height:1;text-align:center;margin-bottom:2px}
+#nav-dsub{font-size:10px;color:rgba(26,24,20,.4);text-align:center;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.nav-status{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:10px}
+#nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(26,24,20,.2);transition:all .4s}
+#nav-dot.near{background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.2)}
+#nav-stxt{font-size:10px;color:rgba(26,24,20,.5);letter-spacing:.08em}
+.nav-btns{display:flex;gap:7px}
+.nbtn{flex:1;padding:11px;border-radius:7px;border:none;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.06em;cursor:pointer;transition:opacity .15s}
+.nbtn:active{opacity:.7}
+.nbtn-p{background:#1a1a14;color:#e8e4dc}
+.nbtn-s{background:rgba(26,24,20,.08);color:rgba(26,24,20,.5);border:1px solid rgba(26,24,20,.1);font-size:13px}
+/* AR */
+#ph-ar{background:#000}
+#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:none}
+#cam.on{display:block}
+#ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2;display:none;
+  align-items:center;justify-content:center;pointer-events:none;transition:top .2s,bottom .2s,right .2s}
+#ov.on{display:flex}
+#ov img{max-width:95%;max-height:95%;transform-origin:center center;
+  -webkit-mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,black 60%,transparent 100%);
+  mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,black 60%,transparent 100%)}
+#sl{position:fixed;inset:0;z-index:3;pointer-events:none;display:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px)}
+#sl.on{display:block}
+#xh{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;z-index:4;pointer-events:none;display:none}
+#xh.on{display:block}
+#xh::before,#xh::after{content:'';position:absolute;background:rgba(220,38,38,.85)}
+#xh::before{width:1px;height:100%;left:50%}
+#xh::after{height:1px;width:100%;top:50%}
+#b-anchor{position:fixed;top:34px;left:8px;z-index:11;font-size:9px;letter-spacing:.1em;
+  padding:2px 7px;border-radius:3px;display:none;
+  background:rgba(0,0,0,.3);border:1px solid rgba(16,185,129,.25);color:#10B981}
+#b-anchor.on{display:block}
+#topbar{position:fixed;top:0;left:0;right:0;z-index:10;display:none;flex-direction:column;
+  gap:0;padding:4px 10px 2px;background:none;pointer-events:none}
+#topbar>*{pointer-events:auto}
+.plbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;
+  color:rgba(220,38,38,.9);text-shadow:0 0 8px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.9)}
+#step-counter{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.08em;color:rgba(220,38,38,.8);text-shadow:0 0 8px rgba(0,0,0,.8)}
+#gyro-tb{display:flex;align-items:center;gap:3px;font-size:8px;letter-spacing:.08em;
+  padding:2px 5px;border-radius:3px;background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);cursor:pointer;transition:all .3s}
+#gyro-tb.ok{color:rgba(16,185,129,.8);border-color:rgba(16,185,129,.2)}
+#gyro-tb.gyro{color:rgba(16,185,129,.85);border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.07)}
+#gyro-tb.comp{color:rgba(220,38,38,.85);border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.07)}
+#dbg-topbar{display:none;align-items:center;gap:6px;font-size:8px;letter-spacing:.06em;padding:1px 0 2px;color:rgba(255,255,255,.5)}
+#panel{position:fixed;bottom:0;left:0;right:0;z-index:10;
+  background:rgba(0,0,0,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.05);display:none;max-height:52vh;overflow-y:auto}
+#panel.on{display:block}
+#handle{display:flex;align-items:center;justify-content:space-between;padding:4px 10px 2px;cursor:pointer;user-select:none}
+#handle-bar{width:26px;height:2px;border-radius:2px;background:rgba(255,255,255,.1);margin:0 auto}
+#cbtn{font-size:8px;color:rgba(255,255,255,.18);padding:1px 4px;border:1px solid rgba(255,255,255,.07);border-radius:2px;cursor:pointer;background:none;font-family:'JetBrains Mono',monospace}
+#pbody{padding:0 8px 8px}
+.ctrl{display:flex;align-items:center;gap:3px;padding:1px 0}
+.ck{font-size:7px;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.25);width:38px;flex-shrink:0}
+.cv{font-size:8px;color:rgba(220,38,38,.9);width:28px;text-align:right;flex-shrink:0}
+input[type=range].rng{-webkit-appearance:none;appearance:none;flex:1;height:2px;background:rgba(255,255,255,.1);border-radius:1px;outline:none;cursor:pointer;min-width:0}
+input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#EF4444;cursor:pointer;border:2px solid rgba(0,0,0,.5)}
+.sb{width:20px;height:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);border-radius:3px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
+.sb:active{background:rgba(220,38,38,.1);color:#EF4444}
+.br{display:flex;gap:4px;margin-top:5px}
+.br>.btn{flex:1}
+.btn{padding:6px 4px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.05em;cursor:pointer;border-radius:4px;border:none;width:100%;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.bp{background:rgba(245,158,11,.6);color:#000}
+.bg{background:rgba(16,185,129,.6);color:#000}
+.bs{background:rgba(255,255,255,.05);color:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.08);font-size:12px}
+.bok{background:rgba(16,185,129,.65);color:#000}
+.db{background:rgba(0,0,0,.1);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:5px 7px;font-size:9px;line-height:1.8}
+.dr{display:flex;justify-content:space-between}
+.dk{color:rgba(255,255,255,.2)}.dv{color:rgba(16,185,129,.75)}
+.ax-btn{font-size:8px;padding:2px 6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.28);border-radius:3px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .1s}
+.ax-btn.on-h{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#EF4444}
+.ax-btn.on-v{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.35);color:#10B981}
+.ax-btn:active{background:rgba(255,255,255,.1)}
+#calib-xh{position:fixed;inset:0;z-index:4;pointer-events:none;display:none}
+#calib-xh.on{display:block}
+@media(orientation:landscape){
+  #panel.on{top:0;bottom:0;left:auto;right:0;width:42vw;max-height:100vh;border-top:none;border-left:1px solid rgba(255,255,255,.05)}
+  #handle{display:none}
 }
-html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--mono); }
-
-/* ── PHASES ── */
-#phase-import,
-#phase-nav,
-#phase-ar {
-  position: fixed; inset: 0;
-  display: none;
-  flex-direction: column;
-}
-#phase-import.active,
-#phase-nav.active,
-#phase-ar.active {
-  display: flex;
-}
-
-/* ══════════════════════════════
-   PHASE 1 — IMPORT
-══════════════════════════════ */
-#phase-import {
-  background: var(--bg);
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.import-card {
-  width: 100%;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.import-title {
-  font-family: var(--serif);
-  font-size: 22px;
-  color: var(--accent);
-  margin-bottom: 4px;
-  letter-spacing: -0.01em;
-}
-.import-sub {
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.2);
-  margin-bottom: 28px;
-}
-.import-zone {
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 20px 16px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  background: rgba(255,255,255,0.02);
-  position: relative;
-}
-.import-zone:active { background: rgba(255,255,255,0.05); }
-.import-zone.done { border-color: rgba(72,199,116,0.4); background: rgba(72,199,116,0.04); }
-.import-zone.done .iz-icon { color: var(--green); }
-.iz-icon { font-size: 22px; flex-shrink: 0; }
-.iz-texts { flex: 1; }
-.iz-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 2px; letter-spacing: 0.04em; }
-.iz-val { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.06em; }
-.import-zone.done .iz-val { color: var(--green); }
-.iz-check { font-size: 14px; color: var(--green); opacity: 0; transition: opacity 0.2s; }
-.import-zone.done .iz-check { opacity: 1; }
-
-.import-btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #000;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-top: 18px;
-  transition: opacity 0.2s;
-}
-.import-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.import-btn:not(:disabled):active { opacity: 0.8; }
-
-.import-info {
-  margin-top: 14px;
-  font-size: 9px;
-  color: rgba(255,255,255,0.18);
-  line-height: 1.7;
-  letter-spacing: 0.04em;
-  text-align: center;
-}
-
-/* ══════════════════════════════
-   PHASE 2 — NAVIGATION
-══════════════════════════════ */
-#phase-nav { background: var(--paper); overflow: hidden; }
-#nav-map {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  min-height: 0;
-}
-#leaflet-map { width: 100%; height: 100%; }
-#nav-bottom {
-  flex-shrink: 0;
-  background: var(--paper2);
-  border-top: 1px solid rgba(26,24,20,0.1);
-  padding: 12px 16px 16px;
-}
-#nav-dist-big {
-  font-family: var(--serif);
-  font-size: 42px;
-  color: var(--ink);
-  line-height: 1;
-  text-align: center;
-  margin-bottom: 2px;
-}
-#nav-dist-sub {
-  font-size: 10px;
-  color: rgba(26,24,20,0.4);
-  text-align: center;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-.nav-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-#nav-status-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: rgba(26,24,20,0.2);
-  transition: background 0.4s;
-}
-#nav-status-dot.near { background: var(--green); box-shadow: 0 0 0 3px rgba(72,199,116,0.2); }
-#nav-status-txt {
-  font-size: 10px;
-  color: rgba(26,24,20,0.5);
-  letter-spacing: 0.1em;
-}
-.nav-row { display: flex; gap: 8px; }
-.nav-btn {
-  flex: 1; padding: 11px 8px; border-radius: 8px; border: none;
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
-  transition: opacity 0.15s;
-}
-.nav-btn:active { opacity: 0.7; }
-.nav-btn-primary { background: var(--ink); color: var(--paper); }
-.nav-btn-secondary { background: rgba(26,24,20,0.08); color: rgba(26,24,20,0.6); border: 1px solid rgba(26,24,20,0.1); }
-
-/* GPS/cal badge */
-#nav-dbg {
-  position: absolute; top: 10px; left: 10px; z-index: 500;
-  background: rgba(26,24,20,0.7); color: #fff;
-  font-family: var(--mono); font-size: 10px;
-  padding: 4px 10px; border-radius: 20px;
-  backdrop-filter: blur(6px);
-  pointer-events: none;
-}
-#nav-cal-btn {
-  position: absolute; top: 10px; right: 10px; z-index: 500;
-  height: 28px; padding: 0 10px; border-radius: 14px;
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  border: none; cursor: pointer; white-space: nowrap;
-}
-#nav-fit-btn {
-  position: absolute; top: 10px; right: 130px; z-index: 500;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(238,239,235,0.92); border: 1px solid #cbcec5;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 4px rgba(26,24,20,0.15);
-}
-
-/* ══════════════════════════════
-   PHASE 3 — AR
-══════════════════════════════ */
-#phase-ar { background: #000; }
-#ar-video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-#ar-canvas {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-}
-
-/* AR HUD */
-#ar-hud {
-  position: absolute; inset: 0;
-  pointer-events: none;
-  display: flex; flex-direction: column;
-  justify-content: space-between;
-}
-#ar-top {
-  padding: 12px 14px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  pointer-events: auto;
-}
-#ar-title-block {}
-#ar-title {
-  font-family: var(--serif);
-  font-size: 13px;
-  color: rgba(255,255,255,0.9);
-  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
-  letter-spacing: 0.01em;
-}
-#ar-subtitle {
-  font-size: 9px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-}
-#ar-dbg-badge {
-  background: rgba(0,0,0,0.55);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 4px 10px;
-  font-size: 9px;
-  color: rgba(255,255,255,0.5);
-  backdrop-filter: blur(6px);
-  pointer-events: none;
-}
-
-/* Adjustment panel */
-#ar-adj {
-  padding: 12px 14px 20px;
-  pointer-events: auto;
-}
-#ar-adj-inner {
-  background: rgba(0,0,0,0.62);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 12px 14px;
-  backdrop-filter: blur(10px);
-}
-.adj-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.adj-row:last-child { margin-bottom: 0; }
-.adj-label {
-  font-size: 9px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  width: 28px;
-  flex-shrink: 0;
-}
-.adj-btn {
-  width: 32px; height: 32px; border-radius: 7px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.7);
-  font-size: 16px; font-family: var(--mono);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  -webkit-user-select: none; user-select: none;
-}
-.adj-btn:active { background: rgba(255,255,255,0.15); }
-.adj-val {
-  flex: 1; text-align: center;
-  font-size: 11px; color: rgba(255,255,255,0.8);
-  font-family: var(--mono);
-}
-.adj-slider {
-  flex: 1; -webkit-appearance: none; appearance: none;
-  height: 2px; border-radius: 2px;
-  background: rgba(255,255,255,0.15); outline: none;
-}
-.adj-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px;
-  border-radius: 50%; background: var(--accent); cursor: pointer;
-}
-
-.ar-btn-row { display: flex; gap: 8px; margin-top: 10px; }
-.ar-btn {
-  flex: 1; padding: 10px 6px; border-radius: 8px; border: none;
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-}
-.ar-btn:active { opacity: 0.7; }
-.ar-btn-primary { background: var(--accent); color: #000; }
-.ar-btn-secondary { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
-.ar-btn-save { background: rgba(72,199,116,0.2); color: var(--green); border: 1px solid rgba(72,199,116,0.3); }
-
-/* opacity slider for photo */
-#ar-opacity-row {
-  display: flex; align-items: center; gap: 8px; margin-top: 6px;
-}
-#ar-opacity-label { font-size: 9px; color: rgba(255,255,255,0.35); width:44px; letter-spacing:0.08em; }
 </style>
 </head>
 <body>
 
-<!-- ══ PHASE 1: IMPORT ══ -->
-<div id="phase-import" class="active">
-  <div class="import-card">
-    <div class="import-title">PicPin AR</div>
-    <div class="import-sub">Archivní fotografie v prostoru</div>
-
-    <div class="import-zone" id="iz-json" onclick="document.getElementById('inp-json').click()">
+<!-- IMPORT -->
+<div id="ph-import" class="on">
+  <div class="imp-card">
+    <div class="imp-hero">PICPIN AR</div>
+    <div class="imp-sub">Historické fotografie ukotvené v prostoru</div>
+    <div class="imp-zone" id="iz-json" onclick="document.getElementById('inp-json').click()">
       <div class="iz-icon">📐</div>
       <div class="iz-texts">
-        <div class="iz-label">Kalibrační data</div>
-        <div class="iz-val" id="iz-json-val">Vybrat _export_step3.json</div>
+        <div class="iz-lbl">Kalibrační data (export_step3.json)</div>
+        <div class="iz-val" id="iz-json-val">Vybrat JSON soubor</div>
       </div>
-      <div class="iz-check">✓</div>
+      <div class="iz-chk">✓</div>
     </div>
-
-    <div class="import-zone" id="iz-photo" onclick="document.getElementById('inp-photo').click()">
+    <div class="imp-zone" id="iz-photo" onclick="document.getElementById('inp-photo').click()">
       <div class="iz-icon">🖼</div>
       <div class="iz-texts">
-        <div class="iz-label">Historická fotografie</div>
+        <div class="iz-lbl">Historická fotografie</div>
         <div class="iz-val" id="iz-photo-val">Vybrat fotografii</div>
       </div>
-      <div class="iz-check">✓</div>
+      <div class="iz-chk">✓</div>
     </div>
-
-    <button class="import-btn" id="import-start-btn" onclick="startNav()" disabled>
-      Navigovat na místo →
-    </button>
-
-    <div class="import-info">
-      Načíst uložená data:<br>
-      <span id="import-saved-info" onclick="loadSaved()" style="color:rgba(201,168,76,0.5);cursor:pointer;text-decoration:underline">zkontrolovat uloženou relaci</span>
-    </div>
+    <button class="imp-go" id="imp-go-btn" onclick="startNav()" disabled>NAVIGOVAT NA MÍSTO →</button>
+    <div class="imp-note">GPS + kamera + gyroskop jsou vyžadovány.<br>Po příchodu na stanoviště fotografa se spustí AR.</div>
   </div>
   <input type="file" id="inp-json" accept=".json" style="display:none">
   <input type="file" id="inp-photo" accept="image/*" style="display:none">
 </div>
 
-<!-- ══ PHASE 2: NAVIGATION ══ -->
-<div id="phase-nav">
+<!-- NAV -->
+<div id="ph-nav">
   <div id="nav-map">
-    <div id="leaflet-map"></div>
+    <div id="leafmap"></div>
     <div id="nav-dbg">GPS: čeká…</div>
     <button id="nav-cal-btn" onclick="toggleCal()"></button>
     <button id="nav-fit-btn" onclick="fitBoth()">
@@ -382,588 +177,555 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
     </button>
   </div>
   <div id="nav-bottom">
-    <div id="nav-dist-big">—</div>
-    <div id="nav-dist-sub">metrů od stanoviště</div>
-    <div class="nav-status-row">
-      <div id="nav-status-dot"></div>
-      <div id="nav-status-txt">Čekám na GPS…</div>
-    </div>
-    <div class="nav-row">
-      <button class="nav-btn nav-btn-secondary" onclick="gotoImport()">← Zpět</button>
-      <button class="nav-btn nav-btn-primary" id="nav-ar-btn" onclick="startAR()">Spustit AR →</button>
+    <div id="nav-dist">—</div>
+    <div id="nav-dsub">metrů od stanoviště</div>
+    <div class="nav-status"><div id="nav-dot"></div><div id="nav-stxt">Čekám na GPS…</div></div>
+    <div class="nav-btns">
+      <button class="nbtn nbtn-s" onclick="showPhase('ph-import')">← ZPĚT</button>
+      <button class="nbtn nbtn-p" onclick="launchAR()">SPUSTIT AR →</button>
     </div>
   </div>
 </div>
 
-<!-- ══ PHASE 3: AR ══ -->
-<div id="phase-ar">
-  <video id="ar-video" autoplay playsinline muted></video>
-  <canvas id="ar-canvas"></canvas>
-  <div id="ar-hud">
-    <div id="ar-top">
-      <div id="ar-title-block">
-        <div id="ar-title">Historická fotografie</div>
-        <div id="ar-subtitle">AR overlay · PicPin</div>
+<!-- AR -->
+<div id="ph-ar">
+  <video id="cam" autoplay muted playsinline></video>
+  <div id="ov"><img id="ov-photo" src="" alt=""></div>
+  <div id="sl"></div>
+  <div id="xh"></div>
+  <div id="b-anchor">● UKOTVENO</div>
+  <svg id="calib-xh" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <div id="topbar" style="flex-direction:column;gap:0;padding:4px 10px 2px">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="plbl" id="plbl">—</div>
+        <div id="orient-lbl" style="font-size:8px;letter-spacing:.06em;color:rgba(255,255,255,.3);background:rgba(0,0,0,.3);padding:1px 5px;border-radius:3px">🟦 PORT</div>
       </div>
-      <div id="ar-dbg-badge">— m · —°</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div id="gyro-tb" onclick="reqGyro()"><div style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;margin-right:2px"></div>GYRO</div>
+        <span id="step-counter">1/3</span>
+      </div>
     </div>
-    <div id="ar-adj">
-      <div id="ar-adj-inner">
-        <div class="adj-row">
-          <div class="adj-label">↔ X</div>
-          <button class="adj-btn" ontouchstart="startAdj('x',-1)" onmousedown="startAdj('x',-1)" ontouchend="stopAdj()" onmouseup="stopAdj()">−</button>
-          <div class="adj-val" id="adj-x-val">0 m</div>
-          <button class="adj-btn" ontouchstart="startAdj('x',1)" onmousedown="startAdj('x',1)" ontouchend="stopAdj()" onmouseup="stopAdj()">+</button>
+    <div id="dbg-topbar" style="display:none;align-items:center;gap:6px;font-size:8px;letter-spacing:.06em;padding:1px 0 2px;color:rgba(255,255,255,.5)">
+      <span>rα<span id="dbg-a" style="color:#F59E0B;margin-left:2px">0.0</span></span>
+      <span>rβ<span id="dbg-b" style="color:#10B981;margin-left:2px">0.0</span></span>
+      <span>rγ<span id="dbg-g" style="color:#60a5fa;margin-left:2px">0.0</span></span>
+      <span style="color:rgba(255,255,255,.2)">|</span>
+      <span>H:<span id="dbg-haxis" style="color:#EF4444">rβ</span><span id="dbg-hsign" style="color:#EF4444">+</span></span>
+      <span>V:<span id="dbg-vaxis" style="color:#EF4444">rα</span><span id="dbg-vsign" style="color:#EF4444">+</span></span>
+    </div>
+  </div>
+
+  <div id="panel">
+    <div id="handle" onclick="toggleC()">
+      <div style="width:20px"></div>
+      <div id="handle-bar"></div>
+      <button id="cbtn">▲</button>
+    </div>
+    <div id="pbody">
+
+      <!-- KROK 1: KALIBRACE OS -->
+      <div id="pc" style="display:none">
+        <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="calibStp('opa',-1)">−</button><input type="range" class="rng" id="c-opa" min="0" max="100" value="60" oninput="calibUpd('opa',this.value)"><button class="sb" onclick="calibStp('opa',1)">+</button><span class="cv" id="cv-opa">60%</span></div>
+        <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="calibStp('sz',-1)">−</button><input type="range" class="rng" id="c-sz" min="10" max="300" value="80" oninput="calibUpd('sz',this.value)"><button class="sb" onclick="calibStp('sz',1)">+</button><span class="cv" id="cv-sz">80%</span></div>
+        <div style="font-size:7px;color:rgba(255,255,255,.25);letter-spacing:.05em;margin:3px 0 4px">Pohybujte telefonem — foto se hýbe. Nastavte správné osy:</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:4px;padding:3px 5px">
+          <span style="font-size:8px;color:#EF4444;width:28px;font-weight:bold">→ H</span>
+          <button class="ax-btn" id="hax-a" onclick="setGyroAxis('h','a')">rα</button>
+          <button class="ax-btn" id="hax-b" onclick="setGyroAxis('h','b')">rβ</button>
+          <button class="ax-btn" id="hax-g" onclick="setGyroAxis('h','g')">rγ</button>
+          <button class="ax-btn" id="hsgn" onclick="flipSign('h')" style="margin-left:4px;color:#EF4444;border-color:rgba(239,68,68,.3)">+</button>
+          <span style="font-size:7px;color:rgba(239,68,68,.4);margin-left:2px" id="h-axis-lbl">rβ+</span>
         </div>
-        <div class="adj-row">
-          <div class="adj-label">↕ Y</div>
-          <button class="adj-btn" ontouchstart="startAdj('y',-1)" onmousedown="startAdj('y',-1)" ontouchend="stopAdj()" onmouseup="stopAdj()">−</button>
-          <div class="adj-val" id="adj-y-val">0 m</div>
-          <button class="adj-btn" ontouchstart="startAdj('y',1)" onmousedown="startAdj('y',1)" ontouchend="stopAdj()" onmouseup="stopAdj()">+</button>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:4px;padding:3px 5px">
+          <span style="font-size:8px;color:#10B981;width:28px;font-weight:bold">↑ V</span>
+          <button class="ax-btn" id="vax-a" onclick="setGyroAxis('v','a')">rα</button>
+          <button class="ax-btn" id="vax-b" onclick="setGyroAxis('v','b')">rβ</button>
+          <button class="ax-btn" id="vax-g" onclick="setGyroAxis('v','g')">rγ</button>
+          <button class="ax-btn" id="vsgn" onclick="flipSign('v')" style="margin-left:4px;color:#10B981;border-color:rgba(16,185,129,.3)">+</button>
+          <span style="font-size:7px;color:rgba(16,185,129,.4);margin-left:2px" id="v-axis-lbl">rα+</span>
         </div>
-        <div class="adj-row">
-          <div class="adj-label">⊞ Z</div>
-          <button class="adj-btn" ontouchstart="startAdj('z',-1)" onmousedown="startAdj('z',-1)" ontouchend="stopAdj()" onmouseup="stopAdj()">−</button>
-          <div class="adj-val" id="adj-z-val">1.00×</div>
-          <button class="adj-btn" ontouchstart="startAdj('z',1)" onmousedown="startAdj('z',1)" ontouchend="stopAdj()" onmouseup="stopAdj()">+</button>
-        </div>
-        <div id="ar-opacity-row">
-          <div id="ar-opacity-label">Krytí</div>
-          <input type="range" class="adj-slider" id="opacity-slider" min="10" max="100" value="80" oninput="setOpacity(this.value)">
-          <div class="adj-val" id="adj-opa-val">80%</div>
-        </div>
-        <div class="ar-btn-row">
-          <button class="ar-btn ar-btn-secondary" onclick="resetAdj()">↺ Reset</button>
-          <button class="ar-btn ar-btn-save" onclick="saveAdj()">💾 Uložit korekci</button>
-          <button class="ar-btn ar-btn-primary" onclick="gotoNav()">🗺 Mapa</button>
+        <div class="br">
+          <button class="btn bs" onclick="stopARCam();showPhase('ph-nav')">← MAPA</button>
+          <button class="btn bs" onclick="resetCalibView()" style="color:rgba(245,158,11,.7)">⟳ RESET</button>
+          <button class="btn bg" onclick="calibDone=true;setPhase('align')">ZAROVNAT →</button>
         </div>
       </div>
+
+      <!-- KROK 2: ZAROVNAT -->
+      <div id="pa" style="display:none">
+        <div class="ctrl"><span class="ck">Opac</span><button class="sb" onclick="stp('opa',-1)">−</button><input type="range" class="rng" id="s-opa" min="0" max="100" value="50" oninput="upd('opa',this.value,'%')"><button class="sb" onclick="stp('opa',1)">+</button><span class="cv" id="v-opa">50%</span></div>
+        <div class="ctrl"><span class="ck">Vel</span><button class="sb" onclick="stp('sz',-1)">−</button><input type="range" class="rng" id="s-sz" min="10" max="300" value="100" oninput="upd('sz',this.value,'%')"><button class="sb" onclick="stp('sz',1)">+</button><span class="cv" id="v-sz">100%</span></div>
+        <div class="ctrl"><span class="ck">X</span><button class="sb" onclick="stp('px',-1)">−</button><input type="range" class="rng" id="s-px" min="-500" max="500" value="0" oninput="upd('px',this.value,'px')"><button class="sb" onclick="stp('px',1)">+</button><span class="cv" id="v-px">0</span></div>
+        <div class="ctrl"><span class="ck">Y</span><button class="sb" onclick="stp('py',-1)">−</button><input type="range" class="rng" id="s-py" min="-500" max="500" value="0" oninput="upd('py',this.value,'px')"><button class="sb" onclick="stp('py',1)">+</button><span class="cv" id="v-py">0</span></div>
+        <div class="ctrl"><span class="ck">Nákl X</span><button class="sb" onclick="stp('rx',-1)">−</button><input type="range" class="rng" id="s-rx" min="-60" max="60" value="0" oninput="upd('rx',this.value,'°')"><button class="sb" onclick="stp('rx',1)">+</button><span class="cv" id="v-rx">0°</span></div>
+        <div class="ctrl"><span class="ck">Nákl Y</span><button class="sb" onclick="stp('ry',-1)">−</button><input type="range" class="rng" id="s-ry" min="-60" max="60" value="0" oninput="upd('ry',this.value,'°')"><button class="sb" onclick="stp('ry',1)">+</button><span class="cv" id="v-ry">0°</span></div>
+        <div class="br">
+          <button class="btn bs" onclick="setPhase('calib')">←</button>
+          <button class="btn bg" onclick="doFix()">FIX ⊕</button>
+        </div>
+      </div>
+
+      <!-- KROK 3: UKOTVENO -->
+      <div id="panch" style="display:none;flex-direction:column;gap:6px;padding:2px 0 4px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+          <button id="aos-badge" onclick="reqAOS()" style="font-size:9px;padding:2px 8px;border-radius:3px;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:none;color:rgba(255,255,255,.2);font-family:'JetBrains Mono',monospace">⊕ AOS —</button>
+          <span style="font-size:8px;color:rgba(255,255,255,.18);letter-spacing:.05em">Roll kompenzace</span>
+        </div>
+        <button id="btn-ar-mode2" onclick="toggleARMode()" style="width:100%;padding:7px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.06em;cursor:pointer;border-radius:4px;transition:all .15s;background:rgba(16,185,129,.12);color:rgba(16,185,129,.85);border:1px solid rgba(16,185,129,.2)">⟳ GYRO — klepni pro 🧭 KOMPAS</button>
+        <div id="anch-db" class="db"></div>
+        <div style="display:flex;gap:5px">
+          <button class="btn bs" style="flex:1" onclick="doReset()">RESET</button>
+          <button class="btn bg" id="btn-copy" style="flex:1" onclick="doExport()">EXPORT JSON</button>
+        </div>
+        <button class="btn bs" style="font-size:11px;margin-top:2px" onclick="stopARCam();showPhase('ph-nav')">← ZPĚT NA MAPU</button>
+      </div>
+
     </div>
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ══════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
+
 // STATE
-// ══════════════════════════════════════════
-var calData = null;       // parsed _export_step3.json
-var photoImg = null;      // Image object
-var photoFile = null;
-var jsonFileName = '';
+let calData=null,photoImg=null,photoFileName='picpin';
+let navMap=null,photMarker=null,userMarker=null;
+let userPos=null,smoothH=null,rawH=null;
+const LP_FAST=0.3,LP_SLOW=0.06;
+let yawOffset=0,calEnabled=false,isLocked=true,relockTimer=null;
+const AR_TRIGGER=15;
+let phase='load',gyroOk=false;
+let ori={a:0,b:0,g:0},refOri=null;
+let rafId=null,calibRafId=null,collapsed=false,calibDone=false;
+let useGyroAR=true;
+let gyroAngles={x:0,y:0},gyroLastT=null,yawCalibOffset=0;
+let gyroHAxis='b',gyroVAxis='a',gyroHSign=1,gyroVSign=1;
+let rawRate={a:0,b:0,g:0};
+let aoSensor=null,aoOk=false;
+let qCur={x:0,y:0,z:0,w:1},qRef={x:0,y:0,z:0,w:1};
+const calibTR={opa:60,sz:80};
+const TR={opa:50,sz:100,px:0,py:0,rx:0,ry:0};
+const KEYS={opa:{min:0,max:100,u:'%'},sz:{min:10,max:300,u:'%'},px:{min:-500,max:500,u:'px'},py:{min:-500,max:500,u:'px'},rx:{min:-60,max:60,u:'°'},ry:{min:-60,max:60,u:'°'}};
+let camStream=null;
+let _dbgT=0,oriPaused=false;
 
-var userPos = null;
-var smoothH = null, rawH = null;
-var LP_FAST = 0.3, LP_SLOW = 0.06;
-
-var yawOffset = 0, calEnabled = false;
-var isLocked = true;
-var relockTimer = null;
-
-// AR adjustment deltas
-var adj = { x: 0, y: 0, z: 1.0, opa: 0.8 };
-var adjTimer = null;
-var adjActive = null;
-var ADJ_STEP_X = 0.5;   // metres
-var ADJ_STEP_Y = 0.5;   // metres
-var ADJ_STEP_Z = 0.05;  // scale multiplier
-
-var AR_TRIGGER_DIST = 15; // metres — auto-suggest AR
-
-var map = null;
-var photMarker = null;
-var userMarker = null;
-var facadeLines = [];
-
-var videoStream = null;
-var arCanvas = null, arCtx = null;
-var arRunning = false;
-
-// ══════════════════════════════════════════
-// PHASE SWITCHING
-// ══════════════════════════════════════════
-function showPhase(id) {
-  ['phase-import','phase-nav','phase-ar'].forEach(function(p) {
-    document.getElementById(p).classList.toggle('active', p === id);
-  });
+function showPhase(id){
+  ['ph-import','ph-nav','ph-ar'].forEach(p=>$(p).classList.toggle('on',p===id));
+  if(id==='ph-nav') setTimeout(()=>{if(navMap)navMap.invalidateSize();},100);
 }
 
-function gotoImport() { stopAR(); showPhase('phase-import'); }
-function gotoNav()    { stopAR(); showPhase('phase-nav'); setTimeout(function(){ if(map) map.invalidateSize(); }, 100); }
-
-// ══════════════════════════════════════════
-// FILE IMPORT
-// ══════════════════════════════════════════
-document.getElementById('inp-json').addEventListener('change', function(e) {
-  var f = e.target.files[0]; if (!f) return;
-  jsonFileName = f.name.replace(/_export_step3\.json$/i, '');
-  var r = new FileReader();
-  r.onload = function(ev) {
-    try {
-      calData = JSON.parse(ev.target.result);
-      if (!calData.photographer) throw new Error('Chybí photographer');
-      document.getElementById('iz-json-val').textContent = f.name;
-      document.getElementById('iz-json').classList.add('done');
-      // Load saved adj if exists
-      loadSavedAdj();
-      checkImportReady();
-    } catch(err) { alert('Chyba v JSON: ' + err.message); }
+// IMPORT
+$('inp-json').addEventListener('change',function(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      calData=JSON.parse(ev.target.result);
+      if(!calData.photographer)throw new Error('Chybí photographer');
+      photoFileName=f.name.replace(/_export_step3\.json$/i,'').replace(/\.[^.]+$/,'');
+      $('iz-json-val').textContent=f.name;
+      $('iz-json').classList.add('done');
+      checkReady();
+    }catch(err){alert('Chyba v JSON: '+err.message);}
   };
   r.readAsText(f);
 });
-
-document.getElementById('inp-photo').addEventListener('change', function(e) {
-  var f = e.target.files[0]; if (!f) return;
-  photoFile = f;
-  var img = new Image();
-  img.onload = function() {
-    photoImg = img;
-    document.getElementById('iz-photo-val').textContent = f.name;
-    document.getElementById('iz-photo').classList.add('done');
-    checkImportReady();
+$('inp-photo').addEventListener('change',function(e){
+  const f=e.target.files[0];if(!f)return;
+  const img=new Image();
+  img.onload=()=>{
+    photoImg=img;
+    $('ov-photo').src=img.src;
+    $('iz-photo-val').textContent=f.name;
+    $('iz-photo').classList.add('done');
+    if(!photoFileName||photoFileName==='picpin') photoFileName=f.name.replace(/\.[^.]+$/,'');
+    checkReady();
   };
-  img.src = URL.createObjectURL(f);
+  img.src=URL.createObjectURL(f);
 });
+function checkReady(){$('imp-go-btn').disabled=!(calData&&photoImg);}
 
-function checkImportReady() {
-  document.getElementById('import-start-btn').disabled = !(calData && photoImg);
-}
+// NAV
+function startNav(){showPhase('ph-nav');initNavMap();startSensors();}
 
-// ══════════════════════════════════════════
-// SAVED SESSION
-// ══════════════════════════════════════════
-function loadSaved() {
-  try {
-    var saved = JSON.parse(localStorage.getItem('picpin_ar_adj') || 'null');
-    if (!saved) { alert('Žádná uložená data'); return; }
-    adj = saved;
-    updateAdjUI();
-    document.getElementById('import-saved-info').textContent = 'korekce načtena ✓';
-  } catch(e) {}
-}
-
-function loadSavedAdj() {
-  try {
-    var key = 'picpin_adj_' + (calData && calData.photoId ? calData.photoId : '');
-    var saved = JSON.parse(localStorage.getItem(key) || 'null');
-    if (saved) { adj = saved; updateAdjUI(); }
-  } catch(e) {}
-}
-
-function saveAdj() {
-  try {
-    var key = 'picpin_adj_' + (calData && calData.photoId ? calData.photoId : 'default');
-    localStorage.setItem(key, JSON.stringify(adj));
-    var btn = document.querySelector('.ar-btn-save');
-    btn.textContent = '✓ Uloženo';
-    setTimeout(function(){ btn.textContent = '💾 Uložit korekci'; }, 1500);
-  } catch(e) {}
-}
-
-// ══════════════════════════════════════════
-// NAVIGATION PHASE
-// ══════════════════════════════════════════
-function startNav() {
-  showPhase('phase-nav');
-  initMap();
-  startSensors();
-  // Set photo title
-  if (calData && calData.photoId) {
-    document.getElementById('ar-title').textContent = calData.photoId.replace(/\.[^.]+$/,'');
+function initNavMap(){
+  if(navMap){navMap.invalidateSize();return;}
+  navMap=L.map('leafmap',{zoomControl:true,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,keepBuffer:4,crossOrigin:true}).addTo(navMap);
+  const p=calData.photographer;
+  navMap.setView([p.lat,p.lng],18);
+  const pIcon=L.divIcon({html:'<div style="width:16px;height:16px;border-radius:50%;background:#1a1a14;border:3px solid #F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.25)"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
+  photMarker=L.marker([p.lat,p.lng],{icon:pIcon}).addTo(navMap);
+  photMarker.bindTooltip('📷 Stanoviště fotografa',{permanent:false,direction:'top'});
+  const FC={facadeA:'#48c774',facadeB:'#4a9eff',facadeC:'#c9a84c',facadeD:'#e91e8c'};
+  ['facadeA','facadeB','facadeC','facadeD'].forEach(k=>{
+    const arr=calData[k];if(!arr||arr.length<2||!arr[0]||!arr[1])return;
+    L.polyline([[arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]],{color:FC[k],weight:3,opacity:.85}).addTo(navMap);
+  });
+  if(calData.plane&&calData.plane.corners){
+    const c=calData.plane.corners;
+    L.polyline([[c.topLeft.lat,c.topLeft.lng],[c.topRight.lat,c.topRight.lng]],{color:'#1a1a14',weight:2.5,dashArray:'5,4',opacity:.7}).addTo(navMap);
   }
+  navMap.on('dragstart zoomstart',()=>{isLocked=false;if(relockTimer)clearTimeout(relockTimer);});
+  navMap.on('dragend zoomend',()=>{if(relockTimer)clearTimeout(relockTimer);relockTimer=setTimeout(()=>{isLocked=true;if(userPos)navMap.setView([userPos.lat,userPos.lng],navMap.getZoom(),{animate:true});},3000);});
+  setTimeout(()=>navMap.invalidateSize(),100);
 }
 
-function initMap() {
-  if (map) { map.invalidateSize(); return; }
-  map = L.map('leaflet-map', { zoomControl: true, attributionControl: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd', maxZoom: 20, keepBuffer: 4,
-    crossOrigin: true
-  }).addTo(map);
-
-  if (!calData) return;
-  var p = calData.photographer;
-  map.setView([p.lat, p.lng], 18);
-
-  // Photographer marker
-  var photIcon = L.divIcon({
-    html: '<div style="width:16px;height:16px;border-radius:50%;background:#1a1a14;border:3px solid #c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,0.25)"></div>',
-    className: '', iconSize: [16,16], iconAnchor: [8,8]
-  });
-  photMarker = L.marker([p.lat, p.lng], { icon: photIcon }).addTo(map);
-  photMarker.bindTooltip('📷 Stanoviště fotografa', { permanent: false, direction: 'top' });
-
-  // Facade lines
-  var COLS = { facadeA:'#48c774', facadeB:'#4a9eff', facadeC:'#c9a84c', facadeD:'#e91e8c' };
-  ['facadeA','facadeB','facadeC','facadeD'].forEach(function(key) {
-    var arr = calData[key];
-    if (!arr || arr.length < 2 || !arr[0] || !arr[1]) return;
-    var line = L.polyline([[arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]], {
-      color: COLS[key], weight: 3, opacity: 0.8
-    }).addTo(map);
-    facadeLines.push(line);
-  });
-
-  // Plane line if corners exist
-  if (calData.plane && calData.plane.corners) {
-    var c = calData.plane.corners;
-    L.polyline([
-      [c.topLeft.lat, c.topLeft.lng],
-      [c.topRight.lat, c.topRight.lng]
-    ], { color: '#1a1a14', weight: 2.5, dashArray: '5,4', opacity: 0.7 }).addTo(map);
-  }
-
-  map.on('dragstart zoomstart', function() {
-    isLocked = false;
-    if (relockTimer) clearTimeout(relockTimer);
-  });
-  map.on('dragend zoomend', function() {
-    if (relockTimer) clearTimeout(relockTimer);
-    relockTimer = setTimeout(function() {
-      isLocked = true;
-      if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: true });
-    }, 3000);
-  });
-
-  setTimeout(function(){ map.invalidateSize(); }, 100);
+function fitBoth(){
+  if(!navMap||!calData)return;isLocked=false;
+  const p=calData.photographer,bounds=[];
+  if(userPos)bounds.push([userPos.lat,userPos.lng]);
+  bounds.push([p.lat,p.lng]);
+  if(bounds.length>1)navMap.fitBounds(L.latLngBounds(bounds),{padding:[60,60],maxZoom:18,animate:true});
 }
 
-function fitBoth() {
-  if (!map || !calData) return;
-  isLocked = false;
-  var p = calData.photographer;
-  var bounds = [];
-  if (userPos) bounds.push([userPos.lat, userPos.lng]);
-  bounds.push([p.lat, p.lng]);
-  if (bounds.length > 1) map.fitBounds(L.latLngBounds(bounds), { padding: [60,60], maxZoom: 18, animate: true });
-}
-
-// ══════════════════════════════════════════
-// SENSORS — GPS + COMPASS (from compass.html)
-// ══════════════════════════════════════════
-var oriPaused = false;
-var lastH = 0;
-
-function startSensors() {
-  // GPS
-  navigator.geolocation && navigator.geolocation.watchPosition(
-    function(pos) {
-      userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
-      onGPSUpdate();
-      document.getElementById('nav-dbg').textContent = 'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
-    },
-    function(err) {
-      var msgs = { 1:'Poloha blokována', 2:'Nelze určit', 3:'Timeout' };
-      document.getElementById('nav-dbg').textContent = msgs[err.code] || 'GPS chyba';
-    },
-    { enableHighAccuracy: true, maximumAge: 1500 }
+// SENSORS
+function startSensors(){
+  navigator.geolocation&&navigator.geolocation.watchPosition(
+    pos=>{userPos={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy};onGPSUpdate();},
+    err=>{const m={1:'Blokováno',2:'Nelze určit',3:'Timeout'};$('nav-dbg').textContent=m[err.code]||'GPS chyba';},
+    {enableHighAccuracy:true,maximumAge:1500}
   );
-
-  // Orientation
-  function handleOri(e) {
-    if (oriPaused) return;
-    var raw = null;
-    if (e.webkitCompassHeading !== undefined) {
-      raw = e.webkitCompassHeading;
-    } else if (e.alpha !== null) {
-      var sa = (screen.orientation && screen.orientation.angle !== undefined) ? screen.orientation.angle : (window.orientation || 0);
-      raw = (360 - e.alpha + sa + 360) % 360;
+  function handleOri(e){
+    if(oriPaused)return;
+    let raw=null;
+    if(e.webkitCompassHeading!==undefined)raw=e.webkitCompassHeading;
+    else if(e.alpha!=null){const sa=(screen.orientation&&screen.orientation.angle!==undefined)?screen.orientation.angle:(window.orientation||0);raw=(360-e.alpha+sa+360)%360;}
+    if(raw!==null){addHeadingSample((raw-yawOffset+360)%360);ori.a=e.alpha||0;ori.b=e.beta||0;ori.g=e.gamma||0;}
+  }
+  window.addEventListener('deviceorientationabsolute',handleOri,true);
+  window.addEventListener('deviceorientation',handleOri,true);
+  window.addEventListener('devicemotion',e=>{
+    if(!e.rotationRate)return;
+    const now=performance.now(),r=e.rotationRate;
+    rawRate={a:r.alpha||0,b:r.beta||0,g:r.gamma||0};
+    if(now-_dbgT>200){_dbgT=now;
+      const da=$('dbg-a'),db=$('dbg-b'),dg=$('dbg-g');
+      if(da)da.textContent=rawRate.a.toFixed(1);if(db)db.textContent=rawRate.b.toFixed(1);if(dg)dg.textContent=rawRate.g.toFixed(1);
     }
-    if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
-  }
-  window.addEventListener('deviceorientationabsolute', handleOri, true);
-  window.addEventListener('deviceorientation', handleOri, true);
-
-  // iOS permission
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    document.addEventListener('touchstart', function u() {
-      DeviceOrientationEvent.requestPermission().then(function(s){ if(s==='granted') {} }).catch(function(){});
-      document.removeEventListener('touchstart', u);
-    }, { once: true });
-  }
-}
-
-function addHeadingSample(raw) {
-  if (rawH === null) { rawH = raw; }
-  else {
-    var d = raw - rawH;
-    if (d > 180) d -= 360; if (d < -180) d += 360;
-    rawH = (rawH + LP_FAST * d + 360) % 360;
-  }
-  if (smoothH === null) { smoothH = rawH; }
-  else {
-    var d2 = rawH - smoothH;
-    if (d2 > 180) d2 -= 360; if (d2 < -180) d2 += 360;
-    smoothH = (smoothH + LP_SLOW * d2 + 360) % 360;
-  }
-}
-
-function onGPSUpdate() {
-  if (!calData) return;
-  var p = calData.photographer;
-  var dist = haversine(userPos.lat, userPos.lng, p.lat, p.lng);
-
-  // Update nav UI
-  var dv = document.getElementById('nav-dist-big');
-  dv.textContent = dist < 1000 ? Math.round(dist) : (dist/1000).toFixed(1).replace('.',',') + ' km';
-  document.getElementById('nav-dist-sub').textContent = dist < 1000 ? 'metrů od stanoviště' : 'km od stanoviště';
-
-  var dot = document.getElementById('nav-status-dot');
-  var txt = document.getElementById('nav-status-txt');
-  if (dist <= AR_TRIGGER_DIST) {
-    dot.classList.add('near');
-    txt.textContent = 'Jsi na místě — AR připraveno';
-    txt.style.color = '#48c774';
-  } else {
-    dot.classList.remove('near');
-    txt.textContent = 'Vzdálenost ' + Math.round(dist) + ' m · naviguj';
-    txt.style.color = 'rgba(26,24,20,0.5)';
-  }
-
-  // Update user marker on map
-  if (map) {
-    if (!userMarker) {
-      var uIcon = L.divIcon({
-        html: '<div style="width:14px;height:14px;border-radius:50%;background:#b04020;border:3px solid #fff;box-shadow:0 0 0 3px rgba(176,64,32,0.25)"></div>',
-        className: '', iconSize: [14,14], iconAnchor: [7,7]
-      });
-      userMarker = L.marker([userPos.lat, userPos.lng], { icon: uIcon }).addTo(map);
-    } else {
-      userMarker.setLatLng([userPos.lat, userPos.lng]);
+    const dt=gyroLastT!==null?(now-gyroLastT)/1000:0;
+    if(useGyroAR&&dt>0&&phase==='anchored'){
+      const hV=gyroHAxis==='a'?rawRate.a:gyroHAxis==='b'?rawRate.b:rawRate.g;
+      const vV=gyroVAxis==='a'?rawRate.a:gyroVAxis==='b'?rawRate.b:rawRate.g;
+      gyroAngles.x+=hV*dt;gyroAngles.y+=vV*dt;
     }
-    if (isLocked) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+    gyroLastT=now;
+  },true);
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    document.addEventListener('touchstart',function u(){DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted'){gyroOk=true;syncG();}}).catch(()=>{});document.removeEventListener('touchstart',u);},{once:true});
+  } else {gyroOk=true;syncG();}
+}
+
+function addHeadingSample(raw){
+  if(rawH===null){rawH=raw;}else{let d=raw-rawH;if(d>180)d-=360;if(d<-180)d+=360;rawH=(rawH+LP_FAST*d+360)%360;}
+  if(smoothH===null){smoothH=rawH;}else{let d2=rawH-smoothH;if(d2>180)d2-=360;if(d2<-180)d2+=360;smoothH=(smoothH+LP_SLOW*d2+360)%360;}
+}
+
+function onGPSUpdate(){
+  if(!calData)return;
+  const p=calData.photographer,dist=haversine(userPos.lat,userPos.lng,p.lat,p.lng);
+  $('nav-dist').textContent=dist<1000?Math.round(dist):(dist/1000).toFixed(1).replace('.',',')+' km';
+  $('nav-dsub').textContent=dist<1000?'metrů od stanoviště':'km od stanoviště';
+  const dot=$('nav-dot'),stxt=$('nav-stxt');
+  if(dist<=AR_TRIGGER){dot.classList.add('near');stxt.textContent='Jsi na místě — AR připraveno ✓';stxt.style.color='#10B981';}
+  else{dot.classList.remove('near');stxt.textContent='Vzdálenost '+Math.round(dist)+' m · naviguj';stxt.style.color='rgba(26,24,20,.5)';}
+  $('nav-dbg').textContent='GPS ±'+Math.round(userPos.acc||0)+'m | '+(smoothH?Math.round(smoothH):0)+'°';
+  if(navMap){
+    if(!userMarker){const uI=L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#b04020;border:3px solid #fff;box-shadow:0 0 0 3px rgba(176,64,32,.25)"></div>',className:'',iconSize:[14,14],iconAnchor:[7,7]});userMarker=L.marker([userPos.lat,userPos.lng],{icon:uI}).addTo(navMap);}
+    else userMarker.setLatLng([userPos.lat,userPos.lng]);
+    if(isLocked)navMap.setView([userPos.lat,userPos.lng],navMap.getZoom(),{animate:false});
   }
 }
 
-// ══════════════════════════════════════════
-// CALIBRATION (from compass.html)
-// ══════════════════════════════════════════
-function loadCal() {
-  try {
-    var disabled = localStorage.getItem('lop_cal_disabled') === '1';
-    var cal = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null');
-    if (cal && !disabled) { yawOffset = (cal.offsets && cal.offsets.yaw) || 0; calEnabled = true; }
-    else { yawOffset = 0; calEnabled = false; }
-  } catch(e) { yawOffset = 0; calEnabled = false; }
+// CALIBRATION
+function loadCal(){
+  try{const dis=localStorage.getItem('lop_cal_disabled')==='1';const cal=JSON.parse(localStorage.getItem('lop_sensor_calibration')||'null');if(cal&&!dis){yawOffset=(cal.offsets&&cal.offsets.yaw)||0;calEnabled=true;}else{yawOffset=0;calEnabled=false;}}catch(e){yawOffset=0;calEnabled=false;}
   updateCalBtn();
 }
-function updateCalBtn() {
-  var btn = document.getElementById('nav-cal-btn'); if (!btn) return;
-  var cal = null;
-  try { cal = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null'); } catch(e) {}
-  var disabled = localStorage.getItem('lop_cal_disabled') === '1';
-  if (!cal) {
-    btn.textContent = 'kalibrovat kompas?';
-    btn.style.background = '#b04020'; btn.style.color = '#fff';
-  } else if (calEnabled) {
-    btn.textContent = '● kompas';
-    btn.style.background = '#3d7a4a'; btn.style.color = '#fff';
-  } else {
-    btn.textContent = '○ kompas';
-    btn.style.background = 'rgba(26,24,20,0.55)'; btn.style.color = '#fff';
-  }
+function updateCalBtn(){
+  const btn=$('nav-cal-btn');if(!btn)return;
+  let cal=null;try{cal=JSON.parse(localStorage.getItem('lop_sensor_calibration')||'null');}catch(e){}
+  const dis=localStorage.getItem('lop_cal_disabled')==='1';
+  if(!cal){btn.textContent='kalibrovat kompas?';btn.style.background='#b04020';btn.style.color='#fff';}
+  else if(calEnabled){btn.textContent='● kompas';btn.style.background='#3d7a4a';btn.style.color='#fff';}
+  else{btn.textContent='○ kompas';btn.style.background='rgba(26,24,20,.55)';btn.style.color='#fff';}
 }
-function toggleCal() {
-  var cal = null;
-  try { cal = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null'); } catch(e) {}
-  if (!cal) { alert('Kalibrace kompasu není k dispozici. Nejprve proveď kalibraci v nástroji.'); return; }
-  var d = localStorage.getItem('lop_cal_disabled') === '1';
-  if (d) localStorage.removeItem('lop_cal_disabled'); else localStorage.setItem('lop_cal_disabled', '1');
+function toggleCal(){
+  let cal=null;try{cal=JSON.parse(localStorage.getItem('lop_sensor_calibration')||'null');}catch(e){}
+  if(!cal){alert('Kalibrace kompasu není k dispozici.');return;}
+  const d=localStorage.getItem('lop_cal_disabled')==='1';
+  if(d)localStorage.removeItem('lop_cal_disabled');else localStorage.setItem('lop_cal_disabled','1');
   loadCal();
 }
 loadCal();
 
-// ══════════════════════════════════════════
-// AR PHASE
-// ══════════════════════════════════════════
-function startAR() {
-  if (!calData || !photoImg) { alert('Chybí data nebo fotografie'); return; }
-  showPhase('phase-ar');
-
-  arCanvas = document.getElementById('ar-canvas');
-  arCtx = arCanvas.getContext('2d');
-
-  // Start camera
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
-    audio: false
-  }).then(function(stream) {
-    videoStream = stream;
-    var video = document.getElementById('ar-video');
-    video.srcObject = stream;
-    video.play();
-    arRunning = true;
-    requestAnimationFrame(arLoop);
-  }).catch(function(err) {
-    alert('Kamera nedostupná: ' + err.message + '\nZkontroluj oprávnění v prohlížeči.');
-    gotoNav();
-  });
+// AR LAUNCH
+function launchAR(){
+  if(!calData||!photoImg){alert('Chybí data nebo fotografie');return;}
+  showPhase('ph-ar');
+  on($('cam'),'on',true);on($('sl'),'on',true);
+  $('topbar').style.display='flex';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false}).then(s=>{
+    camStream=s;$('cam').srcObject=s;$('cam').play();reqAOS();setPhase('calib');
+  }).catch(e=>{alert('Kamera: '+e.message);stopARCam();showPhase('ph-nav');});
+}
+function stopARCam(){
+  stopAR();
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  const c=$('cam');c.srcObject=null;
+  on(c,'on',false);on($('sl'),'on',false);on($('ov'),'on',false);
+  on($('panel'),'on',false);on($('b-anchor'),'on',false);
+  $('topbar').style.display='none';
 }
 
-function stopAR() {
-  arRunning = false;
-  if (videoStream) {
-    videoStream.getTracks().forEach(function(t){ t.stop(); });
-    videoStream = null;
+// AOS
+function initAOS(){
+  if(!('AbsoluteOrientationSensor' in window))return;
+  try{aoSensor=new AbsoluteOrientationSensor({frequency:60,referenceFrame:'device'});aoSensor.addEventListener('reading',()=>{const q=aoSensor.quaternion;qCur={x:q[0],y:q[1],z:q[2],w:q[3]};});aoSensor.addEventListener('error',()=>{aoOk=false;});aoSensor.start();aoOk=true;syncAOSBadge();}catch(e){}
+}
+async function reqAOS(){
+  try{const p=await Promise.all([navigator.permissions.query({name:'accelerometer'}),navigator.permissions.query({name:'gyroscope'}),navigator.permissions.query({name:'magnetometer'})]);if(p.every(r=>r.state==='granted'||r.state==='prompt'))initAOS();}catch(e){initAOS();}
+}
+function syncAOSBadge(){const b=$('aos-badge');if(!b)return;b.textContent=aoOk?'⊕ AOS OK':'⊕ AOS —';b.style.color=aoOk?'rgba(96,165,250,.9)':'rgba(255,255,255,.2)';b.style.borderColor=aoOk?'rgba(96,165,250,.3)':'rgba(255,255,255,.08)';}
+function qMul(a,b){return{w:a.w*b.w-a.x*b.x-a.y*b.y-a.z*b.z,x:a.w*b.x+a.x*b.w+a.y*b.z-a.z*b.y,y:a.w*b.y-a.x*b.z+a.y*b.w+a.z*b.x,z:a.w*b.z+a.x*b.y-a.y*b.x+a.z*b.w};}
+function qConj(q){return{x:-q.x,y:-q.y,z:-q.z,w:q.w};}
+function qRoll(q){const s=2*(q.w*q.z+q.x*q.y),c=1-2*(q.y*q.y+q.z*q.z);return Math.atan2(s,c)*180/Math.PI;}
+function relativeRoll(){if(!aoOk)return 0;return qRoll(qMul(qConj(qRef),qCur));}
+
+// AR PHASES
+const PLBLS={calib:'KALIBRACE OS',align:'ZAROVNAT',anchored:'UKOTVENO'};
+const PIDX={calib:0,align:1,anchored:2};
+const PCLR={calib:'rgba(245,158,11,.9)',align:'rgba(220,38,38,.9)',anchored:'rgba(16,185,129,.9)'};
+
+function setPhase(p){
+  phase=p;
+  const lbl=$('plbl');lbl.textContent=PLBLS[p];lbl.style.color=PCLR[p];
+  const sc=$('step-counter');if(sc)sc.textContent=(PIDX[p]+1)+'/3';
+  collapsed=false;$('pbody').style.display='block';$('cbtn').textContent='▲';
+  on($('panel'),'on',true);$('panel').style.maxHeight=p==='anchored'?'70vh':'52vh';
+  $('pc').style.display=p==='calib'?'block':'none';
+  $('pa').style.display=p==='align'?'block':'none';
+  $('panch').style.display=p==='anchored'?'flex':'none';
+  on($('ov'),'on',!!$('ov-photo').src&&$('ov-photo').src!==location.href);
+  applyTR();
+  on($('xh'),'on',p==='align');
+  const cxh=$('calib-xh');if(cxh){cxh.classList[p==='calib'?'add':'remove']('on');drawCalibXh();}
+  on($('b-anchor'),'on',p==='anchored');
+  const dbgtop=$('dbg-topbar');if(dbgtop)dbgtop.style.display=(p==='calib'||p==='anchored')?'flex':'none';
+  if(p==='anchored'){stopAR();startAR();fillAnch();}
+  else if(p==='calib'){stopAR();startCalibAR();}
+  else stopAR();
+  if(!calibDone)applyDefaultAxes();
+  syncARBadge();
+  setTimeout(updateLayout,60);
+}
+
+// INITIAL TR FROM JSON
+function computeInitialTR(){
+  if(!calData||!userPos||smoothH===null)return;
+  const p=calData.photographer;
+  yawCalibOffset=(calData.azimutDeg||0)-smoothH;
+  const distM=p.distM||20;
+  const planeW=calData.plane?calData.plane.widthM:distM*0.8;
+  const fovH=60*Math.PI/180;
+  const visW=2*distM*Math.tan(fovH/2);
+  const szPct=Math.min(280,Math.max(20,Math.round((planeW/visW)*100)));
+  TR.sz=szPct;TR.px=0;TR.py=0;TR.rx=0;TR.ry=0;TR.opa=50;
+  for(const k of Object.keys(KEYS)){const el=$('s-'+k);if(el)el.value=TR[k];const vl=$('v-'+k);if(vl)vl.textContent=TR[k]+KEYS[k].u;}
+}
+
+// LAYOUT
+function updateLayout(){
+  const ov=$('ov'),xh=$('xh'),panel=$('panel');
+  const ls=window.innerWidth>window.innerHeight,open=!collapsed&&panel.classList.contains('on');
+  if(ls&&open){const sw=window.innerWidth*.42;ov.style.top='0';ov.style.left='0';ov.style.right=sw+'px';ov.style.bottom='0';xh.style.left=((window.innerWidth-sw)/2)+'px';xh.style.top='50%';}
+  else if(!ls&&open){const ph=panel.offsetHeight,tbh=$('topbar').offsetHeight||30;ov.style.top=tbh+'px';ov.style.left='0';ov.style.right='0';ov.style.bottom=ph+'px';xh.style.left='50%';xh.style.top=(tbh+(window.innerHeight-ph-tbh)/2)+'px';}
+  else{ov.style.top='0';ov.style.left='0';ov.style.right='0';ov.style.bottom='0';xh.style.left='50%';xh.style.top='50%';}
+}
+new ResizeObserver(updateLayout).observe($('panel'));
+window.addEventListener('resize',updateLayout);
+window.addEventListener('orientationchange',()=>setTimeout(updateLayout,100));
+
+// GYRO
+function reqGyro(){if(typeof DeviceOrientationEvent?.requestPermission==='function')DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted'){gyroOk=true;syncG();}});}
+function syncG(){const el=$('gyro-tb');if(!el)return;el.className=gyroOk?'ok':'';el.innerHTML='<div style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;margin-right:2px"></div>GYRO '+(gyroOk?'OK':'—');syncARBadge();}
+function syncARBadge(){
+  const el=$('gyro-tb');if(!el)return;
+  const active=['calib','align','anchored'].includes(phase);
+  if(!active||!gyroOk){syncG();return;}
+  if(useGyroAR){el.className='gyro';el.innerHTML='<div style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;margin-right:2px"></div>⟳ GYRO';}
+  else{el.className='comp';el.innerHTML='<div style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;margin-right:2px"></div>🧭 KOMPAS';}
+}
+function applyDefaultAxes(){if(!calibDone){gyroHAxis='b';gyroHSign=1;gyroVAxis='a';gyroVSign=1;}syncAxisUI();}
+function syncAxisUI(){
+  ['a','b','g'].forEach(a=>{const h=$('hax-'+a),v=$('vax-'+a);if(h)h.className='ax-btn'+(a===gyroHAxis?' on-h':'');if(v)v.className='ax-btn'+(a===gyroVAxis?' on-v':'');});
+  const hs=$('hsgn'),vs=$('vsgn');if(hs)hs.textContent=gyroHSign>0?'+':'−';if(vs)vs.textContent=gyroVSign>0?'+':'−';
+  const hl=$('h-axis-lbl'),vl=$('v-axis-lbl');if(hl)hl.textContent='r'+gyroHAxis+(gyroHSign>0?'+':'−');if(vl)vl.textContent='r'+gyroVAxis+(gyroVSign>0?'+':'−');
+  const dh=$('dbg-haxis'),dhs=$('dbg-hsign'),dv=$('dbg-vaxis'),dvs=$('dbg-vsign');
+  if(dh)dh.textContent='r'+gyroHAxis;if(dhs)dhs.textContent=gyroHSign>0?'+':'−';if(dv)dv.textContent='r'+gyroVAxis;if(dvs)dvs.textContent=gyroVSign>0?'+':'−';
+  const ol=$('orient-lbl');if(ol)ol.textContent=window.innerWidth>window.innerHeight?'⬛ LAND':'🟦 PORT';
+  drawCalibXh();
+}
+function setGyroAxis(hv,axis){
+  if(hv==='h'){gyroHAxis=axis;['a','b','g'].forEach(a=>{const e=$('hax-'+a);if(e)e.className='ax-btn'+(a===axis?' on-h':'');});}
+  else{gyroVAxis=axis;['a','b','g'].forEach(a=>{const e=$('vax-'+a);if(e)e.className='ax-btn'+(a===axis?' on-v':'');});}
+  syncAxisUI();
+  if(phase==='anchored'){stopAR();startAR();}else if(phase==='calib'){stopAR();startCalibAR();}
+}
+function flipSign(hv){
+  if(hv==='h'){gyroHSign*=-1;const b=$('hsgn');if(b)b.textContent=gyroHSign>0?'+':'−';}
+  else{gyroVSign*=-1;const b=$('vsgn');if(b)b.textContent=gyroVSign>0?'+':'−';}
+  syncAxisUI();
+  if(phase==='anchored'){stopAR();startAR();}else if(phase==='calib'){stopAR();startCalibAR();}
+}
+function toggleARMode(){
+  useGyroAR=!useGyroAR;
+  const b2=$('btn-ar-mode2');if(!b2)return;
+  if(useGyroAR){b2.textContent='⟳ GYRO — klepni pro 🧭 KOMPAS';b2.style.background='rgba(16,185,129,.12)';b2.style.color='rgba(16,185,129,.85)';b2.style.borderColor='rgba(16,185,129,.2)';}
+  else{b2.textContent='🧭 KOMPAS — klepni pro ⟳ GYRO';b2.style.background='rgba(220,38,38,.1)';b2.style.color='rgba(220,38,38,.85)';b2.style.borderColor='rgba(220,38,38,.2)';}
+  if(phase==='anchored'){stopAR();startAR();}
+  syncARBadge();
+}
+
+// CALIB XH
+function drawCalibXh(){
+  const svg=$('calib-xh');if(!svg||!svg.classList.contains('on'))return;
+  const W=window.innerWidth,H=window.innerHeight,cx=W/2,cy=H/2,FS=11,TICK=18;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width',W);svg.setAttribute('height',H);
+  svg.innerHTML=`<g>
+    <line x1="0" y1="${cy}" x2="${W}" y2="${cy}" stroke="#EF4444" stroke-width="1" stroke-opacity=".55" stroke-dasharray="6,6"/>
+    <polygon points="${W-14},${cy-5} ${W-2},${cy} ${W-14},${cy+5}" fill="#EF4444" fill-opacity=".7"/>
+    <text x="${W-24}" y="${cy-8}" fill="#EF4444" fill-opacity=".8" font-size="${FS}" font-family="JetBrains Mono,monospace" text-anchor="end">H (r${gyroHAxis}${gyroHSign>0?'+':'−'})</text>
+    ${[-3,-2,-1,1,2,3].map(i=>`<line x1="${cx+i*W/8}" y1="${cy-TICK}" x2="${cx+i*W/8}" y2="${cy+TICK}" stroke="#EF4444" stroke-width=".5" stroke-opacity=".35"/>`).join('')}
+    <line x1="${cx}" y1="0" x2="${cx}" y2="${H}" stroke="#10B981" stroke-width="1" stroke-opacity=".55" stroke-dasharray="6,6"/>
+    <polygon points="${cx-5},14 ${cx},2 ${cx+5},14" fill="#10B981" fill-opacity=".7"/>
+    <text x="${cx+8}" y="22" fill="#10B981" fill-opacity=".8" font-size="${FS}" font-family="JetBrains Mono,monospace">V (r${gyroVAxis}${gyroVSign>0?'+':'−'})</text>
+    ${[-3,-2,-1,1,2,3].map(i=>`<line x1="${cx-TICK}" y1="${cy+i*H/8}" x2="${cx+TICK}" y2="${cy+i*H/8}" stroke="#10B981" stroke-width=".5" stroke-opacity=".35"/>`).join('')}
+    <circle cx="${cx}" cy="${cy}" r="4" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
+    <circle cx="${cx}" cy="${cy}" r="38" fill="none" stroke="#60a5fa" stroke-width="1" stroke-opacity=".45" stroke-dasharray="4,8"/>
+    <text x="${cx+42}" y="${cy+4}" fill="#60a5fa" fill-opacity=".6" font-size="${FS-1}" font-family="JetBrains Mono,monospace">R (rα auto)</text>
+  </g>`;
+}
+
+// AR RENDER
+function applyTR(dx,dy,rollDeg){
+  const img=$('ov-photo'),roll=rollDeg||0;
+  img.style.opacity=TR.opa/100;
+  img.style.transform=`translate(${TR.px+(dx||0)}px,${TR.py+(dy||0)}px) rotateZ(${-roll}deg) scale(${TR.sz/100}) perspective(800px) rotateX(${TR.rx}deg) rotateY(${TR.ry}deg)`;
+  img.style.transition=dx!==undefined?'transform 60ms linear':'none';
+}
+function upd(k,v,u){TR[k]=+v;$('v-'+k).textContent=v+u;applyTR();}
+function stp(k,d){const e=$('s-'+k),m=KEYS[k];const v=Math.min(m.max,Math.max(m.min,TR[k]+d));e.value=v;upd(k,v,m.u);}
+
+let calibAngles={x:0,y:0},calibLastT=null;
+function calibUpd(k,v){calibTR[k]=+v;$('cv-'+k).textContent=v+(k==='opa'?'%':'%');applyCalibTR(calibAngles.x,calibAngles.y);}
+function calibStp(k,d){const lim={opa:[0,100],sz:[10,300]};const[mn,mx]=lim[k];calibTR[k]=Math.min(mx,Math.max(mn,calibTR[k]+d));$('c-'+k).value=calibTR[k];calibUpd(k,calibTR[k]);}
+function applyCalibTR(dx,dy){const img=$('ov-photo'),ppd=window.innerWidth/65;img.style.opacity=calibTR.opa/100;img.style.transform=`translate(${dx*ppd}px,${dy*ppd}px) scale(${calibTR.sz/100})`;img.style.transition='none';}
+function startCalibAR(){
+  calibAngles={x:0,y:0};calibLastT=null;
+  function loop(){
+    const now=performance.now();
+    if(calibLastT!==null){const dt=(now-calibLastT)/1000;const hV=gyroHAxis==='a'?rawRate.a:gyroHAxis==='b'?rawRate.b:rawRate.g;const vV=gyroVAxis==='a'?rawRate.a:gyroVAxis==='b'?rawRate.b:rawRate.g;calibAngles.x+=hV*dt;calibAngles.y+=vV*dt;}
+    calibLastT=now;applyCalibTR(gyroHSign*calibAngles.x,gyroVSign*calibAngles.y);drawCalibXh();calibRafId=requestAnimationFrame(loop);
   }
-  var video = document.getElementById('ar-video');
-  video.srcObject = null;
+  calibRafId=requestAnimationFrame(loop);
 }
+function resetCalibView(){calibAngles={x:0,y:0};calibLastT=null;applyCalibTR(0,0);}
 
-// ── AR RENDER LOOP ──
-function arLoop() {
-  if (!arRunning) return;
-  requestAnimationFrame(arLoop);
-
-  // Resize canvas to match display
-  var w = window.innerWidth, h = window.innerHeight;
-  if (arCanvas.width !== w || arCanvas.height !== h) {
-    arCanvas.width = w; arCanvas.height = h;
+function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
+function startAR(){
+  if(!refOri)refOri={...ori};
+  gyroAngles={x:0,y:0};gyroLastT=null;
+  const ppd=window.innerWidth/65;
+  function loop(){
+    let dx,dy;
+    if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
+    else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
+    const roll=aoOk?relativeRoll():0;
+    applyTR(dx,dy,roll);
+    const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+(aoOk?' r'+roll.toFixed(1):'');
+    rafId=requestAnimationFrame(loop);
   }
-  arCtx.clearRect(0, 0, w, h);
+  rafId=requestAnimationFrame(loop);
+}
+function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}if(calibRafId){cancelAnimationFrame(calibRafId);calibRafId=null;}}
 
-  if (!calData || !photoImg || smoothH === null) return;
-  if (!userPos) return;
-
-  // Compute where photo should appear on screen
-  var screen = computePhotoScreenPos(w, h);
-  if (!screen) return;
-
-  // Draw photo
-  arCtx.save();
-  arCtx.globalAlpha = adj.opa;
-
-  // Apply perspective-like transform: map photo corners to computed screen rect
-  // Simple approach: draw centered at computed position with computed size
-  var cx = screen.cx + adj.x * screen.pxPerM;
-  var cy = screen.cy - adj.y * screen.pxPerM; // y up = screen up
-  var pw = screen.w * adj.z;
-  var ph = screen.h * adj.z;
-
-  arCtx.drawImage(photoImg, cx - pw/2, cy - ph/2, pw, ph);
-  arCtx.restore();
-
-  // Debug badge
-  if (userPos && calData) {
-    var dist = haversine(userPos.lat, userPos.lng, calData.photographer.lat, calData.photographer.lng);
-    document.getElementById('ar-dbg-badge').textContent =
-      Math.round(dist) + ' m · ' + Math.round(smoothH) + '°';
-  }
+function doFix(){
+  computeInitialTR();
+  refOri={...ori};qRef={...qCur};
+  const lbl=$('plbl');lbl.textContent='ZAROVNÁNO';lbl.style.color='rgba(16,185,129,.9)';
+  setTimeout(()=>setPhase('anchored'),600);
 }
 
-// ── COMPUTE PHOTO POSITION ──
-// Projects the photo plane onto screen using GPS + heading
-function computePhotoScreenPos(screenW, screenH) {
-  if (!calData || !calData.photographer) return null;
+function fillAnch(){
+  const ab=$('anch-db');if(ab)ab.innerHTML=gyroOk?'<div class="dr"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':'';
+  const b2=$('btn-ar-mode2');if(!b2)return;
+  if(useGyroAR){b2.textContent='⟳ GYRO — klepni pro 🧭 KOMPAS';b2.style.background='rgba(16,185,129,.12)';b2.style.color='rgba(16,185,129,.85)';b2.style.borderColor='rgba(16,185,129,.2)';}
+  else{b2.textContent='🧭 KOMPAS — klepni pro ⟳ GYRO';b2.style.background='rgba(220,38,38,.1)';b2.style.color='rgba(220,38,38,.85)';b2.style.borderColor='rgba(220,38,38,.2)';}
+}
+function toggleC(){if(window.innerWidth>window.innerHeight)return;collapsed=!collapsed;$('pbody').style.display=collapsed?'none':'block';$('cbtn').textContent=collapsed?'▼':'▲';setTimeout(updateLayout,40);}
 
-  var p = calData.photographer;
-  var fovH = 60 * Math.PI / 180; // assumed camera FOV
-  var fPx = (screenW / 2) / Math.tan(fovH / 2); // focal length in pixels
-
-  // Vector from user to photographer position (metres, local coords)
-  var R = 6371000;
-  var dLat = (p.lat - userPos.lat) * Math.PI / 180 * R;
-  var dLng = (p.lng - userPos.lng) * Math.PI / 180 * R * Math.cos(userPos.lat * Math.PI / 180);
-
-  // Rotate into camera frame (azimuth = smoothH degrees from north)
-  var az = smoothH * Math.PI / 180;
-  var forward =  dLat * Math.cos(az) + dLng * Math.sin(az);
-  var right   = -dLat * Math.sin(az) + dLng * Math.cos(az);
-
-  if (forward < 0.5) {
-    // Behind or too close — show centered with warning
-    return {
-      cx: screenW / 2, cy: screenH / 2,
-      w: screenW * 0.6, h: screenW * 0.6 / (photoImg.naturalWidth / photoImg.naturalHeight),
-      pxPerM: fPx / Math.max(1, Math.abs(forward))
-    };
-  }
-
-  // Screen position of photographer's eye point
-  var sx = screenW/2 + right   * fPx / forward;
-  var sy = screenH/2 - (p.heightM || 1.6) * fPx / forward; // eye height above ground
-
-  // Photo physical dimensions from JSON
-  var planeW = calData.plane ? calData.plane.widthM  * adj.z : (calData.photographer.distM || 30) * 0.8;
-  var planeH = calData.plane ? calData.plane.heightM * adj.z : planeW / (photoImg.naturalWidth / photoImg.naturalHeight);
-
-  // Projected size at distance forward
-  var projW = planeW * fPx / forward;
-  var projH = planeH * fPx / forward;
-
-  var pxPerM = fPx / forward;
-
-  return { cx: sx, cy: sy, w: projW, h: projH, pxPerM: pxPerM };
+// EXPORT
+function doExport(){
+  if(!calData||!userPos){alert('Chybí GPS nebo kalibrační data');return;}
+  const p=calData.photographer;
+  const fa=calData.facadeA;
+  const ref=fa&&fa[0]&&fa[1]?{lat:(fa[0].lat+fa[1].lat)/2,lng:(fa[0].lng+fa[1].lng)/2}:{lat:p.lat,lng:p.lng};
+  const distM=p.distM||20;
+  const fovH=60*Math.PI/180;
+  const visW=2*distM*Math.tan(fovH/2);
+  const aspect=calData.plane&&calData.plane.widthM&&calData.plane.heightM?calData.plane.widthM/calData.plane.heightM:(photoImg?photoImg.naturalWidth/photoImg.naturalHeight:16/9);
+  const scaleMult=TR.sz/100;
+  const planeW=(calData.plane?calData.plane.widthM:visW)*scaleMult;
+  const planeH=planeW/aspect;
+  const phX=p.lat-ref.lat,phY=p.lng-ref.lng;
+  const mag=Math.sqrt(phX*phX+phY*phY)||1e-10;
+  const dLat=phX/mag,dLng=phY/mag;
+  const perpLat=-dLng,perpLng=dLat;
+  const R=6371000,halfW=planeW/2,halfH=planeH/2;
+  const ph=p.heightM||1.6;
+  const vertOff=(TR.py/window.innerHeight)*planeH;
+  const horizOff=(TR.px/window.innerWidth)*planeW;
+  function mToGps(mx,my){return{lat:ref.lat+(my/R)*(180/Math.PI),lng:ref.lng+(mx/R)*(180/Math.PI)/Math.cos(ref.lat*Math.PI/180)};}
+  const corners={
+    topLeft:{...mToGps(perpLat*(halfW+horizOff),perpLng*(halfW+horizOff)),alt:ph+halfH-vertOff},
+    topRight:{...mToGps(-perpLat*(halfW-horizOff),-perpLng*(halfW-horizOff)),alt:ph+halfH-vertOff},
+    bottomLeft:{...mToGps(perpLat*(halfW+horizOff),perpLng*(halfW+horizOff)),alt:ph-halfH-vertOff},
+    bottomRight:{...mToGps(-perpLat*(halfW-horizOff),-perpLng*(halfW-horizOff)),alt:ph-halfH-vertOff}
+  };
+  const json={
+    version:4,step:4,photoId:calData.photoId||photoFileName,
+    anchoredAt:new Date().toISOString(),
+    userPosAtAnchor:{lat:userPos.lat,lng:userPos.lng,acc:userPos.acc||0},
+    compassHeading:smoothH||0,arMode:useGyroAR?'gyro':'compass',
+    gyroAxes:{h:'r'+gyroHAxis+(gyroHSign>0?'+':'−'),v:'r'+gyroVAxis+(gyroVSign>0?'+':'−')},
+    adjustments:{szPct:TR.sz,xPx:TR.px,yPx:TR.py,rxDeg:TR.rx,ryDeg:TR.ry},
+    plane:{widthM:parseFloat(planeW.toFixed(2)),heightM:parseFloat(planeH.toFixed(2)),corners},
+    photographer:{...p},
+    facadeA:calData.facadeA||[],facadeB:calData.facadeB||[],
+    facadeC:calData.facadeC||[],facadeD:calData.facadeD||[],
+    calDataRef:calData.timestamp||null
+  };
+  const blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=photoFileName+'_export_step4.json';a.click();URL.revokeObjectURL(a.href);
+  const btn=$('btn-copy');btn.textContent='✓ EXPORTOVÁNO';btn.className='btn bok';setTimeout(()=>{btn.textContent='EXPORT JSON';btn.className='btn bg';},2500);
 }
 
-// ══════════════════════════════════════════
-// ADJUSTMENT CONTROLS
-// ══════════════════════════════════════════
-function startAdj(axis, dir) {
-  stopAdj();
-  doAdj(axis, dir);
-  adjTimer = setInterval(function(){ doAdj(axis, dir); }, 120);
-}
-function stopAdj() {
-  if (adjTimer) { clearInterval(adjTimer); adjTimer = null; }
-}
-function doAdj(axis, dir) {
-  if (axis === 'x') adj.x += dir * ADJ_STEP_X;
-  if (axis === 'y') adj.y += dir * ADJ_STEP_Y;
-  if (axis === 'z') { adj.z = Math.max(0.1, Math.min(5, adj.z + dir * ADJ_STEP_Z)); }
-  updateAdjUI();
-}
-function resetAdj() {
-  adj = { x: 0, y: 0, z: 1.0, opa: adj.opa };
-  updateAdjUI();
-}
-function setOpacity(v) {
-  adj.opa = parseInt(v) / 100;
-  document.getElementById('adj-opa-val').textContent = v + '%';
-}
-function updateAdjUI() {
-  document.getElementById('adj-x-val').textContent = adj.x.toFixed(1) + ' m';
-  document.getElementById('adj-y-val').textContent = adj.y.toFixed(1) + ' m';
-  document.getElementById('adj-z-val').textContent = adj.z.toFixed(2) + '×';
-  var opa = Math.round((adj.opa || 0.8) * 100);
-  document.getElementById('adj-opa-val').textContent = opa + '%';
-  document.getElementById('opacity-slider').value = opa;
+function doReset(){
+  stopARCam();showPhase('ph-import');calData=null;photoImg=null;phase='load';calibDone=false;refOri=null;
+  $('iz-json').classList.remove('done');$('iz-json-val').textContent='Vybrat JSON soubor';
+  $('iz-photo').classList.remove('done');$('iz-photo-val').textContent='Vybrat fotografii';
+  $('imp-go-btn').disabled=true;
 }
 
-// ══════════════════════════════════════════
-// GEOMETRY HELPERS
-// ══════════════════════════════════════════
-function haversine(lat1, lng1, lat2, lng2) {
-  var R = 6371000;
-  var dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
-  var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
-          Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
+function haversine(la1,lo1,la2,lo2){const R=6371000,dL=(la2-la1)*Math.PI/180,dl=(lo2-lo1)*Math.PI/180;const a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 
-// ══════════════════════════════════════════
-// MAIN LOOP — update heading display
-// ══════════════════════════════════════════
-function mainLoop() {
-  var h = smoothH !== null ? smoothH : 0;
-  if (Math.abs(lastH - h) > 0.5) {
-    lastH = h;
-    // Update GPS dbg
-    if (userPos) {
-      document.getElementById('nav-dbg').textContent = 'GPS ✓ | ' + Math.round(h) + '°';
-    }
-  }
-  requestAnimationFrame(mainLoop);
-}
-mainLoop();
-
-// ══════════════════════════════════════════
-// RESIZE
-// ══════════════════════════════════════════
-window.addEventListener('resize', function() {
-  oriPaused = true;
-  setTimeout(function(){ oriPaused = false; }, 800);
-  if (map) setTimeout(function(){ map.invalidateSize(); }, 200);
-});
+window.addEventListener('resize',()=>{oriPaused=true;setTimeout(()=>oriPaused=false,800);if(!calibDone)applyDefaultAxes();if(navMap)setTimeout(()=>navMap.invalidateSize(),200);setTimeout(updateLayout,80);});
+window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(!calibDone)applyDefaultAxes();updateLayout();},120);});
 </script>
 </body>
 </html>
