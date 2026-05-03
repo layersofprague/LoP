@@ -488,7 +488,7 @@ function stopARCam(){
   stopAR();
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
   const c=$('cam');c.srcObject=null;
-  on(c,'on',false);on($('sl'),'on',false);on($('ov'),'on',false);
+  on(c,'on',false);on($('sl'),'on',false);on($('ov'),'on',false);on($('ar-canvas'),'on',false);
   on($('panel'),'on',false);on($('b-anchor'),'on',false);
   $('topbar').style.display='none';
 }
@@ -558,7 +558,8 @@ function setPhase(p){
   $('pc').style.display=p==='calib'?'block':'none';
   $('pa').style.display=p==='align'?'block':'none';
   $('panch').style.display=p==='anchored'?'flex':'none';
-  on($('ov'),'on',!!$('ov-photo').src&&$('ov-photo').src!==location.href);
+  on($('ov'),'on', p!=='anchored' && !!$('ov-photo').src && $('ov-photo').src!==location.href);
+  on($('ar-canvas'),'on', false); // canvas started by startAR itself
   applyTR();
   on($('xh'),'on',p==='align');
   const cxh=$('calib-xh');if(cxh){cxh.classList[p==='calib'?'add':'remove']('on');drawCalibXh();}
@@ -679,78 +680,6 @@ function applyTR(dx,dy,rollDeg){
   img.style.maskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
 }
 
-// Apply homography matrix3d to image element
-// corners: [{x,y},{x,y},{x,y},{x,y}] in canvas pixels — TL,TR,BR,BL
-function applyHomography(corners){
-  const img=$('ov-photo');
-  if(!photoImg||!corners) return;
-  const W=photoImg.naturalWidth, H=photoImg.naturalHeight;
-  // Source corners (normalised 0-1)
-  const src=[[0,0],[1,0],[1,1],[0,1]];
-  // Destination corners in screen pixels
-  const dst=corners;
-  // Compute perspective transform matrix (3x3 homogeneous)
-  // Using standard DLT approach
-  const m=getPerspectiveTransform(src,dst,W,H);
-  if(!m) return;
-  img.style.opacity=TR.opa/100;
-  img.style.transform='none';
-  img.style.position='absolute';
-  img.style.left='0'; img.style.top='0';
-  img.style.width=W+'px'; img.style.height=H+'px';
-  img.style.transformOrigin='0 0';
-  img.style.transform=`matrix3d(${m.join(',')})`;
-  img.style.transition='transform 60ms linear';
-  img.style.webkitMaskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
-  img.style.maskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
-}
-
-// Compute CSS matrix3d from 4 source→dest point correspondences
-// src: normalised 0-1 coords, dst: screen pixels
-function getPerspectiveTransform(src, dst, W, H){
-  // Build 8x8 system Ax=b
-  const A=[], b=[];
-  for(let i=0;i<4;i++){
-    const sx=src[i][0]*W, sy=src[i][1]*H;
-    const dx=dst[i][0], dy=dst[i][1];
-    A.push([sx,sy,1,0,0,0,-dx*sx,-dx*sy]);
-    A.push([0,0,0,sx,sy,1,-dy*sx,-dy*sy]);
-    b.push(dx); b.push(dy);
-  }
-  const h=solveLinear8(A,b);
-  if(!h) return null;
-  const h11=h[0],h12=h[1],h13=h[2],h21=h[3],h22=h[4],h23=h[5],h31=h[6],h32=h[7],h33=1;
-  // CSS matrix3d is column-major 4x4
-  return [
-    h11, h21, 0, h31,
-    h12, h22, 0, h32,
-    0,   0,   1, 0,
-    h13, h23, 0, h33
-  ];
-}
-
-// Gaussian elimination for 8x8 system
-function solveLinear8(A,b){
-  const n=8;
-  const M=A.map((row,i)=>[...row,b[i]]);
-  for(let col=0;col<n;col++){
-    let maxR=col;
-    for(let r=col+1;r<n;r++) if(Math.abs(M[r][col])>Math.abs(M[maxR][col])) maxR=r;
-    [M[col],M[maxR]]=[M[maxR],M[col]];
-    if(Math.abs(M[col][col])<1e-10) return null;
-    for(let r=0;r<n;r++){
-      if(r===col) continue;
-      const f=M[r][col]/M[col][col];
-      for(let c=col;c<=n;c++) M[r][c]-=f*M[col][c];
-    }
-  }
-  return M.map((row,i)=>row[n]/row[i]);
-}
-
-// World-to-screen projection for a GPS+alt point
-// userPos: {lat,lng}, headingDeg: current compass heading
-// pointGPS: {lat,lng,alt}: world point
-// returns {x,y} screen coords or null if behind camera
 function worldToScreen(pointGPS, userPosW, headingDeg, heightM){
   const R=6371000;
   const fovH=60*Math.PI/180;
@@ -800,79 +729,205 @@ function resetCalibView(){calibAngles={x:0,y:0};calibLastT=null;applyCalibTR(0,0
 function angleDiff(a,b){let d=a-b;while(d>180)d-=360;while(d<-180)d+=360;return d;}
 
 function startAR(){
-  if(!refOri)refOri={...ori};
-  gyroAngles={x:0,y:0};gyroLastT=null;
+  if(!refOri) refOri={...ori};
+  gyroAngles={x:0,y:0}; gyroLastT=null;
   const ppd=window.innerWidth/65;
-  // Reset img to normal flow for homography mode
-  const img=$('ov-photo');
-  img.style.position=''; img.style.left=''; img.style.top='';
-  img.style.width=''; img.style.height=''; img.style.transformOrigin='';
-  // Check if we have GPS corners for homography
-  const corners=calData&&calData.plane&&calData.plane.corners;
-  const hasHomography=!!corners&&!!userPos&&smoothH!==null;
+
+  // Switch to canvas rendering — hide ov img
+  const ovEl=$('ov'), cvEl=$('ar-canvas');
+  on(ovEl,'on',false);
+  on(cvEl,'on',true);
+  const cv2=cvEl.getContext('2d');
+
+  // Check if homography is possible
+  const hasCorners=!!(calData&&calData.plane&&calData.plane.corners);
 
   function loop(){
-    const roll=computeRoll();
+    const W=window.innerWidth, H=window.innerHeight;
+    if(cvEl.width!==W||cvEl.height!==H){cvEl.width=W;cvEl.height=H;}
+    cv2.clearRect(0,0,W,H);
 
-    if(hasHomography&&userPos&&smoothH!==null){
+    if(!photoImg){rafId=requestAnimationFrame(loop);return;}
+
+    const roll=computeRoll();
+    const opa=TR.opa/100;
+
+    if(hasCorners&&userPos&&smoothH!==null){
       // ── HOMOGRAPHY MODE ──
-      // Current heading: gyro integrates from reference, compass is absolute
+      const c=calData.plane.corners;
+      const userH=calData.photographer.heightM||1.6;
+
+      // Current heading
       let headingDeg;
       if(useGyroAR){
-        // gyro gives delta from reference; reference was at refOri which had heading smoothH
-        headingDeg=((smoothH||0)+gyroHSign*gyroAngles.x*(180/Math.PI)+360)%360;
+        headingDeg=((smoothH||0) - gyroHSign*gyroAngles.x*(180/Math.PI)+360)%360;
       } else {
         headingDeg=((smoothH||0)+yawCalibOffset+360)%360;
       }
-      // Apply step2 px/py as screen-space offset in metres equivalent
-      const c=calData.plane.corners;
-      const userH=calData.photographer.heightM||1.6;
-      // Project each corner
-      const tl=worldToScreen(c.topLeft,    userPos, headingDeg, userH);
-      const tr=worldToScreen(c.topRight,   userPos, headingDeg, userH);
-      const br=worldToScreen(c.bottomRight,userPos, headingDeg, userH);
-      const bl=worldToScreen(c.bottomLeft, userPos, headingDeg, userH);
+
+      // Project corners
+      const tl=worldToScreen(c.topLeft,    userPos,headingDeg,userH);
+      const tr=worldToScreen(c.topRight,   userPos,headingDeg,userH);
+      const br=worldToScreen(c.bottomRight,userPos,headingDeg,userH);
+      const bl=worldToScreen(c.bottomLeft, userPos,headingDeg,userH);
+
       if(tl&&tr&&br&&bl){
-        // Apply TR.px/py as additional screen offset on all corners
+        // Apply TR.px/py offset (screen pixels from step2 alignment)
         const ox=TR.px, oy=TR.py;
-        const pts=[[tl.x+ox,tl.y+oy],[tr.x+ox,tr.y+oy],[br.x+ox,br.y+oy],[bl.x+ox,bl.y+oy]];
-        applyHomography(pts);
-        // Roll: rotate around centre of projected quad
-        const cx=(tl.x+tr.x+br.x+bl.x)/4+ox;
-        const cy=(tl.y+tr.y+br.y+bl.y)/4+oy;
+        // Apply roll around centre of projected quad
+        let pts=[[tl.x,tl.y],[tr.x,tr.y],[br.x,br.y],[bl.x,bl.y]];
         if(roll!==0){
-          const r=-roll*Math.PI/180;
-          const cos=Math.cos(r),sin=Math.sin(r);
-          const rotated=pts.map(([px,py])=>{
-            const dx=px-cx,dy=py-cy;
-            return [cx+dx*cos-dy*sin, cy+dx*sin+dy*cos];
+          const cx=(pts[0][0]+pts[1][0]+pts[2][0]+pts[3][0])/4;
+          const cy=(pts[0][1]+pts[1][1]+pts[2][1]+pts[3][1])/4;
+          const r=-roll*Math.PI/180, cos=Math.cos(r), sin=Math.sin(r);
+          pts=pts.map(([px,py])=>{
+            const dx=px-cx, dy=py-cy;
+            return [cx+dx*cos-dy*sin+ox, cy+dx*sin+dy*cos+oy];
           });
-          applyHomography(rotated);
+        } else {
+          pts=pts.map(([px,py])=>[px+ox,py+oy]);
         }
-        const el=$('ar-d');if(el)el.textContent='⊞ homo r'+roll.toFixed(1);
+
+        // Draw photo via canvas drawImage with perspective transform
+        drawImageWarped(cv2, photoImg, pts, opa);
+
+        const el=$('ar-d');
+        if(el) el.textContent='⊞ homo h'+Math.round(headingDeg)+'° r'+roll.toFixed(1);
       } else {
-        // Some corners behind camera — fallback to simple transform
-        let dx,dy;
-        if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
-        else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
-        // Reset img to flow mode for applyTR
-        img.style.position='';img.style.left='';img.style.top='';img.style.width='';img.style.height='';img.style.transformOrigin='';
-        applyTR(dx,dy,roll);
-        const el=$('ar-d');if(el)el.textContent='⚠ fallback';
+        // Corners behind camera — draw centered fallback
+        drawImageCentered(cv2, photoImg, W, H, TR, opa, roll);
+        const el=$('ar-d'); if(el) el.textContent='⚠ za kamerou';
       }
     } else {
-      // ── FALLBACK: simple gyro/compass transform ──
+      // ── FALLBACK: gyro offset from reference ──
       let dx,dy;
-      if(useGyroAR){dx=gyroHSign*gyroAngles.x*ppd;dy=gyroVSign*gyroAngles.y*ppd;}
-      else{const beta_r=refOri.b*Math.PI/180;const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);const gamma_d=ori.g-refOri.g;dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;dy=(ori.b-refOri.b)*ppd;}
-      applyTR(dx,dy,roll);
-      const el=$('ar-d');if(el)el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' r'+roll.toFixed(1)+(rollEnabled?'':'[off]');
+      if(useGyroAR){
+        dx=gyroHSign*gyroAngles.x*ppd;
+        dy=gyroVSign*gyroAngles.y*ppd;
+      } else {
+        const beta_r=refOri.b*Math.PI/180;
+        const alpha_d=angleDiff(ori.a+yawCalibOffset,refOri.a+yawCalibOffset);
+        const gamma_d=ori.g-refOri.g;
+        dx=-(alpha_d*Math.cos(beta_r)-gamma_d*Math.sin(beta_r))*ppd;
+        dy=(ori.b-refOri.b)*ppd;
+      }
+      drawImageCentered(cv2, photoImg, W, H, TR, opa, roll, dx, dy);
+      const el=$('ar-d');
+      if(el) el.textContent=(useGyroAR?'⟳':'🧭')+' Δ'+dx.toFixed(0)+','+dy.toFixed(0)+' r'+roll.toFixed(1);
     }
+
     rafId=requestAnimationFrame(loop);
   }
   rafId=requestAnimationFrame(loop);
 }
-function stopAR(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}if(calibRafId){cancelAnimationFrame(calibRafId);calibRafId=null;}}
+
+// Draw photo warped to 4 destination corners using triangular subdivision
+// pts: [[x,y],[x,y],[x,y],[x,y]] TL,TR,BR,BL in screen coords
+function drawImageWarped(ctx, img, pts, opa){
+  const W=img.naturalWidth, H=img.naturalHeight;
+  ctx.save();
+  ctx.globalAlpha=opa;
+
+  // Split quad into 2 triangles and draw each with setTransform
+  // Triangle 1: TL, TR, BR — src: (0,0),(1,0),(1,1)
+  // Triangle 2: TL, BR, BL — src: (0,0),(1,1),(0,1)
+  drawTriangle(ctx,img,
+    {x:0,y:0},{x:W,y:0},{x:W,y:H},
+    {x:pts[0][0],y:pts[0][1]},{x:pts[1][0],y:pts[1][1]},{x:pts[2][0],y:pts[2][1]}
+  );
+  drawTriangle(ctx,img,
+    {x:0,y:0},{x:W,y:H},{x:0,y:H},
+    {x:pts[0][0],y:pts[0][1]},{x:pts[2][0],y:pts[2][1]},{x:pts[3][0],y:pts[3][1]}
+  );
+
+  // Fade mask via radial gradient
+  applyFadeMask(ctx, pts);
+
+  ctx.restore();
+}
+
+// Draw one triangle from source image to destination using affine transform
+function drawTriangle(ctx, img, s0, s1, s2, d0, d1, d2){
+  // Affine transform: [s0,s1,s2] → [d0,d1,d2]
+  const denom=(s1.x-s0.x)*(s2.y-s0.y)-(s2.x-s0.x)*(s1.y-s0.y);
+  if(Math.abs(denom)<0.001) return;
+  const a=(d1.x-d0.x)*(s2.y-s0.y)-(d2.x-d0.x)*(s1.y-s0.y);
+  const b=(d2.x-d0.x)*(s1.x-s0.x)-(d1.x-d0.x)*(s2.x-s0.x);
+  const c= d0.x - a*s0.x/denom - b*s0.y/denom;
+  const d=(d1.y-d0.y)*(s2.y-s0.y)-(d2.y-d0.y)*(s1.y-s0.y);
+  const e=(d2.y-d0.y)*(s1.x-s0.x)-(d1.y-d0.y)*(s2.x-s0.x);
+  const f= d0.y - d*s0.x/denom - e*s0.y/denom;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(d0.x,d0.y); ctx.lineTo(d1.x,d1.y); ctx.lineTo(d2.x,d2.y);
+  ctx.closePath(); ctx.clip();
+  ctx.transform(a/denom,d/denom,b/denom,e/denom,c,f);
+  ctx.drawImage(img,0,0);
+  ctx.restore();
+}
+
+// Fade out edges by drawing a masking gradient over the quad
+function applyFadeMask(ctx, pts){
+  // Compute bounding box centre
+  const cx=(pts[0][0]+pts[1][0]+pts[2][0]+pts[3][0])/4;
+  const cy=(pts[0][1]+pts[1][1]+pts[2][1]+pts[3][1])/4;
+  // Radius = half diagonal of quad
+  const dx=Math.max(Math.abs(pts[1][0]-pts[0][0]),Math.abs(pts[2][0]-pts[3][0]));
+  const dy=Math.max(Math.abs(pts[2][1]-pts[1][1]),Math.abs(pts[3][1]-pts[0][1]));
+  const rx=dx*0.6, ry=dy*0.6;
+  // Draw ellipse gradient on top with destination-out to erase edges
+  ctx.save();
+  ctx.globalCompositeOperation='destination-out';
+  // Horizontal fade
+  const gx=ctx.createLinearGradient(cx-rx,cy,cx+rx,cy);
+  gx.addColorStop(0,'rgba(0,0,0,0.95)');
+  gx.addColorStop(0.15,'rgba(0,0,0,0)');
+  gx.addColorStop(0.85,'rgba(0,0,0,0)');
+  gx.addColorStop(1,'rgba(0,0,0,0.95)');
+  ctx.fillStyle=gx;
+  ctx.fillRect(cx-rx*1.2,cy-ry*1.2,rx*2.4,ry*2.4);
+  // Vertical fade
+  const gy=ctx.createLinearGradient(cx,cy-ry,cx,cy+ry);
+  gy.addColorStop(0,'rgba(0,0,0,0.95)');
+  gy.addColorStop(0.15,'rgba(0,0,0,0)');
+  gy.addColorStop(0.85,'rgba(0,0,0,0)');
+  gy.addColorStop(1,'rgba(0,0,0,0.95)');
+  ctx.fillStyle=gy;
+  ctx.fillRect(cx-rx*1.2,cy-ry*1.2,rx*2.4,ry*2.4);
+  ctx.restore();
+}
+
+// Fallback: draw photo centered with CSS-like transform via canvas
+function drawImageCentered(ctx, img, W, H, TR, opa, roll, dx, dy){
+  const cx=W/2+(TR.px+(dx||0));
+  const cy=H/2+(TR.py+(dy||0));
+  const scale=TR.sz/100;
+  const iw=img.naturalWidth*scale, ih=img.naturalHeight*scale;
+  const r=-roll*Math.PI/180;
+  ctx.save();
+  ctx.globalAlpha=opa;
+  ctx.translate(cx,cy);
+  ctx.rotate(r);
+  ctx.drawImage(img,-iw/2,-ih/2,iw,ih);
+  // Fade
+  const rx=iw*0.55, ry=ih*0.55;
+  ctx.globalCompositeOperation='destination-out';
+  const gx=ctx.createLinearGradient(-rx,0,rx,0);
+  gx.addColorStop(0,'rgba(0,0,0,0.95)');gx.addColorStop(0.15,'rgba(0,0,0,0)');gx.addColorStop(0.85,'rgba(0,0,0,0)');gx.addColorStop(1,'rgba(0,0,0,0.95)');
+  ctx.fillStyle=gx; ctx.fillRect(-rx*1.2,-ry*1.2,rx*2.4,ry*2.4);
+  const gy=ctx.createLinearGradient(0,-ry,0,ry);
+  gy.addColorStop(0,'rgba(0,0,0,0.95)');gy.addColorStop(0.15,'rgba(0,0,0,0)');gy.addColorStop(0.85,'rgba(0,0,0,0)');gy.addColorStop(1,'rgba(0,0,0,0.95)');
+  ctx.fillStyle=gy; ctx.fillRect(-rx*1.2,-ry*1.2,rx*2.4,ry*2.4);
+  ctx.restore();
+}
+
+function stopAR(){
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  if(calibRafId){cancelAnimationFrame(calibRafId);calibRafId=null;}
+  // Hide canvas, restore ov for calib/align phases
+  on($('ar-canvas'),'on',false);
+}
 
 function doFix(){
   computeInitialTR();
