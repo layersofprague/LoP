@@ -139,13 +139,14 @@
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover;
+    z-index: 1;
   }
 
   #overlay-canvas {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
-    object-fit: cover;
     pointer-events: none;
+    z-index: 2;
   }
 
   /* flash effect */
@@ -162,28 +163,59 @@
   /* ── CONTROLS PANEL ── */
   .controls {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
-    padding: 24px 24px 40px;
+    z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    z-index: 5;
+    gap: 14px;
+  }
+
+  /* PORTRAIT — panel dole */
+  @media (orientation: portrait) {
+    .controls {
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.90) 0%, transparent 100%);
+      padding: 20px 20px 36px;
+    }
+  }
+
+  /* LANDSCAPE — panel vpravo */
+  @media (orientation: landscape) {
+    .controls {
+      top: 0; right: 0; bottom: 0;
+      width: 160px;
+      background: linear-gradient(to left, rgba(0,0,0,0.90) 0%, transparent 100%);
+      padding: 16px 16px 16px 12px;
+      justify-content: center;
+      gap: 18px;
+    }
   }
 
   .slider-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
   }
+
+  /* landscape: slidery svisle */
+  @media (orientation: landscape) {
+    .slider-row {
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
   .slider-label {
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: #999;
-    width: 32px;
     flex-shrink: 0;
   }
+
+  @media (orientation: portrait)  { .slider-label { width: 32px; } }
+  @media (orientation: landscape) { .slider-label { width: auto; } }
+
   input[type=range] {
     -webkit-appearance: none;
     appearance: none;
@@ -193,6 +225,18 @@
     outline: none;
     border-radius: 0;
   }
+
+  /* svislý slider v landscape */
+  @media (orientation: landscape) {
+    input[type=range] {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 2px;
+      height: 80px;
+      flex: none;
+    }
+  }
+
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 18px; height: 18px;
@@ -212,24 +256,32 @@
   .slider-val {
     font-size: 11px;
     color: var(--amber);
-    width: 34px;
-    text-align: right;
     flex-shrink: 0;
   }
+  @media (orientation: portrait)  { .slider-val { width: 34px; text-align: right; } }
+  @media (orientation: landscape) { .slider-val { width: auto; text-align: center; } }
 
   .action-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
+  }
+
+  @media (orientation: landscape) {
+    .action-row {
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
   }
 
   .btn-back {
-    width: 44px; height: 44px;
+    width: 40px; height: 40px;
     border: 1px solid #444;
     background: transparent;
     color: #aaa;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
@@ -238,7 +290,7 @@
   .btn-back:active { border-color: var(--paper); color: var(--paper); }
 
   .btn-shutter {
-    width: 72px; height: 72px;
+    width: 64px; height: 64px;
     border-radius: 50%;
     border: 3px solid var(--paper);
     background: transparent;
@@ -250,7 +302,7 @@
   }
   .btn-shutter::after {
     content: '';
-    width: 56px; height: 56px;
+    width: 50px; height: 50px;
     border-radius: 50%;
     background: var(--paper);
     transition: background 0.1s, transform 0.08s;
@@ -259,12 +311,12 @@
   .btn-shutter:active::after { background: var(--amber); }
 
   .counter-block {
-    width: 44px;
+    width: 40px;
     text-align: center;
     flex-shrink: 0;
   }
   .counter-label { font-size: 9px; color: #666; letter-spacing: 0.1em; text-transform: uppercase; }
-  .counter-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 22px; color: var(--paper); line-height: 1; }
+  .counter-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: var(--paper); line-height: 1; }
 
   /* ── TOP BAR ── */
   .top-bar {
@@ -372,6 +424,11 @@
         <input type="range" id="opacity-slider" min="0" max="100" value="50">
         <span class="slider-val" id="opacity-val">50%</span>
       </div>
+      <div class="slider-row">
+        <span class="slider-label">Velikost</span>
+        <input type="range" id="scale-slider" min="20" max="200" value="100">
+        <span class="slider-val" id="scale-val">100%</span>
+      </div>
 
       <div class="action-row">
         <button class="btn-back" id="btn-back" title="Zpět">←</button>
@@ -397,6 +454,7 @@
   let shotCount = 0;
   let stream = null;
   let overlayOpacity = 0.5;
+  let overlayScale = 1.0;
   let animFrame = null;
 
   // ── ELEMENTS ──
@@ -412,6 +470,8 @@
   const captureCanvas   = document.getElementById('capture-canvas');
   const opacitySlider   = document.getElementById('opacity-slider');
   const opacityVal      = document.getElementById('opacity-val');
+  const scaleSlider     = document.getElementById('scale-slider');
+  const scaleVal        = document.getElementById('scale-val');
   const btnShutter      = document.getElementById('btn-shutter');
   const btnBack         = document.getElementById('btn-back');
   const counterEl       = document.getElementById('counter');
@@ -467,10 +527,14 @@
   async function startCamera() {
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false
       });
       video.srcObject = stream;
+      await new Promise(resolve => {
+        video.onloadedmetadata = () => resolve();
+        video.onerror = () => resolve();
+      });
       await video.play();
     } catch (err) {
       showToast('Kamera nedostupná: ' + err.message);
@@ -496,17 +560,20 @@
       if (historicImg && overlayOpacity > 0) {
         overlayCtx.globalAlpha = overlayOpacity;
 
-        // cover-fit the historic image
+        // cover-fit then apply scale around center
         const imgRatio = historicImg.width / historicImg.height;
         const canvRatio = w / h;
-        let dx, dy, dw, dh;
+        let baseW, baseH;
         if (imgRatio > canvRatio) {
-          dh = h; dw = h * imgRatio;
-          dx = (w - dw) / 2; dy = 0;
+          baseH = h; baseW = h * imgRatio;
         } else {
-          dw = w; dh = w / imgRatio;
-          dx = 0; dy = (h - dh) / 2;
+          baseW = w; baseH = w / imgRatio;
         }
+        const dw = baseW * overlayScale;
+        const dh = baseH * overlayScale;
+        const dx = (w - dw) / 2;
+        const dy = (h - dh) / 2;
+
         overlayCtx.drawImage(historicImg, dx, dy, dw, dh);
         overlayCtx.globalAlpha = 1;
       }
@@ -520,6 +587,11 @@
   opacitySlider.addEventListener('input', e => {
     overlayOpacity = e.target.value / 100;
     opacityVal.textContent = e.target.value + '%';
+  });
+
+  scaleSlider.addEventListener('input', e => {
+    overlayScale = e.target.value / 100;
+    scaleVal.textContent = e.target.value + '%';
   });
 
   // ── SHUTTER ──
