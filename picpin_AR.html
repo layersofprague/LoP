@@ -129,8 +129,12 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 #ar-canvas.on{display:block}
 #calib-xh{position:fixed;inset:0;z-index:4;pointer-events:none;display:none}
 #calib-xh.on{display:block}
-  #panel.on{top:0;bottom:0;left:auto;right:0;width:42vw;max-height:100vh;border-top:none;border-left:1px solid rgba(255,255,255,.05)}
+@media (orientation:landscape){
+  #panel.on{top:0;bottom:0;left:auto;right:0;width:42vw;max-height:100vh;
+    border-top:none;border-left:1px solid rgba(255,255,255,.05);overflow-y:auto}
   #handle{display:none}
+  #nav-bottom{padding:8px 16px 10px}
+  #nav-dist{font-size:32px}
 }
 </style>
 </head>
@@ -591,11 +595,24 @@ function computeInitialTR(){
 
 // LAYOUT
 function updateLayout(){
-  const ov=$('ov'),xh=$('xh'),panel=$('panel');
+  const ov=$('ov'),xh=$('xh'),panel=$('panel'),cv=$('ar-canvas'),cxh=$('calib-xh');
   const ls=window.innerWidth>window.innerHeight,open=!collapsed&&panel.classList.contains('on');
-  if(ls&&open){const sw=window.innerWidth*.42;ov.style.top='0';ov.style.left='0';ov.style.right=sw+'px';ov.style.bottom='0';xh.style.left=((window.innerWidth-sw)/2)+'px';xh.style.top='50%';}
-  else if(!ls&&open){const ph=panel.offsetHeight,tbh=$('topbar').offsetHeight||30;ov.style.top=tbh+'px';ov.style.left='0';ov.style.right='0';ov.style.bottom=ph+'px';xh.style.left='50%';xh.style.top=(tbh+(window.innerHeight-ph-tbh)/2)+'px';}
-  else{ov.style.top='0';ov.style.left='0';ov.style.right='0';ov.style.bottom='0';xh.style.left='50%';xh.style.top='50%';}
+  let top='0',left='0',right='0',bottom='0',xhl='50%',xht='50%';
+  if(ls&&open){
+    const sw=window.innerWidth*.42;
+    right=sw+'px';
+    xhl=((window.innerWidth-sw)/2)+'px'; xht='50%';
+  } else if(!ls&&open){
+    const ph=panel.offsetHeight,tbh=$('topbar').offsetHeight||30;
+    top=tbh+'px'; bottom=ph+'px';
+    xhl='50%'; xht=(tbh+(window.innerHeight-ph-tbh)/2)+'px';
+  }
+  ov.style.top=top;ov.style.left=left;ov.style.right=right;ov.style.bottom=bottom;
+  xh.style.left=xhl;xh.style.top=xht;
+  // Canvas matches ov area
+  if(cv){cv.style.top=top;cv.style.left=left;cv.style.right=right;cv.style.bottom=bottom;}
+  // Calib XH matches ov area
+  if(cxh){cxh.style.top=top;cxh.style.left=left;cxh.style.right=right;cxh.style.bottom=bottom;}
 }
 new ResizeObserver(updateLayout).observe($('panel'));
 window.addEventListener('resize',updateLayout);
@@ -680,10 +697,9 @@ function applyTR(dx,dy,rollDeg){
   img.style.maskImage='radial-gradient(ellipse 88% 88% at 50% 50%, black 55%, transparent 100%)';
 }
 
-function worldToScreen(pointGPS, userPosW, headingDeg, heightM){
-  const R=6371000;
-  const fovH=60*Math.PI/180;
-  const W=window.innerWidth, H=window.innerHeight;
+function worldToScreen(pointGPS, userPosW, headingDeg, heightM, W, H){
+  W=W||window.innerWidth; H=H||window.innerHeight;
+  const R=6371000, fovH=60*Math.PI/180;
   const fPx=(W/2)/Math.tan(fovH/2);
   // Vector from user to point in metres (ENU frame: east=x, north=y, up=z)
   const dLat=(pointGPS.lat-userPosW.lat)*Math.PI/180*R;
@@ -743,8 +759,11 @@ function startAR(){
   const hasCorners=!!(calData&&calData.plane&&calData.plane.corners);
 
   function loop(){
-    const W=window.innerWidth, H=window.innerHeight;
-    if(cvEl.width!==W||cvEl.height!==H){cvEl.width=W;cvEl.height=H;}
+    // Canvas dimensions = ov area (excludes panel)
+    const cvRect=cvEl.getBoundingClientRect();
+    const W=cvRect.width||window.innerWidth;
+    const H=cvRect.height||window.innerHeight;
+    if(cvEl.width!==Math.round(W)||cvEl.height!==Math.round(H)){cvEl.width=Math.round(W);cvEl.height=Math.round(H);}
     cv2.clearRect(0,0,W,H);
 
     if(!photoImg){rafId=requestAnimationFrame(loop);return;}
@@ -766,10 +785,10 @@ function startAR(){
       }
 
       // Project corners
-      const tl=worldToScreen(c.topLeft,    userPos,headingDeg,userH);
-      const tr=worldToScreen(c.topRight,   userPos,headingDeg,userH);
-      const br=worldToScreen(c.bottomRight,userPos,headingDeg,userH);
-      const bl=worldToScreen(c.bottomLeft, userPos,headingDeg,userH);
+      const tl=worldToScreen(c.topLeft,    userPos,headingDeg,userH,W,H);
+      const tr=worldToScreen(c.topRight,   userPos,headingDeg,userH,W,H);
+      const br=worldToScreen(c.bottomRight,userPos,headingDeg,userH,W,H);
+      const bl=worldToScreen(c.bottomLeft, userPos,headingDeg,userH,W,H);
 
       if(tl&&tr&&br&&bl){
         // Apply TR.px/py offset (screen pixels from step2 alignment)
