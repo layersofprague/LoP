@@ -160,107 +160,127 @@
   }
   .flash.go { opacity: 1; transition: none; }
 
-  /* ── CONTROLS PANEL ── */
-  .controls {
+  /* ── PORTRAIT CONTROLS — panel dole ── */
+  .controls-portrait {
     position: absolute;
-    z-index: 5;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+    padding: 16px 20px 32px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
+    z-index: 5;
   }
+  @media (orientation: landscape) { .controls-portrait { display: none; } }
 
-  /* PORTRAIT — panel dole */
-  @media (orientation: portrait) {
-    .controls {
-      bottom: 0; left: 0; right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.90) 0%, transparent 100%);
-      padding: 20px 20px 36px;
-    }
+  /* ── LANDSCAPE CONTROLS ── */
+  /* Levý slider */
+  .slider-left {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 44px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 5;
+    padding: 16px 0;
   }
-
-  /* LANDSCAPE — panel vpravo */
+  /* Pravý slider */
+  .slider-right {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 44px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 5;
+    padding: 16px 0;
+  }
   @media (orientation: landscape) {
-    .controls {
-      top: 0; right: 0; bottom: 0;
-      width: 160px;
-      background: linear-gradient(to left, rgba(0,0,0,0.90) 0%, transparent 100%);
-      padding: 16px 16px 16px 12px;
-      justify-content: center;
-      gap: 18px;
-    }
+    .slider-left  { display: flex; }
+    .slider-right { display: flex; }
   }
 
+  .edge-label {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+  .edge-val {
+    font-size: 9px;
+    color: rgba(255,255,255,0.28);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── SHARED SLIDER STYLES ── */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255,255,255,0.15);
+    outline: none;
+    border-radius: 0;
+  }
+  /* portrait — horizontal */
+  @media (orientation: portrait) {
+    input[type=range] { flex: 1; height: 1px; }
+  }
+  /* landscape — vertical */
+  @media (orientation: landscape) {
+    input[type=range] {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 1px;
+      height: 120px;
+      flex: none;
+    }
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: rgba(255,255,255,0.55);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    background: rgba(255,255,255,0.55);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* portrait slider rows */
   .slider-row {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-
-  /* landscape: slidery svisle */
-  @media (orientation: landscape) {
-    .slider-row {
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-  }
-
   .slider-label {
     font-size: 9px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #999;
+    color: #888;
+    width: 36px;
     flex-shrink: 0;
-  }
-
-  @media (orientation: portrait)  { .slider-label { width: 32px; } }
-  @media (orientation: landscape) { .slider-label { width: auto; } }
-
-  input[type=range] {
-    -webkit-appearance: none;
-    appearance: none;
-    flex: 1;
-    height: 2px;
-    background: #444;
-    outline: none;
-    border-radius: 0;
-  }
-
-  /* svislý slider v landscape */
-  @media (orientation: landscape) {
-    input[type=range] {
-      writing-mode: vertical-lr;
-      direction: rtl;
-      width: 2px;
-      height: 80px;
-      flex: none;
-    }
-  }
-
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px; height: 18px;
-    background: var(--amber);
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid var(--ink);
-  }
-  input[type=range]::-moz-range-thumb {
-    width: 18px; height: 18px;
-    background: var(--amber);
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid var(--ink);
-    box-shadow: none;
   }
   .slider-val {
-    font-size: 11px;
-    color: var(--amber);
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    width: 32px;
+    text-align: right;
     flex-shrink: 0;
   }
-  @media (orientation: portrait)  { .slider-val { width: 34px; text-align: right; } }
-  @media (orientation: landscape) { .slider-val { width: auto; text-align: center; } }
 
+  /* ── ACTION ROW (portrait) ── */
   .action-row {
     display: flex;
     align-items: center;
@@ -268,20 +288,13 @@
     gap: 12px;
   }
 
-  @media (orientation: landscape) {
-    .action-row {
-      flex-direction: column;
-      justify-content: center;
-      gap: 14px;
-    }
-  }
-
+  /* ── BACK BUTTON ── */
   .btn-back {
-    width: 40px; height: 40px;
-    border: 1px solid #444;
+    width: 38px; height: 38px;
+    border: 1px solid rgba(255,255,255,0.2);
     background: transparent;
-    color: #aaa;
-    font-size: 16px;
+    color: rgba(255,255,255,0.5);
+    font-size: 15px;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
@@ -289,61 +302,89 @@
   }
   .btn-back:active { border-color: var(--paper); color: var(--paper); }
 
-  .btn-shutter {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    border: 3px solid var(--paper);
+  /* landscape back — bottom-left corner */
+  .btn-back-landscape {
+    position: absolute;
+    bottom: 16px; left: 6px;
+    width: 32px; height: 32px;
+    border: 1px solid rgba(255,255,255,0.15);
     background: transparent;
+    color: rgba(255,255,255,0.3);
+    font-size: 13px;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-    flex-shrink: 0;
-    transition: transform 0.08s;
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 6;
+    transition: color 0.15s;
   }
-  .btn-shutter::after {
-    content: '';
-    width: 50px; height: 50px;
-    border-radius: 50%;
-    background: var(--paper);
-    transition: background 0.1s, transform 0.08s;
+  @media (orientation: landscape) {
+    .btn-back-landscape { display: flex; }
   }
-  .btn-shutter:active { transform: scale(0.93); }
-  .btn-shutter:active::after { background: var(--amber); }
+  .btn-back-landscape:active { color: var(--paper); }
 
+  /* ── SHUTTER — průhledný kříž ── */
+  .btn-shutter {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 80px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 6;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .shutter-cross {
+    position: relative;
+    width: 40px; height: 40px;
+    opacity: 0.55;
+    transition: opacity 0.1s, transform 0.08s;
+  }
+  .shutter-cross::before,
+  .shutter-cross::after {
+    content: '';
+    position: absolute;
+    background: var(--paper);
+  }
+  .shutter-cross::before { width: 1px; height: 100%; left: 50%; top: 0; }
+  .shutter-cross::after  { height: 1px; width: 100%; top: 50%; left: 0; }
+  /* corner ticks */
+  .shutter-cross .tl, .shutter-cross .tr,
+  .shutter-cross .bl, .shutter-cross .br {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-color: var(--paper);
+    border-style: solid;
+    opacity: 0.7;
+  }
+  .shutter-cross .tl { top: 0; left: 0;  border-width: 1px 0 0 1px; }
+  .shutter-cross .tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+  .shutter-cross .bl { bottom: 0; left: 0;  border-width: 0 0 1px 1px; }
+  .shutter-cross .br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+  .btn-shutter:active .shutter-cross { opacity: 1; transform: scale(1.15); }
+
+  /* ── COUNTER (portrait) ── */
   .counter-block {
-    width: 40px;
+    width: 38px;
     text-align: center;
     flex-shrink: 0;
   }
-  .counter-label { font-size: 9px; color: #666; letter-spacing: 0.1em; text-transform: uppercase; }
-  .counter-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: var(--paper); line-height: 1; }
+  .counter-label { font-size: 9px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+  .counter-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; color: var(--paper); line-height: 1; }
 
-  /* ── TOP BAR ── */
-  .top-bar {
+  /* landscape counter — bottom-right */
+  .counter-landscape {
     position: absolute;
-    top: 0; left: 0; right: 0;
-    padding: env(safe-area-inset-top, 12px) 16px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
-    z-index: 5;
+    bottom: 14px; right: 6px;
+    text-align: center;
+    display: none;
+    z-index: 6;
   }
-  .top-wordmark {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 16px;
-    letter-spacing: 0.02em;
-    color: var(--paper);
-  }
-  .top-wordmark span { color: var(--amber); }
-  .filename-badge {
-    font-size: 10px;
-    color: #888;
-    max-width: 180px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    text-align: right;
-  }
+  @media (orientation: landscape) { .counter-landscape { display: block; } }
+  .counter-landscape .counter-num  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: rgba(255,255,255,0.4); line-height: 1; }
+  .counter-landscape .counter-label { font-size: 7px; color: rgba(255,255,255,0.2); letter-spacing: 0.1em; text-transform: uppercase; }
 
   /* ── TOAST ── */
   .toast {
@@ -364,22 +405,7 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* crosshair */
-  .crosshair {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 4;
-    opacity: 0.35;
-  }
-  .crosshair::before, .crosshair::after {
-    content: '';
-    position: absolute;
-    background: var(--paper);
-  }
-  .crosshair::before { width: 1px; height: 24px; top: -12px; left: 0; }
-  .crosshair::after  { width: 24px; height: 1px; left: -12px; top: 0; }
+
 </style>
 </head>
 <body>
@@ -410,15 +436,18 @@
   <div class="vf-stage">
     <video id="video" autoplay playsinline muted></video>
     <canvas id="overlay-canvas"></canvas>
-    <div class="crosshair"></div>
     <div class="flash" id="flash"></div>
 
-    <div class="top-bar">
-      <div class="top-wordmark">RE<span>T</span>AKE</div>
-      <div class="filename-badge" id="top-filename"></div>
-    </div>
+    <!-- Spoušť = průhledný kříž uprostřed -->
+    <button class="btn-shutter" id="btn-shutter" title="Vyfotit">
+      <div class="shutter-cross">
+        <div class="tl"></div><div class="tr"></div>
+        <div class="bl"></div><div class="br"></div>
+      </div>
+    </button>
 
-    <div class="controls">
+    <!-- PORTRAIT ovládání -->
+    <div class="controls-portrait">
       <div class="slider-row">
         <span class="slider-label">Překryv</span>
         <input type="range" id="opacity-slider" min="0" max="100" value="50">
@@ -429,16 +458,39 @@
         <input type="range" id="scale-slider" min="20" max="200" value="100">
         <span class="slider-val" id="scale-val">100%</span>
       </div>
-
       <div class="action-row">
-        <button class="btn-back" id="btn-back" title="Zpět">←</button>
-        <button class="btn-shutter" id="btn-shutter" title="Vyfotit"></button>
+        <button class="btn-back" id="btn-back-portrait" title="Zpět">←</button>
+        <div style="flex:1"></div>
         <div class="counter-block">
-          <div class="counter-num" id="counter">0</div>
+          <div class="counter-num" id="counter-portrait">0</div>
           <div class="counter-label">fotek</div>
         </div>
       </div>
     </div>
+
+    <!-- LANDSCAPE — levý slider (překryv) -->
+    <div class="slider-left">
+      <span class="edge-label">Překryv</span>
+      <input type="range" id="opacity-slider-ls" min="0" max="100" value="50">
+      <span class="edge-val" id="opacity-val-ls">50%</span>
+    </div>
+
+    <!-- LANDSCAPE — pravý slider (velikost) -->
+    <div class="slider-right">
+      <span class="edge-label">Velikost</span>
+      <input type="range" id="scale-slider-ls" min="20" max="200" value="100">
+      <span class="edge-val" id="scale-val-ls">100%</span>
+    </div>
+
+    <!-- LANDSCAPE — zpět (levý dolní roh) -->
+    <button class="btn-back-landscape" id="btn-back-landscape" title="Zpět">←</button>
+
+    <!-- LANDSCAPE — counter (pravý dolní roh) -->
+    <div class="counter-landscape">
+      <div class="counter-num" id="counter-landscape">0</div>
+      <div class="counter-label">fotek</div>
+    </div>
+
   </div>
 </div>
 
@@ -448,7 +500,6 @@
 <canvas id="capture-canvas" style="display:none"></canvas>
 
 <script>
-  // ── STATE ──
   let historicImg = null;
   let baseFilename = 'retake';
   let shotCount = 0;
@@ -457,57 +508,55 @@
   let overlayScale = 1.0;
   let animFrame = null;
 
-  // ── ELEMENTS ──
-  const screenWelcome   = document.getElementById('screen-welcome');
+  const screenWelcome    = document.getElementById('screen-welcome');
   const screenViewfinder = document.getElementById('screen-viewfinder');
-  const fileInput       = document.getElementById('file-input');
-  const uploadZone      = document.getElementById('upload-zone');
-  const filePreview     = document.getElementById('file-preview');
-  const fileNameEl      = document.getElementById('file-name');
-  const btnStart        = document.getElementById('btn-start');
-  const video           = document.getElementById('video');
-  const overlayCanvas   = document.getElementById('overlay-canvas');
-  const captureCanvas   = document.getElementById('capture-canvas');
+  const fileInput        = document.getElementById('file-input');
+  const uploadZone       = document.getElementById('upload-zone');
+  const filePreview      = document.getElementById('file-preview');
+  const fileNameEl       = document.getElementById('file-name');
+  const btnStart         = document.getElementById('btn-start');
+  const video            = document.getElementById('video');
+  const overlayCanvas    = document.getElementById('overlay-canvas');
+  const captureCanvas    = document.getElementById('capture-canvas');
+  const flash            = document.getElementById('flash');
+  const toast            = document.getElementById('toast');
+  const overlayCtx       = overlayCanvas.getContext('2d');
+
+  // sliders
   const opacitySlider   = document.getElementById('opacity-slider');
   const opacityVal      = document.getElementById('opacity-val');
   const scaleSlider     = document.getElementById('scale-slider');
   const scaleVal        = document.getElementById('scale-val');
-  const btnShutter      = document.getElementById('btn-shutter');
-  const btnBack         = document.getElementById('btn-back');
-  const counterEl       = document.getElementById('counter');
-  const topFilename     = document.getElementById('top-filename');
-  const flash           = document.getElementById('flash');
-  const toast           = document.getElementById('toast');
-  const overlayCtx      = overlayCanvas.getContext('2d');
+  const opacitySliderLs = document.getElementById('opacity-slider-ls');
+  const opacityValLs    = document.getElementById('opacity-val-ls');
+  const scaleSliderLs   = document.getElementById('scale-slider-ls');
+  const scaleValLs      = document.getElementById('scale-val-ls');
 
-  // ── FILE LOAD ──
-  fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    loadFile(file);
-  });
+  // counters & back
+  const counterPortrait  = document.getElementById('counter-portrait');
+  const counterLandscape = document.getElementById('counter-landscape');
+  const btnBackPortrait  = document.getElementById('btn-back-portrait');
+  const btnBackLandscape = document.getElementById('btn-back-landscape');
+  const btnShutter       = document.getElementById('btn-shutter');
 
+  // ── FILE ──
+  fileInput.addEventListener('change', e => { const f = e.target.files[0]; if (f) loadFile(f); });
   uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
   uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
   uploadZone.addEventListener('drop', e => {
-    e.preventDefault();
-    uploadZone.classList.remove('drag');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) loadFile(file);
+    e.preventDefault(); uploadZone.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) loadFile(f);
   });
 
   function loadFile(file) {
-    const raw = file.name.replace(/\.[^/.]+$/, ''); // strip extension
-    baseFilename = raw;
+    baseFilename = file.name.replace(/\.[^/.]+$/, '');
     fileNameEl.textContent = file.name;
     filePreview.classList.add('visible');
-
     const reader = new FileReader();
     reader.onload = ev => {
       historicImg = new Image();
-      historicImg.onload = () => {
-        btnStart.classList.add('ready');
-      };
+      historicImg.onload = () => btnStart.classList.add('ready');
       historicImg.src = ev.target.result;
     };
     reader.readAsDataURL(file);
@@ -516,11 +565,15 @@
   // ── START ──
   btnStart.addEventListener('click', async () => {
     if (!historicImg) return;
+    // fullscreen
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } catch(e) {}
     await startCamera();
     showScreen(screenViewfinder);
-    topFilename.textContent = baseFilename;
-    shotCount = 0;
-    counterEl.textContent = '0';
+    shotCount = 0; updateCounter();
     startOverlay();
   });
 
@@ -531,112 +584,89 @@
         audio: false
       });
       video.srcObject = stream;
-      await new Promise(resolve => {
-        video.onloadedmetadata = () => resolve();
-        video.onerror = () => resolve();
-      });
+      await new Promise(resolve => { video.onloadedmetadata = resolve; video.onerror = resolve; });
       await video.play();
-    } catch (err) {
-      showToast('Kamera nedostupná: ' + err.message);
-    }
+    } catch (err) { showToast('Kamera nedostupná: ' + err.message); }
   }
 
-  // ── OVERLAY LOOP ──
+  // ── OVERLAY ──
   function startOverlay() {
     if (animFrame) cancelAnimationFrame(animFrame);
-
     function resize() {
       overlayCanvas.width  = overlayCanvas.offsetWidth;
       overlayCanvas.height = overlayCanvas.offsetHeight;
     }
     resize();
     window.addEventListener('resize', resize);
-
     function drawLoop() {
-      const w = overlayCanvas.width;
-      const h = overlayCanvas.height;
+      const w = overlayCanvas.width, h = overlayCanvas.height;
       overlayCtx.clearRect(0, 0, w, h);
-
       if (historicImg && overlayOpacity > 0) {
         overlayCtx.globalAlpha = overlayOpacity;
-
-        // cover-fit then apply scale around center
-        const imgRatio = historicImg.width / historicImg.height;
-        const canvRatio = w / h;
-        let baseW, baseH;
-        if (imgRatio > canvRatio) {
-          baseH = h; baseW = h * imgRatio;
-        } else {
-          baseW = w; baseH = w / imgRatio;
-        }
-        const dw = baseW * overlayScale;
-        const dh = baseH * overlayScale;
-        const dx = (w - dw) / 2;
-        const dy = (h - dh) / 2;
-
-        overlayCtx.drawImage(historicImg, dx, dy, dw, dh);
+        const ir = historicImg.width / historicImg.height, cr = w / h;
+        let bw, bh;
+        if (ir > cr) { bh = h; bw = h * ir; } else { bw = w; bh = w / ir; }
+        const dw = bw * overlayScale, dh = bh * overlayScale;
+        overlayCtx.drawImage(historicImg, (w-dw)/2, (h-dh)/2, dw, dh);
         overlayCtx.globalAlpha = 1;
       }
-
       animFrame = requestAnimationFrame(drawLoop);
     }
     drawLoop();
   }
 
-  // ── SLIDER ──
-  opacitySlider.addEventListener('input', e => {
-    overlayOpacity = e.target.value / 100;
-    opacityVal.textContent = e.target.value + '%';
-  });
-
-  scaleSlider.addEventListener('input', e => {
-    overlayScale = e.target.value / 100;
-    scaleVal.textContent = e.target.value + '%';
-  });
+  // ── SLIDERS — synced portrait ↔ landscape ──
+  function setOpacity(v) {
+    overlayOpacity = v / 100;
+    opacitySlider.value = v; opacityVal.textContent = v + '%';
+    opacitySliderLs.value = v; opacityValLs.textContent = v + '%';
+  }
+  function setScale(v) {
+    overlayScale = v / 100;
+    scaleSlider.value = v; scaleVal.textContent = v + '%';
+    scaleSliderLs.value = v; scaleValLs.textContent = v + '%';
+  }
+  opacitySlider.addEventListener('input',   e => setOpacity(+e.target.value));
+  opacitySliderLs.addEventListener('input', e => setOpacity(+e.target.value));
+  scaleSlider.addEventListener('input',     e => setScale(+e.target.value));
+  scaleSliderLs.addEventListener('input',   e => setScale(+e.target.value));
 
   // ── SHUTTER ──
   btnShutter.addEventListener('click', capturePhoto);
 
   function capturePhoto() {
     if (!stream) return;
-
-    // flash
     flash.classList.add('go');
-    requestAnimationFrame(() => {
-      setTimeout(() => flash.classList.remove('go'), 80);
-    });
-
-    const vw = video.videoWidth;
-    const vh = video.videoHeight;
-    captureCanvas.width  = vw;
-    captureCanvas.height = vh;
+    requestAnimationFrame(() => setTimeout(() => flash.classList.remove('go'), 80));
+    const vw = video.videoWidth, vh = video.videoHeight;
+    captureCanvas.width = vw; captureCanvas.height = vh;
     const ctx = captureCanvas.getContext('2d');
-
-    // draw live frame
     ctx.drawImage(video, 0, 0, vw, vh);
-
-    // save
-    shotCount++;
-    counterEl.textContent = shotCount;
-
+    shotCount++; updateCounter();
     const filename = `${baseFilename}_${shotCount}.jpg`;
     captureCanvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
+      a.href = url; a.download = filename; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
       showToast(`Uloženo: ${filename}`);
     }, 'image/jpeg', 0.92);
   }
 
+  function updateCounter() {
+    counterPortrait.textContent = shotCount;
+    counterLandscape.textContent = shotCount;
+  }
+
   // ── BACK ──
-  btnBack.addEventListener('click', () => {
+  function goBack() {
     if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    try { if (document.exitFullscreen) document.exitFullscreen(); } catch(e) {}
     showScreen(screenWelcome);
-  });
+  }
+  btnBackPortrait.addEventListener('click', goBack);
+  btnBackLandscape.addEventListener('click', goBack);
 
   // ── HELPERS ──
   function showScreen(el) {
