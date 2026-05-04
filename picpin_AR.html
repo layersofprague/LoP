@@ -824,46 +824,55 @@ function startAR(){
 // Draw photo warped to 4 destination corners using triangular subdivision
 // pts: [[x,y],[x,y],[x,y],[x,y]] TL,TR,BR,BL in screen coords
 function drawImageWarped(ctx, img, pts, opa){
-  const W=img.naturalWidth, H=img.naturalHeight;
+  const CW=ctx.canvas.width, CH=ctx.canvas.height;
   ctx.save();
   ctx.globalAlpha=opa;
 
-  // Split quad into 2 triangles and draw each with setTransform
-  // Triangle 1: TL, TR, BR — src: (0,0),(1,0),(1,1)
-  // Triangle 2: TL, BR, BL — src: (0,0),(1,1),(0,1)
-  drawTriangle(ctx,img,
-    {x:0,y:0},{x:W,y:0},{x:W,y:H},
+  // Use an offscreen canvas to contain the destination-out compositing
+  const off=document.createElement('canvas');
+  off.width=CW; off.height=CH;
+  const oc=off.getContext('2d');
+
+  // Draw warped photo onto offscreen canvas
+  // Source coords are in canvas pixels (0..CW, 0..CH)
+  drawTriangle(oc, img,
+    {x:0,y:0},{x:CW,y:0},{x:CW,y:CH},
     {x:pts[0][0],y:pts[0][1]},{x:pts[1][0],y:pts[1][1]},{x:pts[2][0],y:pts[2][1]}
   );
-  drawTriangle(ctx,img,
-    {x:0,y:0},{x:W,y:H},{x:0,y:H},
+  drawTriangle(oc, img,
+    {x:0,y:0},{x:CW,y:CH},{x:0,y:CH},
     {x:pts[0][0],y:pts[0][1]},{x:pts[2][0],y:pts[2][1]},{x:pts[3][0],y:pts[3][1]}
   );
 
-  // Fade mask via radial gradient
-  applyFadeMask(ctx, pts);
+  // Apply fade mask on offscreen canvas (destination-out stays contained)
+  applyFadeMask(oc, pts);
 
+  // Composite offscreen onto main canvas
+  ctx.drawImage(off, 0, 0);
   ctx.restore();
 }
 
-// Draw one triangle from source image to destination using affine transform
+// Draw one triangle: affine warp from source (canvas-sized) to destination
 function drawTriangle(ctx, img, s0, s1, s2, d0, d1, d2){
-  // Affine transform: [s0,s1,s2] → [d0,d1,d2]
+  const CW=ctx.canvas.width, CH=ctx.canvas.height;
+  // Affine: map [s0,s1,s2] → [d0,d1,d2]
+  // We draw img scaled to canvas size, so source coords are already in canvas pixels
   const denom=(s1.x-s0.x)*(s2.y-s0.y)-(s2.x-s0.x)*(s1.y-s0.y);
   if(Math.abs(denom)<0.001) return;
-  const a=(d1.x-d0.x)*(s2.y-s0.y)-(d2.x-d0.x)*(s1.y-s0.y);
-  const b=(d2.x-d0.x)*(s1.x-s0.x)-(d1.x-d0.x)*(s2.x-s0.x);
-  const c= d0.x - a*s0.x/denom - b*s0.y/denom;
-  const d=(d1.y-d0.y)*(s2.y-s0.y)-(d2.y-d0.y)*(s1.y-s0.y);
-  const e=(d2.y-d0.y)*(s1.x-s0.x)-(d1.y-d0.y)*(s2.x-s0.x);
-  const f= d0.y - d*s0.x/denom - e*s0.y/denom;
+  const a=((d1.x-d0.x)*(s2.y-s0.y)-(d2.x-d0.x)*(s1.y-s0.y))/denom;
+  const b=((d2.x-d0.x)*(s1.x-s0.x)-(d1.x-d0.x)*(s2.x-s0.x))/denom;
+  const c=d0.x-a*s0.x-b*s0.y;
+  const d=((d1.y-d0.y)*(s2.y-s0.y)-(d2.y-d0.y)*(s1.y-s0.y))/denom;
+  const e=((d2.y-d0.y)*(s1.x-s0.x)-(d1.y-d0.y)*(s2.x-s0.x))/denom;
+  const f=d0.y-d*s0.x-e*s0.y;
 
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(d0.x,d0.y); ctx.lineTo(d1.x,d1.y); ctx.lineTo(d2.x,d2.y);
   ctx.closePath(); ctx.clip();
-  ctx.transform(a/denom,d/denom,b/denom,e/denom,c,f);
-  ctx.drawImage(img,0,0);
+  ctx.transform(a,d,b,e,c,f);
+  // Draw image scaled to canvas size so source coords match
+  ctx.drawImage(img, 0, 0, CW, CH);
   ctx.restore();
 }
 
@@ -905,20 +914,30 @@ function drawImageCentered(ctx, img, W, H, TR, opa, roll, dx, dy){
   const scale=TR.sz/100;
   const iw=img.naturalWidth*scale, ih=img.naturalHeight*scale;
   const r=-roll*Math.PI/180;
-  ctx.save();
-  ctx.globalAlpha=opa;
-  ctx.translate(cx,cy);
-  ctx.rotate(r);
-  ctx.drawImage(img,-iw/2,-ih/2,iw,ih);
+
+  // Offscreen canvas to isolate destination-out
+  const off=document.createElement('canvas');
+  off.width=W; off.height=H;
+  const oc=off.getContext('2d');
+
+  oc.save();
+  oc.translate(cx,cy);
+  oc.rotate(r);
+  oc.drawImage(img,-iw/2,-ih/2,iw,ih);
   // Fade
   const rx=iw*0.55, ry=ih*0.55;
-  ctx.globalCompositeOperation='destination-out';
-  const gx=ctx.createLinearGradient(-rx,0,rx,0);
+  oc.globalCompositeOperation='destination-out';
+  const gx=oc.createLinearGradient(-rx,0,rx,0);
   gx.addColorStop(0,'rgba(0,0,0,0.95)');gx.addColorStop(0.15,'rgba(0,0,0,0)');gx.addColorStop(0.85,'rgba(0,0,0,0)');gx.addColorStop(1,'rgba(0,0,0,0.95)');
-  ctx.fillStyle=gx; ctx.fillRect(-rx*1.2,-ry*1.2,rx*2.4,ry*2.4);
-  const gy=ctx.createLinearGradient(0,-ry,0,ry);
+  oc.fillStyle=gx; oc.fillRect(-rx*1.2,-ry*1.2,rx*2.4,ry*2.4);
+  const gy=oc.createLinearGradient(0,-ry,0,ry);
   gy.addColorStop(0,'rgba(0,0,0,0.95)');gy.addColorStop(0.15,'rgba(0,0,0,0)');gy.addColorStop(0.85,'rgba(0,0,0,0)');gy.addColorStop(1,'rgba(0,0,0,0.95)');
-  ctx.fillStyle=gy; ctx.fillRect(-rx*1.2,-ry*1.2,rx*2.4,ry*2.4);
+  oc.fillStyle=gy; oc.fillRect(-rx*1.2,-ry*1.2,rx*2.4,ry*2.4);
+  oc.restore();
+
+  ctx.save();
+  ctx.globalAlpha=opa;
+  ctx.drawImage(off,0,0);
   ctx.restore();
 }
 
