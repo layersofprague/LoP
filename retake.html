@@ -155,19 +155,18 @@
 
   .action-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
 
-  /* focal buttons */
-  .focal-bar { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
-  .focal-btn {
-    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
-    color: rgba(255,255,255,0.45); font-family: 'Space Mono', monospace;
-    font-size: 10px; padding: 4px 7px; cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    white-space: nowrap;
+  /* cycle camera button */
+  .btn-cam-cycle {
+    width: 34px; height: 34px;
+    border: 1px solid rgba(255,255,255,0.16); background: transparent;
+    color: rgba(255,255,255,0.55); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
   }
-  .focal-btn.active { background: rgba(255,255,255,0.16); color: var(--paper); border-color: rgba(255,255,255,0.4); }
-  .focal-btn:active { background: rgba(255,255,255,0.24); }
+  .btn-cam-cycle:active { background: rgba(255,255,255,0.18); color: var(--paper); }
 
-  .btn-back-p {
+  .focal-bar { flex: 1; display: flex; align-items: center; justify-content: center; }
     width: 34px; height: 34px; flex-shrink: 0;
     border: 1px solid rgba(255,255,255,0.16); background: transparent;
     color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer;
@@ -308,7 +307,17 @@
       </div>
       <div class="action-row">
         <button class="btn-back-p" id="btn-back-p">←</button>
-        <div class="focal-bar" id="focal-bar-p"></div>
+        <div class="focal-bar" id="focal-bar-p">
+          <button class="btn-cam-cycle" id="btn-cam-p" title="Přepnout kameru">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" stroke="white" stroke-width="1.1"/>
+              <path d="M3 5H2V3.5C2 2.67 2.67 2 3.5 2H5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+              <path d="M13 5H14V3.5C14 2.67 13.33 2 12.5 2H11" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+              <path d="M3 11H2V12.5C2 13.33 2.67 14 3.5 14H5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+              <path d="M13 11H14V12.5C14 13.33 13.33 14 12.5 14H11" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
         <div class="counter-p">
           <div class="cn" id="counter-p">0</div>
           <div class="cl">fotek</div>
@@ -347,8 +356,18 @@
     <!-- LANDSCAPE zpět -->
     <button class="btn-back-ls" id="btn-back-ls">←</button>
 
-    <!-- LANDSCAPE focal -->
-    <div class="focal-bar-ls" id="focal-bar-ls"></div>
+    <!-- LANDSCAPE focal / cycle camera -->
+    <div class="focal-bar-ls">
+      <button class="btn-cam-cycle" id="btn-cam-ls" title="Přepnout kameru">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="3" stroke="white" stroke-width="1.1"/>
+          <path d="M3 5H2V3.5C2 2.67 2.67 2 3.5 2H5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M13 5H14V3.5C14 2.67 13.33 2 12.5 2H5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M3 11H2V12.5C2 13.33 2.67 14 3.5 14H5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M13 11H14V12.5C14 13.33 13.33 14 12.5 14H11" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
 
     <!-- LANDSCAPE counter -->
     <div class="counter-ls">
@@ -371,8 +390,6 @@
   let overlayOpacity = 0.5;
   let overlayScale = 1.0;
   let animFrame = null;
-  let cameras = [];
-  let activeCamIdx = 0;
   let viewfinderActive = false;
 
   // ── ELEMENTS ──
@@ -448,81 +465,41 @@
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange', onFsChange);
 
-  // ── CAMERAS ──
-  async function enumerateCameras() {
+  // ── CAMERAS — simple cycle through all videoinput devices ──
+  let allDeviceIds = [];   // populated after first getUserMedia
+  let activeCamIdx = 0;
+
+  async function gatherDeviceIds() {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const vids = devices.filter(d => d.kind === 'videoinput');
-
-      // Filter to back cameras only
-      // Strategy: label-based first, fallback to index heuristic
-      let backCams = vids.filter(d => {
-        const lbl = (d.label || '').toLowerCase();
-        // Explicit front indicators → exclude
-        if (lbl.includes('front') || lbl.includes('facing front') ||
-            lbl.includes('user') || lbl.includes('selfie') ||
-            lbl.includes('predni') || lbl.includes('přední')) return false;
-        // Explicit back indicators → include
-        if (lbl.includes('back') || lbl.includes('rear') ||
-            lbl.includes('environment') || lbl.includes('zadni') ||
-            lbl.includes('zadní')) return true;
-        // No label info — include by default (will be filtered by facingMode later)
-        return true;
-      });
-
-      // If labels were empty (iOS before permission), fall back to all — we started
-      // with environment constraint so the active stream is already back-facing
-      if (backCams.length === 0) backCams = vids;
-
-      // Label as C1, C2, C3… in device order (hardware order = UW→W→T on most phones)
-      cameras = backCams.map((d, i) => ({
-        deviceId: d.deviceId,
-        label: d.label,
-        zoom: `C${i + 1}`
-      }));
-
-      // Try to detect which index matches current stream and set activeCamIdx
-      if (stream) {
-        const activeTrack = stream.getVideoTracks()[0];
-        const activeDeviceId = activeTrack?.getSettings()?.deviceId;
-        if (activeDeviceId) {
-          const idx = cameras.findIndex(c => c.deviceId === activeDeviceId);
-          if (idx >= 0) activeCamIdx = idx;
-        }
-      }
-
-      buildFocalBars();
-    } catch(e) { cameras = []; }
-  }
-
-  function buildFocalBars() {
-    [focalBarP, focalBarLs].forEach(bar => {
-      bar.innerHTML = '';
-      if (cameras.length <= 1) return;
-      cameras.forEach((cam, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'focal-btn' + (i === activeCamIdx ? ' active' : '');
-        btn.textContent = cam.zoom;
-        btn.addEventListener('click', () => switchCamera(i));
-        bar.appendChild(btn);
-      });
+      const ids = devices.filter(d => d.kind === 'videoinput').map(d => d.deviceId);
+      if (ids.length > 0) allDeviceIds = ids;
+    } catch(e) {}
+    // show/hide cycle button
+    const show = allDeviceIds.length > 1;
+    ['btn-cam-p','btn-cam-ls'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.visibility = show ? 'visible' : 'hidden';
     });
   }
 
-  async function switchCamera(idx) {
-    if (idx === activeCamIdx && stream) return;
-    activeCamIdx = idx;
-    buildFocalBars();
+  async function cycleCamera() {
+    if (allDeviceIds.length <= 1) return;
+    activeCamIdx = (activeCamIdx + 1) % allDeviceIds.length;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     await startCamera();
+    showToast(`Kamera ${activeCamIdx + 1} / ${allDeviceIds.length}`);
   }
+
+  document.getElementById('btn-cam-p').addEventListener('click', cycleCamera);
+  document.getElementById('btn-cam-ls').addEventListener('click', cycleCamera);
 
   // ── START ──
   btnStart.addEventListener('click', async () => {
     if (!historicImg) return;
     enterFullscreen();
     await startCamera();
-    await enumerateCameras();
+    await gatherDeviceIds();
     viewfinderActive = true;
     showScreen(screenViewfinder);
     shotCount = 0; updateCounter();
@@ -532,13 +509,12 @@
   async function startCamera() {
     try {
       let videoConstraints;
-      if (cameras.length > 0 && cameras[activeCamIdx]) {
+      if (allDeviceIds.length > 0 && allDeviceIds[activeCamIdx]) {
         videoConstraints = {
-          deviceId: { exact: cameras[activeCamIdx].deviceId },
+          deviceId: { exact: allDeviceIds[activeCamIdx] },
           width: { ideal: 1920 }, height: { ideal: 1080 }
         };
       } else {
-        // Before enumeration — request back camera explicitly
         videoConstraints = {
           facingMode: { exact: 'environment' },
           width: { ideal: 1920 }, height: { ideal: 1080 }
@@ -549,7 +525,6 @@
       await new Promise(resolve => { video.onloadedmetadata = resolve; video.onerror = resolve; });
       await video.play();
     } catch(err) {
-      // Fallback: drop exact facingMode constraint if not supported
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } }, audio: false
@@ -637,7 +612,7 @@
       if (document.exitFullscreen) document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     } catch(e) {}
-    cameras = []; activeCamIdx = 0;
+    allDeviceIds = []; activeCamIdx = 0;
     showScreen(screenWelcome);
   }
   btnBackP.addEventListener('click', goBack);
