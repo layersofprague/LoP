@@ -1884,7 +1884,7 @@ function adaptPlace(p) {
   return {
     // ── Identita ──
     id:        p.id,            // string slug místo number
-    num:       p.num,
+    num:       p.id,
     name:      getText(p.name),
     sub:       getText(p.sub),
     area:      getText(p.sub),  // zpětná kompatibilita
@@ -2488,7 +2488,7 @@ function initMap() {
     m.on('click', () => openSheet(loc.id));
     m.on('mouseover', () => {
       const c = CAT[loc.cat];
-      const compassUrl = `compass.html?id=${loc.id}&num=${encodeURIComponent(loc.num)}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
+      const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
       const wBtn = isWished(loc.id);
       rt.innerHTML = `
         <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
