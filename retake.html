@@ -167,6 +167,8 @@
   .btn-cam-cycle:active { background: rgba(255,255,255,0.18); color: var(--paper); }
 
   .focal-bar { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+  .btn-back-p {
     width: 34px; height: 34px; flex-shrink: 0;
     border: 1px solid rgba(255,255,255,0.16); background: transparent;
     color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer;
@@ -180,39 +182,55 @@
 
   /* ── LANDSCAPE CONTROLS ── */
   .slider-left {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 36px;
+    position: absolute; left: 0; top: 0; bottom: 0; width: 44px;
     display: none; flex-direction: column; align-items: center; z-index: 5;
+    padding: 10px 0;
   }
   .slider-right {
-    position: absolute; right: 0; top: 0; bottom: 0; width: 36px;
+    position: absolute; right: 0; top: 0; bottom: 0; width: 44px;
     display: none; flex-direction: column; align-items: center; z-index: 5;
+    padding: 10px 0;
   }
   @media (orientation: landscape) {
     .slider-left  { display: flex; }
     .slider-right { display: flex; }
   }
 
-  .edge-icon { margin-top: 16px; opacity: 0.3; flex-shrink: 0; }
+  .edge-icon { opacity: 0.3; flex-shrink: 0; margin-bottom: 4px; }
+  .edge-val {
+    font-size: 7px; color: rgba(255,255,255,0.22);
+    font-family: 'Space Mono', monospace; flex-shrink: 0; margin: 4px 0;
+  }
   .edge-slider-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
-  .edge-val { margin-bottom: 16px; font-size: 7px; color: rgba(255,255,255,0.22); font-family: 'Space Mono', monospace; flex-shrink: 0; }
+
+  /* +/- nudge buttons */
+  .edge-btn {
+    width: 28px; height: 28px; flex-shrink: 0;
+    background: transparent; border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s, color 0.1s;
+  }
+  .edge-btn:active { background: rgba(255,255,255,0.15); color: var(--paper); }
 
   @media (orientation: landscape) {
     input[type=range].vertical {
       writing-mode: vertical-lr; direction: rtl;
-      width: 1px; height: 90px; flex: none;
+      width: 1px; height: calc(100% - 20px); flex: none;
     }
   }
 
-  /* Landscape focal — bottom center, above any chrome */
+  /* Landscape focal — bottom center */
   .focal-bar-ls {
-    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
     display: none; align-items: center; gap: 5px; z-index: 6;
   }
   @media (orientation: landscape) { .focal-bar-ls { display: flex; } }
 
   /* Landscape back — bottom left, clear of slider */
   .btn-back-ls {
-    position: absolute; bottom: 10px; left: 44px;
+    position: absolute; bottom: 10px; left: 52px;
     width: 28px; height: 28px;
     border: 1px solid rgba(255,255,255,0.12); background: transparent;
     color: rgba(255,255,255,0.25); font-size: 11px; cursor: pointer;
@@ -221,9 +239,21 @@
   @media (orientation: landscape) { .btn-back-ls { display: flex; } }
   .btn-back-ls:active { color: var(--paper); }
 
+  /* Fullscreen button — top right in landscape, top right in portrait */
+  .btn-fullscreen {
+    position: absolute; top: 10px; right: 10px;
+    width: 28px; height: 28px;
+    border: 1px solid rgba(255,255,255,0.12); background: transparent;
+    color: rgba(255,255,255,0.25); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; z-index: 6;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (orientation: landscape) { .btn-fullscreen { right: 52px; } }
+  .btn-fullscreen:active { color: var(--paper); }
+
   /* Landscape counter — bottom right, clear of slider */
   .counter-ls {
-    position: absolute; bottom: 10px; right: 44px;
+    position: absolute; bottom: 10px; right: 52px;
     display: none; text-align: center; z-index: 6;
   }
   @media (orientation: landscape) { .counter-ls { display: block; } }
@@ -333,10 +363,13 @@
           <path d="M2 8L8 11.5L14 8" stroke="white" stroke-width="1.1" fill="none" stroke-linecap="round"/>
         </svg>
       </span>
+      <button class="edge-btn" id="opacity-plus">+</button>
+      <span class="edge-val" id="opacity-val-ls">50%</span>
       <div class="edge-slider-wrap">
         <input type="range" class="vertical" id="opacity-slider-ls" min="0" max="100" value="50">
       </div>
-      <span class="edge-val" id="opacity-val-ls">50%</span>
+      <span class="edge-val" style="opacity:0">--</span>
+      <button class="edge-btn" id="opacity-minus">−</button>
     </div>
 
     <!-- ── LANDSCAPE pravý okraj — scale ── -->
@@ -347,11 +380,24 @@
           <path d="M14.5 14.5H10.5M14.5 14.5V10.5M14.5 14.5L10.5 10.5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
         </svg>
       </span>
+      <button class="edge-btn" id="scale-plus">+</button>
+      <span class="edge-val" id="scale-val-ls">100%</span>
       <div class="edge-slider-wrap">
         <input type="range" class="vertical" id="scale-slider-ls" min="20" max="200" value="100">
       </div>
-      <span class="edge-val" id="scale-val-ls">100%</span>
+      <span class="edge-val" style="opacity:0">--</span>
+      <button class="edge-btn" id="scale-minus">−</button>
     </div>
+
+    <!-- Fullscreen button -->
+    <button class="btn-fullscreen" id="btn-fullscreen" title="Celá obrazovka">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path d="M1.5 1.5H5.5M1.5 1.5V5.5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M14.5 1.5H10.5M14.5 1.5V5.5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M1.5 14.5H5.5M1.5 14.5V10.5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M14.5 14.5H10.5M14.5 14.5V10.5" stroke="white" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+    </button>
 
     <!-- LANDSCAPE zpět -->
     <button class="btn-back-ls" id="btn-back-ls">←</button>
@@ -578,7 +624,47 @@
   scaleSlider.addEventListener('input',     e => setScale(+e.target.value));
   scaleSliderLs.addEventListener('input',   e => setScale(+e.target.value));
 
-  // ── SHUTTER ──
+  // ── +/- NUDGE ──
+  function nudge(type, delta) {
+    if (type === 'opacity') {
+      const v = Math.min(100, Math.max(0, Math.round(overlayOpacity * 100) + delta));
+      setOpacity(v);
+    } else {
+      const v = Math.min(200, Math.max(20, Math.round(overlayScale * 100) + delta));
+      setScale(v);
+    }
+  }
+  // Long-press repeat
+  function addNudge(id, type, delta) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    let timer, interval;
+    const start = () => {
+      nudge(type, delta);
+      timer = setTimeout(() => { interval = setInterval(() => nudge(type, delta), 80); }, 400);
+    };
+    const stop = () => { clearTimeout(timer); clearInterval(interval); };
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup',   stop);
+    btn.addEventListener('pointerleave',stop);
+  }
+  addNudge('opacity-plus',  'opacity',  5);
+  addNudge('opacity-minus', 'opacity', -5);
+  addNudge('scale-plus',    'scale',    5);
+  addNudge('scale-minus',   'scale',   -5);
+
+  // ── FULLSCREEN BUTTON ──
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (isFs) {
+      try {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } catch(e) {}
+    } else {
+      enterFullscreen();
+    }
+  });
   btnShutter.addEventListener('click', capturePhoto);
 
   function capturePhoto() {
