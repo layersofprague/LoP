@@ -2113,6 +2113,24 @@ function switchView(id) {
   if (id === 'wishView') renderWishlist();
 }
 
+/* ═══════════════ VISITED ═══════════════ */
+const VISIT_KEY = 'lop_visited_v1';
+function getVisited() { try { return JSON.parse(localStorage.getItem(VISIT_KEY) || '[]'); } catch(e) { return []; } }
+function setVisited(arr) { localStorage.setItem(VISIT_KEY, JSON.stringify(arr)); }
+function isVisited(id) {
+  const sid = String(id);
+  if (getVisited().map(String).includes(sid)) return true;
+  const loc = LOCATIONS.find(l => String(l.id) === sid);
+  return loc?.visited ?? false;
+}
+function markVisited(id) {
+  const sid = String(id);
+  const v = getVisited().map(String);
+  if (!v.includes(sid)) { v.push(sid); setVisited(v); }
+  const loc = LOCATIONS.find(l => String(l.id) === sid);
+  if (loc) loc.visited = true;
+}
+
 /* ═══════════════ WISHLIST ═══════════════ */
 const WISH_KEY = 'lop_wishlist_v2';
 function getWish() { try { return JSON.parse(localStorage.getItem(WISH_KEY) || '[]'); } catch(e) { return []; } }
@@ -2211,7 +2229,7 @@ function pinLabel(num) {
 }
 
 function pinIconHTML(loc) {
-  const visited = loc.visited ? 'visited' : '';
+  const visited = isVisited(loc.id) ? 'visited' : '';
   const wished = isWished(loc.id) ? 'wished' : '';
   const style = TWEAKS.pinStyle;
   const lbl = pinLabel(loc.num);
@@ -2259,7 +2277,7 @@ function buildChips() {
     </button>
     <button class="chip" data-filter="visited">
       <span class="chip-swatch chip-icon chip-icon-check"></span>
-      Navštíveno <span class="chip-count">${LOCATIONS.filter(l=>l.visited).length}</span>
+      Navštíveno <span class="chip-count">${LOCATIONS.filter(l=>isVisited(l.id)).length}</span>
     </button>
     <button class="chip" data-filter="wished">
       <span class="chip-swatch chip-icon chip-icon-heart"></span>
@@ -2457,7 +2475,7 @@ function applyFilter() {
     if (wishActive && !isWished(loc.id)) {
       if (order[FILTER.wished] > order[s]) s = FILTER.wished;
     }
-    if (visActive && !loc.visited) {
+    if (visActive && !isVisited(loc.id)) {
       if (order[FILTER.visited] > order[s]) s = FILTER.visited;
     }
     if (eraActive) {
@@ -2631,6 +2649,10 @@ function openSheet(id) {
   const loc = LOCATIONS.find(l => l.id === id); if (!loc) return;
   const c = CAT[loc.cat];
   const wished = isWished(id);
+
+  // Otevření detailu = návštěva místa
+  markVisited(id);
+  rebuildMarkers();
 
   const hero = document.getElementById('sheetHero');
   hero.innerHTML = `
