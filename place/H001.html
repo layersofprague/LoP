@@ -132,11 +132,15 @@ a { color: inherit; text-decoration: none; }
 .sl-fs-btn svg { width: 13px; height: 13px; pointer-events: none; }
 /* Fullscreen overlay */
 .hero-fs {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200;
   background: #000;
   display: none; align-items: center; justify-content: center;
   cursor: default;
   user-select: none; -webkit-user-select: none;
+  /* Mobil: vyplní celou dostupnou výšku bez pohybu Chrome UI */
+  height: 100vh;
+  height: 100dvh;
 }
 .hero-fs.open { display: flex; }
 .hero-fs .sl-base,
@@ -691,12 +695,10 @@ const VISIT_KEY  = 'lop_visited_v1';
 function openFullscreen() {
   const fs = document.getElementById('heroFs');
   fs.classList.add('open');
-  document.body.style.overflow = 'hidden';
   if (window._fsSlider) window._fsSlider(0.5);
 }
 function closeFullscreen() {
   document.getElementById('heroFs').classList.remove('open');
-  document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullscreen(); });
 
