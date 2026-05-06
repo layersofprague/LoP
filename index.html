@@ -536,6 +536,8 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   transition: transform .15s;
 }
+/* Leaflet ořezává wrapper — povolíme přetékání pro fajfku a srdíčko */
+.leaflet-marker-icon { overflow: visible !important; }
 .lop-pin:hover { transform: scale(1.1); }
 .lop-pin.cat-hist { background: var(--cat-hist); }
 .lop-pin.cat-arch { background: var(--cat-arch); }
@@ -2226,8 +2228,8 @@ function makeIcon(loc) {
   return L.divIcon({
     html: pinIconHTML(loc),
     className: '',
-    iconSize: [32, 32],
-    iconAnchor: [16, 16]
+    iconSize: [46, 46],
+    iconAnchor: [23, 23]
   });
 }
 
