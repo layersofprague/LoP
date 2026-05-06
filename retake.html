@@ -217,7 +217,7 @@
   @media (orientation: landscape) {
     input[type=range].vertical {
       writing-mode: vertical-lr; direction: rtl;
-      width: 1px; height: calc(100% - 20px); flex: none;
+      width: 1px; height: clamp(60px, 35vh, 160px); flex: none;
     }
   }
 
@@ -437,6 +437,7 @@
   let overlayScale = 1.0;
   let animFrame = null;
   let viewfinderActive = false;
+  let userExitedFullscreen = false;
 
   // ── ELEMENTS ──
   const screenWelcome    = document.getElementById('screen-welcome');
@@ -504,9 +505,12 @@
   // (triggered by orientation change on some Android browsers)
   function onFsChange() {
     const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    if (!isFs && viewfinderActive) {
+    if (!isFs && viewfinderActive && !userExitedFullscreen) {
+      // Lost fullscreen involuntarily (e.g. orientation change) — restore it
       setTimeout(enterFullscreen, 350);
     }
+    // Reset flag after handling
+    userExitedFullscreen = false;
   }
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange', onFsChange);
@@ -657,6 +661,7 @@
   document.getElementById('btn-fullscreen').addEventListener('click', () => {
     const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
     if (isFs) {
+      userExitedFullscreen = true;
       try {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
@@ -692,6 +697,7 @@
   // ── BACK ──
   function goBack() {
     viewfinderActive = false;
+    userExitedFullscreen = true;
     if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     try {
