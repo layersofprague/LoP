@@ -563,7 +563,7 @@ a { color: inherit; text-decoration: none; }
 
 .rt-tip {
   position: fixed; z-index: 900;
-  width: 200px;
+  width: 220px;
   background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 10px;
@@ -1889,8 +1889,8 @@ function adaptPlace(p) {
 
   return {
     // ── Identita ──
-    id:        p.id,            // string slug místo number
-    num:       p.id,
+    id:        p.id,
+    num:       p.num ?? p.id,   // p.num pro fallback data, p.id pro nové H-formát
     name:      getText(p.name),
     sub:       getText(p.sub),
     area:      getText(p.sub),  // zpětná kompatibilita
@@ -1997,7 +1997,7 @@ async function loadData() {
 
 // ── Záložní data (použijí se pokud places.json chybí) ─────────────────────
 const FALLBACK_LOCATIONS = [
-  { id:0, name:"Šítkovská věž", titleAlt:"Věž, která přežila svou dobu", sub:"Nové Město, Praha 1", area:"Rašínovo nábřeží", lat:50.0784, lng:14.4133, cat:"hist", num:101, visited:true, wished:true,
+  { id:"H101", name:"Šítkovská věž", titleAlt:"Věž, která přežila svou dobu", sub:"Nové Město, Praha 1", area:"Rašínovo nábřeží", lat:50.0784, lng:14.4133, cat:"hist", num:"H101", visited:true, wished:true,
     yearThen:"1895", yearNow:"2026", distance:"210 m",
     lede:"Šítkovská věž — středověká vodní věž na pravém břehu Vltavy, postavená kolem roku 1495. Na historickém snímku vidíme zimní sběr ledu z řeky s koňskými potahy. Dnes na stejném místě stojí funkcionalistický Mánes z roku 1930 a u nábřeží kotví boat hotel Klotylda.",
     steps:[
@@ -2013,7 +2013,7 @@ const FALLBACK_LOCATIONS = [
       { k:"Současné využití", v:"Kulturní centrum" }
     ]
   },
-  { id:1, name:"Václavské náměstí", sub:"Nové Město, Praha 1", area:"Pomník sv. Václava", lat:50.0815, lng:14.4278, cat:"hist", num:102,
+  { id:"H102", name:"Václavské náměstí", sub:"Nové Město, Praha 1", area:"Pomník sv. Václava", lat:50.0815, lng:14.4278, cat:"hist", num:"H102",
     yearThen:"1910", yearNow:"2026", distance:"1.2 km",
     lede:"Bývalý Koňský trh, dnes nervové centrum moderní Prahy. Místem prošly všechny zásadní momenty 20. století — od vzniku republiky po sametovou revoluci.",
     steps:[
@@ -2023,7 +2023,7 @@ const FALLBACK_LOCATIONS = [
     tip:"Náměstí bylo původně Koňský trh — na dlažbě u Můstku jsou vyznačeny původní hranice tržiště.",
     facts:[ { k:"Délka", v:"750 m" }, { k:"Výstavba", v:"Od 1348" } ]
   },
-  { id:2, name:"Staroměstské nám.", sub:"Staré Město, Praha 1", area:"Orloj", lat:50.0875, lng:14.4213, cat:"arch", num:201,
+  { id:"H201", name:"Staroměstské nám.", sub:"Staré Město, Praha 1", area:"Orloj", lat:50.0875, lng:14.4213, cat:"arch", num:"H201",
     yearThen:"1900", yearNow:"2026", distance:"1.8 km",
     lede:"Srdce historické Prahy. Orloj, Týnský chrám, sgrafita — tři různé vrstvy času na jednom náměstí.",
     steps:[
@@ -2033,7 +2033,7 @@ const FALLBACK_LOCATIONS = [
     tip:"Na dlažbě u radniční věže jsou kamenné kříže — pamětní místo 27 popravených z roku 1621.",
     facts:[ { k:"Orloj od", v:"1410" }, { k:"Plocha", v:"9 000 m²" } ]
   },
-  { id:3, name:"Národní divadlo", sub:"Nové Město, Praha 1", area:"Legův most", lat:50.0808, lng:14.4133, cat:"arch", num:202, visited:true,
+  { id:"H202", name:"Národní divadlo", sub:"Nové Město, Praha 1", area:"Legův most", lat:50.0808, lng:14.4133, cat:"arch", num:"H202",
     yearThen:"1895", yearNow:"2026", distance:"350 m",
     lede:"Novorenesanční chrám národa. Z darů sbírky celého Československa, dvakrát postaven, dvakrát zachráněn.",
     steps:[
@@ -2043,7 +2043,7 @@ const FALLBACK_LOCATIONS = [
     tip:"Nejpůsobivější pohled je z protějšího břehu za soumraku, kdy je divadlo nasvíceno.",
     facts:[ { k:"Otevřeno", v:"1881" }, { k:"Architekt", v:"Josef Zítek" } ]
   },
-  { id:4, name:"Pražský hrad", sub:"Hradčany, Praha 1", area:"Zlatá ulička", lat:50.0911, lng:14.4016, cat:"fun", num:301, wished:true,
+  { id:"H301", name:"Pražský hrad", sub:"Hradčany, Praha 1", area:"Zlatá ulička", lat:50.0911, lng:14.4016, cat:"fun", num:"H301", wished:true,
     yearThen:"1905", yearNow:"2026", distance:"2.4 km",
     lede:"Největší souvislý hradní komplex na světě. Devět století evropských dějin v jedné siluetě nad Vltavou.",
     steps:[
@@ -2053,7 +2053,7 @@ const FALLBACK_LOCATIONS = [
     tip:"Střídání stráže probíhá každou hodinu, slavnostní verze každý den v poledne.",
     facts:[ { k:"Rozloha", v:"70 000 m²" }, { k:"První zmínka", v:"9. stol." } ]
   },
-  { id:5, name:"Holešovický přístav", titleAlt:"Maniny, které uměli lodě", sub:"Holešovice, Praha 7", area:"Přístavní dozorství", lat:50.10543, lng:14.45595, cat:"hist", num:"H001", photoThen:"https://layersofprague.github.io/LoP/foto/h_001ove.jpg", photoThumb:"https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg",
+  { id:"H001", name:"Holešovický přístav", titleAlt:"Maniny, které uměli lodě", sub:"Holešovice, Praha 7", area:"Přístavní dozorství", lat:50.10543, lng:14.45595, cat:"hist", num:"H001", visited:true, photoThen:"https://layersofprague.github.io/LoP/foto/h_001ove.jpg", photoThumb:"https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg",
     yearThen:"~1930", yearNow:"2026", distance:"4.8 km",
     lede:"Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl v letech 1892–1894 umělým vyhloubením bazénu 750 m dlouhého. Secesní budovy přístavního dozorství postavil roku 1906 architekt František Sander. V 90. letech lodní provoz ustal; dnes část areálu tvoří rezidence Prague Marina.",
     steps:[
@@ -2064,13 +2064,13 @@ const FALLBACK_LOCATIONS = [
     tip:"Historická fotografie byla pořízena ze vzdálenosti cca 7 m. Nejlepší shoda snímku je při pohledu mírně dolů.",
     facts:[ { k:"Architekt", v:"F. Sander" }, { k:"Vybudováno", v:"1892–94" }, { k:"Památka od", v:"2002" }, { k:"Status", v:"Prague Marina" } ]
   },
-  { id:6, name:"Letenské sady", sub:"Letná, Praha 7", area:"Metronom", lat:50.0939, lng:14.4224, cat:"fun", num:302,
+  { id:"H302", name:"Letenské sady", sub:"Letná, Praha 7", area:"Metronom", lat:50.0939, lng:14.4224, cat:"fun", num:"H302",
     yearThen:"1955", yearNow:"2026", distance:"3.1 km",
     lede:"Největší socha Stalina na světě stála v letech 1955–1962 přesně tam, kde dnes kýve metronom Vratislava Nováka.",
     steps:[ { title:"Podstavec", text:"Betonový sokl z žulové dlažby je původní — nese dnes metronom, který odměřuje čas od roku 1991." } ],
     facts:[ { k:"Sloup odstraněn", v:"1962" }, { k:"Metronom od", v:"1991" } ]
   },
-  { id:7, name:"Tančící dům", sub:"Nové Město, Praha 1", area:"Jiráskovo nám.", lat:50.0754, lng:14.4141, cat:"arch", num:203,
+  { id:"H203", name:"Tančící dům", sub:"Nové Město, Praha 1", area:"Jiráskovo nám.", lat:50.0754, lng:14.4141, cat:"arch", num:"H203",
     yearThen:"1945", yearNow:"2026", distance:"640 m",
     lede:"Na místě domu zbořeného při bombardování Prahy v roce 1945 postavili Frank Gehry a Vlado Milunić v roce 1996 svou tančící dvojici.",
     steps:[ { title:"Fred a Ginger", text:"Dvojice věží má pozemek po předválečné zástavbě, zničené americkým bombardováním 14. 2. 1945." } ],
@@ -2507,18 +2507,22 @@ function initMap() {
             <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${loc.distance}</span>
           </div>
           <div class="rt-tip-sub" style="display:flex;gap:6px;margin-top:6px;">
+            <button onclick="openSheet('${loc.id}'); event.stopPropagation();" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:var(--ink);border:1px solid var(--ink);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper);cursor:pointer;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Detail
+            </button>
             <a href="${compassUrl}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-decoration:none;" onclick="event.stopPropagation()">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
               Kompas
             </a>
             <button id="rtWishBtn_${loc.id}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:${wBtn ? 'var(--accent)' : 'var(--paper-2)'};border:1px solid ${wBtn ? 'var(--accent)' : 'var(--rule)'};border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:${wBtn ? '#fff' : 'var(--ink-2)'};cursor:pointer;">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-              ${wBtn ? 'V plánu' : 'Plán'}
+              ${wBtn ? '✓' : 'Plán'}
             </button>
           </div>
         </div>`;
       const rect = m.getElement().getBoundingClientRect();
-      rt.style.left = (rect.left + rect.width/2 - 100) + 'px';
+      rt.style.left = (rect.left + rect.width/2 - 110) + 'px';
       rt.style.top = (rect.top - 140) + 'px';
       rt.classList.add('visible');
       if (loc.photoThen) {
