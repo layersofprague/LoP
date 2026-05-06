@@ -89,7 +89,7 @@ a { color: inherit; text-decoration: none; }
 }
 .sl-top { --pos: 50%; }
 .sl-lbl {
-  position: absolute; top: 14px;
+  position: absolute; bottom: 14px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
   padding: 4px 10px; border-radius: 3px;
@@ -119,16 +119,17 @@ a { color: inherit; text-decoration: none; }
 /* Fullscreen tlačítko */
 .sl-fs-btn {
   position: absolute; top: 12px; right: 12px;
-  width: 32px; height: 32px; border-radius: 6px;
+  width: auto; height: auto; padding: 4px 10px; border-radius: 6px;
   background: rgba(13,11,8,.55);
   backdrop-filter: blur(6px);
+  border-radius: 3px;
   border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: var(--paper); z-index: 5;
   transition: background .15s;
 }
 .sl-fs-btn:hover { background: rgba(13,11,8,.8); }
-.sl-fs-btn svg { width: 14px; height: 14px; pointer-events: none; }
+.sl-fs-btn svg { width: 13px; height: 13px; pointer-events: none; }
 /* Fullscreen overlay */
 .hero-fs {
   position: fixed; inset: 0; z-index: 200;
@@ -435,17 +436,17 @@ a { color: inherit; text-decoration: none; }
 
 <!-- HERO SLIDER -->
 <div class="hero" id="hero">
-  <!-- Základ: současná fotka -->
+  <!-- Základ: historická fotka -->
   <div class="sl-base">
-    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
-  </div>
-  <!-- Overlay: historická fotka, maskována zprava -->
-  <div class="sl-top" id="slTop">
     <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
   </div>
+  <!-- Overlay: současná fotka, maskována zprava -->
+  <div class="sl-top" id="slTop">
+    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+  </div>
   <!-- Popisky -->
-  <div class="sl-lbl sl-lbl-l" id="lblNow">Dnes</div>
-  <div class="sl-lbl sl-lbl-r" id="lblHist">~1930</div>
+  <div class="sl-lbl sl-lbl-l" id="lblHist">~1930</div>
+  <div class="sl-lbl sl-lbl-r" id="lblNow">Dnes</div>
   <!-- Handle — jediné místo pro tažení -->
   <div class="sl-handle" id="slHandle">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -464,13 +465,13 @@ a { color: inherit; text-decoration: none; }
 <!-- FULLSCREEN OVERLAY -->
 <div class="hero-fs" id="heroFs">
   <div class="sl-base">
-    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
-  </div>
-  <div class="sl-top" id="slTopFs">
     <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
   </div>
-  <div class="sl-lbl sl-lbl-l" id="lblNowFs">Dnes</div>
-  <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1930</div>
+  <div class="sl-top" id="slTopFs">
+    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+  </div>
+  <div class="sl-lbl sl-lbl-l" id="lblHistFs">~1930</div>
+  <div class="sl-lbl sl-lbl-r" id="lblNowFs">Dnes</div>
   <div class="sl-handle" id="slHandleFs">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
@@ -632,7 +633,7 @@ const VISIT_KEY  = 'lop_visited_v1';
 
 /* ── SLIDER ── */
 (function() {
-  const BLEND   = 5;    // px prolnutí — změňte dle chuti
+  const BLEND   = 15;    // px prolnutí — změňte dle chuti
   const DEFAULT = 0.5;  // výchozí pozice 0–1
 
   function makeSlider(heroEl, topEl, handleEl, lblLeftEl, lblRightEl) {
@@ -643,8 +644,8 @@ const VISIT_KEY  = 'lop_visited_v1';
       const px = pct * w;
       const lo = ((Math.max(0, px - BLEND) / w) * 100).toFixed(2) + '%';
       const hi = ((Math.min(w, px + BLEND) / w) * 100).toFixed(2) + '%';
-      topEl.style.webkitMaskImage = `linear-gradient(to right, black ${lo}, transparent ${hi})`;
-      topEl.style.maskImage       = `linear-gradient(to right, black ${lo}, transparent ${hi})`;
+      topEl.style.webkitMaskImage = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
+      topEl.style.maskImage       = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
       handleEl.style.left      = (pct * 100) + '%';
       handleEl.style.transform = 'translate(-50%, -50%)';
       if (lblLeftEl)  lblLeftEl.style.opacity  = pct < 0.12 ? '0.35' : '1';
@@ -673,8 +674,8 @@ const VISIT_KEY  = 'lop_visited_v1';
     document.getElementById('hero'),
     document.getElementById('slTop'),
     document.getElementById('slHandle'),
-    document.getElementById('lblNow'),
-    document.getElementById('lblHist')
+    document.getElementById('lblHist'),
+    document.getElementById('lblNow')
   );
 
   // Fullscreen slider
@@ -682,8 +683,8 @@ const VISIT_KEY  = 'lop_visited_v1';
     document.getElementById('heroFs'),
     document.getElementById('slTopFs'),
     document.getElementById('slHandleFs'),
-    document.getElementById('lblNowFs'),
-    document.getElementById('lblHistFs')
+    document.getElementById('lblHistFs'),
+    document.getElementById('lblNowFs')
   );
 })();
 
