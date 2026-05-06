@@ -321,6 +321,16 @@ function calTouchStart() { calTimer = setTimeout(function(){ calTimer = null; do
 function calTouchEnd() { if (calTimer) { clearTimeout(calTimer); calTimer = null; } }
 loadCal();
 
+// ── VISITED (sdílený localStorage s index.html) ──
+var VISIT_KEY = 'lop_visited_v1';
+function markVisited(id) {
+  if (!id) return;
+  try {
+    var v = JSON.parse(localStorage.getItem(VISIT_KEY) || '[]').map(String);
+    if (!v.includes(String(id))) { v.push(String(id)); localStorage.setItem(VISIT_KEY, JSON.stringify(v)); }
+  } catch(e) {}
+}
+
 // ── DISTANCE ──
 function toRad(d) { return d * Math.PI / 180; }
 function calcDist(a, b) {
@@ -329,6 +339,7 @@ function calcDist(a, b) {
   var h = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)*Math.sin(dLng/2);
   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
 }
+var _arrived = false;
 function updateDist() {
   if (!userPos || isNaN(TARGET.lat)) return;
   var dist = calcDist(userPos, TARGET);
@@ -339,6 +350,14 @@ function updateDist() {
   else dv.textContent = (dist/1000).toFixed(1).replace('.', ',') + ' km';
   var steps = Math.round(dist / 0.75);
   ds.textContent = steps < 9999 ? '≈ ' + steps.toLocaleString('cs') + ' kroků' : '';
+
+  // ── Příchod na místo ──
+  var radius = TARGET.arRadius || 15;
+  if (!_arrived && dist <= radius) {
+    _arrived = true;
+    markVisited(TARGET.id);
+    showArrival();
+  }
 }
 
 // ── SENSORS ──
@@ -446,6 +465,40 @@ if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEve
 function rotateMap(h) {
   wrap.style.transform = 'rotate(' + (-h) + 'deg)';
   lastH = h;
+}
+
+// ── PŘÍCHOD NA MÍSTO ──
+function showArrival() {
+  var el = document.getElementById('arrivalBanner');
+  if (el) { el.style.display = 'flex'; return; }
+  var banner = document.createElement('div');
+  banner.id = 'arrivalBanner';
+  banner.style.cssText = [
+    'position:fixed;bottom:90px;left:50%;transform:translateX(-50%)',
+    'background:var(--ink,#1a1814);color:var(--paper,#f5f0e8)',
+    'border-radius:14px;padding:14px 18px',
+    'display:flex;align-items:center;gap:12px',
+    'box-shadow:0 4px 24px rgba(0,0,0,.35)',
+    'z-index:999;max-width:calc(100vw - 32px)',
+    'font-family:Inter,sans-serif'
+  ].join(';');
+  var arUrl = 'ar.html?id=' + encodeURIComponent(TARGET.id) + '&name=' + encodeURIComponent(TARGET.name || '');
+  banner.innerHTML = [
+    '<div style="font-size:22px">✓</div>',
+    '<div style="flex:1">',
+    '  <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:2px">Jste na místě</div>',
+    '  <div style="font-size:14px;font-weight:500">' + (TARGET.name || 'Cíl') + '</div>',
+    '</div>',
+    '<a href="' + arUrl + '" style="',
+    '  background:var(--accent,#c8441a);color:#fff;border:none;',
+    '  border-radius:8px;padding:8px 14px;',
+    '  font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;',
+    '  cursor:pointer;text-decoration:none;white-space:nowrap',
+    '">Otevřít AR</a>'
+  ].join('');
+  document.body.appendChild(banner);
+  // Vibrace (pokud telefon podporuje)
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 }
 
 // ── LOOP ──

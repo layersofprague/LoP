@@ -2650,10 +2650,6 @@ function openSheet(id) {
   const c = CAT[loc.cat];
   const wished = isWished(id);
 
-  // Otevření detailu = návštěva místa
-  markVisited(id);
-  rebuildMarkers();
-
   const hero = document.getElementById('sheetHero');
   hero.innerHTML = `
     <div class="sl-base"><div style="position:absolute; inset:0; background:
