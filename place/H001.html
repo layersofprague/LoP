@@ -65,15 +65,18 @@ a { color: inherit; text-decoration: none; }
 .top-btn svg { width: 19px; height: 19px; }
 .top-btn .dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
-/* ── HERO / SLIDER (fade blend) ── */
+/* ── HERO / SLIDER ── */
 .hero {
   position: relative;
-  height: 56vw; min-height: 260px; max-height: 420px;
+  height: 56vw; min-height: 260px; max-height: 520px;
   background: #0d0b08;
   overflow: hidden;
-  cursor: ew-resize;
+  cursor: default;
   user-select: none; -webkit-user-select: none;
   touch-action: pan-y;
+}
+@media (min-width: 640px) {
+  .hero { height: 420px; max-height: 520px; }
 }
 .sl-base, .sl-top {
   position: absolute; inset: 0;
@@ -84,7 +87,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none; -webkit-user-drag: none;
   display: block;
 }
-/* Fade: sl-top (současná) se maskuje s úzkým přechodem kolem středu */
 .sl-top { --pos: 50%; }
 .sl-lbl {
   position: absolute; top: 14px;
@@ -96,21 +98,68 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(4px);
   pointer-events: none;
   transition: opacity .2s;
+  z-index: 3;
 }
 .sl-lbl-l { left: 14px; }
 .sl-lbl-r { right: 14px; }
-/* Handle — ukazuje pozici */
+/* Handle — jediný ovládací prvek */
 .sl-handle {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 40px; height: 40px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   background: rgba(243,237,225,.92);
-  border: none;
-  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+  box-shadow: 0 2px 12px rgba(0,0,0,.5);
   display: flex; align-items: center; justify-content: center;
-  color: var(--ink); pointer-events: none;
+  color: var(--ink);
+  cursor: ew-resize;
+  z-index: 4;
+  pointer-events: auto;
 }
-.sl-handle svg { width: 15px; height: 15px; }
+.sl-handle svg { width: 15px; height: 15px; pointer-events: none; }
+/* Fullscreen tlačítko */
+.sl-fs-btn {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 6px;
+  background: rgba(13,11,8,.55);
+  backdrop-filter: blur(6px);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--paper); z-index: 5;
+  transition: background .15s;
+}
+.sl-fs-btn:hover { background: rgba(13,11,8,.8); }
+.sl-fs-btn svg { width: 14px; height: 14px; pointer-events: none; }
+/* Fullscreen overlay */
+.hero-fs {
+  position: fixed; inset: 0; z-index: 200;
+  background: #000;
+  display: none; align-items: center; justify-content: center;
+  cursor: default;
+  user-select: none; -webkit-user-select: none;
+}
+.hero-fs.open { display: flex; }
+.hero-fs .sl-base,
+.hero-fs .sl-top { position: absolute; inset: 0; }
+.hero-fs .sl-base img,
+.hero-fs .sl-top img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  pointer-events: none; -webkit-user-drag: none;
+}
+.hero-fs .sl-handle {
+  position: absolute; top: 50%;
+  cursor: ew-resize; z-index: 4;
+}
+.hero-fs .sl-lbl { z-index: 5; }
+.hero-fs .sl-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 6;
+}
+.hero-fs .sl-close svg { width: 18px; height: 18px; pointer-events: none; }
 
 /* AR CTA */
 .ar-cta {
@@ -384,25 +433,54 @@ a { color: inherit; text-decoration: none; }
   </div>
 </header>
 
-<!-- HERO SLIDER (fade blend) -->
+<!-- HERO SLIDER -->
 <div class="hero" id="hero">
-  <!-- Základ: historická fotka -->
+  <!-- Základ: současná fotka -->
   <div class="sl-base">
-    <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
-  </div>
-  <!-- Overlay: současná fotka, opacity řízena tažením -->
-  <div class="sl-top" id="slTop">
     <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
   </div>
-  <!-- Handle -->
+  <!-- Overlay: historická fotka, maskována zprava -->
+  <div class="sl-top" id="slTop">
+    <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+  </div>
+  <!-- Popisky -->
+  <div class="sl-lbl sl-lbl-l" id="lblNow">Dnes</div>
+  <div class="sl-lbl sl-lbl-r" id="lblHist">~1930</div>
+  <!-- Handle — jediné místo pro tažení -->
   <div class="sl-handle" id="slHandle">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
     </svg>
   </div>
-  <!-- Popisky s letopočty -->
-  <div class="sl-lbl sl-lbl-l" id="lblHist">~1930</div>
-  <div class="sl-lbl sl-lbl-r" id="lblNow">Dnes</div>
+  <!-- Fullscreen tlačítko -->
+  <button class="sl-fs-btn" id="slFsBtn" title="Celá obrazovka" onclick="openFullscreen()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+    </svg>
+  </button>
+</div>
+
+<!-- FULLSCREEN OVERLAY -->
+<div class="hero-fs" id="heroFs">
+  <div class="sl-base">
+    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+  </div>
+  <div class="sl-top" id="slTopFs">
+    <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+  </div>
+  <div class="sl-lbl sl-lbl-l" id="lblNowFs">Dnes</div>
+  <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1930</div>
+  <div class="sl-handle" id="slHandleFs">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
+    </svg>
+  </div>
+  <button class="sl-close" onclick="closeFullscreen()" title="Zavřít">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
 </div>
 
 
@@ -552,46 +630,76 @@ const PLACE_ID   = 'H001';
 const WISH_KEY   = 'lop_wishlist_v2';
 const VISIT_KEY  = 'lop_visited_v1';
 
-/* ── SLIDER (úzký fade kolem středu) ── */
+/* ── SLIDER ── */
 (function() {
-  const hero    = document.getElementById('hero');
-  const top     = document.getElementById('slTop');
-  const handle  = document.getElementById('slHandle');
-  const lblHist = document.getElementById('lblHist');
-  const lblNow  = document.getElementById('lblNow');
-  let dragging  = false;
-  const DEFAULT = 0.5;
-  const BLEND   = 5; // šířka přechodu v px — zvyšte pro měkčí, snižte pro ostřejší
+  const BLEND   = 5;    // px prolnutí — změňte dle chuti
+  const DEFAULT = 0.5;  // výchozí pozice 0–1
 
-  function setPos(pct) {
-    const w = hero.offsetWidth;
-    const px = Math.round(pct * w);
-    const lo = Math.max(0, px - BLEND);
-    const hi = Math.min(w, px + BLEND);
-    const pLo = (lo / w * 100).toFixed(2) + '%';
-    const pHi = (hi / w * 100).toFixed(2) + '%';
-    top.style.webkitMaskImage = `linear-gradient(to right, transparent ${pLo}, black ${pHi})`;
-    top.style.maskImage       = `linear-gradient(to right, transparent ${pLo}, black ${pHi})`;
-    handle.style.left      = (pct * 100) + '%';
-    handle.style.transform = 'translate(-50%, -50%)';
-    lblHist.style.opacity  = pct < 0.15 ? '0.35' : '1';
-    lblNow.style.opacity   = pct > 0.85 ? '0.35' : '1';
+  function makeSlider(heroEl, topEl, handleEl, lblLeftEl, lblRightEl) {
+    let dragging = false;
+
+    function setPos(pct) {
+      const w  = heroEl.offsetWidth;
+      const px = pct * w;
+      const lo = ((Math.max(0, px - BLEND) / w) * 100).toFixed(2) + '%';
+      const hi = ((Math.min(w, px + BLEND) / w) * 100).toFixed(2) + '%';
+      topEl.style.webkitMaskImage = `linear-gradient(to right, black ${lo}, transparent ${hi})`;
+      topEl.style.maskImage       = `linear-gradient(to right, black ${lo}, transparent ${hi})`;
+      handleEl.style.left      = (pct * 100) + '%';
+      handleEl.style.transform = 'translate(-50%, -50%)';
+      if (lblLeftEl)  lblLeftEl.style.opacity  = pct < 0.12 ? '0.35' : '1';
+      if (lblRightEl) lblRightEl.style.opacity = pct > 0.88 ? '0.35' : '1';
+    }
+
+    function posFromX(x) {
+      const r = heroEl.getBoundingClientRect();
+      return Math.max(0, Math.min(1, (x - r.left) / r.width));
+    }
+
+    // Tažení pouze za handle
+    handleEl.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
+    handleEl.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
+    window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+    window.addEventListener('mouseup',  () => dragging = false);
+    window.addEventListener('touchend', () => dragging = false);
+
+    setPos(DEFAULT);
+    return setPos;
   }
 
-  function posFromX(x) {
-    const r = hero.getBoundingClientRect();
-    return Math.max(0, Math.min(1, (x - r.left) / r.width));
-  }
+  // Hlavní slider
+  makeSlider(
+    document.getElementById('hero'),
+    document.getElementById('slTop'),
+    document.getElementById('slHandle'),
+    document.getElementById('lblNow'),
+    document.getElementById('lblHist')
+  );
 
-  setPos(DEFAULT);
-
-  hero.addEventListener('mousedown',  e => { dragging = true; setPos(posFromX(e.clientX)); });
-  hero.addEventListener('touchstart', e => { dragging = true; setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
-  window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-  window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
-  window.addEventListener('mouseup',  () => dragging = false);
-  window.addEventListener('touchend', () => dragging = false);
+  // Fullscreen slider
+  window._fsSlider = makeSlider(
+    document.getElementById('heroFs'),
+    document.getElementById('slTopFs'),
+    document.getElementById('slHandleFs'),
+    document.getElementById('lblNowFs'),
+    document.getElementById('lblHistFs')
+  );
 })();
+
+function openFullscreen() {
+  const fs = document.getElementById('heroFs');
+  fs.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Reset na výchozí pozici při otevření
+  if (window._fsSlider) window._fsSlider(0.5);
+}
+function closeFullscreen() {
+  document.getElementById('heroFs').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Klávesa Escape zavře fullscreen
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullscreen(); });
 
 /* ── WISHLIST ── */
 function getWish() { try { return JSON.parse(localStorage.getItem(WISH_KEY)||'[]'); } catch(e) { return []; } }
