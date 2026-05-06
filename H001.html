@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Holešovický přístav — LayersOfPrague</title>
+<meta name="description" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════ TOKENS ═══════════════ */
+:root {
+  --paper:   #eeefeb;
+  --paper-2: #e6e7e2;
+  --paper-3: #dadcd4;
+  --ink:     #1a1a18;
+  --ink-2:   #3a3a36;
+  --ink-3:   #6a6a64;
+  --ink-4:   #9a9a94;
+  --rule:    #cbcec5;
+  --rule-2:  #b8bcb0;
+  --cat-hist: #4A4A48;
+  --cat-hist-soft: #c9c9c4;
+  --cat-arch: #3B5F84;
+  --cat-fun:  #E0A020;
+  --accent:  #b04020;
+  --ok:      #3d7a4a;
+  --ease: cubic-bezier(.22,.8,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+button, input { font-family: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ── TOPBAR ── */
+#topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+.back-btn {
+  appearance: none; border: none; background: transparent;
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink-2);
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.back-btn:hover { background: var(--paper-2); }
+.back-btn svg { width: 18px; height: 18px; }
+.topbar-title {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  color: var(--ink-4);
+  background: var(--paper-2);
+  padding: 3px 8px; border-radius: 4px;
+}
+
+/* ── HERO / SLIDER ── */
+.hero {
+  position: relative;
+  height: 52vw; min-height: 280px; max-height: 480px;
+  background: #0d0b08;
+  overflow: hidden;
+  cursor: ew-resize;
+  user-select: none; -webkit-user-select: none;
+}
+.sl-base, .sl-top {
+  position: absolute; inset: 0;
+}
+.sl-base img, .sl-top img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 30%;
+  pointer-events: none; -webkit-user-drag: none;
+}
+.sl-top { clip-path: inset(0 50% 0 0); }
+.sl-divider {
+  position: absolute; top: 0; left: 50%; bottom: 0;
+  width: 1px; background: rgba(243,237,225,.9);
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 .5px rgba(0,0,0,.3);
+  pointer-events: none;
+}
+.sl-handle {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+  pointer-events: none;
+}
+.sl-handle svg { width: 16px; height: 16px; }
+.sl-lbl {
+  position: absolute; top: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 3px;
+  color: var(--paper);
+  background: rgba(13,11,8,.65);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+.sl-lbl-l { left: 14px; }
+.sl-lbl-r { right: 14px; }
+
+/* AR CTA */
+.ar-cta {
+  position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 3;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border-radius: 10px;
+  background: rgba(13,11,8,.6);
+  backdrop-filter: blur(14px);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background .2s;
+  text-decoration: none;
+}
+.ar-cta:hover { background: rgba(13,11,8,.8); }
+.ar-cta-ic {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(243,237,225,.14);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ar-cta-ic svg { width: 16px; height: 16px; }
+.ar-cta-body { flex: 1; }
+.ar-cta-kick {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(243,237,225,.5);
+}
+.ar-cta-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px; font-weight: 500; line-height: 1.2;
+  margin-top: 1px;
+}
+.ar-cta-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 8px; border-radius: 4px;
+  background: rgba(243,237,225,.14);
+}
+
+/* ── BODY ── */
+.body {
+  padding: 22px 20px 48px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* kicker */
+.kicker {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+.k-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cat-hist); }
+.k-sep { opacity: .3; }
+
+/* title */
+.place-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(28px, 7vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -.015em;
+  color: var(--ink);
+  margin-bottom: 6px;
+  text-wrap: pretty;
+}
+.place-title em { font-style: italic; color: var(--ink-2); }
+
+/* sub */
+.place-sub {
+  font-size: 13px; color: var(--ink-3);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.place-sub .dot { color: var(--ink-4); }
+.place-sub .coords {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--ink-3);
+}
+
+/* actions */
+.actions {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 6px; padding: 12px 8px;
+  margin: -4px -4px 20px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.act-btn {
+  appearance: none; background: transparent; border: none;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 6px 4px; border-radius: 8px;
+  cursor: pointer; color: var(--ink-2);
+  transition: background .15s; text-decoration: none;
+}
+.act-btn:hover { background: var(--paper-2); }
+.act-btn.active { color: var(--accent); }
+.act-btn svg { width: 18px; height: 18px; }
+.act-lbl { font-size: 10px; font-weight: 500; letter-spacing: .01em; }
+
+/* lede */
+.lede {
+  font-family: 'Fraunces', serif;
+  font-size: 17px; line-height: 1.55;
+  color: var(--ink);
+  letter-spacing: -.005em;
+  margin-bottom: 22px;
+  text-wrap: pretty;
+}
+.lede::first-letter {
+  font-size: 2.2em; font-weight: 500;
+  float: left; line-height: .9;
+  margin: 4px 8px 0 0;
+  color: var(--cat-hist);
+}
+
+/* section */
+.section { margin-bottom: 24px; }
+.sec-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+}
+.sec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4);
+}
+
+/* facts */
+.facts {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--rule);
+  border: 1px solid var(--rule); border-radius: 10px; overflow: hidden;
+}
+.fact { background: var(--paper); padding: 11px 14px; }
+.fact-k {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 3px;
+}
+.fact-v {
+  font-family: 'Fraunces', serif;
+  font-size: 16px; font-weight: 500;
+  color: var(--ink); line-height: 1.1;
+}
+
+/* steps */
+.steps { display: flex; flex-direction: column; }
+.step {
+  display: flex; gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+.step:first-child { border-top: none; padding-top: 0; }
+.step-num {
+  flex-shrink: 0;
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 30px; line-height: 1; font-weight: 400;
+  color: var(--cat-hist); width: 38px; letter-spacing: -.02em;
+}
+.step-body h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 16px; font-weight: 500; line-height: 1.25;
+  margin-bottom: 4px; color: var(--ink);
+}
+.step-body p {
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
+}
+
+/* tip */
+.tip {
+  margin: 4px 0 0;
+  padding: 14px 16px 14px 18px;
+  background: var(--paper-2);
+  border-left: 2px solid var(--cat-fun);
+  border-radius: 0 10px 10px 0;
+}
+.tip-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--cat-fun); margin-bottom: 4px;
+}
+.tip-text {
+  font-family: 'Fraunces', serif;
+  font-size: 14.5px; line-height: 1.55; font-style: italic; color: var(--ink-2);
+}
+
+/* nav button */
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 14px 16px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background .15s;
+  text-decoration: none; margin-top: 8px;
+}
+.nav-btn:hover { background: var(--ink-2); }
+.nav-btn svg { width: 16px; height: 16px; }
+.nav-btn-sub {
+  display: flex; gap: 8px; margin-top: 8px;
+}
+.nav-btn-sec {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 12px;
+  background: var(--paper-2); color: var(--ink-2);
+  border: 1px solid var(--rule); border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background .15s; text-decoration: none;
+}
+.nav-btn-sec:hover { background: var(--paper-3); }
+.nav-btn-sec svg { width: 15px; height: 15px; }
+
+/* placeholder gallery */
+.gallery {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+}
+.gallery-thumb {
+  aspect-ratio: 1; border-radius: 6px; overflow: hidden;
+  background: var(--paper-3); position: relative; cursor: pointer;
+  transition: transform .2s var(--ease);
+}
+.gallery-thumb:hover { transform: scale(1.02); }
+.gallery-thumb::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--paper-3), var(--paper-2));
+}
+.gt-label {
+  position: absolute; bottom: 6px; left: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--ink-3);
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <button class="back-btn" onclick="history.back()" title="Zpět na mapu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+  <div class="topbar-title">Holešovice, Praha 7</div>
+  <div class="topbar-id">H001</div>
+</div>
+
+<!-- HERO SLIDER -->
+<div class="hero" id="hero">
+  <!-- Základ: současná fotka (celá šířka) -->
+  <div class="sl-base">
+    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+  </div>
+  <!-- Overlay: historická fotka (zleva, ořezává se doprava) -->
+  <div class="sl-top" id="slTop">
+    <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+  </div>
+  <div class="sl-divider" id="slDiv"></div>
+  <div class="sl-handle" id="slHandle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
+    </svg>
+  </div>
+  <div class="sl-lbl sl-lbl-l">Dnes</div>
+  <div class="sl-lbl sl-lbl-r">~1930</div>
+
+  <!-- AR CTA -->
+  <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="ar-cta">
+    <div class="ar-cta-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="ar-cta-body">
+      <div class="ar-cta-kick">Na místě</div>
+      <div class="ar-cta-title">Otevřít AR historický pohled</div>
+    </div>
+    <div class="ar-cta-badge">136°</div>
+  </a>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- kicker -->
+  <div class="kicker">
+    <div class="k-dot"></div>
+    <span>Holešovice, Praha 7</span>
+    <span class="k-sep">·</span>
+    <span>Historie</span>
+    <span class="k-sep">·</span>
+    <span>Průmysl</span>
+  </div>
+
+  <!-- title -->
+  <h1 class="place-title">Holešovický<br><em>přístav</em></h1>
+
+  <!-- sub -->
+  <div class="place-sub">
+    <span>Přístavní dozorství</span>
+    <span class="dot">·</span>
+    <span class="coords">50.1054° N, 14.4560° E</span>
+  </div>
+
+  <!-- actions -->
+  <div class="actions">
+    <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Navigovat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span class="act-lbl">Kompas</span>
+    </a>
+    <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
+      <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      <span class="act-lbl" id="wishLbl">Plán</span>
+    </button>
+    <button class="act-btn" onclick="share()" title="Sdílet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      <span class="act-lbl">Sdílet</span>
+    </button>
+    <a class="act-btn" href="https://mapy.cz/zakladni?q=50.10543,14.45595" target="_blank" title="Otevřít v Mapy.cz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="act-lbl">Mapy.cz</span>
+    </a>
+  </div>
+
+  <!-- lede -->
+  <p class="lede">Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl v letech 1892–1894 umělým vyhloubením bazénu 750 m dlouhého. Secesní budovy přístavního dozorství postavil roku 1906 architekt František Sander. V 90. letech lodní provoz ustal; dnes část areálu tvoří rezidence Prague Marina.</p>
+
+  <!-- fakta -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Fakta</span>
+      <span class="sec-num">4 položky</span>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="fact-k">Architekt</div><div class="fact-v">F. Sander</div></div>
+      <div class="fact"><div class="fact-k">Vybudováno</div><div class="fact-v">1892–94</div></div>
+      <div class="fact"><div class="fact-k">Památka od</div><div class="fact-v">2002</div></div>
+      <div class="fact"><div class="fact-k">Status</div><div class="fact-v">Prague Marina</div></div>
+    </div>
+  </div>
+
+  <!-- na místě -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Na místě</span>
+      <span class="sec-num">3 kroky</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Budova dozorčí služby</h4>
+          <p>Postav se čelem k řece — historická budova přístavního dozorčího stojí přímo na hraně nábřeží. Hledej původní průmyslové detaily fasády.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Pohled směrem 136°</h4>
+          <p>Otoč se na jihovýchod (136°) — přesně tímto směrem byl pořízen historický snímek. Srovnej panorama s dobovým záběrem v AR.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Přístavní infrastruktura</h4>
+          <p>Všimni si pozůstatků původních přístavních prvků — kolejí, kotvicích ok a průmyslových sloupů podél nábřeží.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip">
+      <div class="tip-label">Tip kurátora</div>
+      <div class="tip-text">Historická fotografie byla pořízena ze vzdálenosti cca 7 m. Nejlepší shoda snímku je při pohledu mírně dolů — záběr zachycuje spodní část budovy.</div>
+    </div>
+  </div>
+
+  <!-- galerie (placeholder) -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Galerie</span>
+      <span class="sec-num">Brzy</span>
+    </div>
+    <div class="gallery">
+      <div class="gallery-thumb">
+        <img src="https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
+        <div class="gt-label">~1930</div>
+      </div>
+      <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
+      <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
+    </div>
+  </div>
+
+  <!-- navigace -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Doprava</span>
+    </div>
+    <a class="nav-btn" href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      Navigovat kompasem
+    </a>
+    <div class="nav-btn-sub">
+      <a class="nav-btn-sec" href="https://mapy.cz/zakladni?q=50.10543,14.45595" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Mapy.cz
+      </a>
+      <a class="nav-btn-sec" href="https://www.google.com/maps?q=50.10543,14.45595" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Google Maps
+      </a>
+    </div>
+    <p style="margin-top:12px;font-size:12.5px;color:var(--ink-3);line-height:1.6;">
+      Tramvaj č. 1, 12 nebo 25, zastávka <strong>Nádraží Holešovice</strong>, pak 10 minut pěšky po nábřeží na sever k přístavu.
+    </p>
+  </div>
+
+</div><!-- /body -->
+
+<script>
+const PLACE_ID   = 'H001';
+const WISH_KEY   = 'lop_wishlist_v2';
+const VISIT_KEY  = 'lop_visited_v1';
+
+/* ── SLIDER ── */
+(function() {
+  const hero   = document.getElementById('hero');
+  const top    = document.getElementById('slTop');
+  const div    = document.getElementById('slDiv');
+  const handle = document.getElementById('slHandle');
+  let dragging = false;
+
+  function setPos(x) {
+    const r = hero.getBoundingClientRect();
+    let pct = Math.max(0, Math.min(1, (x - r.left) / r.width));
+    const p = (pct * 100).toFixed(1) + '%';
+    top.style.clipPath    = `inset(0 ${(100 - pct*100).toFixed(1)}% 0 0)`;
+    div.style.left        = p;
+    handle.style.left     = p;
+    handle.style.transform = 'translate(-50%,-50%)';
+  }
+
+  hero.addEventListener('mousedown',  e => { dragging = true; setPos(e.clientX); });
+  hero.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('mousemove',  e => { if (dragging) setPos(e.clientX); });
+  window.addEventListener('touchmove',  e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('mouseup',  () => dragging = false);
+  window.addEventListener('touchend', () => dragging = false);
+})();
+
+/* ── WISHLIST ── */
+function getWish() { try { return JSON.parse(localStorage.getItem(WISH_KEY)||'[]'); } catch(e) { return []; } }
+function setWish(a) { localStorage.setItem(WISH_KEY, JSON.stringify(a)); }
+function isWished() { return getWish().map(String).includes(PLACE_ID); }
+
+function updateWishUI() {
+  const w = isWished();
+  const btn = document.getElementById('wishBtn');
+  const ico = document.getElementById('wishIco');
+  const lbl = document.getElementById('wishLbl');
+  if (btn) btn.classList.toggle('active', w);
+  if (ico) ico.setAttribute('fill', w ? 'currentColor' : 'none');
+  if (lbl) lbl.textContent = w ? 'V plánu' : 'Plán';
+}
+
+function toggleWishBtn() {
+  const w = isWished();
+  const list = getWish().map(String);
+  if (w) setWish(list.filter(x => x !== PLACE_ID));
+  else   setWish([...list, PLACE_ID]);
+  updateWishUI();
+}
+
+/* ── SHARE ── */
+function share() {
+  if (navigator.share) {
+    navigator.share({ title: 'Holešovický přístav — LayersOfPrague', url: location.href });
+  } else {
+    navigator.clipboard?.writeText(location.href);
+    alert('Odkaz zkopírován do schránky');
+  }
+}
+
+/* ── INIT ── */
+updateWishUI();
+</script>
+</body>
+</html>
