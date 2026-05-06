@@ -76,14 +76,15 @@ a { color: inherit; text-decoration: none; }
   touch-action: pan-y;
 }
 @media (min-width: 640px) {
-  .hero { height: min(44vw, 460px); }
+  .hero { height: min(52vw, 560px); }
+  .sl-base img, .sl-top img { object-position: center 5%; }
 }
 .sl-base, .sl-top {
   position: absolute; inset: 0;
 }
 .sl-base img, .sl-top img {
   width: 100%; height: 100%;
-  object-fit: cover; object-position: center 15%;
+  object-fit: cover; object-position: center 30%;
   pointer-events: none; -webkit-user-drag: none;
   display: block;
 }
