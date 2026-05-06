@@ -65,14 +65,15 @@ a { color: inherit; text-decoration: none; }
 .top-btn svg { width: 19px; height: 19px; }
 .top-btn .dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
-/* ── HERO / SLIDER ── */
+/* ── HERO / SLIDER (fade blend) ── */
 .hero {
   position: relative;
-  height: 52vw; min-height: 280px; max-height: 480px;
+  height: 56vw; min-height: 260px; max-height: 420px;
   background: #0d0b08;
   overflow: hidden;
   cursor: ew-resize;
   user-select: none; -webkit-user-select: none;
+  touch-action: pan-y;
 }
 .sl-base, .sl-top {
   position: absolute; inset: 0;
@@ -81,27 +82,10 @@ a { color: inherit; text-decoration: none; }
   width: 100%; height: 100%;
   object-fit: cover; object-position: center 30%;
   pointer-events: none; -webkit-user-drag: none;
+  display: block;
 }
-.sl-top { clip-path: inset(0 50% 0 0); }
-.sl-divider {
-  position: absolute; top: 0; left: 50%; bottom: 0;
-  width: 1px; background: rgba(243,237,225,.9);
-  transform: translateX(-50%);
-  box-shadow: 0 0 0 .5px rgba(0,0,0,.3);
-  pointer-events: none;
-}
-.sl-handle {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 44px; height: 44px; border-radius: 50%;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  box-shadow: 0 4px 14px rgba(0,0,0,.35);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink);
-  pointer-events: none;
-}
-.sl-handle svg { width: 16px; height: 16px; }
+/* Fade: sl-top (současná) začíná na opacity 0.5, táhnutím doprava → 1, doleva → 0 */
+.sl-top { opacity: 0.5; transition: none; }
 .sl-lbl {
   position: absolute; top: 14px;
   font-family: 'JetBrains Mono', monospace;
@@ -111,9 +95,22 @@ a { color: inherit; text-decoration: none; }
   background: rgba(13,11,8,.65);
   backdrop-filter: blur(4px);
   pointer-events: none;
+  transition: opacity .2s;
 }
 .sl-lbl-l { left: 14px; }
 .sl-lbl-r { right: 14px; }
+/* Handle — ukazuje pozici */
+.sl-handle {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(243,237,225,.92);
+  border: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink); pointer-events: none;
+}
+.sl-handle svg { width: 15px; height: 15px; }
 
 /* AR CTA */
 .ar-cta {
@@ -387,25 +384,26 @@ a { color: inherit; text-decoration: none; }
   </div>
 </header>
 
-<!-- HERO SLIDER -->
+<!-- HERO SLIDER (fade blend) -->
 <div class="hero" id="hero">
-  <!-- Základ: historická fotka (celá šířka) -->
+  <!-- Základ: historická fotka -->
   <div class="sl-base">
     <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
   </div>
-  <!-- Overlay: současná fotka (zleva, ořezává se doprava) -->
+  <!-- Overlay: současná fotka, opacity řízena tažením -->
   <div class="sl-top" id="slTop">
     <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
   </div>
-  </div>
-  <div class="sl-divider" id="slDiv"></div>
+  <!-- Handle -->
   <div class="sl-handle" id="slHandle">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
     </svg>
   </div>
-  <div class="sl-lbl sl-lbl-l">~1930</div>
-  <div class="sl-lbl sl-lbl-r">Dnes</div>
+  <!-- Popisky s letopočty -->
+  <div class="sl-lbl sl-lbl-l" id="lblHist">~1930</div>
+  <div class="sl-lbl sl-lbl-r" id="lblNow">Dnes</div>
+</div>
 
 
 </div>
@@ -554,28 +552,38 @@ const PLACE_ID   = 'H001';
 const WISH_KEY   = 'lop_wishlist_v2';
 const VISIT_KEY  = 'lop_visited_v1';
 
-/* ── SLIDER ── */
+/* ── SLIDER (fade blend) ── */
 (function() {
-  const hero   = document.getElementById('hero');
-  const top    = document.getElementById('slTop');
-  const div    = document.getElementById('slDiv');
-  const handle = document.getElementById('slHandle');
-  let dragging = false;
+  const hero    = document.getElementById('hero');
+  const top     = document.getElementById('slTop');
+  const handle  = document.getElementById('slHandle');
+  const lblHist = document.getElementById('lblHist');
+  const lblNow  = document.getElementById('lblNow');
+  let dragging  = false;
+  const DEFAULT = 0.5; // výchozí poloha: 0 = plná minulost, 1 = plná současnost
 
-  function setPos(x) {
-    const r = hero.getBoundingClientRect();
-    let pct = Math.max(0, Math.min(1, (x - r.left) / r.width));
-    const p = (pct * 100).toFixed(1) + '%';
-    top.style.clipPath    = `inset(0 ${(100 - pct*100).toFixed(1)}% 0 0)`;
-    div.style.left        = p;
-    handle.style.left     = p;
-    handle.style.transform = 'translate(-50%,-50%)';
+  function setPos(pct) {
+    // pct 0→1: 0 = historická plná, 1 = současná plná
+    top.style.opacity = pct;
+    handle.style.left = (pct * 100) + '%';
+    handle.style.transform = 'translate(-50%, -50%)';
+    // Popisky: minulost zesvětlí jak jdeme doprava, současnost naopak
+    lblHist.style.opacity = Math.max(0.3, 1 - pct * 1.4);
+    lblNow.style.opacity  = Math.max(0.3, (pct - 0.3) * 1.4);
   }
 
-  hero.addEventListener('mousedown',  e => { dragging = true; setPos(e.clientX); });
-  hero.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
-  window.addEventListener('mousemove',  e => { if (dragging) setPos(e.clientX); });
-  window.addEventListener('touchmove',  e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  function posFromX(x) {
+    const r = hero.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (x - r.left) / r.width));
+  }
+
+  // Init na výchozí pozici
+  setPos(DEFAULT);
+
+  hero.addEventListener('mousedown',  e => { dragging = true; setPos(posFromX(e.clientX)); });
+  hero.addEventListener('touchstart', e => { dragging = true; setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+  window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
+  window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
   window.addEventListener('mouseup',  () => dragging = false);
   window.addEventListener('touchend', () => dragging = false);
 })();
