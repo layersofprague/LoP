@@ -593,10 +593,24 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Fraunces', serif;
   font-size: 14px; font-weight: 500; line-height: 1.25;
 }
-.rt-tip-sub {
-  font-size: 10px; color: var(--ink-3);
-  margin-top: 3px;
+.rt-tip-actions { display:flex; gap:5px; margin-top:8px; }
+.rt-tip-btn {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer; text-decoration: none;
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  color: var(--ink-2);
+  white-space: nowrap; overflow: hidden;
+  transition: background .12s, color .12s, border-color .12s;
 }
+.rt-tip-btn.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.rt-tip-btn.active  { background: var(--accent); border-color: var(--accent); color: #fff; }
+.rt-tip-btn svg { flex-shrink: 0; }
 
 /* ═══════════════ SHEET ═══════════════ */
 .sheet {
@@ -2506,18 +2520,18 @@ function initMap() {
             <span>${loc.name}</span>
             <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${loc.distance}</span>
           </div>
-          <div class="rt-tip-sub" style="display:flex;gap:6px;margin-top:6px;">
-            <button onclick="openSheet('${loc.id}'); event.stopPropagation();" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:var(--ink);border:1px solid var(--ink);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper);cursor:pointer;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="rt-tip-actions">
+            <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa" onclick="event.stopPropagation()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               Detail
-            </button>
-            <a href="${compassUrl}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-decoration:none;" onclick="event.stopPropagation()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            </a>
+            <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo" onclick="event.stopPropagation()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
               Kompas
             </a>
-            <button id="rtWishBtn_${loc.id}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;background:${wBtn ? 'var(--accent)' : 'var(--paper-2)'};border:1px solid ${wBtn ? 'var(--accent)' : 'var(--rule)'};border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:${wBtn ? '#fff' : 'var(--ink-2)'};cursor:pointer;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-              ${wBtn ? '✓' : 'Plán'}
+            <button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" title="${wBtn ? 'Odebrat z plánu' : 'Přidat do plánu'}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+              ${wBtn ? '✓ Plán' : 'Plán'}
             </button>
           </div>
         </div>`;
@@ -2556,11 +2570,9 @@ function initMap() {
 /* ═══════════════ TOOLTIP WISHLIST TOGGLE ═══════════════ */
 function rtToggleWish(id, btn) {
   const now = toggleWish(id);
-  btn.style.background = now ? 'var(--accent)' : 'var(--paper-2)';
-  btn.style.borderColor = now ? 'var(--accent)' : 'var(--rule)';
-  btn.style.color = now ? '#fff' : 'var(--ink-2)';
+  btn.classList.toggle('active', now);
   btn.querySelector('svg').setAttribute('fill', now ? 'currentColor' : 'none');
-  btn.querySelector('svg').nextSibling.textContent = now ? 'V plánu' : 'Plán';
+  btn.innerHTML = btn.innerHTML.replace(/[✓\s]*Plán/, now ? '✓ Plán' : 'Plán');
   rebuildMarkers();
   updateWishBadge();
 }
