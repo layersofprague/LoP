@@ -68,7 +68,7 @@ a { color: inherit; text-decoration: none; }
 /* ── HERO / SLIDER ── */
 .hero {
   position: relative;
-  height: 56vw; min-height: 260px;
+  height: 64vw; min-height: 300px;
   background: #0d0b08;
   overflow: hidden;
   cursor: default;
@@ -76,14 +76,14 @@ a { color: inherit; text-decoration: none; }
   touch-action: pan-y;
 }
 @media (min-width: 640px) {
-  .hero { height: min(38vw, 360px); }
+  .hero { height: min(44vw, 460px); }
 }
 .sl-base, .sl-top {
   position: absolute; inset: 0;
 }
 .sl-base img, .sl-top img {
   width: 100%; height: 100%;
-  object-fit: cover; object-position: center 30%;
+  object-fit: cover; object-position: center 15%;
   pointer-events: none; -webkit-user-drag: none;
   display: block;
 }
@@ -116,7 +116,18 @@ a { color: inherit; text-decoration: none; }
   pointer-events: auto;
 }
 .sl-handle svg { width: 12px; height: 12px; pointer-events: none; }
-/* Fullscreen tlačítko */
+/* Nativní fullscreen na mobilu */
+.hero:-webkit-full-screen,
+.hero:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: none !important;
+  cursor: ew-resize;
+}
+.hero:-webkit-full-screen .sl-handle,
+.hero:fullscreen .sl-handle {
+  cursor: ew-resize;
+}
 .sl-fs-btn {
   position: absolute; top: 12px; right: 12px;
   width: auto; height: auto; padding: 4px 10px; border-radius: 6px;
@@ -689,17 +700,32 @@ const VISIT_KEY  = 'lop_visited_v1';
 })();
 
 function openFullscreen() {
+  const hero = document.getElementById('hero');
+  // Na mobilu použij nativní fullscreen prohlížeče
+  if (window.innerWidth < 640 && hero.requestFullscreen) {
+    hero.requestFullscreen().catch(() => openFsOverlay());
+    return;
+  }
+  if (window.innerWidth < 640 && hero.webkitRequestFullscreen) {
+    hero.webkitRequestFullscreen();
+    return;
+  }
+  openFsOverlay();
+}
+function openFsOverlay() {
   const fs = document.getElementById('heroFs');
   fs.classList.add('open');
   document.body.style.overflow = 'hidden';
-  // Reset na výchozí pozici při otevření
   if (window._fsSlider) window._fsSlider(0.5);
 }
 function closeFullscreen() {
+  // Zavři nativní fullscreen pokud je aktivní
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  }
   document.getElementById('heroFs').classList.remove('open');
   document.body.style.overflow = '';
 }
-// Klávesa Escape zavře fullscreen
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullscreen(); });
 
 /* ── WISHLIST ── */
