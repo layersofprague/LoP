@@ -40,38 +40,30 @@ html, body {
 button, input { font-family: inherit; color: inherit; }
 a { color: inherit; text-decoration: none; }
 
-/* ── TOPBAR ── */
+/* ── TOPBAR (stejný jako index.html) ── */
 #topbar {
   position: sticky; top: 0; z-index: 50;
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-  background: var(--paper);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px;
   border-bottom: 1px solid var(--rule);
+  background: var(--paper);
 }
-.back-btn {
-  appearance: none; border: none; background: transparent;
-  width: 36px; height: 36px; border-radius: 8px;
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { height: 56px; width: auto; display: block; object-fit: contain; margin-top: -10px; }
+.brand-mark { font-family: 'Fraunces', serif; font-weight: 500; font-size: 20px; letter-spacing: -.015em; line-height: 1; }
+.brand-mark em { font-style: italic; font-weight: 400; color: var(--ink-3); }
+.brand-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+.top-actions { display: flex; align-items: center; gap: 2px; }
+.top-btn {
+  appearance: none; background: transparent; border: none;
+  width: 38px; height: 38px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--ink-2);
+  cursor: pointer; position: relative; color: var(--ink-2);
   transition: background .15s;
-  flex-shrink: 0;
 }
-.back-btn:hover { background: var(--paper-2); }
-.back-btn svg { width: 18px; height: 18px; }
-.topbar-title {
-  flex: 1;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--ink-3);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.topbar-id {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; font-weight: 600;
-  color: var(--ink-4);
-  background: var(--paper-2);
-  padding: 3px 8px; border-radius: 4px;
-}
+.top-btn:hover { background: var(--paper-2); }
+.top-btn svg { width: 19px; height: 19px; }
+.top-btn .dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
 /* ── HERO / SLIDER ── */
 .hero {
@@ -343,6 +335,16 @@ a { color: inherit; text-decoration: none; }
 .nav-btn-sec:hover { background: var(--paper-3); }
 .nav-btn-sec svg { width: 15px; height: 15px; }
 
+/* keyword tags */
+.kw-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .06em;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  color: var(--ink-3);
+}
+
 /* placeholder gallery */
 .gallery {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
@@ -367,15 +369,23 @@ a { color: inherit; text-decoration: none; }
 <body>
 
 <!-- TOPBAR -->
-<div id="topbar">
-  <button class="back-btn" onclick="history.back()" title="Zpět na mapu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="15 18 9 12 15 6"/>
-    </svg>
-  </button>
-  <div class="topbar-title">Holešovice, Praha 7</div>
-  <div class="topbar-id">H001</div>
-</div>
+<header id="topbar">
+  <div class="brand">
+    <a href="../index.html"><img class="brand-logo" src="../logo-tight.png" alt="Layers of Prague"/></a>
+  </div>
+  <div class="top-actions">
+    <button class="top-btn" title="Zpět na mapu" onclick="history.back()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="top-btn" title="Notifikace">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+      <span class="dot"></span>
+    </button>
+    <button class="top-btn" title="Profil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </button>
+  </div>
+</header>
 
 <!-- HERO SLIDER -->
 <div class="hero" id="hero">
@@ -396,19 +406,7 @@ a { color: inherit; text-decoration: none; }
   <div class="sl-lbl sl-lbl-l">Dnes</div>
   <div class="sl-lbl sl-lbl-r">~1930</div>
 
-  <!-- AR CTA -->
-  <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="ar-cta">
-    <div class="ar-cta-ic">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-      </svg>
-    </div>
-    <div class="ar-cta-body">
-      <div class="ar-cta-kick">Na místě</div>
-      <div class="ar-cta-title">Otevřít AR historický pohled</div>
-    </div>
-    <div class="ar-cta-badge">136°</div>
-  </a>
+
 </div>
 
 <!-- BODY -->
@@ -435,23 +433,27 @@ a { color: inherit; text-decoration: none; }
   </div>
 
   <!-- actions -->
-  <div class="actions">
-    <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Navigovat">
+  <div class="actions" style="grid-template-columns:repeat(5,1fr)">
+    <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span class="act-lbl">Kompas</span>
     </a>
-    <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
-      <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      <span class="act-lbl" id="wishLbl">Plán</span>
-    </button>
+    <a href="https://mapy.cz/zakladni?q=50.10543,14.45595" class="act-btn" target="_blank" title="Mapy.cz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="act-lbl">Mapy.cz</span>
+    </a>
+    <a href="https://www.google.com/maps?q=50.10543,14.45595" class="act-btn" target="_blank" title="Google Maps">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="act-lbl">Google</span>
+    </a>
     <button class="act-btn" onclick="share()" title="Sdílet">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
       <span class="act-lbl">Sdílet</span>
     </button>
-    <a class="act-btn" href="https://mapy.cz/zakladni?q=50.10543,14.45595" target="_blank" title="Otevřít v Mapy.cz">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Mapy.cz</span>
-    </a>
+    <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
+      <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      <span class="act-lbl" id="wishLbl">Plán</span>
+    </button>
   </div>
 
   <!-- lede -->
@@ -523,28 +525,25 @@ a { color: inherit; text-decoration: none; }
     </div>
   </div>
 
-  <!-- navigace -->
+  <!-- klíčová slova -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Doprava</span>
+      <span class="sec-label">Klíčová slova</span>
     </div>
-    <a class="nav-btn" href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-      Navigovat kompasem
-    </a>
-    <div class="nav-btn-sub">
-      <a class="nav-btn-sec" href="https://mapy.cz/zakladni?q=50.10543,14.45595" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Mapy.cz
-      </a>
-      <a class="nav-btn-sec" href="https://www.google.com/maps?q=50.10543,14.45595" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Google Maps
-      </a>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <span class="kw-tag">přístav</span>
+      <span class="kw-tag">průmysl</span>
+      <span class="kw-tag">secese</span>
+      <span class="kw-tag">Holešovice</span>
+      <span class="kw-tag">František Sander</span>
+      <span class="kw-tag">lodní doprava</span>
+      <span class="kw-tag">Praha 7</span>
+      <span class="kw-tag">1892</span>
+      <span class="kw-tag">Prague Marina</span>
+      <span class="kw-tag">nábřeží</span>
+      <span class="kw-tag">průmyslová Praha</span>
+      <span class="kw-tag">přístavní dozorství</span>
     </div>
-    <p style="margin-top:12px;font-size:12.5px;color:var(--ink-3);line-height:1.6;">
-      Tramvaj č. 1, 12 nebo 25, zastávka <strong>Nádraží Holešovice</strong>, pak 10 minut pěšky po nábřeží na sever k přístavu.
-    </p>
   </div>
 
 </div><!-- /body -->
