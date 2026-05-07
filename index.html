@@ -1531,6 +1531,14 @@ a { color: inherit; text-decoration: none; }
     </div>
   </header>
 
+  <!-- Link bar -->
+  <div style="background:var(--paper-2);border-bottom:1px solid var(--rule);padding:6px 18px;display:flex;gap:16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);">
+    <a href="index.html" style="color:var(--ink);font-weight:600;">Mapa</a>
+    <a href="#" onclick="switchView('routesView');return false;" style="color:var(--ink-3);text-decoration:none;">Trasy</a>
+    <a href="#" onclick="switchView('arView');return false;" style="color:var(--ink-3);text-decoration:none;">AR</a>
+    <a href="#" onclick="switchView('wishView');return false;" style="color:var(--ink-3);text-decoration:none;">Plán</a>
+  </div>
+
   <div id="topSearch">
     <div class="ts-field">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -1898,7 +1906,7 @@ function getText(val) {
 const CAT = {
   hist:   { name: 'Historie',      color: '#8a5a3a', letter: 'H' },
   arch:   { name: 'Architektura',  color: '#3e5a70', letter: 'A' },
-  fun:    { name: 'Zajímavosti',   color: '#a88520', letter: 'I' },
+  fun:    { name: 'Zajímavosti',   color: '#a88520', letter: 'Z' },
   nature: { name: 'Příroda',       color: '#3a6e4a', letter: 'P' },
   legend: { name: 'Legendy',       color: '#6a3a6e', letter: 'L' }
 };
@@ -2525,8 +2533,13 @@ function applyFilter() {
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
     let s = FILTER[loc.cat];
-    if (wishActive && !isWished(loc.id)) {
-      if (order[FILTER.wished] > order[s]) s = FILTER.wished;
+    if (wishActive) {
+      if (isWished(loc.id)) {
+        // Wished pin je vždy plně viditelný při aktivním wishlist filtru
+        s = 'full';
+      } else {
+        if (order[FILTER.wished] > order[s]) s = FILTER.wished;
+      }
     }
     if (visActive && !isVisited(loc.id)) {
       if (order[FILTER.visited] > order[s]) s = FILTER.visited;
