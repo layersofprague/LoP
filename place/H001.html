@@ -97,20 +97,26 @@ a { color: inherit; text-decoration: none; }
   display: block;
 }
 .sl-top { --pos: 50%; }
-.sl-lbl {
-  position: absolute; top: 14px;
-  font-family: 'Fraunces', serif; font-style: italic;
-  font-size: 14px; line-height: 1;
-  font-variant-numeric: oldstyle-nums;
-  color: rgba(238,239,235,.5);
-  text-shadow: 0 1px 4px rgba(0,0,0,.5);
-  pointer-events: none;
-  transition: color .25s;
-  z-index: 3;
+.sl-margin {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 0 2px;
+  margin-top: 2px;
 }
-.sl-lbl.active { color: #ffffff; }
-.sl-lbl-l { left: 14px; }
-.sl-lbl-r { right: 14px; }
+.sl-kicker { align-self: flex-start; transform: translateY(1px); }
+.sl-lbl {
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 16px; line-height: 1;
+  font-variant-numeric: oldstyle-nums;
+  color: var(--ink-4);
+  font-weight: 300;
+  transition: color .2s, font-weight .2s;
+}
+.sl-lbl.active { color: var(--ink); font-weight: 500; }
+.sl-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-4);
+}
 /* Handle — jediný ovládací prvek */
 .sl-handle {
   position: absolute; top: 50%; left: 50%;
@@ -139,8 +145,6 @@ a { color: inherit; text-decoration: none; }
   padding: 4px;
   display: flex; align-items: center; justify-content: center;
   color: var(--paper); z-index: 5;
-  text-shadow: 0 1px 4px rgba(0,0,0,.6);
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,.6));
 }
 .sl-fs-btn svg { width: 11px; height: 11px; pointer-events: none; }
 
@@ -174,7 +178,12 @@ a { color: inherit; text-decoration: none; }
 }
 .fs-modal-inner .sl-lbl {
   position: absolute; bottom: 14px; z-index: 3;
+  color: rgba(238,239,235,.5);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
 }
+.fs-modal-inner .sl-lbl.active { color: #ffffff; }
+.fs-modal-inner .sl-lbl-l { left: 14px; }
+.fs-modal-inner .sl-lbl-r { right: 14px; }
 .fs-modal-inner .sl-handle {
   position: absolute; top: 50%; cursor: ew-resize; z-index: 4; pointer-events: auto;
 }
@@ -265,14 +274,15 @@ a { color: inherit; text-decoration: none; }
 .place-title {
   font-family: 'Fraunces', serif;
   font-weight: 400;
-  font-size: clamp(28px, 7vw, 44px);
+  font-size: clamp(24px, 6vw, 38px);
   line-height: 1.05;
   letter-spacing: -.015em;
   color: var(--ink);
   margin-bottom: 6px;
   text-wrap: pretty;
+  white-space: nowrap;
 }
-.place-title em { font-style: italic; color: var(--ink-2); }
+.place-title em { font-style: italic; color: var(--ink-2); font-size: .72em; font-weight: 300; }
 
 /* sub */
 .place-sub {
@@ -478,6 +488,28 @@ a { color: inherit; text-decoration: none; }
 
 <!-- HERO SLIDER -->
 <div class="hero-wrap">
+
+  <!-- title -->
+  <h1 class="place-title">Holešovický <em>přístav</em></h1>
+
+  <!-- kicker -->
+  <div class="kicker">
+    <div class="k-dot"></div>
+    <span>Historie</span>
+    <span class="k-sep">·</span>
+    <span>Průmysl</span>
+    <div class="k-votes">
+      <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+        <span id="dislikeCount">2</span>
+      </button>
+      <button class="k-vote-btn" id="likeBtn" onclick="vote('like')" title="Líbí se">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        <span id="likeCount">24</span>
+      </button>
+    </div>
+  </div>
+
 <div class="hero" id="hero">
   <!-- Základ: současná fotka -->
   <div class="sl-base">
@@ -487,9 +519,6 @@ a { color: inherit; text-decoration: none; }
   <div class="sl-top" id="slTop">
     <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
   </div>
-  <!-- Letopočty — vždy oba viditelné, aktivní = bílý -->
-  <div class="sl-lbl sl-lbl-l" id="lblHist">1930</div>
-  <div class="sl-lbl sl-lbl-r" id="lblNow">2025</div>
   <!-- Hairline divider -->
   <div class="sl-divider" id="slDivider"></div>
   <!-- Handle — jediné místo pro tažení -->
@@ -506,6 +535,11 @@ a { color: inherit; text-decoration: none; }
     </svg>
   </button>
 </div>
+<div class="sl-margin">
+  <div class="sl-lbl" id="lblNow">2026</div>
+  <div class="sl-kicker">Tehdy &amp; Dnes</div>
+  <div class="sl-lbl active" id="lblHist">~1930</div>
+</div>
 </div><!-- /hero-wrap -->
 
 <!-- FULLSCREEN MODAL -->
@@ -517,8 +551,8 @@ a { color: inherit; text-decoration: none; }
     <div class="sl-top" id="slTopFs">
       <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
     </div>
-    <div class="sl-lbl sl-lbl-l" id="lblHistFs">1930</div>
-    <div class="sl-lbl sl-lbl-r" id="lblNowFs">2025</div>
+    <div class="sl-lbl sl-lbl-l" id="lblHistFs">~1930</div>
+    <div class="sl-lbl sl-lbl-r" id="lblNowFs">2026</div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
@@ -534,34 +568,6 @@ a { color: inherit; text-decoration: none; }
 
 <!-- BODY -->
 <div class="body">
-
-  <!-- kicker -->
-  <div class="kicker">
-    <div class="k-dot"></div>
-    <span>Historie</span>
-    <span class="k-sep">·</span>
-    <span>Průmysl</span>
-    <div class="k-votes">
-      <button class="k-vote-btn" id="likeBtn" onclick="vote('like')" title="Líbí se">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-        <span id="likeCount">24</span>
-      </button>
-      <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
-        <span id="dislikeCount">2</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- title -->
-  <h1 class="place-title">Holešovický<br><em>přístav</em></h1>
-
-  <!-- sub -->
-  <div class="place-sub">
-    <span>Přístavní dozorství</span>
-    <span class="dot">·</span>
-    <span class="coords">50.1054° N, 14.4560° E</span>
-  </div>
 
   <!-- actions -->
   <div class="actions" style="grid-template-columns:repeat(5,1fr)">
