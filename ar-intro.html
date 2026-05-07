@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#1a1a18"/>
+<title>AR — LayersOfPrague</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:   #eeefeb;
+  --paper-2: #e6e7e2;
+  --paper-3: #dadcd4;
+  --ink:     #1a1a18;
+  --ink-2:   #3a3a36;
+  --ink-3:   #6a6a64;
+  --ink-4:   #9a9a94;
+  --rule:    #cbcec5;
+  --accent:  #b04020;
+  --ease:    cubic-bezier(.22,.8,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+/* ── TOPBAR ── */
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: center; }
+.brand-logo { height: 40px; width: auto; display: block; object-fit: contain; margin-top: -6px; }
+@media (min-width: 400px) { .brand-logo { height: 56px; margin-top: -10px; } }
+.top-actions { display: flex; align-items: center; gap: 2px; }
+.top-btn {
+  appearance: none; background: transparent; border: none;
+  width: 38px; height: 38px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink-3);
+  transition: background .15s;
+}
+.top-btn:hover { background: var(--paper-2); }
+.top-btn svg { width: 19px; height: 19px; }
+
+/* ── HERO (GIF) ── */
+.hero {
+  position: relative;
+  background: var(--ink);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  max-height: 420px;
+}
+@media (min-width: 640px) { .hero { aspect-ratio: unset; height: 460px; max-height: 520px; } }
+.hero-gif {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  display: block;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(26,24,20,.7) 100%);
+  pointer-events: none;
+}
+.hero-badge {
+  position: absolute; top: 14px; left: 14px;
+  background: rgba(176,64,32,.9);
+  backdrop-filter: blur(6px);
+  border-radius: 4px; padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--paper);
+}
+.hero-title {
+  position: absolute; bottom: 20px; left: 20px; right: 20px;
+  font-family: 'Fraunces', serif;
+  font-size: clamp(26px, 7vw, 38px);
+  font-weight: 400; line-height: 1.05;
+  letter-spacing: -.02em;
+  color: var(--paper);
+  text-shadow: 0 1px 8px rgba(0,0,0,.4);
+}
+.hero-title em { font-style: italic; opacity: .75; }
+
+/* ── BODY ── */
+.body {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+/* place card (pokud přišli z konkrétního místa) */
+.place-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 22px;
+}
+.place-card-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+.place-card-name {
+  font-family: 'Fraunces', serif;
+  font-size: 16px; font-weight: 500;
+  color: var(--ink);
+}
+.place-card-sub {
+  font-size: 12px; color: var(--ink-3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: .08em; text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* lede */
+.lede {
+  font-family: 'Fraunces', serif;
+  font-size: 18px; line-height: 1.55;
+  color: var(--ink);
+  letter-spacing: -.005em;
+  margin-bottom: 26px;
+  text-wrap: pretty;
+}
+
+/* steps */
+.steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 26px; }
+.step {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+.step:first-child { border-top: none; padding-top: 0; }
+.step-icon {
+  flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.step-icon.accent { background: var(--accent); }
+.step-icon svg { width: 15px; height: 15px; }
+.step-body h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 16px; font-weight: 500; line-height: 1.25;
+  color: var(--ink); margin-bottom: 3px;
+}
+.step-body p {
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-3);
+}
+
+/* auth gate */
+.auth-gate {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.auth-gate svg { flex-shrink: 0; margin-top: 1px; }
+.auth-gate p { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.auth-gate a { color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+/* buttons */
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 500;
+  transition: background .15s;
+  margin-bottom: 8px;
+}
+.btn-primary:hover { background: var(--ink-2); }
+.btn-primary svg { width: 16px; height: 16px; }
+.btn-secondary {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 12px;
+  background: transparent; color: var(--ink-3);
+  border: 1px solid var(--rule); border-radius: 10px;
+  font-size: 13px;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: var(--paper-2); color: var(--ink); }
+
+/* hidden pokud přihlášen */
+.logged-in-only { display: none; }
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <a href="index.html" class="brand">
+    <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
+  </a>
+  <div class="top-actions">
+    <button class="top-btn" title="Profil" id="profileBtn"
+            onclick="location.href='login.html?return='+encodeURIComponent(location.href)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <img class="hero-gif" src="foto/LOP.gif" alt="AR demo — historická Praha přes objektiv telefonu"
+       onerror="this.style.display='none'"/>
+  <div class="hero-overlay"></div>
+  <div class="hero-badge">Rozšířená realita</div>
+  <div class="hero-title">Praha vrstvou<br><em>po vrstvě</em></div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- place card — zobrazí se jen pokud přišli z konkrétního místa -->
+  <div class="place-card" id="placeCard" style="display:none">
+    <div class="place-card-dot"></div>
+    <div>
+      <div class="place-card-name" id="placeName"></div>
+      <div class="place-card-sub">AR historický pohled</div>
+    </div>
+  </div>
+
+  <!-- lede -->
+  <p class="lede">Vezměte telefon, vydejte se na místo a přiložte historickou fotografii přes živý obraz. Přesně tam, kde stojíte, uvidíte jak vypadalo stejné místo před 100 lety.</p>
+
+  <!-- kroky -->
+  <div class="steps">
+    <div class="step">
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#eeefeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="step-body">
+        <h4>Vyberte místo v mapě</h4>
+        <p>Každý pin skrývá historickou fotografii a příběh. Čím starší místo, tím větší kontrast.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#eeefeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      </div>
+      <div class="step-body">
+        <h4>Nechte se navést kompasem</h4>
+        <p>Aplikace vás dovede přesně na místo pořízení historického snímku — na metr přesně.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon accent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#eeefeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+      </div>
+      <div class="step-body">
+        <h4>Zapněte AR a zarovnejte obraz</h4>
+        <p>Minulost se prolne s přítomností přímo před vámi. Posuňte jezdec a sledujte jak čas plyne.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon" style="background: var(--cat-fun, #e0a020)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#eeefeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+      </div>
+      <div class="step-body">
+        <h4>Soutěžte o nejlepší zarovnání</h4>
+        <p>Každé zarovnání hodnotíme skóre přesnosti. Nejlepší hráči měsíce získají roční členství — a jejich jméno se zapíše do historie místa.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- auth gate — jen pro nepřihlášené -->
+  <div class="auth-gate" id="authGate">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <p>Kompas a AR jsou dostupné po přihlášení. <a id="loginLink">Přihlaste se</a> a vydejte se do minulosti.</p>
+  </div>
+
+  <!-- CTA tlačítka -->
+  <button class="btn-primary" id="btnMain" onclick="handleMain()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+    <span id="btnMainLabel">Přihlásit se a spustit AR</span>
+  </button>
+  <button class="btn-secondary" onclick="history.back()">Zpět</button>
+
+</div>
+
+<script>
+const SESS_KEY = 'lop_auth_session';
+
+/* ── Params ── */
+const params   = new URLSearchParams(location.search);
+const placeId  = params.get('id')   || '';
+const placeName= decodeURIComponent(params.get('name') || '');
+const placeLat = params.get('lat')  || '';
+const placeLng = params.get('lng')  || '';
+const placeThumb = params.get('thumb') || '';
+
+/* ── Auth ── */
+function isLoggedIn() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESS_KEY) || 'null');
+    return !!(s && s.access_token && s.user);
+  } catch(e) { return false; }
+}
+
+function compassUrl() {
+  let url = 'compass.html?id=' + encodeURIComponent(placeId);
+  if (placeLat) url += '&lat=' + placeLat;
+  if (placeLng) url += '&lng=' + placeLng;
+  if (placeName) url += '&name=' + encodeURIComponent(placeName);
+  if (placeThumb) url += '&thumb=' + encodeURIComponent(placeThumb);
+  return url;
+}
+
+function loginUrl() {
+  return 'login.html?return=' + encodeURIComponent(compassUrl());
+}
+
+function handleMain() {
+  if (isLoggedIn()) {
+    location.href = compassUrl();
+  } else {
+    location.href = loginUrl();
+  }
+}
+
+/* ── UI ── */
+function updateUI() {
+  const loggedIn = isLoggedIn();
+
+  // Place card
+  if (placeName) {
+    document.getElementById('placeCard').style.display = 'flex';
+    document.getElementById('placeName').textContent = placeName;
+  }
+
+  // Auth gate
+  document.getElementById('authGate').style.display = loggedIn ? 'none' : 'flex';
+
+  // Login link
+  document.getElementById('loginLink').onclick = () => { location.href = loginUrl(); };
+
+  // Profil tlačítko
+  const btn = document.getElementById('profileBtn');
+  if (loggedIn) {
+    btn.style.color = 'var(--ink)';
+    btn.onclick = () => { location.href = 'login.html?return=' + encodeURIComponent(location.href); };
+  }
+
+  // Hlavní tlačítko
+  document.getElementById('btnMainLabel').textContent = loggedIn
+    ? 'Spustit AR' + (placeName ? ' — ' + placeName : '')
+    : 'Přihlásit se a spustit AR';
+}
+
+updateUI();
+</script>
+</body>
+</html>
