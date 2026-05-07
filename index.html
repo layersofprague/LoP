@@ -76,11 +76,14 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; gap: 10px;
 }
 .brand-logo {
-  height: 56px;
+  height: 40px;
   width: auto;
   display: block;
   object-fit: contain;
-  margin-top: -10px;
+  margin-top: -6px;
+}
+@media (min-width: 400px) {
+  .brand-logo { height: 56px; margin-top: -10px; }
 }
 .brand-mark {
   font-family: 'Fraunces', serif;
@@ -2200,6 +2203,51 @@ function renderWishlist() {
   }).join('');
 }
 
+/* ═══════════════ TOOLTIP ═══════════════ */
+function showTooltip(loc, m, rt) {
+  clearTimeout(window._rtHideTimer);
+  const c = CAT[loc.cat];
+  const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
+  const wBtn = isWished(loc.id);
+  rt._forId = loc.id;
+  rt.innerHTML = `
+    <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
+      <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>
+    </div>
+    <div class="rt-tip-body">
+      <div class="rt-tip-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">
+        <span>${loc.name}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${loc.distance}</span>
+      </div>
+      <div class="rt-tip-actions">
+        <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa" onclick="event.stopPropagation()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Detail
+        </a>
+        <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo" onclick="event.stopPropagation()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          Kompas
+        </a>
+        <button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" title="${wBtn ? 'Odebrat z plánu' : 'Přidat do plánu'}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          ${wBtn ? '✓ Plán' : 'Plán'}
+        </button>
+      </div>
+    </div>`;
+  const rect = m.getElement().getBoundingClientRect();
+  rt.style.left = (rect.left + rect.width/2 - 110) + 'px';
+  rt.style.top  = (rect.top - 140) + 'px';
+  rt.classList.add('visible');
+  if (loc.photoThen) {
+    const imgEl = new Image();
+    imgEl.onload = () => {
+      const box = document.getElementById('rtTipImg');
+      if (box) { imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'; box.insertBefore(imgEl, box.firstChild); }
+    };
+    imgEl.src = loc.photoThumb || loc.photoThen;
+  }
+}
+
 /* ═══════════════ MAP ═══════════════ */
 let _markers = [];
 const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
@@ -2531,55 +2579,26 @@ function initMap() {
     _markers.push({ marker: m, loc });
 
     m.on('click', (e) => {
-      // Klik na pin otevře sheet — ale jen pokud tooltip není právě viditelný
-      // (tooltip překrývá pin, klik na tlačítka v tooltipu nesmí otevřít sheet)
-      if (rt.classList.contains('visible')) return;
-      openSheet(loc.id);
+      const isTouch = e.originalEvent?.pointerType === 'touch' || ('ontouchstart' in window && !window._hasMouseOver);
+      if (isTouch) {
+        // Mobil: první tap = tooltip, druhý tap = sheet
+        if (rt.classList.contains('visible') && rt._forId === loc.id) {
+          // Tooltip tohoto pinu je viditelný — otevři sheet
+          rt.classList.remove('visible');
+          openSheet(loc.id);
+        } else {
+          // Zobraz tooltip
+          showTooltip(loc, m, rt);
+        }
+      } else {
+        // Desktop: klik otevře sheet pokud tooltip není viditelný
+        if (rt.classList.contains('visible')) return;
+        openSheet(loc.id);
+      }
     });
     m.on('mouseover', () => {
-      clearTimeout(window._rtHideTimer);
-      const c = CAT[loc.cat];
-      const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
-      const wBtn = isWished(loc.id);
-      rt.innerHTML = `
-        <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
-          <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>
-        </div>
-        <div class="rt-tip-body">
-          <div class="rt-tip-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">
-            <span>${loc.name}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${loc.distance}</span>
-          </div>
-          <div class="rt-tip-actions">
-            <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa" onclick="event.stopPropagation()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Detail
-            </a>
-            <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo" onclick="event.stopPropagation()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-              Kompas
-            </a>
-            <button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" title="${wBtn ? 'Odebrat z plánu' : 'Přidat do plánu'}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-              ${wBtn ? '✓ Plán' : 'Plán'}
-            </button>
-          </div>
-        </div>`;
-      const rect = m.getElement().getBoundingClientRect();
-      rt.style.left = (rect.left + rect.width/2 - 110) + 'px';
-      rt.style.top = (rect.top - 140) + 'px';
-      rt.classList.add('visible');
-      if (loc.photoThen) {
-        const imgEl = new Image();
-        imgEl.onload = () => {
-          const box = document.getElementById('rtTipImg');
-          if (box) {
-            imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
-            box.insertBefore(imgEl, box.firstChild);
-          }
-        };
-        imgEl.src = loc.photoThumb || loc.photoThen;
-      }
+      window._hasMouseOver = true;
+      showTooltip(loc, m, rt);
     });
     m.on('mouseout', () => {
       window._rtHideTimer = setTimeout(() => rt.classList.remove('visible'), 120);
@@ -2591,6 +2610,9 @@ function initMap() {
   rt.addEventListener('mouseleave', () => {
     window._rtHideTimer = setTimeout(() => rt.classList.remove('visible'), 120);
   });
+
+  // Zavři tooltip při kliknutí na mapu mimo pin
+  map.on('click', () => rt.classList.remove('visible'));
 
   buildChips();
   updateWishBadge();
