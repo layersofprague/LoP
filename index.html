@@ -2025,6 +2025,8 @@ async function loadData() {
   initMap();
   renderRoutes();
   updateWishBadge();
+  // Refresh chipů po načtení — wishlist/visited stavy z localStorage
+  setTimeout(buildChips, 100);
 }
 
 // ── Záložní data (použijí se pokud places.json chybí) ─────────────────────
@@ -2536,12 +2538,10 @@ function applyFilter() {
   _markers.forEach(({ marker, loc }) => {
     let s = FILTER[loc.cat];
     if (wishActive) {
-      if (isWished(loc.id)) { if (order[s] > 0) s = 'full'; }
-      else if (order[FILTER.wished] > order[s]) s = FILTER.wished;
+      if (isWished(loc.id) && order[FILTER.wished] > order[s]) s = FILTER.wished;
     }
     if (visActive) {
-      if (isVisited(loc.id)) { if (order[s] > 0) s = 'full'; }
-      else if (order[FILTER.visited] > order[s]) s = FILTER.visited;
+      if (isVisited(loc.id) && order[FILTER.visited] > order[s]) s = FILTER.visited;
     }
     if (eraActive) {
       const y = locYear(loc);
