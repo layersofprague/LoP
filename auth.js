@@ -433,6 +433,9 @@ async function _init() {
   // Načti session
   await _initSession();
   _updateAllProfileButtons();
+
+  // Signalizuj že auth je připravený
+  window.dispatchEvent(new Event('lop-auth-ready'));
 }
 
 // Spusť po DOM ready
