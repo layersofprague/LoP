@@ -73,22 +73,9 @@ a { color: inherit; text-decoration: none; }
 }
 .topbar-main {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px 6px;
+  padding: 14px 18px 12px;
 }
-.topbar-links {
-  display: flex; gap: 0;
-  padding: 0 18px;
-  border-top: 1px solid var(--rule);
-}
-.tbl-item {
-  padding: 6px 14px 6px 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-3); text-decoration: none;
-  transition: color .15s;
-}
-.tbl-item:hover { color: var(--ink); }
-.tbl-item.active { color: var(--ink); font-weight: 600; }
+
 .brand {
   display: flex; align-items: center; gap: 10px;
 }
@@ -1442,13 +1429,13 @@ a { color: inherit; text-decoration: none; }
     border-right: 1px solid var(--rule);
     width: 100%;
   }
-  .topbar-links { display: none; } /* na PC navigace je v side nav, link bar zbytečný */
+
   #nav {
     flex-direction: column;
     border-top: none;
     border-right: 1px solid var(--rule);
     width: 84px;
-    padding-top: 70px;
+    padding-top: 70px; /* přepíše JS */
     gap: 2px;
     padding-bottom: 14px;
   }
@@ -1462,7 +1449,7 @@ a { color: inherit; text-decoration: none; }
     width: 2px; height: 24px;
   }
   #main {
-    margin-top: 90px;
+    margin-top: 0;
   }
   .sheet-hero { height: 58vh; max-height: 640px; }
   .sheet-body {
@@ -1549,12 +1536,7 @@ a { color: inherit; text-decoration: none; }
         </button>
       </div>
     </div>
-    <div class="topbar-links">
-      <a class="tbl-item active" href="index.html">Mapa</a>
-      <a class="tbl-item" href="#" onclick="switchView('routesView');return false;">Trasy</a>
-      <a class="tbl-item" href="#" onclick="switchView('arView');return false;">AR</a>
-      <a class="tbl-item" href="#" onclick="switchView('wishView');return false;">Plán</a>
-    </div>
+
   </header>
 
   <div id="topSearch">
@@ -2311,7 +2293,9 @@ function pinIconHTML(loc) {
   const visited = isVisited(loc.id) ? 'visited' : '';
   const wished = isWished(loc.id) ? 'wished' : '';
   const style = TWEAKS.pinStyle;
-  const lbl = pinLabel(loc.num);
+  const catLetter = (CAT[loc.cat]?.letter || 'H');
+  const numDigits = String(loc.num).replace(/^[A-Z]+/, '');
+  const lbl = '<span style="display:flex;flex-direction:column;align-items:center;line-height:1;gap:1px"><span style="font-size:11px;font-weight:700">' + catLetter + '</span><span style="font-size:7px;font-weight:600;opacity:.85">' + numDigits + '</span></span>';
   if (style === 'drop') {
     return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:32px; height:32px;"><span style="transform:rotate(45deg)">${lbl}</span></div>`;
   }
@@ -2552,13 +2536,12 @@ function applyFilter() {
   _markers.forEach(({ marker, loc }) => {
     let s = FILTER[loc.cat];
     if (wishActive) {
-      // Wishlist filtr: wished piny full, ostatní hide
-      s = isWished(loc.id) ? 'full' : 'hide';
+      // Wished filtr: wished piny zůstanou viditelné, ostatní se ztlumí/skryjí
+      if (!isWished(loc.id) && order[FILTER.wished] > order[s]) s = FILTER.wished;
     }
     if (visActive) {
-      // Visited filtr: navštívené piny full, ostatní hide
-      if (isVisited(loc.id)) s = 'full';
-      else s = s === 'full' ? 'hide' : s; // respektuj ostatní filtry
+      // Visited filtr: navštívené piny zůstanou viditelné, ostatní se ztlumí/skryjí
+      if (!isVisited(loc.id) && order[FILTER.visited] > order[s]) s = FILTER.visited;
     }
     if (eraActive) {
       const y = locYear(loc);
@@ -2968,11 +2951,25 @@ function renderRoutes() {
 
 /* ═══════════════ INIT ═══════════════ */
 applyTweaks();
+
+function adjustTopbarOffset() {
+  const tb = document.getElementById('topbar');
+  const nav = document.getElementById('nav');
+  const h = tb ? tb.offsetHeight : 0;
+  if (window.innerWidth >= 820) {
+    if (nav) nav.style.paddingTop = h + 'px';
+  } else {
+    if (nav) nav.style.paddingTop = '';
+  }
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadData);
+  document.addEventListener('DOMContentLoaded', () => { adjustTopbarOffset(); loadData(); });
 } else {
+  adjustTopbarOffset();
   loadData();
 }
+window.addEventListener('resize', adjustTopbarOffset);
 </script>
 </body>
 </html>
