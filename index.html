@@ -1423,13 +1423,12 @@ a { color: inherit; text-decoration: none; }
     border-right: 1px solid var(--rule);
   }
   #topbar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
+    position: fixed;
+    top: 0; left: 50%; transform: translateX(-50%);
     z-index: 30;
+    width: min(1600px, 100vw);
     border-right: 1px solid var(--rule);
-    width: 100%;
   }
-
   #nav {
     flex-direction: column;
     border-top: none;
@@ -1440,6 +1439,8 @@ a { color: inherit; text-decoration: none; }
     gap: 2px;
     padding-bottom: 14px;
   }
+  #main { overflow: hidden; }
+  #map { top: 64px; }
   .nav-item {
     flex: 0 0 auto;
     padding: 14px 4px;
@@ -1448,9 +1449,6 @@ a { color: inherit; text-decoration: none; }
     top: 50%; left: -1px;
     transform: translateY(-50%);
     width: 2px; height: 24px;
-  }
-  #main {
-    margin-top: 0;
   }
   .sheet-hero { height: 58vh; max-height: 640px; }
   .sheet-body {
