@@ -1462,7 +1462,7 @@ a { color: inherit; text-decoration: none; }
     width: 2px; height: 24px;
   }
   #main {
-    margin-top: 64px;
+    margin-top: 90px;
   }
   .sheet-hero { height: 58vh; max-height: 640px; }
   .sheet-body {
@@ -2552,14 +2552,13 @@ function applyFilter() {
   _markers.forEach(({ marker, loc }) => {
     let s = FILTER[loc.cat];
     if (wishActive) {
-      if (isWished(loc.id)) {
-        s = 'full'; // wished pin vždy viditelný
-      } else {
-        s = FILTER.wished; // ostatní dostanou stav filtru
-      }
+      // Wishlist filtr: wished piny full, ostatní hide
+      s = isWished(loc.id) ? 'full' : 'hide';
     }
-    if (visActive && !isVisited(loc.id)) {
-      if (order[FILTER.visited] > order[s]) s = FILTER.visited;
+    if (visActive) {
+      // Visited filtr: navštívené piny full, ostatní hide
+      if (isVisited(loc.id)) s = 'full';
+      else s = s === 'full' ? 'hide' : s; // respektuj ostatní filtry
     }
     if (eraActive) {
       const y = locYear(loc);
