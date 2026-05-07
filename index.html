@@ -1532,7 +1532,7 @@ a { color: inherit; text-decoration: none; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
           <span class="dot"></span>
         </button>
-        <button class="top-btn" title="Profil" aria-label="Profil" onclick="location.href='login.html?return='+encodeURIComponent(location.href)">
+        <button class="top-btn" title="Profil" aria-label="Profil">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </button>
       </div>
@@ -1756,7 +1756,7 @@ a { color: inherit; text-decoration: none; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>
       <span class="nav-label">Trasy</span>
     </button>
-    <button class="nav-item" data-view="arView" onclick="switchView('arView')">
+    <button class="nav-item" data-view="arView" onclick="location.href='ar-intro.html'">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/><path d="M7 13h1M17 13h-1"/></svg>
       <span class="nav-label">AR</span>
     </button>
@@ -2863,9 +2863,13 @@ function initHeroSlider() {
 let arState = 'aligning';
 function openArFor(id) {
   const loc = LOCATIONS.find(l => l.id === id);
-  if (loc) document.getElementById('arPlaceName').textContent = loc.name;
-  closeSheet();
-  switchView('arView');
+  if (!loc) return;
+  let url = 'ar-intro.html?id=' + encodeURIComponent(loc.id)
+    + '&name=' + encodeURIComponent(loc.name)
+    + '&lat=' + loc.lat
+    + '&lng=' + loc.lng;
+  if (loc.photoThumb) url += '&thumb=' + encodeURIComponent(loc.photoThumb);
+  location.href = url;
 }
 function simulateAR() {
   const ghost = document.getElementById('arGhost');
