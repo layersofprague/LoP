@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#1a1a18"/>
+<title>Přihlášení — LayersOfPrague</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:   #eeefeb;
+  --paper-2: #e6e7e2;
+  --paper-3: #dadcd4;
+  --ink:     #1a1a18;
+  --ink-2:   #3a3a36;
+  --ink-3:   #6a6a64;
+  --ink-4:   #9a9a94;
+  --rule:    #cbcec5;
+  --accent:  #b04020;
+  --ok:      #3d7a4a;
+  --ease:    cubic-bezier(.22,.8,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font-family: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ── TOPBAR ── */
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: center; }
+.brand-logo { height: 56px; width: auto; display: block; object-fit: contain; margin-top: -10px; }
+.back-btn {
+  appearance: none; background: transparent; border: none;
+  display: flex; align-items: center; gap: 7px;
+  cursor: pointer; color: var(--ink-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 6px 0; transition: color .15s;
+}
+.back-btn:hover { color: var(--ink); }
+.back-btn svg { width: 16px; height: 16px; }
+
+/* ── LAYOUT ── */
+.page {
+  min-height: calc(100vh - 80px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 20px 48px;
+}
+.card {
+  width: 100%; max-width: 400px;
+}
+
+/* ── HEADER ── */
+.card-head { margin-bottom: 28px; }
+.card-kick {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 6px;
+}
+.card-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400; font-size: 38px;
+  letter-spacing: -.02em; line-height: 1.05;
+  color: var(--ink);
+}
+.card-title em { font-style: italic; color: var(--ink-3); }
+.card-sub {
+  font-size: 14px; color: var(--ink-3);
+  line-height: 1.5; margin-top: 8px;
+}
+
+/* ── FORM ── */
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.field label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.field input {
+  padding: 13px 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  font-size: 16px; color: var(--ink);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(26,24,20,.06);
+}
+.field input::placeholder { color: var(--ink-4); }
+
+.submit-btn {
+  width: 100%; padding: 14px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer; margin-top: 6px;
+  transition: background .15s;
+  letter-spacing: .01em;
+}
+.submit-btn:hover { background: var(--ink-2); }
+.submit-btn:disabled { opacity: .5; cursor: default; }
+
+/* ── MESSAGES ── */
+.msg {
+  padding: 11px 14px; border-radius: 8px;
+  font-size: 13.5px; line-height: 1.45;
+  margin-bottom: 16px; display: none;
+}
+.msg.err { background: #fde8e3; border: 1px solid #f0b8a8; color: var(--accent); }
+.msg.ok  { background: #e3f0e6; border: 1px solid #a8d0b0; color: var(--ok); }
+
+/* ── SWITCH ── */
+.switch-row {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-top: 20px; padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-size: 13.5px; color: var(--ink-3);
+}
+.switch-row a {
+  color: var(--ink); font-weight: 500;
+  cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.switch-row a:hover { color: var(--accent); }
+
+/* ── LOGGED IN STATE ── */
+.user-card {
+  text-align: center;
+  padding: 8px 0;
+}
+.user-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--paper-3); border: 2px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-size: 32px;
+  color: var(--ink); margin: 0 auto 14px;
+}
+.user-email {
+  font-size: 15px; color: var(--ink-2); margin-bottom: 24px;
+}
+.signout-btn {
+  padding: 12px 28px;
+  background: transparent; color: var(--ink-3);
+  border: 1px solid var(--rule); border-radius: 10px;
+  font-size: 13px; cursor: pointer;
+  transition: all .15s;
+}
+.signout-btn:hover { background: var(--paper-2); color: var(--ink); }
+.back-to-map {
+  display: block; margin-top: 12px;
+  padding: 12px 28px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: center;
+  transition: background .15s;
+}
+.back-to-map:hover { background: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <a href="index.html" class="brand">
+    <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
+  </a>
+  <button class="back-btn" onclick="history.back()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Zpět
+  </button>
+</header>
+
+<div class="page">
+  <div class="card">
+
+    <!-- Přihlášený uživatel -->
+    <div id="viewLoggedIn" style="display:none">
+      <div class="card-head">
+        <div class="card-kick">Účet</div>
+        <h1 class="card-title">Jste <em>přihlášeni</em></h1>
+      </div>
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div class="user-email" id="userEmail"></div>
+        <a class="back-to-map" href="index.html">Zpět na mapu</a>
+        <button class="signout-btn" onclick="doSignOut()" style="display:block;width:100%;margin-top:8px;">Odhlásit se</button>
+      </div>
+    </div>
+
+    <!-- Přihlášení -->
+    <div id="viewSignIn">
+      <div class="card-head">
+        <div class="card-kick">Vítejte zpět</div>
+        <h1 class="card-title">Přihlaste <em>se</em></h1>
+        <p class="card-sub">Pro ukládání míst, wishlist a přístup k zajímavostem.</p>
+      </div>
+      <div class="msg err" id="errSignIn"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="emailSignIn" placeholder="vas@email.cz" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Heslo</label>
+        <input type="password" id="passSignIn" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="submit-btn" id="btnSignIn" onclick="doSignIn()">Přihlásit se</button>
+      <div class="switch-row">
+        Nemáte účet? <a onclick="show('register')">Registrovat se</a>
+        &nbsp;·&nbsp;
+        <a onclick="show('reset')">Zapomenuté heslo</a>
+      </div>
+    </div>
+
+    <!-- Registrace -->
+    <div id="viewRegister" style="display:none">
+      <div class="card-head">
+        <div class="card-kick">Nový účet</div>
+        <h1 class="card-title">Registrace</h1>
+        <p class="card-sub">Vytvořte si bezplatný účet a ukládejte si místa napříč zařízeními.</p>
+      </div>
+      <div class="msg err" id="errRegister"></div>
+      <div class="msg ok"  id="okRegister"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="emailRegister" placeholder="vas@email.cz" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Heslo <span style="font-size:9px;opacity:.6">(min. 6 znaků)</span></label>
+        <input type="password" id="passRegister" placeholder="••••••••" autocomplete="new-password"/>
+      </div>
+      <button class="submit-btn" id="btnRegister" onclick="doRegister()">Vytvořit účet</button>
+      <div class="switch-row">
+        Máte účet? <a onclick="show('signin')">Přihlásit se</a>
+      </div>
+    </div>
+
+    <!-- Reset hesla -->
+    <div id="viewReset" style="display:none">
+      <div class="card-head">
+        <div class="card-kick">Obnova přístupu</div>
+        <h1 class="card-title">Zapomenuté <em>heslo</em></h1>
+        <p class="card-sub">Zadejte svůj email a pošleme vám odkaz pro obnovu hesla.</p>
+      </div>
+      <div class="msg err" id="errReset"></div>
+      <div class="msg ok"  id="okReset"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="emailReset" placeholder="vas@email.cz" autocomplete="email"/>
+      </div>
+      <button class="submit-btn" id="btnReset" onclick="doReset()">Odeslat odkaz</button>
+      <div class="switch-row">
+        <a onclick="show('signin')">Zpět na přihlášení</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPA_URL  = 'https://lomtaoctzetpweuepesp.supabase.co';
+const SUPA_KEY  = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+const API       = SUPA_URL + '/auth/v1';
+const SESS_KEY  = 'lop_auth_session';
+
+/* ── Helpers ── */
+function getReturnUrl() {
+  const p = new URLSearchParams(location.search).get('return');
+  return p || 'index.html';
+}
+
+function saveSession(s) {
+  try { localStorage.setItem(SESS_KEY, JSON.stringify(s)); } catch(e) {}
+}
+function clearSession() {
+  try { localStorage.removeItem(SESS_KEY); } catch(e) {}
+}
+function loadSession() {
+  try { return JSON.parse(localStorage.getItem(SESS_KEY) || 'null'); } catch(e) { return null; }
+}
+
+async function apiPost(path, body) {
+  const r = await fetch(API + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+async function apiGet(path, token) {
+  const r = await fetch(API + path, {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+  });
+  return r.json();
+}
+
+/* ── Views ── */
+function show(view) {
+  ['SignIn','Register','Reset','LoggedIn'].forEach(v => {
+    document.getElementById('view' + v).style.display = 'none';
+  });
+  const map = { signin:'SignIn', register:'Register', reset:'Reset', loggedIn:'LoggedIn' };
+  document.getElementById('view' + map[view]).style.display = 'block';
+  // Focus první input
+  const inp = document.querySelector('#view' + map[view] + ' input');
+  if (inp) setTimeout(() => inp.focus(), 50);
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function showOk(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function clearMsg(...ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.style.display = 'none'; }
+  });
+}
+function setLoading(btnId, loading, label) {
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = loading; btn.textContent = loading ? '…' : label; }
+}
+
+/* ── Auth actions ── */
+async function doSignIn() {
+  clearMsg('errSignIn');
+  const email = document.getElementById('emailSignIn').value.trim();
+  const pass  = document.getElementById('passSignIn').value;
+  if (!email) { showErr('errSignIn', 'Zadejte emailovou adresu.'); return; }
+  if (!pass)  { showErr('errSignIn', 'Zadejte heslo.'); return; }
+  setLoading('btnSignIn', true, 'Přihlásit se');
+  try {
+    const data = await apiPost('/token?grant_type=password', { email, password: pass });
+    if (data.error) throw new Error(data.error.message || data.msg || 'Nesprávný email nebo heslo.');
+    saveSession(data);
+    location.href = getReturnUrl();
+  } catch(e) {
+    showErr('errSignIn', e.message);
+    setLoading('btnSignIn', false, 'Přihlásit se');
+  }
+}
+
+async function doRegister() {
+  clearMsg('errRegister', 'okRegister');
+  const email = document.getElementById('emailRegister').value.trim();
+  const pass  = document.getElementById('passRegister').value;
+  if (!email) { showErr('errRegister', 'Zadejte emailovou adresu.'); return; }
+  if (!pass || pass.length < 6) { showErr('errRegister', 'Heslo musí mít alespoň 6 znaků.'); return; }
+  setLoading('btnRegister', true, 'Vytvořit účet');
+  try {
+    const data = await apiPost('/signup', { email, password: pass });
+    if (data.error) throw new Error(data.error.message || data.msg || 'Chyba registrace.');
+    showOk('okRegister', 'Účet vytvořen! Zkontrolujte email pro potvrzení.');
+    setLoading('btnRegister', false, 'Vytvořit účet');
+  } catch(e) {
+    showErr('errRegister', e.message);
+    setLoading('btnRegister', false, 'Vytvořit účet');
+  }
+}
+
+async function doReset() {
+  clearMsg('errReset', 'okReset');
+  const email = document.getElementById('emailReset').value.trim();
+  if (!email) { showErr('errReset', 'Zadejte emailovou adresu.'); return; }
+  setLoading('btnReset', true, 'Odeslat odkaz');
+  try {
+    const data = await apiPost('/recover', { email });
+    if (data.error) throw new Error(data.error.message || 'Chyba.');
+    showOk('okReset', 'Odkaz pro obnovu hesla byl odeslán na ' + email + '.');
+    setLoading('btnReset', false, 'Odeslat odkaz');
+  } catch(e) {
+    showErr('errReset', e.message);
+    setLoading('btnReset', false, 'Odeslat odkaz');
+  }
+}
+
+async function doSignOut() {
+  const s = loadSession();
+  if (s?.access_token) {
+    await fetch(API + '/logout', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + s.access_token }
+    }).catch(() => {});
+  }
+  clearSession();
+  show('signin');
+}
+
+/* ── Enter key ── */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const active = document.activeElement?.closest('[id^="view"]')?.id;
+  if (active === 'viewSignIn')   doSignIn();
+  if (active === 'viewRegister') doRegister();
+  if (active === 'viewReset')    doReset();
+});
+
+/* ── Init ── */
+async function init() {
+  const s = loadSession();
+  if (!s?.access_token) { show('signin'); return; }
+
+  // Ověř token
+  const user = await apiGet('/user', s.access_token);
+  if (user?.id) {
+    // Přihlášený
+    const letter = (user.email || '?')[0].toUpperCase();
+    document.getElementById('userAvatar').textContent = letter;
+    document.getElementById('userEmail').textContent = user.email;
+    show('loggedIn');
+  } else {
+    // Session expirovala
+    clearSession();
+    show('signin');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
