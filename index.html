@@ -2536,12 +2536,12 @@ function applyFilter() {
   _markers.forEach(({ marker, loc }) => {
     let s = FILTER[loc.cat];
     if (wishActive) {
-      // Wished filtr: wished piny zůstanou viditelné, ostatní se ztlumí/skryjí
-      if (!isWished(loc.id) && order[FILTER.wished] > order[s]) s = FILTER.wished;
+      if (isWished(loc.id)) { if (order[s] > 0) s = 'full'; }
+      else if (order[FILTER.wished] > order[s]) s = FILTER.wished;
     }
     if (visActive) {
-      // Visited filtr: navštívené piny zůstanou viditelné, ostatní se ztlumí/skryjí
-      if (!isVisited(loc.id) && order[FILTER.visited] > order[s]) s = FILTER.visited;
+      if (isVisited(loc.id)) { if (order[s] > 0) s = 'full'; }
+      else if (order[FILTER.visited] > order[s]) s = FILTER.visited;
     }
     if (eraActive) {
       const y = locYear(loc);
@@ -2955,11 +2955,14 @@ applyTweaks();
 function adjustTopbarOffset() {
   const tb = document.getElementById('topbar');
   const nav = document.getElementById('nav');
+  const main = document.getElementById('main');
   const h = tb ? tb.offsetHeight : 0;
   if (window.innerWidth >= 820) {
-    if (nav) nav.style.paddingTop = h + 'px';
+    if (nav)  nav.style.paddingTop  = h + 'px';
+    if (main) main.style.marginTop  = h + 'px';
   } else {
-    if (nav) nav.style.paddingTop = '';
+    if (nav)  nav.style.paddingTop  = '';
+    if (main) main.style.marginTop  = '';
   }
 }
 
