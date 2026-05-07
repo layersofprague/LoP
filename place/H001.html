@@ -419,6 +419,40 @@ a { color: inherit; text-decoration: none; }
 .nav-btn-sec:hover { background: var(--paper-3); }
 .nav-btn-sec svg { width: 15px; height: 15px; }
 
+/* insider / zajímavosti */
+.insider-wrap { position: relative; }
+.insider-teaser {
+  font-size: 14.5px; line-height: 1.65; color: var(--ink-2);
+  margin-bottom: 14px;
+}
+.insider-full { display: none; flex-direction: column; gap: 12px; }
+.insider-full p { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
+.insider-full.visible { display: flex; }
+.insider-gate {
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+.insider-gate.hidden { display: none; }
+.insider-gate-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: var(--ink-3); text-align: center;
+}
+.insider-gate-inner p {
+  font-size: 13.5px; color: var(--ink-3);
+}
+.insider-gate-inner button {
+  padding: 9px 22px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background .15s;
+  font-family: 'Inter', sans-serif;
+}
+.insider-gate-inner button:hover { background: var(--ink-2); }
+
 /* keyword tags */
 .kw-tag {
   font-family: 'JetBrains Mono', monospace;
@@ -629,6 +663,31 @@ a { color: inherit; text-decoration: none; }
     <div class="tip">
       <div class="tip-label">Tip kurátora</div>
       <div class="tip-text">Historická fotografie byla pořízena ze vzdálenosti cca 7 m. Nejlepší shoda snímku je při pohledu mírně dolů — záběr zachycuje spodní část budovy.</div>
+    </div>
+  </div>
+
+  <!-- zajímavosti -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Zajímavosti</span>
+    </div>
+    <div class="insider-wrap">
+      <!-- Teaser — vidí všichni -->
+      <p class="insider-teaser">Věděli jste, že přístav byl původně navržen tak, aby zvládl lodě až 80 metrů dlouhé? Při výstavbě bylo ručně vyhloubeno přes 200 000 m³ zeminy a celý bazén byl dokončen za pouhé dva roky.</p>
+      <!-- Plný obsah — jen přihlášení -->
+      <div class="insider-full" id="insiderFull">
+        <p>Secesní budova přístavního dozorství od architekta Františka Sandera patří k nejzachovalejším průmyslovým stavbám přelomu 19. a 20. století v Praze. Sander navrhl budovu záměrně ve stylu anglického vesnického domu — tzv. cottage — aby opticky odlehčil industriální charakter přístavu.</p>
+        <p>Přístav byl strategicky důležitý i za druhé světové války — Němci ho využívali k přepravě materiálu po Vltavě. Po válce sloužil k dovozu uhlí a stavebního materiálu pro obnovu Prahy. Pravidelná lodní nákladní doprava zde fungovala až do roku 1989.</p>
+        <p>Dnes je areál zapsán jako nemovitá kulturní památka. Rezidence Prague Marina vznikla přestavbou starých skladišť v roce 2007 — developeři byli povinni zachovat fasády historických budov.</p>
+      </div>
+      <!-- Gate pro nepřihlášené -->
+      <div class="insider-gate" id="insiderGate">
+        <div class="insider-gate-inner">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <p>Přihlaste se pro přístup k zajímavostem</p>
+          <button onclick="window.lopAuth.openModal()">Přihlásit se</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -900,8 +959,17 @@ function share() {
   }
 }
 
+/* ── PAYWALL ── */
+window.lopUpdatePaywall = function() {
+  const loggedIn = window.lopAuth?.isLoggedIn() || false;
+  const full  = document.getElementById('insiderFull');
+  const gate  = document.getElementById('insiderGate');
+  if (full) full.classList.toggle('visible', loggedIn);
+  if (gate) gate.classList.toggle('hidden',  loggedIn);
+};
+
 /* ── INIT ── */
 updateWishUI();
-</script>
+<script src="../auth.js"></script>
 </body>
 </html>
