@@ -654,8 +654,19 @@ a { color: inherit; text-decoration: none; }
       </div>
     </div>
     <div class="tip">
-      <div class="tip-label">Tip kurátora</div>
-      <div class="tip-text">Historická fotografie byla pořízena ze vzdálenosti cca 7 m. Nejlepší shoda snímku je při pohledu mírně dolů — záběr zachycuje spodní část budovy.</div>
+      <div class="tip-label">Zajímavosti</div>
+      <div class="tip-text" id="insiderTeaser">Věděli jste, že přístav byl původně navržen tak, aby…</div>
+      <div class="insider-full" id="insiderFull" style="margin-top:10px">
+        <div class="tip-text" style="font-style:normal">Věděli jste, že přístav byl původně navržen tak, aby zvládl lodě až 80 metrů dlouhé? Při výstavbě bylo ručně vyhloubeno přes 200 000 m³ zeminy a celý bazén byl dokončen za pouhé dva roky.</div>
+        <div class="tip-text" style="font-style:normal;margin-top:10px">Secesní budova přístavního dozorství od architekta Františka Sandera patří k nejzachovalejším průmyslovým stavbám přelomu 19. a 20. století v Praze. Sander navrhl budovu záměrně ve stylu anglického vesnického domu — tzv. cottage — aby opticky odlehčil industriální charakter přístavu.</div>
+        <div class="tip-text" style="font-style:normal;margin-top:10px">Přístav byl strategicky důležitý i za druhé světové války — Němci ho využívali k přepravě materiálu po Vltavě. Po válce sloužil k dovozu uhlí a stavebního materiálu pro obnovu Prahy. Pravidelná lodní nákladní doprava zde fungovala až do roku 1989.</div>
+        <div class="tip-text" style="font-style:normal;margin-top:10px">Dnes je areál zapsán jako nemovitá kulturní památka. Rezidence Prague Marina vznikla přestavbou starých skladišť v roce 2007 — developeři byli povinni zachovat fasády historických budov.</div>
+      </div>
+      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
+        <a style="font-size:13px" onclick="location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+      </div>
     </div>
   </div>
 
@@ -673,24 +684,6 @@ a { color: inherit; text-decoration: none; }
       </div>
       <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
       <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
-    </div>
-  </div>
-
-  <!-- zajímavosti -->
-  <div class="section">
-    <div class="sec-head">
-      <span class="sec-label">Zajímavosti</span>
-    </div>
-    <p class="insider-teaser">Věděli jste, že přístav byl původně navržen tak, aby zvládl lodě až 80 metrů dlouhé? Při výstavbě bylo ručně vyhloubeno přes 200 000 m³ zeminy a celý bazén byl dokončen za pouhé dva roky.</p>
-    <div class="insider-full" id="insiderFull">
-      <p>Secesní budova přístavního dozorství od architekta Františka Sandera patří k nejzachovalejším průmyslovým stavbám přelomu 19. a 20. století v Praze. Sander navrhl budovu záměrně ve stylu anglického vesnického domu — tzv. cottage — aby opticky odlehčil industriální charakter přístavu.</p>
-      <p>Přístav byl strategicky důležitý i za druhé světové války — Němci ho využívali k přepravě materiálu po Vltavě. Po válce sloužil k dovozu uhlí a stavebního materiálu pro obnovu Prahy. Pravidelná lodní nákladní doprava zde fungovala až do roku 1989.</p>
-      <p>Dnes je areál zapsán jako nemovitá kulturní památka. Rezidence Prague Marina vznikla přestavbou starých skladišť v roce 2007 — developeři byli povinni zachovat fasády historických budov.</p>
-    </div>
-    <div class="insider-gate" id="insiderGate">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      <span>Pro přístup k zajímavostem se</span>
-      <a onclick="location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
     </div>
   </div>
 
@@ -731,10 +724,12 @@ const VISIT_KEY  = 'lop_visited_v1';
     } catch(e) { return false; }
   }
   const loggedIn = isLoggedIn();
-  const full = document.getElementById('insiderFull');
-  const gate = document.getElementById('insiderGate');
-  if (full) full.classList.toggle('visible', loggedIn);
-  if (gate) gate.classList.toggle('hidden',  loggedIn);
+  const full    = document.getElementById('insiderFull');
+  const gate    = document.getElementById('insiderGate');
+  const teaser  = document.getElementById('insiderTeaser');
+  if (full)   full.classList.toggle('visible', loggedIn);
+  if (gate)   gate.classList.toggle('hidden',  loggedIn);
+  if (teaser) teaser.style.display = loggedIn ? 'none' : '';
   const btn = document.getElementById('profileBtn');
   if (btn && loggedIn) btn.style.color = 'var(--ink)';
 })();
