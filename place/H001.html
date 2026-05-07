@@ -147,7 +147,7 @@ a { color: inherit; text-decoration: none; }
 .fs-modal {
   display: none;
   position: fixed; inset: 0; z-index: 300;
-  background: rgba(0,0,0,.88);
+  background: rgba(0,0,0,.55);
   align-items: center; justify-content: center;
 }
 .fs-modal.open { display: flex; }
@@ -239,6 +239,22 @@ a { color: inherit; text-decoration: none; }
 }
 .k-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cat-hist); }
 .k-sep { opacity: .3; }
+.k-votes {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
+}
+.k-vote-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-3);
+  padding: 2px 4px; border-radius: 4px;
+  transition: color .15s, background .15s;
+}
+.k-vote-btn:hover { background: var(--paper-2); color: var(--ink); }
+.k-vote-btn.active-like  { color: var(--ok); }
+.k-vote-btn.active-dislike { color: var(--accent); }
+.k-vote-btn svg { width: 13px; height: 13px; }
 
 /* title */
 .place-title {
@@ -520,6 +536,16 @@ a { color: inherit; text-decoration: none; }
     <span>Historie</span>
     <span class="k-sep">·</span>
     <span>Průmysl</span>
+    <div class="k-votes">
+      <button class="k-vote-btn" id="likeBtn" onclick="vote('like')" title="Líbí se">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        <span id="likeCount">24</span>
+      </button>
+      <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+        <span id="dislikeCount">2</span>
+      </button>
+    </div>
   </div>
 
   <!-- title -->
@@ -763,7 +789,87 @@ function toggleFullscreen() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
 
-/* ── WISHLIST ── */
+/* ── SUPABASE VOTES ── */
+const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
+const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+const VOTE_KEY = 'lop_vote_' + PLACE_ID; // localStorage — pamatuje hlas uživatele
+
+// Unikátní token pro tohoto uživatele (anonymní, bez přihlášení)
+function getUserToken() {
+  let t = localStorage.getItem('lop_user_token');
+  if (!t) { t = crypto.randomUUID(); localStorage.setItem('lop_user_token', t); }
+  return t;
+}
+
+function updateVoteUI(myVote, likes, dislikes) {
+  const likeBtn      = document.getElementById('likeBtn');
+  const dislikeBtn   = document.getElementById('dislikeBtn');
+  const likeCount    = document.getElementById('likeCount');
+  const dislikeCount = document.getElementById('dislikeCount');
+  likeBtn.classList.toggle('active-like',     myVote === 'like');
+  dislikeBtn.classList.toggle('active-dislike', myVote === 'dislike');
+  likeBtn.querySelector('svg').setAttribute('fill',     myVote === 'like'    ? 'currentColor' : 'none');
+  dislikeBtn.querySelector('svg').setAttribute('fill',  myVote === 'dislike' ? 'currentColor' : 'none');
+  if (likes    !== null) likeCount.textContent    = likes;
+  if (dislikes !== null) dislikeCount.textContent = dislikes;
+}
+
+async function loadVotes() {
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/vote_counts?place_id=eq.${PLACE_ID}&select=likes,dislikes`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
+    );
+    const data = await res.json();
+    const row = data[0] || { likes: 0, dislikes: 0 };
+    const myVote = localStorage.getItem(VOTE_KEY) || null;
+    updateVoteUI(myVote, row.likes, row.dislikes);
+  } catch(e) {
+    console.warn('Votes load failed:', e);
+  }
+}
+
+async function vote(type) {
+  const token  = getUserToken();
+  const myVote = localStorage.getItem(VOTE_KEY) || null;
+  const next   = myVote === type ? null : type;
+
+  // Optimistická aktualizace UI
+  localStorage.setItem(VOTE_KEY, next || '');
+  updateVoteUI(next, null, null);
+
+  try {
+    if (!next) {
+      // Odeber hlas
+      await fetch(
+        `${SUPA_URL}/rest/v1/votes?place_id=eq.${PLACE_ID}&user_token=eq.${token}`,
+        { method: 'DELETE', headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
+      );
+    } else {
+      // Vlož nebo přepiš hlas (upsert)
+      await fetch(
+        `${SUPA_URL}/rest/v1/votes`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': SUPA_KEY,
+            'Authorization': `Bearer ${SUPA_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({ place_id: PLACE_ID, vote_type: next, user_token: token })
+        }
+      );
+    }
+    // Načti aktuální počty ze serveru
+    await loadVotes();
+  } catch(e) {
+    console.warn('Vote failed:', e);
+  }
+}
+
+// Načti počty při startu
+loadVotes();
 function getWish() { try { return JSON.parse(localStorage.getItem(WISH_KEY)||'[]'); } catch(e) { return []; } }
 function setWish(a) { localStorage.setItem(WISH_KEY, JSON.stringify(a)); }
 function isWished() { return getWish().map(String).includes(PLACE_ID); }
