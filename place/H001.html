@@ -82,7 +82,7 @@ a { color: inherit; text-decoration: none; }
 }
 @media (min-width: 640px) {
   .hero { height: min(52vw, 620px); }
-  .sl-base img, .sl-top img { object-position: center 60%; }
+  .hero .sl-base img, .hero .sl-top img { object-position: center top !important; }
 }
 .sl-base, .sl-top {
   position: absolute; inset: 0;
@@ -587,7 +587,7 @@ const VISIT_KEY  = 'lop_visited_v1';
 /* ── SLIDER ── */
 (function() {
   const BLEND   = 15;    // px prolnutí — změňte dle chuti
-  const DEFAULT = 0.4;  // výchozí pozice 0–1
+  const DEFAULT = 0.35;  // výchozí pozice 0–1
 
   function makeSlider(heroEl, topEl, handleEl, lblLeftEl, lblRightEl) {
     let dragging = false;
