@@ -85,7 +85,7 @@ a { color: inherit; text-decoration: none; }
   cursor: default;
   user-select: none; -webkit-user-select: none;
   touch-action: pan-y;
-  border-radius: 10px;
+  border-radius: 4px;
 }
 .sl-base, .sl-top {
   position: absolute; inset: 0;
@@ -98,46 +98,51 @@ a { color: inherit; text-decoration: none; }
 }
 .sl-top { --pos: 50%; }
 .sl-lbl {
-  position: absolute; bottom: 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  padding: 4px 10px; border-radius: 3px;
-  color: var(--paper);
-  background: rgba(13,11,8,.65);
-  backdrop-filter: blur(4px);
+  position: absolute; top: 14px;
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 14px; line-height: 1;
+  font-variant-numeric: oldstyle-nums;
+  color: rgba(238,239,235,.5);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
   pointer-events: none;
-  transition: opacity .2s;
+  transition: color .25s;
   z-index: 3;
 }
+.sl-lbl.active { color: #ffffff; }
 .sl-lbl-l { left: 14px; }
 .sl-lbl-r { right: 14px; }
 /* Handle — jediný ovládací prvek */
 .sl-handle {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(243,237,225,.85);
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  width: 26px; height: 26px; border-radius: 2px;
+  background: #eeefeb;
+  box-shadow: 0 4px 14px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.05);
   display: flex; align-items: center; justify-content: center;
   color: var(--ink);
   cursor: ew-resize;
   z-index: 4;
   pointer-events: auto;
 }
-.sl-handle svg { width: 12px; height: 12px; pointer-events: none; }
+.sl-handle svg { width: 11px; height: 11px; pointer-events: none; }
+/* Hairline divider */
+.sl-divider {
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 1px; background: rgba(243,237,225,.85);
+  transform: translateX(-.5px);
+  pointer-events: none;
+  z-index: 3;
+}
 .sl-fs-btn {
-  position: absolute; top: 12px; right: 12px;
-  width: auto; height: auto; padding: 4px 10px; border-radius: 6px;
-  background: rgba(13,11,8,.55);
-  backdrop-filter: blur(6px);
-  border-radius: 3px;
-  border: none; cursor: pointer;
+  position: absolute; bottom: 14px; right: 14px;
+  background: transparent; border: none; cursor: pointer;
+  padding: 4px;
   display: flex; align-items: center; justify-content: center;
   color: var(--paper); z-index: 5;
-  transition: background .15s;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.6));
 }
-.sl-fs-btn:hover { background: rgba(13,11,8,.8); }
-.sl-fs-btn svg { width: 13px; height: 13px; pointer-events: none; }
+.sl-fs-btn svg { width: 11px; height: 11px; pointer-events: none; }
 
 /* Nativní fullscreen */
 #hero:-webkit-full-screen { width: 100vw; height: 100vh; max-height: none; }
@@ -482,9 +487,11 @@ a { color: inherit; text-decoration: none; }
   <div class="sl-top" id="slTop">
     <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
   </div>
-  <!-- Popisky -->
-  <div class="sl-lbl sl-lbl-l" id="lblNow">Dnes</div>
-  <div class="sl-lbl sl-lbl-r" id="lblHist">~1930</div>
+  <!-- Letopočty — vždy oba viditelné, aktivní = bílý -->
+  <div class="sl-lbl sl-lbl-l" id="lblHist">1930</div>
+  <div class="sl-lbl sl-lbl-r" id="lblNow">2025</div>
+  <!-- Hairline divider -->
+  <div class="sl-divider" id="slDivider"></div>
   <!-- Handle — jediné místo pro tažení -->
   <div class="sl-handle" id="slHandle">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -510,8 +517,8 @@ a { color: inherit; text-decoration: none; }
     <div class="sl-top" id="slTopFs">
       <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
     </div>
-    <div class="sl-lbl sl-lbl-l" id="lblNowFs">Dnes</div>
-    <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1930</div>
+    <div class="sl-lbl sl-lbl-l" id="lblHistFs">1930</div>
+    <div class="sl-lbl sl-lbl-r" id="lblNowFs">2025</div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
@@ -694,8 +701,12 @@ const VISIT_KEY  = 'lop_visited_v1';
       topEl.style.maskImage       = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
       handleEl.style.left      = (pct * 100) + '%';
       handleEl.style.transform = 'translate(-50%, -50%)';
-      if (lblLeftEl)  lblLeftEl.style.opacity  = pct < 0.12 ? '0.35' : '1';
-      if (lblRightEl) lblRightEl.style.opacity = pct > 0.88 ? '0.35' : '1';
+      const divider = heroEl.querySelector('.sl-divider');
+      if (divider) divider.style.left = (pct * 100) + '%';
+      // Aktivní strana (větší plocha) = bělejší letopočet
+      // Levý letopočet (1930 / hist) je aktivní když je vidět víc historické fotky (pct > 0.5)
+      if (lblLeftEl)  lblLeftEl.classList.toggle('active', pct > 0.5);
+      if (lblRightEl) lblRightEl.classList.toggle('active', pct <= 0.5);
     }
 
     function posFromX(x) {
@@ -750,6 +761,10 @@ const VISIT_KEY  = 'lop_visited_v1';
       handle.style.left = (pct * 100) + '%';
       handle.style.transform = 'translate(-50%,-50%)';
     }
+    const lblL = document.getElementById('lblHistFs');
+    const lblR = document.getElementById('lblNowFs');
+    if (lblL) lblL.classList.toggle('active', pct > 0.5);
+    if (lblR) lblR.classList.toggle('active', pct <= 0.5);
   }
 
   function posFromX(x) {
