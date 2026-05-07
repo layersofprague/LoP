@@ -59,14 +59,19 @@ a { color: inherit; text-decoration: none; }
 .top-btn svg { width: 19px; height: 19px; }
 
 /* ── HERO (GIF) ── */
+.hero-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 20px 20px;
+}
 .hero {
   position: relative;
   background: var(--ink);
   overflow: hidden;
+  width: 100%;
   aspect-ratio: 4/3;
-  max-height: 420px;
+  border-radius: 10px;
 }
-@media (min-width: 640px) { .hero { aspect-ratio: unset; height: 460px; max-height: 520px; } }
 .hero-gif {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
@@ -219,6 +224,7 @@ a { color: inherit; text-decoration: none; }
 </header>
 
 <!-- HERO -->
+<div class="hero-wrap">
 <div class="hero">
   <img class="hero-gif" src="foto/LOP.gif" alt="AR demo — historická Praha přes objektiv telefonu"
        onerror="this.style.display='none'"/>
@@ -226,6 +232,7 @@ a { color: inherit; text-decoration: none; }
   <div class="hero-badge">Rozšířená realita</div>
   <div class="hero-title">Praha vrstvou<br><em>po vrstvě</em></div>
 </div>
+</div><!-- /hero-wrap -->
 
 <!-- BODY -->
 <div class="body">
