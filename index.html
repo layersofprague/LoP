@@ -66,12 +66,29 @@ a { color: inherit; text-decoration: none; }
 }
 #topbar {
   flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px 12px;
+  display: flex; flex-direction: column;
   border-bottom: 1px solid var(--rule);
   background: var(--paper);
   position: relative; z-index: 20;
 }
+.topbar-main {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 6px;
+}
+.topbar-links {
+  display: flex; gap: 0;
+  padding: 0 18px;
+  border-top: 1px solid var(--rule);
+}
+.tbl-item {
+  padding: 6px 14px 6px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3); text-decoration: none;
+  transition: color .15s;
+}
+.tbl-item:hover { color: var(--ink); }
+.tbl-item.active { color: var(--ink); font-weight: 600; }
 .brand {
   display: flex; align-items: center; gap: 10px;
 }
@@ -1425,6 +1442,7 @@ a { color: inherit; text-decoration: none; }
     border-right: 1px solid var(--rule);
     width: 100%;
   }
+  .topbar-links { display: none; } /* na PC navigace je v side nav, link bar zbytečný */
   #nav {
     flex-direction: column;
     border-top: none;
@@ -1514,30 +1532,30 @@ a { color: inherit; text-decoration: none; }
 <div id="app">
   <!-- Topbar -->
   <header id="topbar">
-    <div class="brand">
-      <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
+    <div class="topbar-main">
+      <div class="brand">
+        <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
+      </div>
+      <div class="top-actions">
+        <button class="top-btn" title="Hledat" aria-label="Hledat" onclick="document.getElementById('topSearch').classList.toggle('open'); setTimeout(()=>{const i=document.querySelector('#topSearch input'); if(i&&document.getElementById('topSearch').classList.contains('open'))i.focus();},10);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+        <button class="top-btn" title="Notifikace" aria-label="Notifikace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <button class="top-btn" title="Profil" aria-label="Profil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="top-actions">
-      <button class="top-btn" title="Hledat" aria-label="Hledat" onclick="document.getElementById('topSearch').classList.toggle('open'); setTimeout(()=>{const i=document.querySelector('#topSearch input'); if(i&&document.getElementById('topSearch').classList.contains('open'))i.focus();},10);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      </button>
-      <button class="top-btn" title="Notifikace" aria-label="Notifikace">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-        <span class="dot"></span>
-      </button>
-      <button class="top-btn" title="Profil" aria-label="Profil">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      </button>
+    <div class="topbar-links">
+      <a class="tbl-item active" href="index.html">Mapa</a>
+      <a class="tbl-item" href="#" onclick="switchView('routesView');return false;">Trasy</a>
+      <a class="tbl-item" href="#" onclick="switchView('arView');return false;">AR</a>
+      <a class="tbl-item" href="#" onclick="switchView('wishView');return false;">Plán</a>
     </div>
   </header>
-
-  <!-- Link bar -->
-  <div style="background:var(--paper-2);border-bottom:1px solid var(--rule);padding:6px 18px;display:flex;gap:16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);">
-    <a href="index.html" style="color:var(--ink);font-weight:600;">Mapa</a>
-    <a href="#" onclick="switchView('routesView');return false;" style="color:var(--ink-3);text-decoration:none;">Trasy</a>
-    <a href="#" onclick="switchView('arView');return false;" style="color:var(--ink-3);text-decoration:none;">AR</a>
-    <a href="#" onclick="switchView('wishView');return false;" style="color:var(--ink-3);text-decoration:none;">Plán</a>
-  </div>
 
   <div id="topSearch">
     <div class="ts-field">
@@ -2535,10 +2553,9 @@ function applyFilter() {
     let s = FILTER[loc.cat];
     if (wishActive) {
       if (isWished(loc.id)) {
-        // Wished pin je vždy plně viditelný při aktivním wishlist filtru
-        s = 'full';
+        s = 'full'; // wished pin vždy viditelný
       } else {
-        if (order[FILTER.wished] > order[s]) s = FILTER.wished;
+        s = FILTER.wished; // ostatní dostanou stav filtru
       }
     }
     if (visActive && !isVisited(loc.id)) {
