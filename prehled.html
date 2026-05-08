@@ -185,7 +185,8 @@ a { color: inherit; text-decoration: none; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
   filter: drop-shadow(0 0 1px rgba(255,255,255,.8));
 }
-.place-visited.show { display: block; }
+.place-visited.show { display: block; margin: 0 auto; }
+.place-visited-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ok); letter-spacing: .06em; text-align: center; margin-top: 2px; }
 .place-year {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; color: var(--ink-4);
@@ -209,7 +210,7 @@ a { color: inherit; text-decoration: none; }
 .place-wish-btn svg { width: 16px; height: 16px; pointer-events: none; }
 .place-wish-lbl { font-size: 9px; font-weight: 500; letter-spacing: .01em; pointer-events: none; }
 /* vzdálenost */
-.place-dist-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
+.place-dist-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; min-width: 44px; text-align: center; }
 .place-dist { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
 .place-dist-hint { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-4); letter-spacing: .06em; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .place-dist-hint:hover { color: var(--ink-3); }
@@ -452,13 +453,12 @@ function cardHTML(p, visited, wished) {
       <div class="place-sub">${lede}</div>
     </div>
     <div class="place-meta">
-      <div class="place-visited ${vis ? 'show' : ''}"></div>
       <div class="place-dist-wrap">
         ${vis
-          ? ''
+          ? `<div class="place-visited show"></div><div class="place-visited-lbl">Navštíveno</div>`
           : dist
             ? `<div class="place-dist">${dist}</div>`
-            : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolte polohu</span>`
+            : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolit?</span>`
         }
       </div>
       <button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
