@@ -80,14 +80,14 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; gap: 10px;
 }
 .brand-logo {
-  height: 40px;
+  height: 36px;
   width: auto;
   display: block;
   object-fit: contain;
-  margin-top: -6px;
+  margin-top: -4px;
 }
 @media (min-width: 400px) {
-  .brand-logo { height: 56px; margin-top: -10px; }
+  .brand-logo { height: 46px; margin-top: -8px; }
 }
 .brand-mark {
   font-family: 'Fraunces', serif;
@@ -2960,22 +2960,7 @@ function renderRoutes() {
 /* ═══════════════ INIT ═══════════════ */
 applyTweaks();
 
-// Nastav padding-top navbaru přesně na výšku topbaru
-(function() {
-  function syncNav() {
-    const tb = document.getElementById('topbar');
-    const nav = document.getElementById('nav');
-    if (tb && nav && window.innerWidth >= 820) {
-      nav.style.paddingTop = tb.offsetHeight + 'px';
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncNav);
-  } else {
-    requestAnimationFrame(syncNav);
-  }
-  window.addEventListener('resize', syncNav);
-})();
+// Auth stav profil tlačítka
 (function() {
   try {
     const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
@@ -2987,16 +2972,12 @@ applyTweaks();
 })();
 
 function adjustTopbarOffset() {
-  const tb = document.getElementById('topbar');
+  const tb  = document.getElementById('topbar');
   const nav = document.getElementById('nav');
-  const main = document.getElementById('main');
-  const h = tb ? tb.offsetHeight : 0;
-  if (window.innerWidth >= 820) {
-    if (nav)  nav.style.paddingTop  = h + 'px';
-    if (main) main.style.marginTop  = h + 'px';
-  } else {
-    if (nav)  nav.style.paddingTop  = '';
-    if (main) main.style.marginTop  = '';
+  if (tb && nav && window.innerWidth >= 820) {
+    nav.style.paddingTop = tb.offsetHeight + 'px';
+  } else if (nav) {
+    nav.style.paddingTop = '';
   }
 }
 
