@@ -22,10 +22,11 @@ const ROOT = _root();
 function _activePage() {
   const path = location.pathname;
   if (path.includes('ar-intro') || path.includes('compass') || path.includes('ar.html')) return 'ar';
-  if (path.includes('place/') || path.includes('detail')) return 'map';
   if (path.includes('routes') || path.includes('trasy')) return 'routes';
-  if (path.includes('login') || path.includes('profile')) return 'wish';
-  return 'map';
+  if (path.includes('login') || path.includes('profile')) return '';
+  if (path.includes('place/')) return ''; // detail stránky — žádná položka aktivní
+  if (path.endsWith('index.html') || path.endsWith('/')) return 'map';
+  return '';
 }
 
 /* ── Wishlist počet ── */
