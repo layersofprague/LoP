@@ -291,7 +291,7 @@ const VISIT_KEY  = 'lop_visited_v1';
 const WISH_KEY   = 'lop_wishlist_v2';
 
 let PLACES   = [];
-let activeFilter = 'all';
+let activeFilter = new URLSearchParams(location.search).get('filter') || 'all';
 
 function getWished() {
   try { return JSON.parse(localStorage.getItem(WISH_KEY) || '[]').map(String); } catch(e) { return []; }
@@ -487,6 +487,11 @@ function toggleWish(e, id) {
 
 loadPlaces();
 locateUser();
+
+// Sjednoť chipy s URL parametrem
+document.querySelectorAll('.filter-chip').forEach(c => {
+  c.classList.toggle('active', c.dataset.cat === activeFilter);
+});
 </script>
 </body>
 </html>

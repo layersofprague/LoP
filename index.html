@@ -1519,6 +1519,7 @@ a { color: inherit; text-decoration: none; }
 
 <div id="app">
   <!-- Topbar -->
+  <!-- ⚠️  POZOR: Header je zde napevno. Změny synchronizuj také do header.js -->
   <header id="topbar">
     <div class="topbar-main">
       <div class="brand">
@@ -1532,12 +1533,12 @@ a { color: inherit; text-decoration: none; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
           <span class="dot"></span>
         </button>
-        <button class="top-btn" title="Profil" aria-label="Profil">
+        <button class="top-btn" id="profileBtn" title="Profil" aria-label="Profil"
+                onclick="location.href='login.html?return='+encodeURIComponent(location.href)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </button>
       </div>
     </div>
-
   </header>
 
   <div id="topSearch">
@@ -1747,20 +1748,21 @@ a { color: inherit; text-decoration: none; }
   </main>
 
   <!-- Nav -->
+  <!-- ⚠️  POZOR: Nav je zde napevno. Změny synchronizuj také do nav.js -->
   <nav id="nav">
     <button class="nav-item active" data-view="mapView" onclick="switchView('mapView')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>
       <span class="nav-label">Mapa</span>
     </button>
-    <button class="nav-item" data-view="routesView" onclick="switchView('routesView')">
+    <button class="nav-item" onclick="location.href='prehled.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span class="nav-label">Přehled</span>
+    </button>
+    <button class="nav-item" onclick="location.href='trasy.html'">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>
       <span class="nav-label">Trasy</span>
     </button>
-    <button class="nav-item" data-view="arView" onclick="location.href='ar-intro.html'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/><path d="M7 13h1M17 13h-1"/></svg>
-      <span class="nav-label">AR</span>
-    </button>
-    <button class="nav-item" data-view="wishView" onclick="switchView('wishView')">
+    <button class="nav-item" data-view="wishView" onclick="location.href='prehled.html?filter=wished'">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       <span class="nav-label">Plán</span>
       <span class="nav-badge" id="wishBadge">3</span>
@@ -2956,6 +2958,17 @@ function renderRoutes() {
 
 /* ═══════════════ INIT ═══════════════ */
 applyTweaks();
+
+// Auth stav profil tlačítka
+(function() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    if (s && s.access_token && s.user) {
+      const btn = document.getElementById('profileBtn');
+      if (btn) btn.style.color = 'var(--ink)';
+    }
+  } catch(e) {}
+})();
 
 function adjustTopbarOffset() {
   const tb = document.getElementById('topbar');
