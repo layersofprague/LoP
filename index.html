@@ -216,13 +216,17 @@ a { color: inherit; text-decoration: none; }
 .leaflet-control-zoom {
   border: 1px solid var(--rule) !important;
   box-shadow: 0 2px 10px rgba(26,24,20,.06) !important;
+  margin-bottom: 4px !important;
 }
 .leaflet-control-zoom a {
+  width: 26px !important; height: 26px !important; line-height: 26px !important;
   background: var(--paper) !important;
   color: var(--ink) !important;
   border-color: var(--rule) !important;
   font-family: 'Inter', sans-serif !important;
 }
+.leaflet-control-zoom a:hover { background: var(--paper-2) !important; }
+.leaflet-bottom.leaflet-right { margin-bottom: 10px; margin-right: 14px; }
 
 .map-header {
   position: absolute; top: 8px; left: 14px; right: 14px;
@@ -468,18 +472,25 @@ a { color: inherit; text-decoration: none; }
 
 .map-puck-wrap {
   position: absolute; right: 14px; bottom: 110px; z-index: 400;
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--rule) !important;
+  box-shadow: 0 2px 10px rgba(26,24,20,.06) !important;
+  border-radius: 4px;
+  overflow: hidden;
 }
 .map-puck {
-  width: 44px; height: 44px; border-radius: 50%;
+  width: 26px; height: 26px; border-radius: 0;
   background: var(--paper);
-  border: 1px solid var(--rule);
-  box-shadow: 0 3px 14px rgba(26,24,20,.1);
+  border: none;
+  border-color: var(--rule) !important;
+  box-shadow: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  transition: opacity .3s;
+  transition: opacity .3s, background .15s;
+  color: var(--ink);
 }
-.map-puck svg { width: 20px; height: 20px; }
+.map-puck:hover { background: var(--paper-2); }
+.map-puck svg { width: 14px; height: 14px; }
 
 .map-hint {
   position: absolute; bottom: 16px; left: 14px; right: 14px;
@@ -1464,7 +1475,7 @@ a { color: inherit; text-decoration: none; }
   .sheet-lede { font-size: 19px; max-width: 36em; }
   .map-header { left: 100px; right: 24px; top: 12px; padding: 0; }
   .map-hint { left: 100px; right: 24px; bottom: 24px; }
-  .map-puck-wrap { right: 24px; bottom: 100px; }
+  .map-puck-wrap { right: 24px; bottom: 80px; }
 
   #routesView, #wishView { padding: 28px clamp(24px, 5vw, 64px) 40px; }
   .routes-hero { max-width: 820px; margin: 0 auto 28px; }
