@@ -29,8 +29,8 @@ const ROOT = _root();
 /* ── CSS ── */
 const CSS = `
 #lop-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 0; left: 0; right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -132,6 +132,11 @@ function _inject() {
 
   // HTML
   el.innerHTML = _html();
+
+  // Kompenzace fixed headeru — přidej padding-top na body
+  requestAnimationFrame(() => {
+    document.body.style.paddingTop = el.offsetHeight + 'px';
+  });
 
   // Auth
   _updateAuth();
