@@ -33,7 +33,8 @@ function _activePage() {
 function _wishCount() {
   try {
     const w = JSON.parse(localStorage.getItem('lop_wishlist_v2') || '[]');
-    return Array.isArray(w) ? new Set(w.map(String)).size : 0;
+    if (!Array.isArray(w)) return 0;
+    return new Set(w.map(String).filter(x => x && x !== 'undefined' && x !== 'null')).size;
   } catch(e) { return 0; }
 }
 
