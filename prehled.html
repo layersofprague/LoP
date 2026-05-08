@@ -196,23 +196,22 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .06em;
 }
 .place-wish-btn {
-  display: flex; align-items: center; justify-content: center; gap: 4px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
-  cursor: pointer;
-  border: 1px solid var(--rule);
-  background: var(--paper-2);
-  color: var(--ink-2);
-  white-space: nowrap;
-  transition: background .12s, color .12s, border-color .12s;
-  flex-shrink: 0;
-  align-self: center;
+  appearance: none; background: transparent; border: none;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 8px; border-radius: 8px;
+  cursor: pointer; color: var(--ink-2);
+  transition: background .15s;
+  flex-shrink: 0; align-self: center;
 }
-.place-wish-btn:hover { border-color: var(--ink-3); }
-.place-wish-btn.wished { background: var(--accent); border-color: var(--accent); color: #fff; }
-.place-wish-btn svg { width: 11px; height: 11px; pointer-events: none; flex-shrink: 0; }
+.place-wish-btn:hover { background: var(--paper-2); }
+.place-wish-btn.wished { color: var(--accent); }
+.place-wish-btn svg { width: 18px; height: 18px; pointer-events: none; }
+.place-wish-lbl { font-size: 10px; font-weight: 500; letter-spacing: .01em; }
+/* vzdálenost */
+.place-dist-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; align-self: center; }
+.place-dist { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.place-dist-hint { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-4); letter-spacing: .06em; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.place-dist-hint:hover { color: var(--ink-3); }
 
 /* ── PRÁZDNÝ STAV ── */
 .empty {
@@ -325,6 +324,19 @@ function formatDist(m) {
 }
 
 let userPos = null;
+
+function requestLoc(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  navigator.geolocation.getCurrentPosition(pos => {
+    userPos = [pos.coords.latitude, pos.coords.longitude];
+    render();
+  }, err => {
+    // Pokud zamítnuto, odkáže na nastavení prohlížeče
+    if (err.code === 1) {
+      alert('Přístup k poloze byl zamítnut. Povolte polohu v nastavení prohlížeče a obnovte stránku.');
+    }
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
 
 function locateUser() {
   if (!navigator.geolocation) return;
@@ -442,11 +454,16 @@ function cardHTML(p, visited, wished) {
       <div class="place-visited ${vis ? 'show' : ''}">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>
       </div>
-      ${dist ? `<div class="place-dist">${dist}</div>` : ''}
+      <div class="place-dist-wrap">
+        ${dist
+          ? `<div class="place-dist">${dist}</div>`
+          : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolte polohu</span>`
+        }
+      </div>
     </div>
     <button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
       <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      ${wish ? '✓ Plán' : 'Plán'}
+      <span class="place-wish-lbl">Plán</span>
     </button>
   </a>`;
 }
