@@ -110,7 +110,7 @@ a { color: inherit; text-decoration: none; }
 /* ── PLACE CARD ── */
 .place-card {
   display: grid;
-  grid-template-columns: 72px 1fr auto;
+  grid-template-columns: 72px 1fr auto auto;
   align-items: center; gap: 14px;
   padding: 14px 0;
   border-top: 1px solid var(--rule);
@@ -195,13 +195,18 @@ a { color: inherit; text-decoration: none; }
   font-size: 10px; color: var(--ink-4);
   letter-spacing: .06em;
 }
-.place-wish {
-  width: 20px; height: 20px;
-  display: none; align-items: center; justify-content: center;
-  color: var(--accent);
+.place-wish-btn {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--rule);
+  border-radius: 8px; cursor: pointer;
+  color: var(--ink-4);
+  transition: all .15s;
+  flex-shrink: 0;
 }
-.place-wish.show { display: flex; }
-.place-wish svg { width: 13px; height: 13px; }
+.place-wish-btn:hover { border-color: var(--accent); color: var(--accent); }
+.place-wish-btn.wished { color: var(--accent); border-color: var(--accent); background: rgba(176,64,32,.06); }
+.place-wish-btn svg { width: 14px; height: 14px; pointer-events: none; }
 
 /* ── PRÁZDNÝ STAV ── */
 .empty {
@@ -256,6 +261,10 @@ a { color: inherit; text-decoration: none; }
     <button class="filter-chip" data-cat="visited" onclick="setFilter('visited')">
       <span style="font-size:11px">✓</span>
       Navštíveno <span class="count" id="ctVisited">—</span>
+    </button>
+    <button class="filter-chip" data-cat="wished" onclick="setFilter('wished')">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      Plán <span class="count" id="ctWished">—</span>
     </button>
   </div>
 
@@ -341,6 +350,8 @@ function updateCounts() {
   document.getElementById('ctArch').textContent   = PLACES.filter(p => p.cat === 'arch').length;
   document.getElementById('ctFun').textContent    = PLACES.filter(p => p.cat === 'fun').length;
   document.getElementById('ctVisited').textContent = PLACES.filter(p => visited.includes(String(p.id))).length;
+  const wished = getWished();
+  document.getElementById('ctWished').textContent  = PLACES.filter(p => wished.includes(String(p.id))).length;
 }
 
 /* ── Filtr ── */
@@ -359,6 +370,7 @@ function render() {
   const filtered = PLACES.filter(p => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'visited') return visited.includes(String(p.id));
+    if (activeFilter === 'wished')  return wished.includes(String(p.id));
     return p.cat === activeFilter;
   });
 
@@ -382,7 +394,7 @@ function render() {
     });
   } else {
     html += `<div class="section-label">
-      ${activeFilter === 'visited' ? 'Navštíveno' : CAT_NAME[activeFilter]}
+      ${activeFilter === 'visited' ? 'Navštíveno' : activeFilter === 'wished' ? 'Plán' : CAT_NAME[activeFilter]}
       <span class="ct">${String(filtered.length).padStart(2,'0')}</span>
     </div>`;
     html += filtered.map(p => cardHTML(p, visited, wished)).join('');
@@ -424,12 +436,27 @@ function cardHTML(p, visited, wished) {
       <div class="place-visited ${vis ? 'show' : ''}">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>
       </div>
-      <div class="place-wish ${wish ? 'show' : ''}">
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      </div>
       ${dist ? `<div class="place-dist">${dist}</div>` : ''}
     </div>
+    <button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
+      <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+    </button>
   </a>`;
+}
+
+function toggleWish(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  const btn = e.currentTarget;
+  const w = getWished();
+  const idx = w.indexOf(String(id));
+  if (idx >= 0) w.splice(idx, 1);
+  else w.push(String(id));
+  localStorage.setItem(WISH_KEY, JSON.stringify(w));
+  const wished = idx < 0;
+  btn.classList.toggle('wished', wished);
+  btn.querySelector('svg').setAttribute('fill', wished ? 'currentColor' : 'none');
+  btn.title = wished ? 'Odebrat z plánu' : 'Přidat do plánu';
+  updateCounts();
 }
 
 loadPlaces();
