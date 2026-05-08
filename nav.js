@@ -21,10 +21,10 @@ const ROOT = _root();
 /* ── Detekce aktivní sekce ── */
 function _activePage() {
   const path = location.pathname;
-  if (path.includes('ar-intro') || path.includes('compass') || path.includes('ar.html')) return 'ar';
+  if (path.includes('prehled')) return 'prehled';
   if (path.includes('routes') || path.includes('trasy')) return 'routes';
   if (path.includes('login') || path.includes('profile')) return '';
-  if (path.includes('place/')) return ''; // detail stránky — žádná položka aktivní
+  if (path.includes('place/') || path.includes('ar-intro') || path.includes('compass')) return '';
   if (path.endsWith('index.html') || path.endsWith('/')) return 'map';
   return '';
 }
@@ -124,16 +124,16 @@ function _html() {
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>`
     },
     {
+      id: 'prehled',
+      href: root + 'prehled.html',
+      label: 'Přehled',
+      svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`
+    },
+    {
       id: 'routes',
       href: root + 'index.html#routes',
       label: 'Trasy',
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>`
-    },
-    {
-      id: 'ar',
-      href: root + 'ar-intro.html',
-      label: 'AR',
-      svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/><path d="M7 13h1M17 13h-1"/></svg>`
     },
     {
       id: 'wish',
