@@ -574,7 +574,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--ok);
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
-  filter: drop-shadow(0 0 2px var(--paper)) drop-shadow(0 0 2px var(--paper)) drop-shadow(0 0 2px var(--paper));
+  filter: drop-shadow(0 0 3px white) drop-shadow(0 0 3px white) drop-shadow(0 0 2px white) drop-shadow(0 1px 2px rgba(0,0,0,.3));
 }
 .lop-pin.wished::before {
   content: '';
@@ -584,7 +584,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--accent);
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>") center/contain no-repeat;
-  filter: drop-shadow(0 0 2px var(--paper)) drop-shadow(0 0 2px var(--paper)) drop-shadow(0 0 2px var(--paper));
+  filter: drop-shadow(0 0 3px white) drop-shadow(0 0 3px white) drop-shadow(0 0 2px white) drop-shadow(0 1px 2px rgba(0,0,0,.3));
 }
 
 .rt-tip {
@@ -2309,7 +2309,7 @@ function pinLabel(num) {
 
 function pinIconHTML(loc) {
   const visited = isVisited(loc.id) ? 'visited' : '';
-  const wished = isWished(loc.id) ? 'wished' : '';
+  const wished  = isWished(loc.id)  ? 'wished'  : '';
   const style = TWEAKS.pinStyle;
   const catLetter = (CAT[loc.cat]?.letter || 'H');
   const numDigits = String(loc.num).replace(/^[A-Z]+/, '');
