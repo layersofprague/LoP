@@ -35,7 +35,7 @@ const CSS = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px 12px;
+  padding: 8px 18px 6px;
   border-bottom: 1px solid var(--rule, #cbcec5);
   background: var(--paper, #eeefeb);
   font-family: 'Inter', system-ui, sans-serif;
@@ -46,12 +46,12 @@ const CSS = `
   text-decoration: none;
 }
 .lop-h-logo {
-  height: 40px; width: auto;
+  height: 36px; width: auto;
   display: block; object-fit: contain;
-  margin-top: -6px;
+  margin-top: -4px;
 }
 @media (min-width: 400px) {
-  .lop-h-logo { height: 56px; margin-top: -10px; }
+  .lop-h-logo { height: 46px; margin-top: -8px; }
 }
 .lop-h-actions {
   display: flex; align-items: center; gap: 2px;
