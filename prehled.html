@@ -208,7 +208,7 @@ a { color: inherit; text-decoration: none; }
 .place-wish-btn svg { width: 16px; height: 16px; pointer-events: none; }
 .place-wish-lbl { font-size: 9px; font-weight: 500; letter-spacing: .01em; pointer-events: none; }
 /* vzdálenost */
-.place-dist-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; align-self: center; }
+.place-dist-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
 .place-dist { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
 .place-dist-hint { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-4); letter-spacing: .06em; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .place-dist-hint:hover { color: var(--ink-3); }
@@ -487,6 +487,9 @@ function toggleWish(e, id) {
 
 loadPlaces();
 locateUser();
+
+// Refresh nav badge po načtení
+requestAnimationFrame(() => { if (window.lopNav) window.lopNav.refresh(); });
 
 // Sjednoť chipy s URL parametrem
 document.querySelectorAll('.filter-chip').forEach(c => {
