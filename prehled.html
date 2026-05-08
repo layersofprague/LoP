@@ -190,6 +190,18 @@ a { color: inherit; text-decoration: none; }
   font-size: 10px; color: var(--ink-4);
   letter-spacing: .06em;
 }
+.place-dist {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4);
+  letter-spacing: .06em;
+}
+.place-wish {
+  width: 20px; height: 20px;
+  display: none; align-items: center; justify-content: center;
+  color: var(--accent);
+}
+.place-wish.show { display: flex; }
+.place-wish svg { width: 13px; height: 13px; }
 
 /* ── PRÁZDNÝ STAV ── */
 .empty {
@@ -267,6 +279,14 @@ const WISH_KEY   = 'lop_wishlist_v2';
 let PLACES   = [];
 let activeFilter = 'all';
 
+function getWished() {
+  try { return JSON.parse(localStorage.getItem(WISH_KEY) || '[]').map(String); } catch(e) { return []; }
+}
+
+function isWished(id) {
+  return getWished().includes(String(id));
+}
+
 function getVisited() {
   try { return JSON.parse(localStorage.getItem(VISIT_KEY) || '[]').map(String); } catch(e) { return []; }
 }
@@ -276,6 +296,29 @@ function isVisited(id) {
 }
 
 /* ── Načtení dat ── */
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function formatDist(m) {
+  if (m < 1000) return Math.round(m) + ' m';
+  return (m/1000).toFixed(1).replace('.', ',') + ' km';
+}
+
+let userPos = null;
+
+function locateUser() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    userPos = [pos.coords.latitude, pos.coords.longitude];
+    render(); // překresli s vzdálenostmi
+  }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
+}
+
 async function loadPlaces() {
   try {
     const res = await fetch('places.json');
@@ -312,6 +355,7 @@ function setFilter(cat) {
 /* ── Render ── */
 function render() {
   const visited = getVisited();
+  const wished  = getWished();
   const filtered = PLACES.filter(p => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'visited') return visited.includes(String(p.id));
@@ -334,28 +378,31 @@ function render() {
       html += `<div class="section-label" style="margin-top:20px">
         ${CAT_NAME[cat]} <span class="ct">${String(items.length).padStart(2,'0')}</span>
       </div>`;
-      html += items.map(p => cardHTML(p, visited)).join('');
+      html += items.map(p => cardHTML(p, visited, wished)).join('');
     });
   } else {
     html += `<div class="section-label">
       ${activeFilter === 'visited' ? 'Navštíveno' : CAT_NAME[activeFilter]}
       <span class="ct">${String(filtered.length).padStart(2,'0')}</span>
     </div>`;
-    html += filtered.map(p => cardHTML(p, visited)).join('');
+    html += filtered.map(p => cardHTML(p, visited, wished)).join('');
   }
 
   document.getElementById('placesList').innerHTML = html;
 }
 
-function cardHTML(p, visited) {
+function cardHTML(p, visited, wished) {
   const color  = CAT_COLOR[p.cat]  || '#4A4A48';
   const letter = CAT_LETTER[p.cat] || 'H';
   const catName = CAT_NAME[p.cat]  || '';
   const vis    = visited.includes(String(p.id));
+  const wish   = wished && wished.includes(String(p.id));
   const thumb  = p.thumb || '';
-  const year   = p.yearBuilt || '';
   const lede   = p.lede || '';
   const detailUrl = 'place/' + p.id + '.html';
+  const dist   = userPos && p.lat && p.lng
+    ? formatDist(haversineM(userPos[0], userPos[1], p.lat, p.lng))
+    : '';
 
   return `<a class="place-card" href="${detailUrl}">
     <div class="place-thumb">
@@ -377,12 +424,16 @@ function cardHTML(p, visited) {
       <div class="place-visited ${vis ? 'show' : ''}">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>
       </div>
-      ${year ? `<div class="place-year">${year}</div>` : ''}
+      <div class="place-wish ${wish ? 'show' : ''}">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </div>
+      ${dist ? `<div class="place-dist">${dist}</div>` : ''}
     </div>
   </a>`;
 }
 
 loadPlaces();
+locateUser();
 </script>
 </body>
 </html>
