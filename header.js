@@ -1,0 +1,152 @@
+/* ═══════════════════════════════════════════════════
+   LayersOfPrague — header.js
+   Sdílená hlavička pro všechny stránky
+   Použití:
+     <div id="lop-header"></div>
+     <script src="header.js"></script>        (kořen)
+     <script src="../header.js"></script>     (place/, ar/, atd.)
+   ═══════════════════════════════════════════════════ */
+
+(function() {
+
+/* ── Detekce hloubky cesty ── */
+const _depth = (location.pathname.match(/\//g) || []).length;
+// GitHub Pages: /LoP/ = hloubka 1, /LoP/place/ = hloubka 2
+const _isRoot = !location.pathname.split('/').filter(Boolean).slice(-1)[0]?.includes('.html')
+  || location.pathname.endsWith('index.html');
+
+function _root() {
+  // Vrátí relativní cestu ke kořeni projektu
+  const parts = location.pathname.split('/').filter(Boolean);
+  // Najdi index souboru — vše za posledním segmentem je kořen
+  const depth = parts.length - 1; // minus filename
+  if (depth <= 1) return './'; // jsme v kořeni (/LoP/)
+  return '../'.repeat(depth - 1);
+}
+
+const ROOT = _root();
+
+/* ── CSS ── */
+const CSS = `
+#lop-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--rule, #cbcec5);
+  background: var(--paper, #eeefeb);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.lop-h-brand {
+  display: flex; align-items: center;
+  text-decoration: none;
+}
+.lop-h-logo {
+  height: 40px; width: auto;
+  display: block; object-fit: contain;
+  margin-top: -6px;
+}
+@media (min-width: 400px) {
+  .lop-h-logo { height: 56px; margin-top: -10px; }
+}
+.lop-h-actions {
+  display: flex; align-items: center; gap: 2px;
+}
+.lop-h-btn {
+  appearance: none; background: transparent; border: none;
+  width: 38px; height: 38px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--ink-3, #6a6a64);
+  transition: background .15s, color .15s;
+  position: relative;
+  text-decoration: none;
+}
+.lop-h-btn:hover { background: var(--paper-2, #e6e7e2); }
+.lop-h-btn svg { width: 19px; height: 19px; }
+.lop-h-btn .lop-h-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent, #b04020);
+}
+.lop-h-btn.logged-in { color: var(--ink, #1a1a18); }
+`;
+
+/* ── HTML ── */
+function _html() {
+  const logoSrc = ROOT + 'logo-tight.png';
+  const loginHref = ROOT + 'login.html?return=' + encodeURIComponent(location.href);
+  return `
+    <a class="lop-h-brand" href="${ROOT}index.html">
+      <img class="lop-h-logo" src="${logoSrc}" alt="Layers of Prague"/>
+    </a>
+    <div class="lop-h-actions">
+      <button class="lop-h-btn" id="lopHSearch" title="Hledat" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <button class="lop-h-btn" id="lopHNotif" title="Notifikace">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        <span class="lop-h-dot"></span>
+      </button>
+      <button class="lop-h-btn" id="lopHProfile" title="Profil"
+              onclick="location.href='${loginHref}'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      </button>
+    </div>
+  `;
+}
+
+/* ── Auth stav ── */
+function _updateAuth() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    const loggedIn = !!(s && s.access_token && s.user);
+    const btn = document.getElementById('lopHProfile');
+    if (!btn) return;
+    if (loggedIn) {
+      btn.classList.add('logged-in');
+      btn.title = s.user.email || 'Profil';
+    } else {
+      btn.classList.remove('logged-in');
+      btn.title = 'Profil';
+    }
+  } catch(e) {}
+}
+
+/* ── Inject ── */
+function _inject() {
+  const el = document.getElementById('lop-header');
+  if (!el) return;
+
+  // CSS
+  if (!document.getElementById('lop-header-css')) {
+    const style = document.createElement('style');
+    style.id = 'lop-header-css';
+    style.textContent = CSS;
+    document.head.appendChild(style);
+  }
+
+  // HTML
+  el.innerHTML = _html();
+
+  // Auth
+  _updateAuth();
+}
+
+/* ── Spuštění ── */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _inject);
+} else {
+  _inject();
+}
+
+/* ── Public API ── */
+window.lopHeader = {
+  refresh: _updateAuth
+};
+
+})();
