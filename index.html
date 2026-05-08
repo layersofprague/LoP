@@ -73,7 +73,7 @@ a { color: inherit; text-decoration: none; }
 }
 .topbar-main {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px 12px;
+  padding: 8px 18px 6px;
 }
 
 .brand {
@@ -127,6 +127,7 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--rule);
   background: var(--paper);
   z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .nav-item {
   flex: 1;
@@ -1436,7 +1437,7 @@ a { color: inherit; text-decoration: none; }
     border-right: 1px solid var(--rule);
     border-left: 1px solid var(--rule);
     width: 84px;
-    padding-top: 70px; /* přepíše JS */
+    padding-top: 58px;
     gap: 2px;
     padding-bottom: 14px;
   }
@@ -2959,7 +2960,22 @@ function renderRoutes() {
 /* ═══════════════ INIT ═══════════════ */
 applyTweaks();
 
-// Auth stav profil tlačítka
+// Nastav padding-top navbaru přesně na výšku topbaru
+(function() {
+  function syncNav() {
+    const tb = document.getElementById('topbar');
+    const nav = document.getElementById('nav');
+    if (tb && nav && window.innerWidth >= 820) {
+      nav.style.paddingTop = tb.offsetHeight + 'px';
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncNav);
+  } else {
+    requestAnimationFrame(syncNav);
+  }
+  window.addEventListener('resize', syncNav);
+})();
 (function() {
   try {
     const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
