@@ -921,6 +921,7 @@ function toggleWishBtn() {
   if (w) setWish(list.filter(x => x !== PLACE_ID));
   else   setWish([...list, PLACE_ID]);
   updateWishUI();
+  if (window.lopNav) window.lopNav.refresh();
 }
 
 /* ── SHARE ── */
