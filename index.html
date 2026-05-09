@@ -2279,7 +2279,7 @@ let _markers = [];
 window._markers = _markers;
 const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
 window.FILTER = FILTER;
-const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
+const FILTER_NEXT = { full:'hide', hide:'full' };
 const FILTER_OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
 const ERAS = [
@@ -2372,8 +2372,7 @@ function buildChips() {
       const cat = btn.dataset.cat;
       FILTER[cat] = FILTER_NEXT[FILTER[cat]];
       btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[cat] === 'dim') btn.classList.add('state-dim');
-      else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
+      if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
       applyFilter();
     });
   });
@@ -2382,8 +2381,7 @@ function buildChips() {
       const f = btn.dataset.filter;
       FILTER[f] = FILTER_NEXT[FILTER[f]];
       btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[f] === 'dim') btn.classList.add('state-dim');
-      else if (FILTER[f] === 'hide') btn.classList.add('state-hide');
+      if (FILTER[f] === 'hide') btn.classList.add('state-hide');
       applyFilter();
     });
   });
@@ -2548,54 +2546,24 @@ function locYear(loc) {
 function applyFilter() {
   const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
   const distActive = DIST_STATE.max !== null && window._userLatLng;
-  const WORSE  = (a, b) => ['full','dim','hide'].indexOf(a) >= ['full','dim','hide'].indexOf(b) ? a : b;
+  const RANK   = { full: 0, dim: 1, hide: 2 };
+  const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
   const OPACITY = { full: 1, dim: 0.3, hide: 0 };
-  const isActive = s => s === 'dim' || s === 'hide'; // filtr je aktivní (ne výchozí)
 
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
     const wished  = JSON.parse(localStorage.getItem(WISH_KEY) ||'[]').map(String).includes(String(loc.id));
     const visited = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String).includes(String(loc.id));
-    const catFilter = FILTER[loc.cat]; // stav filtru kategorie tohoto pinu
 
-    let s = 'full';
+    // Každý filtr relevantní pro tento pin hlasuje.
+    // Výsledek = nejpříznivější hlas.
+    // Relevantní filtry: kategorie vždy, wished pokud má příznak, visited pokud má příznak.
+    const votes = [FILTER[loc.cat]];
+    if (wished)  votes.push(FILTER.wished);
+    if (visited) votes.push(FILTER.visited);
+    let s = votes.reduce((best, v) => BETTER(best, v), 'hide');
 
-    // ── 1) Filtr kategorie ──
-    // Utlum pin jeho kategorie, pokud:
-    // - pin nemá příznak wished NEBO filtr wished je aktivní
-    // - pin nemá příznak navštíveno NEBO filtr navštíveno je aktivní
-    if (isActive(catFilter)) {
-      const keepForWish    = wished  && !isActive(FILTER.wished);
-      const keepForVisited = visited && !isActive(FILTER.visited);
-      if (!keepForWish && !keepForVisited) {
-        s = WORSE(s, catFilter);
-      }
-    }
-
-    // ── 2) Filtr wished ──
-    // Utlum wished piny, pokud:
-    // - filtr kategorie pinu není aktivní → skryj
-    // - filtr kategorie pinu je aktivní A pin má navštíveno → ponech
-    // - filtr kategorie pinu je aktivní A pin nemá navštíveno → skryj
-    if (wished && isActive(FILTER.wished)) {
-      const catActive = isActive(catFilter);
-      const keep = catActive && visited; // ponech jen pokud kategorie aktivní A má navštíveno
-      if (!keep) {
-        s = WORSE(s, FILTER.wished);
-      }
-    }
-
-    // ── 3) Filtr navštíveno ──
-    // Symetricky k filtru wished
-    if (visited && isActive(FILTER.visited)) {
-      const catActive = isActive(catFilter);
-      const keep = catActive && wished; // ponech jen pokud kategorie aktivní A má wished
-      if (!keep) {
-        s = WORSE(s, FILTER.visited);
-      }
-    }
-
-    // ── Era a dist (tvrdé skrytí) ──
+    // Era a dist přebijí vše
     if (eraActive) {
       const y = locYear(loc);
       if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) s = 'hide';
