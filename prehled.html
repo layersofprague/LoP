@@ -401,15 +401,16 @@ function render() {
   const filtered = PLACES.filter(p => {
     const wish = wished.includes(String(p.id));
     const vis  = visited.includes(String(p.id));
+    const catVisible = !HIDDEN_CATS.has(p.cat);
 
-    // Speciální filtr — zobraz jen wished/visited piny bez ohledu na kategorii
-    if (ACTIVE_SPECIAL === 'wished')  return wish;
-    if (ACTIVE_SPECIAL === 'visited') return vis;
+    // Každý filtr hlasuje — pin se zobrazí pokud alespoň jeden filtr říká "zobraz"
+    // Kategorie: full pokud není skryta
+    // Wished: full pokud má příznak A Plán filtr je aktivní, nebo Plán filtr není aktivní
+    // Visited: full pokud má příznak A Navštíveno filtr je aktivní, nebo Navštíveno filtr není aktivní
 
-    // Kategorie hide — skryj, ale ne pokud má pin příznak (wish/visited)
-    if (HIDDEN_CATS.has(p.cat)) return wish || vis;
-
-    return true;
+    if (ACTIVE_SPECIAL === 'wished')  return wish || catVisible;
+    if (ACTIVE_SPECIAL === 'visited') return vis  || catVisible;
+    return catVisible || wish || vis;
   });
 
   if (filtered.length === 0) {
