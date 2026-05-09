@@ -2552,16 +2552,12 @@ function applyFilter() {
   const OPACITY = { full: 1, dim: 0.3, hide: 0 };
   const isDimOrHide = s => s === 'dim' || s === 'hide';
 
-  console.log('[filter] FILTER:', JSON.stringify(FILTER));
-
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
     const wished  = JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String).includes(String(loc.id));
     const visited = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String).includes(String(loc.id));
 
     let s = 'full';
-
-    if (loc.id === 'H201') console.log('[H201] wished:', wished, 'visited:', visited, 's before:', s);
 
     // ── Kategorie ──
     // Utlum jen pokud pin není chráněn příznakem wished (filtr wished není aktivní)
@@ -2600,8 +2596,6 @@ function applyFilter() {
     if (distActive) {
       if (haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) s = 'hide';
     }
-
-    if (loc.id === 'H201') console.log('[H201] final s:', s, 'op:', OPACITY[s]);
 
     const op = OPACITY[s];
     if (op === 0) {
