@@ -123,6 +123,56 @@ a { color: inherit; text-decoration: none; }
 }
 .sl-fs-btn svg { width: 11px; height: 11px; pointer-events: none; }
 
+/* Copyright tlačítko */
+.sl-copy-btn {
+  position: absolute; bottom: 14px; left: 14px;
+  padding: 4px;
+  background: transparent;
+  border: none; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .04em;
+  color: var(--paper); z-index: 5;
+  line-height: 1;
+}
+
+/* Copyright modal — vyjede zdola slideru */
+.copy-modal {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  background: rgba(13,11,8,.9);
+  backdrop-filter: blur(8px);
+  padding: 14px 14px 18px;
+  transform: translateY(100%);
+  transition: transform .3s var(--ease);
+  border-top: 1px solid rgba(243,237,225,.12);
+}
+.copy-modal.open { transform: translateY(0); }
+.copy-close {
+  position: absolute; top: 10px; right: 12px;
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(243,237,225,.5); font-size: 16px; line-height: 1;
+  padding: 2px 4px;
+}
+.copy-close:hover { color: var(--paper); }
+.copy-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px;
+  margin-top: 6px;
+}
+.copy-col-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(243,237,225,.4);
+  margin-bottom: 8px; padding-bottom: 5px;
+  border-bottom: 1px solid rgba(243,237,225,.1);
+}
+.copy-row { margin-bottom: 5px; }
+.copy-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(243,237,225,.4); margin-bottom: 1px;
+}
+.copy-val { font-size: 11.5px; color: rgba(243,237,225,.8); line-height: 1.4; }
+
 /* Nativní fullscreen */
 #hero:-webkit-full-screen { width: 100vw; height: 100vh; max-height: none; }
 #hero:fullscreen          { width: 100vw; height: 100vh; max-height: none; }
@@ -497,6 +547,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 9px; color: var(--ink-3);
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
 </head>
 <body>
 
@@ -556,6 +607,22 @@ a { color: inherit; text-decoration: none; }
       <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
     </svg>
   </button>
+  <button class="sl-copy-btn" id="slCopyBtn" title="Autorská práva" onclick="openCopyright()">©</button>
+
+  <!-- Copyright modal -->
+  <div class="copy-modal" id="copyModal">
+    <button class="copy-close" onclick="closeCopyright()">✕</button>
+    <div class="copy-grid" id="copyGrid">
+      <div>
+        <div class="copy-col-head">~1930</div>
+        <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+      <div>
+        <div class="copy-col-head">Dnes</div>
+        <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
@@ -752,6 +819,53 @@ a { color: inherit; text-decoration: none; }
 const PLACE_ID   = 'H001';
 const WISH_KEY   = 'lop_wishlist_v2';
 const VISIT_KEY  = 'lop_visited_v1';
+
+/* ── COPYRIGHT ── */
+const PHOTO_HIST = '../foto/h_001h.jpg';
+const PHOTO_NOW  = '../foto/h_001s.jpg';
+
+let _exifLoaded = false;
+
+function renderExif(elId, data) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const artist   = data?.Artist    || data?.artist    || null;
+  const copy     = data?.Copyright || data?.copyright || null;
+  if (!artist && !copy) {
+    el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">EXIF data nenalezena</div>';
+    return;
+  }
+  el.innerHTML = `
+    ${artist ? `<div class="copy-row"><div class="copy-key">Autor</div><div class="copy-val">${artist}</div></div>` : ''}
+    ${copy   ? `<div class="copy-row"><div class="copy-key">Copyright</div><div class="copy-val">${copy}</div></div>`   : ''}
+  `;
+}
+
+async function loadExif() {
+  if (_exifLoaded) return;
+  _exifLoaded = true;
+  try {
+    const [histData, nowData] = await Promise.all([
+      exifr.parse(PHOTO_HIST, ['Artist', 'Copyright']).catch(() => null),
+      exifr.parse(PHOTO_NOW,  ['Artist', 'Copyright']).catch(() => null),
+    ]);
+    renderExif('copyHist', histData);
+    renderExif('copyNow',  nowData);
+  } catch(e) {
+    ['copyHist','copyNow'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">Nepodařilo se načíst</div>';
+    });
+  }
+}
+
+function openCopyright() {
+  document.getElementById('copyModal').classList.add('open');
+  loadExif();
+}
+function closeCopyright() {
+  document.getElementById('copyModal').classList.remove('open');
+}
 
 /* ── AUTH CHECK ── */
 (function() {
