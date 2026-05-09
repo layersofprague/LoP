@@ -412,11 +412,21 @@ function render() {
     return;
   }
 
-  // Seskup po kategoriích (jen při "Vše")
+  // Seskup po kategoriích
   let html = '';
-  if (activeFilter === 'all') {
+  const isWishedFilter  = PFILTER.wished  === 'hide' && PFILTER.hist === 'full' && PFILTER.arch === 'full' && PFILTER.fun === 'full';
+  const isVisitedFilter = PFILTER.visited === 'hide' && PFILTER.hist === 'full' && PFILTER.arch === 'full' && PFILTER.fun === 'full';
+
+  if (isWishedFilter) {
+    html += `<div class="section-label">Plán <span class="ct">${String(filtered.length).padStart(2,'0')}</span></div>`;
+    html += filtered.map(p => cardHTML(p, visited, wished)).join('');
+  } else if (isVisitedFilter) {
+    html += `<div class="section-label">Navštíveno <span class="ct">${String(filtered.length).padStart(2,'0')}</span></div>`;
+    html += filtered.map(p => cardHTML(p, visited, wished)).join('');
+  } else {
     const cats = ['hist', 'arch', 'fun'];
     cats.forEach(cat => {
+      if (PFILTER[cat] === 'hide') return;
       const items = filtered.filter(p => p.cat === cat);
       if (!items.length) return;
       html += `<div class="section-label" style="margin-top:20px">
@@ -424,12 +434,6 @@ function render() {
       </div>`;
       html += items.map(p => cardHTML(p, visited, wished)).join('');
     });
-  } else {
-    html += `<div class="section-label">
-      ${activeFilter === 'visited' ? 'Navštíveno' : activeFilter === 'wished' ? 'Plán' : 'Vše'}
-      <span class="ct">${String(filtered.length).padStart(2,'0')}</span>
-    </div>`;
-    html += filtered.map(p => cardHTML(p, visited, wished)).join('');
   }
 
   document.getElementById('placesList').innerHTML = html;
