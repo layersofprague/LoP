@@ -2360,11 +2360,11 @@ function buildChips() {
     </button>
     <button class="chip" data-filter="visited">
       <span class="chip-swatch chip-icon chip-icon-check"></span>
-      Navštíveno <span class="chip-count">${LOCATIONS.filter(l=>isVisited(l.id)).length}</span>
+      Navštíveno <span class="chip-count">${JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
     </button>
     <button class="chip" data-filter="wished">
       <span class="chip-swatch chip-icon chip-icon-heart"></span>
-      Wishlist <span class="chip-count">${LOCATIONS.filter(l=>isWished(l.id)).length}</span>
+      Wishlist <span class="chip-count">${JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
     </button>
   `;
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
