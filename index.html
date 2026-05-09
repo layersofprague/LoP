@@ -2188,12 +2188,22 @@ function toggleWish(id) {
   setWish(w);
   return !was;
 }
+function updateChipCounts() {
+  const wishCount = JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length;
+  const visCount  = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length;
+  const wEl = document.querySelector('.chip[data-filter="wished"] .chip-count');
+  const vEl = document.querySelector('.chip[data-filter="visited"] .chip-count');
+  if (wEl) wEl.textContent = wishCount;
+  if (vEl) vEl.textContent = visCount;
+}
+
 function updateWishBadge() {
-  const n = LOCATIONS.filter(l => isWished(l.id)).length;
+  const n = JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length;
   document.getElementById('wishBadge').textContent = n;
   document.getElementById('wishBadge').style.display = n > 0 ? 'block' : 'none';
   const customCt = document.getElementById('customCt');
   if (customCt) customCt.textContent = String(n).padStart(2, '0') + ' míst';
+  updateChipCounts();
 }
 
 function renderWishlist() {
