@@ -2335,7 +2335,7 @@ function showTooltip(loc, m, rt) {
         </a>
         <button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" title="${wBtn ? 'Odebrat z plánu' : 'Přidat do plánu'}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'white' : '#b04020'}" stroke="${wBtn ? 'white' : '#b04020'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-          ${wBtn ? 'V plánu' : 'Plán'}
+          ${wBtn ? 'V plánu' : 'Do plánu'}
         </button>
       </div>
     </div>`;
@@ -2443,7 +2443,7 @@ function buildChips() {
     </button>
     <button class="chip" data-filter="wished">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      Wishlist <span class="chip-count">${JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
+      Plán <span class="chip-count">${JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
     </button>
   `;
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
@@ -2736,7 +2736,7 @@ function rtToggleWish(id, btn) {
   btn.classList.toggle('active', now);
   btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
   btn.querySelector('svg').setAttribute('stroke', now ? 'white' : '#b04020');
-  btn.innerHTML = btn.innerHTML.replace(/V plánu|Plán/, now ? 'V plánu' : 'Plán');
+  btn.innerHTML = btn.innerHTML.replace(/V plánu|Plán/, now ? 'V plánu' : 'Do plánu');
   rebuildMarkers();
   updateWishBadge();
 }
@@ -2925,7 +2925,7 @@ function sheetToggleWish(id) {
   btn.classList.toggle('active', now);
   btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
   btn.querySelector('svg').setAttribute('stroke', now ? 'white' : '#b04020');
-  btn.querySelector('.act-lbl').textContent = now ? 'V plánu' : 'Plán';
+  btn.querySelector('.act-lbl').textContent = now ? 'V plánu' : 'Do plánu';
   rebuildMarkers();
   buildChips();
   updateWishBadge();
