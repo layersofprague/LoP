@@ -2334,8 +2334,8 @@ function showTooltip(loc, m, rt) {
           Kompas
         </a>
         <button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" title="${wBtn ? 'Odebrat z plánu' : 'Přidat do plánu'}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? '#b04020' : 'none'}" stroke="#b04020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-          ${wBtn ? '✓ Plán' : 'Plán'}
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'white' : '#b04020'}" stroke="${wBtn ? 'white' : '#b04020'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          ${wBtn ? 'V plánu' : 'Plán'}
         </button>
       </div>
     </div>`;
@@ -2734,8 +2734,9 @@ function initMap() {
 function rtToggleWish(id, btn) {
   const now = toggleWish(id);
   btn.classList.toggle('active', now);
-  btn.querySelector('svg').setAttribute('fill', now ? 'currentColor' : 'none');
-  btn.innerHTML = btn.innerHTML.replace(/[✓\s]*Plán/, now ? '✓ Plán' : 'Plán');
+  btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
+  btn.querySelector('svg').setAttribute('stroke', now ? 'white' : '#b04020');
+  btn.innerHTML = btn.innerHTML.replace(/V plánu|Plán/, now ? 'V plánu' : 'Plán');
   rebuildMarkers();
   updateWishBadge();
 }
@@ -2922,7 +2923,8 @@ function sheetToggleWish(id) {
   const now = toggleWish(id);
   const btn = document.getElementById('sheetWishBtn');
   btn.classList.toggle('active', now);
-  btn.querySelector('svg').setAttribute('fill', now ? 'currentColor' : 'none');
+  btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
+  btn.querySelector('svg').setAttribute('stroke', now ? 'white' : '#b04020');
   btn.querySelector('.act-lbl').textContent = now ? 'V plánu' : 'Plán';
   rebuildMarkers();
   buildChips();
