@@ -785,7 +785,7 @@ a { color: inherit; text-decoration: none; }
           <span class="autor-rating" id="autorStars">čeká na hodnocení</span>
         </div>
       </div>
-      <a class="autor-link" href="#" title="Profil autora">
+      <a class="autor-link" href="../autor.html?id=layersofprague" title="Profil autora">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
       </a>
     </div>
@@ -1117,10 +1117,11 @@ function toggleWishBtn() {
 /* ── AUTOR HODNOCENÍ ── */
 (async function() {
   const AUTOR_PLACES = ['H001','H101','H102','H201','H202','H301','H302','H203'];
+  const AUTOR_ROUTES = 3;
   const MIN_VOTES = 5;
 
   function starsHTML(score) {
-    const full  = Math.round(score * 5);
+    const full = Math.round(score * 5);
     let html = '';
     for (let i = 1; i <= 5; i++) {
       html += `<svg width="11" height="11" viewBox="0 0 24 24" fill="${i <= full ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
@@ -1128,6 +1129,22 @@ function toggleWishBtn() {
     return html;
   }
 
+  // Počty míst z places.json
+  try {
+    const res = await fetch('../places.json');
+    if (res.ok) {
+      const all = await res.json();
+      const count = all.filter(p => AUTOR_PLACES.includes(p.id)).length;
+      const el = document.getElementById('autorPlaces');
+      if (el) el.textContent = count + ' zastavení';
+    }
+  } catch(e) {}
+
+  // Trasy
+  const elR = document.getElementById('autorRoutes');
+  if (elR) elR.textContent = AUTOR_ROUTES + ' trasy';
+
+  // Hodnocení z Supabase
   try {
     const ids = AUTOR_PLACES.map(id => `place_id.eq.${id}`).join(',');
     const res = await fetch(
