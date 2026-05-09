@@ -373,22 +373,23 @@ function updateCounts() {
 }
 
 /* ── Filtr — stejná logika jako index.html ── */
-const PFILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
-const PFILTER_NEXT = { full:'hide', hide:'full' };
-const PRANK   = { full:0, hide:1 };
-const PBETTER = (a,b) => PRANK[a] <= PRANK[b] ? a : b;
+const HIDDEN_CATS = new Set(); // kategorie které jsou skryté
+let ACTIVE_SPECIAL = null; // 'visited', 'wished', nebo null
 
-function setFilter(cat) {
-  PFILTER[cat] = PFILTER_NEXT[PFILTER[cat]];
+function toggleCat(cat) {
+  if (HIDDEN_CATS.has(cat)) HIDDEN_CATS.delete(cat);
+  else HIDDEN_CATS.add(cat);
   const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
-  if (btn) btn.classList.toggle('active', PFILTER[cat] === 'hide');
+  if (btn) btn.classList.toggle('state-hide', HIDDEN_CATS.has(cat));
   render();
 }
 
-function toggleCat(cat) {
-  PFILTER[cat] = PFILTER_NEXT[PFILTER[cat]];
-  const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
-  if (btn) btn.classList.toggle('state-hide', PFILTER[cat] === 'hide');
+function setFilter(cat) {
+  // Toggle — klik znovu zruší filtr
+  ACTIVE_SPECIAL = ACTIVE_SPECIAL === cat ? null : cat;
+  document.querySelectorAll('.filter-chip[data-cat="visited"], .filter-chip[data-cat="wished"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === ACTIVE_SPECIAL);
+  });
   render();
 }
 
@@ -396,14 +397,21 @@ function toggleCat(cat) {
 function render() {
   const visited = getVisited();
   const wished  = getWished();
+
   const filtered = PLACES.filter(p => {
-    const wish = wished.includes(String(p.id));
-    const vis  = visited.includes(String(p.id));
-    const votes = [PFILTER[p.cat]];
-    if (wish) votes.push(PFILTER.wished);
-    if (vis)  votes.push(PFILTER.visited);
-    const s = votes.reduce((best, v) => PBETTER(best, v), 'hide');
-    return s === 'full';
+    // Kategorie skryta → skryj pin (pokud nemá příznak který ho zachrání)
+    if (HIDDEN_CATS.has(p.cat)) {
+      const wish = wished.includes(String(p.id));
+      const vis  = visited.includes(String(p.id));
+      // Zachraň pin pokud má příznak a jeho speciální filtr není aktivní
+      if (!(wish && ACTIVE_SPECIAL !== 'wished') && !(vis && ACTIVE_SPECIAL !== 'visited')) {
+        return false;
+      }
+    }
+    // Speciální filtr
+    if (ACTIVE_SPECIAL === 'visited') return visited.includes(String(p.id));
+    if (ACTIVE_SPECIAL === 'wished')  return wished.includes(String(p.id));
+    return true;
   });
 
   if (filtered.length === 0) {
@@ -414,19 +422,16 @@ function render() {
 
   // Seskup po kategoriích
   let html = '';
-  const isWishedFilter  = PFILTER.wished  === 'hide' && PFILTER.hist === 'full' && PFILTER.arch === 'full' && PFILTER.fun === 'full';
-  const isVisitedFilter = PFILTER.visited === 'hide' && PFILTER.hist === 'full' && PFILTER.arch === 'full' && PFILTER.fun === 'full';
-
-  if (isWishedFilter) {
+  if (ACTIVE_SPECIAL === 'wished') {
     html += `<div class="section-label">Plán <span class="ct">${String(filtered.length).padStart(2,'0')}</span></div>`;
     html += filtered.map(p => cardHTML(p, visited, wished)).join('');
-  } else if (isVisitedFilter) {
+  } else if (ACTIVE_SPECIAL === 'visited') {
     html += `<div class="section-label">Navštíveno <span class="ct">${String(filtered.length).padStart(2,'0')}</span></div>`;
     html += filtered.map(p => cardHTML(p, visited, wished)).join('');
   } else {
     const cats = ['hist', 'arch', 'fun'];
     cats.forEach(cat => {
-      if (PFILTER[cat] === 'hide') return;
+      if (HIDDEN_CATS.has(cat)) return;
       const items = filtered.filter(p => p.cat === cat);
       if (!items.length) return;
       html += `<div class="section-label" style="margin-top:20px">
@@ -562,12 +567,8 @@ function toggleCat(cat) {
 loadPlaces().then(() => {
   syncFromDB().then(() => {
     updateCounts();
-    // Aktivuj wished filtr z URL
     if (_urlFilter === 'wished') {
-      PFILTER.wished = 'hide';
-      PFILTER.hist = 'hide';
-      PFILTER.arch = 'hide';
-      PFILTER.fun  = 'hide';
+      ACTIVE_SPECIAL = 'wished';
       document.querySelector('.filter-chip[data-cat="wished"]')?.classList.add('active');
     }
     render();
@@ -578,15 +579,7 @@ locateUser();
 // Refresh nav badge po načtení
 requestAnimationFrame(() => { if (window.lopNav) window.lopNav.refresh(); });
 
-// Sjednoť chipy s URL parametrem — wished/visited
-if (PFILTER.wished === 'hide') {
-  const b = document.querySelector('.filter-chip[data-cat="wished"]');
-  if (b) b.classList.add('active');
-}
-if (PFILTER.visited === 'hide') {
-  const b = document.querySelector('.filter-chip[data-cat="visited"]');
-  if (b) b.classList.add('active');
-}
+// Chipy se inicializují při render()
 </script>
 </body>
 </html>
