@@ -399,18 +399,16 @@ function render() {
   const wished  = getWished();
 
   const filtered = PLACES.filter(p => {
-    // Kategorie skryta → skryj pin (pokud nemá příznak který ho zachrání)
-    if (HIDDEN_CATS.has(p.cat)) {
-      const wish = wished.includes(String(p.id));
-      const vis  = visited.includes(String(p.id));
-      // Zachraň pin pokud má příznak a jeho speciální filtr není aktivní
-      if (!(wish && ACTIVE_SPECIAL !== 'wished') && !(vis && ACTIVE_SPECIAL !== 'visited')) {
-        return false;
-      }
-    }
-    // Speciální filtr
-    if (ACTIVE_SPECIAL === 'visited') return visited.includes(String(p.id));
-    if (ACTIVE_SPECIAL === 'wished')  return wished.includes(String(p.id));
+    const wish = wished.includes(String(p.id));
+    const vis  = visited.includes(String(p.id));
+
+    // Speciální filtr — zobraz jen wished/visited piny bez ohledu na kategorii
+    if (ACTIVE_SPECIAL === 'wished')  return wish;
+    if (ACTIVE_SPECIAL === 'visited') return vis;
+
+    // Kategorie hide — skryj, ale ne pokud má pin příznak (wish/visited)
+    if (HIDDEN_CATS.has(p.cat)) return wish || vis;
+
     return true;
   });
 
