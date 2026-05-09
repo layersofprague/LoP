@@ -23,7 +23,7 @@ function _activePage() {
   const path = location.pathname;
   if (path.includes('prehled')) return 'prehled';
   if (path.includes('trasy')) return 'routes';
-  if (path.includes('login') || path.includes('profile')) return '';
+  if (path.includes('login') || path.includes('profil')) return '';
   if (path.includes('place/') || path.includes('ar-intro') || path.includes('compass')) return '';
   if (path.endsWith('index.html') || path.endsWith('/')) return 'map';
   return '';

@@ -110,9 +110,11 @@ function _updateAuth() {
     if (loggedIn) {
       btn.classList.add('logged-in');
       btn.title = s.user.email || 'Profil';
+      btn.onclick = () => { location.href = ROOT + 'profil.html'; };
     } else {
       btn.classList.remove('logged-in');
-      btn.title = 'Profil';
+      btn.title = 'Přihlásit se';
+      btn.onclick = () => { location.href = ROOT + 'login.html?return=' + encodeURIComponent(location.href); };
     }
   } catch(e) {}
 }
