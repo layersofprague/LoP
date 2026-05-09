@@ -552,18 +552,6 @@ async function syncFromDB() {
   } catch(e) { console.warn('Sync failed:', e); }
 }
 
-/* ── Filtr kategorií (full/hide) ── */
-const CAT_FILTER = { hist: 'full', arch: 'full', fun: 'full' };
-
-function toggleCat(cat) {
-  CAT_FILTER[cat] = CAT_FILTER[cat] === 'full' ? 'hide' : 'full';
-  const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
-  if (btn) btn.classList.toggle('state-hide', CAT_FILTER[cat] === 'hide');
-  // Zruš "Vše" aktivní stav
-  document.querySelector('.filter-chip[data-cat="all"]').classList.remove('active');
-  render();
-}
-
 loadPlaces().then(() => {
   syncFromDB().then(() => {
     updateCounts();
