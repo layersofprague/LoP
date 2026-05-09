@@ -2548,42 +2548,49 @@ function locYear(loc) {
 function applyFilter() {
   const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
   const distActive = DIST_STATE.max !== null && window._userLatLng;
-  const WORSE = (a, b) => ['full','dim','hide'].indexOf(a) >= ['full','dim','hide'].indexOf(b) ? a : b;
+  const WORSE  = (a, b) => ['full','dim','hide'].indexOf(a) >= ['full','dim','hide'].indexOf(b) ? a : b;
   const OPACITY = { full: 1, dim: 0.3, hide: 0 };
-  const isDimOrHide = s => s === 'dim' || s === 'hide';
+  const isActive = s => s === 'dim' || s === 'hide'; // filtr je aktivní (ne výchozí)
 
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
-    const wished  = JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String).includes(String(loc.id));
+    const wished  = JSON.parse(localStorage.getItem(WISH_KEY) ||'[]').map(String).includes(String(loc.id));
     const visited = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String).includes(String(loc.id));
+    const catFilter = FILTER[loc.cat]; // stav filtru kategorie tohoto pinu
 
     let s = 'full';
 
-    // ── Kategorie ──
-    // Utlum jen pokud pin není chráněn příznakem wished (filtr wished není aktivní)
-    // nebo příznakem visited (filtr visited není aktivní)
-    if (isDimOrHide(FILTER[loc.cat])) {
-      const protectedByWish = wished  && !isDimOrHide(FILTER.wished);
-      const protectedByVis  = visited && !isDimOrHide(FILTER.visited);
-      if (!protectedByWish && !protectedByVis) {
-        s = WORSE(s, FILTER[loc.cat]);
+    // ── 1) Filtr kategorie ──
+    // Utlum pin jeho kategorie, pokud:
+    // - pin nemá příznak wished NEBO filtr wished je aktivní
+    // - pin nemá příznak navštíveno NEBO filtr navštíveno je aktivní
+    if (isActive(catFilter)) {
+      const keepForWish    = wished  && !isActive(FILTER.wished);
+      const keepForVisited = visited && !isActive(FILTER.visited);
+      if (!keepForWish && !keepForVisited) {
+        s = WORSE(s, catFilter);
       }
     }
 
-    // ── Wishlist filtr ──
-    // Utlum wished piny, jen pokud nejsou chráněny příznakem visited
-    if (wished && isDimOrHide(FILTER.wished)) {
-      const protectedByVis = visited && !isDimOrHide(FILTER.visited);
-      if (!protectedByVis) {
+    // ── 2) Filtr wished ──
+    // Utlum wished piny, pokud:
+    // - filtr kategorie pinu není aktivní → skryj
+    // - filtr kategorie pinu je aktivní A pin má navštíveno → ponech
+    // - filtr kategorie pinu je aktivní A pin nemá navštíveno → skryj
+    if (wished && isActive(FILTER.wished)) {
+      const catActive = isActive(catFilter);
+      const keep = catActive && visited; // ponech jen pokud kategorie aktivní A má navštíveno
+      if (!keep) {
         s = WORSE(s, FILTER.wished);
       }
     }
 
-    // ── Visited filtr ──
-    // Utlum visited piny, jen pokud nejsou chráněny příznakem wished
-    if (visited && isDimOrHide(FILTER.visited)) {
-      const protectedByWish = wished && !isDimOrHide(FILTER.wished);
-      if (!protectedByWish) {
+    // ── 3) Filtr navštíveno ──
+    // Symetricky k filtru wished
+    if (visited && isActive(FILTER.visited)) {
+      const catActive = isActive(catFilter);
+      const keep = catActive && wished; // ponech jen pokud kategorie aktivní A má wished
+      if (!keep) {
         s = WORSE(s, FILTER.visited);
       }
     }
