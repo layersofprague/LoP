@@ -2561,35 +2561,32 @@ function applyFilter() {
     let s = 'full';
 
     // ── 1) Filtr kategorie ──
-    // Utlum pin jeho kategorie, pokud:
-    // - pin nemá příznak wished NEBO filtr wished je aktivní
-    // - pin nemá příznak navštíveno NEBO filtr navštíveno je aktivní
+    // Pin zůstane viditelný pokud:
+    // - má wished příznak a wished filtr NENÍ aktivní, NEBO
+    // - má navštíveno příznak a navštíveno filtr NENÍ aktivní, NEBO
+    // - má oba příznaky (wished i navštíveno) zároveň
     if (isActive(catFilter)) {
       const keepForWish    = wished  && !isActive(FILTER.wished);
       const keepForVisited = visited && !isActive(FILTER.visited);
-      if (!keepForWish && !keepForVisited) {
+      const keepForBoth    = wished  && visited; // má oba příznaky → vždy ponechat
+      if (!keepForWish && !keepForVisited && !keepForBoth) {
         s = WORSE(s, catFilter);
       }
     }
 
     // ── 2) Filtr wished ──
-    // Utlum wished piny, pokud:
-    // - filtr kategorie pinu není aktivní → skryj
-    // - filtr kategorie pinu je aktivní A pin má navštíveno → ponech
-    // - filtr kategorie pinu je aktivní A pin nemá navštíveno → skryj
     if (wished && isActive(FILTER.wished)) {
       const catActive = isActive(catFilter);
-      const keep = catActive && visited; // ponech jen pokud kategorie aktivní A má navštíveno
+      const keep = (catActive && visited) || (!catActive) || (wished && visited);
       if (!keep) {
         s = WORSE(s, FILTER.wished);
       }
     }
 
     // ── 3) Filtr navštíveno ──
-    // Symetricky k filtru wished
     if (visited && isActive(FILTER.visited)) {
       const catActive = isActive(catFilter);
-      const keep = catActive && wished; // ponech jen pokud kategorie aktivní A má wished
+      const keep = (catActive && wished) || (!catActive) || (wished && visited);
       if (!keep) {
         s = WORSE(s, FILTER.visited);
       }
