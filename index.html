@@ -2315,6 +2315,15 @@ function showTooltip(loc, m, rt) {
   const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
   const wBtn = isWished(loc.id);
   rt._forId = loc.id;
+
+  // Živá vzdálenost z GPS
+  let distLabel = '';
+  if (window._userLatLng && loc.lat && loc.lng) {
+    const km = haversineKm(window._userLatLng, [loc.lat, loc.lng]);
+    distLabel = km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1).replace('.', ',') + ' km';
+  } else {
+    distLabel = '<span style="line-height:1.2;text-align:right">? m<br><span style="font-size:8px;opacity:.6;cursor:pointer" onclick="locateMe()">povolit?</span></span>';
+  }
   rt.innerHTML = `
     <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
       <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>
@@ -2322,7 +2331,7 @@ function showTooltip(loc, m, rt) {
     <div class="rt-tip-body">
       <div class="rt-tip-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">
         <span>${loc.name}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${loc.distance}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${distLabel}</span>
       </div>
       <div class="rt-tip-actions">
         <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa" onclick="event.stopPropagation()">
