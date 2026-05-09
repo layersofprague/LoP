@@ -1823,6 +1823,69 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <script>
+/* ═══════════════ SUPABASE SYNC ═══════════════ */
+const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
+const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
+}
+function authHeaders(extra) {
+  const s = getSession();
+  return Object.assign({
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + (s?.access_token || SUPA_KEY),
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates'
+  }, extra);
+}
+
+async function syncFromDB() {
+  const s = getSession();
+  if (!s?.access_token || !s?.user) return;
+  try {
+    const [wRes, vRes] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/wishlist?user_id=eq.${s.user.id}&select=place_id`, { headers: authHeaders() }),
+      fetch(`${SUPA_URL}/rest/v1/visited?user_id=eq.${s.user.id}&select=place_id`,  { headers: authHeaders() })
+    ]);
+    if (wRes.ok) {
+      const remote = (await wRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem('lop_wishlist_v2')||'[]').map(String))];
+      localStorage.setItem('lop_wishlist_v2', JSON.stringify([...new Set([...remote, ...local])]));
+      // Nahraj lokální záznamy které DB nezná
+      local.filter(id => !remote.includes(id)).forEach(id => {
+        fetch(`${SUPA_URL}/rest/v1/wishlist`, { method:'POST', headers: authHeaders(),
+          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
+      });
+    }
+    if (vRes.ok) {
+      const remote = (await vRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem('lop_visited_v1')||'[]').map(String))];
+      localStorage.setItem('lop_visited_v1', JSON.stringify([...new Set([...remote, ...local])]));
+      local.filter(id => !remote.includes(id)).forEach(id => {
+        fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
+          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
+      });
+    }
+  } catch(e) { console.warn('Sync failed:', e); }
+}
+
+function dbAddWish(placeId) {
+  const s = getSession(); if (!s?.user) return;
+  fetch(`${SUPA_URL}/rest/v1/wishlist`, { method:'POST', headers: authHeaders(),
+    body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+}
+function dbRemoveWish(placeId) {
+  const s = getSession(); if (!s?.user) return;
+  fetch(`${SUPA_URL}/rest/v1/wishlist?user_id=eq.${s.user.id}&place_id=eq.${placeId}`,
+    { method:'DELETE', headers: authHeaders() }).catch(()=>{});
+}
+function dbAddVisited(placeId) {
+  const s = getSession(); if (!s?.user) return;
+  fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
+    body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+}
+
 /* ═══════════════ TWEAKS ═══════════════ */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accentColor": "#b04020",
@@ -2041,8 +2104,11 @@ async function loadData() {
   initMap();
   renderRoutes();
   updateWishBadge();
-  // Refresh chipů po načtení — wishlist/visited stavy z localStorage
   setTimeout(buildChips, 100);
+  syncFromDB().then(() => {
+    updateWishBadge();
+    if (window._map) applyFilter();
+  });
 }
 
 // ── Záložní data (použijí se pokud places.json chybí) ─────────────────────
@@ -2163,6 +2229,7 @@ function markVisited(id) {
   if (!v.includes(sid)) { v.push(sid); setVisited(v); }
   const loc = LOCATIONS.find(l => String(l.id) === sid);
   if (loc) loc.visited = true;
+  dbAddVisited(sid);
 }
 
 /* ═══════════════ WISHLIST ═══════════════ */
@@ -2182,8 +2249,10 @@ function toggleWish(id) {
   if (was) {
     w = w.filter(x => x !== sid);
     const loc = LOCATIONS.find(l => String(l.id) === sid); if (loc) loc.wished = false;
+    dbRemoveWish(sid);
   } else {
     if (!w.includes(sid)) w.push(sid);
+    dbAddWish(sid);
   }
   setWish(w);
   return !was;
