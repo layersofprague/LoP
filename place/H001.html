@@ -141,7 +141,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 10;
   background: rgba(13,11,8,.55);
   backdrop-filter: blur(12px);
-  padding: 10px 12px 12px;
+  padding: 7px 12px 8px;
   transform: translateY(100%);
   transition: transform .3s var(--ease);
   border-top: 1px solid rgba(243,237,225,.12);
@@ -162,10 +162,10 @@ a { color: inherit; text-decoration: none; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
   color: rgba(243,237,225,.4);
-  margin-bottom: 5px; padding-bottom: 4px;
+  margin-bottom: 3px; padding-bottom: 3px;
   border-bottom: 1px solid rgba(243,237,225,.1);
 }
-.copy-row { margin-bottom: 3px; }
+.copy-row { margin-bottom: 2px; }
 .copy-key {
   font-family: 'JetBrains Mono', monospace;
   font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
@@ -861,17 +861,16 @@ async function loadExif() {
 function openCopyright() {
   document.getElementById('copyModal').classList.add('open');
   loadExif();
-  // Zavři kliknutím mimo modal
   setTimeout(() => {
-    document.getElementById('hero').addEventListener('click', _closeCopyOutside);
+    document.addEventListener('click', _closeCopyOutside);
   }, 10);
 }
 function closeCopyright() {
   document.getElementById('copyModal').classList.remove('open');
-  document.getElementById('hero').removeEventListener('click', _closeCopyOutside);
+  document.removeEventListener('click', _closeCopyOutside);
 }
 function _closeCopyOutside(e) {
-  if (!e.target.closest('.copy-modal')) closeCopyright();
+  if (!e.target.closest('.copy-modal') && !e.target.closest('#slCopyBtn')) closeCopyright();
 }
 
 /* ── AUTH CHECK ── */
