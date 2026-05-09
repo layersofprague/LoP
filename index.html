@@ -2544,32 +2544,72 @@ function locYear(loc) {
 }
 
 function applyFilter() {
-  const order = { full: 0, dim: 1, hide: 2 };
-  const wishActive = FILTER.wished !== 'full';
-  const visActive = FILTER.visited !== 'full';
-  const eraActive = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
+  const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
   const distActive = DIST_STATE.max !== null && window._userLatLng;
+
+  // Stavy filtrů: 'full'=výchozí, 'dim'=utlumeno, 'hide'=skryto
+  const catState  = { hist: FILTER.hist,    arch: FILTER.arch,    fun: FILTER.fun    };
+  const wishState = FILTER.wished;   // full / dim / hide
+  const visState  = FILTER.visited;  // full / dim / hide
+
+  const isDimOrHide = s => s === 'dim' || s === 'hide';
+  const OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
-    let s = FILTER[loc.cat];
-    if (wishActive) {
-      if (isWished(loc.id) && order[FILTER.wished] > order[s]) s = FILTER.wished;
-    }
-    if (visActive) {
-      if (isVisited(loc.id) && order[FILTER.visited] > order[s]) s = FILTER.visited;
-    }
-    if (eraActive) {
-      const y = locYear(loc);
-      if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) {
-        s = 'hide';
+    const wished  = isWished(loc.id);
+    const visited = isVisited(loc.id);
+    const cat     = loc.cat;
+
+    let s = 'full'; // výsledný stav
+
+    // ── Kategorie filtr ──
+    // Utlum/skryj piny kategorie POUZE pokud:
+    // - pin nemá příznak wished NEBO filtr wished je aktivní (dim/hide)
+    // - pin nemá příznak visited NEBO filtr visited je aktivní (dim/hide)
+    if (isDimOrHide(catState[cat])) {
+      const protectedByWish = wished  && !isDimOrHide(wishState);
+      const protectedByVis  = visited && !isDimOrHide(visState);
+      if (!protectedByWish && !protectedByVis) {
+        s = catState[cat];
       }
     }
-    if (distActive) {
-      const d = haversineKm(window._userLatLng, [loc.lat, loc.lng]);
-      if (d > DIST_STATE.max) s = 'hide';
+
+    // ── Wishlist filtr ──
+    // Utlum/skryj piny s příznakem wished POUZE pokud:
+    // - pin nemá příznak visited NEBO filtr visited je aktivní
+    if (wished && isDimOrHide(wishState)) {
+      const protectedByVis = visited && !isDimOrHide(visState);
+      if (!protectedByVis) {
+        // Vezmi horší ze dvou stavů (cat vs wish)
+        s = ([wishState, s].sort((a, b) =>
+          ['full','dim','hide'].indexOf(b) - ['full','dim','hide'].indexOf(a)
+        ))[0];
+      }
     }
-    const op = FILTER_OPACITY[s];
+
+    // ── Visited filtr ──
+    // Utlum/skryj piny s příznakem visited POUZE pokud:
+    // - pin nemá příznak wished NEBO filtr wished je aktivní
+    if (visited && isDimOrHide(visState)) {
+      const protectedByWish = wished && !isDimOrHide(wishState);
+      if (!protectedByWish) {
+        s = ([visState, s].sort((a, b) =>
+          ['full','dim','hide'].indexOf(b) - ['full','dim','hide'].indexOf(a)
+        ))[0];
+      }
+    }
+
+    // ── Era a dist filtry (tvrdé skrytí) ──
+    if (eraActive) {
+      const y = locYear(loc);
+      if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) s = 'hide';
+    }
+    if (distActive) {
+      if (haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) s = 'hide';
+    }
+
+    const op = OPACITY[s];
     if (op === 0) {
       marker.remove();
     } else {
@@ -2579,6 +2619,7 @@ function applyFilter() {
       activeCount++;
     }
   });
+
   const cnt = document.getElementById('filterHeadActive');
   if (cnt) cnt.textContent = activeCount;
 }
