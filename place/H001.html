@@ -873,6 +873,9 @@ function _closeCopyOutside(e) {
   if (!e.target.closest('.copy-modal') && !e.target.closest('#slCopyBtn')) closeCopyright();
 }
 
+/* ── SYNC ── */
+syncFromDB().then(() => updateWishUI());
+
 /* ── AUTH CHECK ── */
 (function() {
   function isLoggedIn() {
@@ -1013,6 +1016,48 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
 /* ── SUPABASE VOTES ── */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
+}
+function authHeaders() {
+  const s = getSession();
+  return { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (s?.access_token || SUPA_KEY),
+    'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+}
+function dbAddWish(placeId) {
+  const s = getSession(); if (!s?.user) return;
+  fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
+    body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+}
+function dbRemoveWish(placeId) {
+  const s = getSession(); if (!s?.user) return;
+  fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&place_id=eq.' + placeId,
+    { method:'DELETE', headers: authHeaders() }).catch(()=>{});
+}
+async function syncFromDB() {
+  const s = getSession(); if (!s?.access_token || !s?.user) return;
+  try {
+    const [wRes, vRes] = await Promise.all([
+      fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
+      fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders() })
+    ]);
+    if (wRes.ok) {
+      const remote = (await wRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String))];
+      localStorage.setItem(WISH_KEY, JSON.stringify([...new Set([...remote, ...local])]));
+      local.filter(id => !remote.includes(id)).forEach(id => {
+        fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
+          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
+      });
+    }
+    if (vRes.ok) {
+      const remote = (await vRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String))];
+      localStorage.setItem(VISIT_KEY, JSON.stringify([...new Set([...remote, ...local])]));
+    }
+  } catch(e) { console.warn('Sync failed:', e); }
+}
 const VOTE_KEY = 'lop_vote_' + PLACE_ID; // localStorage — pamatuje hlas uživatele
 
 // Unikátní token pro tohoto uživatele (anonymní, bez přihlášení)
@@ -1108,8 +1153,8 @@ function updateWishUI() {
 function toggleWishBtn() {
   const w = isWished();
   const list = getWish().map(String);
-  if (w) setWish(list.filter(x => x !== PLACE_ID));
-  else   setWish([...list, PLACE_ID]);
+  if (w) { setWish(list.filter(x => x !== PLACE_ID)); dbRemoveWish(PLACE_ID); }
+  else   { setWish([...list, PLACE_ID]); dbAddWish(PLACE_ID); }
   updateWishUI();
   if (window.lopNav) window.lopNav.refresh();
 }
