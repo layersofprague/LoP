@@ -778,12 +778,11 @@ a { color: inherit; text-decoration: none; }
         <div class="autor-meta">
           <span class="autor-badge">Kurátor</span>
           <span class="autor-sep">·</span>
-          <span>12 zastavení</span>
+          <span id="autorPlaces">12 zastavení</span>
           <span class="autor-sep">·</span>
-          <span class="autor-rating">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            4.9
-          </span>
+          <span id="autorRoutes">3 trasy</span>
+          <span class="autor-sep">·</span>
+          <span class="autor-rating" id="autorStars">čeká na hodnocení</span>
         </div>
       </div>
       <a class="autor-link" href="#" title="Profil autora">
@@ -1107,6 +1106,44 @@ function toggleWishBtn() {
   updateWishUI();
   if (window.lopNav) window.lopNav.refresh();
 }
+
+/* ── AUTOR HODNOCENÍ ── */
+(async function() {
+  const AUTOR_PLACES = ['H001','H101','H102','H201','H202','H301','H302','H203'];
+  const MIN_VOTES = 5;
+
+  function starsHTML(score) {
+    const full  = Math.round(score * 5);
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      html += `<svg width="11" height="11" viewBox="0 0 24 24" fill="${i <= full ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+    }
+    return html;
+  }
+
+  try {
+    const ids = AUTOR_PLACES.map(id => `place_id.eq.${id}`).join(',');
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/vote_counts?or=(${ids})&select=likes,dislikes`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      const likes    = data.reduce((s, r) => s + (parseInt(r.likes)    || 0), 0);
+      const dislikes = data.reduce((s, r) => s + (parseInt(r.dislikes) || 0), 0);
+      const total    = likes + dislikes;
+      const el       = document.getElementById('autorStars');
+      if (!el) return;
+      if (total < MIN_VOTES) {
+        el.textContent = 'čeká na hodnocení';
+      } else {
+        const score = likes / total;
+        el.innerHTML = starsHTML(score);
+        el.title = `${likes} lajků, ${dislikes} dislajků (${Math.round(score*100)}%)`;
+      }
+    }
+  } catch(e) {}
+})();
 
 /* ── SHARE ── */
 function share() {
