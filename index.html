@@ -2334,7 +2334,7 @@ function showTooltip(loc, m, rt) {
           Kompas
         </a>
         <button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" title="${wBtn ? 'Odebrat z plánu' : 'Přidat do plánu'}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? '#b04020' : 'none'}" stroke="#b04020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           ${wBtn ? '✓ Plán' : 'Plán'}
         </button>
       </div>
@@ -2442,7 +2442,7 @@ function buildChips() {
       Navštíveno <span class="chip-count">${JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
     </button>
     <button class="chip" data-filter="wished">
-      <span class="chip-swatch chip-icon chip-icon-heart"></span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       Wishlist <span class="chip-count">${JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
     </button>
   `;
