@@ -815,6 +815,17 @@ a { color: inherit; text-decoration: none; }
 </div><!-- /body -->
 
 <script>
+// Pročisti localStorage od duplicit při načtení
+(function() {
+  try {
+    ['lop_wishlist_v2','lop_visited_v1'].forEach(key => {
+      const raw = JSON.parse(localStorage.getItem(key) || '[]');
+      const clean = [...new Set(raw.map(String).filter(x => x && x !== 'undefined' && x !== 'null'))];
+      if (clean.length !== raw.length) localStorage.setItem(key, JSON.stringify(clean));
+    });
+  } catch(e) {}
+})();
+
 const PLACE_ID   = 'H001';
 const WISH_KEY   = 'lop_wishlist_v2';
 const VISIT_KEY  = 'lop_visited_v1';
