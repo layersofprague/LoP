@@ -254,6 +254,17 @@ a { color: inherit; text-decoration: none; }
 <script src="nav.js"></script>
 
 <script>
+// Pročisti localStorage od duplicit při načtení
+(function() {
+  try {
+    ['lop_wishlist_v2','lop_visited_v1'].forEach(key => {
+      const raw = JSON.parse(localStorage.getItem(key) || '[]');
+      const clean = [...new Set(raw.map(String).filter(x => x && x !== 'undefined' && x !== 'null'))];
+      if (clean.length !== raw.length) localStorage.setItem(key, JSON.stringify(clean));
+    });
+  } catch(e) {}
+})();
+
 const ROUTES = [
   { id:'r1', title:'Secese napříč Prahou',           kick:'Kurátorované · 7 míst', desc:'Od Obecního domu přes Wilsonovo nádraží až k vile Koulka. Secesi v Praze definovala jedna generace — Kotěra, Polívka, Fanta.',              time:'2h 40min', count:7,  prog:2, num:'I'   },
   { id:'r2', title:'Kafkovy stopy',                  kick:'Literární · 5 míst',    desc:'Rodný dům, Zlatá ulička, židovský hřbitov, Arcibiskupské lesy. Praha očima jejího nejslavnějšího obyvatele.',                                 time:'3h',       count:5,  prog:0, num:'II'  },

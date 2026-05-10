@@ -286,6 +286,17 @@ a { color: inherit; text-decoration: none; }
 <script src="nav.js"></script>
 
 <script>
+// Pročisti localStorage od duplicit při načtení
+(function() {
+  try {
+    ['lop_wishlist_v2','lop_visited_v1'].forEach(key => {
+      const raw = JSON.parse(localStorage.getItem(key) || '[]');
+      const clean = [...new Set(raw.map(String).filter(x => x && x !== 'undefined' && x !== 'null'))];
+      if (clean.length !== raw.length) localStorage.setItem(key, JSON.stringify(clean));
+    });
+  } catch(e) {}
+})();
+
 const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
 const CAT_LETTER = { hist: 'H', arch: 'A', fun: 'Z' };
 const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', fun: 'Zajímavosti' };

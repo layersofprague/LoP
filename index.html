@@ -1823,6 +1823,17 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <script>
+// Pročisti localStorage od duplicit při načtení
+(function() {
+  try {
+    ['lop_wishlist_v2','lop_visited_v1'].forEach(key => {
+      const raw = JSON.parse(localStorage.getItem(key) || '[]');
+      const clean = [...new Set(raw.map(String).filter(x => x && x !== 'undefined' && x !== 'null'))];
+      if (clean.length !== raw.length) localStorage.setItem(key, JSON.stringify(clean));
+    });
+  } catch(e) {}
+})();
+
 /* ═══════════════ SUPABASE SYNC ═══════════════ */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
