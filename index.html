@@ -1860,7 +1860,7 @@ async function syncFromDB() {
       fetch(`${SUPA_URL}/rest/v1/visited?user_id=eq.${s.user.id}&select=place_id`,  { headers: authHeaders() })
     ]);
     if (wRes.ok) {
-      const remote = (await wRes.json()).map(r => r.place_id);
+      const remote = (await wRes.json()).map(r => r.place_id).filter(id => (typeof LOCATIONS !== 'undefined' ? LOCATIONS : PLACES || []).find(p => String(p.id) === String(id)));
       const local  = [...new Set(JSON.parse(localStorage.getItem('lop_wishlist_v2')||'[]').map(String))];
       localStorage.setItem('lop_wishlist_v2', JSON.stringify([...new Set([...remote, ...local])]));
       // Nahraj lokální záznamy které DB nezná
