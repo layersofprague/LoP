@@ -34,7 +34,7 @@ function _wishCount() {
   try {
     const w = JSON.parse(localStorage.getItem('lop_wishlist_v2') || '[]');
     if (!Array.isArray(w)) return 0;
-    return new Set(w.map(String).filter(x => x && x !== 'undefined' && x !== 'null')).size;
+    return new Set(w.map(String).filter(x => x && x !== 'undefined' && x !== 'null' && /^H\d+$/.test(x))).size;
   } catch(e) { return 0; }
 }
 
