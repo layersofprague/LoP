@@ -460,6 +460,8 @@ a { color: inherit; text-decoration: none; }
 }
 .chip.state-dim { opacity: .55; }
 .chip.state-dim .chip-swatch { opacity: .4; }
+.chip.state-force { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; opacity: 1; }
+.chip.state-force .chip-swatch { background: var(--paper) !important; }
 .chip.state-dim::after {
   content: '';
   display: inline-block;
@@ -470,8 +472,9 @@ a { color: inherit; text-decoration: none; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
   flex-shrink: 0;
 }
-.chip.state-hide { opacity: .35; }
-.chip.state-hide .chip-swatch { background: transparent !important; border: 1px solid currentColor; }
+.chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; opacity: 1; }
+.chip.state-hide .chip-swatch { background: var(--paper) !important; }
+.chip.state-hide::after { background: var(--paper) !important; }
 .chip .chip-count {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; color: var(--ink-4);
@@ -2410,6 +2413,7 @@ window._markers = _markers;
 const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
 window.FILTER = FILTER;
 const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
+const FILTER_NEXT_WISHED = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const FILTER_OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
 const ERAS = [
@@ -2510,10 +2514,11 @@ function buildChips() {
   el.querySelectorAll('.chip[data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
       const f = btn.dataset.filter;
-      FILTER[f] = FILTER_NEXT[FILTER[f]];
-      btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[f] === 'dim')  btn.classList.add('state-dim');
-      else if (FILTER[f] === 'hide') btn.classList.add('state-hide');
+      FILTER[f] = (f === 'wished' ? FILTER_NEXT_WISHED : FILTER_NEXT)[FILTER[f]];
+      btn.classList.remove('state-dim', 'state-hide', 'state-force');
+      if (FILTER[f] === 'dim')   btn.classList.add('state-dim');
+      else if (FILTER[f] === 'hide')  btn.classList.add('state-hide');
+      else if (FILTER[f] === 'force') btn.classList.add('state-force');
       applyFilter();
     });
   });
@@ -2636,7 +2641,7 @@ function resetFilters() {
   FILTER.visited = FILTER.wished = 'full';
   ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
   DIST_STATE.max = null;
-  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim'));
+  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force'));
   const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
   const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
   renderEra();
@@ -2697,8 +2702,10 @@ function applyFilter() {
     const visState  = FILTER.visited;
     let s = 'full';
 
+    // force wished = vždy zobrazit wished piny
+    if (wishState === 'force' && wished) { s = 'full'; }
     // Tvrdé skrytí — okamžitě hide bez hlasování
-    if (catState  === 'hide') { s = 'hide'; }
+    else if (catState  === 'hide') { s = 'hide'; }
     else if (wishState === 'hide' && wished)  { s = 'hide'; }
     else if (visState  === 'hide' && visited) { s = 'hide'; }
     else {
