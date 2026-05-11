@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#1a1a18"/>
+<title>O projektu — LayersOfPrague</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:   #eeefeb;
+  --paper-2: #e6e7e2;
+  --paper-3: #dadcd4;
+  --ink:     #1a1a18;
+  --ink-2:   #3a3a36;
+  --ink-3:   #6a6a64;
+  --ink-4:   #9a9a94;
+  --rule:    #cbcec5;
+  --accent:  #b04020;
+  --ok:      #3d7a4a;
+  --cat-fun: #E0A020;
+  --ease:    cubic-bezier(.22,.8,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper); color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ── LAYOUT ── */
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 120px;
+}
+@media (min-width: 820px) {
+  .page { padding: 40px clamp(24px, 5vw, 64px) 80px; }
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 48px 0 56px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 56px;
+}
+.hero-kick {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-kick::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--ink-3);
+}
+.hero-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(42px, 10vw, 72px);
+  line-height: .95; letter-spacing: -.03em;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.hero-title em { font-style: italic; color: var(--ink-3); }
+.hero-title .accent { color: var(--accent); }
+.hero-body {
+  font-size: 16px; line-height: 1.65;
+  color: var(--ink-2); max-width: 38em;
+}
+.hero-body p + p { margin-top: 14px; }
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 64px;
+}
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-3);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
+}
+
+/* ── HOW IT WORKS ── */
+.steps {
+  display: flex; flex-direction: column; gap: 0;
+}
+.step {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.step:last-child { border-bottom: none; }
+.step-num {
+  font-family: 'Fraunces', serif;
+  font-size: 36px; font-weight: 400; font-style: italic;
+  color: var(--rule-2, #b8bcb0);
+  line-height: 1; padding-top: 2px;
+}
+.step-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px; font-weight: 500;
+  margin-bottom: 4px; line-height: 1.2;
+}
+.step-desc {
+  font-size: 13.5px; color: var(--ink-3); line-height: 1.55;
+}
+
+/* ── COMPARE TABLE ── */
+.compare {
+  border: 1px solid var(--rule);
+  border-radius: 14px; overflow: hidden;
+}
+.compare-head {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--rule);
+}
+.compare-head-cell {
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3); text-align: center;
+}
+.compare-head-cell:first-child { text-align: left; }
+.compare-head-cell.insider {
+  background: var(--ink); color: var(--paper);
+  border-radius: 0 12px 0 0;
+}
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  border-bottom: 1px solid var(--rule);
+  transition: background .12s;
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-row:hover { background: var(--paper-2); }
+.compare-cell {
+  padding: 11px 16px;
+  font-size: 13.5px; color: var(--ink-2);
+  display: flex; align-items: center;
+}
+.compare-cell.center { justify-content: center; }
+.compare-cell.insider-col { background: rgba(26,24,20,.03); }
+.check {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--ok); color: white;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.check svg { width: 10px; height: 10px; }
+.dash { width: 14px; height: 1px; background: var(--rule-2, #b8bcb0); }
+
+/* ── PRICING ── */
+.pricing {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 560px) {
+  .pricing { grid-template-columns: 1fr 1fr 1fr; }
+}
+.price-card {
+  border: 1px solid var(--rule);
+  border-radius: 14px; padding: 22px 20px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.price-card:hover {
+  border-color: var(--rule-2, #b8bcb0);
+  box-shadow: 0 4px 24px rgba(26,24,20,.07);
+}
+.price-card.featured {
+  border-color: var(--ink);
+  background: var(--ink); color: var(--paper);
+}
+.price-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.price-card.featured .price-name { color: rgba(238,239,235,.55); }
+.price-amount {
+  font-family: 'Fraunces', serif;
+  font-size: 40px; font-weight: 400; line-height: 1;
+  letter-spacing: -.02em;
+}
+.price-amount span {
+  font-size: 15px; font-weight: 400;
+  color: var(--ink-3); letter-spacing: 0;
+  font-family: 'Inter', sans-serif;
+}
+.price-card.featured .price-amount span { color: rgba(238,239,235,.55); }
+.price-perks {
+  display: flex; flex-direction: column; gap: 7px;
+  flex: 1;
+}
+.price-perk {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: 13px; line-height: 1.4; color: var(--ink-2);
+}
+.price-card.featured .price-perk { color: rgba(238,239,235,.8); }
+.perk-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--rule-2, #b8bcb0); flex-shrink: 0; margin-top: 5px;
+}
+.price-card.featured .perk-dot { background: var(--cat-fun); }
+.price-perk.highlight { color: var(--ink); font-weight: 500; }
+.price-card.featured .price-perk.highlight { color: var(--paper); }
+.price-btn-wrap {
+  margin-top: auto;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.price-note {
+  font-size: 11px; color: var(--ink-4); text-align: center;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: .06em;
+}
+.price-card.featured .price-note { color: rgba(238,239,235,.4); }
+.price-btn {
+  width: 100%; padding: 13px;
+  border: 1px solid var(--rule); border-radius: 9px;
+  background: transparent; color: var(--ink-3);
+  font-size: 13.5px; font-weight: 500; letter-spacing: .01em;
+  transition: all .15s;
+}
+.price-btn:hover { background: var(--paper-2); color: var(--ink); border-color: var(--ink); }
+.price-card.featured .price-btn {
+  background: var(--cat-fun); color: var(--ink);
+  border-color: var(--cat-fun);
+  font-weight: 600;
+}
+.price-card.featured .price-btn:hover { background: #c88c18; border-color: #c88c18; }
+
+/* ── MANIFESTO ── */
+.manifesto {
+  padding: 40px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 56px;
+}
+.manifesto-text {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(20px, 4vw, 28px);
+  font-weight: 400; font-style: italic;
+  line-height: 1.45; color: var(--ink-2);
+  max-width: 28em;
+}
+.manifesto-text em { font-style: normal; color: var(--ink); }
+
+/* ── AUTOR ── */
+.autor-block {
+  display: flex; gap: 20px; align-items: flex-start;
+}
+.autor-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--paper-3); border: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-size: 24px; font-style: italic;
+  color: var(--ink-3); flex-shrink: 0;
+}
+.autor-name {
+  font-family: 'Fraunces', serif;
+  font-size: 18px; font-weight: 500; margin-bottom: 4px;
+}
+.autor-role {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 10px;
+}
+.autor-bio { font-size: 13.5px; color: var(--ink-3); line-height: 1.6; }
+
+/* ── DONÁTOR ── */
+.donator-block {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+  padding: 28px 28px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.donator-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px; font-weight: 400; margin-bottom: 6px;
+}
+.donator-desc {
+  font-size: 13.5px; line-height: 1.6;
+  color: rgba(238,239,235,.65); max-width: 36em;
+}
+.donator-btn {
+  flex-shrink: 0;
+  padding: 13px 24px;
+  background: var(--paper); color: var(--ink);
+  border-radius: 9px;
+  font-size: 14px; font-weight: 500;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.donator-btn:hover { background: var(--paper-2); }
+
+/* ── JOIN AUTOR ── */
+.join-intro { margin-bottom: 20px; }
+.join-text { font-size: 14px; color: var(--ink-3); line-height: 1.6; max-width: 40em; }
+.join-cards {
+  display: grid; grid-template-columns: 1fr; gap: 14px;
+}
+@media (min-width: 560px) {
+  .join-cards { grid-template-columns: 1fr 1fr; }
+}
+.join-card {
+  border: 1px solid var(--rule); border-radius: 14px;
+  padding: 22px 20px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.join-card-dark {
+  background: var(--paper-2);
+}
+.join-card-icon { color: var(--ink-3); }
+.join-card-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px; font-weight: 500;
+}
+.join-card-desc { font-size: 13px; color: var(--ink-3); line-height: 1.55; }
+.join-card-perks { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.join-perk {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--ink-2);
+}
+
+/* ── FINAL CTA ── */
+.final-cta {
+  margin-top: 56px; padding-top: 48px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.final-cta-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(28px, 6vw, 40px); font-weight: 400;
+  letter-spacing: -.02em; margin-bottom: 8px;
+}
+.final-cta-title em { font-style: italic; color: var(--ink-3); }
+.final-cta-sub { font-size: 14px; color: var(--ink-3); margin-bottom: 28px; }
+.cta-btns {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.cta-btn-primary {
+  padding: 14px 28px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  transition: background .15s;
+}
+.cta-btn-primary:hover { background: var(--ink-2); }
+.cta-btn-secondary {
+  padding: 14px 28px;
+  background: transparent; color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 10px;
+  font-size: 14px;
+  transition: all .15s;
+}
+.cta-btn-secondary:hover { border-color: var(--ink); background: var(--paper-2); }
+</style>
+</head>
+<body>
+
+<div id="lop-header"></div>
+<script src="header.js"></script>
+
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-kick">O projektu</div>
+    <h1 class="hero-title">Praha má<br/><em>více vrstev,</em><br/>než se zdá</h1>
+    <div class="hero-body">
+      <p>LayersOfPrague není turistickým seznamem, i když tak může sloužit. Jde o způsob, jak Prahu skutečně poznat. Přímo na konkrétních místech se můžete přesvědčit, jak se formovala její podoba, jak se psala její historie, připomenout si zlomové události nebo osobnosti.</p>
+    </div>
+  </div>
+
+  <!-- ── JAK TO FUNGUJE ── -->
+  <div class="section">
+    <div class="section-label">Jak to funguje</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Objevuj na mapě</div>
+          <p class="step-desc">Stovky míst rozdělených do kategorií — historické stavby, architektonické skvosty, zapomenuté příběhy. Filtruj, ukládej, plánuj trasy.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Přijď na místo</div>
+          <p class="step-desc">Kompas tě navede přímo k cíli. Když dorazíš, odemkneš plný obsah — dobové fotografie, architektonické detaily, historické zajímavosti.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Uvidíš minulost přes kameru</div>
+          <p class="step-desc">AR vrstva překryje živý obraz kamery historickou fotografií ze stejného místa. Táhni prstem a prolínáš tehdejší Praha s dnešní.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Sbírej a sdílej</div>
+          <p class="step-desc">Každé navštívené místo ti přidá body. Sestavuj vlastní procházky, sleduj svůj postup a sdílej AR snímky.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MANIFESTO ── -->
+  <div class="manifesto">
+    <p class="manifesto-text">„Většina lidí míjí zajímavá místa nebo místa zajímavých událostí, aniž by o nich věděli nebo si je uměli představit. Chtěli jsme nástroj, který ukáže <em>více.</em> Přímo na konkrétním místě, přímo přes nejdostupnější zařízení — tvůj telefon."</p>
+  </div>
+
+  <!-- ── COMPARE ── -->
+  <div class="section">
+    <div class="section-label">Co dostaneš</div>
+    <div class="compare">
+      <div class="compare-head">
+        <div class="compare-head-cell">Funkce</div>
+        <div class="compare-head-cell">Zdarma</div>
+        <div class="compare-head-cell insider">Insider</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Mapa a všechna místa</div>
+        <div class="compare-cell center"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Wishlist a navštívená místa</div>
+        <div class="compare-cell center"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Soutěže a žebříčky</div>
+        <div class="compare-cell center"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Pravidelný nový obsah</div>
+        <div class="compare-cell center"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Kurátorované trasy</div>
+        <div class="compare-cell center"><div class="dash"></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Zajímavosti</div>
+        <div class="compare-cell center"><div class="dash"></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">AR overlay — then &amp; now</div>
+        <div class="compare-cell center"><div class="dash"></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Offline procházky</div>
+        <div class="compare-cell center"><div class="dash"></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Bonusová místa pouze pro předplatitele</div>
+        <div class="compare-cell center"><div class="dash"></div></div>
+        <div class="compare-cell center insider-col"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRICING ── -->
+  <div class="section">
+    <div class="section-label">Předplatné</div>
+    <div class="pricing">
+
+      <!-- Zdarma -->
+      <div class="price-card">
+        <div class="price-name">Zdarma</div>
+        <div class="price-amount">0 <span>Kč</span></div>
+        <div class="price-perks">
+          <div class="price-perk"><span class="perk-dot"></span>Neomezené užívání</div>
+          <div class="price-perk"><span class="perk-dot"></span>Mapa a přehled</div>
+          <div class="price-perk"><span class="perk-dot"></span>Filtrování</div>
+          <div class="price-perk"><span class="perk-dot"></span>Plánování návštěv</div>
+          <div class="price-perk"><span class="perk-dot"></span>Navigace k místům</div>
+          <div class="price-perk"><span class="perk-dot"></span>Přehled navštívených míst</div>
+          <div class="price-perk"><span class="perk-dot"></span>Informace o místech</div>
+        </div>
+        <div class="price-btn-wrap">
+          <button class="price-btn" onclick="window.lopAuth ? window.lopAuth.open('register') : location.href='login.html'">Začít zdarma</button>
+        </div>
+      </div>
+
+      <!-- Týden -->
+      <div class="price-card">
+        <div class="price-name">Insider · týden</div>
+        <div class="price-amount">49 <span>Kč / týden</span></div>
+        <div class="price-perks">
+          <div class="price-perk highlight"><span class="perk-dot"></span>Vše ze zdarma</div>
+          <div class="price-perk"><span class="perk-dot"></span>Zajímavosti</div>
+          <div class="price-perk"><span class="perk-dot"></span>AR overlay</div>
+          <div class="price-perk"><span class="perk-dot"></span>Kurátorované trasy</div>
+        </div>
+        <div class="price-btn-wrap">
+          <div class="price-note">Ideální pro výlet</div>
+          <button class="price-btn" onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html'">Vyzkoušet</button>
+        </div>
+      </div>
+
+      <!-- Měsíc -->
+      <div class="price-card featured">
+        <div class="price-name">Insider · měsíc</div>
+        <div class="price-amount">99 <span>Kč / měsíc</span></div>
+        <div class="price-perks">
+          <div class="price-perk highlight"><span class="perk-dot"></span>Vše ze zdarma</div>
+          <div class="price-perk"><span class="perk-dot"></span>Zajímavosti</div>
+          <div class="price-perk"><span class="perk-dot"></span>AR overlay</div>
+          <div class="price-perk"><span class="perk-dot"></span>Kurátorované trasy</div>
+          <div class="price-perk"><span class="perk-dot"></span>Offline procházky</div>
+          <div class="price-perk"><span class="perk-dot"></span>Pravidelný nový obsah</div>
+          <div class="price-perk highlight"><span class="perk-dot"></span>Bonusová místa jen pro předplatitele</div>
+        </div>
+        <div class="price-btn-wrap">
+          <div class="price-note">Úspora ~40 % vs týdenní</div>
+          <button class="price-btn" onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html'">Stát se Insiderem</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PROČ ZPOPLATNĚNÍ ── -->
+  <div class="section">
+    <div class="section-label">Proč je část obsahu zpoplatněna</div>
+    <div class="hero-body" style="font-size:14px;font-style:italic;font-family:'Fraunces',serif;color:var(--ink-2)">
+      <p>Zajištění provozu a rozvoje projektu s sebou nese náklady — časové i finanční. Zajímavých historických fotografií lze nalézt nepřeberné množství, nicméně použít lze pouze zlomek. Každý snímek musí mít zajištěné licencování z volně šiřitelných zdrojů, nebo je nutné autorská práva zakoupit a ke každému vytvořit obsah odpovídající kvality.</p>
+      <p style="margin-top:14px">Předplatné nám umožňuje projekt udržovat, přidávat nová místa a AR vrstvy a dlouhodobě budovat něco, co má smysl.</p>
+    </div>
+  </div>
+
+  <!-- ── DONÁTOR ── -->
+  <div class="section">
+    <div class="section-label">Podpořit projekt</div>
+    <div class="donator-block">
+      <div class="donator-body">
+        <h3 class="donator-title">Pomoci lze i jinak než penězi</h3>
+        <p class="donator-desc">Máte zajímavou historickou fotografii, příběh, rodinnou vzpomínku nebo odborné znalosti? I to je pro projekt nesmírně cenné. A pokud chcete podpořit finančně — jednorázovým příspěvkem nebo dlouhodobější spoluprací — rádi se domluvíme na poděkování, věnování, licenčních či jiných podmínkách, nebo přístupu k fotografiím ve vysokém rozlišení.</p>
+      </div>
+      <a class="donator-btn" href="mailto:ahoj@layersofprague.cz">Napište nám</a>
+    </div>
+  </div>
+
+  <!-- ── AUTOR ── -->
+  <div class="section">
+    <div class="section-label">Za projektem</div>
+    <div class="autor-block">
+      <div class="autor-avatar">L</div>
+      <div>
+        <div class="autor-name">Autor projektu</div>
+        <div class="autor-role">Zakladatel · LayersOfPrague</div>
+        <p class="autor-bio" style="font-style:italic;font-family:'Fraunces',serif">Praha je město, které jsem procházel roky — a přesto jsem pořád narážel na místa a příběhy, které jsem neznal. A když jsem je znal já, neznali je ostatní. Projekt LayersOfPrague vznikl z touhy poodkrýt tyto vrstvy s ostatními. Nejde o encyklopedii, jde o živý průvodce, paměť města, která roste s každým zastavením — a vy do ní můžete blíže nahlédnout.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STAŇTE SE AUTOREM ── -->
+  <div class="section">
+    <div class="section-label">Přidejte se k týmu</div>
+    <div class="autor-join">
+      <div class="join-intro">
+        <p class="join-text">Víte o místě, které na mapě chybí? Máte fotografii, příběh, historický detail? LayersOfPrague roste díky lidem, kteří Prahu znají a chtějí se podělit.</p>
+      </div>
+      <div class="join-cards">
+        <div class="join-card">
+          <div class="join-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div class="join-card-title">Autor</div>
+          <p class="join-card-desc">Přidávejte nová místa, fotografie a příběhy. Za aktivní příspěvky získáte Insider přístup zdarma — a časem i finanční odměnu za obsah, který se osvědčí.</p>
+          <div class="join-card-perks">
+            <div class="join-perk"><div class="check" style="width:14px;height:14px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Insider zdarma</div>
+            <div class="join-perk"><div class="check" style="width:14px;height:14px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Jméno u vašich míst</div>
+            <div class="join-perk"><div class="check" style="width:14px;height:14px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Časem finanční odměna</div>
+          </div>
+          <button class="price-btn" style="margin-top:4px" onclick="window.lopAuth ? window.lopAuth.open('register') : location.href='login.html'">Chci přispívat</button>
+        </div>
+        <div class="join-card join-card-dark">
+          <div class="join-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="join-card-title">Hodnoťte místa</div>
+          <p class="join-card-desc">I jako běžný uživatel přispíváte — hodnocením míst, která jste navštívili, pomáháte ostatním i týmu kurátorů při výběru nového obsahu.</p>
+          <div class="join-card-perks">
+            <div class="join-perk"><div class="check" style="width:14px;height:14px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Lajky a hodnocení</div>
+            <div class="join-perk"><div class="check" style="width:14px;height:14px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Body za navštívená místa</div>
+            <div class="join-perk"><div class="check" style="width:14px;height:14px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Žebříček přispěvatelů</div>
+          </div>
+          <button class="price-btn" style="margin-top:4px" onclick="location.href='index.html'">Otevřít mapu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FINAL CTA ── -->
+  <div class="final-cta">
+    <h2 class="final-cta-title">Začni <em>objevovat</em></h2>
+    <p class="final-cta-sub">Mapa čeká. Praha také.</p>
+    <div class="cta-btns">
+      <button class="cta-btn-primary" onclick="location.href='index.html'">Otevřít mapu</button>
+      <button class="cta-btn-secondary" onclick="window.lopAuth ? window.lopAuth.open('register') : location.href='login.html'">Vytvořit účet</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="lop-nav"></div>
+<script src="nav.js"></script>
+<script src="auth-modal.js"></script>
+</body>
+</html>
