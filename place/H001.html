@@ -1066,12 +1066,16 @@ let _syncOffline = false;
 function _injectSyncUI() {
   if (document.getElementById('lop-sync-bar')) return;
   const style = document.createElement('style');
-  style.textContent = `
-#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:var(--ink,#1a1a18);color:var(--paper,#eeefeb);padding:11px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:'Inter',system-ui,sans-serif;}
+  style.textContent = `#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.82);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+@media(max-width:819px){#lop-sync-bar{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}
+@media(min-width:820px){#lop-sync-bar{bottom:0;right:84px;}}
 #lop-sync-bar.show{transform:translateY(0);}
 #lop-sync-bar .sb-text{flex:1;}
-#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.35);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}
+#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.35);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}
+#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}
 #lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}
+@media(max-width:819px){#lop-sync-spinner{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}
+@media(min-width:820px){#lop-sync-spinner{bottom:0;right:84px;}}
 #lop-sync-spinner.show{opacity:1;}
 @keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}`;
   document.head.appendChild(style);
@@ -1097,15 +1101,18 @@ async function syncFromDB(onDone) {
   const ctrl = new AbortController();
   const tid  = setTimeout(() => ctrl.abort(), SYNC_TIMEOUT_MS);
   try {
-    const [wRes, vRes, rRes] = await Promise.all([
+    const [wRes, vRes] = await Promise.all([
       fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders(), signal: ctrl.signal }),
       fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders(), signal: ctrl.signal }),
-      fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role',     { headers: authHeaders(), signal: ctrl.signal }),
     ]);
     clearTimeout(tid);
     if (wRes.ok) localStorage.setItem(WISH_KEY,  JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
     if (vRes.ok) localStorage.setItem(VISIT_KEY, JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
-    if (rRes.ok) { const rows = await rRes.json(); if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }
+    // Role — separátní fetch, nezastaví sync při chybě
+    fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : [])
+      .then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); })
+      .catch(() => {});
     _showSyncSpinner(false);
     _syncOffline = false;
     if (onDone) onDone();
