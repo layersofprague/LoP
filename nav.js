@@ -29,6 +29,14 @@ function _activePage() {
   return '';
 }
 
+/* ── Auth check ── */
+function _isLoggedIn() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    return !!(s && s.access_token && s.user);
+  } catch(e) { return false; }
+}
+
 /* ── Wishlist počet ── */
 function _wishCount() {
   try {
@@ -109,6 +117,15 @@ const CSS = `
     width: 2px; height: 24px;
   }
 }
+
+.lop-n-badge-lock {
+  position: absolute; top: 0; right: 0;
+  width: 14px; height: 14px;
+  background: var(--paper, #eeefeb);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.lop-n-item { position: relative; }
 `;
 
 /* ── HTML ── */
@@ -138,9 +155,10 @@ function _html() {
     },
     {
       id: 'wish',
-      href: root + 'prehled.html?filter=wished',
+      href: _isLoggedIn() ? root + 'prehled.html?filter=wished' : root + 'login.html?return=' + encodeURIComponent(location.href),
       label: 'Plán',
-      badge: wc,
+      badge: _isLoggedIn() ? wc : null,
+      locked: !_isLoggedIn(),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`
     }
   ];
@@ -150,6 +168,7 @@ function _html() {
       ${item.svg}
       <span class="lop-n-label">${item.label}</span>
       ${item.badge ? `<span class="lop-n-badge${item.badge > 0 ? ' visible' : ''}">${item.badge}</span>` : ''}
+      ${item.locked ? `<span class="lop-n-badge-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>` : ''}
     </a>
   `).join('');
 }
