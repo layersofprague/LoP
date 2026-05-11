@@ -386,18 +386,24 @@ async function loadPlaces() { // vrací Promise
     return;
   }
   updateCounts();
-  render();
 }
 
 /* ── Počty ── */
 function updateCounts() {
-  const visited = getVisited();
-  document.getElementById('ctHist').textContent   = PLACES.filter(p => p.cat === 'hist').length;
-  document.getElementById('ctArch').textContent   = PLACES.filter(p => p.cat === 'arch').length;
-  document.getElementById('ctFun').textContent    = PLACES.filter(p => p.cat === 'fun').length;
-  document.getElementById('ctVisited').textContent = PLACES.filter(p => visited.includes(String(p.id))).length;
-  const wished = getWished();
-  document.getElementById('ctWished').textContent  = PLACES.filter(p => wished.includes(String(p.id))).length;
+  const visited  = getVisited();
+  const wished   = getWished();
+  const loggedIn = isLoggedIn();
+  const lockSVG  = '<svg class="chip-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  const el = id => document.getElementById(id);
+  if (el('ctHist')) el('ctHist').textContent = PLACES.filter(p=>p.cat==='hist').length;
+  if (el('ctArch')) el('ctArch').textContent = PLACES.filter(p=>p.cat==='arch').length;
+  if (el('ctFun'))  el('ctFun').textContent  = PLACES.filter(p=>p.cat==='fun').length;
+  const chipV = el('chipVisited'), chipW = el('chipWished');
+  const wrapV = el('ctVisitedWrap'), wrapW = el('ctWishedWrap');
+  if (chipV) chipV.classList.toggle('chip-locked', !loggedIn);
+  if (chipW) chipW.classList.toggle('chip-locked', !loggedIn);
+  if (wrapV) wrapV.innerHTML = loggedIn ? '<span class="count">' + PLACES.filter(p=>visited.includes(String(p.id))).length + '</span>' : lockSVG;
+  if (wrapW) wrapW.innerHTML = loggedIn ? '<span class="count">' + PLACES.filter(p=>wished.includes(String(p.id))).length + '</span>' : lockSVG;
 }
 
 /* ── Filtr — přesně jako index.html ── */
@@ -405,20 +411,30 @@ const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'f
 const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
 const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
-const RANK   = { full:0, hide:1 };
+const RANK   = { full:0, dim:1, hide:2, force:0 };
 const BETTER = (a,b) => RANK[a] <= RANK[b] ? a : b;
 
 function toggleCat(cat) {
   FILTER[cat] = FILTER_NEXT[FILTER[cat]];
   const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
-  if (btn) { btn.classList.remove('state-hide'); if (FILTER[cat]==='hide') btn.classList.add('state-hide'); }
+  if (btn) {
+    btn.classList.remove('state-dim','state-hide','state-active');
+    if (FILTER[cat]==='dim')  btn.classList.add('state-dim');
+    if (FILTER[cat]==='hide') btn.classList.add('state-hide');
+  }
   render();
 }
 
 function setFilter(cat) {
-  FILTER[cat] = FILTER_NEXT[FILTER[cat]];
+  if (!isLoggedIn()) { location.href = 'login.html?return=' + encodeURIComponent(location.href); return; }
+  FILTER[cat] = (cat==='wished' ? FILTER_NEXT_WISHED : cat==='visited' ? FILTER_NEXT_VISITED : FILTER_NEXT)[FILTER[cat]];
   const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
-  if (btn) { btn.classList.remove('state-hide'); if (FILTER[cat]==='hide') btn.classList.add('state-hide'); }
+  if (btn) {
+    btn.classList.remove('state-dim','state-hide','state-active');
+    if (FILTER[cat]==='dim')   btn.classList.add('state-dim');
+    if (FILTER[cat]==='hide')  btn.classList.add('state-hide');
+    if (FILTER[cat]==='force') btn.classList.add('state-active');
+  }
   render();
 }
 
