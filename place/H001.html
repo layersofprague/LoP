@@ -744,7 +744,7 @@ a { color: inherit; text-decoration: none; }
       <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
-        <a style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+        <a style="font-size:13px" onclick="location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
       </div>
     </div>
   </div>
@@ -885,26 +885,37 @@ function _closeCopyOutside(e) {
 }
 
 /* ── SYNC ── */
-syncFromDB().then(() => updateWishUI());
+syncFromDB(() => { updateWishUI(); updateInsiderGate(); });
 
 /* ── AUTH CHECK ── */
-(function() {
-  function isLoggedIn() {
-    try {
-      const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
-      return !!(s && s.access_token && s.user);
-    } catch(e) { return false; }
+function updateInsiderGate() {
+  const loggedIn = !!(()=>{ try { const s = JSON.parse(localStorage.getItem('lop_auth_session')||'null'); return s&&s.access_token&&s.user; } catch(e){} })();
+  const role     = localStorage.getItem('lop_user_role') || 'member';
+  const insider  = ['insider','author','admin'].includes(role);
+
+  const full   = document.getElementById('insiderFull');
+  const gate   = document.getElementById('insiderGate');
+  const teaser = document.getElementById('insiderTeaser');
+  const txt    = document.getElementById('insiderGateText');
+  const link   = document.getElementById('insiderGateLink');
+
+  if (full)   full.classList.toggle('visible', insider);
+  if (gate)   gate.classList.toggle('hidden',  insider);
+  if (teaser) teaser.style.display = insider ? 'none' : '';
+
+  if (gate && !insider) {
+    if (!loggedIn) {
+      if (txt)  txt.textContent = 'Pro celý obsah se';
+      if (link) { link.textContent = 'přihlaste'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
+    } else {
+      if (txt)  txt.textContent = 'Pro celý obsah';
+      if (link) { link.textContent = 'upgradujte na Insider'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
+    }
   }
-  const loggedIn = isLoggedIn();
-  const full    = document.getElementById('insiderFull');
-  const gate    = document.getElementById('insiderGate');
-  const teaser  = document.getElementById('insiderTeaser');
-  if (full)   full.classList.toggle('visible', loggedIn);
-  if (gate)   gate.classList.toggle('hidden',  loggedIn);
-  if (teaser) teaser.style.display = loggedIn ? 'none' : '';
   const btn = document.getElementById('lopHProfile');
   if (btn && loggedIn) btn.classList.add('logged-in');
-})();
+}
+updateInsiderGate();
 
 /* ── SLIDER ── */
 (function() {
@@ -1037,39 +1048,77 @@ function authHeaders() {
     'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
 }
 function dbAddWish(placeId) {
+  if (_syncOffline) return;
   const s = getSession(); if (!s?.user) return;
   fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
     body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
 }
 function dbRemoveWish(placeId) {
+  if (_syncOffline) return;
   const s = getSession(); if (!s?.user) return;
   fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&place_id=eq.' + placeId,
     { method:'DELETE', headers: authHeaders() }).catch(()=>{});
 }
-async function syncFromDB() {
-  const s = getSession(); if (!s?.access_token || !s?.user) return;
-  try {
-    const [wRes, vRes] = await Promise.all([
-      fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
-      fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders() })
-    ]);
-    if (wRes.ok) {
-      const remote = (await wRes.json()).map(r => r.place_id);
-      const local  = [...new Set(JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String))];
-      localStorage.setItem(WISH_KEY, JSON.stringify([...new Set([...remote, ...local])]));
-      local.filter(id => !remote.includes(id)).forEach(id => {
-        fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
-          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
-      });
-    }
-    if (vRes.ok) {
-      const remote = (await vRes.json()).map(r => r.place_id);
-      const local  = [...new Set(JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String))];
-      localStorage.setItem(VISIT_KEY, JSON.stringify([...new Set([...remote, ...local])]));
-    }
-  } catch(e) { console.warn('Sync failed:', e); }
+/* ── Sync UI ── */
+const SYNC_TIMEOUT_MS = 10000;
+let _syncOffline = false;
+
+function _injectSyncUI() {
+  if (document.getElementById('lop-sync-bar')) return;
+  const style = document.createElement('style');
+  style.textContent = `
+#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:var(--ink,#1a1a18);color:var(--paper,#eeefeb);padding:11px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:'Inter',system-ui,sans-serif;}
+#lop-sync-bar.show{transform:translateY(0);}
+#lop-sync-bar .sb-text{flex:1;}
+#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.35);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}
+#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}
+#lop-sync-spinner.show{opacity:1;}
+@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}`;
+  document.head.appendChild(style);
+  const spinner = document.createElement('div'); spinner.id = 'lop-sync-spinner'; document.body.appendChild(spinner);
+  const bar = document.createElement('div'); bar.id = 'lop-sync-bar';
+  bar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se načíst data ze serveru. Zobrazujeme naposledy uložený stav.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>`;
+  document.body.appendChild(bar);
 }
-const VOTE_KEY = 'lop_vote_' + PLACE_ID; // localStorage — pamatuje hlas uživatele
+function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
+function _showSyncBar(on)     { const el = document.getElementById('lop-sync-bar');     if (el) el.classList.toggle('show', on); }
+
+window._lopSyncRetry = () => {
+  _showSyncBar(false);
+  syncFromDB(() => { updateWishUI(); updateInsiderGate(); });
+};
+
+async function syncFromDB(onDone) {
+  const s = getSession(); if (!s?.access_token || !s?.user) return;
+  _injectSyncUI();
+  _showSyncSpinner(true);
+  _showSyncBar(false);
+  _syncOffline = false;
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), SYNC_TIMEOUT_MS);
+  try {
+    const [wRes, vRes, rRes] = await Promise.all([
+      fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders(), signal: ctrl.signal }),
+      fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders(), signal: ctrl.signal }),
+      fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role',     { headers: authHeaders(), signal: ctrl.signal }),
+    ]);
+    clearTimeout(tid);
+    if (wRes.ok) localStorage.setItem(WISH_KEY,  JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
+    if (vRes.ok) localStorage.setItem(VISIT_KEY, JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
+    if (rRes.ok) { const rows = await rRes.json(); if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }
+    _showSyncSpinner(false);
+    _syncOffline = false;
+    if (onDone) onDone();
+  } catch(e) {
+    clearTimeout(tid);
+    _showSyncSpinner(false);
+    _syncOffline = true;
+    if (onDone) onDone();
+    _showSyncBar(true);
+    console.warn('Sync failed (offline fallback):', e);
+  }
+}
+const VOTE_KEY = 'lop_vote_' + PLACE_ID;
 
 // Unikátní token pro tohoto uživatele (anonymní, bez přihlášení)
 function getUserToken() {
@@ -1241,11 +1290,14 @@ updateWishUI();
 <script src="../auth-modal.js"></script>
 <script>
 window.lopAuth.onLogin(() => {
-  if (typeof syncFromDB === 'function') syncFromDB().then(() => updateWishUI());
-  else updateWishUI();
+  syncFromDB(() => { updateWishUI(); updateInsiderGate(); });
   if (window.lopHeader) window.lopHeader.refresh();
 });
-window.lopAuth.onLogout(() => { updateWishUI(); });
+window.lopAuth.onLogout(() => {
+  localStorage.removeItem('lop_user_role');
+  updateWishUI();
+  updateInsiderGate();
+});
 </script>
 </body>
 </html>
