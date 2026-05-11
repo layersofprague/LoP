@@ -456,7 +456,11 @@ function toggleCat(cat) {
 }
 
 function setFilter(cat) {
-  if (!isLoggedIn()) { location.href = 'login.html?return=' + encodeURIComponent(location.href); return; }
+  if (!isLoggedIn()) {
+    if (window.lopAuth) window.lopAuth.open();
+    else location.href = 'login.html?return=' + encodeURIComponent(location.href);
+    return;
+  }
   FILTER[cat] = (cat==='wished' ? FILTER_NEXT_WISHED : cat==='visited' ? FILTER_NEXT_VISITED : FILTER_NEXT)[FILTER[cat]];
   const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
   if (btn) {
@@ -521,7 +525,7 @@ function cardHTML(p, visited, wished) {
         <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         <span class="place-wish-lbl">Plán</span>
       </button>`
-    : `<button class="place-wish-btn" onclick="event.stopPropagation(); location.href='login.html?return='+encodeURIComponent(location.href);" title="Pro správu plánovaných míst je nutné přihlášení" style="position:relative">
+    : `<button class="place-wish-btn" onclick="event.stopPropagation(); window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href);" title="Pro správu plánovaných míst je nutné přihlášení" style="position:relative">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         <span class="place-wish-lock"></span>
         <span class="place-wish-lbl">Plán</span>
@@ -630,6 +634,19 @@ locateUser();
 requestAnimationFrame(() => { if (window.lopNav) window.lopNav.refresh(); });
 
 // Chipy se inicializují při render()
+</script>
+<script src="auth-modal.js"></script>
+<script>
+window.lopAuth.onLogin(() => {
+  if (typeof syncFromDB === 'function') syncFromDB().then(() => render());
+  else render();
+  if (window.lopHeader) window.lopHeader.refresh();
+  if (window.lopNav)    window.lopNav.refresh();
+});
+window.lopAuth.onLogout(() => {
+  render();
+  if (window.lopNav) window.lopNav.refresh();
+});
 </script>
 </body>
 </html>
