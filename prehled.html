@@ -119,6 +119,7 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   transition: background .15s;
   text-decoration: none; color: inherit;
+  width: 100%;
 }
 .place-card:first-of-type { border-top: none; padding-top: 6px; }
 .place-card:hover .place-name { color: var(--accent); }
@@ -130,6 +131,7 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   flex-shrink: 0;
   background: var(--paper-3);
+  grid-column: 1;
 }
 .place-thumb img {
   width: 100%; height: 100%;
@@ -177,7 +179,7 @@ a { color: inherit; text-decoration: none; }
 
 .place-meta {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  flex-shrink: 0; align-self: center;
+  flex-shrink: 0; align-self: center; justify-self: end;
 }
 .place-visited {
   width: 14px; height: 14px;
