@@ -460,6 +460,16 @@ a { color: inherit; text-decoration: none; }
 }
 .chip.state-dim { opacity: .55; }
 .chip.state-dim .chip-swatch { opacity: .4; }
+.chip.state-dim::after {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-left: 2px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+  flex-shrink: 0;
+}
 .chip.state-hide { opacity: .35; }
 .chip.state-hide .chip-swatch { background: transparent !important; border: 1px solid currentColor; }
 .chip .chip-count {
@@ -1834,6 +1844,26 @@ a { color: inherit; text-decoration: none; }
   } catch(e) {}
 })();
 
+
+/* ── Login snackbar ── */
+let _snackTimer = null;
+function showLoginSnackbar() {
+  const el = document.getElementById('lop-snackbar');
+  if (!el) return;
+  const ret = encodeURIComponent(location.href);
+  el.innerHTML = 'Pro pokročilou správu míst se <a href="login.html?return=' + ret + '">přihlaste</a>';
+  el.classList.add('show');
+  clearTimeout(_snackTimer);
+  _snackTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function isLoggedIn() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    return !!(s && s.access_token && s.user);
+  } catch(e) { return false; }
+}
+
 /* ═══════════════ SUPABASE SYNC ═══════════════ */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
@@ -2254,6 +2284,7 @@ function isWished(id) {
   return loc?.wished ?? false;
 }
 function toggleWish(id) {
+  if (!isLoggedIn()) { showLoginSnackbar(); return false; }
   const sid = String(id);
   let w = getWish().map(String);
   const was = w.includes(sid) || LOCATIONS.find(l => String(l.id) === sid)?.wished;
@@ -2378,7 +2409,7 @@ let _markers = [];
 window._markers = _markers;
 const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
 window.FILTER = FILTER;
-const FILTER_NEXT = { full:'hide', hide:'full' };
+const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
 const FILTER_OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
 const ERAS = [
@@ -2471,7 +2502,8 @@ function buildChips() {
       const cat = btn.dataset.cat;
       FILTER[cat] = FILTER_NEXT[FILTER[cat]];
       btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
+      if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
+      else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
       applyFilter();
     });
   });
@@ -2480,7 +2512,8 @@ function buildChips() {
       const f = btn.dataset.filter;
       FILTER[f] = FILTER_NEXT[FILTER[f]];
       btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[f] === 'hide') btn.classList.add('state-hide');
+      if (FILTER[f] === 'dim')  btn.classList.add('state-dim');
+      else if (FILTER[f] === 'hide') btn.classList.add('state-hide');
       applyFilter();
     });
   });
@@ -2657,10 +2690,24 @@ function applyFilter() {
     // Každý filtr relevantní pro tento pin hlasuje.
     // Výsledek = nejpříznivější hlas.
     // Relevantní filtry: kategorie vždy, wished pokud má příznak, visited pokud má příznak.
-    const votes = [FILTER[loc.cat]];
-    if (wished)  votes.push(FILTER.wished);
-    if (visited) votes.push(FILTER.visited);
-    let s = votes.reduce((best, v) => BETTER(best, v), 'hide');
+    // hide = tvrdé skrytí bez výjimek
+    // dim = měkké skrytí, příznaky mohou zachránit (hlasování)
+    const catState  = FILTER[loc.cat];
+    const wishState = FILTER.wished;
+    const visState  = FILTER.visited;
+    let s = 'full';
+
+    // Tvrdé skrytí — okamžitě hide bez hlasování
+    if (catState  === 'hide') { s = 'hide'; }
+    else if (wishState === 'hide' && wished)  { s = 'hide'; }
+    else if (visState  === 'hide' && visited) { s = 'hide'; }
+    else {
+      // Měkké skrytí — hlasování
+      const votes = [catState];
+      if (wished)  votes.push(wishState);
+      if (visited) votes.push(visState);
+      s = votes.reduce((best, v) => BETTER(best, v), 'hide');
+    }
 
     // Era a dist přebijí vše
     if (eraActive) {
@@ -2752,6 +2799,7 @@ function initMap() {
 
 /* ═══════════════ TOOLTIP WISHLIST TOGGLE ═══════════════ */
 function rtToggleWish(id, btn) {
+  if (!isLoggedIn()) { showLoginSnackbar(); return; }
   const now = toggleWish(id);
   btn.classList.toggle('active', now);
   btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
@@ -2940,6 +2988,7 @@ function closeSheet() { sheet.classList.remove('open'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 
 function sheetToggleWish(id) {
+  if (!isLoggedIn()) { showLoginSnackbar(); return; }
   const now = toggleWish(id);
   const btn = document.getElementById('sheetWishBtn');
   btn.classList.toggle('active', now);
@@ -3119,5 +3168,6 @@ if (document.readyState === 'loading') {
 }
 window.addEventListener('resize', adjustTopbarOffset);
 </script>
+<div id="lop-snackbar"></div>
 </body>
 </html>
