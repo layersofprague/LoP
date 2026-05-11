@@ -461,9 +461,10 @@ a { color: inherit; text-decoration: none; }
 .chip.state-dim { opacity: .55; }
 .chip.state-dim .chip-swatch { opacity: .4; }
 .chip.state-force { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; opacity: 1; }
-.chip[data-filter="visited"].state-force { background: var(--ok) !important; border-color: var(--ok) !important; }
+.chip[data-filter="visited"].state-force { background: var(--accent) !important; border-color: var(--accent) !important; }
 .chip.state-force .chip-swatch { background: var(--paper) !important; }
 .chip.state-force .chip-icon-heart { background: var(--paper) !important; }
+.chip.state-force svg { color: var(--paper) !important; fill: var(--paper) !important; stroke: var(--paper) !important; }
 .chip.state-force .chip-icon-check { background: var(--paper) !important; }
 .chip.state-dim::after {
   content: '';
