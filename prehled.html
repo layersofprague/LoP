@@ -236,6 +236,21 @@ a { color: inherit; text-decoration: none; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
 }
+
+.filter-chip.state-dim { opacity: .55; }
+.filter-chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
+.filter-chip.state-active { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; }
+.filter-chip.chip-locked { cursor: pointer; position: relative; }
+.filter-chip.chip-locked::before {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  font-size: 11px; padding: 6px 10px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .15s; z-index: 1000;
+}
+.filter-chip.chip-locked:hover::before { opacity: 1; }
 </style>
 </head>
 <body>
@@ -265,13 +280,13 @@ a { color: inherit; text-decoration: none; }
       <span class="dot" style="background:var(--cat-fun)"></span>
       Zajímavosti <span class="count" id="ctFun">—</span>
     </button>
-    <button class="filter-chip" data-cat="visited" onclick="setFilter('visited')">
+    <button class="filter-chip" id="chipVisited" data-cat="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení" onclick="setFilter('visited')">
       <span style="font-size:11px">✓</span>
-      Navštíveno <span class="count" id="ctVisited">—</span>
+      Navštíveno <span id="ctVisitedWrap"></span>
     </button>
-    <button class="filter-chip" data-cat="wished" onclick="setFilter('wished')">
+    <button class="filter-chip" id="chipWished" data-cat="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení" onclick="setFilter('wished')">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      Plán <span class="count" id="ctWished">—</span>
+      Plán <span id="ctWishedWrap"></span>
     </button>
   </div>
 
@@ -387,7 +402,9 @@ function updateCounts() {
 
 /* ── Filtr — přesně jako index.html ── */
 const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
-const FILTER_NEXT = { full:'hide', hide:'full' };
+const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
+const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
+const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const RANK   = { full:0, hide:1 };
 const BETTER = (a,b) => RANK[a] <= RANK[b] ? a : b;
 
@@ -413,9 +430,11 @@ function render() {
   const filtered = PLACES.filter(p => {
     const wish = wished.includes(String(p.id));
     const vis  = visited.includes(String(p.id));
+    if (FILTER.wished  === 'force' && wish) return true;
+    if (FILTER.visited === 'force' && vis)  return true;
     const votes = [FILTER[p.cat]];
-    if (wish) votes.push(FILTER.wished);
-    if (vis)  votes.push(FILTER.visited);
+    if (wish) votes.push(FILTER.wished  === 'force' ? 'full' : FILTER.wished);
+    if (vis)  votes.push(FILTER.visited === 'force' ? 'full' : FILTER.visited);
     const s = votes.reduce((best, v) => BETTER(best, v), 'hide');
     return s === 'full';
   });
@@ -475,10 +494,16 @@ function cardHTML(p, visited, wished) {
             : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolit?</span>`
         }
       </div>
-      <button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
-        <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        <span class="place-wish-lbl">Plán</span>
-      </button>
+      ${isLoggedIn()
+        ? `<button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
+            <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            <span class="place-wish-lbl">Plán</span>
+          </button>`
+        : `<a class="place-wish-btn" href="login.html?return=${encodeURIComponent(location.href)}" onclick="event.stopPropagation();" title="Pro správu plánovaných míst je nutné přihlášení">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            <span class="place-wish-lbl" style="display:flex;align-items:center;gap:2px">Plán <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          </a>`
+      }
     </div>
   </a>`;
 }
@@ -505,6 +530,9 @@ const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
+}
+function isLoggedIn() {
+  try { const s = getSession(); return !!(s && s.access_token && s.user); } catch(e) { return false; }
 }
 function authHeaders() {
   const s = getSession();
