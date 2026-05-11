@@ -501,11 +501,26 @@ function cardHTML(p, visited, wished) {
     ? formatDist(haversineM(userPos[0], userPos[1], p.lat, p.lng))
     : '';
 
+  const loggedIn = isLoggedIn();
+  const wishBtn = loggedIn
+    ? `<button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
+        <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span class="place-wish-lbl">Plán</span>
+      </button>`
+    : `<a class="place-wish-btn" href="login.html?return=${encodeURIComponent(location.href)}" onclick="event.stopPropagation();" title="Pro správu plánovaných míst je nutné přihlášení" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span class="place-wish-lock"></span>
+        <span class="place-wish-lbl">Plán</span>
+      </a>`;
+  const visitedHtml = vis && loggedIn
+    ? `<div class="place-visited show"></div><div class="place-visited-lbl">Navštíveno</div>`
+    : dist
+      ? `<div class="place-dist">${dist}</div>`
+      : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolit?</span>`;
+
   return `<a class="place-card" href="${detailUrl}">
     <div class="place-thumb">
-      ${thumb
-        ? `<img src="${thumb}" alt="${p.name}" onerror="this.style.display='none'"/>`
-        : ''}
+      ${thumb ? `<img src="${thumb}" alt="${p.name}" onerror="this.style.display='none'"/>` : ''}
       <div class="place-thumb-fallback">${letter}</div>
       <div class="place-id">${p.id}</div>
     </div>
@@ -518,25 +533,8 @@ function cardHTML(p, visited, wished) {
       <div class="place-sub">${lede}</div>
     </div>
     <div class="place-meta">
-      <div class="place-dist-wrap">
-        ${vis && isLoggedIn()
-          ? `<div class="place-visited show"></div><div class="place-visited-lbl">Navštíveno</div>`
-          : dist
-            ? `<div class="place-dist">${dist}</div>`
-            : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolit?</span>`
-        }
-      </div>
-      ${isLoggedIn()
-        ? `<button class="place-wish-btn ${wish ? 'wished' : ''}" onclick="toggleWish(event, '${p.id}')" title="${wish ? 'Odebrat z plánu' : 'Přidat do plánu'}">
-            <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-            <span class="place-wish-lbl">Plán</span>
-          </button>`
-        : `<a class="place-wish-btn" href="login.html?return=${encodeURIComponent(location.href)}" onclick="event.stopPropagation();" title="Pro správu plánovaných míst je nutné přihlášení" style="position:relative">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-            <span class="place-wish-lock"></span>
-            <span class="place-wish-lbl">Plán</span>
-          </a>`
-      }
+      <div class="place-dist-wrap">${visitedHtml}</div>
+      ${wishBtn}
     </div>
   </a>`;
 }
