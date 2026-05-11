@@ -521,11 +521,11 @@ function cardHTML(p, visited, wished) {
         <svg viewBox="0 0 24 24" fill="${wish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         <span class="place-wish-lbl">Plán</span>
       </button>`
-    : `<a class="place-wish-btn" href="login.html?return=${encodeURIComponent(location.href)}" onclick="event.stopPropagation();" title="Pro správu plánovaných míst je nutné přihlášení" style="position:relative">
+    : `<button class="place-wish-btn" onclick="event.stopPropagation(); location.href='login.html?return='+encodeURIComponent(location.href);" title="Pro správu plánovaných míst je nutné přihlášení" style="position:relative">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         <span class="place-wish-lock"></span>
         <span class="place-wish-lbl">Plán</span>
-      </div>`;
+      </button>`;
   const visitedHtml = vis && loggedIn
     ? `<div class="place-visited show"></div><div class="place-visited-lbl">Navštíveno</div>`
     : dist
