@@ -196,25 +196,21 @@ function _inject() {
   // HTML
   el.innerHTML = _html();
 
-  // Kompenzace fixed nav — přidej padding-bottom na body (mobil)
-  // Na PC nav je vpravo, body padding-right
-  requestAnimationFrame(() => {
-    if (window.innerWidth < 820) {
-      document.body.style.paddingBottom = el.offsetHeight + 'px';
-    } else {
-      document.body.style.paddingRight = '84px';
-    }
-  });
-
-  window.addEventListener('resize', () => {
+  // Kompenzace fixed nav
+  const setCompensation = () => {
+    const app = document.getElementById('app');
     if (window.innerWidth < 820) {
       document.body.style.paddingBottom = el.offsetHeight + 'px';
       document.body.style.paddingRight = '';
+      if (app) { app.style.paddingBottom = el.offsetHeight + 'px'; app.style.paddingRight = ''; }
     } else {
       document.body.style.paddingBottom = '';
-      document.body.style.paddingRight = '84px';
+      document.body.style.paddingRight = '';
+      if (app) { app.style.paddingRight = '84px'; app.style.paddingBottom = ''; }
     }
-  });
+  };
+  requestAnimationFrame(setCompensation);
+  window.addEventListener('resize', setCompensation);
 }
 
 /* ── Spuštění ── */
