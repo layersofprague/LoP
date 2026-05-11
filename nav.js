@@ -162,7 +162,8 @@ function _html() {
     },
     {
       id: 'wish',
-      href: _isLoggedIn() ? root + 'prehled.html?filter=wished' : root + 'login.html?return=' + encodeURIComponent(location.href),
+      href: _isLoggedIn() ? root + 'prehled.html?filter=wished' : '#',
+      onclick: _isLoggedIn() ? null : "if(window.lopAuth){event.preventDefault();window.lopAuth.open();}",
       label: 'Plán',
       badge: _isLoggedIn() ? wc : null,
       locked: !_isLoggedIn(),
@@ -171,7 +172,7 @@ function _html() {
   ];
 
   return items.map(item => `
-    <a class="lop-n-item${item.id === active ? ' active' : ''}" href="${item.href}">
+    <a class="lop-n-item${item.id === active ? ' active' : ''}" href="${item.href}"${item.onclick ? ` onclick="${item.onclick}"` : ''}>
       ${item.svg}
       <span class="lop-n-label">${item.label}</span>
       ${item.badge ? `<span class="lop-n-badge${item.badge > 0 ? ' visible' : ''}">${item.badge}</span>` : ''}

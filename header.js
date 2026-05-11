@@ -93,7 +93,7 @@ function _html() {
         <span class="lop-h-dot"></span>
       </button>
       <button class="lop-h-btn" id="lopHProfile" title="Profil"
-              onclick="location.href='${loginHref}'">
+              onclick="window.lopAuth ? window.lopAuth.open() : location.href='${loginHref}'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
       </button>
     </div>
@@ -110,11 +110,17 @@ function _updateAuth() {
     if (loggedIn) {
       btn.classList.add('logged-in');
       btn.title = s.user.email || 'Profil';
-      btn.onclick = () => { location.href = ROOT + 'profil.html'; };
+      btn.onclick = () => {
+        if (window.lopAuth) window.lopAuth.open('loggedIn');
+        else location.href = ROOT + 'profil.html';
+      };
     } else {
       btn.classList.remove('logged-in');
       btn.title = 'Přihlásit se';
-      btn.onclick = () => { location.href = ROOT + 'login.html?return=' + encodeURIComponent(location.href); };
+      btn.onclick = () => {
+        if (window.lopAuth) window.lopAuth.open('signin');
+        else location.href = ROOT + 'login.html?return=' + encodeURIComponent(location.href);
+      };
     }
   } catch(e) {}
 }
