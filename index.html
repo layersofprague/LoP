@@ -465,9 +465,29 @@ a { color: inherit; text-decoration: none; }
 .chip.state-force .chip-swatch { background: var(--paper) !important; }
 .chip.state-force .chip-icon-heart { background: var(--paper) !important; }
 .chip.state-force svg { color: var(--paper) !important; fill: var(--paper) !important; stroke: var(--paper) !important; }
-.chip.chip-locked { cursor: pointer; }
+.chip.chip-locked { cursor: pointer; position: relative; }
 .chip.chip-locked .chip-lock { opacity: .5; }
-.chip.chip-locked:hover .chip-lock { opacity: .8; }
+.chip.chip-locked::before {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  font-size: 11px; line-height: 1.4;
+  padding: 6px 10px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .15s;
+  z-index: 1000;
+  font-family: 'Inter', sans-serif; font-weight: 400;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.chip.chip-locked::after {
+  content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: var(--ink);
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+}
+.chip.chip-locked:hover::before,
+.chip.chip-locked:hover::after { opacity: 1; }
 .chip.state-force .chip-icon-check { background: var(--paper) !important; }
 
 .chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; opacity: 1; }
@@ -2314,12 +2334,25 @@ function toggleWish(id) {
   return !was;
 }
 function updateChipCounts() {
+  const lockSVG = '<svg class="chip-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
   const wishCount = JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length;
   const visCount  = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length;
-  const wEl = document.querySelector('.chip[data-filter="wished"] .chip-count');
-  const vEl = document.querySelector('.chip[data-filter="visited"] .chip-count');
-  if (wEl) wEl.textContent = wishCount;
-  if (vEl) vEl.textContent = visCount;
+  const loggedIn  = isLoggedIn();
+
+  const chipV = document.getElementById('chipVisited');
+  const chipW = document.getElementById('chipWished');
+  const wrapV = document.getElementById('ctVisitedWrap');
+  const wrapW = document.getElementById('ctWishedWrap');
+
+  if (chipV) chipV.classList.toggle('chip-locked', !loggedIn);
+  if (chipW) chipW.classList.toggle('chip-locked', !loggedIn);
+
+  if (wrapV) wrapV.innerHTML = loggedIn
+    ? '<span class="chip-count" id="ctVisited">' + visCount + '</span><span class="chip-filter-icon"></span>'
+    : lockSVG;
+  if (wrapW) wrapW.innerHTML = loggedIn
+    ? '<span class="chip-count" id="ctWished">' + wishCount + '</span><span class="chip-filter-icon"></span>'
+    : lockSVG;
 }
 
 function updateWishBadge() {
@@ -2504,13 +2537,13 @@ function buildChips() {
       <span class="chip-swatch" style="background: var(--cat-fun)"></span>
       Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
     </button>
-    <button class="chip" data-filter="visited">
+    <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
       <span class="chip-swatch chip-icon chip-icon-check"></span>
-      Navštíveno <span class="chip-count" id="ctVisited">${JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span><span class="chip-filter-icon"></span>
+      Navštíveno <span id="ctVisitedWrap"></span>
     </button>
-    <button class="chip" data-filter="wished">
+    <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      Plán <span class="chip-count" id="ctWished">${JSON.parse(localStorage.getItem(WISH_KEY)||'[]').filter(id=>LOCATIONS.find(l=>String(l.id)===String(id))).length}</span>
+      Plán <span id="ctWishedWrap"></span>
     </button>
   `;
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
