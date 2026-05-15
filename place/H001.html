@@ -1078,14 +1078,16 @@ function _injectSyncUI() {
 function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
 function _showSyncBar(on)     { const el = document.getElementById('lop-sync-bar');     if (el) { el.classList.toggle('show', on); if (on) _repositionSyncBar(); } }
 function _repositionSyncBar() {
-  const bar = document.getElementById('lop-sync-bar');
-  const spinner = document.getElementById('lop-sync-spinner');
-  if (!bar) return;
-  // Najdi nav element — inline nav nebo lop-nav
-  const nav = document.getElementById('nav') || document.getElementById('lop-nav');
-  const offset = (nav && window.innerWidth < 820) ? nav.offsetHeight : 0;
-  bar.style.bottom = offset + 'px';
-  if (spinner) spinner.style.bottom = offset + 'px';
+  requestAnimationFrame(() => {
+    const bar = document.getElementById('lop-sync-bar');
+    const spinner = document.getElementById('lop-sync-spinner');
+    if (!bar) return;
+    const nav = document.getElementById('nav') || document.getElementById('lop-nav');
+    const h = nav ? nav.getBoundingClientRect().height : 0;
+    const offset = (window.innerWidth < 820) ? (h || 56) : 0;
+    bar.style.bottom = offset + 'px';
+    if (spinner) spinner.style.bottom = offset + 'px';
+  });
 }
 window.addEventListener('resize', _repositionSyncBar);
 
