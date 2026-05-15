@@ -673,7 +673,7 @@ requestAnimationFrame(() => { if (window.lopNav) window.lopNav.refresh(); });
 <script src="auth-modal.js"></script>
 <script>
 window.lopAuth.onLogin(() => {
-  if (typeof syncFromDB === 'function') syncFromDB().then(() => render());
+  if (typeof syncFromDB === 'function') syncFromDB(() => render());
   else render();
   if (window.lopHeader) window.lopHeader.refresh();
   if (window.lopNav)    window.lopNav.refresh();

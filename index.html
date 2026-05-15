@@ -3340,7 +3340,7 @@ window.lopAuth.onLogin(() => {
     }
   }
   // Sync z DB a refresh pinů/badgů
-  if (typeof syncFromDB === 'function') syncFromDB().then(() => {
+  if (typeof syncFromDB === 'function') syncFromDB(() => {
     if (typeof applyFilter === 'function') applyFilter();
     if (typeof updateWishBadge === 'function') updateWishBadge();
   });
