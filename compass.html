@@ -38,13 +38,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 <div id="clip">
   <div id="mapWrap"><div id="map"></div></div>
   <div id="userDot"></div>
+  <!-- Small compass top-right -->
+  <canvas id="miniCompass" width="80" height="80" style="
+    position:absolute;right:8px;
+    z-index:200;pointer-events:none;
+    width:60px;height:60px;
+  "></canvas>
   <input type="file" id="calFile" accept=".json" style="display:none" onchange="importCal(this)"/>
   <!-- Cal button top right -->
-  <button onclick="fitBoth()" style="position:absolute;top:12px;right:12px;z-index:200;
-    width:28px;height:28px;border-radius:50%;
-    background:rgba(238,239,235,.9);border:1px solid #cbcec5;
+  <button id="fitBtn" onclick="fitBoth()" style="position:fixed;right:12px;z-index:200;
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(238,239,235,.92);border:1px solid #cbcec5;
     cursor:pointer;display:flex;align-items:center;justify-content:center;
-    box-shadow:0 1px 4px rgba(26,24,20,.15);">
+    box-shadow:0 2px 8px rgba(26,24,20,.12);">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3a3a36" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
       <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
@@ -52,7 +58,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
   </button>
 
   <button id="calBtn" onclick="toggleCal()" ontouchstart="calTouchStart()" ontouchend="calTouchEnd()"
-    style="position:absolute;top:12px;right:48px;z-index:200;
+    style="position:absolute;top:12px;right:12px;z-index:200;
       height:28px;padding:0 10px;border-radius:14px;
       font-family:monospace;font-size:11px;font-weight:600;letter-spacing:.04em;
       border:none;cursor:pointer;white-space:nowrap;
@@ -120,6 +126,10 @@ function applyClipBounds() {
   var dist = document.getElementById('distBox');
   if (dbg) dbg.style.top = (ht + 8) + 'px';
   if (dist) { dist.style.bottom = (nb + 8) + 'px'; dist.style.left = '8px'; }
+  var fit = document.getElementById('fitBtn');
+  if (fit) fit.style.bottom = (nb + 8) + 'px';
+  var mc = document.getElementById('miniCompass');
+  if (mc) mc.style.top = (ht + 8) + 'px';
   return { ht: ht, nb: nb };
 }
 
@@ -477,9 +487,45 @@ function rotateMap(h) {
 }
 
 // ── LOOP ──
+function drawMiniCompass(heading) {
+  var c = document.getElementById('miniCompass');
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var S = 80, cx = 40, cy = 40, R = 36;
+  ctx.clearRect(0, 0, S, S);
+  // Background
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(238,239,235,0.88)'; ctx.fill();
+  ctx.strokeStyle = '#cbcec5'; ctx.lineWidth = 1.5; ctx.stroke();
+  // Rotating rose
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(-heading * Math.PI / 180);
+  // Ticks
+  for (var i = 0; i < 36; i++) {
+    var a = i * 10 * Math.PI / 180, big = i % 9 === 0;
+    ctx.beginPath();
+    ctx.moveTo(Math.sin(a)*(big?R-10:R-6), -Math.cos(a)*(big?R-10:R-6));
+    ctx.lineTo(Math.sin(a)*R, -Math.cos(a)*R);
+    ctx.strokeStyle = big ? '#6a6a64' : '#cbcec5';
+    ctx.lineWidth = big ? 1.5 : 1; ctx.stroke();
+  }
+  // N label
+  ctx.fillStyle = '#b04020'; ctx.font = '600 10px JetBrains Mono, monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('N', 0, -(R-18));
+  ctx.restore();
+  // Center dot
+  ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI*2);
+  ctx.fillStyle = '#1a1a18'; ctx.fill();
+  // Heading
+  ctx.fillStyle = '#1a1a18'; ctx.font = '600 9px JetBrains Mono, monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(Math.round(heading) + '°', cx, cy);
+}
+
 function loop() {
   var h = smoothH !== null ? smoothH : 0;
   if (Math.abs(lastH - h) > 1.5) rotateMap(h);
+  drawMiniCompass(h);
   if (userPos) document.getElementById('dbg').textContent = 'GPS ✓ | h:' + Math.round(h) + '° sc:' + getScreenAngle() + '°';
   requestAnimationFrame(loop);
 }
