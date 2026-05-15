@@ -2010,7 +2010,7 @@ async function syncFromDB(onDone) {
   } catch(e) {
     _showSyncSpinner(false); _syncOffline = true; if (onDone) onDone(); _showSyncBar(true);
     console.warn('Sync failed:', e?.message || e, e?.name);
-    const sb = document.getElementById('lop-sync-bar'); if (sb) { const t = sb.querySelector('.sb-text'); if (t) t.textContent = 'Chyba: ' + (e?.message || String(e)); }
+    const sb = document.getElementById('lop-sync-bar'); if (sb) { const t = sb.querySelector('.sb-text'); if (t) t.textContent = 'Chyba: ' + (e?.message || String(e)); } alert('Sync error: ' + (e?.message||String(e)) + ' / ' + (e?.name||''));
   }
 }
 
