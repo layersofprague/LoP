@@ -1623,15 +1623,15 @@ a { color: inherit; text-decoration: none; }
         <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
       </div>
       <div class="top-actions">
-        <button class="top-btn" title="Hledat" aria-label="Hledat" onclick="document.getElementById('topSearch').classList.toggle('open'); setTimeout(()=>{const i=document.querySelector('#topSearch input'); if(i&&document.getElementById('topSearch').classList.contains('open'))i.focus();},10);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        </button>
+        <a class="top-btn" href="oprojektu.html" title="O projektu" aria-label="O projektu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </a>
         <button class="top-btn" title="Notifikace" aria-label="Notifikace">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
           <span class="dot"></span>
         </button>
         <button class="top-btn" id="profileBtn" title="Profil" aria-label="Profil"
-                onclick="location.href='login.html?return='+encodeURIComponent(location.href)">
+                onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </button>
       </div>
@@ -1859,7 +1859,7 @@ a { color: inherit; text-decoration: none; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>
       <span class="nav-label">Trasy</span>
     </button>
-    <button class="nav-item" data-view="wishView" onclick="isLoggedIn() ? location.href='prehled.html?filter=wished' : location.href='login.html?return='+encodeURIComponent(location.href)">
+    <button class="nav-item" data-view="wishView" onclick="isLoggedIn() ? location.href='prehled.html?filter=wished' : (window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href))">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       <span class="nav-label">Plán</span>
       <span class="nav-badge" id="wishBadge">3</span>
@@ -1923,6 +1923,10 @@ a { color: inherit; text-decoration: none; }
 /* ── Login snackbar ── */
 let _snackTimer = null;
 function showLoginSnackbar() {
+  if (window.lopAuth) {
+    window.lopAuth.open();
+    return;
+  }
   const el = document.getElementById('lop-snackbar');
   if (!el) return;
   const ret = encodeURIComponent(location.href);
@@ -1938,6 +1942,12 @@ function isLoggedIn() {
     return !!(s && s.access_token && s.user);
   } catch(e) { return false; }
 }
+function getUserRole() {
+  return localStorage.getItem('lop_user_role') || 'member';
+}
+function isInsider() { const r = getUserRole(); return ['insider','author','admin'].includes(r); }
+function isAuthor()  { const r = getUserRole(); return ['author','admin'].includes(r); }
+function isAdmin()   { return getUserRole() === 'admin'; }
 
 /* ═══════════════ SUPABASE SYNC ═══════════════ */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
@@ -1963,72 +1973,44 @@ let _syncOffline = false;
 function _injectSyncUI() {
   if (document.getElementById('lop-sync-bar')) return;
   const style = document.createElement('style');
-  style.textContent = `#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.82);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-@media(max-width:819px){#lop-sync-bar{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}
-@media(min-width:820px){#lop-sync-bar{bottom:0;right:84px;}}
-#lop-sync-bar.show{transform:translateY(0);}
-#lop-sync-bar .sb-text{flex:1;}
-#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.35);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}
-#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}
-#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}
-@media(max-width:819px){#lop-sync-spinner{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}
-@media(min-width:820px){#lop-sync-spinner{bottom:0;right:84px;}}
-#lop-sync-spinner.show{opacity:1;}
-@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}`;
+  style.textContent = '#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.85);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}@media(max-width:819px){#lop-sync-bar{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}@media(min-width:820px){#lop-sync-bar{right:84px;}}#lop-sync-bar.show{transform:translateY(0);}#lop-sync-bar .sb-text{flex:1;}#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.4);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}@media(max-width:819px){#lop-sync-spinner{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}@media(min-width:820px){#lop-sync-spinner{right:84px;}}#lop-sync-spinner.show{opacity:1;}@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}';
   document.head.appendChild(style);
-  const spinner = document.createElement('div');
-  spinner.id = 'lop-sync-spinner';
-  document.body.appendChild(spinner);
-  const bar = document.createElement('div');
-  bar.id = 'lop-sync-bar';
-  bar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se načíst data ze serveru. Zobrazujeme naposledy uložený stav.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>`;
+  const spinner = document.createElement('div'); spinner.id = 'lop-sync-spinner'; document.body.appendChild(spinner);
+  const bar = document.createElement('div'); bar.id = 'lop-sync-bar';
+  bar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se načíst data ze serveru. Zobrazujeme naposledy uložený stav.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>';
   document.body.appendChild(bar);
 }
 function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
 function _showSyncBar(on)     { const el = document.getElementById('lop-sync-bar');     if (el) el.classList.toggle('show', on); }
 
+function _fetchTimeout(url, opts, ms) {
+  return new Promise((resolve, reject) => {
+    const tid = setTimeout(() => reject(new Error('timeout')), ms);
+    fetch(url, opts).then(r => { clearTimeout(tid); resolve(r); }).catch(e => { clearTimeout(tid); reject(e); });
+  });
+}
+
 window._lopSyncRetry = () => {
   _showSyncBar(false);
-  syncFromDB(() => {
-    applyFilter();
-    updateWishBadge();
-    if (window.lopNav)    window.lopNav.refresh();
-    if (window.lopHeader) window.lopHeader.refresh();
-  });
+  syncFromDB(() => { applyFilter(); updateWishBadge(); if(window.lopNav)window.lopNav.refresh(); });
 };
 
 async function syncFromDB(onDone) {
-  const s = getSession();
-  if (!s?.access_token || !s?.user) return;
-  _injectSyncUI();
-  _showSyncSpinner(true);
-  _showSyncBar(false);
-  _syncOffline = false;
-  const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), SYNC_TIMEOUT_MS);
+  const s = getSession(); if (!s?.access_token || !s?.user) return;
+  _injectSyncUI(); _showSyncSpinner(true); _showSyncBar(false); _syncOffline = false;
   try {
     const [wRes, vRes] = await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/wishlist?user_id=eq.${s.user.id}&select=place_id`, { headers: authHeaders(), signal: ctrl.signal }),
-      fetch(`${SUPA_URL}/rest/v1/visited?user_id=eq.${s.user.id}&select=place_id`,  { headers: authHeaders(), signal: ctrl.signal }),
+      _fetchTimeout(`${SUPA_URL}/rest/v1/wishlist?user_id=eq.${s.user.id}&select=place_id`, { headers: authHeaders() }, SYNC_TIMEOUT_MS),
+      _fetchTimeout(`${SUPA_URL}/rest/v1/visited?user_id=eq.${s.user.id}&select=place_id`,  { headers: authHeaders() }, SYNC_TIMEOUT_MS),
     ]);
-    clearTimeout(tid);
     if (wRes.ok) localStorage.setItem('lop_wishlist_v2', JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
     if (vRes.ok) localStorage.setItem('lop_visited_v1',  JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
-    // Role — separátní fetch, nezastaví sync při chybě
     fetch(`${SUPA_URL}/rest/v1/profiles?user_id=eq.${s.user.id}&select=role`, { headers: authHeaders() })
-      .then(r => r.ok ? r.json() : [])
-      .then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); })
-      .catch(() => {});
-    _showSyncSpinner(false);
-    _syncOffline = false;
-    if (onDone) onDone();
+      .then(r => r.ok ? r.json() : []).then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }).catch(() => {});
+    _showSyncSpinner(false); _syncOffline = false; if (onDone) onDone();
   } catch(e) {
-    clearTimeout(tid);
-    _showSyncSpinner(false);
-    _syncOffline = true;
-    if (onDone) onDone();
-    _showSyncBar(true);
-    console.warn('Sync failed (offline fallback):', e);
+    _showSyncSpinner(false); _syncOffline = true; if (onDone) onDone(); _showSyncBar(true);
+    console.warn('Sync failed:', e);
   }
 }
 
@@ -2270,10 +2252,7 @@ async function loadData() {
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
-  syncFromDB(() => {
-    updateWishBadge();
-    if (window._map) applyFilter();
-  });
+  syncFromDB(() => { updateWishBadge(); if (window._map) applyFilter(); });
 }
 
 // ── Záložní data (použijí se pokud places.json chybí) ─────────────────────
@@ -2503,11 +2482,11 @@ function showTooltip(loc, m, rt) {
         <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'white' : '#b04020'}" stroke="${wBtn ? 'white' : '#b04020'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         ${wBtn ? 'V plánu' : 'Plán'}
       </button>`
-    : `<a href="login.html?return=${encodeURIComponent(location.href)}" class="rt-tip-btn" onclick="event.stopPropagation();" title="Pro správu plánovaných míst je nutné přihlášení">
+    : `<button class="rt-tip-btn" onclick="event.stopPropagation(); window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href);" title="Pro správu plánovaných míst je nutné přihlášení">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         Plán
         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.6;margin-left:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      </a>`;
+      </button>`;
   rt._forId = loc.id;
 
   // Živá vzdálenost z GPS
@@ -2667,7 +2646,8 @@ function buildChips() {
   el.querySelectorAll('.chip[data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!isLoggedIn()) {
-        location.href = 'login.html?return=' + encodeURIComponent(location.href);
+        if (window.lopAuth) window.lopAuth.open();
+        else location.href = 'login.html?return=' + encodeURIComponent(location.href);
         return;
       }
       const f = btn.dataset.filter;
@@ -3346,5 +3326,30 @@ if (document.readyState === 'loading') {
 window.addEventListener('resize', adjustTopbarOffset);
 </script>
 <div id="lop-snackbar"></div>
+<script src="auth-modal.js"></script>
+<script>
+// Po přihlášení přes modal: obnov header, badge a sync DB
+window.lopAuth.onLogin(() => {
+  // Refresh profil tlačítka
+  const btn = document.getElementById('profileBtn');
+  if (btn) {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    if (s?.user) {
+      btn.title = s.user.email || 'Profil';
+      btn.onclick = () => window.lopAuth.open();
+    }
+  }
+  // Sync z DB a refresh pinů/badgů
+  if (typeof syncFromDB === 'function') syncFromDB().then(() => {
+    if (typeof applyFilter === 'function') applyFilter();
+    if (typeof updateWishBadge === 'function') updateWishBadge();
+  });
+});
+window.lopAuth.onLogout(() => {
+  localStorage.removeItem('lop_user_role');
+  if (typeof applyFilter === 'function') applyFilter();
+  if (typeof updateWishBadge === 'function') updateWishBadge();
+});
+</script>
 </body>
 </html>
