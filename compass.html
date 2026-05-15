@@ -316,6 +316,8 @@ function fitBoth() {
   var zoom = Math.log2(156543 * Math.cos(midLat * Math.PI/180) * pxForDist / dist);
   zoom = Math.min(Math.max(Math.round(zoom), 13), 17);
 
+  // Debug
+  document.getElementById('dbg').textContent = 'fit: d=' + Math.round(dist) + 'm z=' + zoom;
   map.setView([midLat, midLng], zoom, { animate: true });
 }
 
@@ -470,20 +472,30 @@ function getScreenAngle() {
 function startOri() {
   var hasAbsolute = false;
 
+  function toHeading(e, isAbsolute) {
+    // iOS: webkitCompassHeading is always correct, no processing needed
+    if (e.webkitCompassHeading !== undefined) return e.webkitCompassHeading;
+    if (e.alpha === null) return null;
+    if (isAbsolute) {
+      // deviceorientationabsolute: alpha = degrees from north, counterclockwise
+      // Convert to clockwise bearing
+      return (360 - e.alpha) % 360;
+    } else {
+      // deviceorientation: alpha relative to screen orientation
+      return (360 - e.alpha + getScreenAngle() + 360) % 360;
+    }
+  }
+
   function handleAbsolute(e) {
     if (oriPaused) return;
     hasAbsolute = true;
-    var raw = null;
-    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
-    else if (e.alpha !== null) raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
+    var raw = toHeading(e, true);
     if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
   }
 
   function handleRelative(e) {
-    if (oriPaused || hasAbsolute) return; // ignore if absolute is available
-    var raw = null;
-    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
-    else if (e.alpha !== null) raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
+    if (oriPaused || hasAbsolute) return;
+    var raw = toHeading(e, false);
     if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
   }
 
@@ -549,7 +561,7 @@ function loop() {
   var h = smoothH !== null ? smoothH : 0;
   if (Math.abs(lastH - h) > 1.5) rotateMap(h);
   drawMiniCompass(h);
-  if (userPos) document.getElementById('dbg').textContent = 'GPS ✓ | h:' + Math.round(h) + '° sc:' + getScreenAngle() + '°';
+  document.getElementById('dbg').textContent = (userPos?'GPS ✓':'GPS…') + ' h:' + Math.round(h) + '° off:' + yawOffset.toFixed(1) + '°';
   requestAnimationFrame(loop);
 }
 loop();
