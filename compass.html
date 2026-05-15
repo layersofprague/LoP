@@ -178,12 +178,12 @@ setTimeout(function() {
     var cos = Math.cos(h), sin = Math.sin(h);
     var mdx = dx * cos + dy * sin;
     var mdy = -dx * sin + dy * cos;
-    // Convert pixel delta to latlng
-    var z = map.getZoom();
-    var mpp = 156543.03392 * Math.cos(startLatLng.lat * Math.PI / 180) / Math.pow(2, z);
-    var dlat = (mdy / 96) * mpp / 111320;
-    var dlng = (-mdx / 96) * mpp / (111320 * Math.cos(startLatLng.lat * Math.PI / 180));
-    map.setView([startLatLng.lat - dlat, startLatLng.lng - dlng], z, { animate: false });
+    // Convert pixel delta to latlng using Leaflet's own projection
+    var startPx = map.latLngToContainerPoint(startLatLng);
+    var newLatLng = map.containerPointToLatLng(
+      L.point(startPx.x - mdx, startPx.y - mdy)
+    );
+    map.setView(newLatLng, map.getZoom(), { animate: false });
   }
 
   function onUp() { active = false; }
