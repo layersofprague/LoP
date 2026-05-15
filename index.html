@@ -3354,9 +3354,15 @@ window.lopAuth.onLogin(() => {
   // Sync z DB a refresh pinů/badgů
   if (typeof syncFromDB === 'function') syncFromDB(() => {
     if (typeof updateWishBadge === 'function') updateWishBadge();
-    if (typeof rebuildMarkers  === 'function') rebuildMarkers();
-    if (typeof applyFilter     === 'function') applyFilter();
-    if (window._map) setTimeout(() => window._map.invalidateSize(), 60);
+    // Vynutit překreslení Leaflet markerů — remove + addTo
+    if (window._map && typeof _markers !== 'undefined') {
+      _markers.forEach(({ marker, loc }) => {
+        marker.remove();
+        marker.setIcon(makeIcon(loc));
+        marker.addTo(window._map);
+      });
+    }
+    if (typeof applyFilter === 'function') applyFilter();
   });
 });
 window.lopAuth.onLogout(() => {
