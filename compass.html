@@ -284,9 +284,13 @@ function loadCal() {
   } catch(e) { yawOffset = 0; calEnabled = false; }
   updateCalBtn();
 }
+var fitActive = false;
 function fitBoth() {
   if (!userPos || isNaN(TARGET.lat)) return;
   isLocked = false;
+  fitActive = true;
+  clearTimeout(fitActive._t);
+  fitActive._t = setTimeout(function(){ fitActive = false; }, 4000);
 
   // Center between user and target
   var midLat = (userPos.lat + TARGET.lat) / 2;
@@ -316,7 +320,6 @@ function fitBoth() {
   var zoom = Math.log2(156543 * Math.cos(midLat * Math.PI/180) * pxForDist / dist);
   zoom = Math.min(Math.max(Math.round(zoom), 13), 17);
 
-  alert('fit: d=' + Math.round(dist) + 'm z=' + zoom + ' pos:' + (userPos?'ok':'null') + ' tgt:' + (isNaN(TARGET.lat)?'null':'ok'));
   map.setView([midLat, midLng], zoom, { animate: true });
 }
 
@@ -444,7 +447,7 @@ navigator.geolocation && navigator.geolocation.watchPosition(
     // Only pan if moved more than ~3m to suppress GPS noise
     var dlat = Math.abs(userPos.lat - lastPanLat);
     var dlng = Math.abs(userPos.lng - lastPanLng);
-    if (isLocked && (lastPanLat === null || dlat > 0.00003 || dlng > 0.00003)) {
+    if (isLocked && !fitActive && (lastPanLat === null || dlat > 0.00003 || dlng > 0.00003)) {
       lastPanLat = userPos.lat; lastPanLng = userPos.lng;
       map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
     }
