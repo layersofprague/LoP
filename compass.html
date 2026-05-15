@@ -40,7 +40,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
   <div id="userDot"></div>
   <!-- Small compass top-right -->
   <canvas id="miniCompass" width="80" height="80" style="
-    position:absolute;right:8px;
+    position:fixed;right:8px;
     z-index:200;pointer-events:none;
     width:60px;height:60px;
   "></canvas>
@@ -124,12 +124,19 @@ function applyClipBounds() {
   // Position overlay elements
   var dbg = document.getElementById('dbg');
   var dist = document.getElementById('distBox');
-  if (dbg) { dbg.style.top = (ht + 48) + 'px'; dbg.style.left = '8px'; dbg.style.right = 'auto'; }
-  if (dist) { dist.style.bottom = (nb + 8) + 'px'; dist.style.left = '8px'; }
+  // calBtn: top-left under header
+  var cal = document.getElementById('calBtn');
+  if (cal) cal.style.top = (ht + 8) + 'px';
+  // miniCompass: top-right under header
+  var mc = document.getElementById('miniCompass');
+  if (mc) mc.style.top = (ht + 8) + 'px';
+  // fitBtn: bottom-right above navbar
   var fit = document.getElementById('fitBtn');
   if (fit) fit.style.bottom = (nb + 8) + 'px';
-  var mc = document.getElementById('miniCompass');
-  if (mc) { mc.style.top = (ht + 8) + 'px'; mc.style.right = '8px'; }
+  // dbg: below calBtn
+  if (dbg) { dbg.style.top = (ht + 44) + 'px'; dbg.style.left = '8px'; }
+  // dist: bottom-left above navbar
+  if (dist) { dist.style.bottom = (nb + 8) + 'px'; dist.style.left = '8px'; }
   return { ht: ht, nb: nb };
 }
 
@@ -297,29 +304,41 @@ function fitBoth() {
   if (!userPos || isNaN(TARGET.lat)) return;
   isLocked = false;
 
-  var midLat = (userPos.lat + TARGET.lat) / 2;
-  var midLng = (userPos.lng + TARGET.lng) / 2;
-
-  // Calculate zoom so both points fit with generous margin
-  // Use haversine distance to pick zoom level
-  var R = 6371000;
-  var dLat = (TARGET.lat - userPos.lat) * Math.PI / 180;
-  var dLng = (TARGET.lng - userPos.lng) * Math.PI / 180;
-  var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(userPos.lat*Math.PI/180)*Math.cos(TARGET.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
-  var dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-  // Pick zoom: want dist to span ~40% of screen
   var hdr = document.getElementById('lop-header');
   var nav = document.getElementById('lop-nav');
-  var clipH = window.innerHeight - (hdr ? hdr.offsetHeight : 57) - (nav ? nav.offsetHeight : 56);
-  var clipW = window.innerWidth;
-  var screenPx = Math.min(clipW, clipH) * 0.4;
-  // metres per pixel at zoom z: 156543 * cos(lat) / 2^z
-  var lat = midLat * Math.PI / 180;
-  var zoom = Math.log2(156543 * Math.cos(lat) * screenPx / dist);
-  zoom = Math.min(Math.max(Math.floor(zoom), 12), 17);
+  var ht = hdr ? hdr.offsetHeight : 57;
+  var nb = nav ? nav.offsetHeight : 56;
 
-  map.setView([midLat, midLng], zoom, { animate: true });
+  // Generous padding so both points are well inside the clip area
+  var padX = Math.round(window.innerWidth * 0.2);
+  var padY = Math.round((window.innerHeight - ht - nb) * 0.2);
+
+  var bounds = L.latLngBounds(
+    [userPos.lat, userPos.lng],
+    [TARGET.lat, TARGET.lng]
+  );
+
+  // Expand bounds by minimum 0.006° (~500m) so close points get reasonable zoom
+  var sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+  var minDeg = 0.006;
+  if ((ne.lat - sw.lat) < minDeg) {
+    var midLat = (ne.lat + sw.lat) / 2;
+    sw = L.latLng(midLat - minDeg/2, sw.lng);
+    ne = L.latLng(midLat + minDeg/2, ne.lng);
+  }
+  if ((ne.lng - sw.lng) < minDeg) {
+    var midLng = (ne.lng + sw.lng) / 2;
+    sw = L.latLng(sw.lat, midLng - minDeg/2);
+    ne = L.latLng(ne.lat, midLng + minDeg/2);
+  }
+  bounds = L.latLngBounds(sw, ne);
+
+  map.fitBounds(bounds, {
+    paddingTopLeft: [padX, padY + ht],
+    paddingBottomRight: [padX, padY + nb],
+    maxZoom: 16,
+    animate: true
+  });
 }
 
 function updateCalBtn() {
