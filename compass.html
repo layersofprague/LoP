@@ -147,30 +147,34 @@ var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.4
 map.setView(initCenter, 16);
 [100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
 
-// Rotation-compensated drag
+// Rotation-compensated drag using Leaflet's own _lastPoint
 setTimeout(function() {
   var draggable = map.dragging._draggable;
   if (!draggable) return;
   var origOnMove = draggable._onMove.bind(draggable);
   draggable._onMove = function(e) {
     var h = lastH * Math.PI / 180;
-    if (Math.abs(h) < 0.01) { origOnMove(e); return; }
-    // Get raw movement from event
-    var point;
-    if (e.touches) point = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    else point = { x: e.clientX, y: e.clientY };
-    var last = draggable._lastPoint || point;
-    draggable._lastPoint = point;
-    var dx = point.x - last.x;
-    var dy = point.y - last.y;
-    // Rotate dx,dy by -heading to get map coords
-    var cos = Math.cos(-h), sin = Math.sin(-h);
-    var rdx = dx * cos - dy * sin;
-    var rdy = dx * sin + dy * cos;
-    // Manually pan
-    map.panBy([-rdx, -rdy], { animate: false });
+    // Let Leaflet compute the move first — it updates _newPos and _lastPoint
+    origOnMove(e);
+    if (Math.abs(h) < 0.05) return; // north-up, no compensation needed
+    // Leaflet just panned by (_newPos - _startPos) in screen coords
+    // We need to undo that pan and redo it with rotated delta
+    var newPos = draggable._newPos;
+    var startPos = draggable._startPos;
+    if (!newPos || !startPos) return;
+    var dx = newPos.x - startPos.x;
+    var dy = newPos.y - startPos.y;
+    // Rotate delta by heading to compensate CSS rotation
+    var cos = Math.cos(h), sin = Math.sin(h);
+    var rdx = dx * cos + dy * sin;
+    var rdy = -dx * sin + dy * cos;
+    // Correction delta
+    var cdx = rdx - dx;
+    var cdy = rdy - dy;
+    if (Math.abs(cdx) > 0.5 || Math.abs(cdy) > 0.5) {
+      map.panBy([cdx, cdy], { animate: false, noMoveStart: true });
+    }
   };
-  draggable.on('dragstart', function() { draggable._lastPoint = null; });
 }, 500);
 // Re-measure after header/nav scripts have fully injected
 setTimeout(function(){ applyClipBounds(); setAnchor(); }, 50);
