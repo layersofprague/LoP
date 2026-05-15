@@ -626,7 +626,8 @@ window._lopSyncRetry = () => {
 };
 
 async function syncFromDB(onDone) {
-  const s = getSession(); if (!s?.access_token || !s?.user) return;
+  const s = getSession();
+  if (!s?.access_token || !s?.user) { if (onDone) onDone(); return; }
   _injectSyncUI();
   _showSyncSpinner(true);
   _showSyncBar(false);
