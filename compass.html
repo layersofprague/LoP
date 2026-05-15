@@ -14,13 +14,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 #clip { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
 #mapWrap { position: absolute; transform-origin: 50% 50%; background: #e8e4dc; }
 #map { width: 100%; height: 100%; }
-#userDot {
-  position: absolute; z-index: 100; pointer-events: none;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: #b04020; border: 3px solid #fff;
-  box-shadow: 0 0 0 3px rgba(176,64,32,.25), 0 2px 8px rgba(0,0,0,.4);
-  transform: translate(-50%, -50%);
-}
+/* userDot now a Leaflet marker */
 /* calBtn styled inline */
 /* dbg styled inline */
 </style>
@@ -31,7 +25,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 <div id="lop-header"></div>
 <div id="clip">
   <div id="mapWrap"><div id="map"></div></div>
-  <div id="userDot"></div>
+  <!-- userDot removed, using Leaflet marker instead -->
 </div>
 
 <!-- Overlays — all position:fixed, top/bottom set by applyClipBounds() -->
@@ -153,6 +147,52 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.42];
 map.setView(initCenter, 16);
 [100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
+
+// Fix drag direction for rotated map
+// We intercept mousemove/touchmove on the map container and rotate the delta
+(function() {
+  var dragging = false, startX, startY, startCenter;
+  var mc = document.getElementById('map');
+
+  function getCenter() { return map.getCenter(); }
+
+  function onStart(x, y) {
+    if (!dragging) {
+      dragging = true;
+      startX = x; startY = y;
+      startCenter = map.getCenter();
+      map.dragging.disable();
+    }
+  }
+  function onMove(x, y) {
+    if (!dragging) return;
+    var h = (lastH || 0) * Math.PI / 180;
+    var dx = x - startX, dy = y - startY;
+    // Rotate delta by heading to compensate CSS rotation
+    var cos = Math.cos(h), sin = Math.sin(h);
+    var rdx = dx * cos - dy * sin;
+    var rdy = dx * sin + dy * cos;
+    // Convert pixel delta to latlng delta
+    var z = map.getZoom();
+    var mpp = 156543.03392 * Math.cos(startCenter.lat * Math.PI/180) / Math.pow(2, z);
+    var dlat = (rdy / 96) * mpp / 111320;
+    var dlng = (-rdx / 96) * mpp / (111320 * Math.cos(startCenter.lat * Math.PI/180));
+    // Actually use Leaflet's containerPointToLatLng for accuracy
+    var sz = map.getSize();
+    var centerPx = map.latLngToContainerPoint(startCenter);
+    var newCenterPx = L.point(centerPx.x - rdx, centerPx.y - rdy);
+    // But container coords are in rotated space, need to unrotate
+    map.setView(map.containerPointToLatLng(newCenterPx), z, {animate:false});
+  }
+  function onEnd() { dragging = false; map.dragging.enable(); }
+
+  mc.addEventListener('touchstart', function(e){ if(e.touches.length===1){onStart(e.touches[0].clientX, e.touches[0].clientY);} }, {passive:true});
+  mc.addEventListener('touchmove', function(e){ if(e.touches.length===1){e.preventDefault();onMove(e.touches[0].clientX, e.touches[0].clientY);} }, {passive:false});
+  mc.addEventListener('touchend', onEnd, {passive:true});
+  mc.addEventListener('mousedown', function(e){ onStart(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', onEnd);
+})();
 // Re-measure after header/nav scripts have fully injected
 setTimeout(function(){ applyClipBounds(); setAnchor(); }, 50);
 setTimeout(function(){ applyClipBounds(); setAnchor(); map.invalidateSize(); }, 300);
@@ -411,7 +451,17 @@ var lastPanLat = null, lastPanLng = null;
 navigator.geolocation && navigator.geolocation.watchPosition(
   function(pos) {
     userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    // Only pan if moved more than ~3m to suppress GPS noise
+    // Update/create user marker at GPS coordinates (inside map, rotates with it)
+    if (userMarker) {
+      userMarker.setLatLng([userPos.lat, userPos.lng]);
+    } else {
+      var dotHtml = '<div style="width:18px;height:18px;border-radius:50%;background:#b04020;border:3px solid #fff;box-shadow:0 0 0 3px rgba(176,64,32,.25),0 2px 8px rgba(0,0,0,.4);margin:-1px"></div>';
+      userMarker = L.marker([userPos.lat, userPos.lng], {
+        icon: L.divIcon({ html: dotHtml, className: '', iconSize: [18,18], iconAnchor: [9,9] }),
+        zIndexOffset: 1000
+      }).addTo(map);
+    }
+    // Only pan if locked and moved more than ~3m
     var dlat = Math.abs(userPos.lat - lastPanLat);
     var dlng = Math.abs(userPos.lng - lastPanLng);
     if (isLocked && (lastPanLat === null || dlat > 0.00003 || dlng > 0.00003)) {
