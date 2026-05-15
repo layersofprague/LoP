@@ -296,27 +296,23 @@ function loadCal() {
 function fitBoth() {
   if (!userPos || isNaN(TARGET.lat)) return;
   isLocked = false;
+
+  // Expand bounds so points are never too close together on screen
+  // Min span = ~300m in each direction from midpoint
+  var midLat = (userPos.lat + TARGET.lat) / 2;
+  var midLng = (userPos.lng + TARGET.lng) / 2;
+  var spanLat = Math.abs(userPos.lat - TARGET.lat);
+  var spanLng = Math.abs(userPos.lng - TARGET.lng);
+  var minSpan = 0.004; // ~300m
+  spanLat = Math.max(spanLat, minSpan);
+  spanLng = Math.max(spanLng, minSpan);
+  // Add 60% margin around the span
+  var margin = 0.6;
   var bounds = L.latLngBounds(
-    [userPos.lat, userPos.lng],
-    [TARGET.lat, TARGET.lng]
+    [midLat - spanLat * (0.5 + margin), midLng - spanLng * (0.5 + margin)],
+    [midLat + spanLat * (0.5 + margin), midLng + spanLng * (0.5 + margin)]
   );
-  // Compensate for rotation: use diagonal of screen as padding basis
-  // so both points are always visible regardless of map orientation
-  var hdr = document.getElementById('lop-header');
-  var nav = document.getElementById('lop-nav');
-  var ht = hdr ? hdr.offsetHeight : 57;
-  var nb = nav ? nav.offsetHeight : 56;
-  var clipW = window.innerWidth;
-  var clipH = window.innerHeight - ht - nb;
-  // Padding: enough to clear UI + extra for rotation distortion
-  var padX = Math.round(clipW * 0.18);
-  var padY = Math.round(clipH * 0.18);
-  map.fitBounds(bounds, {
-    paddingTopLeft:     [padX, padY],
-    paddingBottomRight: [padX, padY],
-    maxZoom: 17,
-    animate: true
-  });
+  map.fitBounds(bounds, { maxZoom: 17, animate: true });
 }
 
 function updateCalBtn() {
