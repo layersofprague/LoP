@@ -288,9 +288,6 @@ var fitActive = false;
 function fitBoth() {
   if (!userPos || isNaN(TARGET.lat)) return;
   isLocked = false;
-  fitActive = true;
-  clearTimeout(fitActive._t);
-  fitActive._t = setTimeout(function(){ fitActive = false; }, 4000);
 
   // Center between user and target
   var midLat = (userPos.lat + TARGET.lat) / 2;
@@ -320,7 +317,15 @@ function fitBoth() {
   var zoom = Math.log2(156543 * Math.cos(midLat * Math.PI/180) * pxForDist / dist);
   zoom = Math.min(Math.max(Math.round(zoom), 13), 17);
 
-  map.setView([midLat, midLng], zoom, { animate: true });
+  // Temporarily stop rotation so fit view is stable
+  fitActive = true;
+  clearTimeout(fitActive._t);
+  // Set rotation to 0 for fit view
+  wrap.style.transform = 'rotate(0deg)';
+  lastH = 0;
+  map.setView([midLat, midLng], zoom, { animate: false });
+  // Resume rotation after 4s
+  fitActive._t = setTimeout(function(){ fitActive = false; }, 4000);
 }
 
 function updateCalBtn() {
