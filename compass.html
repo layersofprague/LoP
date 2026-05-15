@@ -148,51 +148,7 @@ var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.4
 map.setView(initCenter, 16);
 [100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
 
-// Fix drag direction for rotated map
-// We intercept mousemove/touchmove on the map container and rotate the delta
-(function() {
-  var dragging = false, startX, startY, startCenter;
-  var mc = document.getElementById('map');
-
-  function getCenter() { return map.getCenter(); }
-
-  function onStart(x, y) {
-    if (!dragging) {
-      dragging = true;
-      startX = x; startY = y;
-      startCenter = map.getCenter();
-      map.dragging.disable();
-    }
-  }
-  function onMove(x, y) {
-    if (!dragging) return;
-    var h = (lastH || 0) * Math.PI / 180;
-    var dx = x - startX, dy = y - startY;
-    // Rotate delta by heading to compensate CSS rotation
-    var cos = Math.cos(h), sin = Math.sin(h);
-    var rdx = dx * cos - dy * sin;
-    var rdy = dx * sin + dy * cos;
-    // Convert pixel delta to latlng delta
-    var z = map.getZoom();
-    var mpp = 156543.03392 * Math.cos(startCenter.lat * Math.PI/180) / Math.pow(2, z);
-    var dlat = (rdy / 96) * mpp / 111320;
-    var dlng = (-rdx / 96) * mpp / (111320 * Math.cos(startCenter.lat * Math.PI/180));
-    // Actually use Leaflet's containerPointToLatLng for accuracy
-    var sz = map.getSize();
-    var centerPx = map.latLngToContainerPoint(startCenter);
-    var newCenterPx = L.point(centerPx.x - rdx, centerPx.y - rdy);
-    // But container coords are in rotated space, need to unrotate
-    map.setView(map.containerPointToLatLng(newCenterPx), z, {animate:false});
-  }
-  function onEnd() { dragging = false; map.dragging.enable(); }
-
-  mc.addEventListener('touchstart', function(e){ if(e.touches.length===1){onStart(e.touches[0].clientX, e.touches[0].clientY);} }, {passive:true});
-  mc.addEventListener('touchmove', function(e){ if(e.touches.length===1){e.preventDefault();onMove(e.touches[0].clientX, e.touches[0].clientY);} }, {passive:false});
-  mc.addEventListener('touchend', onEnd, {passive:true});
-  mc.addEventListener('mousedown', function(e){ onStart(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', onEnd);
-})();
+// drag: using Leaflet default
 // Re-measure after header/nav scripts have fully injected
 setTimeout(function(){ applyClipBounds(); setAnchor(); }, 50);
 setTimeout(function(){ applyClipBounds(); setAnchor(); map.invalidateSize(); }, 300);
