@@ -143,7 +143,7 @@ applyClipBounds();
 setAnchor(); // run before Leaflet init so #mapWrap has dimensions
 
 // ── MAP ──
-var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: true });
+var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: false });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 20, keepBuffer: 4
 }).addTo(map);
@@ -397,16 +397,16 @@ function addHeadingSample(raw) {
 
 var isLocked = true; // false = user manually panned/zoomed, stop GPS following
 
+// Unlock on zoom, relock after 3s
 var relockTimer = null;
-map.on('dragstart zoomstart', function() {
+map.on('zoomstart', function() {
   isLocked = false;
   if (relockTimer) clearTimeout(relockTimer);
 });
-map.on('dragend zoomend', function() {
+map.on('zoomend', function() {
   if (relockTimer) clearTimeout(relockTimer);
   relockTimer = setTimeout(function() {
     isLocked = true;
-    // Snap back to user position
     if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: true });
   }, 3000);
 });
