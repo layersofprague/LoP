@@ -1068,13 +1068,14 @@ let _syncOffline = false;
 
 function _injectSyncUI() {
   if (document.getElementById('lop-sync-bar')) return;
+  if (!document.body) return;
   const style = document.createElement('style');
   style.textContent = '#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.78);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}#lop-sync-bar.show{transform:translateY(0);}#lop-sync-bar .sb-text{flex:1;}#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.4);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}#lop-sync-spinner.show{opacity:1;}@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}';
   document.head.appendChild(style);
   const spinner = document.createElement('div'); spinner.id = 'lop-sync-spinner';
   document.body.appendChild(spinner);
   const bar = document.createElement('div'); bar.id = 'lop-sync-bar';
-  bar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se náčst data ze serveru. Zobrazujeme naposledy uložený stav.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>';
+  bar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se načíst data ze serveru. Zobrazujeme naposledy uložený stav.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>';
   document.body.appendChild(bar);
   // Pozicuj nad navbar
   requestAnimationFrame(() => {
@@ -1086,7 +1087,19 @@ function _injectSyncUI() {
   });
 }
 function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
-function _showSyncBar(on)     { const el = document.getElementById('lop-sync-bar');     if (el) el.classList.toggle('show', on); }
+function _showSyncBar(on) {
+  const el = document.getElementById('lop-sync-bar');
+  const sp = document.getElementById('lop-sync-spinner');
+  if (!el) return;
+  if (on) {
+    const nav = document.getElementById('nav') || document.getElementById('lop-nav');
+    const h = nav ? nav.getBoundingClientRect().height : 56;
+    const offset = window.innerWidth < 820 ? h : 0;
+    el.style.bottom = offset + 'px';
+    if (sp) sp.style.bottom = offset + 'px';
+  }
+  el.classList.toggle('show', on);
+}
 
 window._lopSyncRetry = () => {
   _showSyncBar(false);
@@ -1117,6 +1130,7 @@ async function syncFromDB(onDone) {
     if (onDone) onDone();
     _showSyncBar(true);
     console.warn('Sync failed:', e?.message || e);
+    const _sb = document.getElementById('lop-sync-bar'); if (_sb) { const _t = _sb.querySelector('.sb-text'); if (_t) _t.textContent = (e?.message || String(e)); }
   }
 }
 const VOTE_KEY = 'lop_vote_' + PLACE_ID; // localStorage — pamatuje hlas uživatele
