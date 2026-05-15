@@ -147,35 +147,55 @@ var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.4
 map.setView(initCenter, 16);
 [100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
 
-// Rotation-compensated drag using Leaflet's own _lastPoint
+// Custom drag — disable Leaflet drag, implement our own with rotation compensation
 setTimeout(function() {
-  var draggable = map.dragging._draggable;
-  if (!draggable) return;
-  var origOnMove = draggable._onMove.bind(draggable);
-  draggable._onMove = function(e) {
+  map.dragging.disable();
+  var active = false, startX, startY, startLatLng;
+
+  function getPoint(e) {
+    return e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+                     : { x: e.clientX, y: e.clientY };
+  }
+
+  function onDown(e) {
+    if (e.touches && e.touches.length !== 1) return;
+    var p = getPoint(e);
+    active = true;
+    startX = p.x;
+    startY = p.y;
+    startLatLng = map.getCenter();
+  }
+
+  function onMove(e) {
+    if (!active) return;
+    if (e.touches && e.touches.length !== 1) return;
+    e.preventDefault();
+    var p = getPoint(e);
+    var dx = p.x - startX;
+    var dy = p.y - startY;
+    // Rotate delta by heading to convert screen coords → map coords
     var h = lastH * Math.PI / 180;
-    // Let Leaflet compute the move first — it updates _newPos and _lastPoint
-    origOnMove(e);
-    if (Math.abs(h) < 0.05) return; // north-up, no compensation needed
-    // Leaflet just panned by (_newPos - _startPos) in screen coords
-    // We need to undo that pan and redo it with rotated delta
-    var newPos = draggable._newPos;
-    var startPos = draggable._startPos;
-    if (!newPos || !startPos) return;
-    var dx = newPos.x - startPos.x;
-    var dy = newPos.y - startPos.y;
-    // Rotate delta by heading to compensate CSS rotation
     var cos = Math.cos(h), sin = Math.sin(h);
-    var rdx = dx * cos + dy * sin;
-    var rdy = -dx * sin + dy * cos;
-    // Correction delta
-    var cdx = rdx - dx;
-    var cdy = rdy - dy;
-    if (Math.abs(cdx) > 0.5 || Math.abs(cdy) > 0.5) {
-      map.panBy([cdx, cdy], { animate: false, noMoveStart: true });
-    }
-  };
-}, 500);
+    var mdx = dx * cos + dy * sin;
+    var mdy = -dx * sin + dy * cos;
+    // Convert pixel delta to latlng
+    var z = map.getZoom();
+    var mpp = 156543.03392 * Math.cos(startLatLng.lat * Math.PI / 180) / Math.pow(2, z);
+    var dlat = (mdy / 96) * mpp / 111320;
+    var dlng = (-mdx / 96) * mpp / (111320 * Math.cos(startLatLng.lat * Math.PI / 180));
+    map.setView([startLatLng.lat - dlat, startLatLng.lng - dlng], z, { animate: false });
+  }
+
+  function onUp() { active = false; }
+
+  var mc = document.getElementById('clip');
+  mc.addEventListener('mousedown', onDown);
+  mc.addEventListener('touchstart', onDown, { passive: true });
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+}, 600);
 // Re-measure after header/nav scripts have fully injected
 setTimeout(function(){ applyClipBounds(); setAnchor(); }, 50);
 setTimeout(function(){ applyClipBounds(); setAnchor(); map.invalidateSize(); }, 300);
