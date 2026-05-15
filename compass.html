@@ -11,7 +11,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
-#clip { position: fixed; top: 57px; left: 0; right: 0; bottom: 56px; overflow: hidden; }
+#clip { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
 #mapWrap { position: absolute; transform-origin: 50% 50%; background: #e8e4dc; }
 #map { width: 100%; height: 100%; }
 #userDot {
@@ -106,12 +106,23 @@ const wrap = document.getElementById('mapWrap');
 const dot  = document.getElementById('userDot');
 let AX = 0, AY = 0;
 
+function applyClipBounds() {
+  var hdr = document.getElementById('lop-header');
+  var nav = document.getElementById('lop-nav');
+  var clip = document.getElementById('clip');
+  var ht = hdr ? hdr.offsetHeight : 0;
+  var nb = nav ? nav.offsetHeight : 0;
+  clip.style.top = ht + 'px';
+  clip.style.bottom = nb + 'px';
+  return { ht: ht, nb: nb };
+}
+
 function setAnchor() {
   const landscape = window.innerWidth > window.innerHeight;
   AX = window.innerWidth / 2;
-  var headerH = 57, navH = 56;
-  var clipH = window.innerHeight - headerH - navH;
-  AY = headerH + (landscape ? clipH - 60 : clipH * 0.78);
+  var bounds = applyClipBounds();
+  var clipH = window.innerHeight - bounds.ht - bounds.nb;
+  AY = bounds.ht + (landscape ? clipH - 60 : clipH * 0.78);
 
   const d = Math.ceil(Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight) * 1.5);
   wrap.style.width  = d + 'px';
@@ -122,6 +133,7 @@ function setAnchor() {
   dot.style.left = AX + 'px';
   dot.style.top  = AY + 'px';
 }
+applyClipBounds();
 setAnchor(); // run before Leaflet init so #mapWrap has dimensions
 
 // ── MAP ──
@@ -134,6 +146,9 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.42];
 map.setView(initCenter, 16);
 [100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
+// Re-measure after header/nav scripts have fully injected
+setTimeout(function(){ applyClipBounds(); setAnchor(); }, 50);
+setTimeout(function(){ applyClipBounds(); setAnchor(); map.invalidateSize(); }, 300);
 
 // Target pin
 if (!isNaN(TARGET.lat)) {
