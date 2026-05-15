@@ -1068,7 +1068,7 @@ let _syncOffline = false;
 function _injectSyncUI() {
   if (document.getElementById('lop-sync-bar')) return;
   const style = document.createElement('style');
-  style.textContent = '#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.85);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:\'Inter\',system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}@media(max-width:819px){#lop-sync-bar{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}@media(min-width:820px){#lop-sync-bar{right:84px;}}#lop-sync-bar.show{transform:translateY(0);}#lop-sync-bar .sb-text{flex:1;}#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.4);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}@media(max-width:819px){#lop-sync-spinner{bottom:calc(56px + env(safe-area-inset-bottom,0px));}}@media(min-width:820px){#lop-sync-spinner{right:84px;}}#lop-sync-spinner.show{opacity:1;}@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}';
+  style.textContent = '#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.72);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:\'Inter\',system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}@media(min-width:820px){#lop-sync-bar{right:84px;}}#lop-sync-bar.show{transform:translateY(0);}#lop-sync-bar .sb-text{flex:1;}#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.4);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}@media(min-width:820px){#lop-sync-spinner{right:84px;}}#lop-sync-spinner.show{opacity:1;}@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}';
   document.head.appendChild(style);
   const spinner = document.createElement('div'); spinner.id = 'lop-sync-spinner'; document.body.appendChild(spinner);
   const bar = document.createElement('div'); bar.id = 'lop-sync-bar';
@@ -1076,7 +1076,19 @@ function _injectSyncUI() {
   document.body.appendChild(bar);
 }
 function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
-function _showSyncBar(on)     { const el = document.getElementById('lop-sync-bar');     if (el) el.classList.toggle('show', on); }
+function _showSyncBar(on)     { const el = document.getElementById('lop-sync-bar');     if (el) { el.classList.toggle('show', on); if (on) _repositionSyncBar(); } }
+function _repositionSyncBar() {
+  const bar = document.getElementById('lop-sync-bar');
+  const spinner = document.getElementById('lop-sync-spinner');
+  if (!bar) return;
+  // Najdi nav element — inline nav nebo lop-nav
+  const nav = document.getElementById('nav') || document.getElementById('lop-nav');
+  const offset = (nav && window.innerWidth < 820) ? nav.offsetHeight : 0;
+  bar.style.bottom = offset + 'px';
+  if (spinner) spinner.style.bottom = offset + 'px';
+}
+window.addEventListener('resize', _repositionSyncBar);
+
 
 function _fetchTimeout(url, opts, ms) {
   const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
@@ -1101,7 +1113,7 @@ async function syncFromDB(onDone) {
     if (vRes.ok) localStorage.setItem(VISIT_KEY, JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
     fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() })
       .then(r => r.ok ? r.json() : []).then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }).catch(() => {});
-    _showSyncSpinner(false); _syncOffline = false; if (onDone) onDone();
+    _showSyncSpinner(false); _showSyncBar(false); _syncOffline = false; if (onDone) onDone();
   } catch(e) {
     _showSyncSpinner(false); _syncOffline = true; if (onDone) onDone(); _showSyncBar(true);
     console.warn('Sync failed:', e?.message || e, e?.name);
