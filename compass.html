@@ -288,41 +288,35 @@ function fitBoth() {
   if (!userPos || isNaN(TARGET.lat)) return;
   isLocked = false;
 
+  // Center between user and target
+  var midLat = (userPos.lat + TARGET.lat) / 2;
+  var midLng = (userPos.lng + TARGET.lng) / 2;
+
+  // Haversine distance between points
+  var R = 6371000;
+  var dLat = (TARGET.lat - userPos.lat) * Math.PI / 180;
+  var dLng = (TARGET.lng - userPos.lng) * Math.PI / 180;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2)
+        + Math.cos(userPos.lat*Math.PI/180)*Math.cos(TARGET.lat*Math.PI/180)
+        * Math.sin(dLng/2)*Math.sin(dLng/2);
+  var dist = Math.max(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)), 100);
+
+  // Available clip size
   var hdr = document.getElementById('lop-header');
   var nav = document.getElementById('lop-nav');
   var ht = hdr ? hdr.offsetHeight : 57;
   var nb = nav ? nav.offsetHeight : 56;
+  var clipW = window.innerWidth;
+  var clipH = window.innerHeight - ht - nb;
+  // Use shorter dimension, leave 35% margin each side → 30% for content
+  var pxForDist = Math.max(clipW, clipH) * 0.30;
 
-  // Generous padding so both points are well inside the clip area
-  var padX = Math.round(window.innerWidth * 0.2);
-  var padY = Math.round((window.innerHeight - ht - nb) * 0.2);
+  // Zoom: metres/pixel = 156543 * cos(lat) / 2^zoom
+  // → zoom = log2(156543 * cos(lat) * px / dist)
+  var zoom = Math.log2(156543 * Math.cos(midLat * Math.PI/180) * pxForDist / dist);
+  zoom = Math.min(Math.max(Math.round(zoom), 13), 17);
 
-  var bounds = L.latLngBounds(
-    [userPos.lat, userPos.lng],
-    [TARGET.lat, TARGET.lng]
-  );
-
-  // Expand bounds by minimum 0.006° (~500m) so close points get reasonable zoom
-  var sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
-  var minDeg = 0.006;
-  if ((ne.lat - sw.lat) < minDeg) {
-    var midLat = (ne.lat + sw.lat) / 2;
-    sw = L.latLng(midLat - minDeg/2, sw.lng);
-    ne = L.latLng(midLat + minDeg/2, ne.lng);
-  }
-  if ((ne.lng - sw.lng) < minDeg) {
-    var midLng = (ne.lng + sw.lng) / 2;
-    sw = L.latLng(sw.lat, midLng - minDeg/2);
-    ne = L.latLng(ne.lat, midLng + minDeg/2);
-  }
-  bounds = L.latLngBounds(sw, ne);
-
-  map.fitBounds(bounds, {
-    paddingTopLeft: [padX, padY + ht],
-    paddingBottomRight: [padX, padY + nb],
-    maxZoom: 16,
-    animate: true
-  });
+  map.setView([midLat, midLng], zoom, { animate: true });
 }
 
 function updateCalBtn() {
@@ -474,20 +468,27 @@ function getScreenAngle() {
 }
 
 function startOri() {
-  function handle(e) {
+  var hasAbsolute = false;
+
+  function handleAbsolute(e) {
     if (oriPaused) return;
+    hasAbsolute = true;
     var raw = null;
-    if (e.webkitCompassHeading !== undefined) {
-      // iOS: already compensated for screen orientation
-      raw = e.webkitCompassHeading;
-    } else if (e.alpha !== null) {
-      // Android: alpha is relative to current screen orientation — correct it
-      raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
-    }
+    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+    else if (e.alpha !== null) raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
     if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
   }
-  window.addEventListener('deviceorientationabsolute', handle, true);
-  window.addEventListener('deviceorientation', handle, true);
+
+  function handleRelative(e) {
+    if (oriPaused || hasAbsolute) return; // ignore if absolute is available
+    var raw = null;
+    if (e.webkitCompassHeading !== undefined) raw = e.webkitCompassHeading;
+    else if (e.alpha !== null) raw = (360 - e.alpha + getScreenAngle() + 360) % 360;
+    if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
+  }
+
+  window.addEventListener('deviceorientationabsolute', handleAbsolute, true);
+  window.addEventListener('deviceorientation', handleRelative, true);
 }
 
 // Pause orientation briefly on resize to avoid sensor glitch during rotation
