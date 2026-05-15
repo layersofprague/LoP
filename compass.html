@@ -316,8 +316,7 @@ function fitBoth() {
   var zoom = Math.log2(156543 * Math.cos(midLat * Math.PI/180) * pxForDist / dist);
   zoom = Math.min(Math.max(Math.round(zoom), 13), 17);
 
-  // Debug
-  document.getElementById('dbg').textContent = 'fit: d=' + Math.round(dist) + 'm z=' + zoom;
+  alert('fit: d=' + Math.round(dist) + 'm z=' + zoom + ' pos:' + (userPos?'ok':'null') + ' tgt:' + (isNaN(TARGET.lat)?'null':'ok'));
   map.setView([midLat, midLng], zoom, { animate: true });
 }
 
