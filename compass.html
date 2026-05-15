@@ -4,12 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Kompas · LoP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
-#clip { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+#clip { position: fixed; top: 57px; left: 0; right: 0; bottom: 56px; overflow: hidden; }
 #mapWrap { position: absolute; transform-origin: 50% 50%; background: #e8e4dc; }
 #map { width: 100%; height: 100%; }
 #userDot {
@@ -27,8 +29,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
   padding: 5px 10px; border-radius: 20px; white-space: nowrap;
 }
 </style>
+<script src="header.js"></script>
+<script src="nav.js"></script>
 </head>
 <body>
+<div id="lop-header"></div>
 <div id="clip">
   <div id="mapWrap"><div id="map"></div></div>
   <div id="userDot"></div>
@@ -88,7 +93,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 const params = new URLSearchParams(location.search);
 var TARGET = {
   id:    params.get('id'),
-  num:   params.get('id') || '?',
+  num:   params.get('num') || params.get('id') || '?',
   lat:   parseFloat(params.get('lat')),
   lng:   parseFloat(params.get('lng')),
   name:  params.get('name') || '',
@@ -103,7 +108,9 @@ let AX = 0, AY = 0;
 function setAnchor() {
   const landscape = window.innerWidth > window.innerHeight;
   AX = window.innerWidth / 2;
-  AY = landscape ? window.innerHeight - 60 : window.innerHeight - 120;
+  var headerH = 57, navH = 56;
+  var clipH = window.innerHeight - headerH - navH;
+  AY = headerH + (landscape ? clipH - 60 : clipH * 0.78);
 
   const d = Math.ceil(Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight) * 1.5);
   wrap.style.width  = d + 'px';
@@ -151,7 +158,7 @@ if (!isNaN(TARGET.lat)) {
 var CAT_COLOR_TIP = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
 function showTip(e, loc) {
   var tip = document.getElementById('tipBox');
-  var name = loc.name || ('Cíl ' + loc.id);
+  var name = loc.name || ('Cíl ' + loc.num);
   document.getElementById('tipName').textContent = name;
   // Distance
   if (userPos && !isNaN(loc.lat)) {
@@ -214,21 +221,21 @@ document.getElementById('clip').addEventListener('click', function(e) {
 
 // ── OTHER LOCATIONS (dimmed) ──
 var LOCATIONS = [
-  { id:"H101", name:"Šítkovská věž",        lat:50.0784,  lng:14.4133,  cat:"hist" },
-  { id:"H102", name:"Václavské náměstí",    lat:50.0815,  lng:14.4278,  cat:"hist" },
-  { id:"H201", name:"Staroměstské náměstí", lat:50.0875,  lng:14.4213,  cat:"arch" },
-  { id:"H202", name:"Národní divadlo",      lat:50.0808,  lng:14.4133,  cat:"arch" },
-  { id:"H301", name:"Pražský hrad",         lat:50.0911,  lng:14.4016,  cat:"fun"  },
-  { id:"H001", name:"Holešovický přístav",  lat:50.10543, lng:14.45595, cat:"hist" },
-  { id:"H302", name:"Letenské sady",        lat:50.0939,  lng:14.4224,  cat:"fun"  },
-  { id:"H203", name:"Tančící dům",          lat:50.0754,  lng:14.4141,  cat:"arch" }
+  { id:0, name:"Šítkovská věž", lat:50.0784, lng:14.4133, cat:"hist", num:101 },
+  { id:1, name:"Václavské náměstí", lat:50.0815, lng:14.4278, cat:"hist", num:102 },
+  { id:2, name:"Staroměstské nám.", lat:50.0875, lng:14.4213, cat:"arch", num:201 },
+  { id:3, name:"Národní divadlo", lat:50.0808, lng:14.4133, cat:"arch", num:202 },
+  { id:4, name:"Pražský hrad", lat:50.0911, lng:14.4016, cat:"fun", num:301 },
+  { id:5, name:"Holešovický přístav", lat:50.10543, lng:14.45595, cat:"hist", num:"H001" },
+  { id:6, name:"Letenské sady", lat:50.0939, lng:14.4224, cat:"fun", num:302 },
+  { id:7, name:"Tančící dům", lat:50.0754, lng:14.4141, cat:"arch", num:203 }
 ];
 var CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
 
 LOCATIONS.forEach(function(loc) {
   // Skip the target location
   if (String(loc.id) === String(TARGET.id)) return;
-  var n = String(loc.id), m = n.match(/^([A-Z]+)(\d+)$/);
+  var n = String(loc.num), m = n.match(/^([A-Z]+)(\d+)$/);
   var col = CAT_COLOR[loc.cat] || '#4A4A48';
   var ph = m
     ? '<div style="width:30px;height:30px;border-radius:50%;background:' + col + ';border:2px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#fff"><span style="font-size:10px;font-weight:700;line-height:1">' + m[1] + '</span><span style="font-size:7px;opacity:.8;line-height:1">' + m[2] + '</span></div>'
@@ -321,16 +328,6 @@ function calTouchStart() { calTimer = setTimeout(function(){ calTimer = null; do
 function calTouchEnd() { if (calTimer) { clearTimeout(calTimer); calTimer = null; } }
 loadCal();
 
-// ── VISITED (sdílený localStorage s index.html) ──
-var VISIT_KEY = 'lop_visited_v1';
-function markVisited(id) {
-  if (!id) return;
-  try {
-    var v = JSON.parse(localStorage.getItem(VISIT_KEY) || '[]').map(String);
-    if (!v.includes(String(id))) { v.push(String(id)); localStorage.setItem(VISIT_KEY, JSON.stringify(v)); }
-  } catch(e) {}
-}
-
 // ── DISTANCE ──
 function toRad(d) { return d * Math.PI / 180; }
 function calcDist(a, b) {
@@ -339,7 +336,6 @@ function calcDist(a, b) {
   var h = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)*Math.sin(dLng/2);
   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
 }
-var _arrived = false;
 function updateDist() {
   if (!userPos || isNaN(TARGET.lat)) return;
   var dist = calcDist(userPos, TARGET);
@@ -350,14 +346,6 @@ function updateDist() {
   else dv.textContent = (dist/1000).toFixed(1).replace('.', ',') + ' km';
   var steps = Math.round(dist / 0.75);
   ds.textContent = steps < 9999 ? '≈ ' + steps.toLocaleString('cs') + ' kroků' : '';
-
-  // ── Příchod na místo ──
-  var radius = TARGET.arRadius || 15;
-  if (!_arrived && dist <= radius) {
-    _arrived = true;
-    markVisited(TARGET.id);
-    showArrival();
-  }
 }
 
 // ── SENSORS ──
@@ -467,40 +455,6 @@ function rotateMap(h) {
   lastH = h;
 }
 
-// ── PŘÍCHOD NA MÍSTO ──
-function showArrival() {
-  var el = document.getElementById('arrivalBanner');
-  if (el) { el.style.display = 'flex'; return; }
-  var banner = document.createElement('div');
-  banner.id = 'arrivalBanner';
-  banner.style.cssText = [
-    'position:fixed;bottom:90px;left:50%;transform:translateX(-50%)',
-    'background:var(--ink,#1a1814);color:var(--paper,#f5f0e8)',
-    'border-radius:14px;padding:14px 18px',
-    'display:flex;align-items:center;gap:12px',
-    'box-shadow:0 4px 24px rgba(0,0,0,.35)',
-    'z-index:999;max-width:calc(100vw - 32px)',
-    'font-family:Inter,sans-serif'
-  ].join(';');
-  var arUrl = 'ar.html?id=' + encodeURIComponent(TARGET.id) + '&name=' + encodeURIComponent(TARGET.name || '');
-  banner.innerHTML = [
-    '<div style="font-size:22px">✓</div>',
-    '<div style="flex:1">',
-    '  <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:2px">Jste na místě</div>',
-    '  <div style="font-size:14px;font-weight:500">' + (TARGET.name || 'Cíl') + '</div>',
-    '</div>',
-    '<a href="' + arUrl + '" style="',
-    '  background:var(--accent,#c8441a);color:#fff;border:none;',
-    '  border-radius:8px;padding:8px 14px;',
-    '  font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;',
-    '  cursor:pointer;text-decoration:none;white-space:nowrap',
-    '">Otevřít AR</a>'
-  ].join('');
-  document.body.appendChild(banner);
-  // Vibrace (pokud telefon podporuje)
-  if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-}
-
 // ── LOOP ──
 function loop() {
   var h = smoothH !== null ? smoothH : 0;
@@ -546,5 +500,6 @@ window.addEventListener('resize', function() {
     </div>
   </div>
 </div>
+<div id="lop-nav"></div>
 </body>
 </html>
