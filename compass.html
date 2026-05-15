@@ -300,7 +300,23 @@ function fitBoth() {
     [userPos.lat, userPos.lng],
     [TARGET.lat, TARGET.lng]
   );
-  map.fitBounds(bounds, { padding: [60, 60], maxZoom: 17, animate: true });
+  // Compensate for rotation: use diagonal of screen as padding basis
+  // so both points are always visible regardless of map orientation
+  var hdr = document.getElementById('lop-header');
+  var nav = document.getElementById('lop-nav');
+  var ht = hdr ? hdr.offsetHeight : 57;
+  var nb = nav ? nav.offsetHeight : 56;
+  var clipW = window.innerWidth;
+  var clipH = window.innerHeight - ht - nb;
+  // Padding: enough to clear UI + extra for rotation distortion
+  var padX = Math.round(clipW * 0.18);
+  var padY = Math.round(clipH * 0.18);
+  map.fitBounds(bounds, {
+    paddingTopLeft:     [padX, padY],
+    paddingBottomRight: [padX, padY],
+    maxZoom: 17,
+    animate: true
+  });
 }
 
 function updateCalBtn() {
