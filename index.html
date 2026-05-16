@@ -3001,6 +3001,8 @@ function initMap() {
         clearTimeout(window._rtAutoHide);
         setTimeout(() => {
           showTooltip(loc, m, rt);
+          rt.style.pointerEvents = 'none';
+          setTimeout(() => { rt.style.pointerEvents = ''; }, 800);
           window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
         }, 350);
       }
