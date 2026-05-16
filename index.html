@@ -1954,7 +1954,16 @@ function isAdmin()   { return getUserRole() === 'admin'; }
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 
-function getSession() {
+function _dbg(msg) {
+  let el = document.getElementById('_dbg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_dbg';
+    el.style.cssText = 'position:fixed;top:60px;left:0;right:0;z-index:99999;background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-family:monospace;padding:6px 10px;max-height:180px;overflow-y:auto;';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<div>' + new Date().toISOString().slice(11,23) + ' ' + msg + '</div>' + el.innerHTML;
+}
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
 }
 
@@ -2575,7 +2584,7 @@ function showTooltip(loc, m, rt) {
           Detail
         </a>
         <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo"
-           onclick="if(Date.now()-window._rtShownAt<800){event.preventDefault();} event.stopPropagation()">
+           onclick="_dbg('COMPASS CLICK', Date.now(), window._rtShownAt, Date.now()-window._rtShownAt); if(Date.now()-window._rtShownAt<1000){event.preventDefault(); _dbg('BLOCKED');} event.stopPropagation()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           Kompas
         </a>
@@ -2989,7 +2998,8 @@ function initMap() {
     });
     m.on('touchend', (e) => {
       L.DomEvent.stopPropagation(e);
-      window._rtShownAt = Date.now(); // okamžitě — blokuje ghost tap
+      window._rtShownAt = Date.now();
+      _dbg('TOUCHEND', window._rtShownAt, 'visible:', rt.classList.contains('visible'), 'forId:', rt._forId, 'locId:', loc.id);
       window._suppressNextClick = true;
       setTimeout(() => { window._suppressNextClick = false; }, 600);
       if (rt.classList.contains('visible') && rt._forId === loc.id) {
