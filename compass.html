@@ -335,7 +335,46 @@ function toggleCal() {
   }
   var d = localStorage.getItem('lop_cal_disabled') === '1';
   if (d) localStorage.removeItem('lop_cal_disabled'); else localStorage.setItem('lop_cal_disabled', '1');
-  loadCal();
+  // ── ARRIVAL ──
+var _arrivalShown = false;
+
+function showArrival() {
+  if (_arrivalShown) return;
+  _arrivalShown = true;
+  try {
+    var visited = JSON.parse(localStorage.getItem('lop_visited_v1') || '[]').map(String);
+    if (!visited.includes(String(TARGET.id))) {
+      visited.push(String(TARGET.id));
+      localStorage.setItem('lop_visited_v1', JSON.stringify(visited));
+    }
+  } catch(e) {}
+  try {
+    var s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    if (s && s.user) {
+      fetch('https://lomtaoctzetpweuepesp.supabase.co/rest/v1/visited', {
+        method: 'POST',
+        headers: {
+          'apikey': 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5',
+          'Authorization': 'Bearer ' + s.access_token,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ user_id: s.user.id, place_id: String(TARGET.id) })
+      }).catch(function(){});
+    }
+  } catch(e) {}
+  document.getElementById('arrivalName').textContent = TARGET.name || '';
+  document.getElementById('arrivalOverlay').style.display = 'flex';
+}
+function arrGoAR() {
+  var url = 'ar-intro.html?id=' + TARGET.id + '&lat=' + TARGET.lat + '&lng=' + TARGET.lng + '&name=' + encodeURIComponent(TARGET.name || '');
+  if (TARGET.thumb) url += '&thumb=' + encodeURIComponent(TARGET.thumb);
+  location.href = url;
+}
+function arrGoDetail() { location.href = 'place/' + TARGET.id + '.html'; }
+function arrGoMap() { location.href = 'index.html'; }
+
+loadCal();
 }
 function importCal(input) {
   var file = input.files[0]; if (!file) return;
@@ -408,10 +447,7 @@ function addHeadingSample(raw) {
 
 var isLocked = true; // false = user manually panned/zoomed, stop GPS following
 
-// After any zoom, immediately re-center on user
-map.on('zoom', function() {
-  if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
-});
+// zoom: GPS setView handles re-centering
 
 var lastPanLat = null, lastPanLng = null;
 navigator.geolocation && navigator.geolocation.watchPosition(
@@ -588,5 +624,64 @@ window.addEventListener('resize', function() {
   </div>
 </div>
 <div id="lop-nav"></div>
+<!-- Arrival overlay -->
+<div id="arrivalOverlay" style="
+  display:none; position:fixed; top:0;left:0;right:0;bottom:0; z-index:500;
+  background:rgba(26,24,20,.85); backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  padding:32px 24px; text-align:center;
+  font-family:'Inter',system-ui,sans-serif;
+">
+  <!-- Check -->
+  <div style="margin-bottom:24px">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <circle cx="36" cy="36" r="36" fill="rgba(61,122,74,.2)"/>
+      <circle cx="36" cy="36" r="28" fill="rgba(61,122,74,.35)"/>
+      <circle cx="36" cy="36" r="20" fill="#3d7a4a"/>
+      <polyline points="24,36 32,44 48,28" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- Kicker -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.5);margin-bottom:8px">
+    Místo navštíveno
+  </div>
+
+  <!-- Název -->
+  <div id="arrivalName" style="font-family:'Fraunces',serif;font-size:32px;font-weight:400;color:#eeefeb;line-height:1.1;margin-bottom:8px;letter-spacing:-.015em"></div>
+
+  <!-- Subtext -->
+  <div style="font-size:13px;color:rgba(238,239,235,.5);margin-bottom:36px">
+    Výborně! Pokračuj dál.
+  </div>
+
+  <!-- Tlačítka -->
+  <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px">
+    <button id="arrBtnAR" onclick="arrGoAR()" style="
+      width:100%;padding:15px;border-radius:10px;border:none;
+      background:#eeefeb;color:#1a1a18;
+      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;cursor:pointer;">
+      Spustit AR →
+    </button>
+    <button id="arrBtnDetail" onclick="arrGoDetail()" style="
+      width:100%;padding:15px;border-radius:10px;border:none;
+      background:rgba(238,239,235,.1);color:#eeefeb;
+      border:1px solid rgba(238,239,235,.2);
+      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;cursor:pointer;">
+      Detail místa
+    </button>
+    <button onclick="arrGoMap()" style="
+      width:100%;padding:15px;border-radius:10px;border:none;
+      background:transparent;color:rgba(238,239,235,.4);
+      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
+      letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">
+      Zpět na mapu
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
