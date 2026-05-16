@@ -1997,11 +1997,16 @@ function _showSyncBar(on) {
   const sp = document.getElementById('lop-sync-spinner');
   if (!el) return;
   if (on) {
-    const nav = document.getElementById('nav') || document.getElementById('lop-nav');
-    const h = nav ? nav.getBoundingClientRect().height : 56;
-    const offset = window.innerWidth < 820 ? h : 0;
-    el.style.bottom = offset + 'px';
-    if (sp) sp.style.bottom = offset + 'px';
+    const doPosition = () => {
+      const nav = document.getElementById('nav');
+      const h = nav ? nav.getBoundingClientRect().height : 0;
+      const offset = (window.innerWidth < 820 && h > 0) ? h : 56;
+      el.style.bottom = (window.innerWidth < 820 ? offset : 0) + 'px';
+      if (sp) sp.style.bottom = el.style.bottom;
+    };
+    // Zkus okamžitě, pak ještě po renderu
+    doPosition();
+    requestAnimationFrame(doPosition);
   }
   el.classList.toggle('show', on);
 }
@@ -2024,6 +2029,10 @@ async function syncFromDB(onDone) {
       ft(`${SUPA_URL}` + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
       ft(`${SUPA_URL}` + '/rest/v1/visited?user_id=eq.'  + s.user.id + '&select=place_id', { headers: authHeaders() }),
     ]);
+    if (!wRes.ok || !vRes.ok) {
+      const err = !wRes.ok ? wRes.status : vRes.status;
+      throw new Error('HTTP ' + err);
+    }
     if (wRes.ok) localStorage.setItem('lop_wishlist_v2', JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
     if (vRes.ok) localStorage.setItem('lop_visited_v1', JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
     fetch(`${SUPA_URL}` + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() })
@@ -2942,19 +2951,26 @@ function initMap() {
 
     m.on('click', (e) => {
       const oe = e.originalEvent;
-      const isTouch = oe?.pointerType === 'touch' || oe?.pointerType === 'pen';
+      const isTouch = oe?.pointerType === 'touch' || oe?.pointerType === 'pen'
+                   || ('ontouchstart' in window);
       if (isTouch) return; // touch handled by touchend
       if (rt.classList.contains('visible')) return;
       openSheet(loc.id);
     });
     m.on('touchend', (e) => {
       L.DomEvent.stopPropagation(e);
+      L.DomEvent.preventDefault(e);
       if (rt.classList.contains('visible') && rt._forId === loc.id) {
         rt.classList.remove('visible');
         rt._forId = null;
+        clearTimeout(window._rtAutoHide);
         openSheet(loc.id);
       } else {
+        rt.classList.remove('visible'); // skryj případný jiný tooltip
         showTooltip(loc, m, rt);
+        // auto-hide po 4s
+        clearTimeout(window._rtAutoHide);
+        window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
       }
     });
     m.on('mouseover', () => {
