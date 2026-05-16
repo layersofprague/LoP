@@ -239,26 +239,260 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
   font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
 }
 
-.filter-chip.state-dim { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
-.filter-chip.state-dim .chip-filter-icon,
-.filter-chip.state-hide .chip-filter-icon { display: inline-block; }
-.filter-chip .chip-filter-icon { display: none; width: 9px; height: 9px; margin-left: 2px;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat; }
-.filter-chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
-.filter-chip.state-active { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; }
-.filter-chip.chip-locked { cursor: pointer; position: relative; }
-.filter-chip.chip-locked::before {
+.filter-bar {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: 0 3px 18px rgba(26,24,20,.08);
+  overflow: visible;
+  pointer-events: auto;
+}
+.filter-head {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit;
+  color: var(--ink);
+}
+.filter-head-lead {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px;
+}
+.filter-head-dots { display: flex; gap: 3px; }
+.filter-head-dots span {
+  width: 7px; height: 7px; border-radius: 50%;
+}
+.filter-head-lbl { font-weight: 500; }
+.filter-head-cnt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .08em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+}
+.filter-head-chev {
+  color: var(--ink-3);
+  transition: transform .28s var(--ease);
+  display: flex;
+}
+.filter-bar.open .filter-head-chev { transform: rotate(180deg); }
+.filter-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .32s var(--ease);
+  border-top: 0 solid var(--rule);
+}
+.filter-bar.open .filter-panel {
+  max-height: 480px;
+  border-top: 1px solid var(--rule);
+}
+.filter-panel-inner {
+  padding: 14px 16px 12px;
+  background: var(--paper-2);
+}
+.filter-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.filter-row:first-child { padding-top: 4px; }
+.filter-row:last-of-type { border-bottom: none; }
+.filter-lbl {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.filter-lbl-val {
+  color: var(--ink);
+  letter-spacing: .04em;
+  font-size: 10px;
+}
+.filter-chips {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+
+.filter-timeline {
+  position: relative;
+  height: 70px;
+  padding: 0 4px;
+}
+.filter-timeline .ft-track {
+  position: absolute; left: 4px; right: 4px; top: 20px;
+  height: 4px; background: var(--rule); border-radius: 2px;
+}
+.filter-timeline .ft-fill {
+  position: absolute; top: 20px;
+  height: 4px; background: var(--ink); border-radius: 2px;
+}
+.filter-timeline .ft-h {
+  position: absolute; top: 22px; transform: translate(-50%, -50%);
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  cursor: grab; z-index: 3;
+  touch-action: none;
+}
+.filter-timeline .ft-h:active { cursor: grabbing; }
+.filter-timeline .ft-div {
+  position: absolute; top: 14px;
+  width: 1px; height: 16px;
+  background: var(--rule-2);
+  pointer-events: none;
+}
+.filter-timeline .ft-lbl {
+  position: absolute; top: 36px;
+  transform: translateX(-50%);
+  font-size: 10px; font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+  pointer-events: none;
+  max-width: 90px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.filter-timeline .ft-lbl.off { color: var(--ink-4); opacity: .5; }
+.filter-timeline .ft-year {
+  position: absolute; top: 54px;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--ink-4);
+  letter-spacing: .05em;
+  pointer-events: none;
+}
+.filter-timeline .ft-year-tick {
+  position: absolute; top: 50px;
+  width: 1px; height: 3px; background: var(--rule-2);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.filter-range-input {
+  appearance: none; -webkit-appearance: none;
+  width: 100%; height: 4px; border-radius: 2px;
+  background: var(--rule);
+  outline: none;
+  margin-top: 2px;
+}
+.filter-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--ink);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.filter-range-input::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--ink);
+  cursor: pointer;
+}
+
+.filter-footer {
+  display: flex; justify-content: flex-end;
+  padding-top: 10px;
+}
+.filter-reset {
+  background: transparent;
+  border: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 4px 0;
+}
+.filter-reset:hover { color: var(--ink); }
+
+.chip {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: 0 2px 10px rgba(26,24,20,.05);
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--ink-3); }
+.chip .chip-swatch {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.chip .chip-icon {
+  width: 13px; height: 13px; border-radius: 0;
+  background: transparent;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+  filter: drop-shadow(0 0 1px var(--paper));
+}
+.chip .chip-icon-check {
+  background-color: var(--ok);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+}
+.chip .chip-icon-heart {
+  background-color: var(--accent);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+  width: 11px; height: 11px;
+}
+.chip.state-dim { opacity: .55; }
+.chip.state-dim .chip-swatch { opacity: .4; }
+.chip.state-force { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; opacity: 1; }
+.chip[data-filter="visited"].state-force { background: var(--accent) !important; border-color: var(--accent) !important; }
+.chip.state-force .chip-swatch { background: var(--paper) !important; }
+.chip.state-force .chip-icon-heart { background: var(--paper) !important; }
+.chip.state-force svg { color: var(--paper) !important; fill: var(--paper) !important; stroke: var(--paper) !important; }
+.chip.chip-locked { cursor: pointer; position: relative; }
+.chip.chip-locked .chip-lock { opacity: .5; }
+.chip.chip-locked::before {
   content: attr(data-tooltip);
   position: absolute; bottom: calc(100% + 6px); left: 50%;
   transform: translateX(-50%);
   background: var(--ink); color: var(--paper);
-  font-size: 11px; padding: 6px 10px; border-radius: 6px;
+  font-size: 11px; line-height: 1.4;
+  padding: 6px 10px; border-radius: 6px;
   white-space: nowrap; pointer-events: none;
-  opacity: 0; transition: opacity .15s; z-index: 1000;
+  opacity: 0; transition: opacity .15s;
+  z-index: 1000;
+  font-family: 'Inter', sans-serif; font-weight: 400;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
-.filter-chip.chip-locked:hover::before { opacity: 1; }
+.chip.chip-locked::after {
+  content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: var(--ink);
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+}
+.chip.chip-locked:hover::before,
+.chip.chip-locked:hover::after { opacity: 1; }
+.chip.state-force .chip-icon-check { background: var(--paper) !important; }
+
+.chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; opacity: 1; }
+.chip.state-hide .chip-swatch { background: var(--paper) !important; }
+.chip.state-hide:not(.chip-locked)::after { content: none; }
+.chip .chip-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4);
+  margin-left: 2px;
+}
+.chip .chip-filter-icon {
+  display: none;
+  width: 9px; height: 9px; margin-left: 2px; flex-shrink: 0;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+}
+.chip.state-dim .chip-count { display: none; }
+.chip.state-dim .chip-filter-icon { display: inline-block; }
+.chip.state-hide .chip-count { display: none; }
+.chip.state-hide .chip-filter-icon { display: inline-block; background: var(--paper); }
+.chip.all { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip.all .chip-count { color: rgba(255,255,255,.55); }
+
 
 .place-wish-lock {
   position: absolute; top: 0; right: 2px;
@@ -274,6 +508,7 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
+.map-header { position: relative; top: auto; left: auto; right: auto; pointer-events: auto; margin-bottom: 20px; }
 </style>
 </head>
 <body>
@@ -290,27 +525,48 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
   </div>
 
   <!-- Filtry -->
-  <div class="filter-row" id="filterRow">
-    <button class="filter-chip" data-cat="hist" onclick="toggleCat('hist')">
-      <span class="dot" style="background:var(--cat-hist)"></span>
-      Historie <span class="count" id="ctHist">—</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="filter-chip" data-cat="arch" onclick="toggleCat('arch')">
-      <span class="dot" style="background:var(--cat-arch)"></span>
-      Architektura <span class="count" id="ctArch">—</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="filter-chip" data-cat="fun" onclick="toggleCat('fun')">
-      <span class="dot" style="background:var(--cat-fun)"></span>
-      Zajímavosti <span class="count" id="ctFun">—</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="filter-chip" id="chipVisited" data-cat="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení" onclick="setFilter('visited')">
-      <span style="font-size:11px">✓</span>
-      Navštíveno <span id="ctVisitedWrap"></span>
-    </button>
-    <button class="filter-chip" id="chipWished" data-cat="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení" onclick="setFilter('wished')">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      Plán <span id="ctWishedWrap"></span>
-    </button>
+  <div class="map-header" style="position:relative;top:auto;left:auto;right:auto;margin-bottom:20px;pointer-events:auto;">
+    <div class="filter-bar" id="filterBar">
+          <button class="filter-head" id="filterHead" onclick="toggleFilter()">
+            <span class="filter-head-lead">
+              <span class="filter-head-dots">
+                <span style="background:var(--cat-hist)"></span>
+                <span style="background:var(--cat-arch)"></span>
+                <span style="background:var(--cat-fun)"></span>
+              </span>
+              <span class="filter-head-lbl">Filtr</span>
+              <span class="filter-head-cnt" id="filterHeadCnt">· <span id="filterHeadActive">26</span> MÍST</span>
+            </span>
+            <span class="filter-head-chev">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="filter-panel" id="filterPanel">
+            <div class="filter-panel-inner">
+              <div class="filter-row">
+                <div class="filter-lbl"><span>Kategorie</span></div>
+                <div class="filter-chips" id="mapChips"></div>
+              </div>
+              <div class="filter-row">
+                <div class="filter-lbl">
+                  <span>Období</span>
+                  <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
+                </div>
+                <div class="filter-timeline" id="eraTimeline"></div>
+              </div>
+              <div class="filter-row">
+                <div class="filter-lbl">
+                  <span>Vzdálenost od vás</span>
+                  <span class="filter-lbl-val" id="distV">libovolná</span>
+                </div>
+                <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+              </div>
+              <div class="filter-footer">
+                <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
+              </div>
+            </div>
+          </div>
+        </div>
   </div>
 
   <!-- Seznam -->
@@ -424,16 +680,18 @@ function locateUser() {
   }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
 }
 
+let LOCATIONS = []; // alias pro buildChips/applyFilter kompatibilitu
 async function loadPlaces() { // vrací Promise
   try {
     const res = await fetch('places.json');
     if (!res.ok) throw new Error('404');
-    PLACES = await res.json();
+    PLACES = await res.json(); LOCATIONS = PLACES;
   } catch(e) {
     document.getElementById('placesList').innerHTML =
       '<div class="empty"><h3>Nepodařilo se načíst místa</h3><p>Zkontrolujte připojení a obnovte stránku.</p></div>';
     return;
   }
+  LOCATIONS = PLACES;
   updateCounts();
 }
 
@@ -462,6 +720,307 @@ const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full'
 const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const RANK   = { full:0, dim:1, hide:2, force:0 };
 const BETTER = (a,b) => RANK[a] <= RANK[b] ? a : b;
+const ERAS = [
+  { id:'rom', name:'Románský',    from: 1000, to: 1230 },
+  { id:'got', name:'Gotika',      from: 1230, to: 1500 },
+  { id:'ren', name:'Renesance',   from: 1500, to: 1620 },
+  { id:'bar', name:'Baroko',      from: 1620, to: 1780 },
+  { id:'emp', name:'Klasicismus', from: 1780, to: 1850 },
+  { id:'sec', name:'Secese',      from: 1850, to: 1918 },
+  { id:'mod', name:'Moderna',     from: 1918, to: 2000 },
+];
+const ERA_START = 1000, ERA_END = 2000;
+const ERA_STATE = { from: ERA_START, to: ERA_END };
+const DIST_STATE = { max: null };
+
+function toggleFilter() {
+  const bar = document.getElementById('filterBar');
+  bar.classList.toggle('open');
+}
+function buildChips() {
+  const el = document.getElementById('mapChips');
+  const counts = { hist:0, arch:0, fun:0 };
+  LOCATIONS.forEach(l => counts[l.cat]++);
+  el.innerHTML = `
+    <button class="chip" data-cat="hist">
+      <span class="chip-swatch" style="background: var(--cat-hist)"></span>
+      Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
+    </button>
+    <button class="chip" data-cat="arch">
+      <span class="chip-swatch" style="background: var(--cat-arch)"></span>
+      Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
+    </button>
+    <button class="chip" data-cat="fun">
+      <span class="chip-swatch" style="background: var(--cat-fun)"></span>
+      Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
+    </button>
+    <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
+      <span class="chip-swatch chip-icon chip-icon-check"></span>
+      Navštíveno <span id="ctVisitedWrap"></span>
+    </button>
+    <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      Plán <span id="ctWishedWrap"></span>
+    </button>
+  `;
+  el.querySelectorAll('.chip[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      FILTER[cat] = FILTER_NEXT[FILTER[cat]];
+      btn.classList.remove('state-dim', 'state-hide');
+      if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
+      else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
+      applyFilter();
+    });
+  });
+  el.querySelectorAll('.chip[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!isLoggedIn()) {
+        if (window.lopAuth) window.lopAuth.open();
+        else location.href = 'login.html?return=' + encodeURIComponent(location.href);
+        return;
+      }
+      const f = btn.dataset.filter;
+      FILTER[f] = (f === 'wished' ? FILTER_NEXT_WISHED : f === 'visited' ? FILTER_NEXT_VISITED : FILTER_NEXT)[FILTER[f]];
+      btn.classList.remove('state-dim', 'state-hide', 'state-force');
+      if (FILTER[f] === 'dim')   btn.classList.add('state-dim');
+      else if (FILTER[f] === 'hide')  btn.classList.add('state-hide');
+      else if (FILTER[f] === 'force') btn.classList.add('state-force');
+      applyFilter();
+    });
+  });
+  buildEraTimeline();
+  initDistSlider();
+  updateChipCounts();
+}
+function buildEraTimeline() {
+  const el = document.getElementById('eraTimeline');
+  if (!el) return;
+  const years = [1000, 1200, 1400, 1600, 1800, 2000];
+  const html = [];
+  html.push('<div class="ft-track"></div>');
+  html.push(`<div class="ft-fill" id="eraFill"></div>`);
+  ERAS.slice(1).forEach(e => {
+    html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`);
+  });
+  ERAS.forEach(e => {
+    const mid = (e.from + e.to) / 2;
+    const w = eraPct(e.to) - eraPct(e.from);
+    html.push(`<span class="ft-lbl" data-era="${e.id}" style="left:${eraPct(mid)}%; max-width: calc(${w}% - 4px)">${e.name}</span>`);
+  });
+  years.forEach(y => {
+    html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`);
+    html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y}</span>`);
+  });
+  html.push(`<div class="ft-h" id="eraHFrom" data-which="from"></div>`);
+  html.push(`<div class="ft-h" id="eraHTo" data-which="to"></div>`);
+  el.innerHTML = html.join('');
+  renderEra();
+
+  const hs = el.querySelectorAll('.ft-h');
+  hs.forEach(h => {
+    const onDown = (ev) => {
+      ev.preventDefault();
+      const which = h.dataset.which;
+      const rect = el.getBoundingClientRect();
+      const onMove = (e) => {
+        const cx = (e.touches ? e.touches[0].clientX : e.clientX);
+        const p = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+        const y = pctToYear(p);
+        if (which === 'from') {
+          ERA_STATE.from = Math.min(y, ERA_STATE.to - 20);
+        } else {
+          ERA_STATE.to = Math.max(y, ERA_STATE.from + 20);
+        }
+        renderEra();
+        applyFilter();
+      };
+      const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('touchend', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+      window.addEventListener('touchmove', onMove, { passive: false });
+      window.addEventListener('touchend', onUp);
+    };
+    h.addEventListener('mousedown', onDown);
+    h.addEventListener('touchstart', onDown, { passive: false });
+  });
+}
+function renderEra() {
+  const fromP = eraPct(ERA_STATE.from);
+  const toP = eraPct(ERA_STATE.to);
+  const fromH = document.getElementById('eraHFrom');
+  const toH = document.getElementById('eraHTo');
+  const fill = document.getElementById('eraFill');
+  if (fromH) fromH.style.left = fromP + '%';
+  if (toH) toH.style.left = toP + '%';
+  if (fill) {
+    fill.style.left = fromP + '%';
+    fill.style.width = (toP - fromP) + '%';
+  }
+  document.getElementById('eraFromV').textContent = ERA_STATE.from;
+  document.getElementById('eraToV').textContent = ERA_STATE.to;
+  document.querySelectorAll('.ft-lbl').forEach(lbl => {
+    const era = ERAS.find(e => e.id === lbl.dataset.era);
+    const overlap = era.to > ERA_STATE.from && era.from < ERA_STATE.to;
+    lbl.classList.toggle('off', !overlap);
+  });
+}
+function initDistSlider() {
+  const slider = document.getElementById('distSlider');
+  const label = document.getElementById('distV');
+  if (!slider) return;
+  slider.addEventListener('input', () => {
+    const v = +slider.value;
+    if (v >= 100) {
+      DIST_STATE.max = null;
+      label.textContent = 'libovolná';
+    } else {
+      const km = 0.2 + (v / 100) * 4.8;
+      DIST_STATE.max = km;
+      label.textContent = '< ' + km.toFixed(1) + ' km';
+    }
+    applyFilter();
+  });
+}
+function haversineKm(a, b) {
+  const R = 6371;
+  const dLat = (b[0] - a[0]) * Math.PI / 180;
+  const dLon = (b[1] - a[1]) * Math.PI / 180;
+  const lat1 = a[0] * Math.PI / 180;
+  const lat2 = b[0] * Math.PI / 180;
+  const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function resetFilters() {
+  FILTER.hist = FILTER.arch = FILTER.fun = 'full';
+  FILTER.visited = FILTER.wished = 'full';
+  ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
+  DIST_STATE.max = null;
+  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force'));
+  const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
+  const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
+  renderEra();
+  applyFilter();
+}
+function locYear(loc) {
+  // Nové schema: yearBuilt je přímé číslo
+  if (loc.yearBuilt) return loc.yearBuilt;
+
+  const parseYearOrCentury = (s) => {
+    const v = String(s);
+    const y = v.match(/\d{3,4}/);
+    if (y) return parseInt(y[0]);
+    const c = v.match(/(\d{1,2})\.\s*stol/i);
+    if (c) return (parseInt(c[1]) - 1) * 100 + 50;
+    return null;
+  };
+  if (loc.facts && loc.facts.length) {
+    const buildKeys = /postaveno|otevřeno|dokončeno|vybudováno|výstavba|první zmínka|orloj od|od\b/i;
+    for (const f of loc.facts) {
+      if (buildKeys.test(f.k)) {
+        const y = parseYearOrCentury(f.v);
+        if (y != null) return y;
+      }
+    }
+    for (const f of loc.facts) {
+      const y = parseYearOrCentury(f.v);
+      if (y != null) return y;
+    }
+  }
+  if (loc.yearThen) {
+    const y = parseYearOrCentury(loc.yearThen);
+    if (y != null) return y;
+  }
+  return null;
+}
+// prehled.html: applyFilter volá render() místo marker logic
+function applyFilter() {
+  render();
+  const cnt = document.getElementById('filterHeadActive');
+  const visited = getVisited(), wished = getWished();
+  const filtered = PLACES.filter(p => {
+    const wish = wished.includes(String(p.id));
+    const vis  = visited.includes(String(p.id));
+    if (FILTER.wished === 'force' && wish) return true;
+    if (FILTER.visited === 'force' && vis)  return true;
+    const votes = [FILTER[p.cat]];
+    if (wish) votes.push(FILTER.wished === 'force' ? 'full' : FILTER.wished);
+    if (vis)  votes.push(FILTER.visited === 'force' ? 'full' : FILTER.visited);
+    const s = votes.reduce((best, v) => BETTER(best, v), 'hide');
+    return s === 'full';
+  });
+  if (cnt) cnt.textContent = filtered.length;
+}
+
+function _applyFilterOld() {
+  const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
+  const distActive = DIST_STATE.max !== null && window._userLatLng;
+  const RANK   = { full: 0, dim: 1, hide: 2 };
+  const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
+  const OPACITY = { full: 1, dim: 0.3, hide: 0 };
+
+  let activeCount = 0;
+  _markers.forEach(({ marker, loc }) => {
+    const wished  = JSON.parse(localStorage.getItem(WISH_KEY) ||'[]').map(String).includes(String(loc.id));
+    const visited = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String).includes(String(loc.id));
+
+    // Každý filtr relevantní pro tento pin hlasuje.
+    // Výsledek = nejpříznivější hlas.
+    // Relevantní filtry: kategorie vždy, wished pokud má příznak, visited pokud má příznak.
+    // hide = tvrdé skrytí bez výjimek
+    // dim = měkké skrytí, příznaky mohou zachránit (hlasování)
+    const catState  = FILTER[loc.cat];
+    const wishState = FILTER.wished;
+    const visState  = FILTER.visited;
+    let s = 'full';
+
+    // force = vždy zobrazit příznakové piny
+    if (wishState === 'force' && wished)   { s = 'full'; }
+    else if (visState  === 'force' && visited) { s = 'full'; }
+    // Tvrdé skrytí — okamžitě hide bez hlasování
+    else if (catState  === 'hide') { s = 'hide'; }
+    else if (wishState === 'hide' && wished)  { s = 'hide'; }
+    else if (visState  === 'hide' && visited) { s = 'hide'; }
+    else {
+      // Měkké skrytí — hlasování
+      const votes = [catState];
+      if (wished)  votes.push(wishState);
+      if (visited) votes.push(visState);
+      s = votes.reduce((best, v) => BETTER(best, v), 'hide');
+    }
+
+    // Era a dist přebijí vše
+    if (eraActive) {
+      const y = locYear(loc);
+      if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) s = 'hide';
+    }
+    if (distActive) {
+      if (haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) s = 'hide';
+    }
+
+    const op = OPACITY[s];
+    if (op === 0) {
+      marker.remove();
+    } else {
+      marker.addTo(window._map);
+      const el = marker.getElement();
+      if (el) el.style.opacity = op;
+      activeCount++;
+    }
+  });
+
+  const cnt = document.getElementById('filterHeadActive');
+  if (cnt) cnt.textContent = activeCount;
+}
+
+function haversineM(lat1, lng1, lat2, lng2) {
+  return haversineKm([lat1,lng1],[lat2,lng2]) * 1000;
+}
 
 function toggleCat(cat) {
   FILTER[cat] = FILTER_NEXT[FILTER[cat]];
@@ -471,7 +1030,7 @@ function toggleCat(cat) {
     if (FILTER[cat]==='dim')  btn.classList.add('state-dim');
     if (FILTER[cat]==='hide') btn.classList.add('state-hide');
   }
-  render();
+  applyFilter();
 }
 
 function setFilter(cat) {
@@ -488,7 +1047,7 @@ function setFilter(cat) {
     if (FILTER[cat]==='hide')  btn.classList.add('state-hide');
     if (FILTER[cat]==='force') btn.classList.add('state-active');
   }
-  render();
+  applyFilter();
 }
 
 /* ── Render ── */
@@ -496,6 +1055,7 @@ function render() {
   const visited = getVisited();
   const wished  = getWished();
 
+  const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
   const filtered = PLACES.filter(p => {
     const wish = wished.includes(String(p.id));
     const vis  = visited.includes(String(p.id));
@@ -505,7 +1065,12 @@ function render() {
     if (wish) votes.push(FILTER.wished  === 'force' ? 'full' : FILTER.wished);
     if (vis)  votes.push(FILTER.visited === 'force' ? 'full' : FILTER.visited);
     const s = votes.reduce((best, v) => BETTER(best, v), 'hide');
-    return s === 'full';
+    if (s !== 'full') return false;
+    if (eraActive) {
+      const y = locYear(p);
+      if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) return false;
+    }
+    return true;
   });
 
   if (filtered.length === 0) {
@@ -641,6 +1206,7 @@ async function syncFromDB() {
 }
 
 loadPlaces().then(() => {
+  setTimeout(buildChips, 50);
   syncFromDB().then(() => {
     updateCounts();
     if (_urlFilter === 'wished') {
