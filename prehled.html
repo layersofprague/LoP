@@ -239,6 +239,41 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
   font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
 }
 
+.filter-chip.state-dim { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
+.filter-chip.state-dim .chip-filter-icon,
+.filter-chip.state-hide .chip-filter-icon { display: inline-block; }
+.filter-chip .chip-filter-icon { display: none; width: 9px; height: 9px; margin-left: 2px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat; }
+.filter-chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
+.filter-chip.state-active { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; }
+.filter-chip.chip-locked { cursor: pointer; position: relative; }
+.filter-chip.chip-locked::before {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  font-size: 11px; padding: 6px 10px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .15s; z-index: 1000;
+}
+.filter-chip.chip-locked:hover::before { opacity: 1; }
+
+.place-wish-lock {
+  position: absolute; top: 0; right: 2px;
+  width: 12px; height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.place-wish-lock::after {
+  content: '';
+  position: absolute; inset: 0; margin: auto;
+  width: 7px; height: 7px;
+  background: white;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
+}
 .filter-bar {
   background: var(--paper);
   border: 1px solid var(--rule);
@@ -400,6 +435,97 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
   padding: 4px 0;
 }
 .filter-reset:hover { color: var(--ink); }
+.chip {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: 0 2px 10px rgba(26,24,20,.05);
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--ink-3); }
+.chip .chip-swatch {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.chip .chip-icon {
+  width: 13px; height: 13px; border-radius: 0;
+  background: transparent;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+  filter: drop-shadow(0 0 1px var(--paper));
+}
+.chip .chip-icon-check {
+  background-color: var(--ok);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+}
+.chip .chip-icon-heart {
+  background-color: var(--accent);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+  width: 11px; height: 11px;
+}
+.chip.state-dim { opacity: .55; }
+.chip.state-dim .chip-swatch { opacity: .4; }
+.chip.state-force { background: var(--accent) !important; color: var(--paper) !important; border-color: var(--accent) !important; opacity: 1; }
+.chip[data-filter="visited"].state-force { background: var(--accent) !important; border-color: var(--accent) !important; }
+.chip.state-force .chip-swatch { background: var(--paper) !important; }
+.chip.state-force .chip-icon-heart { background: var(--paper) !important; }
+.chip.state-force svg { color: var(--paper) !important; fill: var(--paper) !important; stroke: var(--paper) !important; }
+.chip.chip-locked { cursor: pointer; position: relative; }
+.chip.chip-locked .chip-lock { opacity: .5; }
+.chip.chip-locked::before {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  font-size: 11px; line-height: 1.4;
+  padding: 6px 10px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .15s;
+  z-index: 1000;
+  font-family: 'Inter', sans-serif; font-weight: 400;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.chip.chip-locked::after {
+  content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: var(--ink);
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+}
+.chip.chip-locked:hover::before,
+.chip.chip-locked:hover::after { opacity: 1; }
+.chip.state-force .chip-icon-check { background: var(--paper) !important; }
+
+.chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; opacity: 1; }
+.chip.state-hide .chip-swatch { background: var(--paper) !important; }
+.chip.state-hide:not(.chip-locked)::after { content: none; }
+.chip .chip-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4);
+  margin-left: 2px;
+}
+.chip .chip-filter-icon {
+  display: none;
+  width: 9px; height: 9px; margin-left: 2px; flex-shrink: 0;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
+}
+.chip.state-dim .chip-count { display: none; }
+.chip.state-dim .chip-filter-icon { display: inline-block; }
+.chip.state-hide .chip-count { display: none; }
+.chip.state-hide .chip-filter-icon { display: inline-block; background: var(--paper); }
+.chip.all { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip.all .chip-count { color: rgba(255,255,255,.55); }
 
 .chip {
   flex-shrink: 0;
@@ -493,22 +619,26 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
 .chip.all { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .chip.all .chip-count { color: rgba(255,255,255,.55); }
 
-
+.map-puck-wrap {
+  position: absolute; right: 14px; bottom: 76px; z-index: 400; transition: bottom .1s;
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--rule) !important;
+  box-shadow: 0 2px 10px rgba(26,24,20,.06) !important;
+  border-radius: 4px;
+  overflow: hidden;
+}
 .place-wish-lock {
   position: absolute; top: 0; right: 2px;
-  width: 12px; height: 12px;
-  background: var(--accent);
-  border-radius: 50%;
+  width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
 }
 .place-wish-lock::after {
-  content: '';
-  position: absolute; inset: 0; margin: auto;
-  width: 7px; height: 7px;
-  background: white;
+  content: ''; position: absolute; inset: 0; margin: auto;
+  width: 7px; height: 7px; background: white;
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
 .map-header { position: relative; top: auto; left: auto; right: auto; pointer-events: auto; margin-bottom: 20px; }
+
 </style>
 </head>
 <body>
@@ -525,48 +655,48 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
   </div>
 
   <!-- Filtry -->
-  <div class="map-header" style="position:relative;top:auto;left:auto;right:auto;margin-bottom:20px;pointer-events:auto;">
+  <div class="map-header">
     <div class="filter-bar" id="filterBar">
-          <button class="filter-head" id="filterHead" onclick="toggleFilter()">
-            <span class="filter-head-lead">
-              <span class="filter-head-dots">
-                <span style="background:var(--cat-hist)"></span>
-                <span style="background:var(--cat-arch)"></span>
-                <span style="background:var(--cat-fun)"></span>
-              </span>
-              <span class="filter-head-lbl">Filtr</span>
-              <span class="filter-head-cnt" id="filterHeadCnt">· <span id="filterHeadActive">26</span> MÍST</span>
-            </span>
-            <span class="filter-head-chev">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
-          </button>
-          <div class="filter-panel" id="filterPanel">
-            <div class="filter-panel-inner">
-              <div class="filter-row">
-                <div class="filter-lbl"><span>Kategorie</span></div>
-                <div class="filter-chips" id="mapChips"></div>
-              </div>
-              <div class="filter-row">
-                <div class="filter-lbl">
-                  <span>Období</span>
-                  <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
-                </div>
-                <div class="filter-timeline" id="eraTimeline"></div>
-              </div>
-              <div class="filter-row">
-                <div class="filter-lbl">
-                  <span>Vzdálenost od vás</span>
-                  <span class="filter-lbl-val" id="distV">libovolná</span>
-                </div>
-                <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
-              </div>
-              <div class="filter-footer">
-                <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
-              </div>
+      <button class="filter-head" id="filterHead" onclick="toggleFilter()">
+        <span class="filter-head-lead">
+          <span class="filter-head-dots">
+            <span style="background:var(--cat-hist)"></span>
+            <span style="background:var(--cat-arch)"></span>
+            <span style="background:var(--cat-fun)"></span>
+          </span>
+          <span class="filter-head-lbl">Filtr</span>
+          <span class="filter-head-cnt" id="filterHeadCnt">· <span id="filterHeadActive">—</span> MÍST</span>
+        </span>
+        <span class="filter-head-chev">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="filter-panel" id="filterPanel">
+        <div class="filter-panel-inner">
+          <div class="filter-row">
+            <div class="filter-lbl"><span>Kategorie</span></div>
+            <div class="filter-chips" id="mapChips"></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-lbl">
+              <span>Období</span>
+              <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
             </div>
+            <div class="filter-timeline" id="eraTimeline"></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-lbl">
+              <span>Vzdálenost od vás</span>
+              <span class="filter-lbl-val" id="distV">libovolná</span>
+            </div>
+            <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+          </div>
+          <div class="filter-footer">
+            <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
           </div>
         </div>
+      </div>
+    </div>
   </div>
 
   <!-- Seznam -->
@@ -676,22 +806,216 @@ function locateUser() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
     userPos = [pos.coords.latitude, pos.coords.longitude];
-    render();
+    render(); // překresli s vzdálenostmi
   }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
 }
 
-let LOCATIONS = []; // alias pro buildChips/applyFilter kompatibilitu
+
+/* ── Filter konstanty ── */
+const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
+const FILTER_NEXT         = { full:'dim', dim:'hide', hide:'full' };
+const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
+const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
+const RANK   = { full:0, dim:1, hide:2, force:0 };
+const BETTER = (a,b) => RANK[a] <= RANK[b] ? a : b;
+const ERAS = [
+  { id:'rom', name:'Románský',    from: 1000, to: 1230 },
+  { id:'got', name:'Gotika',      from: 1230, to: 1500 },
+  { id:'ren', name:'Renesance',   from: 1500, to: 1620 },
+  { id:'bar', name:'Baroko',      from: 1620, to: 1780 },
+  { id:'emp', name:'Klasicismus', from: 1780, to: 1850 },
+  { id:'sec', name:'Secese',      from: 1850, to: 1918 },
+  { id:'mod', name:'Moderna',     from: 1918, to: 2000 },
+];
+const ERA_START = 1000, ERA_END = 2000;
+const ERA_STATE = { from: ERA_START, to: ERA_END };
+const DIST_STATE = { max: null };
+let LOCATIONS = [];
+
+const eraPct    = (y) => ((y - ERA_START) / (ERA_END - ERA_START)) * 100;
+const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
+
+function toggleFilter() { document.getElementById('filterBar').classList.toggle('open'); }
+
+function buildChips() {
+  const el = document.getElementById('mapChips');
+  if (!el) return;
+  LOCATIONS = PLACES;
+  const counts = { hist:0, arch:0, fun:0 };
+  LOCATIONS.forEach(l => counts[l.cat]++);
+  el.innerHTML = `
+    <button class="chip" data-cat="hist"><span class="chip-swatch" style="background:var(--cat-hist)"></span>Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span></button>
+    <button class="chip" data-cat="arch"><span class="chip-swatch" style="background:var(--cat-arch)"></span>Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span></button>
+    <button class="chip" data-cat="fun"><span class="chip-swatch" style="background:var(--cat-fun)"></span>Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span></button>
+    <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení"><span class="chip-swatch chip-icon chip-icon-check"></span>Navštíveno <span id="ctVisitedWrap"></span></button>
+    <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>Plán <span id="ctWishedWrap"></span></button>
+  `;
+  el.querySelectorAll('.chip[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      FILTER[cat] = FILTER_NEXT[FILTER[cat]];
+      btn.classList.remove('state-dim','state-hide','state-force');
+      if (FILTER[cat]==='dim')  btn.classList.add('state-dim');
+      else if (FILTER[cat]==='hide') btn.classList.add('state-hide');
+      applyFilter();
+    });
+  });
+  el.querySelectorAll('.chip[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!isLoggedIn()) { window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href); return; }
+      const f = btn.dataset.filter;
+      FILTER[f] = (f==='wished' ? FILTER_NEXT_WISHED : f==='visited' ? FILTER_NEXT_VISITED : FILTER_NEXT)[FILTER[f]];
+      btn.classList.remove('state-dim','state-hide','state-force');
+      if (FILTER[f]==='dim')   btn.classList.add('state-dim');
+      else if (FILTER[f]==='hide')  btn.classList.add('state-hide');
+      else if (FILTER[f]==='force') btn.classList.add('state-force');
+      applyFilter();
+    });
+  });
+  buildEraTimeline();
+  initDistSlider();
+  updateChipCounts();
+}
+
+function updateChipCounts() {
+  const visited = getVisited(), wished = getWished(), loggedIn = isLoggedIn();
+  const lockSVG = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  const chipV = document.getElementById('chipVisited');
+  const chipW = document.getElementById('chipWished');
+  const wrapV = document.getElementById('ctVisitedWrap');
+  const wrapW = document.getElementById('ctWishedWrap');
+  if (chipV) chipV.classList.toggle('chip-locked', !loggedIn);
+  if (chipW) chipW.classList.toggle('chip-locked', !loggedIn);
+  if (wrapV) wrapV.innerHTML = loggedIn ? '<span class="chip-count">'+PLACES.filter(p=>visited.includes(String(p.id))).length+'</span><span class="chip-filter-icon"></span>' : lockSVG;
+  if (wrapW) wrapW.innerHTML = loggedIn ? '<span class="chip-count">'+PLACES.filter(p=>wished.includes(String(p.id))).length+'</span><span class="chip-filter-icon"></span>' : lockSVG;
+}
+
+function buildEraTimeline() {
+  const el = document.getElementById('eraTimeline');
+  if (!el) return;
+  const years = [1000, 1200, 1400, 1600, 1800, 2000];
+  const html = [];
+  html.push('<div class="ft-track"></div>');
+  html.push('<div class="ft-fill" id="eraFill"></div>');
+  ERAS.slice(1).forEach(e => html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`));
+  ERAS.forEach(e => {
+    const mid = (e.from + e.to) / 2;
+    const w = eraPct(e.to) - eraPct(e.from);
+    html.push(`<span class="ft-lbl" data-era="${e.id}" style="left:${eraPct(mid)}%;max-width:calc(${w}% - 4px)">${e.name}</span>`);
+  });
+  years.forEach(y => {
+    html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`);
+    html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y}</span>`);
+  });
+  html.push('<div class="ft-h" id="eraHFrom" data-which="from"></div>');
+  html.push('<div class="ft-h" id="eraHTo" data-which="to"></div>');
+  el.innerHTML = html.join('');
+  renderEra();
+  el.querySelectorAll('.ft-h').forEach(h => {
+    const onDown = (ev) => {
+      ev.preventDefault();
+      const which = h.dataset.which;
+      const rect = el.getBoundingClientRect();
+      const onMove = (e) => {
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const p = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+        const y = pctToYear(p);
+        if (which === 'from') ERA_STATE.from = Math.min(y, ERA_STATE.to - 20);
+        else ERA_STATE.to = Math.max(y, ERA_STATE.from + 20);
+        renderEra(); applyFilter();
+      };
+      const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('touchend', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+      window.addEventListener('touchmove', onMove, { passive: false });
+      window.addEventListener('touchend', onUp);
+    };
+    h.addEventListener('mousedown', onDown);
+    h.addEventListener('touchstart', onDown, { passive: false });
+  });
+}
+
+function renderEra() {
+  const fromP = eraPct(ERA_STATE.from), toP = eraPct(ERA_STATE.to);
+  const fromH = document.getElementById('eraHFrom');
+  const toH   = document.getElementById('eraHTo');
+  const fill  = document.getElementById('eraFill');
+  if (fromH) fromH.style.left = fromP + '%';
+  if (toH)   toH.style.left   = toP   + '%';
+  if (fill)  { fill.style.left = fromP + '%'; fill.style.width = (toP - fromP) + '%'; }
+  const fv = document.getElementById('eraFromV');
+  const tv = document.getElementById('eraToV');
+  if (fv) fv.textContent = ERA_STATE.from;
+  if (tv) tv.textContent = ERA_STATE.to;
+  document.querySelectorAll('.ft-lbl').forEach(lbl => {
+    const era = ERAS.find(e => e.id === lbl.dataset.era);
+    if (era) lbl.classList.toggle('off', !(era.to > ERA_STATE.from && era.from < ERA_STATE.to));
+  });
+}
+
+function initDistSlider() {
+  const slider = document.getElementById('distSlider');
+  const label  = document.getElementById('distV');
+  if (!slider) return;
+  slider.addEventListener('input', () => {
+    const v = +slider.value;
+    if (v >= 100) { DIST_STATE.max = null; label.textContent = 'libovolná'; }
+    else { DIST_STATE.max = 0.2 + (v / 100) * 4.8; label.textContent = '< ' + DIST_STATE.max.toFixed(1) + ' km'; }
+    applyFilter();
+  });
+}
+
+function haversineKm(a, b) {
+  const R = 6371;
+  const dLat = (b[0]-a[0]) * Math.PI/180;
+  const dLon = (b[1]-a[1]) * Math.PI/180;
+  const lat1 = a[0] * Math.PI/180, lat2 = b[0] * Math.PI/180;
+  const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function resetFilters() {
+  FILTER.hist = FILTER.arch = FILTER.fun = 'full';
+  FILTER.visited = FILTER.wished = 'full';
+  ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
+  DIST_STATE.max = null;
+  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide','state-dim','state-force'));
+  const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
+  const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
+  renderEra(); applyFilter();
+}
+
+function locYear(p) {
+  if (p.yearBuilt) return p.yearBuilt;
+  const parse = (s) => { const v = String(s); const y = v.match(/\d{3,4}/); if (y) return parseInt(y[0]); const cc = v.match(/(\d{1,2})\.\s*stol/i); if (cc) return (parseInt(cc[1])-1)*100+50; return null; };
+  if (p.facts) { for (const f of p.facts) { if (/postaveno|otevřeno|dokončeno|vybudováno/i.test(f.k)) { const y = parse(f.v); if (y) return y; } } for (const f of p.facts) { const y = parse(f.v); if (y) return y; } }
+  if (p.yearThen) { const y = parse(p.yearThen); if (y) return y; }
+  return null;
+}
+
+function applyFilter() { render(); }
+
+// Zavři filtr při kliknutí mimo
+document.addEventListener('click', (e) => {
+  const bar = document.getElementById('filterBar');
+  if (bar && bar.classList.contains('open') && !bar.contains(e.target)) bar.classList.remove('open');
+}, true);
+
 async function loadPlaces() { // vrací Promise
   try {
     const res = await fetch('places.json');
     if (!res.ok) throw new Error('404');
-    PLACES = await res.json(); LOCATIONS = PLACES;
+    PLACES = await res.json();
   } catch(e) {
     document.getElementById('placesList').innerHTML =
       '<div class="empty"><h3>Nepodařilo se načíst místa</h3><p>Zkontrolujte připojení a obnovte stránku.</p></div>';
     return;
   }
-  LOCATIONS = PLACES;
   updateCounts();
 }
 
@@ -713,250 +1037,17 @@ function updateCounts() {
   if (wrapW) wrapW.innerHTML = loggedIn ? '<span class="count">' + PLACES.filter(p=>wished.includes(String(p.id))).length + '</span>' : lockSVG;
 }
 
-/* ── Filtr — přesně jako index.html ── */
-const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
-const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
-const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
-const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
-const RANK   = { full:0, dim:1, hide:2, force:0 };
-const BETTER = (a,b) => RANK[a] <= RANK[b] ? a : b;
-const ERAS = [
-  { id:'rom', name:'Románský',    from: 1000, to: 1230 },
-  { id:'got', name:'Gotika',      from: 1230, to: 1500 },
-  { id:'ren', name:'Renesance',   from: 1500, to: 1620 },
-  { id:'bar', name:'Baroko',      from: 1620, to: 1780 },
-  { id:'emp', name:'Klasicismus', from: 1780, to: 1850 },
-  { id:'sec', name:'Secese',      from: 1850, to: 1918 },
-  { id:'mod', name:'Moderna',     from: 1918, to: 2000 },
-];
-const ERA_START = 1000, ERA_END = 2000;
-const ERA_STATE = { from: ERA_START, to: ERA_END };
-const DIST_STATE = { max: null };
 
-function toggleFilter() {
-  const bar = document.getElementById('filterBar');
-  bar.classList.toggle('open');
-}
-function buildChips() {
-  const el = document.getElementById('mapChips');
-  const counts = { hist:0, arch:0, fun:0 };
-  LOCATIONS.forEach(l => counts[l.cat]++);
-  el.innerHTML = `
-    <button class="chip" data-cat="hist">
-      <span class="chip-swatch" style="background: var(--cat-hist)"></span>
-      Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="chip" data-cat="arch">
-      <span class="chip-swatch" style="background: var(--cat-arch)"></span>
-      Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="chip" data-cat="fun">
-      <span class="chip-swatch" style="background: var(--cat-fun)"></span>
-      Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
-      <span class="chip-swatch chip-icon chip-icon-check"></span>
-      Navštíveno <span id="ctVisitedWrap"></span>
-    </button>
-    <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      Plán <span id="ctWishedWrap"></span>
-    </button>
-  `;
-  el.querySelectorAll('.chip[data-cat]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const cat = btn.dataset.cat;
-      FILTER[cat] = FILTER_NEXT[FILTER[cat]];
-      btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
-      else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
-      applyFilter();
-    });
-  });
-  el.querySelectorAll('.chip[data-filter]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (!isLoggedIn()) {
-        if (window.lopAuth) window.lopAuth.open();
-        else location.href = 'login.html?return=' + encodeURIComponent(location.href);
-        return;
-      }
-      const f = btn.dataset.filter;
-      FILTER[f] = (f === 'wished' ? FILTER_NEXT_WISHED : f === 'visited' ? FILTER_NEXT_VISITED : FILTER_NEXT)[FILTER[f]];
-      btn.classList.remove('state-dim', 'state-hide', 'state-force');
-      if (FILTER[f] === 'dim')   btn.classList.add('state-dim');
-      else if (FILTER[f] === 'hide')  btn.classList.add('state-hide');
-      else if (FILTER[f] === 'force') btn.classList.add('state-force');
-      applyFilter();
-    });
-  });
-  buildEraTimeline();
-  initDistSlider();
-  updateChipCounts();
-}
-function buildEraTimeline() {
-  const el = document.getElementById('eraTimeline');
-  if (!el) return;
-  const years = [1000, 1200, 1400, 1600, 1800, 2000];
-  const html = [];
-  html.push('<div class="ft-track"></div>');
-  html.push(`<div class="ft-fill" id="eraFill"></div>`);
-  ERAS.slice(1).forEach(e => {
-    html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`);
-  });
-  ERAS.forEach(e => {
-    const mid = (e.from + e.to) / 2;
-    const w = eraPct(e.to) - eraPct(e.from);
-    html.push(`<span class="ft-lbl" data-era="${e.id}" style="left:${eraPct(mid)}%; max-width: calc(${w}% - 4px)">${e.name}</span>`);
-  });
-  years.forEach(y => {
-    html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`);
-    html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y}</span>`);
-  });
-  html.push(`<div class="ft-h" id="eraHFrom" data-which="from"></div>`);
-  html.push(`<div class="ft-h" id="eraHTo" data-which="to"></div>`);
-  el.innerHTML = html.join('');
-  renderEra();
-
-  const hs = el.querySelectorAll('.ft-h');
-  hs.forEach(h => {
-    const onDown = (ev) => {
-      ev.preventDefault();
-      const which = h.dataset.which;
-      const rect = el.getBoundingClientRect();
-      const onMove = (e) => {
-        const cx = (e.touches ? e.touches[0].clientX : e.clientX);
-        const p = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
-        const y = pctToYear(p);
-        if (which === 'from') {
-          ERA_STATE.from = Math.min(y, ERA_STATE.to - 20);
-        } else {
-          ERA_STATE.to = Math.max(y, ERA_STATE.from + 20);
-        }
-        renderEra();
-        applyFilter();
-      };
-      const onUp = () => {
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-        window.removeEventListener('touchmove', onMove);
-        window.removeEventListener('touchend', onUp);
-      };
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
-      window.addEventListener('touchmove', onMove, { passive: false });
-      window.addEventListener('touchend', onUp);
-    };
-    h.addEventListener('mousedown', onDown);
-    h.addEventListener('touchstart', onDown, { passive: false });
-  });
-}
-function renderEra() {
-  const fromP = eraPct(ERA_STATE.from);
-  const toP = eraPct(ERA_STATE.to);
-  const fromH = document.getElementById('eraHFrom');
-  const toH = document.getElementById('eraHTo');
-  const fill = document.getElementById('eraFill');
-  if (fromH) fromH.style.left = fromP + '%';
-  if (toH) toH.style.left = toP + '%';
-  if (fill) {
-    fill.style.left = fromP + '%';
-    fill.style.width = (toP - fromP) + '%';
-  }
-  document.getElementById('eraFromV').textContent = ERA_STATE.from;
-  document.getElementById('eraToV').textContent = ERA_STATE.to;
-  document.querySelectorAll('.ft-lbl').forEach(lbl => {
-    const era = ERAS.find(e => e.id === lbl.dataset.era);
-    const overlap = era.to > ERA_STATE.from && era.from < ERA_STATE.to;
-    lbl.classList.toggle('off', !overlap);
-  });
-}
-function initDistSlider() {
-  const slider = document.getElementById('distSlider');
-  const label = document.getElementById('distV');
-  if (!slider) return;
-  slider.addEventListener('input', () => {
-    const v = +slider.value;
-    if (v >= 100) {
-      DIST_STATE.max = null;
-      label.textContent = 'libovolná';
-    } else {
-      const km = 0.2 + (v / 100) * 4.8;
-      DIST_STATE.max = km;
-      label.textContent = '< ' + km.toFixed(1) + ' km';
-    }
-    applyFilter();
-  });
-}
-function haversineKm(a, b) {
-  const R = 6371;
-  const dLat = (b[0] - a[0]) * Math.PI / 180;
-  const dLon = (b[1] - a[1]) * Math.PI / 180;
-  const lat1 = a[0] * Math.PI / 180;
-  const lat2 = b[0] * Math.PI / 180;
-  const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-function resetFilters() {
-  FILTER.hist = FILTER.arch = FILTER.fun = 'full';
-  FILTER.visited = FILTER.wished = 'full';
-  ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
-  DIST_STATE.max = null;
-  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force'));
-  const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
-  const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
-  renderEra();
-  applyFilter();
-}
-function locYear(loc) {
-  // Nové schema: yearBuilt je přímé číslo
-  if (loc.yearBuilt) return loc.yearBuilt;
-
-  const parseYearOrCentury = (s) => {
-    const v = String(s);
-    const y = v.match(/\d{3,4}/);
-    if (y) return parseInt(y[0]);
-    const c = v.match(/(\d{1,2})\.\s*stol/i);
-    if (c) return (parseInt(c[1]) - 1) * 100 + 50;
-    return null;
-  };
-  if (loc.facts && loc.facts.length) {
-    const buildKeys = /postaveno|otevřeno|dokončeno|vybudováno|výstavba|první zmínka|orloj od|od\b/i;
-    for (const f of loc.facts) {
-      if (buildKeys.test(f.k)) {
-        const y = parseYearOrCentury(f.v);
-        if (y != null) return y;
-      }
-    }
-    for (const f of loc.facts) {
-      const y = parseYearOrCentury(f.v);
-      if (y != null) return y;
-    }
-  }
-  if (loc.yearThen) {
-    const y = parseYearOrCentury(loc.yearThen);
-    if (y != null) return y;
-  }
-  return null;
-}
-function applyFilter() {
-  render();
-}
-
-
-
-function haversineM(lat1, lng1, lat2, lng2) {
-  return haversineKm([lat1,lng1],[lat2,lng2]) * 1000;
-}
 
 function toggleCat(cat) {
   FILTER[cat] = FILTER_NEXT[FILTER[cat]];
-  const btn = document.querySelector('[data-cat="' + cat + '"]');
+  const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
   if (btn) {
-    btn.classList.remove('state-dim','state-hide','state-force');
-    if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
-    else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
+    btn.classList.remove('state-dim','state-hide','state-active');
+    if (FILTER[cat]==='dim')  btn.classList.add('state-dim');
+    if (FILTER[cat]==='hide') btn.classList.add('state-hide');
   }
-  applyFilter();
+  render();
 }
 
 function setFilter(cat) {
@@ -973,53 +1064,35 @@ function setFilter(cat) {
     if (FILTER[cat]==='hide')  btn.classList.add('state-hide');
     if (FILTER[cat]==='force') btn.classList.add('state-active');
   }
-  applyFilter();
+  render();
 }
 
 /* ── Render ── */
 function render() {
   const visited = getVisited();
   const wished  = getWished();
-
-  const RANK   = { full: 0, dim: 1, hide: 2 };
-  const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
   const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
   const distActive = DIST_STATE.max !== null && userPos;
 
   const filtered = PLACES.filter(p => {
     const wish = wished.includes(String(p.id));
     const vis  = visited.includes(String(p.id));
-
-    const catState  = FILTER[p.cat];
-    const wishState = FILTER.wished;
-    const visState  = FILTER.visited;
+    const catState = FILTER[p.cat], wishState = FILTER.wished, visState = FILTER.visited;
     let s = 'full';
-
-    // force = vždy zobrazit příznakové piny
-    if      (wishState === 'force' && wish)    { s = 'full'; }
-    else if (visState  === 'force' && vis)     { s = 'full'; }
-    // hide = tvrdé skrytí bez výjimek
-    else if (catState  === 'hide')             { s = 'hide'; }
-    else if (wishState === 'hide' && wish)     { s = 'hide'; }
-    else if (visState  === 'hide' && vis)      { s = 'hide'; }
+    if      (wishState === 'force' && wish)  { s = 'full'; }
+    else if (visState  === 'force' && vis)   { s = 'full'; }
+    else if (catState  === 'hide')           { s = 'hide'; }
+    else if (wishState === 'hide' && wish)   { s = 'hide'; }
+    else if (visState  === 'hide' && vis)    { s = 'hide'; }
     else {
-      // dim = měkké skrytí — hlasování, příznaky mohou zachránit
       const votes = [catState];
       if (wish) votes.push(wishState);
       if (vis)  votes.push(visState);
-      s = votes.reduce((best, v) => BETTER(best, v), 'hide');
+      s = votes.reduce((best, v) => RANK[v] <= RANK[best] ? v : best, 'hide');
     }
-
     if (s === 'hide') return false;
-
-    if (eraActive) {
-      const y = locYear(p);
-      if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) return false;
-    }
-    if (distActive) {
-      if (haversineKm([userPos[0], userPos[1]], [p.lat, p.lng]) > DIST_STATE.max) return false;
-    }
-
+    if (eraActive) { const y = locYear(p); if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) return false; }
+    if (distActive) { if (haversineKm([userPos[0], userPos[1]], [p.lat, p.lng]) > DIST_STATE.max) return false; }
     return true;
   });
 
@@ -1038,9 +1111,8 @@ function render() {
   });
 
   document.getElementById('placesList').innerHTML = html;
-  // Aktualizuj počet v hlavičce filtru
-  const cnt = document.getElementById('filterHeadActive');
-  if (cnt) cnt.textContent = filtered.length;
+  const _cnt = document.getElementById('filterHeadActive'); if (_cnt) _cnt.textContent = filtered.length;
+  updateChipCounts();
 }
 
 function cardHTML(p, visited, wished) {
@@ -1134,46 +1206,64 @@ function dbRemoveWish(id) {
       { method:'DELETE', headers: authHeaders() }).catch(()=>{});
   });
 }
-async function syncFromDB() {
-  const s = getSession(); if (!s?.access_token || !s?.user) return;
+async function syncFromDB(onDone) {
+  const s = await getValidSession();
+  if (!s?.access_token || !s?.user) { if (onDone) onDone(); return; }
+  const SYNC_TIMEOUT_MS = 10000;
+  let _syncOffline = false;
+  function _injectSyncUI() {
+    if (document.getElementById('lop-sync-bar')) return;
+    const style = document.createElement('style');
+    style.textContent = '#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.78);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:Inter,system-ui,sans-serif;backdrop-filter:blur(10px);}#lop-sync-bar.show{transform:translateY(0);}#lop-sync-bar .sb-text{flex:1;}#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.4);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}#lop-sync-spinner.show{opacity:1;}@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}';
+    document.head.appendChild(style);
+    const spinner = document.createElement('div'); spinner.id = 'lop-sync-spinner'; document.body.appendChild(spinner);
+    const bar = document.createElement('div'); bar.id = 'lop-sync-bar';
+    bar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se načíst data ze serveru.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>';
+    document.body.appendChild(bar);
+  }
+  function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
+  function _showSyncBar(on) {
+    const el = document.getElementById('lop-sync-bar');
+    if (!el) return;
+    if (on) {
+      const nav = document.getElementById('lop-nav');
+      const h = nav ? nav.getBoundingClientRect().height : 56;
+      el.style.bottom = (window.innerWidth < 820 ? h : 0) + 'px';
+    }
+    el.classList.toggle('show', on);
+  }
+  _injectSyncUI(); _showSyncSpinner(true); _showSyncBar(false);
+  window._lopSyncRetry = () => { _showSyncBar(false); syncFromDB(() => { render(); updateCounts(); }); };
+  const ft = (url, opts) => new Promise((res, rej) => {
+    const t = setTimeout(() => rej(new Error('timeout')), SYNC_TIMEOUT_MS);
+    fetch(url, opts).then(r => { clearTimeout(t); res(r); }).catch(e => { clearTimeout(t); rej(e); });
+  });
   try {
     const [wRes, vRes] = await Promise.all([
-      fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
-      fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders() })
+      ft(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
+      ft(SUPA_URL + '/rest/v1/visited?user_id=eq.'  + s.user.id + '&select=place_id', { headers: authHeaders() }),
     ]);
-    if (wRes.ok) {
-      const remote = (await wRes.json()).map(r => r.place_id).filter(id => (typeof LOCATIONS !== 'undefined' ? LOCATIONS : PLACES || []).find(p => String(p.id) === String(id)));
-      const local  = [...new Set(JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String))];
-      localStorage.setItem(WISH_KEY, JSON.stringify([...new Set([...remote, ...local])]));
-      local.filter(id => !remote.includes(id)).forEach(id => {
-        fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
-          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
-      });
-    }
-    if (vRes.ok) {
-      const remote = (await vRes.json()).map(r => r.place_id);
-      const local  = [...new Set(JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String))];
-      localStorage.setItem(VISIT_KEY, JSON.stringify([...new Set([...remote, ...local])]));
-    }
-  } catch(e) { console.warn('Sync failed:', e); }
-}
-
-
-// Zavři filtr při kliknutí mimo
-document.addEventListener('click', (e) => {
-  const bar = document.getElementById('filterBar');
-  if (bar && bar.classList.contains('open') && !bar.contains(e.target)) {
-    bar.classList.remove('open');
+    if (!wRes.ok || !vRes.ok) throw new Error('HTTP ' + (!wRes.ok ? wRes.status : vRes.status));
+    localStorage.setItem(WISH_KEY,  JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
+    localStorage.setItem(VISIT_KEY, JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
+    fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : []).then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }).catch(() => {});
+    _showSyncSpinner(false); _showSyncBar(false);
+    if (onDone) onDone();
+  } catch(e) {
+    _showSyncSpinner(false); _showSyncBar(true);
+    const sb = document.getElementById('lop-sync-bar');
+    if (sb) { const t = sb.querySelector('.sb-text'); if (t) t.textContent = 'Chyba: ' + (e?.message || String(e)); }
+    if (onDone) onDone();
   }
-}, true);
+}
 
 loadPlaces().then(() => {
   buildChips();
   syncFromDB(() => {
-    updateCounts();
+    updateCounts(); updateChipCounts();
     if (_urlFilter === 'wished') {
-      FILTER.hist = 'hide'; FILTER.arch = 'hide'; FILTER.fun = 'hide';
-      FILTER.visited = 'hide';
+      FILTER.hist = 'hide'; FILTER.arch = 'hide'; FILTER.fun = 'hide'; FILTER.visited = 'hide';
       document.querySelectorAll('[data-cat="hist"],[data-cat="arch"],[data-cat="fun"],[data-filter="visited"]').forEach(b => b.classList.add('state-hide'));
     }
     render();
@@ -1189,8 +1279,7 @@ requestAnimationFrame(() => { if (window.lopNav) window.lopNav.refresh(); });
 <script src="auth-modal.js"></script>
 <script>
 window.lopAuth.onLogin(() => {
-  if (typeof syncFromDB === 'function') syncFromDB().then(() => render());
-  else render();
+  syncFromDB(() => { render(); updateCounts(); if(window.lopNav) window.lopNav.refresh(); });
   if (window.lopHeader) window.lopHeader.refresh();
   if (window.lopNav)    window.lopNav.refresh();
 });
