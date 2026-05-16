@@ -58,6 +58,20 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
   </svg>
 </button>
 
+<!-- Zoom buttons: below fit -->
+<button id="zoomInBtn" onclick="map.zoomIn()"
+  style="position:fixed;right:14px;z-index:200;
+    width:26px;height:26px;border-radius:4px 4px 0 0;
+    background:#eeefeb;border:1px solid #cbcec5;border-bottom:none;
+    box-shadow:0 2px 10px rgba(26,24,20,.06);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;color:#1a1a18;font-size:16px;line-height:1;">+</button>
+<button id="zoomOutBtn" onclick="map.zoomOut()"
+  style="position:fixed;right:14px;z-index:200;
+    width:26px;height:26px;border-radius:0 0 4px 4px;
+    background:#eeefeb;border:1px solid #cbcec5;
+    box-shadow:0 2px 10px rgba(26,24,20,.06);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;color:#1a1a18;font-size:16px;line-height:1;">−</button>
+
 <!-- GPS debug: below calBtn -->
 <div id="dbg" style="position:fixed;top:80px;left:8px;z-index:200;background:rgba(26,24,20,.65);color:#fff;font-family:monospace;font-size:11px;padding:5px 10px;border-radius:20px;white-space:nowrap;pointer-events:none;">GPS: čeká…</div>
 
@@ -111,6 +125,10 @@ function applyClipBounds() {
   // fitBtn: bottom-right above navbar
   var fit = document.getElementById('fitBtn');
   if (fit) fit.style.bottom = (nb + 8) + 'px';
+  var zi = document.getElementById('zoomInBtn');
+  var zo = document.getElementById('zoomOutBtn');
+  if (zi) zi.style.bottom = (nb + 8 + 26 + 4 + 26 + 4) + 'px';
+  if (zo) zo.style.bottom = (nb + 8 + 26 + 4) + 'px';
   // dbg: below calBtn
   if (dbg) { dbg.style.top = (ht + 44) + 'px'; dbg.style.left = '8px'; }
   // dist: bottom-left above navbar
@@ -137,7 +155,7 @@ applyClipBounds();
 setAnchor(); // run before Leaflet init so #mapWrap has dimensions
 
 // ── MAP ──
-var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: true });
+var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: false });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 20, keepBuffer: 4
 }).addTo(map);
@@ -147,55 +165,7 @@ var initCenter = (!isNaN(TARGET.lat)) ? [TARGET.lat, TARGET.lng] : [50.083, 14.4
 map.setView(initCenter, 16);
 [100, 400, 800].forEach(function(t){ setTimeout(function(){ map.invalidateSize(); }, t); });
 
-// Custom drag — disable Leaflet drag, implement our own with rotation compensation
-setTimeout(function() {
-  map.dragging.disable();
-  var active = false, startX, startY, startLatLng;
-
-  function getPoint(e) {
-    return e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
-                     : { x: e.clientX, y: e.clientY };
-  }
-
-  function onDown(e) {
-    if (e.touches && e.touches.length !== 1) return;
-    var p = getPoint(e);
-    active = true;
-    startX = p.x;
-    startY = p.y;
-    startLatLng = map.getCenter();
-  }
-
-  function onMove(e) {
-    if (!active) return;
-    if (e.touches && e.touches.length !== 1) return;
-    e.preventDefault();
-    var p = getPoint(e);
-    var dx = p.x - startX;
-    var dy = p.y - startY;
-    // Rotate delta by heading to convert screen coords → map coords
-    var h = lastH * Math.PI / 180;
-    var cos = Math.cos(h), sin = Math.sin(h);
-    var mdx = dx * cos + dy * sin;
-    var mdy = -dx * sin + dy * cos;
-    // Convert pixel delta to latlng using Leaflet's own projection
-    var startPx = map.latLngToContainerPoint(startLatLng);
-    var newLatLng = map.containerPointToLatLng(
-      L.point(startPx.x - mdx, startPx.y - mdy)
-    );
-    map.setView(newLatLng, map.getZoom(), { animate: false });
-  }
-
-  function onUp() { active = false; }
-
-  var mc = document.getElementById('clip');
-  mc.addEventListener('mousedown', onDown);
-  mc.addEventListener('touchstart', onDown, { passive: true });
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
-}, 600);
+// drag disabled — map follows GPS
 // Re-measure after header/nav scripts have fully injected
 setTimeout(function(){ applyClipBounds(); setAnchor(); }, 50);
 setTimeout(function(){ applyClipBounds(); setAnchor(); map.invalidateSize(); }, 300);
@@ -438,17 +408,13 @@ function addHeadingSample(raw) {
 
 var isLocked = true; // false = user manually panned/zoomed, stop GPS following
 
+// After pinch-zoom, re-center on user after 2s
 var relockTimer = null;
-map.on('dragstart zoomstart', function() {
-  isLocked = false;
-  if (relockTimer) clearTimeout(relockTimer);
-});
-map.on('dragend zoomend', function() {
+map.on('zoomend', function() {
   if (relockTimer) clearTimeout(relockTimer);
   relockTimer = setTimeout(function() {
-    isLocked = true;
     if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: true });
-  }, 3000);
+  }, 2000);
 });
 
 var lastPanLat = null, lastPanLng = null;
