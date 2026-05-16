@@ -2995,9 +2995,12 @@ function initMap() {
         openSheet(loc.id);
       } else {
         rt.classList.remove('visible');
-        showTooltip(loc, m, rt);
         clearTimeout(window._rtAutoHide);
-        window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
+        // Krátký delay — prst musí opustit obrazovku než se tooltip zobrazí
+        setTimeout(() => {
+          showTooltip(loc, m, rt);
+          window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
+        }, 120);
       }
     });
     m.on('mouseover', () => {
