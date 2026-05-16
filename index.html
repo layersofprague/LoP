@@ -2988,19 +2988,19 @@ function initMap() {
     });
     m.on('touchend', (e) => {
       L.DomEvent.stopPropagation(e);
+      window._rtShownAt = Date.now(); // okamžitě — blokuje ghost tap
       window._suppressNextClick = true;
       setTimeout(() => { window._suppressNextClick = false; }, 600);
       if (rt.classList.contains('visible') && rt._forId === loc.id) {
         rt.classList.remove('visible');
         rt._forId = null;
         clearTimeout(window._rtAutoHide);
-        openSheet(loc.id);
+        setTimeout(() => { openSheet(loc.id); }, 350);
       } else {
         rt.classList.remove('visible');
         clearTimeout(window._rtAutoHide);
         setTimeout(() => {
           showTooltip(loc, m, rt);
-          window._rtShownAt = Date.now();
           window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
         }, 350);
       }
