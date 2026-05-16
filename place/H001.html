@@ -1209,6 +1209,27 @@ const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
 }
+async function getValidSession() {
+  const s = getSession();
+  if (!s?.access_token || !s?.user) return null;
+  const expiresAt = s.expires_at || 0;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (expiresAt > nowSec + 60) return s;
+  if (!s.refresh_token) return null;
+  try {
+    const r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    });
+    if (!r.ok) { localStorage.removeItem('lop_auth_session'); return null; }
+    const data = await r.json();
+    const newSession = { ...data, user: data.user || s.user };
+    localStorage.setItem('lop_auth_session', JSON.stringify(newSession));
+    return newSession;
+  } catch(e) { return null; }
+}
+
 function authHeaders() {
   const s = getSession();
   return { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (s?.access_token || SUPA_KEY),
@@ -1272,7 +1293,7 @@ window._lopSyncRetry = () => {
 };
 
 async function syncFromDB(onDone) {
-  const s = getSession();
+  const s = await getValidSession();
   if (!s?.access_token || !s?.user) { if (onDone) onDone(); return; }
   _injectSyncUI(); _showSyncSpinner(true); _showSyncBar(false); _syncOffline = false;
   try {
