@@ -2596,8 +2596,9 @@ const ERAS = [
   { id:'emp', name:'Klasicismus', from: 1780, to: 1850 },
   { id:'sec', name:'Secese',      from: 1850, to: 1918 },
   { id:'mod', name:'Moderna',     from: 1918, to: 2000 },
+  { id:'sou', name:'2000+',       from: 2000, to: 9999 },
 ];
-const ERA_START = 1000, ERA_END = 2000;
+const ERA_START = 1000, ERA_END = 9999;
 const ERA_STATE = { from: ERA_START, to: ERA_END };
 const DIST_STATE = { max: null };
 
@@ -2710,7 +2711,7 @@ const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
 function buildEraTimeline() {
   const el = document.getElementById('eraTimeline');
   if (!el) return;
-  const years = [1000, 1200, 1400, 1600, 1800, 2000];
+  const years = [1000, 1400, 1800, 2000];
   const html = [];
   html.push('<div class="ft-track"></div>');
   html.push(`<div class="ft-fill" id="eraFill"></div>`);
