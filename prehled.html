@@ -835,7 +835,15 @@ let LOCATIONS = [];
 const eraPct    = (y) => ((y - ERA_START) / (ERA_END - ERA_START)) * 100;
 const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
 
-function toggleFilter() { document.getElementById('filterBar').classList.toggle('open'); }
+let _timelineBuilt = false;
+function toggleFilter() {
+  const bar = document.getElementById('filterBar');
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    // Panel transition trvá 320ms — přestavíme timeline po ní
+    setTimeout(() => buildEraTimeline(), 340);
+  }
+}
 
 function buildChips() {
   const el = document.getElementById('mapChips');
@@ -872,9 +880,10 @@ function buildChips() {
       applyFilter();
     });
   });
-  buildEraTimeline();
   initDistSlider();
   updateChipCounts();
+  // Timeline se postaví s requestAnimationFrame aby měl panel čas na layout
+  requestAnimationFrame(() => buildEraTimeline());
 }
 
 function updateChipCounts() {
