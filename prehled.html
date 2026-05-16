@@ -715,7 +715,7 @@ function updateCounts() {
 
 /* ── Filtr — přesně jako index.html ── */
 const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
-const FILTER_NEXT = { full:'hide', hide:'full' };
+const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
 const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const RANK   = { full:0, dim:1, hide:2, force:0 };
@@ -938,85 +938,11 @@ function locYear(loc) {
   }
   return null;
 }
-// prehled.html: applyFilter volá render() místo marker logic
 function applyFilter() {
   render();
-  const cnt = document.getElementById('filterHeadActive');
-  const visited = getVisited(), wished = getWished();
-  const filtered = PLACES.filter(p => {
-    const wish = wished.includes(String(p.id));
-    const vis  = visited.includes(String(p.id));
-    if (FILTER.wished === 'force' && wish) return true;
-    if (FILTER.visited === 'force' && vis)  return true;
-    const votes = [FILTER[p.cat]];
-    if (wish) votes.push(FILTER.wished === 'force' ? 'full' : FILTER.wished);
-    if (vis)  votes.push(FILTER.visited === 'force' ? 'full' : FILTER.visited);
-    const s = votes.reduce((best, v) => BETTER(best, v), 'hide');
-    return s === 'full';
-  });
-  if (cnt) cnt.textContent = filtered.length;
 }
 
-function _applyFilterOld() {
-  const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
-  const distActive = DIST_STATE.max !== null && window._userLatLng;
-  const RANK   = { full: 0, dim: 1, hide: 2 };
-  const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
-  const OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
-  let activeCount = 0;
-  _markers.forEach(({ marker, loc }) => {
-    const wished  = JSON.parse(localStorage.getItem(WISH_KEY) ||'[]').map(String).includes(String(loc.id));
-    const visited = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String).includes(String(loc.id));
-
-    // Každý filtr relevantní pro tento pin hlasuje.
-    // Výsledek = nejpříznivější hlas.
-    // Relevantní filtry: kategorie vždy, wished pokud má příznak, visited pokud má příznak.
-    // hide = tvrdé skrytí bez výjimek
-    // dim = měkké skrytí, příznaky mohou zachránit (hlasování)
-    const catState  = FILTER[loc.cat];
-    const wishState = FILTER.wished;
-    const visState  = FILTER.visited;
-    let s = 'full';
-
-    // force = vždy zobrazit příznakové piny
-    if (wishState === 'force' && wished)   { s = 'full'; }
-    else if (visState  === 'force' && visited) { s = 'full'; }
-    // Tvrdé skrytí — okamžitě hide bez hlasování
-    else if (catState  === 'hide') { s = 'hide'; }
-    else if (wishState === 'hide' && wished)  { s = 'hide'; }
-    else if (visState  === 'hide' && visited) { s = 'hide'; }
-    else {
-      // Měkké skrytí — hlasování
-      const votes = [catState];
-      if (wished)  votes.push(wishState);
-      if (visited) votes.push(visState);
-      s = votes.reduce((best, v) => BETTER(best, v), 'hide');
-    }
-
-    // Era a dist přebijí vše
-    if (eraActive) {
-      const y = locYear(loc);
-      if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) s = 'hide';
-    }
-    if (distActive) {
-      if (haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) s = 'hide';
-    }
-
-    const op = OPACITY[s];
-    if (op === 0) {
-      marker.remove();
-    } else {
-      marker.addTo(window._map);
-      const el = marker.getElement();
-      if (el) el.style.opacity = op;
-      activeCount++;
-    }
-  });
-
-  const cnt = document.getElementById('filterHeadActive');
-  if (cnt) cnt.textContent = activeCount;
-}
 
 function haversineM(lat1, lng1, lat2, lng2) {
   return haversineKm([lat1,lng1],[lat2,lng2]) * 1000;
@@ -1024,11 +950,11 @@ function haversineM(lat1, lng1, lat2, lng2) {
 
 function toggleCat(cat) {
   FILTER[cat] = FILTER_NEXT[FILTER[cat]];
-  const btn = document.querySelector('.filter-chip[data-cat="' + cat + '"]');
+  const btn = document.querySelector('[data-cat="' + cat + '"]');
   if (btn) {
-    btn.classList.remove('state-dim','state-hide','state-active');
-    if (FILTER[cat]==='dim')  btn.classList.add('state-dim');
-    if (FILTER[cat]==='hide') btn.classList.add('state-hide');
+    btn.classList.remove('state-dim','state-hide','state-force');
+    if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
+    else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
   }
   applyFilter();
 }
@@ -1088,6 +1014,9 @@ function render() {
   });
 
   document.getElementById('placesList').innerHTML = html;
+  // Aktualizuj počet v hlavičce filtru
+  const cnt = document.getElementById('filterHeadActive');
+  if (cnt) cnt.textContent = filtered.length;
 }
 
 function cardHTML(p, visited, wished) {
@@ -1204,6 +1133,15 @@ async function syncFromDB() {
     }
   } catch(e) { console.warn('Sync failed:', e); }
 }
+
+
+// Zavři filtr při kliknutí mimo
+document.addEventListener('click', (e) => {
+  const bar = document.getElementById('filterBar');
+  if (bar && bar.classList.contains('open') && !bar.contains(e.target)) {
+    bar.classList.remove('open');
+  }
+}, true);
 
 loadPlaces().then(() => {
   setTimeout(buildChips, 50);
