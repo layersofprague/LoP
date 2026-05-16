@@ -21,6 +21,7 @@
   --ink-3:   #6a6a64;
   --ink-4:   #9a9a94;
   --rule:    #cbcec5;
+  --rule-2:  #b8bcb0;
   --accent:  #b04020;
   --ok:      #3d7a4a;
   --cat-hist: #4A4A48;
@@ -835,13 +836,17 @@ let LOCATIONS = [];
 const eraPct    = (y) => ((y - ERA_START) / (ERA_END - ERA_START)) * 100;
 const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
 
-let _timelineBuilt = false;
 function toggleFilter() {
   const bar = document.getElementById('filterBar');
   bar.classList.toggle('open');
   if (bar.classList.contains('open')) {
-    // Panel transition trvá 320ms — přestavíme timeline po ní
-    setTimeout(() => buildEraTimeline(), 340);
+    // Čekáme než panel dosáhne plné výšky a timeline má rozměry
+    const check = () => {
+      const tl = document.getElementById('eraTimeline');
+      if (tl && tl.offsetWidth > 0) { buildEraTimeline(); }
+      else { setTimeout(check, 50); }
+    };
+    setTimeout(check, 50);
   }
 }
 
