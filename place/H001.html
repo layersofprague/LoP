@@ -596,6 +596,23 @@ a { color: inherit; text-decoration: none; }
 .lb-gold .lb-name { color: var(--ink); }
 .lb-gold .lb-pts  { color: #b08010; }
 
+.ar-cta-light {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background .2s;
+  text-decoration: none;
+  margin-top: 12px;
+}
+.ar-cta-light:hover { background: var(--ink-2); }
+.ar-cta-light .ar-cta-ic {
+  background: rgba(238,239,235,.12);
+}
+.ar-cta-light .ar-cta-kick { color: rgba(238,239,235,.5); }
+
 /* keyword tags */
 .kw-tag {
   font-family: 'JetBrains Mono', monospace;
@@ -901,6 +918,17 @@ a { color: inherit; text-decoration: none; }
         <div class="lb-bar-wrap"><div class="lb-bar" style="width:58%"></div></div>
       </div>
     </div>
+
+    <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg">
+      <div class="ar-cta-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+      </div>
+      <div class="ar-cta-body">
+        <div class="ar-cta-kick">Nahlédni do historie</div>
+        <div class="ar-cta-title">Spustit AR — Holešovický přístav</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
   </div>
 
   <!-- autor zastavení -->
