@@ -2046,19 +2046,25 @@ async function syncFromDB(onDone) {
 }
 
 function dbAddWish(placeId) {
-  const s = getSession(); if (!s?.user) return;
-  fetch(`${SUPA_URL}/rest/v1/wishlist`, { method:'POST', headers: authHeaders(),
-    body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(`${SUPA_URL}/rest/v1/wishlist`, { method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+  });
 }
 function dbRemoveWish(placeId) {
-  const s = getSession(); if (!s?.user) return;
-  fetch(`${SUPA_URL}/rest/v1/wishlist?user_id=eq.${s.user.id}&place_id=eq.${placeId}`,
-    { method:'DELETE', headers: authHeaders() }).catch(()=>{});
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(`${SUPA_URL}/rest/v1/wishlist?user_id=eq.${s.user.id}&place_id=eq.${placeId}`,
+      { method:'DELETE', headers: authHeaders() }).catch(()=>{});
+  });
 }
 function dbAddVisited(placeId) {
-  const s = getSession(); if (!s?.user) return;
-  fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
-    body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+  });
 }
 
 /* ═══════════════ TWEAKS ═══════════════ */
