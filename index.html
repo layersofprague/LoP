@@ -2596,9 +2596,9 @@ const ERAS = [
   { id:'emp', name:'Klasicismus', from: 1780, to: 1850 },
   { id:'sec', name:'Secese',      from: 1850, to: 1918 },
   { id:'mod', name:'Moderna',     from: 1918, to: 2000 },
-  { id:'sou', name:'2000+',       from: 2000, to: 9999 },
+  { id:'sou', name:'Současnost',  from: 2000, to: 2025 },
 ];
-const ERA_START = 1000, ERA_END = 9999;
+const ERA_START = 1000, ERA_END = 2025;
 const ERA_STATE = { from: ERA_START, to: ERA_END };
 const DIST_STATE = { max: null };
 
@@ -2725,7 +2725,7 @@ function buildEraTimeline() {
   });
   years.forEach(y => {
     html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`);
-    html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y}</span>`);
+    html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y === 2000 ? 'souč.' : y}</span>`);
   });
   html.push(`<div class="ft-h" id="eraHFrom" data-which="from"></div>`);
   html.push(`<div class="ft-h" id="eraHTo" data-which="to"></div>`);
@@ -2779,7 +2779,7 @@ function renderEra() {
     fill.style.width = (toP - fromP) + '%';
   }
   document.getElementById('eraFromV').textContent = ERA_STATE.from;
-  document.getElementById('eraToV').textContent = ERA_STATE.to;
+  document.getElementById('eraToV').textContent = ERA_STATE.to >= 2025 ? '2000+' : ERA_STATE.to;
   document.querySelectorAll('.ft-lbl').forEach(lbl => {
     const era = ERAS.find(e => e.id === lbl.dataset.era);
     const overlap = era.to > ERA_STATE.from && era.from < ERA_STATE.to;
