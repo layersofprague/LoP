@@ -645,6 +645,7 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
 }
 .rt-tip.visible { opacity: 1; pointer-events: auto; }
+.rt-tip.visible.rt-blocked { pointer-events: none !important; }
 /* Neviditelný most mezi pinem a tooltipem — zabraňuje problikávání */
 .rt-tip.visible::after {
   content: '';
@@ -3001,8 +3002,8 @@ function initMap() {
         clearTimeout(window._rtAutoHide);
         setTimeout(() => {
           showTooltip(loc, m, rt);
-          rt.style.pointerEvents = 'none';
-          setTimeout(() => { rt.style.pointerEvents = ''; }, 800);
+          rt.classList.add('rt-blocked');
+          setTimeout(() => { rt.classList.remove('rt-blocked'); }, 800);
           window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
         }, 350);
       }
