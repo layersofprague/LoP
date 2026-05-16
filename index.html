@@ -1954,7 +1954,7 @@ function isAdmin()   { return getUserRole() === 'admin'; }
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 
-function _dbg(msg) {
+function _dbg(...args) {
   let el = document.getElementById('_dbg');
   if (!el) {
     el = document.createElement('div');
@@ -1962,7 +1962,7 @@ function _dbg(msg) {
     el.style.cssText = 'position:fixed;top:60px;left:0;right:0;z-index:99999;background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-family:monospace;padding:6px 10px;max-height:180px;overflow-y:auto;';
     document.body.appendChild(el);
   }
-  el.innerHTML = '<div>' + new Date().toISOString().slice(11,23) + ' ' + msg + '</div>' + el.innerHTML;
+  el.innerHTML = '<div>' + new Date().toISOString().slice(11,23) + ' ' + args.join(' ') + '</div>' + el.innerHTML;
 }
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
 }
