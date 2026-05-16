@@ -1954,14 +1954,6 @@ function isAdmin()   { return getUserRole() === 'admin'; }
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 
-function _dbg(...args) {
-  let el = document.getElementById('_dbg');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = '_dbg';
-    el.style.cssText = 'position:fixed;top:60px;left:0;right:0;z-index:99999;background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-family:monospace;padding:6px 10px;max-height:180px;overflow-y:auto;';
-    document.body.appendChild(el);
-  }
   el.innerHTML = '<div>' + new Date().toISOString().slice(11,23) + ' ' + args.join(' ') + '</div>' + el.innerHTML;
 }
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
@@ -2584,7 +2576,7 @@ function showTooltip(loc, m, rt) {
           Detail
         </a>
         <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo"
-           onclick="_dbg('COMPASS CLICK', Date.now(), window._rtShownAt, Date.now()-window._rtShownAt); if(Date.now()-window._rtShownAt<1000){event.preventDefault(); _dbg('BLOCKED');} event.stopPropagation()">
+           onclick="event.stopPropagation()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           Kompas
         </a>
@@ -2594,10 +2586,22 @@ function showTooltip(loc, m, rt) {
   const rect = m.getElement().getBoundingClientRect();
   const tipW = 220, tipH = 150;
   const margin = 8;
-  let tipLeft = rect.left + rect.width/2 - tipW/2;
-  let tipTop  = rect.top - tipH - 8;
-  tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, tipLeft));
-  tipTop  = tipTop < margin ? rect.bottom + 8 : tipTop;
+  const mainEl = document.getElementById('main') || document.getElementById('mapView');
+  const mainRect = mainEl ? mainEl.getBoundingClientRect() : { top: 60, left: 0 };
+  const isMobile = window.innerWidth < 820;
+  let tipLeft, tipTop;
+  if (isMobile) {
+    // Vždy dole nad navbarem — daleko od pinu který je uprostřed mapy
+    const navEl = document.getElementById('nav');
+    const navH = navEl ? navEl.getBoundingClientRect().height : 56;
+    tipTop  = window.innerHeight - navH - tipH - 12;
+    tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, window.innerWidth/2 - tipW/2));
+  } else {
+    tipLeft = rect.left + rect.width/2 - tipW/2;
+    tipTop  = rect.top - tipH - 8;
+    tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, tipLeft));
+    tipTop  = tipTop < margin ? rect.bottom + 8 : tipTop;
+  }
   rt.style.left = tipLeft + 'px';
   rt.style.top  = tipTop  + 'px';
   rt.classList.add('visible');
@@ -2999,7 +3003,7 @@ function initMap() {
     m.on('touchend', (e) => {
       L.DomEvent.stopPropagation(e);
       window._rtShownAt = Date.now();
-      _dbg('TOUCHEND', window._rtShownAt, 'visible:', rt.classList.contains('visible'), 'forId:', rt._forId, 'locId:', loc.id);
+      
       window._suppressNextClick = true;
       setTimeout(() => { window._suppressNextClick = false; }, 600);
       if (rt.classList.contains('visible') && rt._forId === loc.id) {
