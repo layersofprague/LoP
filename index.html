@@ -3374,19 +3374,22 @@ window.addEventListener('resize', adjustTopbarOffset);
 <script>
 // Po přihlášení přes modal: obnov header, badge a sync DB
 window.lopAuth.onLogin(() => {
-  // Refresh profil tlačítka
   const btn = document.getElementById('profileBtn');
   if (btn) {
     const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
-    if (s?.user) {
-      btn.title = s.user.email || 'Profil';
-      btn.onclick = () => window.lopAuth.open();
-    }
+    if (s?.user) { btn.title = s.user.email || 'Profil'; btn.onclick = () => window.lopAuth.open(); }
   }
-  // Sync z DB a refresh pinů/badgů
-  if (typeof syncFromDB === 'function') syncFromDB().then(() => {
+  syncFromDB(() => {
+    updateWishBadge();
+    if (window._map && typeof _markers !== 'undefined') {
+      _markers.forEach(({ marker, loc }) => {
+        marker.remove();
+        marker.setIcon(makeIcon(loc));
+        marker.addTo(window._map);
+      });
+    }
     if (typeof applyFilter === 'function') applyFilter();
-    if (typeof updateWishBadge === 'function') updateWishBadge();
+    if (window.lopNav) window.lopNav.refresh();
   });
 });
 window.lopAuth.onLogout(() => {
