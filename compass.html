@@ -108,42 +108,43 @@ function applyClipBounds() {
   var hdr = document.getElementById('lop-header');
   var nav = document.getElementById('lop-nav');
   var clip = document.getElementById('clip');
-  var ht = hdr ? hdr.offsetHeight : 0;
-  var nb = nav ? nav.offsetHeight : 0;
-  if (ht === 0 && nb === 0) return { ht: 57, nb: 56 }; // fallback
-  clip.style.top = ht + 'px';
+  var desktop = window.innerWidth >= 820;
+  // On desktop: nav is right sidebar (84px), header spans top
+  var ht = hdr ? hdr.offsetHeight : 57;
+  var nb = (!desktop && nav) ? nav.offsetHeight : 0;
+  var nr = (desktop && nav) ? nav.offsetWidth || 84 : 0; // right offset on desktop
+  if (ht === 0) ht = 57;
+  clip.style.top    = ht + 'px';
   clip.style.bottom = nb + 'px';
-  // Position overlay elements
-  var dbg = document.getElementById('dbg');
+  clip.style.right  = nr + 'px';
+  // right offset for buttons (clear nav on desktop)
+  var br = nr + 14;
+  var dbg  = document.getElementById('dbg');
   var dist = document.getElementById('distBox');
-  // calBtn: top-left under header
-  var cal = document.getElementById('calBtn');
+  var cal  = document.getElementById('calBtn');
+  var mc   = document.getElementById('miniCompass');
+  var fit  = document.getElementById('fitBtn');
+  var zi   = document.getElementById('zoomInBtn');
+  var zo   = document.getElementById('zoomOutBtn');
   if (cal) cal.style.top = (ht + 8) + 'px';
-  // miniCompass: top-right under header
-  var mc = document.getElementById('miniCompass');
-  if (mc) mc.style.top = (ht + 8) + 'px';
-  // fitBtn: bottom-right above navbar
-  var fit = document.getElementById('fitBtn');
-  if (fit) fit.style.bottom = (nb + 8) + 'px';
-  var zi = document.getElementById('zoomInBtn');
-  var zo = document.getElementById('zoomOutBtn');
-  if (zi) zi.style.bottom = (nb + 8 + 26 + 4 + 26 + 4) + 'px';
-  if (zo) zo.style.bottom = (nb + 8 + 26 + 4) + 'px';
-  // dbg: below calBtn
+  if (mc)  { mc.style.top = (ht + 8) + 'px'; mc.style.right = br + 'px'; }
+  if (fit) { fit.style.bottom = (nb + 8) + 'px'; fit.style.right = br + 'px'; }
+  if (zi)  { zi.style.bottom = (nb + 8 + 26 + 4 + 26 + 4) + 'px'; zi.style.right = br + 'px'; }
+  if (zo)  { zo.style.bottom = (nb + 8 + 26 + 4) + 'px'; zo.style.right = br + 'px'; }
   if (dbg) { dbg.style.top = (ht + 44) + 'px'; dbg.style.left = '8px'; }
-  // dist: bottom-left above navbar
-  if (dist) { dist.style.bottom = (nb + 8) + 'px'; dist.style.left = '8px'; }
-  return { ht: ht, nb: nb };
+  if (dist){ dist.style.bottom = (nb + 8) + 'px'; dist.style.left = '8px'; }
+  return { ht: ht, nb: nb, nr: nr };
 }
 
 function setAnchor() {
   var landscape = window.innerWidth > window.innerHeight;
-  AX = window.innerWidth / 2;
   var bounds = applyClipBounds();
+  var clipW = window.innerWidth - bounds.nr;
   var clipH = window.innerHeight - bounds.ht - bounds.nb;
+  AX = clipW / 2;
   AY = bounds.ht + (landscape ? clipH - 60 : clipH * 0.78);
 
-  var d = Math.ceil(Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight) * 1.5);
+  var d = Math.ceil(Math.sqrt(clipW * clipW + clipH * clipH) * 1.5);
   wrap.style.width  = d + 'px';
   wrap.style.height = d + 'px';
   wrap.style.left   = (AX - d / 2) + 'px';
