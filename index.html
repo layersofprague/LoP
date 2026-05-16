@@ -2551,9 +2551,7 @@ function showTooltip(loc, m, rt) {
   const margin = 8;
   let tipLeft, tipTop;
   if (window.innerWidth < 820) {
-    const navEl = document.getElementById('nav');
-    const navH = navEl ? navEl.getBoundingClientRect().height : 56;
-    tipTop  = window.innerHeight - navH - tipH - 12;
+    tipTop  = Math.round((window.innerHeight - tipH) / 2);
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, window.innerWidth/2 - tipW/2));
   } else {
     tipLeft = rect.left + rect.width/2 - tipW/2;
