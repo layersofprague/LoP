@@ -676,7 +676,7 @@ function locateUser() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
     userPos = [pos.coords.latitude, pos.coords.longitude];
-    render(); // překresli s vzdálenostmi
+    render();
   }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
 }
 
@@ -983,7 +983,8 @@ function render() {
 
   const RANK   = { full: 0, dim: 1, hide: 2 };
   const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
-  const eraActive = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
+  const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
+  const distActive = DIST_STATE.max !== null && userPos;
 
   const filtered = PLACES.filter(p => {
     const wish = wished.includes(String(p.id));
@@ -1011,10 +1012,12 @@ function render() {
 
     if (s === 'hide') return false;
 
-    // Era filtr
     if (eraActive) {
       const y = locYear(p);
       if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) return false;
+    }
+    if (distActive) {
+      if (haversineKm([userPos[0], userPos[1]], [p.lat, p.lng]) > DIST_STATE.max) return false;
     }
 
     return true;
@@ -1165,13 +1168,13 @@ document.addEventListener('click', (e) => {
 }, true);
 
 loadPlaces().then(() => {
-  setTimeout(buildChips, 50);
-  syncFromDB().then(() => {
+  buildChips();
+  syncFromDB(() => {
     updateCounts();
     if (_urlFilter === 'wished') {
       FILTER.hist = 'hide'; FILTER.arch = 'hide'; FILTER.fun = 'hide';
       FILTER.visited = 'hide';
-      document.querySelectorAll('.filter-chip[data-cat="hist"], .filter-chip[data-cat="arch"], .filter-chip[data-cat="fun"], .filter-chip[data-cat="visited"]').forEach(b => b.classList.add('state-hide'));
+      document.querySelectorAll('[data-cat="hist"],[data-cat="arch"],[data-cat="fun"],[data-filter="visited"]').forEach(b => b.classList.add('state-hide'));
     }
     render();
   });
