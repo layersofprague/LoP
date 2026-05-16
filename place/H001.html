@@ -517,102 +517,6 @@ a { color: inherit; text-decoration: none; }
 }
 .autor-link:hover { color: var(--ink); }
 
-/* leaderboard */
-.lbm-card {
-  display: flex; gap: 12px; align-items: flex-start;
-  padding: 14px;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
-.lbm-avatar {
-  flex-shrink: 0;
-  width: 38px; height: 38px; border-radius: 50%;
-  background: var(--cat-hist); color: var(--paper);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; font-weight: 600; letter-spacing: .04em;
-}
-.lbm-body { flex: 1; min-width: 0; }
-.lbm-meta {
-  display: flex; align-items: center; gap: 6px;
-  margin-bottom: 5px;
-}
-.lbm-name {
-  font-family: 'Fraunces', serif;
-  font-size: 15px; font-weight: 500; color: var(--ink);
-}
-.lbm-sep { color: var(--ink-4); font-size: 12px; }
-.lbm-score {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: .06em;
-  color: var(--cat-fun, #E0A020);
-}
-.lbm-text {
-  font-size: 13px; line-height: 1.55; color: var(--ink-3);
-  font-style: italic;
-}
-
-.leaderboard {
-  display: flex; flex-direction: column;
-  border: 1px solid var(--rule); border-radius: 10px;
-  overflow: hidden;
-}
-.lb-row {
-  display: grid;
-  grid-template-columns: 28px 1fr 42px 80px;
-  align-items: center; gap: 8px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--rule);
-  background: var(--paper);
-}
-.lb-row:first-child { border-top: none; }
-.lb-gold { background: linear-gradient(90deg, rgba(224,160,32,.08) 0%, transparent 100%); }
-.lb-rank {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; color: var(--ink-4); font-weight: 500;
-  display: flex; align-items: center; justify-content: center;
-}
-.lb-name {
-  font-size: 13.5px; font-weight: 500; color: var(--ink);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.lb-pts {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px; font-weight: 600; color: var(--ink-2);
-  text-align: right;
-}
-.lb-bar-wrap {
-  height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden;
-}
-.lb-bar {
-  height: 100%; background: var(--cat-fun, #E0A020);
-  border-radius: 2px;
-  transition: width .6s var(--ease);
-}
-.lb-gold .lb-bar { background: #E0A020; }
-.lb-gold .lb-name { color: var(--ink); }
-.lb-gold .lb-pts  { color: #b08010; }
-
-.ar-cta-light {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--ink);
-  color: var(--paper);
-  cursor: pointer;
-  transition: background .2s;
-  text-decoration: none;
-  margin-top: 12px;
-}
-.ar-cta-light:hover { background: var(--ink-2); }
-.ar-cta-light .ar-cta-ic {
-  background: rgba(238,239,235,.12);
-}
-.ar-cta-light .ar-cta-kick { color: rgba(238,239,235,.5); }
-
 /* keyword tags */
 .kw-tag {
   font-family: 'JetBrains Mono', monospace;
@@ -756,15 +660,15 @@ a { color: inherit; text-decoration: none; }
 
   <!-- actions -->
   <div class="actions" style="grid-template-columns:repeat(6,1fr)">
-    <a href="../compass.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav" class="act-btn" title="Kompas">
+    <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span class="act-lbl">Kompas</span>
     </a>
-    <a href="https://mapy.cz/zakladni?q=50.105147,14.456289&route-end=50.105147,14.456289&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
+    <a href="https://mapy.cz/zakladni?q=50.10543,14.45595&route-end=50.10543,14.45595&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span class="act-lbl">Mapy.cz</span>
     </a>
-    <a href="https://www.google.com/maps/dir/?api=1&destination=50.105147,14.456289&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
+    <a href="https://www.google.com/maps/dir/?api=1&destination=50.10543,14.45595&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span class="act-lbl">Google</span>
     </a>
@@ -772,7 +676,7 @@ a { color: inherit; text-decoration: none; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
       <span class="act-lbl">Sdílet</span>
     </button>
-    <a href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="act-btn" title="AR">
+    <a href="../ar-intro.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="act-btn" title="AR">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
       <span class="act-lbl">AR</span>
     </a>
@@ -860,75 +764,6 @@ a { color: inherit; text-decoration: none; }
       <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
       <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
     </div>
-  </div>
-
-  <!-- gamifikace — žebříček -->
-  <div class="section">
-    <div class="sec-head">
-      <span class="sec-label">Žebříček</span>
-      <span class="sec-num">Top 5</span>
-    </div>
-
-    <!-- Vzkaz od #1 -->
-    <div class="lbm-card">
-      <div class="lbm-avatar">JK</div>
-      <div class="lbm-body">
-        <div class="lbm-meta">
-          <span class="lbm-name">Jan K.</span>
-          <span class="lbm-sep">·</span>
-          <span class="lbm-score">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="#E0A020" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            342 bodů
-          </span>
-        </div>
-        <p class="lbm-text">Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.</p>
-      </div>
-    </div>
-
-    <!-- Žebříček -->
-    <div class="leaderboard">
-      <div class="lb-row lb-gold">
-        <div class="lb-rank"><svg width="12" height="12" viewBox="0 0 24 24" fill="#E0A020" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-        <div class="lb-name">Jan K.</div>
-        <div class="lb-pts">342</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:100%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">2</div>
-        <div class="lb-name">Tereza M.</div>
-        <div class="lb-pts">298</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:87%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">3</div>
-        <div class="lb-name">Pavel N.</div>
-        <div class="lb-pts">261</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:76%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">4</div>
-        <div class="lb-name">Lucie V.</div>
-        <div class="lb-pts">244</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:71%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">5</div>
-        <div class="lb-name">Martin H.</div>
-        <div class="lb-pts">198</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:58%"></div></div>
-      </div>
-    </div>
-
-    <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg">
-      <div class="ar-cta-ic">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
-      </div>
-      <div class="ar-cta-body">
-        <div class="ar-cta-kick">Nahlédni do historie</div>
-        <div class="ar-cta-title">Spustit AR — Holešovický přístav</div>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5"><path d="m9 6 6 6-6 6"/></svg>
-    </a>
   </div>
 
   <!-- autor zastavení -->
@@ -1050,7 +885,7 @@ function _closeCopyOutside(e) {
 }
 
 /* ── SYNC ── */
-syncFromDB(() => { updateWishUI(); updateInsiderGate(); });
+syncFromDB().then(() => updateWishUI());
 
 /* ── AUTH CHECK ── */
 function updateInsiderGate() {
@@ -1212,9 +1047,8 @@ function getSession() {
 async function getValidSession() {
   const s = getSession();
   if (!s?.access_token || !s?.user) return null;
-  const expiresAt = s.expires_at || 0;
   const nowSec = Math.floor(Date.now() / 1000);
-  if (expiresAt > nowSec + 60) return s;
+  if ((s.expires_at || 0) > nowSec + 60) return s;
   if (!s.refresh_token) return null;
   try {
     const r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
@@ -1224,9 +1058,8 @@ async function getValidSession() {
     });
     if (!r.ok) { localStorage.removeItem('lop_auth_session'); return null; }
     const data = await r.json();
-    const newSession = { ...data, user: data.user || s.user };
-    localStorage.setItem('lop_auth_session', JSON.stringify(newSession));
-    return newSession;
+    localStorage.setItem('lop_auth_session', JSON.stringify({ ...data, user: data.user || s.user }));
+    return data;
   } catch(e) { return null; }
 }
 
@@ -1236,88 +1069,47 @@ function authHeaders() {
     'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
 }
 function dbAddWish(placeId) {
-  if (_syncOffline) return;
-  const s = getSession(); if (!s?.user) return;
-  fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
-    body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
-}
-function dbRemoveWish(placeId) {
-  if (_syncOffline) return;
-  const s = getSession(); if (!s?.user) return;
-  fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&place_id=eq.' + placeId,
-    { method:'DELETE', headers: authHeaders() }).catch(()=>{});
-}
-
-/* ── Sync UI ── */
-const SYNC_TIMEOUT_MS = 10000;
-let _syncOffline = false;
-
-function _injectSyncUI() {
-  if (document.getElementById('lop-sync-bar')) return;
-  if (!document.body) return;
-  const style = document.createElement('style');
-  style.textContent = '#lop-sync-bar{position:fixed;bottom:0;left:0;right:0;z-index:8000;background:rgba(26,24,20,.78);color:var(--paper,#eeefeb);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.4;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.8,.36,1);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}#lop-sync-bar.show{transform:translateY(0);}#lop-sync-bar .sb-text{flex:1;}#lop-sync-bar .sb-retry{flex-shrink:0;background:transparent;border:1px solid rgba(238,239,235,.4);color:var(--paper,#eeefeb);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;}#lop-sync-bar .sb-retry:hover{background:rgba(238,239,235,.12);}#lop-sync-spinner{position:fixed;bottom:0;left:0;right:0;z-index:7999;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#b04020),transparent);background-size:200% 100%;animation:lop-slide 1.4s linear infinite;opacity:0;transition:opacity .2s;}#lop-sync-spinner.show{opacity:1;}@keyframes lop-slide{0%{background-position:200% 0;}100%{background-position:-200% 0;}}';
-  document.head.appendChild(style);
-  const spinner = document.createElement('div'); spinner.id = 'lop-sync-spinner';
-  document.body.appendChild(spinner);
-  const bar = document.createElement('div'); bar.id = 'lop-sync-bar';
-  bar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sb-text">Nepodařilo se načíst data ze serveru. Zobrazujeme naposledy uložený stav.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>';
-  document.body.appendChild(bar);
-  // Pozicuj nad navbar
-  requestAnimationFrame(() => {
-    const nav = document.getElementById('nav') || document.getElementById('lop-nav');
-    const h = nav ? nav.getBoundingClientRect().height : 56;
-    const offset = window.innerWidth < 820 ? h : 0;
-    bar.style.bottom = offset + 'px';
-    if (spinner) spinner.style.bottom = offset + 'px';
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
   });
 }
-function _showSyncSpinner(on) { const el = document.getElementById('lop-sync-spinner'); if (el) el.classList.toggle('show', on); }
-function _showSyncBar(on) {
-  const el = document.getElementById('lop-sync-bar');
-  const sp = document.getElementById('lop-sync-spinner');
-  if (!el) return;
-  if (on) {
-    const nav = document.getElementById('nav') || document.getElementById('lop-nav');
-    const h = nav ? nav.getBoundingClientRect().height : 56;
-    const offset = window.innerWidth < 820 ? h : 0;
-    el.style.bottom = offset + 'px';
-    if (sp) sp.style.bottom = offset + 'px';
-  }
-  el.classList.toggle('show', on);
+function dbRemoveWish(placeId) {
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&place_id=eq.' + placeId,
+      { method:'DELETE', headers: authHeaders() }).catch(()=>{});
+  });
 }
-
-window._lopSyncRetry = () => {
-  _showSyncBar(false);
-  syncFromDB(() => { updateWishUI(); updateInsiderGate(); });
-};
-
-async function syncFromDB(onDone) {
-  const s = await getValidSession();
-  if (!s?.access_token || !s?.user) { if (onDone) onDone(); return; }
-  _injectSyncUI(); _showSyncSpinner(true); _showSyncBar(false); _syncOffline = false;
+async function syncFromDB() {
+  const s = getSession(); if (!s?.access_token || !s?.user) return;
   try {
-    const ft = (url, opts) => new Promise((res, rej) => {
-      const t = setTimeout(() => rej(new Error('timeout')), SYNC_TIMEOUT_MS);
-      fetch(url, opts).then(r => { clearTimeout(t); res(r); }).catch(e => { clearTimeout(t); rej(e); });
-    });
     const [wRes, vRes] = await Promise.all([
-      ft(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
-      ft(SUPA_URL + '/rest/v1/visited?user_id=eq.'  + s.user.id + '&select=place_id', { headers: authHeaders() }),
+      fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
+      fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders() })
     ]);
-    if (wRes.ok) localStorage.setItem(WISH_KEY, JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
-    if (vRes.ok) localStorage.setItem(VISIT_KEY, JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
-    fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() })
-      .then(r => r.ok ? r.json() : []).then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }).catch(() => {});
-    _showSyncSpinner(false); _showSyncBar(false); _syncOffline = false;
-    if (onDone) onDone();
-  } catch(e) {
-    _showSyncSpinner(false); _syncOffline = true;
-    if (onDone) onDone();
-    _showSyncBar(true);
-    console.warn('Sync failed:', e?.message || e);
-    const _sb = document.getElementById('lop-sync-bar'); if (_sb) { const _t = _sb.querySelector('.sb-text'); if (_t) _t.textContent = (e?.message || String(e)); }
-  }
+    if (wRes.ok) {
+      const remote = (await wRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String))];
+      localStorage.setItem(WISH_KEY, JSON.stringify([...new Set([...remote, ...local])]));
+      local.filter(id => !remote.includes(id)).forEach(id => {
+        fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
+          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
+      });
+    }
+    if (vRes.ok) {
+      const remote = (await vRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String))];
+      localStorage.setItem(VISIT_KEY, JSON.stringify([...new Set([...remote, ...local])]));
+    }
+    // Načti roli z profiles
+    const rRes = await fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() });
+    if (rRes.ok) {
+      const rows = await rRes.json();
+      if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role);
+    }
+  } catch(e) { console.warn('Sync failed:', e); }
 }
 const VOTE_KEY = 'lop_vote_' + PLACE_ID; // localStorage — pamatuje hlas uživatele
 
