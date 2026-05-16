@@ -838,15 +838,15 @@ const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
 
 function toggleFilter() {
   const bar = document.getElementById('filterBar');
+  const wasOpen = bar.classList.contains('open');
   bar.classList.toggle('open');
-  if (bar.classList.contains('open')) {
-    // Čekáme než panel dosáhne plné výšky a timeline má rozměry
-    const check = () => {
-      const tl = document.getElementById('eraTimeline');
-      if (tl && tl.offsetWidth > 0) { buildEraTimeline(); }
-      else { setTimeout(check, 50); }
+  if (!wasOpen) {
+    const panel = document.getElementById('filterPanel');
+    const onEnd = () => {
+      panel.removeEventListener('transitionend', onEnd);
+      buildEraTimeline();
     };
-    setTimeout(check, 50);
+    panel.addEventListener('transitionend', onEnd);
   }
 }
 
