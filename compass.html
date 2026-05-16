@@ -408,13 +408,9 @@ function addHeadingSample(raw) {
 
 var isLocked = true; // false = user manually panned/zoomed, stop GPS following
 
-// After pinch-zoom, re-center on user after 2s
-var relockTimer = null;
-map.on('zoomend', function() {
-  if (relockTimer) clearTimeout(relockTimer);
-  relockTimer = setTimeout(function() {
-    if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: true });
-  }, 2000);
+// After any zoom, immediately re-center on user
+map.on('zoom', function() {
+  if (userPos) map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
 });
 
 var lastPanLat = null, lastPanLng = null;
