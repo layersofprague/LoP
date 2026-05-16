@@ -2568,11 +2568,13 @@ function showTooltip(loc, m, rt) {
         <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${distLabel}</span>
       </div>
       <div class="rt-tip-actions">
-        <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa" onclick="event.stopPropagation()">
+        <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa"
+           onclick="if(Date.now()-window._rtShownAt<800){event.preventDefault();} event.stopPropagation()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Detail
         </a>
-        <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo" onclick="event.stopPropagation()">
+        <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo"
+           onclick="if(Date.now()-window._rtShownAt<800){event.preventDefault();} event.stopPropagation()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           Kompas
         </a>
@@ -2996,11 +2998,11 @@ function initMap() {
       } else {
         rt.classList.remove('visible');
         clearTimeout(window._rtAutoHide);
-        // Krátký delay — prst musí opustit obrazovku než se tooltip zobrazí
         setTimeout(() => {
           showTooltip(loc, m, rt);
+          window._rtShownAt = Date.now();
           window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
-        }, 120);
+        }, 350);
       }
     });
     m.on('mouseover', () => {
