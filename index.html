@@ -1956,6 +1956,32 @@ const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
 }
+
+async function getValidSession() {
+  const s = getSession();
+  if (!s?.access_token || !s?.user) return null;
+  // Zkontroluj expiraci — expires_at je Unix timestamp v sekundách
+  const expiresAt = s.expires_at || 0;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (expiresAt > nowSec + 60) return s; // platný ještě aspoň minutu
+  // Token expiroval — zkus refresh
+  if (!s.refresh_token) return null;
+  try {
+    const r = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    });
+    if (!r.ok) { localStorage.removeItem('lop_auth_session'); return null; }
+    const data = await r.json();
+    const newSession = { ...data, user: data.user || s.user };
+    localStorage.setItem('lop_auth_session', JSON.stringify(newSession));
+    return newSession;
+  } catch(e) {
+    console.warn('Token refresh failed:', e);
+    return null;
+  }
+}
 function authHeaders(extra) {
   const s = getSession();
   return Object.assign({
@@ -2017,7 +2043,7 @@ window._lopSyncRetry = () => {
 };
 
 async function syncFromDB(onDone) {
-  const s = getSession();
+  const s = await getValidSession();
   if (!s?.access_token || !s?.user) { if (onDone) onDone(); return; }
   _injectSyncUI(); _showSyncSpinner(true); _showSyncBar(false); _syncOffline = false;
   try {
@@ -2954,21 +2980,22 @@ function initMap() {
       const isTouch = oe?.pointerType === 'touch' || oe?.pointerType === 'pen'
                    || ('ontouchstart' in window);
       if (isTouch) return; // touch handled by touchend
+      if (window._suppressNextClick) { window._suppressNextClick = false; return; }
       if (rt.classList.contains('visible')) return;
       openSheet(loc.id);
     });
     m.on('touchend', (e) => {
       L.DomEvent.stopPropagation(e);
-      L.DomEvent.preventDefault(e);
+      window._suppressNextClick = true;
+      setTimeout(() => { window._suppressNextClick = false; }, 600);
       if (rt.classList.contains('visible') && rt._forId === loc.id) {
         rt.classList.remove('visible');
         rt._forId = null;
         clearTimeout(window._rtAutoHide);
         openSheet(loc.id);
       } else {
-        rt.classList.remove('visible'); // skryj případný jiný tooltip
+        rt.classList.remove('visible');
         showTooltip(loc, m, rt);
-        // auto-hide po 4s
         clearTimeout(window._rtAutoHide);
         window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
       }
