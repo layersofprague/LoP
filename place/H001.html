@@ -517,6 +517,85 @@ a { color: inherit; text-decoration: none; }
 }
 .autor-link:hover { color: var(--ink); }
 
+/* leaderboard */
+.lbm-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.lbm-avatar {
+  flex-shrink: 0;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--cat-hist); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600; letter-spacing: .04em;
+}
+.lbm-body { flex: 1; min-width: 0; }
+.lbm-meta {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 5px;
+}
+.lbm-name {
+  font-family: 'Fraunces', serif;
+  font-size: 15px; font-weight: 500; color: var(--ink);
+}
+.lbm-sep { color: var(--ink-4); font-size: 12px; }
+.lbm-score {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .06em;
+  color: var(--cat-fun, #E0A020);
+}
+.lbm-text {
+  font-size: 13px; line-height: 1.55; color: var(--ink-3);
+  font-style: italic;
+}
+
+.leaderboard {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--rule); border-radius: 10px;
+  overflow: hidden;
+}
+.lb-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 42px 80px;
+  align-items: center; gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+}
+.lb-row:first-child { border-top: none; }
+.lb-gold { background: linear-gradient(90deg, rgba(224,160,32,.08) 0%, transparent 100%); }
+.lb-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--ink-4); font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+}
+.lb-name {
+  font-size: 13.5px; font-weight: 500; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lb-pts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600; color: var(--ink-2);
+  text-align: right;
+}
+.lb-bar-wrap {
+  height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden;
+}
+.lb-bar {
+  height: 100%; background: var(--cat-fun, #E0A020);
+  border-radius: 2px;
+  transition: width .6s var(--ease);
+}
+.lb-gold .lb-bar { background: #E0A020; }
+.lb-gold .lb-name { color: var(--ink); }
+.lb-gold .lb-pts  { color: #b08010; }
+
 /* keyword tags */
 .kw-tag {
   font-family: 'JetBrains Mono', monospace;
@@ -660,15 +739,15 @@ a { color: inherit; text-decoration: none; }
 
   <!-- actions -->
   <div class="actions" style="grid-template-columns:repeat(6,1fr)">
-    <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Kompas">
+    <a href="../compass.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span class="act-lbl">Kompas</span>
     </a>
-    <a href="https://mapy.cz/zakladni?q=50.10543,14.45595&route-end=50.10543,14.45595&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
+    <a href="https://mapy.cz/zakladni?q=50.105147,14.456289&route-end=50.105147,14.456289&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span class="act-lbl">Mapy.cz</span>
     </a>
-    <a href="https://www.google.com/maps/dir/?api=1&destination=50.10543,14.45595&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
+    <a href="https://www.google.com/maps/dir/?api=1&destination=50.105147,14.456289&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span class="act-lbl">Google</span>
     </a>
@@ -676,7 +755,7 @@ a { color: inherit; text-decoration: none; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
       <span class="act-lbl">Sdílet</span>
     </button>
-    <a href="../ar-intro.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="act-btn" title="AR">
+    <a href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="act-btn" title="AR">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
       <span class="act-lbl">AR</span>
     </a>
@@ -763,6 +842,64 @@ a { color: inherit; text-decoration: none; }
       </div>
       <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
       <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
+    </div>
+  </div>
+
+  <!-- gamifikace — žebříček -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Žebříček</span>
+      <span class="sec-num">Top 5</span>
+    </div>
+
+    <!-- Vzkaz od #1 -->
+    <div class="lbm-card">
+      <div class="lbm-avatar">JK</div>
+      <div class="lbm-body">
+        <div class="lbm-meta">
+          <span class="lbm-name">Jan K.</span>
+          <span class="lbm-sep">·</span>
+          <span class="lbm-score">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="#E0A020" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            342 bodů
+          </span>
+        </div>
+        <p class="lbm-text">Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.</p>
+      </div>
+    </div>
+
+    <!-- Žebříček -->
+    <div class="leaderboard">
+      <div class="lb-row lb-gold">
+        <div class="lb-rank"><svg width="12" height="12" viewBox="0 0 24 24" fill="#E0A020" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <div class="lb-name">Jan K.</div>
+        <div class="lb-pts">342</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:100%"></div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">2</div>
+        <div class="lb-name">Tereza M.</div>
+        <div class="lb-pts">298</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:87%"></div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">3</div>
+        <div class="lb-name">Pavel N.</div>
+        <div class="lb-pts">261</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:76%"></div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">4</div>
+        <div class="lb-name">Lucie V.</div>
+        <div class="lb-pts">244</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:71%"></div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">5</div>
+        <div class="lb-name">Martin H.</div>
+        <div class="lb-pts">198</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:58%"></div></div>
+      </div>
     </div>
   </div>
 
