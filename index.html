@@ -3000,12 +3000,10 @@ function initMap() {
       } else {
         rt.classList.remove('visible');
         clearTimeout(window._rtAutoHide);
-        setTimeout(() => {
-          showTooltip(loc, m, rt);
-          rt.classList.add('rt-blocked');
-          setTimeout(() => { rt.classList.remove('rt-blocked'); }, 800);
-          window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
-        }, 350);
+        showTooltip(loc, m, rt);
+        rt.classList.add('rt-blocked');
+        setTimeout(() => { rt.classList.remove('rt-blocked'); }, 1000);
+        window._rtAutoHide = setTimeout(() => rt.classList.remove('visible'), 4000);
       }
     });
     m.on('mouseover', () => {
