@@ -981,21 +981,42 @@ function render() {
   const visited = getVisited();
   const wished  = getWished();
 
-  const eraActive  = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
+  const RANK   = { full: 0, dim: 1, hide: 2 };
+  const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
+  const eraActive = ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END;
+
   const filtered = PLACES.filter(p => {
     const wish = wished.includes(String(p.id));
     const vis  = visited.includes(String(p.id));
-    if (FILTER.wished  === 'force' && wish) return true;
-    if (FILTER.visited === 'force' && vis)  return true;
-    const votes = [FILTER[p.cat]];
-    if (wish) votes.push(FILTER.wished  === 'force' ? 'full' : FILTER.wished);
-    if (vis)  votes.push(FILTER.visited === 'force' ? 'full' : FILTER.visited);
-    const s = votes.reduce((best, v) => BETTER(best, v), 'hide');
-    if (s !== 'full') return false;
+
+    const catState  = FILTER[p.cat];
+    const wishState = FILTER.wished;
+    const visState  = FILTER.visited;
+    let s = 'full';
+
+    // force = vždy zobrazit příznakové piny
+    if      (wishState === 'force' && wish)    { s = 'full'; }
+    else if (visState  === 'force' && vis)     { s = 'full'; }
+    // hide = tvrdé skrytí bez výjimek
+    else if (catState  === 'hide')             { s = 'hide'; }
+    else if (wishState === 'hide' && wish)     { s = 'hide'; }
+    else if (visState  === 'hide' && vis)      { s = 'hide'; }
+    else {
+      // dim = měkké skrytí — hlasování, příznaky mohou zachránit
+      const votes = [catState];
+      if (wish) votes.push(wishState);
+      if (vis)  votes.push(visState);
+      s = votes.reduce((best, v) => BETTER(best, v), 'hide');
+    }
+
+    if (s === 'hide') return false;
+
+    // Era filtr
     if (eraActive) {
       const y = locYear(p);
       if (y != null && (y < ERA_STATE.from || y > ERA_STATE.to)) return false;
     }
+
     return true;
   });
 
