@@ -1275,7 +1275,10 @@ loadPlaces().then(() => {
     updateCounts(); updateChipCounts();
     if (_urlFilter === 'wished') {
       FILTER.hist = 'hide'; FILTER.arch = 'hide'; FILTER.fun = 'hide'; FILTER.visited = 'hide';
+      FILTER.wished = 'force';
       document.querySelectorAll('[data-cat="hist"],[data-cat="arch"],[data-cat="fun"],[data-filter="visited"]').forEach(b => b.classList.add('state-hide'));
+      const chipW = document.getElementById('chipWished');
+      if (chipW) chipW.classList.add('state-force');
     }
     render();
   });
