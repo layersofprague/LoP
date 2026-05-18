@@ -75,14 +75,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
     cursor:pointer;display:flex;align-items:center;justify-content:center;color:#1a1a18;font-size:16px;line-height:1;">−</button>
 
 <!-- TEST: arrival trigger (remove before production) -->
-<button onclick="
-  var o=document.getElementById('arrivalOverlay');
-  o.classList.remove('arrival-hidden');
-  o.classList.add('arrival-visible');
-  o.style.display='flex';
-  document.getElementById('arrivalName').textContent='Test místa';
-  alert('classes:'+o.className+' computed:'+getComputedStyle(o).display);
-" style="position:fixed;bottom:80px;left:8px;z-index:200;
+<button onclick="_arrivalShown=false;showArrival()" style="position:fixed;bottom:80px;left:8px;z-index:200;
   padding:6px 10px;border-radius:8px;
   background:#b04020;color:#fff;border:none;
   font-family:monospace;font-size:10px;cursor:pointer;opacity:.7;">
