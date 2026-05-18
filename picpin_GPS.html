@@ -1474,6 +1474,68 @@ function updatePreviewMap() {
     bounds.push([c.topLeft.lat,c.topLeft.lng],[c.topRight.lat,c.topRight.lng]);
   }
 
+  // Photo corners with coordinate tooltips
+  if (S.corners) {
+    const c = S.corners;
+    const cornerDefs = [
+      { pt:c.topLeft,     lbl:'TL' },
+      { pt:c.topRight,    lbl:'TR' },
+      { pt:c.bottomRight, lbl:'BR' },
+      { pt:c.bottomLeft,  lbl:'BL' },
+    ];
+    // Outline polygon
+    prevLayers.push(L.polygon(
+      cornerDefs.map(({pt})=>[pt.lat,pt.lng]),
+      { color:'#1a1a18', weight:2, dashArray:'5,4', fillOpacity:0, opacity:0.7 }
+    ).addTo(prevMap));
+    // Corner markers with tooltip
+    cornerDefs.forEach(({pt,lbl}) => {
+      const icon = L.divIcon({
+        html:`<div style="width:7px;height:7px;border-radius:50%;background:#1a1a18;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)"></div>`,
+        className:'', iconSize:[7,7], iconAnchor:[3.5,3.5]
+      });
+      const mk = L.marker([pt.lat,pt.lng],{icon}).addTo(prevMap);
+      mk.bindTooltip(
+        `<b>${lbl}</b><br>${pt.lat.toFixed(6)}, ${pt.lng.toFixed(6)}<br>alt ${pt.alt!==undefined?pt.alt.toFixed(1)+'m':'—'}`,
+        { permanent:false, direction:'top', className:'leaflet-tooltip-small' }
+      );
+      prevLayers.push(mk);
+    });
+    cornerDefs.forEach(({pt})=>bounds.push([pt.lat,pt.lng]));
+  }
+
+  // Facade points A1/A2/B1/B2... with lines to photographer
+  if (S.photographer && S.photographer.lat) {
+    const facadePtDefs = [
+      { arr:S.facadeA, col:'#48c774', prefix:'A' },
+      { arr:S.facadeB, col:'#4a9eff', prefix:'B' },
+      { arr:S.facadeC, col:'#c9a84c', prefix:'C' },
+      { arr:S.facadeD, col:'#e91e8c', prefix:'D' },
+    ];
+    facadePtDefs.forEach(({arr,col,prefix}) => {
+      arr.forEach((pt,i) => {
+        if (!pt) return;
+        const lbl = prefix + (i+1);
+        // Dashed line to photographer
+        prevLayers.push(L.polyline(
+          [[S.photographer.lat,S.photographer.lng],[pt.lat,pt.lng]],
+          { color:col, weight:1, opacity:0.35, dashArray:'3,5' }
+        ).addTo(prevMap));
+        // Point marker
+        const icon = L.divIcon({
+          html:`<div style="width:8px;height:8px;border-radius:50%;background:${col};border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)"></div>`,
+          className:'', iconSize:[8,8], iconAnchor:[4,4]
+        });
+        const mk = L.marker([pt.lat,pt.lng],{icon}).addTo(prevMap);
+        mk.bindTooltip(
+          `<b>${lbl}</b><br>${pt.lat.toFixed(6)}, ${pt.lng.toFixed(6)}`,
+          { permanent:false, direction:'top', className:'leaflet-tooltip-small' }
+        );
+        prevLayers.push(mk);
+      });
+    });
+  }
+
   // mapPts on map
   const MAP_PT_COLORS = { B:'#4a9eff', C:'#c9a84c', D:'#e91e8c' };
   getValidPairs().forEach(pair => {
