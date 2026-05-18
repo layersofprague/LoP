@@ -313,13 +313,6 @@ const _urlNum=_params.get('num')||'';   // e.g. "H001"
 const _urlName=_params.get('name')||'';
 const _urlId=_params.get('id')||'';
 
-// Convert "H001" → "h_001h"  (prefix letter(s) lowercase + _ + zero-padded number + h)
-function numToSlug(num){
-  const m=String(num).match(/^([A-Za-z]+)(\d+)$/);
-  if(!m)return num.toLowerCase();
-  return m[1].toLowerCase()+'_'+m[2].padStart(3,'0')+'h';
-}
-
 const GITHUB_BASE='https://raw.githubusercontent.com/layersofprague/LoP/main/';
 
 // STATE
@@ -358,10 +351,18 @@ function showManual(errMsg){
   else{$('imp-error').style.display='none';}
 }
 
+// Convert "H001" → "h_001h" (for photo filename)
+function numToPhotoSlug(num){
+  const m=String(num).match(/^([A-Za-z]+)(\d+)$/);
+  if(!m)return num.toLowerCase();
+  return m[1].toLowerCase()+'_'+m[2].padStart(3,'0')+'h';
+}
+
 async function autoLoad(num){
-  const slug=numToSlug(num);
-  const jsonUrl=GITHUB_BASE+'place/'+slug+'_export_step3.json';
-  const photoUrl=GITHUB_BASE+'foto/'+slug+'.jpg';
+  const photoSlug=numToPhotoSlug(num);        // h_001h  (foto)
+  const jsonName=String(num).toUpperCase();   // H001    (JSON)
+  const jsonUrl=GITHUB_BASE+'place/'+jsonName+'_export_step3.json';
+  const photoUrl=GITHUB_BASE+'foto/'+photoSlug+'.jpg';
 
   showLoading('Načítám kalibrační data…');
   let json;
@@ -381,7 +382,7 @@ async function autoLoad(num){
     // success
     calData=json;
     photoImg=img;
-    photoFileName=slug;
+    photoFileName=jsonName;
     $('ov-photo').src=img.src;
     // go straight to nav
     startNav();
@@ -389,7 +390,7 @@ async function autoLoad(num){
     showManual('Nepodařilo se načíst '+photoUrl+':\n'+e.message);
     // JSON loaded OK so pre-fill it, just photo is missing
     calData=json;
-    $('iz-json-val').textContent=slug+'_export_step3.json';
+    $('iz-json-val').textContent=jsonName+'_export_step3.json';
     $('iz-json').classList.add('done');
     checkReady();
   }
