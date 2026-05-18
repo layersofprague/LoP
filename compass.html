@@ -382,7 +382,11 @@ function showArrival() {
   ov.classList.add('arrival-visible');
 }
 function arrGoAR() {
-  var url = 'ar-intro.html?id=' + TARGET.id + '&lat=' + TARGET.lat + '&lng=' + TARGET.lng + '&name=' + encodeURIComponent(TARGET.name || '');
+  var url = 'ar.html?id=' + TARGET.id
+    + '&num=' + encodeURIComponent(TARGET.num || '')
+    + '&lat=' + TARGET.lat
+    + '&lng=' + TARGET.lng
+    + '&name=' + encodeURIComponent(TARGET.name || '');
   if (TARGET.thumb) url += '&thumb=' + encodeURIComponent(TARGET.thumb);
   location.href = url;
 }
@@ -641,7 +645,7 @@ window.addEventListener('resize', function() {
 <div id="lop-nav"></div>
 <!-- Arrival overlay -->
 <div id="arrivalOverlay" class="arrival-hidden" style="
-  position:fixed; top:0;left:0;right:0;bottom:0; z-index:9999;
+  position:fixed; top:0;left:0;right:0;bottom:0; z-index:99999;
   background:rgba(26,24,20,.85); backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
   flex-direction:column; align-items:center; justify-content:center;
