@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LoP · Picture Pinning Tool</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=EB+Garamond:ital,wght@0,400;1,400&display=swap');
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#0d0d0d; --panel:#141414; --border:rgba(255,255,255,0.08);
+      --red:#c0392b; --gold:#c9a84c; --green:#48c774; --blue:#4a9eff; --yellow:#f1c40f;
+      --mono:'JetBrains Mono',monospace; --serif:'EB Garamond',Georgia,serif;
+    }
+    html,body { width:100%; height:100%; overflow:hidden; background:var(--bg); color:#fff; font-family:var(--mono); }
+    #app { width:100%; height:100%; display:flex; flex-direction:column; }
+
+    /* Header */
+    #header { flex-shrink:0; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); background:var(--panel); }
+    .app-title { font-family:var(--serif); font-size:16px; color:var(--gold); }
+    .app-title span { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; color:rgba(255,255,255,0.3); display:block; text-transform:uppercase; }
+
+    /* Tabs */
+    #tabs { flex-shrink:0; display:flex; border-bottom:1px solid var(--border); background:var(--panel); }
+    .tab { flex:1; padding:9px 4px; text-align:center; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:5px; }
+    .tab.active { color:#fff; border-bottom-color:var(--gold); }
+    .tab.done { color:var(--green); }
+    .tab-num { width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,0.08); font-size:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .tab.active .tab-num { background:var(--gold); color:#000; }
+    .tab.done .tab-num { background:var(--green); color:#000; }
+
+    /* Steps */
+    #steps { flex:1; overflow:hidden; position:relative; }
+    .step { display:none; width:100%; height:100%; flex-direction:column; }
+    .step.active { display:flex; }
+
+    /* ── MAP ── */
+    #map-container { flex:1; position:relative; }
+    #map { width:100%; height:100%; cursor:crosshair !important; }
+    #map-hint { position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:1000; background:rgba(0,0,0,0.82); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:11px; color:rgba(255,255,255,0.6); text-align:center; backdrop-filter:blur(8px); pointer-events:none; white-space:nowrap; }
+    #map-hint strong { color:#fff; display:block; margin-bottom:2px; font-size:12px; }
+
+    #map-bottom { flex-shrink:0; padding:10px 14px; background:var(--panel); border-top:1px solid var(--border); }
+    .facade-section { margin-bottom:8px; }
+    .facade-label { font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:5px; display:flex; align-items:center; gap:8px; }
+    .facade-label-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .points-row { display:flex; gap:6px; }
+    .point-chip { flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); font-size:9px; }
+    .point-chip .chip-label { color:rgba(255,255,255,0.3); font-size:8px; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2px; }
+    .point-chip .chip-val { color:rgba(255,255,255,0.5); }
+    .point-chip.set .chip-val { color:#fff; }
+    .point-chip.set { border-color:rgba(255,255,255,0.2); }
+    .facade-a-chip.set { border-color:rgba(201,168,76,0.5) !important; }
+    .facade-b-chip.set { border-color:rgba(74,158,255,0.5) !important; }
+    .mode-btns { display:flex; gap:6px; margin-bottom:8px; }
+    .mode-btn { flex:1; padding:7px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.03); font-family:var(--mono); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; color:rgba(255,255,255,0.4); transition:all 0.2s; text-align:center; }
+    .mode-btn.active { background:rgba(201,168,76,0.15); border-color:var(--gold); color:var(--gold); }
+    .mode-btn.active-b { background:rgba(74,158,255,0.15); border-color:var(--blue); color:var(--blue); }
+
+    /* ── PHOTO ── */
+    #photo-area { flex:1; position:relative; overflow:hidden; background:#000; cursor:crosshair; }
+    #hist-img { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); max-width:100%; max-height:100%; user-select:none; pointer-events:none; }
+    #vp-canvas { position:absolute; inset:0; width:100%; height:100%; }
+
+    #photo-toolbar { position:absolute; top:10px; right:10px; z-index:10; display:flex; flex-direction:column; gap:5px; }
+    .tool-btn { width:34px; height:34px; border-radius:7px; background:rgba(0,0,0,0.72); border:1px solid var(--border); color:rgba(255,255,255,0.55); font-size:13px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(6px); transition:all 0.2s; }
+    .tool-btn.active-h { background:rgba(74,158,255,0.2); border-color:var(--blue); color:var(--blue); }
+    .tool-btn.active-v { background:rgba(72,199,116,0.2); border-color:var(--green); color:var(--green); }
+    .tool-btn.active-b { background:rgba(241,196,15,0.2); border-color:var(--yellow); color:var(--yellow); }
+
+    #photo-bottom { flex-shrink:0; padding:8px 14px; background:var(--panel); border-top:1px solid var(--border); }
+    .vp-chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+    .vp-chip { padding:3px 9px; border-radius:20px; font-size:9px; letter-spacing:0.08em; border:1px solid var(--border); color:rgba(255,255,255,0.3); }
+    .vp-chip.found { border-color:rgba(72,199,116,0.5); color:var(--green); }
+    .vp-chip.partial { border-color:rgba(201,168,76,0.4); color:var(--gold); }
+
+    /* ── PREVIEW ── */
+    #preview-area { flex:1; position:relative; overflow:hidden; background:#0a0a0a; }
+    #preview-canvas { width:100%; height:100%; }
+    #preview-bottom { flex-shrink:0; padding:8px 14px; background:var(--panel); border-top:1px solid var(--border); }
+
+    /* Shared */
+    .sl-row { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+    .sl-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.35); width:50px; flex-shrink:0; }
+    .sl { -webkit-appearance:none; appearance:none; flex:1; height:2px; border-radius:2px; background:rgba(255,255,255,0.15); outline:none; }
+    .sl::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--gold); cursor:pointer; }
+    .sl-val { font-size:10px; color:var(--gold); width:38px; text-align:right; flex-shrink:0; }
+    .btn-row { display:flex; gap:7px; margin-top:8px; }
+    .btn { flex:1; padding:10px 6px; border-radius:7px; border:none; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+    .btn:active { opacity:0.75; }
+    .btn-primary { background:var(--gold); color:#000; }
+    .btn-secondary { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.45); border:1px solid var(--border); }
+    .btn-green { background:var(--green); color:#000; }
+    .btn-danger { background:rgba(192,57,43,0.15); color:var(--red); border:1px solid rgba(192,57,43,0.25); }
+
+    /* Results */
+    #results-block { display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.96); overflow-y:auto; padding:22px 16px; }
+    #results-block.show { display:block; }
+    .res-title { font-family:var(--serif); font-size:20px; color:var(--gold); margin-bottom:3px; }
+    .res-sub { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:18px; }
+    .res-section { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:7px; padding:12px; margin-bottom:10px; }
+    .res-section-title { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:8px; }
+    .res-row { display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; }
+    .res-key { color:rgba(255,255,255,0.4); }
+    .res-val { color:var(--gold); font-weight:600; font-size:10px; }
+    .res-code { background:rgba(0,0,0,0.6); border:1px solid var(--border); border-radius:5px; padding:10px; font-size:10px; color:#7ec8e3; overflow-x:auto; white-space:pre; margin-top:8px; line-height:1.5; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div class="app-title">Picture Pinning Tool<span>Pozice fotografa z úběžníků</span></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.12em">BETA</div>
+      <button onclick="document.getElementById('cal-file-input').click()" style="font-size:9px;padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-family:var(--mono);cursor:pointer">📂</button>
+      <div id="cal-status" onclick="toggleCalibration()" style="font-size:9px;color:rgba(255,255,255,0.2);cursor:pointer" title="Klikni pro zapnutí/vypnutí">Kalibrace: —</div>
+    </div>
+    <input type="file" id="cal-file-input" accept=".json" style="display:none">
+    <div id="cal-status" style="font-size:9px;letter-spacing:0.08em;color:rgba(255,255,255,0.2)">Kalibrace: —</div>
+  </div>
+  </div>
+  <div id="tabs">
+    <div class="tab active" id="tab-1" onclick="gotoStep(1)"><div class="tab-num">1</div>Mapa</div>
+    <div class="tab" id="tab-2" onclick="gotoStep(2)"><div class="tab-num">2</div>Fotografie</div>
+    <div class="tab" id="tab-3" onclick="gotoStep(3)"><div class="tab-num">3</div>Náhled</div>
+  </div>
+  <div id="steps">
+
+    <!-- STEP 1: MAP -->
+    <div class="step active" id="step-map">
+      <div id="map-container">
+        <div id="map"></div>
+        <div id="map-hint"><strong id="hint-title">Fasáda A — bod 1</strong><span id="hint-text">Klikni na první roh fasády</span></div>
+      </div>
+      <div id="map-bottom">
+        <div class="mode-btns">
+          <div class="mode-btn active" id="mode-btn-a" onclick="setMapMode('a')">🟡 Fasáda A</div>
+          <div class="mode-btn" id="mode-btn-b" onclick="setMapMode('b')">🔵 Fasáda B</div>
+          <div class="mode-btn" id="mode-btn-c" onclick="setMapMode('c')" style="color:rgba(72,199,116,0.5)">🟢 Fasáda C</div>
+          <div class="mode-btn btn-danger" onclick="resetMap()" style="flex:0.5">↺</div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--gold)"></div>Fasáda A (povinná)</div>
+          <div class="points-row">
+            <div class="point-chip facade-a-chip" id="chip-a1"><div class="chip-label">Bod 1</div><div class="chip-val" id="cv-a1">—</div></div>
+            <div class="point-chip facade-a-chip" id="chip-a2"><div class="chip-label">Bod 2</div><div class="chip-val" id="cv-a2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--blue)"></div>Fasáda B (volitelná)</div>
+          <div class="points-row">
+            <div class="point-chip facade-b-chip" id="chip-b1"><div class="chip-label">Bod 1</div><div class="chip-val" id="cv-b1">—</div></div>
+            <div class="point-chip facade-b-chip" id="chip-b2"><div class="chip-label">Bod 2</div><div class="chip-val" id="cv-b2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--green)"></div>Fasáda C (volitelná)</div>
+          <div class="points-row">
+            <div class="point-chip" id="chip-c1" style="border-color:rgba(72,199,116,0.3)"><div class="chip-label" style="color:rgba(72,199,116,0.6)">Bod 1</div><div class="chip-val" id="cv-c1">—</div></div>
+            <div class="point-chip" id="chip-c2" style="border-color:rgba(72,199,116,0.3)"><div class="chip-label" style="color:rgba(72,199,116,0.6)">Bod 2</div><div class="chip-val" id="cv-c2">—</div></div>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-secondary" onclick="document.getElementById('project-input').click()" style="border-color:rgba(74,158,255,0.3);color:#4a9eff">📂 Načíst projekt</button>
+          <button class="btn btn-primary" id="btn-map-next" onclick="gotoStep(2)" disabled>Dál →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: PHOTO -->
+    <div class="step" id="step-photo">
+      <div id="photo-area">
+        <img id="hist-img" src="" alt="" />
+        <canvas id="vp-canvas"></canvas>
+        <div style="position:absolute;bottom:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:4px">
+          <button onclick="zoomPhoto(1.25)" style="width:30px;height:30px;border-radius:6px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
+          <button onclick="zoomPhoto(0.8)" style="width:30px;height:30px;border-radius:6px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
+          <button onclick="zoomPhoto(0)" style="width:30px;height:30px;border-radius:6px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:8px;cursor:pointer;font-family:var(--mono)">FIT</button>
+        </div>
+        <div id="photo-toolbar" style="flex-wrap:wrap;gap:4px">
+          <div class="tool-btn" onclick="loadPhoto()" title="Načíst foto">📂</div>
+          <div class="tool-btn" id="tool-ah" onclick="setLineTool('ah')" title="A vodorovné" style="border-left:3px solid #c0392b;color:#c0392b;font-size:10px">A↔</div>
+          <div class="tool-btn" id="tool-av" onclick="setLineTool('av')" title="A svislé" style="border-left:3px solid #c0392b;border-style:dashed none none solid;color:rgba(192,57,43,0.7);font-size:10px">A↕</div>
+          <div class="tool-btn" id="tool-bh" onclick="setLineTool('bh')" title="B vodorovné" style="border-left:3px solid #4a9eff;color:#4a9eff;font-size:10px">B↔</div>
+          <div class="tool-btn" id="tool-bv" onclick="setLineTool('bv')" title="B svislé" style="border-left:3px solid #4a9eff;border-style:dashed none none solid;color:rgba(74,158,255,0.7);font-size:10px">B↕</div>
+          <div class="tool-btn" id="tool-ch" onclick="setLineTool('ch')" title="C vodorovné" style="border-left:3px solid #48c774;color:#48c774;font-size:10px">C↔</div>
+          <div class="tool-btn" id="tool-cv" onclick="setLineTool('cv')" title="C svislé" style="border-left:3px solid #48c774;border-style:dashed none none solid;color:rgba(72,199,116,0.7);font-size:10px">C↕</div>
+          <div class="tool-btn" onclick="undoLine()" title="Zpět">⌫</div>
+          <div class="tool-btn" onclick="clearLines()" title="Smazat vše">✕</div>
+        </div>
+      </div>
+      <div id="photo-bottom">
+        <div class="vp-chips">
+          <div class="vp-chip" id="chip-vph" style="border-color:rgba(192,57,43,0.4);color:rgba(192,57,43,0.7)">A↔: 0</div>
+          <div class="vp-chip" id="chip-vpv" style="border-color:rgba(192,57,43,0.3);color:rgba(192,57,43,0.5)">A↕: 0</div>
+          <div class="vp-chip" id="chip-vpb" style="border-color:rgba(74,158,255,0.4);color:rgba(74,158,255,0.7)">B↔: 0</div>
+          <div class="vp-chip" id="chip-vpbv" style="border-color:rgba(74,158,255,0.3);color:rgba(74,158,255,0.5)">B↕: 0</div>
+          <div class="vp-chip" id="chip-vpch" style="border-color:rgba(72,199,116,0.4);color:rgba(72,199,116,0.7)">C↔: 0</div>
+          <div class="vp-chip" id="chip-vpcv" style="border-color:rgba(72,199,116,0.3);color:rgba(72,199,116,0.5)">C↕: 0</div>
+          <div class="vp-chip" id="chip-result">Čekám na čáry</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="gotoStep(1)">← Zpět</button>
+          <button class="btn btn-secondary" onclick="gotoStep(3)">Přeskočit</button>
+          <button class="btn btn-primary" onclick="computeAll()">Vypočítat →</button>
+        </div>
+        <div class="btn-row" style="margin-top:6px">
+          <button class="btn btn-secondary" onclick="saveProject()" style="border-color:rgba(74,158,255,0.3);color:#4a9eff">💾 Uložit projekt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: PREVIEW -->
+    <div class="step" id="step-preview">
+      <div id="preview-area"><canvas id="preview-canvas"></canvas></div>
+      <div id="preview-bottom">
+        <div class="sl-row">
+          <span class="sl-label">Výška</span>
+          <input type="range" class="sl" id="sl-h" min="0.5" max="3" step="0.05" value="1" oninput="updateSlider('h',this.value,'×')">
+          <span class="sl-val" id="sv-h">1.0×</span>
+        </div>
+        <div class="sl-row">
+          <span class="sl-label">Svisle</span>
+          <input type="range" class="sl" id="sl-v" min="-8" max="8" step="0.1" value="0" oninput="updateSlider('v',this.value,'m')">
+          <span class="sl-val" id="sv-v">0.0m</span>
+        </div>
+        <div class="sl-row">
+          <span class="sl-label">Šířka</span>
+          <input type="range" class="sl" id="sl-w" min="0.5" max="3" step="0.05" value="1" oninput="updateSlider('w',this.value,'×')">
+          <span class="sl-val" id="sv-w">1.0×</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="gotoStep(2)">← Zpět</button>
+          <button class="btn btn-green" onclick="showResults()">⬇ Export JSON</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Results -->
+<div id="results-block">
+  <div class="res-title">Kalibrace dokončena</div>
+  <div class="res-sub">Calibrator v2 · LayersOfPrague</div>
+  <div class="res-section">
+    <div class="res-section-title">📷 Dopočítaná pozice fotografa</div>
+    <div class="res-row"><span class="res-key">Latitude</span><span class="res-val" id="r-lat">—</span></div>
+    <div class="res-row"><span class="res-key">Longitude</span><span class="res-val" id="r-lng">—</span></div>
+    <div class="res-row"><span class="res-key">Azimut</span><span class="res-val" id="r-az">—</span></div>
+    <div class="res-row"><span class="res-key">Výška fotografa</span><span class="res-val" id="r-ph">—</span></div>
+    <div class="res-row"><span class="res-key">Vzdálenost od fasády</span><span class="res-val" id="r-dist">—</span></div>
+  </div>
+  <div class="res-section">
+    <div class="res-section-title">🖼 Rohy roviny fotografie</div>
+    <div class="res-row"><span class="res-key">Levý horní</span><span class="res-val" id="r-tl">—</span></div>
+    <div class="res-row"><span class="res-key">Pravý horní</span><span class="res-val" id="r-tr">—</span></div>
+    <div class="res-row"><span class="res-key">Pravý dolní</span><span class="res-val" id="r-br">—</span></div>
+    <div class="res-row"><span class="res-key">Levý dolní</span><span class="res-val" id="r-bl">—</span></div>
+  </div>
+  <div class="res-section">
+    <div class="res-section-title">💾 JSON</div>
+    <div class="res-code" id="r-json"></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button class="btn btn-green" onclick="downloadJSON()" style="flex:2">⬇ Stáhnout JSON</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('results-block').classList.remove('show')" style="flex:1">← Zpět</button>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/*" style="display:none">
+<input type="file" id="project-input" accept=".json" style="display:none">
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const S = {
+  mapMode: 'a',
+  facadeA: [null, null],  // [{lat,lng}, {lat,lng}]
+  facadeB: [null, null],
+  facadeC: [null, null],
+  lines: [],              // {x1,y1,x2,y2,group:'h'|'v'|'b'}
+  lineTool: 'ah',
+  vp: { h: null, v: null, b: null },
+  photoW: 0, photoH: 0,
+  photoFile: null,
+  // Computed
+  photographer: null,     // {lat,lng,x,y} in local meters from ref
+  azimut: null,
+  photographerHeight: 1.6,
+  dist: null,
+  planeW: null, planeH: null,
+  ref: null,              // reference GPS point (facade A midpoint)
+  // Adjustments
+  heightMult: 1, vertOffset: 0, widthMult: 1,
+};
+
+// ═══════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════
+let map, mapLayers = [];
+
+function initMap() {
+  map = L.map('map', { zoomControl:true }).setView([50.1052, 14.4563], 17);
+  const streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom:20, subdomains:'abcd', attribution:'© CartoDB'});
+  const satLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom:21, subdomains:['mt0','mt1','mt2','mt3'], attribution:'© Google'});
+  streetLayer.addTo(map);
+  L.control.layers({'🗺 Mapa': streetLayer, '🛰 Satelit': satLayer}).addTo(map);
+  map.on('click', onMapClick);
+}
+
+function setMapMode(m) {
+  S.mapMode = m;
+  document.getElementById('mode-btn-a').className = 'mode-btn' + (m==='a' ? ' active' : '');
+  document.getElementById('mode-btn-b').className = 'mode-btn' + (m==='b' ? ' active-b' : '');
+  const mc=document.getElementById('mode-btn-c');
+  if(mc) { mc.style.background=m==='c'?'rgba(72,199,116,0.15)':''; mc.style.borderColor=m==='c'?'#48c774':''; mc.style.color=m==='c'?'#48c774':'rgba(72,199,116,0.5)'; }
+  updateMapHint();
+}
+
+function updateMapHint() {
+  const fa = S.facadeA, fb = S.facadeB;
+  const m = S.mapMode;
+  let title, text;
+  if (m === 'a') {
+    const idx = fa[0] ? (fa[1] ? '✓' : '2') : '1';
+    title = `Fasáda A — bod ${idx}`;
+    text = fa[0] ? (fa[1] ? 'Fasáda A kompletní' : 'Klikni na druhý roh fasády A') : 'Klikni na první roh fasády A';
+  } else {
+    const idx = fb[0] ? (fb[1] ? '✓' : '2') : '1';
+    title = `Fasáda B — bod ${idx}`;
+    text = fb[0] ? (fb[1] ? 'Fasáda B kompletní' : 'Klikni na druhý roh fasády B') : 'Klikni na první roh fasády B';
+  }
+  document.getElementById('hint-title').textContent = title;
+  document.getElementById('hint-text').textContent  = text;
+}
+
+function onMapClick(e) {
+  const { lat, lng } = e.latlng;
+  const m = S.mapMode;
+  const arr = getArr(m);
+  const idx = arr[0] ? 1 : 0;
+  if (arr[0] && arr[1]) return; // both set
+
+  arr[idx] = { lat, lng };
+
+  // Marker
+  const color = getColor(m);
+  const label = m === 'a' ? `A${idx+1}` : `B${idx+1}`;
+  const mk = L.circleMarker([lat,lng], { radius:7, color, fillColor:color, fillOpacity:0.9, weight:2 })
+    .bindTooltip(label, { permanent:true, direction:'top', offset:[0,-10] }).addTo(map);
+  mapLayers.push(mk);
+
+  // Update chip
+  const chipId = `chip-${m}${idx+1}`, cvId = `cv-${m}${idx+1}`;
+  document.getElementById(cvId).textContent = lat.toFixed(5) + ',' + lng.toFixed(5);
+  document.getElementById(chipId).classList.add('set');
+
+  // Draw facade line when both points set
+  if (arr[0] && arr[1]) {
+    const line = L.polyline([[arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]], { color, weight:2, dashArray:'5,4', opacity:0.8 }).addTo(map);
+    mapLayers.push(line);
+  }
+
+  updateMapHint();
+  checkMapComplete();
+}
+
+function checkMapComplete() {
+  const ok = S.facadeA[0] && S.facadeA[1];
+  document.getElementById('btn-map-next').disabled = !ok;
+}
+
+function resetMap() {
+  S.facadeA=[null,null]; S.facadeB=[null,null]; S.facadeC=[null,null];
+  mapLayers.forEach(l => map.removeLayer(l)); mapLayers = [];
+  ['a1','a2','b1','b2','c1','c2'].forEach(id => {
+    document.getElementById('chip-'+id).classList.remove('set');
+    document.getElementById('cv-'+id).textContent = '—';
+  });
+  document.getElementById('btn-map-next').disabled = true;
+  setMapMode('a');
+}
+
+// ═══════════════════════════════════════
+// PHOTO + VANISHING POINTS
+// ═══════════════════════════════════════
+let cvs, ctx, imgEl, isDrawing=false, drawStart=null;
+
+function initPhoto() {
+  cvs  = document.getElementById('vp-canvas');
+  ctx  = cvs.getContext('2d');
+  imgEl = document.getElementById('hist-img');
+  cvs.addEventListener('mousedown', e => startDraw(getPos(e)));
+  cvs.addEventListener('mousemove', e => moveDraw(getPos(e)));
+  cvs.addEventListener('mouseup',   e => endDraw(getPos(e)));
+  cvs.addEventListener('touchstart', e => { e.preventDefault(); startDraw(getTPos(e)); }, {passive:false});
+  cvs.addEventListener('touchmove',  e => { e.preventDefault(); moveDraw(getTPos(e)); },  {passive:false});
+  cvs.addEventListener('touchend',   e => { e.preventDefault(); endDraw(getTPos(e)); },   {passive:false});
+}
+
+function loadPhoto() { document.getElementById('file-input').click(); }
+document.getElementById('file-input').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  S.photoFile = f;
+  imgEl.onload = () => { S.photoW = imgEl.naturalWidth; S.photoH = imgEl.naturalHeight; resizeCvs(); redraw(); };
+  imgEl.src = URL.createObjectURL(f);
+});
+
+function resizeCvs() { const a = document.getElementById('photo-area'); cvs.width=a.offsetWidth; cvs.height=a.offsetHeight; }
+
+function getPos(e) { const r=cvs.getBoundingClientRect(); return {cx:e.clientX-r.left, cy:e.clientY-r.top}; }
+function getTPos(e) { const t=e.touches[0]||e.changedTouches[0]; const r=cvs.getBoundingClientRect(); return {cx:t.clientX-r.left, cy:t.clientY-r.top}; }
+
+function canvasToImg(cx,cy) {
+  const r=imgEl.getBoundingClientRect(), cr=cvs.getBoundingClientRect();
+  return { x:(cx-(r.left-cr.left))/r.width, y:(cy-(r.top-cr.top))/r.height };
+}
+function imgToCanvas(x,y) {
+  const r=imgEl.getBoundingClientRect(), cr=cvs.getBoundingClientRect();
+  return { x:r.left-cr.left+x*r.width, y:r.top-cr.top+y*r.height };
+}
+
+function setLineTool(t) {
+  S.lineTool = t;
+  ['ah','av','bh','bv','ch','cv'].forEach(g=>{
+    const el=document.getElementById('tool-'+g); if(!el) return;
+    const col=LINE_COLORS[g];
+    if(g===t){el.style.background=col+'30';el.style.color=col;el.style.outline='1px solid '+col;}
+    else{el.style.background='';el.style.color='';el.style.outline='';}
+  });
+}
+
+function startDraw({cx,cy}) { isDrawing=true; drawStart=canvasToImg(cx,cy); }
+function moveDraw({cx,cy}) {
+  if(!isDrawing) return;
+  redraw();
+  const p=canvasToImg(cx,cy);
+  const s=imgToCanvas(drawStart.x,drawStart.y), e=imgToCanvas(p.x,p.y);
+  ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(e.x,e.y);
+  ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1.5; ctx.stroke();
+}
+function endDraw({cx,cy}) {
+  if(!isDrawing) return; isDrawing=false;
+  const p=canvasToImg(cx,cy);
+  const dx=p.x-drawStart.x, dy=p.y-drawStart.y;
+  if(Math.sqrt(dx*dx+dy*dy)<0.015) return;
+  S.lines.push({x1:drawStart.x,y1:drawStart.y,x2:p.x,y2:p.y,group:S.lineTool});
+  computeVPs(); redraw(); updateVPChips();
+}
+function undoLine() { S.lines.pop(); computeVPs(); redraw(); updateVPChips(); }
+function clearLines() { S.lines=[]; S.vp={h:null,v:null,b:null}; redraw(); updateVPChips(); }
+
+// LINE_COLORS moved to js_additions below
+
+function redraw() {
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  S.lines.forEach(l => {
+    const s=imgToCanvas(l.x1,l.y1), e=imgToCanvas(l.x2,l.y2);
+    const color=LINE_COLORS[l.group];
+    const isDash=LINE_DASH&&LINE_DASH[l.group];
+    const dx=e.x-s.x, dy=e.y-s.y, len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) return;
+    const sc=1500/len;
+    ctx.beginPath(); ctx.moveTo(s.x-dx*sc,s.y-dy*sc); ctx.lineTo(e.x+dx*sc,e.y+dy*sc);
+    ctx.strokeStyle=color+'28'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(e.x,e.y);
+    ctx.strokeStyle=color; ctx.lineWidth=2;
+    if(isDash) ctx.setLineDash([7,4]); else ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]);
+    // Endpoints
+    ctx.beginPath(); ctx.arc(s.x,s.y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+    ctx.beginPath(); ctx.arc(e.x,e.y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  });
+  // Draw VPs
+  if(S.vp.h) drawVPDot(S.vp.h,'#4a9eff','VP↔');
+  if(S.vp.v) drawVPDot(S.vp.v,'#48c774','VP↕');
+  if(S.vp.b) drawVPDot(S.vp.b,'#f1c40f','VP╲');
+}
+
+function drawVPDot(vp,color,label) {
+  const p=imgToCanvas(vp.x,vp.y);
+  if(p.x<-300||p.x>cvs.width+300||p.y<-300||p.y>cvs.height+300) return;
+  ctx.beginPath(); ctx.arc(p.x,p.y,10,0,Math.PI*2); ctx.fillStyle=color+'25'; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  ctx.fillStyle=color; ctx.font='9px JetBrains Mono'; ctx.fillText(label,p.x+8,p.y+3);
+}
+
+function lineIntersect(x1,y1,x2,y2,x3,y3,x4,y4) {
+  const d=(x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+  if(Math.abs(d)<1e-10) return null;
+  const t=((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/d;
+  return {x:x1+t*(x2-x1),y:y1+t*(y2-y1)};
+}
+
+function medianVP(lines) {
+  if(lines.length<2) return null;
+  const pts=[];
+  for(let i=0;i<lines.length;i++)
+    for(let j=i+1;j<lines.length;j++) {
+      const p=lineIntersect(lines[i].x1,lines[i].y1,lines[i].x2,lines[i].y2,
+                             lines[j].x1,lines[j].y1,lines[j].x2,lines[j].y2);
+      if(p) pts.push(p);
+    }
+  if(!pts.length) return null;
+  pts.sort((a,b)=>a.x-b.x);
+  return pts[Math.floor(pts.length/2)];
+}
+
+function computeVPs() {
+  S.vp.h  = medianVP(S.lines.filter(l=>l.group==='ah'));
+  S.vp.v  = medianVP(S.lines.filter(l=>l.group==='av'));
+  S.vp.b  = medianVP([...S.lines.filter(l=>l.group==='bh'),...S.lines.filter(l=>l.group==='bv')]);
+}
+
+function updateVPChips() {
+  const chip=(id,n,vp)=>{const el=document.getElementById(id);if(!el)return;el.textContent=el.textContent.replace(/: \d+/,': '+n);el.className='vp-chip'+(vp&&n>=2?' found':n>0?' partial':'');};
+  chip('chip-vph',S.lines.filter(l=>l.group==='ah').length,S.vp.h);
+  chip('chip-vpv',S.lines.filter(l=>l.group==='av').length,S.vp.v);
+  chip('chip-vpb',S.lines.filter(l=>l.group==='bh'||l.group==='bv').length,S.vp.b);
+  chip('chip-vpbv',S.lines.filter(l=>l.group==='bv').length,null);
+  chip('chip-vpch',S.lines.filter(l=>l.group==='ch').length,null);
+  chip('chip-vpcv',S.lines.filter(l=>l.group==='cv').length,null);
+  const res=document.getElementById('chip-result');
+  if(S.vp.h||S.vp.v) { res.textContent='Úběžníky nalezeny ✓'; res.className='vp-chip found'; }
+  else { res.textContent='Potřeba min. 2 čáry'; res.className='vp-chip'; }
+}
+
+// ═══════════════════════════════════════
+// GEOMETRY
+// ═══════════════════════════════════════
+function gpsToM(lat,lng,rlat,rlng) {
+  const R=6371000;
+  return { x:(lng-rlng)*Math.PI/180*R*Math.cos(rlat*Math.PI/180), y:(lat-rlat)*Math.PI/180*R };
+}
+function mToGps(mx,my,rlat,rlng) {
+  const R=6371000;
+  return { lat:rlat+(my/R)*(180/Math.PI), lng:rlng+(mx/R)*(180/Math.PI)/Math.cos(rlat*Math.PI/180) };
+}
+
+function computeAll() {
+  computeVPs();
+  computePhotographerPosition();
+  buildPlane();
+  gotoStep(3);
+}
+
+function computePhotographerPosition() {
+  const fa = S.facadeA;
+  if(!fa[0]||!fa[1]) return;
+
+  // Use facade A midpoint as reference origin
+  S.ref = { lat:(fa[0].lat+fa[1].lat)/2, lng:(fa[0].lng+fa[1].lng)/2 };
+  const ref = S.ref;
+
+  // Facade A in local meters
+  const pA1 = gpsToM(fa[0].lat,fa[0].lng,ref.lat,ref.lng);
+  const pA2 = gpsToM(fa[1].lat,fa[1].lng,ref.lat,ref.lng);
+
+  // Facade A vector and normal
+  const fvx=pA2.x-pA1.x, fvy=pA2.y-pA1.y;
+  const flen=Math.sqrt(fvx*fvx+fvy*fvy);
+  // Normal pointing "outward" (toward photographer) — two options, pick later
+  const nx=-fvy/flen, ny=fvx/flen;
+
+  // Estimate photographer distance from VP if available
+  // From horizontal VP: the VP position in image space encodes the angle
+  // VP at image center x → photographer directly in front
+  // VP off-center → photographer to the side
+  let distEstimate = 20; // default 20m
+
+  if(S.vp.h && S.photoW>0) {
+    // Horizontal VP x position relative to image center
+    const vpXrel = S.vp.h.x - 0.5; // -0.5 to 0.5
+    // From VP we can estimate viewing angle to facade
+    // Assuming ~60° FOV: angle = vpXrel * 60°
+    const fovH = 60 * Math.PI/180;
+    const angleH = vpXrel * fovH;
+    // Distance ≈ (half facade length) / tan(angle from center to facade edge)
+    const halfFacade = flen/2;
+    if(Math.abs(angleH)>0.05) distEstimate = Math.abs(halfFacade/Math.tan(angleH));
+    distEstimate = Math.max(5, Math.min(100, distEstimate));
+  }
+
+  // Photographer position: distance along normal from facade center
+  // Try both normal directions, pick the one that makes geometric sense
+  // (photographer should be on same side as camera — we assume "in front")
+  const photX = nx*distEstimate;
+  const photY = ny*distEstimate;
+
+  // If facade B is available, refine using its direction
+  let finalX=photX, finalY=photY;
+  if(S.facadeB[0]&&S.facadeB[1]&&S.vp.b) {
+    const fb=S.facadeB;
+    const pB1=gpsToM(fb[0].lat,fb[0].lng,ref.lat,ref.lng);
+    const pB2=gpsToM(fb[1].lat,fb[1].lng,ref.lat,ref.lng);
+    // Direction from VP B to some point on facade B
+    // This refines the photographer x,y position
+    const bMidX=(pB1.x+pB2.x)/2, bMidY=(pB1.y+pB2.y)/2;
+    const bvx=pB2.x-pB1.x, bvy=pB2.y-pB1.y;
+    const bnx=-bvy/Math.sqrt(bvx*bvx+bvy*bvy);
+    const bny=bvx/Math.sqrt(bvx*bvx+bvy*bvy);
+    // Average the two normal estimates
+    finalX=(photX+bMidX+bnx*distEstimate*0.5)/2;
+    finalY=(photY+bMidY+bny*distEstimate*0.5)/2;
+  }
+
+  S.photographer = { x:finalX, y:finalY };
+  S.dist = Math.sqrt(finalX*finalX+finalY*finalY);
+
+  // Azimut from photographer to facade center (0,0 in local coords)
+  const dX = -finalX, dY = -finalY;
+  const rawAzimut = (Math.atan2(dX,dY)*180/Math.PI+360)%360;
+  S.azimut = applyYawCalibration(rawAzimut);
+
+  // Photographer height from vertical VP
+  if(S.vp.v) {
+    const vy=S.vp.v.y;
+    const rawHeight = Math.max(0.5, Math.min(5, 1.2+(0.5-vy)*4));
+    // Pitch calibration adjusts height estimate slightly
+    const pitchCorr = sensorCal ? sensorCal.offsets.pitch * 0.05 : 0;
+    S.photographerHeight = Math.max(0.5, Math.min(5, rawHeight + pitchCorr));
+  }
+
+  // Convert photographer back to GPS
+  const photGPS = mToGps(finalX,finalY,ref.lat,ref.lng);
+  S.photographer.lat = photGPS.lat;
+  S.photographer.lng = photGPS.lng;
+}
+
+function buildPlane() {
+  if(!S.photographer||!S.ref) return;
+  const ref=S.ref;
+  const ph=S.photographerHeight;
+  const dist=S.dist||20;
+  const aspect=S.photoW>0?S.photoW/S.photoH:16/9;
+  const fov=60*Math.PI/180;
+  S.planeW=2*dist*Math.tan(fov/2);
+  S.planeH=S.planeW/aspect;
+
+  // Perpendicular to photographer direction
+  const dx=-S.photographer.x/dist, dy=-S.photographer.y/dist;
+  const perpX=-dy, perpY=dx;
+  const halfW=S.planeW/2, halfH=S.planeH/2;
+  const facX=0, facY=0; // facade center at origin
+
+  S.corners = {
+    topLeft:     {...mToGps(facX+perpX*halfW,facY+perpY*halfW,ref.lat,ref.lng), alt:ph+halfH},
+    topRight:    {...mToGps(facX-perpX*halfW,facY-perpY*halfW,ref.lat,ref.lng), alt:ph+halfH},
+    bottomLeft:  {...mToGps(facX+perpX*halfW,facY+perpY*halfW,ref.lat,ref.lng), alt:ph-halfH},
+    bottomRight: {...mToGps(facX-perpX*halfW,facY-perpY*halfW,ref.lat,ref.lng), alt:ph-halfH},
+  };
+}
+
+// ═══════════════════════════════════════
+// PREVIEW
+// ═══════════════════════════════════════
+function renderPreview() {
+  const canvas=document.getElementById('preview-canvas');
+  const ctx2=canvas.getContext('2d');
+  const area=document.getElementById('preview-area');
+  canvas.width=area.offsetWidth; canvas.height=area.offsetHeight;
+
+  ctx2.fillStyle='#0a0a0a'; ctx2.fillRect(0,0,canvas.width,canvas.height);
+  if(!S.photographer||!S.ref) { ctx2.fillStyle='rgba(255,255,255,0.2)'; ctx2.font='12px JetBrains Mono'; ctx2.fillText('Nejprve dokončete kroky 1 a 2',20,40); return; }
+
+  const ref=S.ref;
+  const dist=S.dist||20;
+  const scale=Math.min(canvas.width,canvas.height)*0.32/(dist*0.7);
+  const cx=canvas.width/2, cy=canvas.height*0.58;
+  const toS=(mx,my)=>({x:cx+mx*scale,y:cy-my*scale});
+
+  // Grid
+  ctx2.strokeStyle='rgba(255,255,255,0.04)'; ctx2.lineWidth=1;
+  for(let i=-5;i<=5;i++) {
+    const g=i*10; const s1=toS(g,-60),s2=toS(g,60),s3=toS(-60,g),s4=toS(60,g);
+    ctx2.beginPath();ctx2.moveTo(s1.x,s1.y);ctx2.lineTo(s2.x,s2.y);ctx2.stroke();
+    ctx2.beginPath();ctx2.moveTo(s3.x,s3.y);ctx2.lineTo(s4.x,s4.y);ctx2.stroke();
+  }
+
+  // Facade A
+  const fa=S.facadeA;
+  const pA1=gpsToM(fa[0].lat,fa[0].lng,ref.lat,ref.lng);
+  const pA2=gpsToM(fa[1].lat,fa[1].lng,ref.lat,ref.lng);
+  const sA1=toS(pA1.x,pA1.y),sA2=toS(pA2.x,pA2.y);
+  ctx2.beginPath();ctx2.moveTo(sA1.x,sA1.y);ctx2.lineTo(sA2.x,sA2.y);
+  ctx2.strokeStyle='#c9a84c';ctx2.lineWidth=3;ctx2.stroke();
+  [sA1,sA2].forEach(p=>{ctx2.beginPath();ctx2.arc(p.x,p.y,5,0,Math.PI*2);ctx2.fillStyle='#c9a84c';ctx2.fill();});
+
+  // Facade B
+  if(S.facadeB[0]&&S.facadeB[1]) {
+    const fb=S.facadeB;
+    const pB1=gpsToM(fb[0].lat,fb[0].lng,ref.lat,ref.lng);
+    const pB2=gpsToM(fb[1].lat,fb[1].lng,ref.lat,ref.lng);
+    const sB1=toS(pB1.x,pB1.y),sB2=toS(pB2.x,pB2.y);
+    ctx2.beginPath();ctx2.moveTo(sB1.x,sB1.y);ctx2.lineTo(sB2.x,sB2.y);
+    ctx2.strokeStyle='#4a9eff';ctx2.lineWidth=2;ctx2.stroke();
+  }
+
+  // Photo plane
+  const hm=S.heightMult, wm=S.widthMult, vm=S.vertOffset;
+  const halfW=S.planeW/2*wm;
+  const dx=-S.photographer.x/dist, dy=-S.photographer.y/dist;
+  const perpX=-dy, perpY=dx;
+  const plL=toS(perpX*halfW,perpY*halfW);
+  const plR=toS(-perpX*halfW,-perpY*halfW);
+  ctx2.beginPath();ctx2.moveTo(plL.x,plL.y);ctx2.lineTo(plR.x,plR.y);
+  ctx2.strokeStyle='#48c774';ctx2.lineWidth=2;ctx2.stroke();
+
+  // Photo thumbnail
+  if(imgEl.src&&S.photoW>0) {
+    const pw=Math.abs(plR.x-plL.x);
+    const ph2=pw/(S.photoW/S.photoH)*hm;
+    const px=Math.min(plL.x,plR.x), py=(plL.y+plR.y)/2-ph2/2;
+    ctx2.save();ctx2.globalAlpha=0.65;ctx2.drawImage(imgEl,px,py,pw,ph2);ctx2.restore();
+    ctx2.strokeStyle='#48c77450';ctx2.lineWidth=1;ctx2.strokeRect(px,py,pw,ph2);
+  }
+
+  // Lines from photographer to plane
+  const sp=toS(S.photographer.x,S.photographer.y);
+  [plL,plR].forEach(p=>{
+    ctx2.beginPath();ctx2.moveTo(sp.x,sp.y);ctx2.lineTo(p.x,p.y);
+    ctx2.strokeStyle='rgba(74,158,255,0.15)';ctx2.lineWidth=1;ctx2.stroke();
+  });
+
+  // Photographer dot
+  ctx2.beginPath();ctx2.arc(sp.x,sp.y,8,0,Math.PI*2);
+  ctx2.fillStyle='rgba(74,158,255,0.2)';ctx2.fill();
+  ctx2.beginPath();ctx2.arc(sp.x,sp.y,4,0,Math.PI*2);
+  ctx2.fillStyle='#4a9eff';ctx2.fill();
+
+  // Labels
+  ctx2.fillStyle='#c9a84c80';ctx2.font='9px JetBrains Mono';
+  ctx2.fillText('Fasáda A',(sA1.x+sA2.x)/2-20,(sA1.y+sA2.y)/2-8);
+  ctx2.fillStyle='#48c774';
+  ctx2.fillText('Rovina fotografie',(plL.x+plR.x)/2-40,(plL.y+plR.y)/2-8);
+  ctx2.fillStyle='#4a9effaa';
+  ctx2.fillText('📷'+(S.azimut?Math.round(S.azimut)+'°':''),sp.x+10,sp.y-8);
+
+  // Stats
+  ctx2.fillStyle='rgba(255,255,255,0.25)';ctx2.font='9px JetBrains Mono';
+  ctx2.fillText(`Vzdálenost: ${dist.toFixed(1)} m`,12,canvas.height-36);
+  ctx2.fillText(`Šířka roviny: ${(S.planeW*wm).toFixed(1)} m`,12,canvas.height-24);
+  ctx2.fillText(`Výška fotografa: ${S.photographerHeight.toFixed(1)} m`,12,canvas.height-12);
+}
+
+function updateSlider(id,val,unit) {
+  if(id==='h') S.heightMult=parseFloat(val);
+  if(id==='v') S.vertOffset=parseFloat(val);
+  if(id==='w') S.widthMult=parseFloat(val);
+  document.getElementById('sv-'+id).textContent=parseFloat(val).toFixed(id==='v'?1:2)+unit;
+  renderPreview();
+}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function gotoStep(n) {
+  S.step=n;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(['','step-map','step-photo','step-preview'][n]).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',i+1===n);
+    if(i+1<n) t.classList.add('done'); else if(i+1>n) t.classList.remove('done');
+  });
+  if(n===1) setTimeout(()=>map.invalidateSize(),50);
+  if(n===2) setTimeout(()=>{resizeCvs();redraw();},50);
+  if(n===3) setTimeout(()=>renderPreview(),50);
+}
+
+// ═══════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════
+function computeFinalCorners() {
+  if(!S.corners||!S.ref) return null;
+  const ref=S.ref, dist=S.dist||20;
+  const hm=S.heightMult, wm=S.widthMult, vm=S.vertOffset;
+  const ph=S.photographerHeight;
+  const halfW=S.planeW/2*wm, halfH=S.planeH/2*hm;
+  const dx=-S.photographer.x/dist, dy=-S.photographer.y/dist;
+  const perpX=-dy, perpY=dx;
+  return {
+    topLeft:     {...mToGps(perpX*halfW,perpY*halfW,ref.lat,ref.lng),    alt:ph+halfH+vm},
+    topRight:    {...mToGps(-perpX*halfW,-perpY*halfW,ref.lat,ref.lng),   alt:ph+halfH+vm},
+    bottomLeft:  {...mToGps(perpX*halfW,perpY*halfW,ref.lat,ref.lng),    alt:ph-halfH+vm},
+    bottomRight: {...mToGps(-perpX*halfW,-perpY*halfW,ref.lat,ref.lng),   alt:ph-halfH+vm},
+  };
+}
+
+function showResults() {
+  const c=computeFinalCorners(); if(!c) return;
+  const p=S.photographer;
+  document.getElementById('r-lat').textContent  = p.lat.toFixed(7);
+  document.getElementById('r-lng').textContent  = p.lng.toFixed(7);
+  document.getElementById('r-az').textContent   = S.azimut?S.azimut.toFixed(1)+'°':'—';
+  document.getElementById('r-ph').textContent   = S.photographerHeight.toFixed(2)+' m';
+  document.getElementById('r-dist').textContent = (S.dist||0).toFixed(1)+' m';
+  const fmt=x=>`${x.lat.toFixed(6)}, ${x.lng.toFixed(6)}, ${x.alt.toFixed(1)}m`;
+  document.getElementById('r-tl').textContent=fmt(c.topLeft);
+  document.getElementById('r-tr').textContent=fmt(c.topRight);
+  document.getElementById('r-br').textContent=fmt(c.bottomRight);
+  document.getElementById('r-bl').textContent=fmt(c.bottomLeft);
+  const json={
+    version:2,
+    photoId:S.photoFile?S.photoFile.name:'unknown',
+    photographer:{lat:p.lat,lng:p.lng,heightM:S.photographerHeight,distM:S.dist},
+    azimutDeg:S.azimut,
+    facadeA:S.facadeA.map(p=>({lat:p.lat,lng:p.lng})),
+    facadeB:S.facadeB.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    vanishingPoints:{
+      horizontal:S.vp.h,vertical:S.vp.v,facadeB:S.vp.b,
+      linesCount:{h:S.lines.filter(l=>l.group==='h').length,v:S.lines.filter(l=>l.group==='v').length,b:S.lines.filter(l=>l.group==='b').length}
+    },
+    plane:{widthM:parseFloat((S.planeW*S.widthMult).toFixed(2)),heightM:parseFloat((S.planeH*S.heightMult).toFixed(2)),verticalOffsetM:S.vertOffset,corners:c},
+    sensorCalibration: sensorCal ? {
+      appliedAt: new Date().toISOString(),
+      offsets: sensorCal.offsets,
+      savedAt: sensorCal.savedAt
+    } : null,
+    timestamp:new Date().toISOString()
+  };
+  document.getElementById('r-json').textContent=JSON.stringify(json,null,2);
+  document.getElementById('results-block').classList.add('show');
+}
+
+function downloadJSON() {
+  const json=document.getElementById('r-json').textContent;
+  const name=(S.photoFile?S.photoFile.name.replace(/\.[^.]+$/,''):'calibration')+'_v2.json';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  a.download=name; a.click();
+}
+
+
+
+// ═══════════════════════════════════════
+// SENSOR CALIBRATION
+// ═══════════════════════════════════════
+let sensorCal = null;
+
+function loadSensorCalibration() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('lop_sensor_calibration') || 'null');
+    if (saved && saved.offsets) {
+      sensorCal = saved;
+      const d = new Date(saved.savedAt).toLocaleDateString('cs-CZ');
+      document.getElementById('cal-status').textContent = '✓ Kalibrace ' + d;
+      document.getElementById('cal-status').style.color = 'var(--green)';
+    } else {
+      document.getElementById('cal-status').textContent = '⚠ Bez kalibrace';
+      document.getElementById('cal-status').style.color = 'rgba(201,168,76,0.7)';
+    }
+  } catch(e) {}
+}
+
+function applyYawCalibration(rawYaw) {
+  if (!sensorCal) return rawYaw;
+  // Apply yaw offset: correctedYaw = rawYaw - yawOffset
+  return (rawYaw - sensorCal.offsets.yaw + 360) % 360;
+}
+
+function applyPitchCalibration(rawPitch) {
+  if (!sensorCal) return rawPitch;
+  return rawPitch - sensorCal.offsets.pitch;
+}
+
+// ═══════════════════════════════════════
+// PROJECT SAVE / LOAD
+// ═══════════════════════════════════════
+function saveProject() {
+  // Compute everything first
+  if(S.lines.length>=2) computeVPs();
+  computePhotographerPosition();
+  buildPlane();
+
+  const project = {
+    version: 2,
+    savedAt: new Date().toISOString(),
+    facadeA: S.facadeA,
+    facadeB: S.facadeB,
+    lines: S.lines,
+    vp: S.vp,
+    photoW: S.photoW,
+    photoH: S.photoH,
+    photoFileName: S.photoFile ? S.photoFile.name : null,
+    photographer: S.photographer,
+    azimut: S.azimut,
+    photographerHeight: S.photographerHeight,
+    dist: S.dist,
+    planeW: S.planeW,
+    planeH: S.planeH,
+    ref: S.ref,
+    corners: S.corners,
+  };
+  const name = (S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/,'') : 'calibration') + '_project.json';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}));
+  a.download = name; a.click();
+}
+
+document.getElementById('project-input').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      // Restore state
+      if(p.facadeA) S.facadeA = p.facadeA;
+      if(p.facadeB) S.facadeB = p.facadeB;
+      if(p.lines)   S.lines   = p.lines;
+      if(p.vp)      S.vp      = p.vp;
+      S.photoW              = p.photoW || 0;
+      S.photoH              = p.photoH || 0;
+      S.photographer        = p.photographer;
+      S.azimut              = p.azimut;
+      S.photographerHeight  = p.photographerHeight || 1.6;
+      S.dist                = p.dist;
+      S.planeW              = p.planeW;
+      S.planeH              = p.planeH;
+      S.ref                 = p.ref;
+      S.corners             = p.corners;
+
+      // Restore map markers
+      resetMap();
+      if(S.facadeA[0]&&S.facadeA[1]) {
+        [S.facadeA[0],S.facadeA[1]].forEach((pt,i) => {
+          const mk=L.circleMarker([pt.lat,pt.lng],{radius:7,color:'#c9a84c',fillColor:'#c9a84c',fillOpacity:0.9,weight:2})
+            .bindTooltip(`A${i+1}`,{permanent:true,direction:'top',offset:[0,-10]}).addTo(map);
+          mapLayers.push(mk);
+          document.getElementById(`cv-a${i+1}`).textContent=pt.lat.toFixed(5)+','+pt.lng.toFixed(5);
+          document.getElementById(`chip-a${i+1}`).classList.add('set');
+        });
+        L.polyline([[S.facadeA[0].lat,S.facadeA[0].lng],[S.facadeA[1].lat,S.facadeA[1].lng]],
+          {color:'#c9a84c',weight:2,dashArray:'5,4',opacity:0.8}).addTo(map);
+        mapLayers.push(mapLayers[mapLayers.length-1]);
+      }
+      if(S.facadeB[0]&&S.facadeB[1]) {
+        [S.facadeB[0],S.facadeB[1]].forEach((pt,i) => {
+          if(!pt) return;
+          const mk=L.circleMarker([pt.lat,pt.lng],{radius:7,color:'#4a9eff',fillColor:'#4a9eff',fillOpacity:0.9,weight:2})
+            .bindTooltip(`B${i+1}`,{permanent:true,direction:'top',offset:[0,-10]}).addTo(map);
+          mapLayers.push(mk);
+          document.getElementById(`cv-b${i+1}`).textContent=pt.lat.toFixed(5)+','+pt.lng.toFixed(5);
+          document.getElementById(`chip-b${i+1}`).classList.add('set');
+        });
+      }
+      document.getElementById('btn-map-next').disabled = false;
+
+      // Note about photo
+      const photoNote = p.photoFileName ?
+        `Projekt načten. Načti historickou fotku: "${p.photoFileName}"` :
+        'Projekt načten. Přejdi na krok 3.';
+
+      // Go straight to step 3 if we have all computed data
+      if(S.photographer && S.planeW) {
+        if(confirm('Projekt nacten. Prejit primo na krok 3?')) {
+          gotoStep(3);
+        }
+      } else {
+        alert(photoNote);
+        gotoStep(1);
+      }
+    } catch(err) {
+      alert('Chyba při načítání projektu: ' + err.message);
+    }
+  };
+  reader.readAsText(f);
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.addEventListener('load',()=>{ initMap(); initPhoto(); loadSensorCalibration(); });
+window.addEventListener('resize',()=>{
+  if(S.step===2){resizeCvs();redraw();}
+  if(S.step===3) renderPreview();
+});
+</script>
+</body>
+</html>
