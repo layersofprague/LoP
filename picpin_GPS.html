@@ -178,7 +178,13 @@
     .res-code { background:rgba(0,0,0,0.6); border:1px solid var(--border); border-radius:5px; padding:10px; font-size:10px; color:#7ec8e3; overflow-x:auto; white-space:pre; margin-top:8px; line-height:1.5; }
 
     /* Photographer marker on map */
-    .phot-marker { width:14px; height:14px; border-radius:50%; background:var(--blue); border:2px solid #fff; box-shadow:0 0 0 2px rgba(74,158,255,0.3); }
+    .leaflet-tooltip-small {
+      background: rgba(0,0,0,0.7); border: none; border-radius: 3px;
+      color: #fff; font-family: var(--mono); font-size: 9px; font-weight: 600;
+      padding: 1px 4px; white-space: nowrap; box-shadow: none;
+      letter-spacing: 0.06em;
+    }
+    .leaflet-tooltip-small::before { display: none; }
   </style>
 </head>
 <body>
@@ -542,8 +548,11 @@ function placeMarker(facade, idx, lat, lng) {
     html: `<div style="width:6px;height:6px;border-radius:50%;background:${col};border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 1px 3px rgba(0,0,0,0.5);"></div>`,
     className:'', iconSize:[6,6], iconAnchor:[3,3]
   });
+  const label = facade.toUpperCase() + (idx+1);
   const mk = L.marker([lat, lng], { icon, draggable: true });
   mk.addTo(map);
+  mk.bindTooltip(label, { permanent: true, direction: 'top', offset:[0,-4],
+    className: 'leaflet-tooltip-small' });
   mk.on('dragend', () => {
     const pos = mk.getLatLng();
     const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
@@ -1648,7 +1657,7 @@ function showResults() {
 
   // Download directly
   const jsonStr = JSON.stringify(json, null, 2);
-  const name = (S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/,'') : 'calibration') + '_GPS_export_step3.json';
+  const name = _photoBase() + '_GPS_export_step3.json';
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([jsonStr], {type:'application/json'}));
   a.download = name;
@@ -1659,22 +1668,18 @@ function showResults() {
 // SAVE / LOAD PROJECT
 // ═══════════════════════════════════════
 function loadFromGitHub() {
-  // Prompt for filename (without extension)
   const name = prompt(
     'Název souboru na GitHubu (bez přípony):\nPříklad: h_001h',
     S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/, '') : ''
   );
   if (!name) return;
 
-  // Determine repo base URL from current page URL or use default
-  // Expected pattern: https://username.github.io/repo/
   let base = '';
   const loc = window.location.href;
   const ghMatch = loc.match(/^(https:\/\/[^/]+\/[^/]+\/)/);
   if (ghMatch) {
     base = ghMatch[1];
   } else {
-    // Fallback: ask user for base URL
     const userBase = prompt(
       'Nepodařilo se určit GitHub URL.\nZadej základní URL repozitáře:',
       'https://username.github.io/repo/'
@@ -1683,29 +1688,62 @@ function loadFromGitHub() {
     base = userBase.endsWith('/') ? userBase : userBase + '/';
   }
 
-  const url = base + 'place/' + name + '_GPS_export_step2.json';
-  const statusEl = document.getElementById('btn-map-next');
+  const jsonUrl  = base + 'place/' + name + '_GPS_export_step2.json';
 
-  fetch(url)
+  // Show loading state
+  const btn = document.querySelector('[onclick="loadFromGitHub()"]');
+  if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Načítám…'; btn.disabled = true; }
+  const resetBtn = () => { if (btn) { btn.textContent = btn._orig; btn.disabled = false; } };
+
+  fetch(jsonUrl)
     .then(r => {
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' — soubor nenalezen na ' + url);
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' — JSON nenalezen:\n' + jsonUrl);
       return r.json();
     })
     .then(p => {
-      // Reuse existing project loader
       loadProjectData(p);
-      alert('✓ Načteno z GitHub:\n' + url);
+      // Load photo from /foto/{photoId}
+      const photoId = p.photoId || p.photoFileName || (name + '.jpg');
+      const photoUrl = base + 'foto/' + photoId;
+      return fetch(photoUrl)
+        .then(r => {
+          if (!r.ok) throw new Error('foto/' + photoId + ' nenalezena (HTTP ' + r.status + ')');
+          return r.blob();
+        })
+        .then(blob => {
+          const img = new Image();
+          img.onload = () => {
+            photoImg = img;
+            S.photoW = img.naturalWidth;
+            S.photoH = img.naturalHeight;
+            // Set ov-photo for step 2
+            document.getElementById('ov-photo') && (document.getElementById('ov-photo').src = img.src);
+            // Redraw step 2 if active
+            if (S.step === 2) { resizeCvs(); fitPhotoToCanvas(); redraw(); }
+            resetBtn();
+          };
+          img.onerror = () => { resetBtn(); alert('Chyba načítání fotografie.'); };
+          img.src = URL.createObjectURL(blob);
+          // Also set as S.photoFile substitute for export names
+          S._photoName = photoId;
+        })
+        .catch(err => {
+          resetBtn();
+          alert('JSON načten ✓\nFotografie: ' + err.message + '\nNačti ji ručně v kroku 2.');
+        });
     })
     .catch(err => {
-      const tryLocal = confirm(
-        'GitHub nenalezen:\n' + err.message +
-        '\n\nNačíst ze lokálu?'
-      );
+      resetBtn();
+      const tryLocal = confirm('GitHub nenalezen:\n' + err.message + '\n\nNačíst ze lokálu?');
       if (tryLocal) document.getElementById('project-input').click();
     });
 }
 
-// Extracted project loading logic for reuse
+function _photoBase() {
+  if (S.photoFile) return S.photoFile.name.replace(/\.[^.]+$/,'');
+  if (S._photoName) return S._photoName.replace(/\.[^.]+$/,'');
+  return 'project';
+}
 function loadProjectData(p) {
   if(p.facadeA) S.facadeA=p.facadeA.map(x=>x&&x.lat?x:null);
   if(p.facadeB) S.facadeB=p.facadeB.map(x=>x&&x.lat?x:null);
@@ -1764,7 +1802,7 @@ function exportStep1() {
     viewpoint: S.viewpoint,
     timestamp: new Date().toISOString()
   };
-  const base = S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/,'') : 'project';
+  const base = _photoBase();
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(json,null,2)],{type:'application/json'}));
   a.download = base + '_GPS_export_step1.json';
@@ -1787,7 +1825,7 @@ function saveProject() {
     dist:S.dist, planeW:S.planeW, planeH:S.planeH,
     ref:S.ref, corners:S.corners,
   };
-  const name=(S.photoFile?S.photoFile.name.replace(/\.[^.]+$/,''):'project')+'_GPS_export_step2.json';
+  const name=_photoBase()+'_GPS_export_step2.json';
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}));
   a.download=name; a.click();
