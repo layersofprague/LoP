@@ -759,11 +759,9 @@ function startAR(){
   const hasCorners=!!(calData&&calData.plane&&calData.plane.corners);
 
   function loop(){
-    // Canvas dimensions = ov area (excludes panel)
-    const cvRect=cvEl.getBoundingClientRect();
-    const W=cvRect.width||window.innerWidth;
-    const H=cvRect.height||window.innerHeight;
-    if(cvEl.width!==Math.round(W)||cvEl.height!==Math.round(H)){cvEl.width=Math.round(W);cvEl.height=Math.round(H);}
+    // Canvas always full viewport — drawing clips to camera area naturally
+    const W=window.innerWidth, H=window.innerHeight;
+    if(cvEl.width!==W||cvEl.height!==H){cvEl.width=W;cvEl.height=H;}
     cv2.clearRect(0,0,W,H);
 
     if(!photoImg){rafId=requestAnimationFrame(loop);return;}
