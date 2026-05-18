@@ -16,6 +16,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 #map { width: 100%; height: 100%; }
 /* userDot now a Leaflet marker */
 /* calBtn styled inline */
+.arrival-hidden { display: none !important; }
+.arrival-visible { display: flex !important; }
 /* dbg styled inline */
 </style>
 <script src="header.js"></script>
@@ -73,7 +75,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
     cursor:pointer;display:flex;align-items:center;justify-content:center;color:#1a1a18;font-size:16px;line-height:1;">−</button>
 
 <!-- TEST: arrival trigger (remove before production) -->
-<button onclick="var o=document.getElementById('arrivalOverlay');alert(o?'found:'+o.style.display:'NOT FOUND')" style="
+<button onclick="_arrivalShown=false;showArrival()" style="
   position:fixed;bottom:80px;left:8px;z-index:200;
   padding:6px 10px;border-radius:8px;
   background:#b04020;color:#fff;border:none;
@@ -375,10 +377,10 @@ function showArrival() {
   } catch(e) {}
   var nameEl = document.getElementById('arrivalName');
   var ov = document.getElementById('arrivalOverlay');
-  if (!ov) { alert('arrivalOverlay not found!'); return; }
+  if (!ov) return;
   if (nameEl) nameEl.textContent = TARGET.name || 'Testovací místo';
-  ov.style.cssText = ov.style.cssText.replace('display:none','display:flex');
-  ov.style.display = 'flex';
+  ov.classList.remove('arrival-hidden');
+  ov.classList.add('arrival-visible');
 }
 function arrGoAR() {
   var url = 'ar-intro.html?id=' + TARGET.id + '&lat=' + TARGET.lat + '&lng=' + TARGET.lng + '&name=' + encodeURIComponent(TARGET.name || '');
@@ -639,8 +641,8 @@ window.addEventListener('resize', function() {
 </div>
 <div id="lop-nav"></div>
 <!-- Arrival overlay -->
-<div id="arrivalOverlay" style="
-  display:none; position:fixed; top:0;left:0;right:0;bottom:0; z-index:500;
+<div id="arrivalOverlay" class="arrival-hidden" style="
+  position:fixed; top:0;left:0;right:0;bottom:0; z-index:500;
   background:rgba(26,24,20,.85); backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
   flex-direction:column; align-items:center; justify-content:center;
