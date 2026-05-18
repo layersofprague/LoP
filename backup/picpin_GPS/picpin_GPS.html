@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LoP · Picture Pinning Tool</title>
+  <script>
+    window.onerror = function(msg, src, line, col) {
+      document.body.innerHTML = '<div style="background:#c0392b;color:#fff;padding:20px;font-family:monospace;font-size:13px;white-space:pre-wrap;position:fixed;inset:0;z-index:9999;overflow:auto">JS ERROR:\n' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col + '</div>';
+      return false;
+    };
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=EB+Garamond:ital,wght@0,400;1,400&display=swap');
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#0d0d0d; --panel:#141414; --border:rgba(255,255,255,0.08);
+      --red:#c0392b; --gold:#c9a84c; --green:#48c774; --blue:#4a9eff; --yellow:#f1c40f; --purple:#e91e8c;
+      --mono:'JetBrains Mono',monospace; --serif:'EB Garamond',Georgia,serif;
+    }
+    html,body { width:100%; height:100%; overflow:hidden; background:var(--bg); color:#fff; font-family:var(--mono); }
+    #app { width:100%; height:100%; display:flex; flex-direction:column; }
+
+    /* Header */
+    #header { flex-shrink:0; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); background:var(--panel); }
+    .app-title { font-family:var(--serif); font-size:16px; color:var(--gold); }
+    .app-title span { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; color:rgba(255,255,255,0.3); display:block; text-transform:uppercase; }
+
+    /* Tabs */
+    #tabs { flex-shrink:0; display:flex; border-bottom:1px solid var(--border); background:var(--panel); }
+    .tab { flex:1; padding:9px 4px; text-align:center; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:5px; }
+    .tab.active { color:#fff; border-bottom-color:var(--gold); }
+    .tab.done { color:var(--green); }
+    .tab-num { width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,0.08); font-size:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .tab.active .tab-num { background:var(--gold); color:#000; }
+    .tab.done .tab-num { background:var(--green); color:#000; }
+
+    /* Steps */
+    #steps { flex:1; overflow:hidden; position:relative; min-height:0; }
+    .step { display:none; width:100%; height:100%; flex-direction:column; }
+    .step.active { display:flex; }
+
+    /* ── MAP ── */
+    #map-container { flex:1; position:relative; overflow:hidden; }
+    #map { width:100%; height:100%; }
+
+    /* Crosshair */
+    #crosshair {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      z-index:1000; pointer-events:none; width:32px; height:32px;
+    }
+    #crosshair::before, #crosshair::after {
+      content:''; position:absolute; background:var(--red);
+    }
+    #crosshair::before { width:1px; height:100%; left:50%; transform:translateX(-50%); }
+    #crosshair::after  { height:1px; width:100%; top:50%; transform:translateY(-50%); }
+    #crosshair-dot {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      width:4px; height:4px; border-radius:50%; background:var(--red);
+      z-index:1001; pointer-events:none;
+    }
+
+    /* Map status badge */
+    #map-status {
+      position:absolute; top:10px; left:50%; transform:translateX(-50%);
+      z-index:1000; background:rgba(0,0,0,0.85); border:1px solid var(--border);
+      border-radius:8px; padding:7px 14px; font-size:11px; color:rgba(255,255,255,0.7);
+      text-align:center; backdrop-filter:blur(8px); pointer-events:none; white-space:nowrap;
+    }
+    #map-status strong { color:#fff; display:block; margin-bottom:1px; font-size:12px; }
+    #map-status.gold { border-color:rgba(201,168,76,0.5); }
+    #map-status.blue { border-color:rgba(74,158,255,0.5); }
+    #map-status.green-s { border-color:rgba(72,199,116,0.5); }
+
+    #map-bottom { flex-shrink:0; padding:10px 14px; background:var(--panel); border-top:1px solid var(--border); }
+
+    /* Coord input */
+    #coord-input-row { display:flex; gap:6px; margin-bottom:8px; }
+    #coord-input { flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; padding:7px 10px; font-family:var(--mono); font-size:10px; color:#fff; outline:none; }
+    #coord-input::placeholder { color:rgba(255,255,255,0.2); }
+    #coord-input:focus { border-color:rgba(201,168,76,0.4); }
+    #coord-input-btn { padding:7px 12px; border-radius:6px; border:1px solid rgba(201,168,76,0.3); background:rgba(201,168,76,0.1); font-family:var(--mono); font-size:10px; color:var(--gold); cursor:pointer; white-space:nowrap; }
+
+    .facade-section { margin-bottom:7px; }
+    .facade-label { font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+    .facade-label-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .points-row { display:flex; gap:5px; }
+    .point-chip { flex:1; padding:5px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); font-size:9px; cursor:pointer; transition:background 0.15s; }
+    .point-chip:hover { background:rgba(255,255,255,0.05); }
+    .point-chip.editing { outline:2px solid rgba(255,255,255,0.5); outline-offset:1px; }
+    .point-chip .chip-label { color:rgba(255,255,255,0.3); font-size:8px; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2px; }
+    .point-chip .chip-val { color:rgba(255,255,255,0.4); font-size:8px; }
+    .point-chip.set .chip-val { color:#fff; }
+    .point-chip.set { border-color:rgba(255,255,255,0.15); }
+    .chip-a.set { border-color:rgba(72,199,116,0.5) !important; }
+    .chip-b.set { border-color:rgba(74,158,255,0.5) !important; }
+    .chip-c.set { border-color:rgba(241,196,15,0.5) !important; }
+    .chip-d.set { border-color:rgba(233,30,140,0.5) !important; }
+
+    .mode-btns { display:flex; gap:5px; margin-bottom:8px; }
+    .mode-btn { flex:1; padding:7px 4px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.03); font-family:var(--mono); font-size:9px; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; color:rgba(255,255,255,0.4); transition:all 0.2s; text-align:center; }
+    .mode-btn.active-a { background:rgba(72,199,116,0.15); border-color:var(--green); color:var(--green); }
+    .mode-btn.active-b { background:rgba(74,158,255,0.15); border-color:var(--blue); color:var(--blue); }
+    .mode-btn.active-c { background:rgba(241,196,15,0.15); border-color:var(--yellow); color:var(--yellow); }
+    .mode-btn.active-d { background:rgba(233,30,140,0.15); border-color:var(--purple); color:var(--purple); }
+    .mode-btn.active-r { background:rgba(192,57,43,0.15); border-color:var(--red); color:var(--red); }
+    .mode-btn.active-eye { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.4); color:#fff; }
+
+    /* Confirm btn */
+    #btn-confirm { 
+      position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+      z-index:1000; padding:9px 28px; border-radius:8px; border:none;
+      background:var(--green); color:#000; font-family:var(--mono); font-size:11px;
+      font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;
+      box-shadow:0 2px 12px rgba(72,199,116,0.4);
+    }
+    #btn-confirm.blue   { background:var(--blue);   box-shadow:0 2px 12px rgba(74,158,255,0.4); }
+    #btn-confirm.yellow { background:var(--yellow); box-shadow:0 2px 12px rgba(241,196,15,0.4); }
+    #btn-confirm.purple { background:var(--purple); box-shadow:0 2px 12px rgba(233,30,140,0.4); }
+
+    /* ── PHOTO ── */
+    #photo-area { flex:1; position:relative; overflow:hidden; background:#000; cursor:crosshair; }
+    #hist-img { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); max-width:100%; max-height:100%; user-select:none; pointer-events:none; }
+    #vp-canvas { position:absolute; inset:0; width:100%; height:100%; }
+
+    #photo-toolbar { position:absolute; top:10px; right:10px; z-index:10; display:flex; flex-direction:column; gap:5px; }
+    .tool-btn { width:34px; height:34px; border-radius:7px; background:rgba(0,0,0,0.72); border:1px solid var(--border); color:rgba(255,255,255,0.55); font-size:13px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(6px); transition:all 0.2s; }
+    .tool-btn.active-a { background:rgba(72,199,116,0.2); border-color:var(--green); color:var(--green); }
+    .tool-btn.active-b { background:rgba(74,158,255,0.2); border-color:var(--blue); color:var(--blue); }
+    .tool-btn.active-c { background:rgba(241,196,15,0.2); border-color:var(--yellow); color:var(--yellow); }
+    .tool-btn.active-d { background:rgba(233,30,140,0.2); border-color:var(--purple); color:var(--purple); }
+    .tool-btn.active-v { background:rgba(192,57,43,0.2); border-color:var(--red); color:var(--red); }
+    .tool-btn.active-pts { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.4); color:#fff; }
+    .tool-btn.active-mappts { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.4); color:#fff; }
+    .mps-btn { padding:3px 7px; border-radius:5px; border:1px solid var(--border); background:rgba(255,255,255,0.04); font-family:var(--mono); font-size:9px; cursor:pointer; color:rgba(255,255,255,0.4); transition:all 0.15s; }
+    .mps-btn.active { color:#000; font-weight:700; }
+    .mps-btn.set { opacity:0.5; }
+
+    /* ── PREVIEW MAP ── */
+    #preview-area { flex:1; position:relative; overflow:hidden; min-height:0; }
+    #preview-map { position:absolute; inset:0; width:100%; height:100%; }
+
+    #photo-bottom { flex-shrink:0; padding:8px 14px; background:var(--panel); border-top:1px solid var(--border); }
+    .vp-chips { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:7px; }
+    .vp-chip { padding:3px 8px; border-radius:20px; font-size:9px; letter-spacing:0.08em; border:1px solid var(--border); color:rgba(255,255,255,0.3); }
+    .vp-chip.found { border-color:rgba(72,199,116,0.5); color:var(--green); }
+    .vp-chip.partial { border-color:rgba(201,168,76,0.4); color:var(--gold); }
+
+    #preview-bottom { flex-shrink:0; padding:8px 14px; background:var(--panel); border-top:1px solid var(--border); }
+
+    /* Shared */
+    .sl-row { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+    .sl-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.35); width:50px; flex-shrink:0; }
+    .sl { -webkit-appearance:none; appearance:none; flex:1; height:2px; border-radius:2px; background:rgba(255,255,255,0.15); outline:none; }
+    .sl::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--gold); cursor:pointer; }
+    .sl-val { font-size:10px; color:var(--gold); width:38px; text-align:right; flex-shrink:0; }
+    .btn-row { display:flex; gap:7px; margin-top:8px; }
+    .btn { flex:1; padding:10px 6px; border-radius:7px; border:none; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+    .btn:active { opacity:0.75; }
+    .btn-primary { background:var(--gold); color:#000; }
+    .btn-secondary { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.45); border:1px solid var(--border); }
+    .btn-green { background:var(--green); color:#000; }
+    .btn-danger { background:rgba(192,57,43,0.15); color:var(--red); border:1px solid rgba(192,57,43,0.25); }
+
+    /* Results */
+    #results-block { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.96); overflow-y:auto; padding:22px 16px; }
+    #results-block.show { display:block; }
+    .res-title { font-family:var(--serif); font-size:20px; color:var(--gold); margin-bottom:3px; }
+    .res-sub { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:18px; }
+    .res-section { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:7px; padding:12px; margin-bottom:10px; }
+    .res-section-title { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:8px; }
+    .res-row { display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; }
+    .res-key { color:rgba(255,255,255,0.4); }
+    .res-val { color:var(--gold); font-weight:600; font-size:10px; }
+    .res-code { background:rgba(0,0,0,0.6); border:1px solid var(--border); border-radius:5px; padding:10px; font-size:10px; color:#7ec8e3; overflow-x:auto; white-space:pre; margin-top:8px; line-height:1.5; }
+
+    /* Photographer marker on map */
+    .phot-marker { width:14px; height:14px; border-radius:50%; background:var(--blue); border:2px solid #fff; box-shadow:0 0 0 2px rgba(74,158,255,0.3); }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div class="app-title">Picture Pinning Tool<span>Kalibrace polohy fotografa</span></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+      <div style="font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.12em">BETA</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button onclick="document.getElementById('cal-file-input').click()" style="font-size:9px;padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-family:var(--mono);cursor:pointer;letter-spacing:0.08em">📂</button>
+        <div id="cal-status" onclick="toggleCalibration()" style="font-size:9px;letter-spacing:0.08em;color:rgba(255,255,255,0.2);cursor:pointer">Kalibrace: —</div>
+      </div>
+      <input type="file" id="cal-file-input" accept=".json" style="display:none">
+    </div>
+  </div>
+  <div id="tabs">
+    <div class="tab active" id="tab-1" onclick="gotoStep(1)"><div class="tab-num">1</div>Mapa</div>
+    <div class="tab" id="tab-2" onclick="gotoStep(2)"><div class="tab-num">2</div>Fotografie</div>
+    <div class="tab" id="tab-3" onclick="gotoStep(3)"><div class="tab-num">3</div>Náhled</div>
+  </div>
+  <div id="steps">
+
+    <!-- STEP 1: MAP -->
+    <div class="step active" id="step-map">
+      <div id="map-container">
+        <div id="map"></div>
+        <div id="crosshair"></div>
+        <div id="crosshair-dot"></div>
+        <div id="map-status" class="gold"><strong id="status-title">Fasáda A — bod 1</strong><span id="status-text">Vystřeď kříž na bod a potvrď</span></div>
+        <button id="btn-confirm" onclick="confirmPoint()">Potvrdit A1</button>
+      </div>
+      <div id="map-bottom">
+        <!-- Coord input -->
+        <div id="coord-input-row">
+          <input id="coord-input" type="text" placeholder="50.10553, 14.45606 — vložit souřadnice" onkeydown="if(event.key==='Enter') pasteCoords()" />
+          <button id="coord-input-btn" onclick="pasteCoords()">Vložit</button>
+        </div>
+        <!-- Mode buttons -->
+        <div class="mode-btns">
+          <div class="mode-btn active-a" id="mode-btn-a" onclick="setMapMode('a')">🟢 A</div>
+          <div class="mode-btn" id="mode-btn-b" onclick="setMapMode('b')">🔵 B</div>
+          <div class="mode-btn" id="mode-btn-c" onclick="setMapMode('c')">🟡 C</div>
+          <div class="mode-btn" id="mode-btn-d" onclick="setMapMode('d')">🟣 D</div>
+          <div class="mode-btn" id="mode-btn-eye" onclick="setMapMode('eye')" title="Stanoviště fotografa — odkud koukal">👁</div>
+          <div class="mode-btn" id="mode-btn-r" onclick="setMapMode('r')" title="Přesunout bod">✥</div>
+          <div class="mode-btn btn-danger" onclick="resetMap()" style="flex:0.5;border-color:rgba(192,57,43,0.3);color:var(--red)">↺</div>
+        </div>
+        <!-- Points -->
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--green)"></div>Fasáda A — délka A1–A2 se použije pro výpočet vzdálenosti</div>
+          <div class="points-row">
+            <div class="point-chip chip-a" id="chip-a1" onclick="selectChip('a',0)" title="Klikni pro editaci"><div class="chip-label">A1</div><div class="chip-val" id="cv-a1">—</div></div>
+            <div class="point-chip chip-a" id="chip-a2" onclick="selectChip('a',1)" title="Klikni pro editaci"><div class="chip-label">A2</div><div class="chip-val" id="cv-a2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--blue)"></div>Fasáda B (volitelná)</div>
+          <div class="points-row">
+            <div class="point-chip chip-b" id="chip-b1" onclick="selectChip('b',0)" title="Klikni pro editaci"><div class="chip-label">B1</div><div class="chip-val" id="cv-b1">—</div></div>
+            <div class="point-chip chip-b" id="chip-b2" onclick="selectChip('b',1)" title="Klikni pro editaci"><div class="chip-label">B2</div><div class="chip-val" id="cv-b2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--yellow)"></div>Fasáda C (volitelná)</div>
+          <div class="points-row">
+            <div class="point-chip chip-c" id="chip-c1" onclick="selectChip('c',0)" title="Klikni pro editaci"><div class="chip-label">C1</div><div class="chip-val" id="cv-c1">—</div></div>
+            <div class="point-chip chip-c" id="chip-c2" onclick="selectChip('c',1)" title="Klikni pro editaci"><div class="chip-label">C2</div><div class="chip-val" id="cv-c2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:var(--purple)"></div>Fasáda D (volitelná)</div>
+          <div class="points-row">
+            <div class="point-chip chip-d" id="chip-d1" onclick="selectChip('d',0)" title="Klikni pro editaci"><div class="chip-label">D1</div><div class="chip-val" id="cv-d1">—</div></div>
+            <div class="point-chip chip-d" id="chip-d2" onclick="selectChip('d',1)" title="Klikni pro editaci"><div class="chip-label">D2</div><div class="chip-val" id="cv-d2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:#fff;opacity:0.5"></div>Stanoviště fotografa (volitelné — určí stranu fasády)</div>
+          <div class="points-row">
+            <div class="point-chip" id="chip-eye" onclick="selectChip('eye',0)" title="Klikni pro editaci" style="flex:2"><div class="chip-label">👁 Stanoviště</div><div class="chip-val" id="cv-eye">—</div></div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="document.getElementById('project-input').click()" style="border-color:rgba(74,158,255,0.3);color:#4a9eff">📂 Načíst</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('json-import-input').click()" style="border-color:rgba(201,168,76,0.3);color:var(--gold)">📥 JSON</button>
+          <button class="btn btn-secondary" onclick="exportStep1()" style="border-color:rgba(72,199,116,0.3);color:var(--green)">💾 Step 1</button>
+          <button class="btn btn-primary" id="btn-map-next" onclick="gotoStep(2)" disabled>Dál →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: PHOTO -->
+    <div class="step" id="step-photo">
+      <div id="photo-area">
+        <canvas id="vp-canvas"></canvas>
+        <div id="photo-toolbar">
+          <div class="tool-btn" onclick="loadPhoto()" title="Načíst foto">📂</div>
+          <select id="zoom-select" onchange="setPhotoZoomMult(parseFloat(this.value))" style="background:rgba(0,0,0,0.72);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:rgba(255,255,255,0.7);font-family:var(--mono);font-size:9px;padding:4px 3px;cursor:pointer;width:52px;text-align:center;">
+            <option value="0.25">25%</option>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1" selected>100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="1.75">175%</option>
+            <option value="2">200%</option>
+            <option value="3">300%</option>
+          </select>
+          <div class="tool-btn" id="tool-pan" onclick="setLineTool('pan')" title="Posouvat fotografii">✋</div>
+          <div class="tool-btn active-a" id="tool-a" onclick="setLineTool('a')" title="Čáry fasády A (zelené)">A</div>
+          <div class="tool-btn" id="tool-b" onclick="setLineTool('b')" title="Čáry fasády B (modré)">B</div>
+          <div class="tool-btn" id="tool-c" onclick="setLineTool('c')" title="Čáry fasády C (zlaté)">C</div>
+          <div class="tool-btn" id="tool-d" onclick="setLineTool('d')" title="Čáry fasády D (růžové)">D</div>
+          <div class="tool-btn" id="tool-v" onclick="setLineTool('v')" title="Svislice (červené, čárkované)">↕</div>
+          <div class="tool-btn" id="tool-pts" onclick="setLineTool('pts')" title="Body A1/A2 na fotografii — pro výpočet vzdálenosti">⊕A</div>
+          <div class="tool-btn" id="tool-mappts" onclick="setLineTool('mappts')" title="Body B1/B2/C1/C2/D1/D2 na fotografii — pro výpočet roviny">⊕BCD</div>
+          <div class="tool-btn" onclick="undoLine()" title="Zpět">⌫</div>
+          <div class="tool-btn" onclick="clearLines()" title="Smazat vše">✕</div>
+        </div>
+        <!-- Map point selector — overlay -->
+        <div id="mappts-selector" style="display:none;position:absolute;top:10px;left:52px;z-index:20;background:rgba(0,0,0,0.82);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;backdrop-filter:blur(6px);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:5px;letter-spacing:0.1em">ZAZNAČIT BOD:</div>
+          <div id="mps-row" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+      <div id="photo-bottom">
+        <div class="vp-chips">
+          <div class="vp-chip" id="chip-vpa">A: 0 čar</div>
+          <div class="vp-chip" id="chip-vpb">B: 0 čar</div>
+          <div class="vp-chip" id="chip-vpc">C: 0 čar</div>
+          <div class="vp-chip" id="chip-vpd">D: 0 čar</div>
+          <div class="vp-chip" id="chip-vpv">↕ svislice: 0</div>
+          <div class="vp-chip" id="chip-pts">A1/A2: 0 bodů</div>
+          <div class="vp-chip" id="chip-mappts">B/C/D body: 0</div>
+          <div class="vp-chip" id="chip-result">Čekám na čáry</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="gotoStep(1)">← Zpět</button>
+          <button class="btn btn-secondary" onclick="gotoStep(3)">Přeskočit</button>
+          <button class="btn btn-primary" onclick="computeAll()">Vypočítat →</button>
+        </div>
+        <div class="btn-row" style="margin-top:6px">
+          <button class="btn btn-secondary" onclick="saveProject()" style="border-color:rgba(74,158,255,0.3);color:#4a9eff">💾 Uložit projekt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: PREVIEW MAP -->
+    <div class="step" id="step-preview">
+      <div id="preview-area"><div id="preview-map"></div></div>
+      <div id="preview-bottom">
+        <div id="prev-stats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px;font-size:9px;letter-spacing:0.06em;">
+          <span style="color:rgba(255,255,255,0.35)">📷 <span id="ps-pos" style="color:rgba(255,255,255,0.7)">—</span></span>
+          <span style="color:rgba(255,255,255,0.35)">↔ <span id="ps-dist" style="color:var(--green)">—</span></span>
+          <span style="color:rgba(255,255,255,0.35)">⇄ <span id="ps-lat" style="color:var(--gold)">—</span></span>
+          <span style="color:rgba(255,255,255,0.35)">⦿ <span id="ps-az" style="color:var(--blue)">—</span></span>
+        </div>
+        <!-- Debug panel -->
+        <details style="margin-bottom:5px;">
+          <summary style="font-size:9px;color:rgba(255,255,255,0.3);cursor:pointer;letter-spacing:0.08em;text-transform:uppercase">🔍 Debug</summary>
+          <div style="background:rgba(0,0,0,0.4);border-radius:5px;padding:7px;margin-top:4px;font-size:9px;line-height:1.7;">
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Metoda</span><span id="dbg-method" style="color:#fff">—</span></div>
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Vzdálenost</span><span id="dbg-dist" style="color:var(--green)">—</span></div>
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Boční</span><span id="dbg-lateral" style="color:var(--gold)">—</span></div>
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Výška</span><span id="dbg-height" style="color:var(--blue)">—</span></div>
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">MapPts</span><span id="dbg-pairs" style="color:rgba(255,255,255,0.6)">—</span></div>
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Varování</span><span id="dbg-warnings" style="color:var(--red)">—</span></div>
+          </div>
+        </details>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="gotoStep(2)">← Zpět</button>
+          <button class="btn btn-secondary" onclick="fitPreviewMap()">⊡ Celá scéna</button>
+          <button class="btn btn-green" onclick="showResults()">⬇ Stáhnout JSON</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<input type="file" id="file-input" accept="image/*" style="display:none">
+<input type="file" id="project-input" accept=".json" style="display:none">
+<input type="file" id="json-import-input" accept=".json" style="display:none">
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const S = {
+  mapMode: 'a',
+  facadeA: [null, null],
+  facadeB: [null, null],
+  facadeC: [null, null],
+  facadeD: [null, null],
+  viewpoint: null,        // {lat,lng} — odkud fotograf koukal
+  lines: [],
+  facadePts: [],          // [{x,y,label:'A1'|'A2'}] — for distance calc
+  mapPts: [],             // [{x,y,label:'B1'|'B2'|'C1'|'C2'|'D1'|'D2'}] — for plane computation
+  activeMapPtLabel: 'B1', // next label to place in mappts tool
+  lineTool: 'a',
+  vp: { a: null, b: null, c: null, d: null, v: null },
+  photoW: 0, photoH: 0,
+  photoFile: null,
+  photographer: null,
+  azimut: null,
+  photographerHeight: 1.6,
+  dist: null,
+  planeW: null, planeH: null,
+  ref: null,
+  corners: null,
+  heightMult: 1, vertOffset: 0, widthMult: 1,
+  step: 1,
+};
+
+let mapMarkers = { a:[null,null], b:[null,null], c:[null,null], d:[null,null] };
+
+// ═══════════════════════════════════════
+// MAP — CartoDB light, no rotation
+// ═══════════════════════════════════════
+let map, mapPolylines = [];
+
+function initMap() {
+  map = L.map('map', { zoomControl:true }).setView([50.0875, 14.4213], 17);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    subdomains:'abcd', maxZoom:20, keepBuffer:4
+  }).addTo(map);
+  // No click handler — use crosshair + confirm button
+}
+
+// ─── Mode ───
+function setMapMode(m) {
+  S.mapMode = m;
+  ['a','b','c','d','eye','r'].forEach(x => {
+    const btn = document.getElementById('mode-btn-' + x);
+    if (!btn) return;
+    btn.className = 'mode-btn' + (m===x ? ' active-'+x : '');
+  });
+  updateConfirmBtn();
+  updateStatus();
+}
+
+function updateStatus() {
+  const m = S.mapMode;
+  const statusEl = document.getElementById('map-status');
+  const titleEl  = document.getElementById('status-title');
+  const textEl   = document.getElementById('status-text');
+  if (m === 'r') {
+    statusEl.className = 'gold';
+    titleEl.textContent = 'Režim přesunu';
+    textEl.textContent  = 'Táhni marker na novou pozici';
+    document.getElementById('btn-confirm').style.display = 'none';
+    return;
+  }
+  document.getElementById('btn-confirm').style.display = '';
+  if (m === 'eye') {
+    statusEl.className = '';
+    titleEl.textContent = 'Stanoviště fotografa';
+    textEl.textContent  = S.viewpoint ? 'Zadáno — potvrď pro přepsání' : 'Vystřeď kříž na místo fotografa';
+    return;
+  }
+  const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+  const labels  = { a:'Fasáda A', b:'Fasáda B', c:'Fasáda C', d:'Fasáda D' };
+  const classes = { a:'green-s', b:'blue', c:'gold', d:'purple-s' };
+  const arr = facades[m];
+  const next = arr[0] ? (arr[1] ? null : 2) : 1;
+  statusEl.className = classes[m] || '';
+  titleEl.textContent = next ? `${labels[m]} — bod ${next}` : `${labels[m]} — hotovo`;
+  textEl.textContent  = next ? 'Vystřeď kříž na bod a potvrď' : 'Oba body zadány';
+}
+
+function updateConfirmBtn() {
+  const m = S.mapMode;
+  if (m === 'r') return;
+  const btn = document.getElementById('btn-confirm');
+  if (m === 'eye') {
+    btn.className = 'btn-confirm';
+    btn.textContent = S.viewpoint ? 'Přepsat stanoviště' : 'Potvrdit stanoviště';
+    btn.disabled = false;
+    return;
+  }
+  const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+  const arr = facades[m];
+  const next = activeChip && activeChip.facade === m ? activeChip.idx + 1 :
+               (arr[0] ? (arr[1] ? null : 2) : 1);
+  const colorClass = { a:'', b:'blue', c:'yellow', d:'purple' };
+  btn.className = 'btn-confirm' + (colorClass[m] ? ' '+colorClass[m] : '');
+  btn.textContent = next ? `Potvrdit ${m.toUpperCase()}${next}` : `${m.toUpperCase()} — hotovo`;
+  btn.disabled = !next;
+}
+
+function confirmPoint() {
+  const m = S.mapMode;
+  if (m === 'r') return;
+  const center = map.getCenter();
+
+  if (m === 'eye') {
+    S.viewpoint = { lat: center.lat, lng: center.lng };
+    placeViewpointMarker(center.lat, center.lng);
+    document.getElementById('chip-eye').classList.add('set');
+    document.getElementById('cv-eye').textContent = center.lat.toFixed(5) + ', ' + center.lng.toFixed(5);
+    computePhotographerPosition();
+    updatePreviewMap();
+    updateConfirmBtn(); updateStatus();
+    return;
+  }
+
+  const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+  let facade = m, idx;
+  if (activeChip && activeChip.facade === m) {
+    idx = activeChip.idx;
+    document.querySelectorAll('.point-chip').forEach(el => el.classList.remove('editing'));
+    activeChip = null;
+  } else {
+    const arr = facades[m];
+    if (arr[0] && arr[1]) return;
+    idx = arr[0] ? 1 : 0;
+  }
+  facades[facade][idx] = { lat: center.lat, lng: center.lng };
+  placeMarker(facade, idx, center.lat, center.lng);
+  updateChip(facade, idx, center.lat, center.lng);
+  updateFacadeLine(facade);
+  updateConfirmBtn();
+  updateStatus();
+  checkMapComplete();
+}
+
+let viewpointMarker = null;
+function updateChip(facade, idx, lat, lng) {
+  const id   = `chip-${facade}${idx+1}`;
+  const cvid = `cv-${facade}${idx+1}`;
+  const el = document.getElementById(id);
+  const cv = document.getElementById(cvid);
+  if (el) el.classList.add('set');
+  if (cv) cv.textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+}
+
+function placeViewpointMarker(lat, lng) {
+  if (viewpointMarker) map.removeLayer(viewpointMarker);
+  const icon = L.divIcon({
+    html:`<div style="font-size:16px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6))">👁</div>`,
+    className:'', iconSize:[18,18], iconAnchor:[9,9]
+  });
+  viewpointMarker = L.marker([lat, lng], { icon, draggable: true }).addTo(map);
+  viewpointMarker.bindTooltip('Stanoviště fotografa', { permanent:false, direction:'top' });
+  viewpointMarker.on('dragend', () => {
+    const pos = viewpointMarker.getLatLng();
+    S.viewpoint = { lat: pos.lat, lng: pos.lng };
+    document.getElementById('cv-eye').textContent = pos.lat.toFixed(5) + ', ' + pos.lng.toFixed(5);
+    computePhotographerPosition();
+    updatePreviewMap();
+  });
+}
+
+function placeMarker(facade, idx, lat, lng) {
+  const colors = { a:'#48c774', b:'#4a9eff', c:'#c9a84c', d:'#e91e8c' };
+  const col = colors[facade];
+  if (mapMarkers[facade][idx]) map.removeLayer(mapMarkers[facade][idx]);
+  const icon = L.divIcon({
+    html: `<div style="width:6px;height:6px;border-radius:50%;background:${col};border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 1px 3px rgba(0,0,0,0.5);"></div>`,
+    className:'', iconSize:[6,6], iconAnchor:[3,3]
+  });
+  const mk = L.marker([lat, lng], { icon, draggable: true });
+  mk.addTo(map);
+  mk.on('dragend', () => {
+    const pos = mk.getLatLng();
+    const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+    facades[facade][idx] = { lat: pos.lat, lng: pos.lng };
+    updateChip(facade, idx, pos.lat, pos.lng);
+    updateFacadeLine(facade);
+    computePhotographerPosition();
+    updatePreviewMap();
+  });
+  mapMarkers[facade][idx] = mk;
+}
+
+function updateFacadeLine(facade) {
+  const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+  const colors  = { a:'#48c774', b:'#4a9eff', c:'#c9a84c', d:'#e91e8c' };
+  const arr = facades[facade];
+  if (!arr[0] || !arr[1]) return;
+  if (S['line_'+facade]) map.removeLayer(S['line_'+facade]);
+  S['line_'+facade] = L.polyline([[arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]], {
+    color: colors[facade], weight:2.5, dashArray:'5,4', opacity:0.9
+  }).addTo(map);
+  if (S.photographer) drawPhotographerMarker();
+}
+
+// ─── Photographer marker ───
+let photMarker = null;
+function drawPhotographerMarker() {
+  if (!S.photographer) return;
+  if (photMarker) map.removeLayer(photMarker);
+  const icon = L.divIcon({
+    html: `<div style="width:14px;height:14px;border-radius:50%;background:#4a9eff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(74,158,255,0.3);"></div>`,
+    className: '', iconSize: [14,14], iconAnchor: [7,7]
+  });
+  photMarker = L.marker([S.photographer.lat, S.photographer.lng], { icon }).addTo(map);
+  photMarker.bindTooltip('📷 Fotograf', { permanent:false, direction:'top' });
+}
+
+// ─── Active chip for editing ───
+let activeChip = null; // { facade, idx }
+
+function selectChip(facade, idx) {
+  document.querySelectorAll('.point-chip').forEach(el => el.classList.remove('editing'));
+
+  // Special case: eye viewpoint
+  if (facade === 'eye') {
+    activeChip = { facade: 'eye', idx: 0 };
+    document.getElementById('chip-eye').classList.add('editing');
+    const input = document.getElementById('coord-input');
+    if (S.viewpoint) {
+      input.value = S.viewpoint.lat.toFixed(7) + ', ' + S.viewpoint.lng.toFixed(7);
+      map.panTo([S.viewpoint.lat, S.viewpoint.lng], { animate: true });
+    } else {
+      input.value = '';
+    }
+    S.mapMode = 'eye';
+    ['a','b','c','d','eye','r'].forEach(x => {
+      const btn = document.getElementById('mode-btn-' + x);
+      if (btn) btn.className = 'mode-btn' + ('eye'===x ? ' active-eye' : '');
+    });
+    updateConfirmBtn(); updateStatus();
+    setTimeout(() => { input.focus(); input.select(); }, 50);
+    return;
+  }
+
+  activeChip = { facade, idx };
+  document.getElementById(`chip-${facade}${idx+1}`).classList.add('editing');
+
+  const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+  const pt = facades[facade][idx];
+  const input = document.getElementById('coord-input');
+  if (pt) {
+    input.value = pt.lat.toFixed(7) + ', ' + pt.lng.toFixed(7);
+    map.panTo([pt.lat, pt.lng], { animate: true });
+  } else {
+    input.value = '';
+  }
+
+  S.mapMode = facade;
+  ['a','b','c','d','eye','r'].forEach(x => {
+    const btn = document.getElementById('mode-btn-' + x);
+    if (btn) btn.className = 'mode-btn' + (facade===x ? ' active-'+x : '');
+  });
+  const btn = document.getElementById('btn-confirm');
+  const colorClass = { a:'', b:'blue', c:'yellow', d:'purple' };
+  btn.className = 'btn-confirm' + (colorClass[facade] ? ' '+colorClass[facade] : '');
+  btn.textContent = `Potvrdit ${facade.toUpperCase()}${idx+1}`;
+  btn.disabled = false;
+  btn.style.display = '';
+  updateStatus();
+  setTimeout(() => { input.focus(); input.select(); }, 50);
+}
+
+function pasteCoords() {
+  const raw = document.getElementById('coord-input').value.trim();
+  if (!raw) return;
+
+  // Parse — accept "50.10553, 14.45606" or "50.10553 14.45606" or tab/semicolon separated
+  const parts = raw.split(/[\s,;]+/).filter(Boolean);
+  if (parts.length < 2) { alert('Formát: 50.10553, 14.45606'); return; }
+  const lat = parseFloat(parts[0]);
+  const lng = parseFloat(parts[1]);
+  if (isNaN(lat) || isNaN(lng)) { alert('Nelze přečíst čísla ze: ' + raw); return; }
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) { alert('Souřadnice mimo rozsah'); return; }
+
+  // Determine target
+  let tFacade = null, tIdx = null;
+  if (activeChip) {
+    tFacade = activeChip.facade;
+    tIdx    = activeChip.idx;
+  } else {
+    const mode = S.mapMode;
+    if (mode === 'eye') {
+      tFacade = 'eye'; tIdx = 0;
+    } else if (['a','b','c','d'].includes(mode)) {
+      const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+      const arr = facades[mode];
+      tFacade = mode;
+      tIdx = (!arr[0]) ? 0 : (!arr[1]) ? 1 : 0;
+    }
+  }
+
+  if (!tFacade) { alert('Nejprve vyber fasádu (A/B/C/D) nebo klikni na chip'); return; }
+
+  // Write
+  if (tFacade === 'eye') {
+    S.viewpoint = { lat, lng };
+    placeViewpointMarker(lat, lng);
+    document.getElementById('chip-eye').classList.add('set');
+    document.getElementById('cv-eye').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+  } else {
+    const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+    facades[tFacade][tIdx] = { lat, lng };
+    placeMarker(tFacade, tIdx, lat, lng);
+    updateChip(tFacade, tIdx, lat, lng);
+    updateFacadeLine(tFacade);
+    checkMapComplete();
+  }
+
+  // Cleanup
+  document.querySelectorAll('.point-chip').forEach(el => el.classList.remove('editing'));
+  activeChip = null;
+  document.getElementById('coord-input').value = '';
+
+  // Pan map
+  try { map.panTo([lat, lng], { animate: true }); } catch(e) {}
+
+  computePhotographerPosition();
+  updatePreviewMap();
+  updateConfirmBtn();
+  updateStatus();
+}
+
+function resetMap() {
+  ['a','b','c','d'].forEach(f => {
+    [0,1].forEach(i => { if (mapMarkers[f][i]) { map.removeLayer(mapMarkers[f][i]); mapMarkers[f][i]=null; } });
+    if (S['line_'+f]) { map.removeLayer(S['line_'+f]); S['line_'+f]=null; }
+  });
+  if (photMarker) { map.removeLayer(photMarker); photMarker=null; }
+  if (viewpointMarker) { map.removeLayer(viewpointMarker); viewpointMarker=null; }
+  S.facadeA=[null,null]; S.facadeB=[null,null]; S.facadeC=[null,null]; S.facadeD=[null,null];
+  S.viewpoint=null;
+  ['a1','a2','b1','b2','c1','c2','d1','d2'].forEach(id => {
+    document.getElementById('chip-'+id).classList.remove('set');
+    document.getElementById('cv-'+id).textContent='—';
+  });
+  document.getElementById('chip-eye').classList.remove('set');
+  document.getElementById('cv-eye').textContent='—';
+  document.getElementById('btn-map-next').disabled=true;
+  setMapMode('a');
+}
+
+function checkMapComplete() {
+  const ok = S.facadeA[0] && S.facadeA[1];
+  document.getElementById('btn-map-next').disabled = !ok;
+}
+
+// ═══════════════════════════════════════
+// PHOTO + VANISHING POINTS — canvas-based zoom/pan
+// ═══════════════════════════════════════
+let cvs, ctx, isDrawing=false, drawStart=null;
+let draggingPtIdx=null, draggingArr=null;
+
+// Viewport: zoom and pan
+let vpZoom = 1;
+let vpPanX = 0, vpPanY = 0;
+let isPanning = false, panStart = null;
+let photoImg = null;
+
+function initPhoto() {
+  cvs = document.getElementById('vp-canvas');
+  ctx = cvs.getContext('2d');
+  cvs.addEventListener('mousedown',  e => {
+    if (e.button === 1) { e.preventDefault(); isPanning=true; panStart={cx:e.clientX-cvs.getBoundingClientRect().left, cy:e.clientY-cvs.getBoundingClientRect().top, px:vpPanX, py:vpPanY}; cvs.style.cursor='grabbing'; return; }
+    onPhotoDown(getPos(e));
+  });
+  cvs.addEventListener('mousemove',  e => onPhotoMove(getPos(e)));
+  cvs.addEventListener('mouseup',    e => {
+    if (e.button === 1) { isPanning=false; panStart=null; cvs.style.cursor = S.lineTool==='pan'?'grab':'crosshair'; return; }
+    onPhotoUp(getPos(e));
+  });
+  cvs.addEventListener('mouseleave', () => { isPanning=false; panStart=null; isDrawing=false; });
+  cvs.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = cvs.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const delta = e.deltaY < 0 ? 1.15 : 1/1.15;
+    const newZoom = Math.max(0.1, Math.min(10, vpZoom * delta));
+    // Zoom toward mouse position
+    vpPanX = mx - (mx - vpPanX) * (newZoom / vpZoom);
+    vpPanY = my - (my - vpPanY) * (newZoom / vpZoom);
+    vpZoom = newZoom;
+    clampPan();
+    // Update select to nearest option
+    syncZoomSelect();
+    redraw();
+  }, { passive: false });
+  cvs.addEventListener('contextmenu', e => e.preventDefault());
+  cvs.addEventListener('touchstart', e => { e.preventDefault(); onPhotoDown(getTPos(e)); }, {passive:false});
+  cvs.addEventListener('touchmove',  e => { e.preventDefault(); onPhotoMove(getTPos(e)); }, {passive:false});
+  cvs.addEventListener('touchend',   e => { e.preventDefault(); onPhotoUp(getTPos(e));   }, {passive:false});
+}
+
+// Zoom by multiplier of fit scale (called from select)
+function setPhotoZoomMult(mult) {
+  if (!photoImg) { return; }
+  const fitScale = Math.min(cvs.width / photoImg.naturalWidth, cvs.height / photoImg.naturalHeight);
+  const newZoom = mult * fitScale;
+  const cx = cvs.width/2, cy = cvs.height/2;
+  vpPanX = cx - (cx - vpPanX) * (newZoom / vpZoom);
+  vpPanY = cy - (cy - vpPanY) * (newZoom / vpZoom);
+  vpZoom = newZoom;
+  clampPan(); redraw();
+}
+
+function syncZoomSelect() {
+  if (!photoImg) return;
+  const fitScale = Math.min(cvs.width / photoImg.naturalWidth, cvs.height / photoImg.naturalHeight);
+  const mult = vpZoom / fitScale;
+  const opts = [0.25,0.5,0.75,1,1.25,1.5,1.75,2,3];
+  const nearest = opts.reduce((a,b) => Math.abs(b-mult)<Math.abs(a-mult)?b:a, 1);
+  const sel = document.getElementById('zoom-select');
+  if (sel) sel.value = nearest;
+}
+
+function setPhotoZoom(z) { setPhotoZoomMult(z); }
+
+function clampPan() {
+  if (!photoImg) return;
+  const iw = photoImg.naturalWidth * vpZoom;
+  const ih = photoImg.naturalHeight * vpZoom;
+  vpPanX = Math.max(-iw + cvs.width*0.2,  Math.min(cvs.width*0.8,  vpPanX));
+  vpPanY = Math.max(-ih + cvs.height*0.2, Math.min(cvs.height*0.8, vpPanY));
+}
+
+function canvasToImg(cx, cy) {
+  const iw = photoImg ? photoImg.naturalWidth  * vpZoom : cvs.width;
+  const ih = photoImg ? photoImg.naturalHeight * vpZoom : cvs.height;
+  return { x: (cx - vpPanX) / iw, y: (cy - vpPanY) / ih };
+}
+function imgToCanvas(x, y) {
+  const iw = photoImg ? photoImg.naturalWidth  * vpZoom : cvs.width;
+  const ih = photoImg ? photoImg.naturalHeight * vpZoom : cvs.height;
+  return { x: vpPanX + x * iw, y: vpPanY + y * ih };
+}
+
+// No-op — kept for compatibility
+function cacheRects() {}
+
+function loadPhoto() { document.getElementById('file-input').click(); }
+document.getElementById('file-input').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  S.photoFile = f;
+  const img = new Image();
+  img.onload = () => {
+    photoImg = img;
+    S.photoW = img.naturalWidth;
+    S.photoH = img.naturalHeight;
+    resizeCvs(); fitPhotoToCanvas(); redraw();
+  };
+  img.src = URL.createObjectURL(f);
+});
+
+function resizeCvs() {
+  const a = document.getElementById('photo-area');
+  cvs.width = a.offsetWidth; cvs.height = a.offsetHeight;
+}
+
+function fitPhotoToCanvas() {
+  if (!photoImg) return;
+  const sel = document.getElementById('zoom-select');
+  const zoomMult = sel ? parseFloat(sel.value) : 1;
+  const fitScale = Math.min(cvs.width / photoImg.naturalWidth, cvs.height / photoImg.naturalHeight);
+  vpZoom = zoomMult * fitScale;
+  vpPanX = (cvs.width  - photoImg.naturalWidth  * vpZoom) / 2;
+  vpPanY = (cvs.height - photoImg.naturalHeight * vpZoom) / 2;
+}
+
+function getPos(e)  { const r=cvs.getBoundingClientRect(); return {cx:e.clientX-r.left, cy:e.clientY-r.top}; }
+function getTPos(e) { const t=e.touches[0]||e.changedTouches[0]; const r=cvs.getBoundingClientRect(); return {cx:t.clientX-r.left, cy:t.clientY-r.top}; }
+
+function setLineTool(t) {
+  S.lineTool = t;
+  ['pan','a','b','c','d','v','pts','mappts'].forEach(g => {
+    const el = document.getElementById('tool-'+g);
+    if (!el) return;
+    const cls = {pan:'active-pts',a:'active-a',b:'active-b',c:'active-c',d:'active-d',v:'active-v',pts:'active-pts',mappts:'active-mappts'};
+    el.className = 'tool-btn' + (g===t ? ' '+cls[g] : '');
+  });
+  cvs.style.cursor = t==='pan' ? 'grab' : 'crosshair';
+  const sel = document.getElementById('mappts-selector');
+  if (t === 'mappts') { sel.style.display='block'; buildMapPtSelector(); }
+  else sel.style.display='none';
+}
+
+function buildMapPtSelector() {
+  const row = document.getElementById('mps-row');
+  const COLS = { B:'#4a9eff', C:'#c9a84c', D:'#e91e8c' };
+  row.innerHTML = ['B1','B2','C1','C2','D1','D2'].map(lbl => {
+    const col = COLS[lbl[0]];
+    const isSet = S.mapPts.find(p => p.label===lbl);
+    const isActive = S.activeMapPtLabel===lbl;
+    return `<button class="mps-btn${isActive?' active':''}${isSet?' set':''}"
+      style="${isActive?'background:'+col+';border-color:'+col+';color:#000;':''}"
+      onclick="setActiveMapPt('${lbl}')">${lbl}</button>`;
+  }).join(' ');
+}
+
+function setActiveMapPt(label) { S.activeMapPtLabel=label; buildMapPtSelector(); }
+
+function hitFacadePt(cx, cy, r=14) {
+  for(let i=0;i<S.facadePts.length;i++){
+    const p=imgToCanvas(S.facadePts[i].x,S.facadePts[i].y);
+    if(Math.hypot(cx-p.x,cy-p.y)<r) return {arr:'facadePts',idx:i};
+  }
+  for(let i=0;i<S.mapPts.length;i++){
+    const p=imgToCanvas(S.mapPts[i].x,S.mapPts[i].y);
+    if(Math.hypot(cx-p.x,cy-p.y)<r) return {arr:'mapPts',idx:i};
+  }
+  return null;
+}
+
+function onPhotoDown({cx,cy}) {
+  if (S.lineTool==='pan') { isPanning=true; panStart={cx,cy,px:vpPanX,py:vpPanY}; cvs.style.cursor='grabbing'; return; }
+  if (S.lineTool==='pts') {
+    const hit=hitFacadePt(cx,cy);
+    if(hit&&hit.arr==='facadePts'){draggingPtIdx=hit.idx;draggingArr='facadePts';return;}
+    if(S.facadePts.length>=2) S.facadePts=[];
+    const p=canvasToImg(cx,cy);
+    S.facadePts.push({x:p.x,y:p.y,label:S.facadePts.length===0?'A1':'A2'});
+    redraw();updateVPChips();return;
+  }
+  if (S.lineTool==='mappts') {
+    const hit=hitFacadePt(cx,cy);
+    if(hit&&hit.arr==='mapPts'){draggingPtIdx=hit.idx;draggingArr='mapPts';return;}
+    const label=S.activeMapPtLabel;
+    const ei=S.mapPts.findIndex(p=>p.label===label);
+    const p=canvasToImg(cx,cy);
+    if(ei>=0) S.mapPts[ei]={x:p.x,y:p.y,label}; else S.mapPts.push({x:p.x,y:p.y,label});
+    const next=['B1','B2','C1','C2','D1','D2'].find(l=>l!==label&&!S.mapPts.find(p=>p.label===l));
+    if(next) S.activeMapPtLabel=next;
+    redraw();updateVPChips();buildMapPtSelector();return;
+  }
+  isDrawing=true; drawStart=canvasToImg(cx,cy);
+}
+
+function onPhotoMove({cx,cy}) {
+  if (isPanning&&panStart) {
+    vpPanX=panStart.px+(cx-panStart.cx); vpPanY=panStart.py+(cy-panStart.cy);
+    clampPan(); redraw(); return;
+  }
+  if (draggingPtIdx!==null&&draggingArr) {
+    const p=canvasToImg(cx,cy);
+    S[draggingArr][draggingPtIdx].x=p.x; S[draggingArr][draggingPtIdx].y=p.y;
+    redraw(); return;
+  }
+  if (!isDrawing) return;
+  redraw();
+  const s=imgToCanvas(drawStart.x,drawStart.y);
+  const color=LINE_COLORS[S.lineTool]||'#fff';
+  ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(cx,cy);
+  ctx.strokeStyle=color;ctx.lineWidth=2;
+  if(S.lineTool==='v') ctx.setLineDash([6,5]); else ctx.setLineDash([]);
+  ctx.stroke();ctx.setLineDash([]);
+}
+
+function onPhotoUp({cx,cy}) {
+  if (isPanning){isPanning=false;panStart=null;cvs.style.cursor='grab';return;}
+  if (draggingPtIdx!==null){draggingPtIdx=null;draggingArr=null;updateVPChips();return;}
+  if (!isDrawing) return; isDrawing=false;
+  const p=canvasToImg(cx,cy);
+  const dx=p.x-drawStart.x,dy=p.y-drawStart.y;
+  if(Math.sqrt(dx*dx+dy*dy)<0.003) return;
+  S.lines.push({x1:drawStart.x,y1:drawStart.y,x2:p.x,y2:p.y,group:S.lineTool});
+  computeVPs();redraw();updateVPChips();
+}
+function undoLine() {
+  if (S.lineTool === 'pts' && S.facadePts.length > 0) {
+    S.facadePts.pop(); redraw(); updateVPChips(); return;
+  }
+  if (S.lineTool === 'mappts' && S.mapPts.length > 0) {
+    S.mapPts.pop(); redraw(); updateVPChips(); buildMapPtSelector(); return;
+  }
+  S.lines.pop(); computeVPs(); redraw(); updateVPChips();
+}
+function clearLines() {
+  S.lines=[]; S.facadePts=[]; S.mapPts=[];
+  S.vp={a:null,b:null,c:null,d:null,v:null};
+  redraw(); updateVPChips();
+}
+
+// ─── Colors ───
+const LINE_COLORS = { a:'#48c774', b:'#4a9eff', c:'#c9a84c', d:'#e91e8c', v:'#c0392b' };
+
+function redraw() {
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+
+  // Draw photo
+  if (photoImg) {
+    const iw = photoImg.naturalWidth  * vpZoom;
+    const ih = photoImg.naturalHeight * vpZoom;
+    ctx.drawImage(photoImg, vpPanX, vpPanY, iw, ih);
+  } else {
+    ctx.fillStyle='rgba(255,255,255,0.05)';
+    ctx.fillRect(0,0,cvs.width,cvs.height);
+    ctx.fillStyle='rgba(255,255,255,0.2)';
+    ctx.font='13px JetBrains Mono';
+    ctx.textAlign='center';
+    ctx.fillText('📂 Načti fotografii', cvs.width/2, cvs.height/2);
+    ctx.textAlign='left';
+  }
+
+  S.lines.forEach(l => {
+    const s=imgToCanvas(l.x1,l.y1), e=imgToCanvas(l.x2,l.y2);
+    const color=LINE_COLORS[l.group] || '#fff';
+    const dx=e.x-s.x, dy=e.y-s.y, len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) return;
+    const sc=1500/len;
+
+    // Extended faint line
+    ctx.beginPath(); ctx.moveTo(s.x-dx*sc,s.y-dy*sc); ctx.lineTo(e.x+dx*sc,e.y+dy*sc);
+    ctx.strokeStyle=color+'28'; ctx.lineWidth=1;
+    if (l.group==='v') ctx.setLineDash([6,5]); else ctx.setLineDash([4,4]);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // Main line
+    ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(e.x,e.y);
+    ctx.strokeStyle=color; ctx.lineWidth=2;
+    if (l.group==='v') ctx.setLineDash([6,5]); else ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // Endpoints
+    ctx.beginPath(); ctx.arc(s.x,s.y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+    ctx.beginPath(); ctx.arc(e.x,e.y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  });
+
+  // VPs
+  if(S.vp.a) drawVPDot(S.vp.a,'#48c774','VP-A');
+  if(S.vp.b) drawVPDot(S.vp.b,'#4a9eff','VP-B');
+  if(S.vp.c) drawVPDot(S.vp.c,'#c9a84c','VP-C');
+  if(S.vp.d) drawVPDot(S.vp.d,'#e91e8c','VP-D');
+  if(S.vp.v) drawVPDot(S.vp.v,'#c0392b','VP↕');
+
+  // Facade A points on photo
+  S.facadePts.forEach((pt, i) => {
+    const p = imgToCanvas(pt.x, pt.y);
+    ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
+    ctx.fillStyle='rgba(72,199,116,0.2)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x,p.y,2.5,0,Math.PI*2);
+    ctx.fillStyle='#48c774'; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 9px JetBrains Mono';
+    ctx.fillText(pt.label, p.x+6, p.y+3);
+  });
+
+  if (S.facadePts.length === 2) {
+    const p1=imgToCanvas(S.facadePts[0].x,S.facadePts[0].y);
+    const p2=imgToCanvas(S.facadePts[1].x,S.facadePts[1].y);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.strokeStyle='rgba(72,199,116,0.5)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // B/C/D map points on photo
+  const MAP_PT_COLORS = { B:'#4a9eff', C:'#c9a84c', D:'#e91e8c' };
+  S.mapPts.forEach(pt => {
+    const p = imgToCanvas(pt.x, pt.y);
+    const col = MAP_PT_COLORS[pt.label[0]] || '#fff';
+    ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
+    ctx.fillStyle=col+'30'; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x,p.y,2.5,0,Math.PI*2);
+    ctx.fillStyle=col; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 9px JetBrains Mono';
+    ctx.fillText(pt.label, p.x+6, p.y+3);
+  });
+}
+
+function drawVPDot(vp,color,label) {
+  const p=imgToCanvas(vp.x,vp.y);
+  if(p.x<-300||p.x>cvs.width+300||p.y<-300||p.y>cvs.height+300) return;
+  ctx.beginPath(); ctx.arc(p.x,p.y,10,0,Math.PI*2); ctx.fillStyle=color+'25'; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  ctx.fillStyle=color; ctx.font='9px JetBrains Mono'; ctx.fillText(label,p.x+8,p.y+3);
+}
+
+function lineIntersect(x1,y1,x2,y2,x3,y3,x4,y4) {
+  const d=(x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+  if(Math.abs(d)<1e-10) return null;
+  const t=((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/d;
+  return {x:x1+t*(x2-x1),y:y1+t*(y2-y1)};
+}
+
+function medianVP(lines) {
+  if(lines.length<2) return null;
+  const pts=[];
+  for(let i=0;i<lines.length;i++)
+    for(let j=i+1;j<lines.length;j++) {
+      const p=lineIntersect(lines[i].x1,lines[i].y1,lines[i].x2,lines[i].y2,
+                             lines[j].x1,lines[j].y1,lines[j].x2,lines[j].y2);
+      if(p) pts.push(p);
+    }
+  if(!pts.length) return null;
+  pts.sort((a,b)=>a.x-b.x);
+  return pts[Math.floor(pts.length/2)];
+}
+
+function computeVPs() {
+  S.vp.a = medianVP(S.lines.filter(l=>l.group==='a'));
+  S.vp.b = medianVP(S.lines.filter(l=>l.group==='b'));
+  S.vp.c = medianVP(S.lines.filter(l=>l.group==='c'));
+  S.vp.d = medianVP(S.lines.filter(l=>l.group==='d'));
+  S.vp.v = medianVP(S.lines.filter(l=>l.group==='v'));
+}
+
+function updateVPChips() {
+  const cnt = g => S.lines.filter(l=>l.group===g).length;
+  const chip = (id,n,vp,label) => {
+    const el=document.getElementById(id); if(!el) return;
+    el.textContent=`${label}: ${n}`;
+    el.className='vp-chip'+(vp?' found':n>0?' partial':'');
+  };
+  chip('chip-vpa',cnt('a'),S.vp.a,'A');
+  chip('chip-vpb',cnt('b'),S.vp.b,'B');
+  chip('chip-vpc',cnt('c'),S.vp.c,'C');
+  chip('chip-vpd',cnt('d'),S.vp.d,'D');
+  chip('chip-vpv',cnt('v'),S.vp.v,'↕');
+  const pEl=document.getElementById('chip-pts');
+  pEl.textContent=`A1/A2: ${S.facadePts.length} bodů`;
+  pEl.className='vp-chip'+(S.facadePts.length===2?' found':S.facadePts.length>0?' partial':'');
+  const mpEl=document.getElementById('chip-mappts');
+  mpEl.textContent=`B/C/D: ${S.mapPts.length} bodů`;
+  mpEl.className='vp-chip'+(S.mapPts.length>=2?' found':S.mapPts.length>0?' partial':'');
+  const res=document.getElementById('chip-result');
+  if(S.vp.a||S.vp.b) { res.textContent='Úběžníky nalezeny ✓'; res.className='vp-chip found'; }
+  else { res.textContent='Potřeba min. 2 čáry'; res.className='vp-chip'; }
+}
+
+// ═══════════════════════════════════════
+// GEOMETRY
+// ═══════════════════════════════════════
+function gpsToM(lat,lng,rlat,rlng) {
+  const R=6371000;
+  return { x:(lng-rlng)*Math.PI/180*R*Math.cos(rlat*Math.PI/180), y:(lat-rlat)*Math.PI/180*R };
+}
+function mToGps(mx,my,rlat,rlng) {
+  const R=6371000;
+  return { lat:rlat+(my/R)*(180/Math.PI), lng:rlng+(mx/R)*(180/Math.PI)/Math.cos(rlat*Math.PI/180) };
+}
+function haversine(lat1,lng1,lat2,lng2) {
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function computeAll() {
+  if (S.facadePts.length < 2) {
+    if (!confirm('Nezadal jsi body A1/A2 na fotografii — vzdálenost fotografa nebude přesná. Pokračovat?')) return;
+  }
+  computeVPs();
+  computePhotographerPosition();
+  buildPlane();
+  gotoStep(3);
+}
+
+// ═══════════════════════════════════════
+// GEOMETRY — photographer position + plane
+// ═══════════════════════════════════════
+
+// Get all valid pairs: {gpsPt, imgPt, label} where both GPS and pixel coords exist
+function getValidPairs() {
+  const facadeMap = { B:[S.facadeB,0,1], C:[S.facadeC,0,1], D:[S.facadeD,0,1] };
+  return S.mapPts.map(mp => {
+    const f = mp.label[0]; // 'B','C','D'
+    const i = parseInt(mp.label[1]) - 1; // 0 or 1
+    const arr = { B:S.facadeB, C:S.facadeC, D:S.facadeD }[f];
+    if (!arr || !arr[i]) return null;
+    return { gpsPt: arr[i], imgPt: mp, label: mp.label };
+  }).filter(Boolean);
+}
+
+// For each known GPS point visible in image, compute a ray from that point
+// through the camera. The photographer lies where these rays intersect.
+// Ray direction: from GPS point, in direction the camera was pointing.
+// In 2D (top-down), each pair gives a line: the photographer's position
+// satisfies that the angle from photog to gpsPt matches the pixel angle.
+//
+// Pixel (px, py) normalized 0-1. Image center = (0.5, 0.5).
+// Horizontal angle from center: atan((px-0.5) * 2 * tan(FOV/2))
+// This angle is measured from the view direction toward the point.
+//
+// We use a simpler approach: given two known GPS points and their pixel positions,
+// find the photographer location by triangulation.
+function triangulatePhotographer(pairs, ref) {
+  // Need at least 2 pairs for triangulation
+  if (pairs.length < 2) return null;
+
+  const fovH = 60 * Math.PI / 180;
+  const f_norm = 0.5 / Math.tan(fovH / 2); // normalized focal length
+
+  // Each pair gives: angle from photographer to GPS point (in world coords)
+  // pixel x → horizontal angle in camera space
+  // We solve: photographer position P such that for each pair i:
+  //   atan2(GPSi.y - P.y, GPSi.x - P.x) = cameraYaw + atan((pxi-0.5)/f_norm)
+  //
+  // Iterative least-squares over pairs of pairs:
+  const pts = pairs.map(p => ({
+    gps: gpsToM(p.gpsPt.lat, p.gpsPt.lng, ref.lat, ref.lng),
+    angleOffset: Math.atan((p.imgPt.x - 0.5) / f_norm) // angle relative to view direction
+  }));
+
+  // For each pair of observations, solve for intersection
+  const intersections = [];
+  for (let i = 0; i < pts.length; i++) {
+    for (let j = i+1; j < pts.length; j++) {
+      const A = pts[i], B = pts[j];
+      // Angle from P to A: θA = yaw + A.angleOffset
+      // Angle from P to B: θB = yaw + B.angleOffset
+      // Difference: angle(P→B) - angle(P→A) = B.angleOffset - A.angleOffset
+      // This is independent of yaw — gives us a constraint on P position.
+
+      // Vector from A.gps to B.gps
+      const dx = B.gps.x - A.gps.x;
+      const dy = B.gps.y - A.gps.y;
+      const dAngle = B.angleOffset - A.angleOffset;
+
+      // sin rule: |AB| / sin(angle at P) = |PA| / sin(angle at B) = |PB| / sin(angle at A)
+      // angle at P = |dAngle|
+      // But we need to find P, not just angles. Use line intersection instead:
+
+      // Line from A.gps in direction perpendicular to its ray from P:
+      // P lies on ray: A.gps + t * (cos(θA), sin(θA)) for some t < 0 (P is behind A from A's perspective... no)
+      // Actually: P + s*(cos(θA_world), sin(θA_world)) = A.gps
+      // So P = A.gps - s*(cos(θA_world), sin(θA_world))
+      // We don't know θA_world (depends on yaw).
+      // BUT: θA_world - θB_world = A.angleOffset - B.angleOffset (known)
+      // Use: bearing from P to A minus bearing from P to B = dAngle (known)
+      // This defines a circle (isogonal locus). Approximate with midpoint method:
+
+      // Simple approach: assume view direction from midpoint of A,B
+      // and solve iteratively — too complex. Use direct formula instead:
+
+      // If we assume the photographer faces roughly toward the midpoint of A and B,
+      // and the angular separation in image is dAngle,
+      // then distance to midpoint ≈ |AB| / (2 * sin(|dAngle|/2))... but this ignores lateral position.
+
+      // BEST simple approach: use each GPS point + its pixel angle to define a 2D ray
+      // from the GPS point back toward the photographer.
+      // Ray from A: P = A.gps - t*(cos(αA), sin(αA))
+      // We need world angle αA. Use viewpoint hint if available.
+
+      // Use viewpoint to estimate initial yaw, then refine
+      let yaw = 0;
+      if (S.viewpoint) {
+        const vpM = gpsToM(S.viewpoint.lat, S.viewpoint.lng, ref.lat, ref.lng);
+        // Rough yaw: angle from viewpoint toward midpoint of all GPS points
+        const midX = pts.reduce((s,p)=>s+p.gps.x,0)/pts.length;
+        const midY = pts.reduce((s,p)=>s+p.gps.y,0)/pts.length;
+        yaw = Math.atan2(midX - vpM.x, midY - vpM.y); // toward GPS cluster from viewpoint
+        // Actually photographer faces FROM viewpoint TOWARD GPS cluster
+        yaw = Math.atan2(midX - vpM.x, midY - vpM.y);
+      }
+
+      // Ray from A.gps back to photographer: direction = -(cos(yaw + A.angleOffset), sin(yaw + A.angleOffset))
+      // Ray from B.gps back to photographer: direction = -(cos(yaw + B.angleOffset), sin(yaw + B.angleOffset))
+      const axA = -Math.sin(yaw + A.angleOffset); // world: x=east, y=north; yaw from north
+      const ayA = -Math.cos(yaw + A.angleOffset);
+      const axB = -Math.sin(yaw + B.angleOffset);
+      const ayB = -Math.cos(yaw + B.angleOffset);
+
+      // Intersect: A.gps + s*(axA,ayA) = B.gps + t*(axB,ayB)
+      const denom = axA*ayB - ayA*axB;
+      if (Math.abs(denom) < 1e-8) continue;
+      const s = ((B.gps.x-A.gps.x)*ayB - (B.gps.y-A.gps.y)*axB) / denom;
+      const ix = A.gps.x + s*axA;
+      const iy = A.gps.y + s*ayA;
+      if (Math.abs(s) < 200) intersections.push({x:ix, y:iy});
+    }
+  }
+
+  if (!intersections.length) return null;
+  // Median of intersections
+  intersections.sort((a,b)=>a.x-b.x);
+  const mid = Math.floor(intersections.length/2);
+  return intersections[mid];
+}
+
+function computePhotographerPosition() {
+  const fa = S.facadeA;
+  if(!fa[0]||!fa[1]) return;
+
+  S.ref = { lat:(fa[0].lat+fa[1].lat)/2, lng:(fa[0].lng+fa[1].lng)/2 };
+  const ref = S.ref;
+
+  const pA1 = gpsToM(fa[0].lat,fa[0].lng,ref.lat,ref.lng);
+  const pA2 = gpsToM(fa[1].lat,fa[1].lng,ref.lat,ref.lng);
+  const fvx=pA2.x-pA1.x, fvy=pA2.y-pA1.y;
+  const flen=Math.sqrt(fvx*fvx+fvy*fvy);
+  const tx=fvx/flen, ty=fvy/flen; // tangent along A
+  const nx=-ty, ny=tx;            // normal to A
+
+  S._debug = { method:'', pairs:0, warnings:[] };
+
+  // ── Distance from facade A points on photo ──
+  let distEstimate = 20;
+  if (S.facadePts.length === 2 && fa[0] && fa[1] && S.photoW > 0) {
+    const facadeLenM = haversine(fa[0].lat,fa[0].lng,fa[1].lat,fa[1].lng);
+    const dx = S.facadePts[1].x - S.facadePts[0].x;
+    const dy = S.facadePts[1].y - S.facadePts[0].y;
+    const facadeLenPx = Math.sqrt(dx*dx+dy*dy);
+    const fovH = 60 * Math.PI/180;
+    distEstimate = facadeLenM / (2 * facadeLenPx * Math.tan(fovH/2));
+    distEstimate = Math.max(3, Math.min(300, distEstimate));
+    S._debug.distSource = 'A1-A2 pixely (' + distEstimate.toFixed(1) + 'm)';
+  } else {
+    S._debug.distSource = 'odhad 20m (chybí A1/A2)';
+    S._debug.warnings.push('Chybí body A1/A2 na fotografii');
+  }
+
+  // ── Lateral offset from VP-A ──
+  let lateralOffset = 0;
+  if (S.vp.a) {
+    const fovH = 60 * Math.PI / 180;
+    lateralOffset = (S.vp.a.x - 0.5) * 2 * Math.tan(fovH/2) * distEstimate;
+    lateralOffset = Math.max(-flen*3, Math.min(flen*3, lateralOffset));
+    S._debug.lateralSource = 'VP-A (' + lateralOffset.toFixed(1) + 'm)';
+  } else {
+    S._debug.lateralSource = 'VP-A chybí (0m)';
+  }
+
+  // ── Triangulation from mapPts ──
+  const pairs = getValidPairs();
+  S._debug.pairs = pairs.length;
+  let triResult = null;
+  if (pairs.length >= 2) {
+    triResult = triangulatePhotographer(pairs, ref);
+    if (triResult) S._debug.method = 'triangulace (' + pairs.length + ' bodů)';
+  }
+
+  // ── Combine: prefer triangulation for XY, use distEstimate for dist ──
+  let finalX, finalY;
+  if (triResult) {
+    finalX = triResult.x;
+    finalY = triResult.y;
+    // Recalculate dist from triangulated position
+    S.dist = Math.sqrt(finalX**2 + finalY**2);
+    S.lateralOffsetM = finalX*tx + finalY*ty; // projection onto facade tangent
+    S._debug.method = 'triangulace (' + pairs.length + ' bodů)';
+  } else {
+    // Fallback: normal + lateral from VP-A
+    let sign = 1;
+    if (S.viewpoint) {
+      const vpM = gpsToM(S.viewpoint.lat, S.viewpoint.lng, ref.lat, ref.lng);
+      sign = (vpM.x*nx + vpM.y*ny) >= 0 ? 1 : -1;
+    }
+    finalX = sign*nx*distEstimate + tx*lateralOffset;
+    finalY = sign*ny*distEstimate + ty*lateralOffset;
+    S.dist = distEstimate;
+    S.lateralOffsetM = lateralOffset;
+    S._debug.method = pairs.length === 1
+      ? 'normála fasády A + 1 bod (nestačí pro triangulaci)'
+      : 'normála fasády A (žádné mapPts)';
+  }
+
+  S.photographer = { x:finalX, y:finalY };
+
+  const dX=-finalX, dY=-finalY;
+  const rawAzimut = (Math.atan2(dX,dY)*180/Math.PI+360)%360;
+  S.azimut = applyYawCalibration(rawAzimut);
+
+  // Photographer height from vertical VP
+  if(S.vp.v) {
+    const vy=S.vp.v.y;
+    const rawHeight=Math.max(0.5,Math.min(5,1.2+(0.5-vy)*4));
+    const pitchCorr=sensorCal?sensorCal.offsets.pitch*0.05:0;
+    S.photographerHeight=Math.max(0.5,Math.min(5,rawHeight+pitchCorr));
+    S._debug.heightSource='VP-V (' + S.photographerHeight.toFixed(2) + 'm)';
+  } else {
+    S._debug.heightSource='výchozí 1.6m';
+  }
+
+  const photGPS=mToGps(finalX,finalY,ref.lat,ref.lng);
+  S.photographer.lat=photGPS.lat;
+  S.photographer.lng=photGPS.lng;
+
+  drawPhotographerMarker();
+}
+
+function buildPlane() {
+  if(!S.photographer||!S.ref) return;
+  const ref=S.ref;
+  const dist=S.dist||20;
+  const aspect=S.photoW>0?S.photoW/S.photoH:16/9;
+  const fov=60*Math.PI/180;
+  S.planeW=2*dist*Math.tan(fov/2);
+  S.planeH=S.planeW/aspect;
+
+  const mag=Math.sqrt(S.photographer.x**2+S.photographer.y**2);
+  if(mag < 0.1) return;
+  const dx=-S.photographer.x/mag, dy=-S.photographer.y/mag;
+  const perpX=-dy, perpY=dx;
+  const halfW=S.planeW/2, halfH=S.planeH/2;
+  const ph=S.photographerHeight;
+
+  S.corners = {
+    topLeft:     { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph+halfH },
+    topRight:    { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph+halfH },
+    bottomLeft:  { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph-halfH },
+    bottomRight: { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph-halfH },
+  };
+}
+
+// ═══════════════════════════════════════
+// PREVIEW MAP (krok 3)
+// ═══════════════════════════════════════
+let prevMap = null;
+let prevLayers = [];
+
+function initPreviewMap() {
+  if (prevMap) return;
+  prevMap = L.map('preview-map', { zoomControl:true }).setView([50.0875, 14.4213], 17);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    subdomains:'abcd', maxZoom:20, keepBuffer:4
+  }).addTo(prevMap);
+}
+
+function clearPrevLayers() {
+  prevLayers.forEach(l => prevMap.removeLayer(l));
+  prevLayers = [];
+}
+
+function updatePreviewMap() {
+  if (!prevMap) return;
+  clearPrevLayers();
+
+  // Update stats + debug panel
+  const el = id => document.getElementById(id);
+  if (S.photographer && S._debug) {
+    el('ps-pos').textContent = S.photographer.lat.toFixed(5) + ', ' + S.photographer.lng.toFixed(5);
+    el('ps-dist').textContent = S.dist ? S.dist.toFixed(1) + ' m' : '—';
+    el('ps-lat').textContent = S.lateralOffsetM !== undefined ? S.lateralOffsetM.toFixed(1) + ' m' : '—';
+    el('ps-az').textContent = S.azimut ? Math.round(S.azimut) + '°' : '—';
+    // Debug
+    el('dbg-method').textContent = S._debug.method || '—';
+    el('dbg-dist').textContent = S._debug.distSource || '—';
+    el('dbg-lateral').textContent = S._debug.lateralSource || '—';
+    el('dbg-height').textContent = S._debug.heightSource || '—';
+    el('dbg-pairs').textContent = S._debug.pairs + ' párů GPS+pixel';
+    el('dbg-warnings').textContent = (S._debug.warnings||[]).join(' | ') || '—';
+  }
+
+  if (!S.photographer || !S.photographer.lat || !S.ref) return;
+
+  const facadeData = [
+    { arr:S.facadeA, col:'#48c774', lbl:'A' },
+    { arr:S.facadeB, col:'#4a9eff', lbl:'B' },
+    { arr:S.facadeC, col:'#c9a84c', lbl:'C' },
+    { arr:S.facadeD, col:'#e91e8c', lbl:'D' },
+  ];
+  const bounds = [];
+
+  facadeData.forEach(({ arr, col, lbl }) => {
+    if (!arr[0] || !arr[1]) return;
+    const line = L.polyline([[arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]], {
+      color:col, weight:3, opacity:0.9
+    }).addTo(prevMap);
+    prevLayers.push(line);
+    bounds.push([arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]);
+    const midLat=(arr[0].lat+arr[1].lat)/2, midLng=(arr[0].lng+arr[1].lng)/2;
+    const labelIcon=L.divIcon({
+      html:`<div style="font-family:monospace;font-size:10px;font-weight:700;color:${col};text-shadow:0 0 3px #fff,0 0 3px #fff">${lbl}</div>`,
+      className:'', iconAnchor:[6,6]
+    });
+    prevLayers.push(L.marker([midLat,midLng],{icon:labelIcon}).addTo(prevMap));
+  });
+
+  // Photo plane — draw as a line at facade (top-down projection of left/right edges)
+  if (S.corners) {
+    const c = S.corners;
+    const planeLine = L.polyline([
+      [c.topLeft.lat, c.topLeft.lng],
+      [c.topRight.lat, c.topRight.lng],
+    ], { color:'#1a1a18', weight:2.5, dashArray:'5,4' }).addTo(prevMap);
+    prevLayers.push(planeLine);
+    // Small markers at corners
+    [[c.topLeft,'TL'],[c.topRight,'TR']].forEach(([pt,lbl]) => {
+      const icon=L.divIcon({
+        html:`<div style="width:5px;height:5px;border-radius:50%;background:#1a1a18;border:1px solid #555"></div>`,
+        className:'', iconSize:[5,5], iconAnchor:[2.5,2.5]
+      });
+      prevLayers.push(L.marker([pt.lat,pt.lng],{icon}).addTo(prevMap));
+    });
+    // Lines from photographer to plane corners (field of view)
+    [[c.topLeft],[c.topRight]].forEach(([pt]) => {
+      prevLayers.push(L.polyline(
+        [[S.photographer.lat,S.photographer.lng],[pt.lat,pt.lng]],
+        { color:'rgba(74,158,255,0.2)', weight:1, dashArray:'3,4' }
+      ).addTo(prevMap));
+    });
+    bounds.push([c.topLeft.lat,c.topLeft.lng],[c.topRight.lat,c.topRight.lng]);
+  }
+
+  // mapPts on map
+  const MAP_PT_COLORS = { B:'#4a9eff', C:'#c9a84c', D:'#e91e8c' };
+  getValidPairs().forEach(pair => {
+    const col = MAP_PT_COLORS[pair.label[0]] || '#fff';
+    const icon = L.divIcon({
+      html:`<div style="font-family:monospace;font-size:9px;font-weight:700;color:${col};text-shadow:0 0 3px #fff">${pair.label}</div>`,
+      className:'', iconAnchor:[8,6]
+    });
+    prevLayers.push(L.marker([pair.gpsPt.lat,pair.gpsPt.lng],{icon}).addTo(prevMap));
+  });
+
+  // Photographer
+  const photIcon=L.divIcon({
+    html:`<div style="width:14px;height:14px;border-radius:50%;background:#4a9eff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(74,158,255,0.35);font-size:8px;display:flex;align-items:center;justify-content:center;">📷</div>`,
+    className:'', iconSize:[14,14], iconAnchor:[7,7]
+  });
+  const pm=L.marker([S.photographer.lat,S.photographer.lng],{icon:photIcon}).addTo(prevMap);
+  pm.bindTooltip(`${S.dist?S.dist.toFixed(1)+'m':''} · ${S.azimut?Math.round(S.azimut)+'°':''}`, {permanent:false,direction:'top'});
+  prevLayers.push(pm);
+  bounds.push([S.photographer.lat,S.photographer.lng]);
+
+  // Viewpoint
+  if (S.viewpoint) {
+    const vpIcon=L.divIcon({html:`<div style="font-size:14px">👁</div>`,className:'',iconSize:[16,16],iconAnchor:[8,8]});
+    prevLayers.push(L.marker([S.viewpoint.lat,S.viewpoint.lng],{icon:vpIcon}).addTo(prevMap));
+  }
+
+  if (bounds.length>1) prevMap.fitBounds(L.latLngBounds(bounds),{padding:[30,30],maxZoom:19,animate:true});
+
+  // Info
+  const info=document.getElementById('prev-info');
+  if(info) info.textContent=`${S.photographer.lat.toFixed(5)}, ${S.photographer.lng.toFixed(5)} · ${S.dist?S.dist.toFixed(1)+'m':''} · ${S.azimut?Math.round(S.azimut)+'°':''}`;
+}
+
+
+function fitPreviewMap() {
+  if (!prevMap) return;
+  const bounds = [];
+  [S.facadeA,S.facadeB,S.facadeC,S.facadeD].forEach(arr => {
+    arr.forEach(pt => { if(pt) bounds.push([pt.lat,pt.lng]); });
+  });
+  if (S.photographer) bounds.push([S.photographer.lat,S.photographer.lng]);
+  if (bounds.length > 1) prevMap.fitBounds(L.latLngBounds(bounds), { padding:[30,30], maxZoom:19 });
+}
+
+function renderPreview() { updatePreviewMap(); }
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function gotoStep(n) {
+  S.step=n;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(['','step-map','step-photo','step-preview'][n]).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',i+1===n);
+    if(i+1<n) t.classList.add('done'); else t.classList.remove('done');
+    if(i+1===n) t.classList.remove('done');
+  });
+  if(n===1) setTimeout(()=>map.invalidateSize(),50);
+  if(n===2) setTimeout(()=>{ resizeCvs(); if(photoImg) fitPhotoToCanvas(); redraw(); },50);
+  if(n===3) {
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        initPreviewMap();
+        prevMap.invalidateSize();
+        updatePreviewMap();
+      });
+    });
+  }
+}
+
+// ═══════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════
+function computeFinalCorners() {
+  if(!S.ref) return null;
+  const ref=S.ref, dist=S.dist||20;
+  const hm=S.heightMult, wm=S.widthMult, vm=S.vertOffset;
+  const ph=S.photographerHeight;
+  const halfW=S.planeW/2*wm, halfH=S.planeH/2*hm;
+  const mag=Math.sqrt(S.photographer.x**2+S.photographer.y**2);
+  const dx=-S.photographer.x/mag, dy=-S.photographer.y/mag;
+  const perpX=-dy, perpY=dx;
+
+  return {
+    topLeft:     { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph+halfH+vm },
+    topRight:    { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph+halfH+vm },
+    bottomLeft:  { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph-halfH+vm },
+    bottomRight: { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph-halfH+vm },
+  };
+}
+
+function showResults() {
+  computeVPs();
+  computePhotographerPosition();
+  buildPlane();
+  if (!S.photographer || !S.ref) { alert('Nejprve dokonči kroky 1 a 2'); return; }
+
+  const c = computeFinalCorners();
+  const p = S.photographer;
+  const facadeLenM = (S.facadeA[0]&&S.facadeA[1]) ?
+    haversine(S.facadeA[0].lat,S.facadeA[0].lng,S.facadeA[1].lat,S.facadeA[1].lng) : null;
+
+  const json = {
+    version: 4,
+    photoId: S.photoFile ? S.photoFile.name : 'unknown',
+    photographer: {
+      lat: p.lat, lng: p.lng,
+      heightM: parseFloat(S.photographerHeight.toFixed(2)),
+      distM: parseFloat((S.dist||0).toFixed(2)),
+      lateralOffsetM: parseFloat((S.lateralOffsetM||0).toFixed(2))
+    },
+    azimutDeg: S.azimut ? parseFloat(S.azimut.toFixed(2)) : null,
+    facadeA: S.facadeA.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeB: S.facadeB.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeC: S.facadeC.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeD: S.facadeD.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeLenM: facadeLenM ? parseFloat(facadeLenM.toFixed(2)) : null,
+    facadePtsOnPhoto: S.facadePts,
+    mapPtsOnPhoto: S.mapPts,
+    vanishingPoints: {
+      a:S.vp.a, b:S.vp.b, c:S.vp.c, d:S.vp.d, v:S.vp.v,
+      linesCount: {
+        a: S.lines.filter(l=>l.group==='a').length,
+        b: S.lines.filter(l=>l.group==='b').length,
+        c: S.lines.filter(l=>l.group==='c').length,
+        d: S.lines.filter(l=>l.group==='d').length,
+        v: S.lines.filter(l=>l.group==='v').length,
+      }
+    },
+    plane: c ? {
+      widthM: parseFloat((S.planeW*S.widthMult).toFixed(2)),
+      heightM: parseFloat((S.planeH*S.heightMult).toFixed(2)),
+      verticalOffsetM: S.vertOffset,
+      corners: c
+    } : null,
+    sensorCalibration: sensorCal ? {
+      appliedAt: new Date().toISOString(),
+      offsets: sensorCal.offsets,
+      savedAt: sensorCal.savedAt
+    } : null,
+    timestamp: new Date().toISOString()
+  };
+
+  // Download directly
+  const jsonStr = JSON.stringify(json, null, 2);
+  const name = (S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/,'') : 'calibration') + '_export_step3.json';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([jsonStr], {type:'application/json'}));
+  a.download = name;
+  a.click();
+}
+
+// ═══════════════════════════════════════
+// SAVE / LOAD PROJECT
+// ═══════════════════════════════════════
+function exportStep1() {
+  const json = {
+    version: 4,
+    step: 1,
+    facadeA: S.facadeA.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeB: S.facadeB.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeC: S.facadeC.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    facadeD: S.facadeD.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    viewpoint: S.viewpoint,
+    timestamp: new Date().toISOString()
+  };
+  const base = S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/,'') : 'project';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(json,null,2)],{type:'application/json'}));
+  a.download = base + '_export_step1.json';
+  a.click();
+}
+
+function saveProject() {
+  if(S.lines.length>=2) computeVPs();
+  computePhotographerPosition();
+  buildPlane();
+  const project={
+    version:4, savedAt:new Date().toISOString(),
+    facadeA:S.facadeA, facadeB:S.facadeB, facadeC:S.facadeC, facadeD:S.facadeD,
+    viewpoint:S.viewpoint,
+    lines:S.lines, facadePts:S.facadePts, mapPts:S.mapPts, vp:S.vp,
+    photoW:S.photoW, photoH:S.photoH,
+    photoFileName:S.photoFile?S.photoFile.name:null,
+    photographer:S.photographer, azimut:S.azimut,
+    photographerHeight:S.photographerHeight,
+    dist:S.dist, planeW:S.planeW, planeH:S.planeH,
+    ref:S.ref, corners:S.corners,
+  };
+  const name=(S.photoFile?S.photoFile.name.replace(/\.[^.]+$/,''):'project')+'_export_step2.json';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}));
+  a.download=name; a.click();
+}
+
+document.getElementById('project-input').addEventListener('change', e => {
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const p=JSON.parse(ev.target.result);
+      // Both project and export JSON have facadeA — load what's available
+      if(p.facadeA) S.facadeA=p.facadeA.map(x=>x&&x.lat?x:null);
+      if(p.facadeB) S.facadeB=p.facadeB.map(x=>x&&x.lat?x:null);
+      if(p.facadeC) S.facadeC=p.facadeC.map(x=>x&&x.lat?x:null);
+      if(p.facadeD) S.facadeD=p.facadeD.map(x=>x&&x.lat?x:null);
+      if(p.viewpoint) {
+        S.viewpoint=p.viewpoint;
+        placeViewpointMarker(p.viewpoint.lat,p.viewpoint.lng);
+        document.getElementById('chip-eye').classList.add('set');
+        document.getElementById('cv-eye').textContent=p.viewpoint.lat.toFixed(5)+', '+p.viewpoint.lng.toFixed(5);
+      }
+      // Project-only fields
+      if(p.lines)     S.lines=p.lines;
+      if(p.facadePts) S.facadePts=p.facadePts;
+      if(p.mapPts)    S.mapPts=p.mapPts;
+      if(p.vp)        S.vp=p.vp;
+      S.photoW=p.photoW||0; S.photoH=p.photoH||0;
+      if(p.photographer) { S.photographer=p.photographer; S.azimut=p.azimut; }
+      S.photographerHeight=p.photographerHeight||1.6;
+      S.dist=p.dist||null; S.planeW=p.planeW||null; S.planeH=p.planeH||null;
+      S.ref=p.ref||null; S.corners=p.corners||null;
+      // From export JSON: photographer nested
+      if(p.photographer&&p.photographer.heightM) S.photographerHeight=p.photographer.heightM;
+      if(p.photographer&&p.photographer.distM) S.dist=p.photographer.distM;
+      if(p.azimutDeg) S.azimut=p.azimutDeg;
+
+      resetMap();
+      ['a','b','c','d'].forEach(fk=>{
+        const arr={a:S.facadeA,b:S.facadeB,c:S.facadeC,d:S.facadeD}[fk];
+        arr.forEach((pt,i)=>{
+          if(!pt) return;
+          placeMarker(fk,i,pt.lat,pt.lng);
+          updateChip(fk,i,pt.lat,pt.lng);
+        });
+        if(arr[0]&&arr[1]) updateFacadeLine(fk);
+      });
+      if(S.photographer) drawPhotographerMarker();
+      document.getElementById('btn-map-next').disabled=!(S.facadeA[0]&&S.facadeA[1]);
+
+      const isExport = !!p.azimutDeg; // export JSON has azimutDeg, project has azimut
+      if(isExport) {
+        alert('Export JSON načten — fasády zobrazeny v mapě. Čáry a body nejsou součástí exportu, načti projekt pro pokračování v práci.');
+        gotoStep(1);
+      } else if(S.photographer&&S.planeW) {
+        if(confirm('Projekt načten. Přejít rovnou na krok 3?')) gotoStep(3);
+      } else {
+        alert('Projekt načten. Pokračuj krokem 2.');
+        gotoStep(1);
+      }
+    } catch(err) { alert('Chyba při načítání: '+err.message); }
+  };
+  reader.readAsText(f);
+});
+
+// ═══════════════════════════════════════
+// SENSOR CALIBRATION
+// ═══════════════════════════════════════
+let sensorCal=null;
+
+function toggleCalibration() {
+  const disabled=localStorage.getItem('lop_sensor_calibration_disabled');
+  if(disabled==='1') {
+    localStorage.removeItem('lop_sensor_calibration_disabled');
+    loadSensorCalibration();
+  } else {
+    localStorage.setItem('lop_sensor_calibration_disabled','1');
+    sensorCal=null;
+    document.getElementById('cal-status').textContent='✗ Kalibrace vypnuta';
+    document.getElementById('cal-status').style.color='var(--red)';
+  }
+}
+
+document.getElementById('cal-file-input').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const d=JSON.parse(ev.target.result);
+      if(!d.offsets){alert('Neplatný soubor kalibrace');return;}
+      localStorage.setItem('lop_sensor_calibration',JSON.stringify(d));
+      localStorage.removeItem('lop_sensor_calibration_disabled');
+      loadSensorCalibration();
+      alert('Kalibrace načtena: yaw='+d.offsets.yaw+'°');
+    } catch(e){alert('Chyba: '+e.message);}
+  };
+  reader.readAsText(f);
+});
+
+function loadSensorCalibration() {
+  try {
+    const disabled=localStorage.getItem('lop_sensor_calibration_disabled');
+    if(disabled==='1'){
+      document.getElementById('cal-status').textContent='✗ Kalibrace vypnuta';
+      document.getElementById('cal-status').style.color='var(--red)';
+      return;
+    }
+    const saved=JSON.parse(localStorage.getItem('lop_sensor_calibration')||'null');
+    if(saved&&saved.offsets){
+      sensorCal=saved;
+      const d=new Date(saved.savedAt).toLocaleDateString('cs-CZ');
+      document.getElementById('cal-status').textContent='✓ Kalibrace '+d;
+      document.getElementById('cal-status').style.color='var(--green)';
+    } else {
+      document.getElementById('cal-status').textContent='⚠ Bez kalibrace';
+      document.getElementById('cal-status').style.color='rgba(201,168,76,0.7)';
+    }
+  } catch(e){}
+}
+
+function applyYawCalibration(rawYaw) {
+  if(!sensorCal) return rawYaw;
+  return (rawYaw-sensorCal.offsets.yaw+360)%360;
+}
+function applyPitchCalibration(rawPitch) {
+  if(!sensorCal) return rawPitch;
+  return rawPitch-sensorCal.offsets.pitch;
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.addEventListener('error', e => {
+  console.error('JS Error:', e.message, 'at', e.filename, e.lineno);
+  const dbg = document.getElementById('dbg-method');
+  if (dbg) dbg.textContent = 'JS ERROR: ' + e.message + ' line ' + e.lineno;
+});
+window.addEventListener('load',()=>{
+  initMap();
+  initPhoto();
+  loadSensorCalibration();
+  updateStatus();
+  updateConfirmBtn();
+});
+window.addEventListener('resize',()=>{
+  if(S.step===2){ resizeCvs(); if(photoImg) fitPhotoToCanvas(); redraw(); }
+  if(S.step===3 && prevMap) prevMap.invalidateSize();
+});
+</script>
+</body>
+</html>
