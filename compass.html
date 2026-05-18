@@ -373,8 +373,12 @@ function showArrival() {
       }).catch(function(){});
     }
   } catch(e) {}
-  document.getElementById('arrivalName').textContent = TARGET.name || '';
-  document.getElementById('arrivalOverlay').style.display = 'flex';
+  var nameEl = document.getElementById('arrivalName');
+  var ov = document.getElementById('arrivalOverlay');
+  if (!ov) { alert('arrivalOverlay not found!'); return; }
+  if (nameEl) nameEl.textContent = TARGET.name || 'Testovací místo';
+  ov.style.cssText = ov.style.cssText.replace('display:none','display:flex');
+  ov.style.display = 'flex';
 }
 function arrGoAR() {
   var url = 'ar-intro.html?id=' + TARGET.id + '&lat=' + TARGET.lat + '&lng=' + TARGET.lng + '&name=' + encodeURIComponent(TARGET.name || '');
