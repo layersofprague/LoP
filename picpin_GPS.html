@@ -1745,6 +1745,10 @@ function _photoBase() {
   return 'project';
 }
 function loadProjectData(p) {
+  // Reset visual state first (clears old markers/lines)
+  resetMap();
+
+  // Then load data into state
   if(p.facadeA) S.facadeA=p.facadeA.map(x=>x&&x.lat?x:null);
   if(p.facadeB) S.facadeB=p.facadeB.map(x=>x&&x.lat?x:null);
   if(p.facadeC) S.facadeC=p.facadeC.map(x=>x&&x.lat?x:null);
@@ -1768,7 +1772,7 @@ function loadProjectData(p) {
   if(p.photographer&&p.photographer.distM) S.dist=p.photographer.distM;
   if(p.azimutDeg) S.azimut=p.azimutDeg;
 
-  resetMap();
+  // Place markers and update chips
   ['a','b','c','d'].forEach(fk=>{
     const arr={a:S.facadeA,b:S.facadeB,c:S.facadeC,d:S.facadeD}[fk];
     arr.forEach((pt,i)=>{
@@ -1778,7 +1782,7 @@ function loadProjectData(p) {
     });
     if(arr[0]&&arr[1]) updateFacadeLine(fk);
   });
-  if(S.photographer) drawPhotographerMarker();
+  if(S.photographer&&S.photographer.lat) drawPhotographerMarker();
   document.getElementById('btn-map-next').disabled=!(S.facadeA[0]&&S.facadeA[1]);
 
   const isExport = !!p.azimutDeg;
