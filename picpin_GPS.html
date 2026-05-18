@@ -1476,7 +1476,34 @@ function updatePreviewMap() {
     prevLayers.push(L.marker([pair.gpsPt.lat,pair.gpsPt.lng],{icon}).addTo(prevMap));
   });
 
-  // Photographer
+  // Azimuth arrow from photographer
+  if (S.azimut !== null && S.azimut !== undefined && S.photographer) {
+    const az = S.azimut * Math.PI / 180;
+    const arrowLen = 0.00015;
+    const endLat = S.photographer.lat + Math.cos(az) * arrowLen;
+    const endLng = S.photographer.lng + Math.sin(az) * arrowLen / Math.cos(S.photographer.lat * Math.PI / 180);
+    prevLayers.push(L.polyline(
+      [[S.photographer.lat,S.photographer.lng],[endLat,endLng]],
+      {color:'#4a9eff',weight:2.5,opacity:0.9}
+    ).addTo(prevMap));
+    const ahIcon=L.divIcon({
+      html:`<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:10px solid #4a9eff;transform:rotate(${S.azimut}deg);transform-origin:5px 10px"></div>`,
+      className:'',iconSize:[10,10],iconAnchor:[5,10]
+    });
+    prevLayers.push(L.marker([endLat,endLng],{icon:ahIcon}).addTo(prevMap));
+  }
+
+  // FOV triangle
+  if (S.corners && S.photographer) {
+    const c = S.corners;
+    prevLayers.push(L.polygon([
+      [S.photographer.lat,S.photographer.lng],
+      [c.topLeft.lat,c.topLeft.lng],
+      [c.topRight.lat,c.topRight.lng],
+    ], {color:'#4a9eff',weight:1,opacity:0.5,fillColor:'#4a9eff',fillOpacity:0.06,dashArray:'3,4'}).addTo(prevMap));
+  }
+
+  // Photographer icon
   const photIcon=L.divIcon({
     html:`<div style="width:14px;height:14px;border-radius:50%;background:#4a9eff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(74,158,255,0.35);font-size:8px;display:flex;align-items:center;justify-content:center;">📷</div>`,
     className:'', iconSize:[14,14], iconAnchor:[7,7]
@@ -1524,7 +1551,16 @@ function gotoStep(n) {
     if(i+1<n) t.classList.add('done'); else t.classList.remove('done');
     if(i+1===n) t.classList.remove('done');
   });
-  if(n===1) setTimeout(()=>map.invalidateSize(),50);
+  if(n===1) setTimeout(()=>{
+    map.invalidateSize();
+    // Fit map to show all placed markers
+    const pts=[];
+    [S.facadeA,S.facadeB,S.facadeC,S.facadeD].forEach(arr=>arr.forEach(p=>{if(p)pts.push([p.lat,p.lng]);}));
+    if(S.viewpoint) pts.push([S.viewpoint.lat,S.viewpoint.lng]);
+    if(S.photographer&&S.photographer.lat) pts.push([S.photographer.lat,S.photographer.lng]);
+    if(pts.length>1) map.fitBounds(L.latLngBounds(pts),{padding:[40,40],maxZoom:19,animate:false});
+    else if(pts.length===1) map.setView(pts[0],18,{animate:false});
+  },80);
   if(n===2) setTimeout(()=>{ resizeCvs(); if(photoImg) fitPhotoToCanvas(); redraw(); },50);
   if(n===3) {
     requestAnimationFrame(()=>{
@@ -1647,7 +1683,7 @@ function loadFromGitHub() {
     base = userBase.endsWith('/') ? userBase : userBase + '/';
   }
 
-  const url = base + 'GPS/' + name + '_GPS_export_step2.json';
+  const url = base + 'place/' + name + '_GPS_export_step2.json';
   const statusEl = document.getElementById('btn-map-next');
 
   fetch(url)
