@@ -771,6 +771,10 @@ function pasteCoords() {
       const arr = facades[mode];
       tFacade = mode;
       tIdx = (!arr[0]) ? 0 : (!arr[1]) ? 1 : 0;
+    } else if (mode === 'zl') {
+      tFacade = 'zl'; tIdx = 0;
+    } else if (mode === 'zr') {
+      tFacade = 'zr'; tIdx = 0;
     }
   }
 
@@ -782,6 +786,16 @@ function pasteCoords() {
     placeViewpointMarker(lat, lng);
     document.getElementById('chip-eye').classList.add('set');
     document.getElementById('cv-eye').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+  } else if (tFacade === 'zl') {
+    S.zaberL = { lat, lng };
+    placeZaberMarker('L', lat, lng);
+    document.getElementById('chip-zl').classList.add('set');
+    document.getElementById('cv-zl').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+  } else if (tFacade === 'zr') {
+    S.zaberR = { lat, lng };
+    placeZaberMarker('R', lat, lng);
+    document.getElementById('chip-zr').classList.add('set');
+    document.getElementById('cv-zr').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
   } else {
     const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
     facades[tFacade][tIdx] = { lat, lng };
