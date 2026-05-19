@@ -1698,17 +1698,21 @@ function solveGaussian(A, b) {
 }
 
 function buildPlane() {
-  if(!S.photographer||!S.ref) return;
+  if(!S.photographer||!S.ref) {
+    console.warn('buildPlane: chybí photographer nebo ref', {ph:!!S.photographer, ref:!!S.ref});
+    return;
+  }
   const ref=S.ref;
   const ph=S.photographerHeight;
   const mag=Math.sqrt(S.photographer.x**2+S.photographer.y**2);
-  if(mag < 0.1) return;
-
-  // Direction vector from photographer toward scene (unit vector)
+  if(mag < 0.1) {
+    console.warn('buildPlane: mag příliš malé', mag, 'x:', S.photographer.x, 'y:', S.photographer.y);
+    return;
+  }
   const dx=-S.photographer.x/mag, dy=-S.photographer.y/mag;
-
   const zaberL = S.zaberPts.find(p=>p.side==='L');
   const zaberR = S.zaberPts.find(p=>p.side==='R');
+  console.log('buildPlane: zaberL=',!!zaberL,'zaberR=',!!zaberR,'S.zaberL=',!!S.zaberL,'S.zaberR=',!!S.zaberR);
 
   if (zaberL && zaberR && S.zaberL && S.zaberR) {
     // ── ZÁBĚR MODE ──
@@ -2110,7 +2114,7 @@ function showResults() {
   buildPlane();
   if (!S.photographer || !S.ref) { alert('Nejprve dokonči kroky 1 a 2'); return; }
 
-  const c = computeFinalCorners();
+  const c = S.corners || computeFinalCorners();
   const p = S.photographer;
   const facadeLenM = (S.facadeA[0]&&S.facadeA[1]) ?
     haversine(S.facadeA[0].lat,S.facadeA[0].lng,S.facadeA[1].lat,S.facadeA[1].lng) : null;
@@ -2149,9 +2153,9 @@ function showResults() {
       }
     },
     plane: c ? {
-      widthM: parseFloat((S.planeW*S.widthMult).toFixed(2)),
-      heightM: parseFloat((S.planeH*S.heightMult).toFixed(2)),
-      verticalOffsetM: S.vertOffset,
+      widthM: parseFloat(((S.planeW||0)*(S.widthMult||1)).toFixed(2)),
+      heightM: parseFloat(((S.planeH||0)*(S.heightMult||1)).toFixed(2)),
+      verticalOffsetM: S.vertOffset||0,
       corners: c
     } : null,
     sensorCalibration: sensorCal ? {
@@ -2305,16 +2309,23 @@ function loadProjectData(p) {
   if(p.photoId&&!S._photoName) S._photoName=p.photoId;
   if(p.photographer) {
     S.photographer=p.photographer;
-    S.azimut=p.azimut||null;
-    // step3 nemá x/y — dopočítej z lat/lng a ref
-    if(!S.photographer.x && p.ref) {
-      const m=gpsToM(S.photographer.lat,S.photographer.lng,p.ref.lat,p.ref.lng);
+    S.azimut=p.azimut||p.azimutDeg||null;
+    // Dopočítej x/y od ref pokud chybí
+    if((!S.photographer.x || !S.photographer.y) && S.ref) {
+      const m=gpsToM(S.photographer.lat,S.photographer.lng,S.ref.lat,S.ref.lng);
       S.photographer.x=m.x; S.photographer.y=m.y;
     }
   }
   S.photographerHeight=p.photographerHeight||1.6;
   S.dist=p.dist||null; S.planeW=p.planeW||null; S.planeH=p.planeH||null;
   S.ref=p.ref||null;
+  // Step3 nemá ref — dopočítej ze středu fasády A
+  if(!S.ref && S.facadeA[0] && S.facadeA[1]) {
+    S.ref = {
+      lat: (S.facadeA[0].lat + S.facadeA[1].lat) / 2,
+      lng: (S.facadeA[0].lng + S.facadeA[1].lng) / 2
+    };
+  }
   S.corners=p.corners||(p.plane&&p.plane.corners)||null;
   if(p.plane) { S.planeW=p.plane.widthM||null; S.planeH=p.plane.heightM||null; }
   if(p.photographer&&p.photographer.heightM) S.photographerHeight=p.photographer.heightM;
