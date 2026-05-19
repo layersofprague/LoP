@@ -609,8 +609,6 @@ function toggleCal(){
 loadCal();
 
 // ── GPS PLACEMENT ENGINE ──
-// Projects a GPS point to screen pixel coordinates given current compass heading and camera FOV.
-// Returns {x, y} in pixels, or null if behind camera.
 function haversine(la1,lo1,la2,lo2){const R=6371000,dL=(la2-la1)*Math.PI/180,dl=(lo2-lo1)*Math.PI/180;const a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 
 function gpsToM(lat,lng,refLat,refLng){
@@ -620,7 +618,6 @@ function gpsToM(lat,lng,refLat,refLng){
   return{x,y};
 }
 
-// Compute horizontal bearing (degrees from north, 0-360) from (lat1,lng1) to (lat2,lng2)
 function bearing(lat1,lng1,lat2,lng2){
   const dLng=(lng2-lng1)*Math.PI/180;
   const φ1=lat1*Math.PI/180,φ2=lat2*Math.PI/180;
@@ -629,55 +626,106 @@ function bearing(lat1,lng1,lat2,lng2){
   return(Math.atan2(y,x)*180/Math.PI+360)%360;
 }
 
-// Given compass heading (degrees N) and camera FOV, project a GPS point to normalized screen coords
-// Returns {nx, ny} where 0,0 = top-left, 1,1 = bottom-right. Returns null if behind camera.
+// Project one GPS+alt point to normalised screen coords [0-1, 0-1].
+// alt = metres relative to ground level (positive = above ground).
+// photographer.heightM = eye height above ground.
+// compassHeading = where camera is pointing (degrees from N).
+// fovDegH / fovDegV = camera field of view.
 function gpsToScreenNorm(pointLat,pointLng,pointAltM,compassHeading,fovDegH,fovDegV,photographerPos){
-  // Get horizontal angle from photographer to point relative to north
+  // Horizontal bearing from photographer to point
   const brg=bearing(photographerPos.lat,photographerPos.lng,pointLat,pointLng);
-  // Horizontal angle relative to camera heading (positive = right)
   let dH=brg-compassHeading;
   while(dH>180)dH-=360;
   while(dH<-180)dH+=360;
-  // Check if in FOV
-  if(Math.abs(dH)>fovDegH/2+5)return null; // 5° margin
-  // Horizontal normalized position
-  const nx=0.5+dH/(fovDegH);
-  // Vertical: use distance and altitude difference
+  if(Math.abs(dH)>fovDegH/2+10)return null; // outside FOV + margin
+
+  // Horizontal: rectilinear projection
+  // nx=0 → left edge, nx=1 → right edge
+  const fovHRad=fovDegH*Math.PI/180;
+  const nx=0.5+Math.tan(dH*Math.PI/180)/Math.tan(fovHRad/2)*0.5;
+
+  // Vertical: alt is metres above ground; eye is photographer.heightM above ground
   const distH=haversine(photographerPos.lat,photographerPos.lng,pointLat,pointLng);
-  const phHeight=photographerPos.heightM||1.6;
-  const dV=pointAltM-phHeight; // altitude difference (positive = above eye level)
-  // Vertical angle (positive = below horizon)
-  const vertAngle=-Math.atan2(dV,distH)*180/Math.PI; // degrees, positive=down
-  const ny=0.5+vertAngle/(fovDegV);
-  return{nx,ny,dH,distH};
+  const eyeH=photographerPos.heightM||1.6;
+  const dV=pointAltM-eyeH; // positive = above eye level
+  // vertical angle in degrees (positive = above horizon → negative ny offset)
+  const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
+  const fovVRad=fovDegV*Math.PI/180;
+  const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVRad/2)*0.5;
+
+  return{nx,ny,dH,distH,vertAngleDeg};
 }
 
-// Get camera vertical FOV from horizontal FOV and screen aspect ratio
 function getVerticalFov(fovH,W,H){
-  // Assuming rectilinear lens
+  // Rectilinear: vFOV = 2*atan(tan(hFOV/2) / aspectRatio)
   const fovHRad=fovH*Math.PI/180;
   const aspect=W/H;
   return 2*Math.atan(Math.tan(fovHRad/2)/aspect)*180/Math.PI;
 }
 
-// Detect camera FOV by asking for video track settings
+// Derive camera horizontal FOV.
+// Strategy:
+//   1. Try video track settings (field_of_view — rarely available)
+//   2. Use vanishing point geometry from step3 JSON (facadePtsOnPhoto + distM)
+//   3. Fall back to 68° (typical wide-angle mobile rear camera)
 function detectCameraFov(stream){
+  // Try browser-reported FOV first
   try{
     const track=stream.getVideoTracks()[0];
-    if(!track)return;
-    const caps=track.getCapabilities?track.getCapabilities():{};
-    // Some browsers expose fov via settings
-    const settings=track.getSettings?track.getSettings():{};
-    // Use calData._optFov if present (from GPS calibration)
-    if(calData&&calData.plane&&calData.plane.widthM&&calData.photographer&&calData.photographer.distM){
-      // Derive FOV from plane width and distance
-      const w=calData.plane.widthM,d=calData.photographer.distM;
-      const fovRad=2*Math.atan(w/(2*d));
-      cameraFovDeg=fovRad*180/Math.PI;
+    const settings=track&&track.getSettings?track.getSettings():{};
+    if(settings.field_of_view&&settings.field_of_view>20){
+      cameraFovDeg=settings.field_of_view;
       camFovDetected=true;
-      console.log('FOV from plane geometry:',cameraFovDeg.toFixed(1)+'°');
+      console.log('FOV from browser track settings:',cameraFovDeg.toFixed(1)+'°');
+      return;
     }
   }catch(e){}
+
+  if(!calData)return;
+
+  // Strategy 2: derive from facadePtsOnPhoto pixel positions + known facade length + distM
+  // The facade A spans from pixel x=A1.x to x=A2.x (normalised 0-1).
+  // Angular width of facade = atan(facadeLen / distM) from perpendicular, but
+  // we know exact pixel span → FOV = facadeAngularWidth / pixelSpan
+  try{
+    const pts=calData.facadePtsOnPhoto;
+    const p=calData.photographer;
+    const facadeLen=calData.facadeLenM;
+    if(pts&&pts.length>=2&&p&&p.distM&&facadeLen){
+      const A1=pts.find(pp=>pp.label==='A1');
+      const A2=pts.find(pp=>pp.label==='A2');
+      if(A1&&A2){
+        const pixSpan=Math.abs(A2.x-A1.x); // 0-1 normalised
+        // Angular width of facade as seen from photographer (lateral geometry)
+        // dist to facade A is approx distM (perpendicular), lateral offset = lateralOffsetM
+        // Use haversine between facade A endpoints and photographer for accuracy
+        const fa=calData.facadeA;
+        if(fa&&fa[0]&&fa[1]){
+          const distA1=haversine(p.lat,p.lng,fa[0].lat,fa[0].lng);
+          const distA2=haversine(p.lat,p.lng,fa[1].lat,fa[1].lng);
+          const brgA1=bearing(p.lat,p.lng,fa[0].lat,fa[0].lng);
+          const brgA2=bearing(p.lat,p.lng,fa[1].lat,fa[1].lng);
+          let angDiff=brgA2-brgA1;
+          while(angDiff>180)angDiff-=360;
+          while(angDiff<-180)angDiff+=360;
+          const facadeAngDeg=Math.abs(angDiff);
+          if(facadeAngDeg>1&&pixSpan>0.02){
+            cameraFovDeg=facadeAngDeg/pixSpan;
+            // Clamp to sane range for mobile cameras
+            cameraFovDeg=Math.max(40,Math.min(90,cameraFovDeg));
+            camFovDetected=true;
+            console.log('FOV from facade pixel span:',cameraFovDeg.toFixed(1)+'° (facadeAng='+facadeAngDeg.toFixed(2)+'° pixSpan='+pixSpan.toFixed(3)+')');
+            return;
+          }
+        }
+      }
+    }
+  }catch(e){console.warn('FOV facade detection failed:',e);}
+
+  // Fallback: 68° typical mobile rear camera
+  cameraFovDeg=68;
+  camFovDetected=false;
+  console.log('FOV fallback:',cameraFovDeg+'°');
 }
 
 // ── CANVAS AR RENDERING ──
@@ -752,6 +800,13 @@ function computeCornerScreenPos(compassHeading){
     const proj=gpsToScreenNorm(c.lat,c.lng,c.alt||0,compassHeading,fovH,fovV,photographerPos);
     if(!proj)return null;
     result[name]={x:proj.nx*W,y:proj.ny*H};
+  }
+  // Debug log (throttled)
+  const now=performance.now();
+  if(!computeCornerScreenPos._lastLog||now-computeCornerScreenPos._lastLog>2000){
+    computeCornerScreenPos._lastLog=now;
+    const tl=result.topLeft,tr=result.topRight,bl=result.bottomLeft;
+    console.log(`GPS corners @ az${compassHeading.toFixed(1)}° FOV${fovH.toFixed(0)}°h/${fovV.toFixed(0)}°v: TL(${tl.x.toFixed(0)},${tl.y.toFixed(0)}) TR(${tr.x.toFixed(0)},${tr.y.toFixed(0)}) BL(${bl.x.toFixed(0)},${bl.y.toFixed(0)})`);
   }
   return result;
 }
@@ -1061,7 +1116,7 @@ function toggleARMode(){
 function fillAnch(){
   const ab=$('anch-db');if(ab)ab.innerHTML=`
     <div class="dr"><span class="dk">GPS placement</span><span class="dv">${gpsPlacementActive?'✓ aktivní':'— manuál'}</span></div>
-    <div class="dr"><span class="dk">FOV</span><span class="dv">${cameraFovDeg.toFixed(0)}°${camFovDetected?' (z dat)':' (default)'}</span></div>
+    <div class="dr"><span class="dk">FOV kamera</span><span class="dv">${cameraFovDeg.toFixed(1)}°${camFovDetected?' ✓ fasáda':' ⚠ default'}</span></div>
     <div class="dr"><span class="dk">Azimut</span><span class="dv">${calData&&calData.azimutDeg?calData.azimutDeg.toFixed(1)+'°':'—'}</span></div>
     ${gyroOk?'<div class="dr"><span class="dk">AR Δ</span><span class="dv" id="ar-d">—</span></div>':''}
   `;
