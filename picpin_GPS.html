@@ -1298,6 +1298,7 @@ function computeAll() {
   }
   computeVPs();
   computePhotographerPosition();
+  optimizeCameraParams();
   buildPlane();
   gotoStep(3);
 }
@@ -1525,6 +1526,172 @@ function computePhotographerPosition() {
   drawPhotographerMarker();
 }
 
+// ═══════════════════════════════════════
+// CAMERA OPTIMIZATION — least squares přes všechny páry GPS+pixel
+// ═══════════════════════════════════════
+function optimizeCameraParams() {
+  if (!S.photographer || !S.ref) return;
+  const ref = S.ref;
+
+  // Sbíráme všechny dostupné páry GPS+pixel
+  const allPairs = [];
+
+  // A1/A2
+  S.facadePts.forEach(fp => {
+    const idx = fp.label === 'A1' ? 0 : 1;
+    if (S.facadeA[idx]) allPairs.push({ gps: S.facadeA[idx], px: fp.x, py: fp.y, label: fp.label });
+  });
+
+  // B1/B2/C1/C2/D1/D2
+  getValidPairs().forEach(p => {
+    allPairs.push({ gps: p.gpsPt, px: p.imgPt.x, py: p.imgPt.y, label: p.label });
+  });
+
+  // Záběr L/P
+  const zaberL = S.zaberPts.find(p=>p.side==='L');
+  const zaberR = S.zaberPts.find(p=>p.side==='R');
+  if (zaberL && S.zaberL) allPairs.push({ gps: S.zaberL, px: zaberL.x, py: zaberL.y, label:'ZL' });
+  if (zaberR && S.zaberR) allPairs.push({ gps: S.zaberR, px: zaberR.x, py: zaberR.y, label:'ZR' });
+
+  if (allPairs.length < 3) return; // potřebujeme alespoň 3 páry
+
+  const R = 6371000;
+  const cosLat = Math.cos(ref.lat * Math.PI / 180);
+
+  // Převod GPS na lokální metry od ref
+  function toLocal(gps) {
+    return {
+      x: (gps.lng - ref.lng) * Math.PI/180 * R * cosLat,
+      y: (gps.lat - ref.lat) * Math.PI/180 * R
+    };
+  }
+
+  // Projekce GPS bodu na obraz pro dané parametry kamery
+  // params: [photX, photY, azimutRad, fovRad]
+  function project(params, gpsLocal) {
+    const [px, py, az, fov] = params;
+    const dx = gpsLocal.x - px;
+    const dy = gpsLocal.y - py;
+    // Rotace do souřadnic kamery: forward=(sin(az),cos(az)), right=(cos(az),-sin(az))
+    const fwdX = Math.sin(az), fwdY = Math.cos(az);
+    const rgtX = Math.cos(az), rgtY = -Math.sin(az);
+    const forward = dx*fwdX + dy*fwdY;
+    const right   = dx*rgtX + dy*rgtY;
+    if (forward < 0.1) return null; // za kamerou
+    // Normalizovaná pixel pozice (0=levý okraj, 1=pravý okraj)
+    const imgX = 0.5 + (right/forward) / (2*Math.tan(fov/2));
+    return imgX;
+  }
+
+  // Chybová funkce — suma čtverců chyb v pixelech (normalizovaných)
+  function residuals(params) {
+    const res = [];
+    const localPairs = allPairs.map(p => ({ ...p, local: toLocal(p.gps) }));
+    for (const p of localPairs) {
+      const imgX = project(params, p.local);
+      if (imgX === null) continue;
+      res.push(imgX - p.px);
+    }
+    return res;
+  }
+
+  // Počáteční odhad z aktuálního výpočtu
+  const az0 = S.azimut * Math.PI / 180;
+  const fov0 = 60 * Math.PI / 180;
+  let params = [S.photographer.x, S.photographer.y, az0, fov0];
+
+  // Gauss-Newton iterace
+  const h = 1e-4; // krok pro numerický gradient
+  for (let iter = 0; iter < 50; iter++) {
+    const res = residuals(params);
+    if (!res.length) break;
+    const n = params.length, m = res.length;
+
+    // Jacobian J[i][j] = dres[i]/dparams[j]
+    const J = res.map(() => new Array(n).fill(0));
+    for (let j = 0; j < n; j++) {
+      const p2 = [...params]; p2[j] += h;
+      const res2 = residuals(p2);
+      for (let i = 0; i < m; i++) {
+        J[i][j] = (res2[i] - res[i]) / h;
+      }
+    }
+
+    // JtJ * delta = -Jt * res
+    const JtJ = Array.from({length:n}, () => new Array(n).fill(0));
+    const Jtr = new Array(n).fill(0);
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        Jtr[j] -= J[i][j] * res[i];
+        for (let k = 0; k < n; k++) JtJ[j][k] += J[i][j] * J[i][k];
+      }
+    }
+
+    // Regularizace — stabilizuje FOV a polohu
+    const lambda = 1e-3;
+    for (let j = 0; j < n; j++) JtJ[j][j] += lambda;
+
+    // Gaussian elimination 4x4
+    const delta = solveGaussian(JtJ, Jtr);
+    if (!delta) break;
+
+    // Omezení kroku
+    const stepScale = 1.0;
+    params[0] += delta[0] * stepScale;
+    params[1] += delta[1] * stepScale;
+    params[2] += delta[2] * stepScale;
+    params[3] = Math.max(20*Math.PI/180, Math.min(120*Math.PI/180, params[3] + delta[3] * stepScale));
+
+    // Konvergence
+    const norm = Math.sqrt(delta.reduce((s,d)=>s+d*d,0));
+    if (norm < 1e-6) break;
+  }
+
+  // Aplikuj výsledky pokud jsou rozumné
+  const [optX, optY, optAz, optFov] = params;
+  const distOpt = Math.sqrt(optX**2 + optY**2);
+  const distOrig = Math.sqrt(S.photographer.x**2 + S.photographer.y**2);
+
+  // Sanity check — odmítni pokud je výsledek příliš divný
+  if (distOpt < 1 || distOpt > 500) return;
+  if (optFov < 20*Math.PI/180 || optFov > 110*Math.PI/180) return;
+  if (Math.abs(distOpt - distOrig) > distOrig * 0.8) return; // víc než 80% změna
+
+  // Ulož optimalizované parametry
+  S.photographer.x = optX;
+  S.photographer.y = optY;
+  const photGPS = mToGps(optX, optY, ref.lat, ref.lng);
+  S.photographer.lat = photGPS.lat;
+  S.photographer.lng = photGPS.lng;
+  S.azimut = ((optAz * 180/Math.PI) + 360) % 360;
+  S.dist = distOpt;
+  S._optFov = optFov * 180 / Math.PI;
+
+  const finalRes = residuals(params);
+  const rmse = Math.sqrt(finalRes.reduce((s,r)=>s+r*r,0)/finalRes.length);
+  S._debug && (S._debug.method += ` → opt(${allPairs.length}p, RMSE=${rmse.toFixed(4)})`);
+  S._debug && (S._debug.optFov = optFov * 180/Math.PI);
+
+  drawPhotographerMarker();
+}
+
+function solveGaussian(A, b) {
+  const n = b.length;
+  const M = A.map((row,i) => [...row, b[i]]);
+  for (let col = 0; col < n; col++) {
+    let maxR = col;
+    for (let r = col+1; r < n; r++) if (Math.abs(M[r][col]) > Math.abs(M[maxR][col])) maxR = r;
+    [M[col], M[maxR]] = [M[maxR], M[col]];
+    if (Math.abs(M[col][col]) < 1e-12) return null;
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const f = M[r][col] / M[col][col];
+      for (let c = col; c <= n; c++) M[r][c] -= f * M[col][c];
+    }
+  }
+  return M.map((row,i) => row[n] / row[i]);
+}
+
 function buildPlane() {
   if(!S.photographer||!S.ref) return;
   const ref=S.ref;
@@ -1619,10 +1786,10 @@ function buildPlane() {
     S._debug && (S._debug.planeSource = `záběr L+P (${S.planeW.toFixed(1)}m, FOV ${fovEff.toFixed(1)}°)`);
 
   } else {
-    // ── FALLBACK: FOV estimate ──
+    // ── FALLBACK: FOV estimate (použij optimalizovaný FOV pokud dostupný) ──
     const dist=S.dist||20;
     const aspect=S.photoW>0?S.photoW/S.photoH:16/9;
-    const fov=60*Math.PI/180;
+    const fov=(S._optFov ? S._optFov*Math.PI/180 : 60*Math.PI/180);
     S.planeW=2*dist*Math.tan(fov/2);
     S.planeH=S.planeW/aspect;
 
@@ -1672,7 +1839,7 @@ function updatePreviewMap() {
     el('ps-az').textContent = S.azimut ? Math.round(S.azimut) + '°' : '—';
     // Debug
     el('dbg-method').textContent = S._debug.method || '—';
-    if(el('dbg-plane')) el('dbg-plane').textContent = S._debug.planeSource || '—';
+    if(el('dbg-plane')) el('dbg-plane').textContent = (S._debug.planeSource || '—') + (S._optFov ? ` · FOV ${S._optFov.toFixed(1)}°` : '');
     el('dbg-dist').textContent = S._debug.distSource || '—';
     el('dbg-lateral').textContent = S._debug.lateralSource || '—';
     el('dbg-height').textContent = S._debug.heightSource || '—';
