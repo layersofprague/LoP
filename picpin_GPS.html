@@ -270,8 +270,8 @@
         <div class="facade-section">
           <div class="facade-label"><div class="facade-label-dot" style="background:#fff;opacity:0.7"></div>Záběr — okraje fotografie v mapě (pro přesnou rovinu)</div>
           <div class="points-row">
-            <div class="point-chip chip-zl" id="chip-zl" onclick="selectChip('zl',0)" title="Levý okraj záběru — identifikovatelný bod na levém okraji fotografie"><div class="chip-label">◧ Záběr L</div><div class="chip-val" id="cv-zl">—</div></div>
-            <div class="point-chip chip-zr" id="chip-zr" onclick="selectChip('zr',0)" title="Pravý okraj záběru — identifikovatelný bod na pravém okraji fotografie"><div class="chip-label">▨ Záběr P</div><div class="chip-val" id="cv-zr">—</div></div>
+            <div class="point-chip chip-zl" id="chip-zl" onclick="setMapMode('zl')" title="Levý okraj záběru — identifikovatelný bod na levém okraji fotografie"><div class="chip-label">◧ Záběr L</div><div class="chip-val" id="cv-zl">—</div></div>
+            <div class="point-chip chip-zr" id="chip-zr" onclick="setMapMode('zr')" title="Pravý okraj záběru — identifikovatelný bod na pravém okraji fotografie"><div class="chip-label">▨ Záběr P</div><div class="chip-val" id="cv-zr">—</div></div>
           </div>
         </div>
         <div class="facade-section">
@@ -1953,33 +1953,27 @@ function showResults() {
 // SAVE / LOAD PROJECT
 // ═══════════════════════════════════════
 function loadFromGitHub() {
-  const name = prompt(
-    'Název souboru na GitHubu (bez přípony):\nPříklad: h_001h',
-    S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/, '') : ''
+  let name = prompt(
+    'Název místa na GitHubu:\nPříklad: H001\n(bez přípony a bez _GPS_export_step...)',
+    S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/, '').replace(/_GPS_export_step\d+$/i,'') : ''
   );
   if (!name) return;
+  // Strip suffix if user pasted full filename
+  name = name.replace(/_GPS_export_step\d+\.json$/i,'').replace(/\.json$/i,'').trim();
 
   let base = '';
   const loc = window.location.href;
 
-  // Convert raw.githubusercontent.com URL to github.io
-  // raw: https://raw.githubusercontent.com/USER/REPO/main/file.html
-  // pages: https://USER.github.io/REPO/
   const rawMatch = loc.match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//);
+  const ghMatch  = loc.match(/^(https:\/\/[^/]+\/[^/]+\/)/);
+
   if (rawMatch) {
     base = `https://${rawMatch[1]}.github.io/${rawMatch[2]}/`;
+  } else if (ghMatch && !loc.startsWith('file://')) {
+    base = ghMatch[1];
   } else {
-    const ghMatch = loc.match(/^(https:\/\/[^/]+\/[^/]+\/)/);
-    if (ghMatch) {
-      base = ghMatch[1];
-    } else {
-      const userBase = prompt(
-        'Nepodařilo se určit GitHub URL.\nZadej základní URL repozitáře:',
-        'https://layersofprague.github.io/LoP/'
-      );
-      if (!userBase) return;
-      base = userBase.endsWith('/') ? userBase : userBase + '/';
-    }
+    // Lokální soubor nebo neznámé prostředí — použij known repo
+    base = 'https://layersofprague.github.io/LoP/';
   }
 
   const jsonUrl = base + 'place/' + name + '_GPS_export_step2.json';
