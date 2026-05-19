@@ -734,9 +734,18 @@ let arCanvas=null,arCtx=null;
 
 function initCanvas(){
   arCanvas=$('ar-canvas');
-  arCanvas.width=window.innerWidth;
-  arCanvas.height=window.innerHeight;
+  arCanvas.width=window.innerWidth||390;
+  arCanvas.height=window.innerHeight||844;
   arCtx=arCanvas.getContext('2d');
+  console.log('initCanvas: canvas='+arCanvas.width+'x'+arCanvas.height+' ctx='+!!arCtx);
+  // Immediate test draw — bright red rect, always visible if canvas works
+  if(arCtx){
+    arCtx.fillStyle='rgba(255,0,0,0.8)';
+    arCtx.fillRect(20,80,200,40);
+    arCtx.fillStyle='#fff';
+    arCtx.font='bold 13px monospace';
+    arCtx.fillText('CANVAS OK '+arCanvas.width+'x'+arCanvas.height,28,105);
+  }
 }
 
 // Draw a quadrilateral by triangulating: TL→TR→BL and TR→BR→BL
@@ -937,9 +946,8 @@ function updateGpsPlacementUI(active,heading){
 // Start canvas render loop
 function startCanvasLoop(){
   if(arCanvasRafId)cancelAnimationFrame(arCanvasRafId);
+  console.log('startCanvasLoop: arCanvas='+!!arCanvas+' arCtx='+!!arCtx);
   function loop(){
-    // Do NOT reset canvas.width — it destroys the 2D context state every frame.
-    // Instead clear via clearRect in renderARCanvas.
     renderARCanvas();
     arCanvasRafId=requestAnimationFrame(loop);
   }
@@ -953,10 +961,13 @@ function launchAR(){
   showPhase('ph-ar');
   on($('cam'),'on',true);on($('sl'),'on',true);
   $('topbar').style.display='flex';
-  // Init canvas BEFORE getUserMedia — no race condition with render loop
-  initCanvas();
+  // Make canvas visible FIRST, then init (so dimensions are correct)
   on($('ar-canvas'),'on',true);
-  startCanvasLoop();
+  // Small delay ensures layout is done before we read innerWidth/Height
+  setTimeout(()=>{
+    initCanvas();
+    startCanvasLoop();
+  },50);
   navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false}).then(s=>{
     camStream=s;$('cam').srcObject=s;$('cam').play();
     detectCameraFov(s);
