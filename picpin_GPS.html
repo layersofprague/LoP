@@ -2178,11 +2178,23 @@ function showResults() {
 // SAVE / LOAD PROJECT
 // ═══════════════════════════════════════
 function loadFromGitHub() {
+  const defaultName = (S._photoName || (S.photoFile && S.photoFile.name) || '')
+    .replace(/\.[^.]+$/, '')
+    .replace(/_GPS_export_step\d+$/i, '');
   let name = prompt(
-    'Název místa na GitHubu:\nPříklad: H001\n(bez přípony a bez _GPS_export_step...)',
-    S.photoFile ? S.photoFile.name.replace(/\.[^.]+$/, '').replace(/_GPS_export_step\d+$/i,'') : ''
+    'Název souboru na GitHubu:\nPříklad: h_001h nebo H001',
+    defaultName
   );
   if (!name) return;
+  name = name.replace(/_GPS_export_step\d+\.json$/i,'').replace(/\.json$/i,'').trim();
+
+  // Pokud vypadá jako H001, zkus také h_001h variantu
+  function toAlt(n) {
+    const m = n.match(/^([A-Z]+)(\d+)$/);
+    if (!m) return null;
+    return m[1].toLowerCase() + '_0' + m[2] + 'h';
+  }
+  const altName = toAlt(name);
   // Strip suffix if user pasted full filename
   name = name.replace(/_GPS_export_step\d+\.json$/i,'').replace(/\.json$/i,'').trim();
 
@@ -2201,30 +2213,33 @@ function loadFromGitHub() {
     base = 'https://layersofprague.github.io/LoP/';
   }
 
-  const jsonUrl  = base + 'GPS/' + name + '_GPS_export_step2.json';
-  const jsonUrl3 = base + 'GPS/' + name + '_GPS_export_step3.json';
+  const base_url_info = base + 'GPS/' + name + '_GPS_export_step3.json';
 
   const btn = document.querySelector('[onclick="loadFromGitHub()"]');
   if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Načítám…'; btn.disabled = true; }
   const resetBtn = () => { if (btn) { btn.textContent = btn._orig||'📡 GitHub'; btn.disabled = false; } };
 
   async function doLoad() {
-    // Try step3, then step2
+    // Try step3, then step2, then alt name variants
     let p = null, usedUrl = '';
-    console.log('Trying URLs:', jsonUrl3, jsonUrl);
-    for (const url of [jsonUrl3, jsonUrl]) {
-      try {
-        const r = await fetch(url);
-        if (!r.ok) { console.warn('fetch', url, r.status); continue; }
-        p = await r.json();
-        usedUrl = url;
-        break;
-      } catch(e) { console.warn('fetch error', url, e.message); }
+    const names = altName ? [name, altName] : [name];
+    outer: for (const n of names) {
+      for (const suffix of ['_GPS_export_step3.json', '_GPS_export_step2.json']) {
+        const url = base + 'GPS/' + n + suffix;
+        try {
+          const r = await fetch(url);
+          if (!r.ok) { console.warn('fetch', url, r.status); continue; }
+          p = await r.json();
+          usedUrl = url;
+          name = n; // update name for photo fetch
+          break outer;
+        } catch(e) { console.warn('fetch error', url, e.message); }
+      }
     }
 
     if (!p) {
       resetBtn();
-      const msg = 'Nepodařilo se načíst:\n' + jsonUrl3 + '\n' + jsonUrl + '\n\nNačíst ze lokálu?';
+      const msg = 'Nepodařilo se načíst:\n' + base_url_info + (altName ? '\n(zkoušeno i: ' + altName + ')' : '') + '\n\nNačíst ze lokálu?';
       if (confirm(msg)) document.getElementById('project-input').click();
       return;
     }
