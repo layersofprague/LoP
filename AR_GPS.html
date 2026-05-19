@@ -549,7 +549,7 @@ function initNavMap(){
   navMap.setView([p.lat,p.lng],18);
   const pIcon=L.divIcon({html:'<div style="width:16px;height:16px;border-radius:50%;background:#1a1a14;border:3px solid #F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.25)"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
   photMarker=L.marker([p.lat,p.lng],{icon:pIcon}).addTo(navMap);
-  photMarker.bindTooltip('📷 Stanoviště fotografa',{permanent:false,direction:'top'});
+  photMarker.bindTooltip('📷 Stanoviště fotografa',{permanent:true,direction:'top'});
   const FC={facadeA:'#48c774',facadeB:'#4a9eff',facadeC:'#c9a84c',facadeD:'#e91e8c'};
   ['facadeA','facadeB','facadeC','facadeD'].forEach(k=>{
     const arr=calData[k];if(!arr||arr.length<2||!arr[0]||!arr[1])return;
@@ -602,14 +602,14 @@ function initNavMap(){
 function fitBoth(){
   if(!navMap||!calData)return;
   const p=calData.photographer,bounds=[];
-  if(userPos)bounds.push([userPos.lat,userPos.lng]);
   bounds.push([p.lat,p.lng]);
-  // Also include plane corners so the whole scene is visible
   if(calData.plane&&calData.plane.corners){
     const c=calData.plane.corners;
     bounds.push([c.topLeft.lat,c.topLeft.lng],[c.topRight.lat,c.topRight.lng]);
   }
-  if(bounds.length>=1)navMap.fitBounds(L.latLngBounds(bounds),{padding:[50,50],maxZoom:19,animate:true});
+  if(calData.zaberL)bounds.push([calData.zaberL.lat,calData.zaberL.lng]);
+  if(calData.zaberR)bounds.push([calData.zaberR.lat,calData.zaberR.lng]);
+  navMap.fitBounds(L.latLngBounds(bounds),{padding:[50,50],maxZoom:19,animate:true});
 }
 
 // ── SENSORS ──
@@ -661,10 +661,9 @@ function onGPSUpdate(){
     if(!userMarker){
       const uI=L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#b04020;border:3px solid #fff;box-shadow:0 0 0 3px rgba(176,64,32,.25)"></div>',className:'',iconSize:[14,14],iconAnchor:[7,7]});
       userMarker=L.marker([userPos.lat,userPos.lng],{icon:uI}).addTo(navMap);
-      fitBoth(); // first fix: show both user and photographer
+      // Nezahrnuj uživatele do bounds — mapa zůstane na fotografovi a rovině
     } else {
       userMarker.setLatLng([userPos.lat,userPos.lng]);
-      if(isLocked&&!navMap.getBounds().contains([userPos.lat,userPos.lng]))fitBoth();
     }
   }
 }
