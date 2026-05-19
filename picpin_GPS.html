@@ -2104,6 +2104,7 @@ function computeFinalCorners() {
 function showResults() {
   computeVPs();
   computePhotographerPosition();
+  optimizeCameraParams();
   buildPlane();
   if (!S.photographer || !S.ref) { alert('Nejprve dokonči kroky 1 a 2'); return; }
 
@@ -2114,7 +2115,7 @@ function showResults() {
 
   const json = {
     version: 4,
-    photoId: S.photoFile ? S.photoFile.name : 'unknown',
+    photoId: S.photoFile ? S.photoFile.name : (S._photoName || 'unknown'),
     photographer: {
       lat: p.lat, lng: p.lng,
       heightM: parseFloat(S.photographerHeight.toFixed(2)),
@@ -2122,13 +2123,19 @@ function showResults() {
       lateralOffsetM: parseFloat((S.lateralOffsetM||0).toFixed(2))
     },
     azimutDeg: S.azimut ? parseFloat(S.azimut.toFixed(2)) : null,
+    optFovDeg: S._optFov ? parseFloat(S._optFov.toFixed(2)) : null,
     facadeA: S.facadeA.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
     facadeB: S.facadeB.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
     facadeC: S.facadeC.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
     facadeD: S.facadeD.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
+    viewpoint: S.viewpoint || null,
+    zaberL: S.zaberL || null,
+    zaberR: S.zaberR || null,
+    zaberPts: S.zaberPts || [],
     facadeLenM: facadeLenM ? parseFloat(facadeLenM.toFixed(2)) : null,
     facadePtsOnPhoto: S.facadePts,
     mapPtsOnPhoto: S.mapPts,
+    lines: S.lines,
     vanishingPoints: {
       a:S.vp.a, b:S.vp.b, c:S.vp.c, d:S.vp.d, v:S.vp.v,
       linesCount: {
@@ -2267,9 +2274,10 @@ function loadProjectData(p) {
     document.getElementById('cv-eye').textContent=p.viewpoint.lat.toFixed(5)+', '+p.viewpoint.lng.toFixed(5);
   }
   if(p.lines)     S.lines=p.lines;
-  if(p.facadePts) S.facadePts=p.facadePts;
-  if(p.mapPts)    S.mapPts=p.mapPts;
+  if(p.facadePts||p.facadePtsOnPhoto) S.facadePts=p.facadePts||p.facadePtsOnPhoto;
+  if(p.mapPts||p.mapPtsOnPhoto)       S.mapPts=p.mapPts||p.mapPtsOnPhoto;
   if(p.zaberPts)  S.zaberPts=p.zaberPts;
+  if(p.optFovDeg) S._optFov=p.optFovDeg;
   if(p.zaberL)    { S.zaberL=p.zaberL; placeZaberMarker('L',p.zaberL.lat,p.zaberL.lng); document.getElementById('chip-zl').classList.add('set'); document.getElementById('cv-zl').textContent=p.zaberL.lat.toFixed(5)+', '+p.zaberL.lng.toFixed(5); }
   if(p.zaberR)    { S.zaberR=p.zaberR; placeZaberMarker('R',p.zaberR.lat,p.zaberR.lng); document.getElementById('chip-zr').classList.add('set'); document.getElementById('cv-zr').textContent=p.zaberR.lat.toFixed(5)+', '+p.zaberR.lng.toFixed(5); }
   if(p.vp)        S.vp=p.vp;
