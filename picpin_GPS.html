@@ -99,6 +99,10 @@
     .chip-b.set { border-color:rgba(74,158,255,0.5) !important; }
     .chip-c.set { border-color:rgba(241,196,15,0.5) !important; }
     .chip-d.set { border-color:rgba(233,30,140,0.5) !important; }
+    .chip-zl.set, .chip-zr.set { border-color:rgba(255,255,255,0.5) !important; }
+    .chip-zl, .chip-zr { border-color:rgba(255,255,255,0.2); }
+    .mode-btn.active-zl, .mode-btn.active-zr { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.5); color:#fff; }
+    .tool-btn.active-zaber { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.5); color:#fff; }
 
     .mode-btns { display:flex; gap:5px; margin-bottom:8px; }
     .mode-btn { flex:1; padding:7px 4px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.03); font-family:var(--mono); font-size:9px; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; color:rgba(255,255,255,0.4); transition:all 0.2s; text-align:center; }
@@ -228,6 +232,8 @@
           <div class="mode-btn" id="mode-btn-b" onclick="setMapMode('b')">🔵 B</div>
           <div class="mode-btn" id="mode-btn-c" onclick="setMapMode('c')">🟡 C</div>
           <div class="mode-btn" id="mode-btn-d" onclick="setMapMode('d')">🟣 D</div>
+          <div class="mode-btn" id="mode-btn-zl" onclick="setMapMode('zl')" title="Záběr — levý okraj fotografie">◧ L</div>
+          <div class="mode-btn" id="mode-btn-zr" onclick="setMapMode('zr')" title="Záběr — pravý okraj fotografie">▨ P</div>
           <div class="mode-btn" id="mode-btn-eye" onclick="setMapMode('eye')" title="Stanoviště fotografa — odkud koukal">👁</div>
           <div class="mode-btn" id="mode-btn-r" onclick="setMapMode('r')" title="Přesunout bod">✥</div>
           <div class="mode-btn btn-danger" onclick="resetMap()" style="flex:0.5;border-color:rgba(192,57,43,0.3);color:var(--red)">↺</div>
@@ -259,6 +265,13 @@
           <div class="points-row">
             <div class="point-chip chip-d" id="chip-d1" onclick="selectChip('d',0)" title="Klikni pro editaci"><div class="chip-label">D1</div><div class="chip-val" id="cv-d1">—</div></div>
             <div class="point-chip chip-d" id="chip-d2" onclick="selectChip('d',1)" title="Klikni pro editaci"><div class="chip-label">D2</div><div class="chip-val" id="cv-d2">—</div></div>
+          </div>
+        </div>
+        <div class="facade-section">
+          <div class="facade-label"><div class="facade-label-dot" style="background:#fff;opacity:0.7"></div>Záběr — okraje fotografie v mapě (pro přesnou rovinu)</div>
+          <div class="points-row">
+            <div class="point-chip chip-zl" id="chip-zl" onclick="selectChip('zl',0)" title="Levý okraj záběru — identifikovatelný bod na levém okraji fotografie"><div class="chip-label">◧ Záběr L</div><div class="chip-val" id="cv-zl">—</div></div>
+            <div class="point-chip chip-zr" id="chip-zr" onclick="selectChip('zr',0)" title="Pravý okraj záběru — identifikovatelný bod na pravém okraji fotografie"><div class="chip-label">▨ Záběr P</div><div class="chip-val" id="cv-zr">—</div></div>
           </div>
         </div>
         <div class="facade-section">
@@ -302,6 +315,7 @@
           <div class="tool-btn" id="tool-v" onclick="setLineTool('v')" title="Svislice (červené, čárkované)">↕</div>
           <div class="tool-btn" id="tool-pts" onclick="setLineTool('pts')" title="Body A1/A2 na fotografii — pro výpočet vzdálenosti">⊕A</div>
           <div class="tool-btn" id="tool-mappts" onclick="setLineTool('mappts')" title="Body B1/B2/C1/C2/D1/D2 na fotografii — pro výpočet roviny">⊕BCD</div>
+          <div class="tool-btn" id="tool-zaber" onclick="setLineTool('zaber')" title="Záběr L/P — okraje fotografie odpovídající bodům v mapě">◧▨</div>
           <div class="tool-btn" onclick="undoLine()" title="Zpět">⌫</div>
           <div class="tool-btn" onclick="clearLines()" title="Smazat vše">✕</div>
         </div>
@@ -309,6 +323,15 @@
         <div id="mappts-selector" style="display:none;position:absolute;top:10px;left:52px;z-index:20;background:rgba(0,0,0,0.82);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;backdrop-filter:blur(6px);">
           <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:5px;letter-spacing:0.1em">ZAZNAČIT BOD:</div>
           <div id="mps-row" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+        </div>
+        <!-- Záběr selector -->
+        <div id="zaber-selector" style="display:none;position:absolute;top:10px;left:52px;z-index:20;background:rgba(0,0,0,0.82);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;backdrop-filter:blur(6px);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:5px;letter-spacing:0.1em">ZÁBĚR — OKRAJ:</div>
+          <div style="display:flex;gap:6px;">
+            <button id="zaber-btn-l" class="mps-btn" onclick="setActiveSide('L')" style="padding:4px 10px;font-size:10px">◧ Levý</button>
+            <button id="zaber-btn-r" class="mps-btn" onclick="setActiveSide('R')" style="padding:4px 10px;font-size:10px">▨ Pravý</button>
+          </div>
+          <div id="zaber-hint" style="font-size:8px;color:rgba(255,255,255,0.3);margin-top:5px;letter-spacing:0.05em">Vyber okraj, pak klikni na fotografii</div>
         </div>
       </div>
       <div id="photo-bottom">
@@ -320,6 +343,7 @@
           <div class="vp-chip" id="chip-vpv">↕ svislice: 0</div>
           <div class="vp-chip" id="chip-pts">A1/A2: 0 bodů</div>
           <div class="vp-chip" id="chip-mappts">B/C/D body: 0</div>
+          <div class="vp-chip" id="chip-zaber">Záběr: 0/2</div>
           <div class="vp-chip" id="chip-result">Čekám na čáry</div>
         </div>
         <div class="btn-row">
@@ -348,6 +372,7 @@
           <summary style="font-size:9px;color:rgba(255,255,255,0.3);cursor:pointer;letter-spacing:0.08em;text-transform:uppercase">🔍 Debug</summary>
           <div style="background:rgba(0,0,0,0.4);border-radius:5px;padding:7px;margin-top:4px;font-size:9px;line-height:1.7;">
             <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Metoda</span><span id="dbg-method" style="color:#fff">—</span></div>
+            <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Rovina</span><span id="dbg-plane" style="color:#fff">—</span></div>
             <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Vzdálenost</span><span id="dbg-dist" style="color:var(--green)">—</span></div>
             <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Boční</span><span id="dbg-lateral" style="color:var(--gold)">—</span></div>
             <div><span style="color:rgba(255,255,255,0.35);width:80px;display:inline-block">Výška</span><span id="dbg-height" style="color:var(--blue)">—</span></div>
@@ -385,6 +410,9 @@ const S = {
   lines: [],
   facadePts: [],          // [{x,y,label:'A1'|'A2'}] — for distance calc
   mapPts: [],             // [{x,y,label:'B1'|'B2'|'C1'|'C2'|'D1'|'D2'}] — for plane computation
+  zaberPts: [],           // [{x,y,side:'L'|'R'}] — záběr body na fotografii
+  zaberL: null,           // {lat,lng} GPS bod levého okraje záběru
+  zaberR: null,           // {lat,lng} GPS bod pravého okraje záběru
   activeMapPtLabel: 'B1', // next label to place in mappts tool
   lineTool: 'a',
   vp: { a: null, b: null, c: null, d: null, v: null },
@@ -419,7 +447,7 @@ function initMap() {
 // ─── Mode ───
 function setMapMode(m) {
   S.mapMode = m;
-  ['a','b','c','d','eye','r'].forEach(x => {
+  ['a','b','c','d','eye','r','zl','zr'].forEach(x => {
     const btn = document.getElementById('mode-btn-' + x);
     if (!btn) return;
     btn.className = 'mode-btn' + (m===x ? ' active-'+x : '');
@@ -447,6 +475,18 @@ function updateStatus() {
     textEl.textContent  = S.viewpoint ? 'Zadáno — potvrď pro přepsání' : 'Vystřeď kříž na místo fotografa';
     return;
   }
+  if (m === 'zl') {
+    statusEl.className = '';
+    titleEl.textContent = 'Záběr — levý okraj';
+    textEl.textContent  = S.zaberL ? 'Zadáno — potvrď pro přepsání' : 'Vystřeď kříž na bod viditelný na levém okraji fotografie';
+    return;
+  }
+  if (m === 'zr') {
+    statusEl.className = '';
+    titleEl.textContent = 'Záběr — pravý okraj';
+    textEl.textContent  = S.zaberR ? 'Zadáno — potvrď pro přepsání' : 'Vystřeď kříž na bod viditelný na pravém okraji fotografie';
+    return;
+  }
   const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
   const labels  = { a:'Fasáda A', b:'Fasáda B', c:'Fasáda C', d:'Fasáda D' };
   const classes = { a:'green-s', b:'blue', c:'gold', d:'purple-s' };
@@ -467,6 +507,18 @@ function updateConfirmBtn() {
     btn.disabled = false;
     return;
   }
+  if (m === 'zl') {
+    btn.className = 'btn-confirm';
+    btn.textContent = S.zaberL ? 'Přepsat Záběr L' : 'Potvrdit Záběr L';
+    btn.disabled = false;
+    return;
+  }
+  if (m === 'zr') {
+    btn.className = 'btn-confirm';
+    btn.textContent = S.zaberR ? 'Přepsat Záběr P' : 'Potvrdit Záběr P';
+    btn.disabled = false;
+    return;
+  }
   const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
   const arr = facades[m];
   const next = activeChip && activeChip.facade === m ? activeChip.idx + 1 :
@@ -475,6 +527,34 @@ function updateConfirmBtn() {
   btn.className = 'btn-confirm' + (colorClass[m] ? ' '+colorClass[m] : '');
   btn.textContent = next ? `Potvrdit ${m.toUpperCase()}${next}` : `${m.toUpperCase()} — hotovo`;
   btn.disabled = !next;
+}
+
+let zaberMarkerL = null, zaberMarkerR = null;
+
+function placeZaberMarker(side, lat, lng) {
+  const isL = side === 'L';
+  const label = isL ? '◧ L' : '▨ P';
+  const icon = L.divIcon({
+    html: `<div style="background:rgba(255,255,255,0.9);border:2px solid #1a1a18;border-radius:4px;padding:1px 5px;font-family:monospace;font-size:9px;font-weight:700;color:#1a1a18;white-space:nowrap">${label}</div>`,
+    className: '', iconAnchor: [18, 10]
+  });
+  if (isL) {
+    if (zaberMarkerL) map.removeLayer(zaberMarkerL);
+    zaberMarkerL = L.marker([lat, lng], { icon, draggable: true }).addTo(map);
+    zaberMarkerL.on('dragend', e => {
+      const p = e.target.getLatLng();
+      S.zaberL = { lat: p.lat, lng: p.lng };
+      document.getElementById('cv-zl').textContent = p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);
+    });
+  } else {
+    if (zaberMarkerR) map.removeLayer(zaberMarkerR);
+    zaberMarkerR = L.marker([lat, lng], { icon, draggable: true }).addTo(map);
+    zaberMarkerR.on('dragend', e => {
+      const p = e.target.getLatLng();
+      S.zaberR = { lat: p.lat, lng: p.lng };
+      document.getElementById('cv-zr').textContent = p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);
+    });
+  }
 }
 
 function confirmPoint() {
@@ -489,6 +569,24 @@ function confirmPoint() {
     document.getElementById('cv-eye').textContent = center.lat.toFixed(5) + ', ' + center.lng.toFixed(5);
     computePhotographerPosition();
     updatePreviewMap();
+    updateConfirmBtn(); updateStatus();
+    return;
+  }
+
+  if (m === 'zl') {
+    S.zaberL = { lat: center.lat, lng: center.lng };
+    placeZaberMarker('L', center.lat, center.lng);
+    document.getElementById('chip-zl').classList.add('set');
+    document.getElementById('cv-zl').textContent = center.lat.toFixed(5) + ', ' + center.lng.toFixed(5);
+    updateConfirmBtn(); updateStatus();
+    return;
+  }
+
+  if (m === 'zr') {
+    S.zaberR = { lat: center.lat, lng: center.lng };
+    placeZaberMarker('R', center.lat, center.lng);
+    document.getElementById('chip-zr').classList.add('set');
+    document.getElementById('cv-zr').textContent = center.lat.toFixed(5) + ', ' + center.lng.toFixed(5);
     updateConfirmBtn(); updateStatus();
     return;
   }
@@ -855,16 +953,20 @@ function getTPos(e) { const t=e.touches[0]||e.changedTouches[0]; const r=cvs.get
 
 function setLineTool(t) {
   S.lineTool = t;
-  ['pan','a','b','c','d','v','pts','mappts'].forEach(g => {
+  ['pan','a','b','c','d','v','pts','mappts','zaber'].forEach(g => {
     const el = document.getElementById('tool-'+g);
     if (!el) return;
-    const cls = {pan:'active-pts',a:'active-a',b:'active-b',c:'active-c',d:'active-d',v:'active-v',pts:'active-pts',mappts:'active-mappts'};
+    const cls = {pan:'active-pts',a:'active-a',b:'active-b',c:'active-c',d:'active-d',v:'active-v',pts:'active-pts',mappts:'active-mappts',zaber:'active-zaber'};
     el.className = 'tool-btn' + (g===t ? ' '+cls[g] : '');
   });
   cvs.style.cursor = t==='pan' ? 'grab' : 'crosshair';
   const sel = document.getElementById('mappts-selector');
   if (t === 'mappts') { sel.style.display='block'; buildMapPtSelector(); }
   else sel.style.display='none';
+  // Show zaber side selector
+  const zsel = document.getElementById('zaber-selector');
+  if (t === 'zaber') { if(zsel) zsel.style.display='block'; }
+  else { if(zsel) zsel.style.display='none'; }
 }
 
 function buildMapPtSelector() {
@@ -880,7 +982,19 @@ function buildMapPtSelector() {
   }).join(' ');
 }
 
-function setActiveMapPt(label) { S.activeMapPtLabel=label; buildMapPtSelector(); }
+let activeSide = 'L'; // 'L' or 'R'
+
+function setActiveSide(side) {
+  activeSide = side;
+  const bl = document.getElementById('zaber-btn-l');
+  const br = document.getElementById('zaber-btn-r');
+  const hint = document.getElementById('zaber-hint');
+  if (bl) bl.style.background = side==='L' ? 'rgba(255,255,255,0.2)' : '';
+  if (br) br.style.background = side==='R' ? 'rgba(255,255,255,0.2)' : '';
+  if (hint) hint.textContent = side==='L'
+    ? (S.zaberPts.find(p=>p.side==='L') ? '◧ L zadán — klikni pro přepsání' : 'Klikni na bod viditelný na levém okraji foto')
+    : (S.zaberPts.find(p=>p.side==='R') ? '▨ P zadán — klikni pro přepsání' : 'Klikni na bod viditelný na pravém okraji foto');
+}
 
 function hitFacadePt(cx, cy, r=14) {
   for(let i=0;i<S.facadePts.length;i++){
@@ -915,7 +1029,17 @@ function onPhotoDown({cx,cy}) {
     if(next) S.activeMapPtLabel=next;
     redraw();updateVPChips();buildMapPtSelector();return;
   }
-  isDrawing=true; drawStart=canvasToImg(cx,cy);
+  if (S.lineTool==='zaber') {
+    const p = canvasToImg(cx, cy);
+    // Remove existing point for this side
+    S.zaberPts = S.zaberPts.filter(pt => pt.side !== activeSide);
+    S.zaberPts.push({ x:p.x, y:p.y, side:activeSide });
+    // Update chip
+    const chip = document.getElementById('chip-zaber');
+    if (chip) chip.textContent = 'Záběr: ' + S.zaberPts.length + '/2';
+    setActiveSide(activeSide); // refresh hint
+    redraw(); return;
+  }
 }
 
 function onPhotoMove({cx,cy}) {
@@ -1047,6 +1171,31 @@ function redraw() {
     ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.stroke();
     ctx.fillStyle='#fff'; ctx.font='bold 9px JetBrains Mono';
     ctx.fillText(pt.label, p.x+6, p.y+3);
+  });
+
+  // Draw záběr points
+  S.zaberPts.forEach(pt => {
+    const p = imgToCanvas(pt.x, pt.y);
+    const label = pt.side === 'L' ? '◧ L' : '▨ P';
+    // Vertical dashed line at x position
+    const px = imgToCanvas(pt.x, 0);
+    ctx.save();
+    ctx.setLineDash([4,4]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px.x, 0); ctx.lineTo(px.x, cvs.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    // Point
+    ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2);
+    ctx.fillStyle='#fff'; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.stroke();
+    // Label
+    ctx.fillStyle='#fff'; ctx.font='bold 9px JetBrains Mono';
+    ctx.fillText(label, p.x+7, p.y+3);
   });
 }
 
@@ -1363,25 +1512,86 @@ function computePhotographerPosition() {
 function buildPlane() {
   if(!S.photographer||!S.ref) return;
   const ref=S.ref;
-  const dist=S.dist||20;
-  const aspect=S.photoW>0?S.photoW/S.photoH:16/9;
-  const fov=60*Math.PI/180;
-  S.planeW=2*dist*Math.tan(fov/2);
-  S.planeH=S.planeW/aspect;
-
+  const ph=S.photographerHeight;
   const mag=Math.sqrt(S.photographer.x**2+S.photographer.y**2);
   if(mag < 0.1) return;
-  const dx=-S.photographer.x/mag, dy=-S.photographer.y/mag;
-  const perpX=-dy, perpY=dx;
-  const halfW=S.planeW/2, halfH=S.planeH/2;
-  const ph=S.photographerHeight;
 
-  S.corners = {
-    topLeft:     { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph+halfH },
-    topRight:    { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph+halfH },
-    bottomLeft:  { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph-halfH },
-    bottomRight: { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph-halfH },
-  };
+  // Direction vector from photographer toward scene (unit vector)
+  const dx=-S.photographer.x/mag, dy=-S.photographer.y/mag;
+
+  const zaberL = S.zaberPts.find(p=>p.side==='L');
+  const zaberR = S.zaberPts.find(p=>p.side==='R');
+
+  if (zaberL && zaberR && S.zaberL && S.zaberR) {
+    // ── ZÁBĚR MODE: rovinu definují reálné okrajové body ──
+    // Convert GPS záběr points to local metres
+    const gL = gpsToM(S.zaberL.lat, S.zaberL.lng, ref.lat, ref.lng);
+    const gR = gpsToM(S.zaberR.lat, S.zaberR.lng, ref.lat, ref.lng);
+
+    // Pixel x of each záběr point (normalised 0–1, 0=left edge, 1=right edge)
+    // The záběr point on photo corresponds to the angle from optical axis
+    const fovH = 60 * Math.PI / 180;
+    const halfFov = Math.tan(fovH/2);
+
+    // Angle from optical axis for each záběr point pixel
+    const angL = (zaberL.x - 0.5) * 2 * halfFov; // negative = left
+    const angR = (zaberR.x - 0.5) * 2 * halfFov; // positive = right
+
+    // Ray from photographer: forward = (dx,dy), right = (-dy,dx)
+    const rx = -dy, ry = dx; // right perpendicular
+
+    // For záběr point: direction = forward + angle * right
+    // Find where ray intersects the plane defined by GPS záběr point
+    // Simple approach: scale the GPS point to lie on the ray
+    // Ray direction for L: (dx + angL*rx, dy + angL*ry)
+    const rayLx = dx + angL*rx, rayLy = dy + angL*ry;
+    const rayRx = dx + angR*rx, rayRy = dy + angR*ry;
+
+    // Scale: find t such that photographer + t*ray = gPS point (least squares)
+    const tL = (gL.x*rayLx + gL.y*rayLy) / (rayLx**2 + rayLy**2);
+    const tR = (gR.x*rayRx + gR.y*rayRy) / (rayRx**2 + rayRy**2);
+
+    // Left and right edge of plane = photographer + t*ray
+    const planeLeftX  = tL * rayLx;
+    const planeLeftY  = tL * rayLy;
+    const planeRightX = tR * rayRx;
+    const planeRightY = tR * rayRy;
+
+    // Plane width = distance between left and right edge
+    S.planeW = Math.sqrt((planeRightX-planeLeftX)**2 + (planeRightY-planeLeftY)**2);
+    const aspect = S.photoW>0 ? S.photoW/S.photoH : 16/9;
+    S.planeH = S.planeW / aspect;
+    const halfH = S.planeH/2;
+
+    S.corners = {
+      topLeft:     { ...mToGps(planeLeftX,  planeLeftY,  ref.lat,ref.lng), alt: ph+halfH },
+      topRight:    { ...mToGps(planeRightX, planeRightY, ref.lat,ref.lng), alt: ph+halfH },
+      bottomLeft:  { ...mToGps(planeLeftX,  planeLeftY,  ref.lat,ref.lng), alt: ph-halfH },
+      bottomRight: { ...mToGps(planeRightX, planeRightY, ref.lat,ref.lng), alt: ph-halfH },
+    };
+
+    S._debug && (S._debug.planeSource = 'záběr L+P (' + S.planeW.toFixed(1) + 'm)');
+
+  } else {
+    // ── FALLBACK: FOV estimate ──
+    const dist=S.dist||20;
+    const aspect=S.photoW>0?S.photoW/S.photoH:16/9;
+    const fov=60*Math.PI/180;
+    S.planeW=2*dist*Math.tan(fov/2);
+    S.planeH=S.planeW/aspect;
+
+    const perpX=-dy, perpY=dx;
+    const halfW=S.planeW/2, halfH=S.planeH/2;
+
+    S.corners = {
+      topLeft:     { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph+halfH },
+      topRight:    { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph+halfH },
+      bottomLeft:  { ...mToGps( perpX*halfW,  perpY*halfW, ref.lat,ref.lng), alt: ph-halfH },
+      bottomRight: { ...mToGps(-perpX*halfW, -perpY*halfW, ref.lat,ref.lng), alt: ph-halfH },
+    };
+
+    S._debug && (S._debug.planeSource = 'FOV 60° odhad (' + S.planeW.toFixed(1) + 'm)');
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1416,6 +1626,7 @@ function updatePreviewMap() {
     el('ps-az').textContent = S.azimut ? Math.round(S.azimut) + '°' : '—';
     // Debug
     el('dbg-method').textContent = S._debug.method || '—';
+    if(el('dbg-plane')) el('dbg-plane').textContent = S._debug.planeSource || '—';
     el('dbg-dist').textContent = S._debug.distSource || '—';
     el('dbg-lateral').textContent = S._debug.lateralSource || '—';
     el('dbg-height').textContent = S._debug.heightSource || '—';
@@ -1572,6 +1783,18 @@ function updatePreviewMap() {
       [c.topLeft.lat,c.topLeft.lng],
       [c.topRight.lat,c.topRight.lng],
     ], {color:'#4a9eff',weight:1,opacity:0.5,fillColor:'#4a9eff',fillOpacity:0.06,dashArray:'3,4'}).addTo(prevMap));
+  }
+
+  // Záběr body v mapě
+  if (S.zaberL) {
+    const icon = L.divIcon({ html:`<div style="background:rgba(255,255,255,0.9);border:2px solid #1a1a18;border-radius:3px;padding:1px 4px;font-family:monospace;font-size:8px;font-weight:700;color:#1a1a18">◧ L</div>`, className:'', iconAnchor:[16,8] });
+    prevLayers.push(L.marker([S.zaberL.lat,S.zaberL.lng],{icon}).addTo(prevMap));
+    if(S.photographer) prevLayers.push(L.polyline([[S.photographer.lat,S.photographer.lng],[S.zaberL.lat,S.zaberL.lng]],{color:'rgba(255,255,255,0.4)',weight:1,dashArray:'3,5'}).addTo(prevMap));
+  }
+  if (S.zaberR) {
+    const icon = L.divIcon({ html:`<div style="background:rgba(255,255,255,0.9);border:2px solid #1a1a18;border-radius:3px;padding:1px 4px;font-family:monospace;font-size:8px;font-weight:700;color:#1a1a18">▨ P</div>`, className:'', iconAnchor:[16,8] });
+    prevLayers.push(L.marker([S.zaberR.lat,S.zaberR.lng],{icon}).addTo(prevMap));
+    if(S.photographer) prevLayers.push(L.polyline([[S.photographer.lat,S.photographer.lng],[S.zaberR.lat,S.zaberR.lng]],{color:'rgba(255,255,255,0.4)',weight:1,dashArray:'3,5'}).addTo(prevMap));
   }
 
   // Photographer icon
@@ -1824,6 +2047,9 @@ function loadProjectData(p) {
   if(p.lines)     S.lines=p.lines;
   if(p.facadePts) S.facadePts=p.facadePts;
   if(p.mapPts)    S.mapPts=p.mapPts;
+  if(p.zaberPts)  S.zaberPts=p.zaberPts;
+  if(p.zaberL)    { S.zaberL=p.zaberL; placeZaberMarker('L',p.zaberL.lat,p.zaberL.lng); document.getElementById('chip-zl').classList.add('set'); document.getElementById('cv-zl').textContent=p.zaberL.lat.toFixed(5)+', '+p.zaberL.lng.toFixed(5); }
+  if(p.zaberR)    { S.zaberR=p.zaberR; placeZaberMarker('R',p.zaberR.lat,p.zaberR.lng); document.getElementById('chip-zr').classList.add('set'); document.getElementById('cv-zr').textContent=p.zaberR.lat.toFixed(5)+', '+p.zaberR.lng.toFixed(5); }
   if(p.vp)        S.vp=p.vp;
   S.photoW=p.photoW||0; S.photoH=p.photoH||0;
   if(p.photographer) { S.photographer=p.photographer; S.azimut=p.azimut; }
@@ -1883,7 +2109,8 @@ function saveProject() {
     version:4, savedAt:new Date().toISOString(),
     facadeA:S.facadeA, facadeB:S.facadeB, facadeC:S.facadeC, facadeD:S.facadeD,
     viewpoint:S.viewpoint,
-    lines:S.lines, facadePts:S.facadePts, mapPts:S.mapPts, vp:S.vp,
+    lines:S.lines, facadePts:S.facadePts, mapPts:S.mapPts,
+    zaberPts:S.zaberPts, zaberL:S.zaberL, zaberR:S.zaberR, vp:S.vp,
     photoW:S.photoW, photoH:S.photoH,
     photoFileName:S.photoFile?S.photoFile.name:null,
     photographer:S.photographer, azimut:S.azimut,
