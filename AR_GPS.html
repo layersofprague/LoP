@@ -528,11 +528,16 @@ function initNavMap(){
 }
 
 function fitBoth(){
-  if(!navMap||!calData)return;isLocked=false;
+  if(!navMap||!calData)return;
   const p=calData.photographer,bounds=[];
   if(userPos)bounds.push([userPos.lat,userPos.lng]);
   bounds.push([p.lat,p.lng]);
-  if(bounds.length>1)navMap.fitBounds(L.latLngBounds(bounds),{padding:[60,60],maxZoom:18,animate:true});
+  // Also include plane corners so the whole scene is visible
+  if(calData.plane&&calData.plane.corners){
+    const c=calData.plane.corners;
+    bounds.push([c.topLeft.lat,c.topLeft.lng],[c.topRight.lat,c.topRight.lng]);
+  }
+  if(bounds.length>=1)navMap.fitBounds(L.latLngBounds(bounds),{padding:[50,50],maxZoom:19,animate:true});
 }
 
 // ── SENSORS ──
@@ -581,9 +586,14 @@ function onGPSUpdate(){
   else{dot.classList.remove('near');stxt.textContent='Vzdálenost '+Math.round(dist)+' m · naviguj';stxt.style.color='rgba(26,24,20,.5)';}
   $('nav-dbg').textContent='GPS ±'+Math.round(userPos.acc||0)+'m | '+(smoothH?Math.round(smoothH):0)+'°';
   if(navMap){
-    if(!userMarker){const uI=L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#b04020;border:3px solid #fff;box-shadow:0 0 0 3px rgba(176,64,32,.25)"></div>',className:'',iconSize:[14,14],iconAnchor:[7,7]});userMarker=L.marker([userPos.lat,userPos.lng],{icon:uI}).addTo(navMap);}
-    else userMarker.setLatLng([userPos.lat,userPos.lng]);
-    if(isLocked)navMap.setView([userPos.lat,userPos.lng],navMap.getZoom(),{animate:false});
+    if(!userMarker){
+      const uI=L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#b04020;border:3px solid #fff;box-shadow:0 0 0 3px rgba(176,64,32,.25)"></div>',className:'',iconSize:[14,14],iconAnchor:[7,7]});
+      userMarker=L.marker([userPos.lat,userPos.lng],{icon:uI}).addTo(navMap);
+      fitBoth(); // first fix: show both user and photographer
+    } else {
+      userMarker.setLatLng([userPos.lat,userPos.lng]);
+      if(isLocked&&!navMap.getBounds().contains([userPos.lat,userPos.lng]))fitBoth();
+    }
   }
 }
 
@@ -917,10 +927,10 @@ function renderARCanvas(){
 }
 
 function getCurrentHeading(){
-  if(smoothH===null)return null;
-  // In anchored mode, use yawCalibOffset computed at anchor time
+  // Fallback: use azimutDeg from JSON when no compass available (desktop/no sensor)
+  const fallback = calData&&calData.azimutDeg!=null ? calData.azimutDeg : null;
+  if(smoothH===null) return fallback;
   if(phase==='anchored'){
-    // Use gyro delta on top of calibrated heading
     if(useGyroAR){
       return(yawCalibOffset+smoothH+gyroAngles.x+360)%360;
     }else{
