@@ -361,7 +361,7 @@ function numToPhotoSlug(num){
 async function autoLoad(num){
   const photoSlug=numToPhotoSlug(num);        // h_001h  (foto)
   const jsonName=String(num).toUpperCase();   // H001    (JSON)
-  const jsonUrl=GITHUB_BASE+'place/'+jsonName+'_export_step3.json';
+  const jsonUrl=GITHUB_BASE+'place/'+jsonName+'_GPS_export_step3.json';
   const photoUrl=GITHUB_BASE+'foto/'+photoSlug+'.jpg';
 
   showLoading('Načítám kalibrační data…');
@@ -390,7 +390,7 @@ async function autoLoad(num){
     showManual('Nepodařilo se načíst '+photoUrl+':\n'+e.message);
     // JSON loaded OK so pre-fill it, just photo is missing
     calData=json;
-    $('iz-json-val').textContent=jsonName+'_export_step3.json';
+    $('iz-json-val').textContent=jsonName+'_GPS_export_step3.json';
     $('iz-json').classList.add('done');
     checkReady();
   }
