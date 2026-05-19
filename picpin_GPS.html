@@ -2209,14 +2209,14 @@ function loadFromGitHub() {
   if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Načítám…'; btn.disabled = true; }
   const resetBtn = () => { if (btn) { btn.textContent = btn._orig; btn.disabled = false; } };
 
-  // Try step2 first, then step3
+  // Try step3 first (more complete data), then step2
   const tryFetch = url => fetch(url).then(r => {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
   });
 
-  tryFetch(jsonUrl)
-    .catch(() => tryFetch(jsonUrl3))
+  tryFetch(jsonUrl3)
+    .catch(() => tryFetch(jsonUrl))
     .then(p => {
       loadProjectData(p);
       // Load photo from /foto/{photoId}
@@ -2283,14 +2283,25 @@ function loadProjectData(p) {
   if(p.mapPts||p.mapPtsOnPhoto)       S.mapPts=p.mapPts||p.mapPtsOnPhoto;
   if(p.zaberPts)  { S.zaberPts=p.zaberPts; const cz=document.getElementById('chip-zaber'); if(cz) cz.textContent='Záběr: '+S.zaberPts.length+'/2'; }
   if(p.optFovDeg) S._optFov=p.optFovDeg;
-  if(p.zaberL)    { S.zaberL=p.zaberL; placeZaberMarker('L',p.zaberL.lat,p.zaberL.lng); document.getElementById('chip-zl').classList.add('set'); document.getElementById('cv-zl').textContent=p.zaberL.lat.toFixed(5)+', '+p.zaberL.lng.toFixed(5); }
-  if(p.zaberR)    { S.zaberR=p.zaberR; placeZaberMarker('R',p.zaberR.lat,p.zaberR.lng); document.getElementById('chip-zr').classList.add('set'); document.getElementById('cv-zr').textContent=p.zaberR.lat.toFixed(5)+', '+p.zaberR.lng.toFixed(5); }
-  if(p.vp)        S.vp=p.vp;
-  S.photoW=p.photoW||0; S.photoH=p.photoH||0;
-  if(p.photographer) { S.photographer=p.photographer; S.azimut=p.azimut; }
+  if(p.zaberL)    S.zaberL=p.zaberL;
+  if(p.zaberR)    S.zaberR=p.zaberR;
+  if(p.vp||p.vanishingPoints) S.vp=p.vp||p.vanishingPoints;
+  if(p.photoW||p.photoH) { S.photoW=p.photoW||0; S.photoH=p.photoH||0; }
+  if(p.photoId&&!S._photoName) S._photoName=p.photoId;
+  if(p.photographer) {
+    S.photographer=p.photographer;
+    S.azimut=p.azimut||null;
+    // step3 nemá x/y — dopočítej z lat/lng a ref
+    if(!S.photographer.x && p.ref) {
+      const m=gpsToM(S.photographer.lat,S.photographer.lng,p.ref.lat,p.ref.lng);
+      S.photographer.x=m.x; S.photographer.y=m.y;
+    }
+  }
   S.photographerHeight=p.photographerHeight||1.6;
   S.dist=p.dist||null; S.planeW=p.planeW||null; S.planeH=p.planeH||null;
-  S.ref=p.ref||null; S.corners=p.corners||null;
+  S.ref=p.ref||null;
+  S.corners=p.corners||(p.plane&&p.plane.corners)||null;
+  if(p.plane) { S.planeW=p.plane.widthM||null; S.planeH=p.plane.heightM||null; }
   if(p.photographer&&p.photographer.heightM) S.photographerHeight=p.photographer.heightM;
   if(p.photographer&&p.photographer.distM) S.dist=p.photographer.distM;
   if(p.azimutDeg) S.azimut=p.azimutDeg;
@@ -2316,6 +2327,20 @@ function loadProjectData(p) {
   } else {
     gotoStep(1);
   }
+
+  // Záběr markery až po gotoStep — mapa musí být viditelná
+  setTimeout(() => {
+    if(S.zaberL) {
+      placeZaberMarker('L', S.zaberL.lat, S.zaberL.lng);
+      const czl=document.getElementById('chip-zl');
+      if(czl){ czl.classList.add('set'); document.getElementById('cv-zl').textContent=S.zaberL.lat.toFixed(5)+', '+S.zaberL.lng.toFixed(5); }
+    }
+    if(S.zaberR) {
+      placeZaberMarker('R', S.zaberR.lat, S.zaberR.lng);
+      const czr=document.getElementById('chip-zr');
+      if(czr){ czr.classList.add('set'); document.getElementById('cv-zr').textContent=S.zaberR.lat.toFixed(5)+', '+S.zaberR.lng.toFixed(5); }
+    }
+  }, 200);
 }
 
 function exportStep1() {
