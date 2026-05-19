@@ -826,14 +826,19 @@ function resetMap() {
   });
   if (photMarker) { map.removeLayer(photMarker); photMarker=null; }
   if (viewpointMarker) { map.removeLayer(viewpointMarker); viewpointMarker=null; }
+  if (zaberMarkerL) { map.removeLayer(zaberMarkerL); zaberMarkerL=null; }
+  if (zaberMarkerR) { map.removeLayer(zaberMarkerR); zaberMarkerR=null; }
   S.facadeA=[null,null]; S.facadeB=[null,null]; S.facadeC=[null,null]; S.facadeD=[null,null];
-  S.viewpoint=null;
+  S.viewpoint=null; S.zaberL=null; S.zaberR=null; S.zaberPts=[];
   ['a1','a2','b1','b2','c1','c2','d1','d2'].forEach(id => {
     document.getElementById('chip-'+id).classList.remove('set');
     document.getElementById('cv-'+id).textContent='—';
   });
   document.getElementById('chip-eye').classList.remove('set');
   document.getElementById('cv-eye').textContent='—';
+  const czl=document.getElementById('chip-zl'), czr=document.getElementById('chip-zr');
+  if(czl){czl.classList.remove('set'); document.getElementById('cv-zl').textContent='—';}
+  if(czr){czr.classList.remove('set'); document.getElementById('cv-zr').textContent='—';}
   document.getElementById('btn-map-next').disabled=true;
   setMapMode('a');
 }
@@ -2276,7 +2281,7 @@ function loadProjectData(p) {
   if(p.lines)     S.lines=p.lines;
   if(p.facadePts||p.facadePtsOnPhoto) S.facadePts=p.facadePts||p.facadePtsOnPhoto;
   if(p.mapPts||p.mapPtsOnPhoto)       S.mapPts=p.mapPts||p.mapPtsOnPhoto;
-  if(p.zaberPts)  S.zaberPts=p.zaberPts;
+  if(p.zaberPts)  { S.zaberPts=p.zaberPts; const cz=document.getElementById('chip-zaber'); if(cz) cz.textContent='Záběr: '+S.zaberPts.length+'/2'; }
   if(p.optFovDeg) S._optFov=p.optFovDeg;
   if(p.zaberL)    { S.zaberL=p.zaberL; placeZaberMarker('L',p.zaberL.lat,p.zaberL.lng); document.getElementById('chip-zl').classList.add('set'); document.getElementById('cv-zl').textContent=p.zaberL.lat.toFixed(5)+', '+p.zaberL.lng.toFixed(5); }
   if(p.zaberR)    { S.zaberR=p.zaberR; placeZaberMarker('R',p.zaberR.lat,p.zaberR.lng); document.getElementById('chip-zr').classList.add('set'); document.getElementById('cv-zr').textContent=p.zaberR.lat.toFixed(5)+', '+p.zaberR.lng.toFixed(5); }
