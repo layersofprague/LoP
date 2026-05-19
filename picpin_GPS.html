@@ -1961,30 +1961,43 @@ function loadFromGitHub() {
 
   let base = '';
   const loc = window.location.href;
-  const ghMatch = loc.match(/^(https:\/\/[^/]+\/[^/]+\/)/);
-  if (ghMatch) {
-    base = ghMatch[1];
+
+  // Convert raw.githubusercontent.com URL to github.io
+  // raw: https://raw.githubusercontent.com/USER/REPO/main/file.html
+  // pages: https://USER.github.io/REPO/
+  const rawMatch = loc.match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//);
+  if (rawMatch) {
+    base = `https://${rawMatch[1]}.github.io/${rawMatch[2]}/`;
   } else {
-    const userBase = prompt(
-      'Nepodařilo se určit GitHub URL.\nZadej základní URL repozitáře:',
-      'https://username.github.io/repo/'
-    );
-    if (!userBase) return;
-    base = userBase.endsWith('/') ? userBase : userBase + '/';
+    const ghMatch = loc.match(/^(https:\/\/[^/]+\/[^/]+\/)/);
+    if (ghMatch) {
+      base = ghMatch[1];
+    } else {
+      const userBase = prompt(
+        'Nepodařilo se určit GitHub URL.\nZadej základní URL repozitáře:',
+        'https://layersofprague.github.io/LoP/'
+      );
+      if (!userBase) return;
+      base = userBase.endsWith('/') ? userBase : userBase + '/';
+    }
   }
 
-  const jsonUrl  = base + 'place/' + name + '_GPS_export_step2.json';
+  const jsonUrl = base + 'place/' + name + '_GPS_export_step2.json';
+  const jsonUrl3 = base + 'place/' + name + '_GPS_export_step3.json';
 
   // Show loading state
   const btn = document.querySelector('[onclick="loadFromGitHub()"]');
   if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Načítám…'; btn.disabled = true; }
   const resetBtn = () => { if (btn) { btn.textContent = btn._orig; btn.disabled = false; } };
 
-  fetch(jsonUrl)
-    .then(r => {
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' — JSON nenalezen:\n' + jsonUrl);
-      return r.json();
-    })
+  // Try step2 first, then step3
+  const tryFetch = url => fetch(url).then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+
+  tryFetch(jsonUrl)
+    .catch(() => tryFetch(jsonUrl3))
     .then(p => {
       loadProjectData(p);
       // Load photo from /foto/{photoId}
@@ -2019,7 +2032,9 @@ function loadFromGitHub() {
     })
     .catch(err => {
       resetBtn();
-      const tryLocal = confirm('GitHub nenalezen:\n' + err.message + '\n\nNačíst ze lokálu?');
+      const tryLocal = confirm(
+        'GitHub nenalezen:\n' + jsonUrl + '\n(ani step3 varianta)\n\nNačíst ze lokálu?'
+      );
       if (tryLocal) document.getElementById('project-input').click();
     });
 }
