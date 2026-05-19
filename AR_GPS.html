@@ -531,11 +531,62 @@ function showPhase(id){
   if(id==='ph-nav')setTimeout(()=>{if(navMap)navMap.invalidateSize();},100);
 }
 
-// Corners jsou přímo z plane.corners v JSONu — picpin_GPS je tam exportuje
-// po buildPlane() ze záběr bodů. Nepřepočítáváme, jen použijeme.
+// Přepočítej corners z záběr bodů — stejná logika jako picpin_GPS buildPlane()
+// NIKDY nepoužívej plane.corners z JSONu — mohou být ze starého výpočtu
 function computeNavCorners(){
-  if(!calData||!calData.plane||!calData.plane.corners)return null;
-  return calData.plane.corners; // {topLeft,topRight,bottomLeft,bottomRight} s lat/lng/alt
+  if(!calData||!calData.photographer)return null;
+  const p=calData.photographer;
+  const R=6371000;
+  const cosLat=Math.cos(p.lat*Math.PI/180);
+  function gpsFromPhotog(lat,lng){return{x:(lng-p.lng)*Math.PI/180*R*cosLat,y:(lat-p.lat)*Math.PI/180*R};}
+  function mToLatLng(mx,my){return{lat:p.lat+my/(R*Math.PI/180),lng:p.lng+mx/(R*Math.PI/180*cosLat)};}
+  const az=(calData.azimutDeg||0)*Math.PI/180;
+  const fwdX=Math.sin(az),fwdY=Math.cos(az);
+  const rgtX=-fwdY,rgtY=fwdX;
+  const zL=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='L');
+  const zR=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='R');
+  if(zL&&zR&&calData.zaberL&&calData.zaberR){
+    const gL=gpsFromPhotog(calData.zaberL.lat,calData.zaberL.lng);
+    const gR=gpsFromPhotog(calData.zaberR.lat,calData.zaberR.lng);
+    const azL=Math.atan2(gL.x*rgtX+gL.y*rgtY,gL.x*fwdX+gL.y*fwdY);
+    const azR=Math.atan2(gR.x*rgtX+gR.y*rgtY,gR.x*fwdX+gR.y*fwdY);
+    const xL=zL.x,xR=zR.x;
+    if(Math.abs(xR-xL)<0.01)return null;
+    const azEdgeL=azL+(0-xL)/(xR-xL)*(azR-azL);
+    const azEdgeR=azL+(1-xL)/(xR-xL)*(azR-azL);
+    const depthL=gL.x*fwdX+gL.y*fwdY;
+    const depthR=gR.x*fwdX+gR.y*fwdY;
+    const depth=(depthL+depthR)/2;
+    if(depth<1)return null;
+    function ray(az){const rx=fwdX+Math.tan(az)*rgtX,ry=fwdY+Math.tan(az)*rgtY;const fc=rx*fwdX+ry*fwdY;if(Math.abs(fc)<0.001)return null;const t=depth/fc;return{x:rx*t,y:ry*t};}
+    const pL=ray(azEdgeL),pR=ray(azEdgeR);
+    if(!pL||!pR)return null;
+    const tlGps=mToLatLng(pL.x,pL.y),trGps=mToLatLng(pR.x,pR.y);
+    const planeW=Math.sqrt((pR.x-pL.x)**2+(pR.y-pL.y)**2);
+    const aspect=calData.plane?(calData.plane.widthM/calData.plane.heightM):16/9;
+    const halfH=planeW/aspect/2;
+    const eyeH=p.heightM||0.5;
+    return{
+      topLeft:   {lat:tlGps.lat,lng:tlGps.lng,alt:eyeH+halfH},
+      topRight:  {lat:trGps.lat,lng:trGps.lng,alt:eyeH+halfH},
+      bottomLeft:{lat:tlGps.lat,lng:tlGps.lng,alt:eyeH-halfH},
+      bottomRight:{lat:trGps.lat,lng:trGps.lng,alt:eyeH-halfH},
+    };
+  }
+  // Fallback: optFovDeg
+  const dist=p.distM||20;
+  const fov=(calData.optFovDeg||60)*Math.PI/180;
+  const aspect=calData.plane?(calData.plane.widthM/calData.plane.heightM):16/9;
+  const halfW=dist*Math.tan(fov/2),halfH_fb=halfW/aspect;
+  const eyeH=p.heightM||0.5;
+  const pL=mToLatLng(fwdX*dist-rgtX*halfW,fwdY*dist-rgtY*halfW);
+  const pR=mToLatLng(fwdX*dist+rgtX*halfW,fwdY*dist+rgtY*halfW);
+  return{
+    topLeft:   {lat:pL.lat,lng:pL.lng,alt:eyeH+halfH_fb},
+    topRight:  {lat:pR.lat,lng:pR.lng,alt:eyeH+halfH_fb},
+    bottomLeft:{lat:pL.lat,lng:pL.lng,alt:eyeH-halfH_fb},
+    bottomRight:{lat:pR.lat,lng:pR.lng,alt:eyeH-halfH_fb},
+  };
 }
 
 // ── NAV ──
@@ -760,223 +811,109 @@ function getVerticalFov(fovH,W,H){
   return getScreenFovs(fovH,W,H).fovVScreen;
 }
 
-// Port of picpin_GPS buildPlane() — computes screen corners using
-// the same local metric coordinate system (forward/right vectors).
-// Returns {tl,tr,bl,br} in normalised screen coords [0-1], or null.
-function buildPlaneScreenCorners(compassHeading){
-  if(!calData||!calData.photographer)return null;
-  const p=calData.photographer;
+// ── 3D PROJEKCE ──
+// Každý roh roviny má GPS (lat/lng) + výšku (alt = metry nad zemí).
+// Kamera = uživatelova GPS poloha (nebo historický fotograf jako fallback) + výška oka.
+// Pipeline:
+//   1. GPS+alt → 3D bod v lokálních metrech (East, North, Up) od kamery
+//   2. Rotace do camera space (heading, pitch, roll)
+//   3. Perspektivní projekce → normalizované screen coords (nx, ny)
+//   4. drawQuad() udělá perspektivní zkreslení automaticky
+
+function project3D(compassHeading){
+  if(!calData||!calData.plane||!calData.plane.corners)return null;
+  const C=calData.plane.corners;
+  const W=arCanvas?arCanvas.width:window.innerWidth;
+  const H=arCanvas?arCanvas.height:window.innerHeight;
+
+  // Pozice kamery — uživatel pokud máme GPS, jinak historický fotograf
+  const camPos = userPos && userPos.lat ? userPos : calData.photographer;
+  const eyeH   = 1.6; // výška oka uživatele nad zemí (m)
+
   const R=6371000;
-  const cosLat=Math.cos(p.lat*Math.PI/180);
+  const cosLat=Math.cos(camPos.lat*Math.PI/180);
 
-  // Convert GPS→local metres from photographer
-  function gpsFromPhotog(lat,lng){
+  // GPS+alt → lokální 3D vektor od kamery (East=x, North=y, Up=z)
+  function toLocal(lat,lng,alt){
     return{
-      x:(lng-p.lng)*Math.PI/180*R*cosLat,
-      y:(lat-p.lat)*Math.PI/180*R
-    };
-  }
-  function mToLatLng(mx,my){
-    return{
-      lat:p.lat+my/(R*Math.PI/180),
-      lng:p.lng+mx/(R*Math.PI/180*cosLat)
+      x:(lng-camPos.lng)*Math.PI/180*R*cosLat,  // East  (m)
+      y:(lat-camPos.lat)*Math.PI/180*R,           // North (m)
+      z:alt - eyeH                                // Up    (m, od výšky oka)
     };
   }
 
-  // Forward direction from photographer toward scene.
-  // In picpin_GPS this comes from S.photographer.x/y (local metres from ref).
-  // Here we derive it from azimutDeg + compassHeading offset.
-  const historicalAz=(calData.azimutDeg||0)*Math.PI/180;
-  const currentAz=compassHeading*Math.PI/180;
-  const azOffset=currentAz-historicalAz;
+  // Camera axes — portrait mód: heading rotuje kolem Up osy
+  // heading = kompasový azimut kam kamera míří (stupně od severu)
+  const yaw = compassHeading * Math.PI/180;
+  // Pitch z ori.beta (telefon nakloněný vpřed/vzad) — 0 = telefon vodorovně
+  // V portrait: beta≈90° = telefon svisle, to odpovídá pohledu rovně
+  const pitchRaw = (ori.b||90) * Math.PI/180;
+  const pitch = pitchRaw - Math.PI/2; // 0 = rovně před sebe
+  // Roll = náklon do strany (osa Z telefonu)
+  const roll = (ori.g||0) * Math.PI/180;
 
-  // Historical forward = direction photographer was looking
-  const fwdX0=Math.sin(historicalAz), fwdY0=Math.cos(historicalAz);
-  // Rotated by current compass delta
-  const fwdX=Math.sin(currentAz), fwdY=Math.cos(currentAz);
-  const rgtX=-fwdY, rgtY=fwdX;
+  // Forward vektor kamery (kam míří střed záběru)
+  // yaw=0 → sever, pitch=0 → horizont
+  const cy=Math.cos(yaw), sy=Math.sin(yaw);
+  const cp=Math.cos(pitch), sp=Math.sin(pitch);
+  const cr=Math.cos(roll),  sr=Math.sin(roll);
 
-  // ── ZÁBĚR MODE (exact port of picpin_GPS) ──
-  // Use plane.corners directly from JSON (computed by picpin_GPS buildPlane)
-  if(calData.plane&&calData.plane.corners){
-    const C=calData.plane.corners;
-    const eyeH=p.heightM||0.5;
-    const fovH_sensor=calData.optFovDeg||60;
-    const {fovVScreen}=getScreenFovs(fovH_sensor,
-      arCanvas?arCanvas.width:window.innerWidth,
-      arCanvas?arCanvas.height:window.innerHeight);
-    cameraFovDeg=fovH_sensor;camFovDetected=!!calData.optFovDeg;
-
-    function cornerToScreen(lat,lng,alt){
-      const g=gpsFromPhotog(lat,lng);
-      // Project using historical forward/right axes
-      const azPt=Math.atan2(g.x*rgtX+g.y*rgtY,g.x*fwdX+g.y*fwdY);
-      // Apply compass offset
-      const azPt_cur=azPt+azOffset;
-      // Derive edge angles from corners themselves
-      const gTL=gpsFromPhotog(C.topLeft.lat,C.topLeft.lng);
-      const gTR=gpsFromPhotog(C.topRight.lat,C.topRight.lng);
-      const azTL=Math.atan2(gTL.x*rgtX+gTL.y*rgtY,gTL.x*fwdX+gTL.y*fwdY)+azOffset;
-      const azTR=Math.atan2(gTR.x*rgtX+gTR.y*rgtY,gTR.x*fwdX+gTR.y*fwdY)+azOffset;
-      const nx=(azPt_cur-azTL)/(azTR-azTL);
-      const distH=haversine(p.lat,p.lng,lat,lng);
-      const dV=alt-eyeH;
-      const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
-      const fovVRad=fovVScreen*Math.PI/180;
-      const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVRad/2)*0.5;
-      return{nx,ny};
-    }
-    return{
-      topLeft:    cornerToScreen(C.topLeft.lat,   C.topLeft.lng,   C.topLeft.alt),
-      topRight:   cornerToScreen(C.topRight.lat,  C.topRight.lng,  C.topRight.alt),
-      bottomLeft: cornerToScreen(C.bottomLeft.lat, C.bottomLeft.lng, C.bottomLeft.alt),
-      bottomRight:cornerToScreen(C.bottomRight.lat,C.bottomRight.lng,C.bottomRight.alt),
-    };
-  }
-
-  // ── ZÁBĚR fallback (no plane.corners) ──
-  const zL=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='L');
-  const zR=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='R');
-  if(zL&&zR&&calData.zaberL&&calData.zaberR){
-    const gL=gpsFromPhotog(calData.zaberL.lat,calData.zaberL.lng);
-    const gR=gpsFromPhotog(calData.zaberR.lat,calData.zaberR.lng);
-
-    // Angles relative to HISTORICAL forward axis (same as picpin_GPS)
-    const fwdX_h=fwdX0, fwdY_h=fwdY0;
-    const rgtX_h=-fwdY0, rgtY_h=fwdX0;
-    const azL_h=Math.atan2(gL.x*rgtX_h+gL.y*rgtY_h, gL.x*fwdX_h+gL.y*fwdY_h);
-    const azR_h=Math.atan2(gR.x*rgtX_h+gR.y*rgtY_h, gR.x*fwdX_h+gR.y*fwdY_h);
-
-    const xL=zL.x, xR=zR.x;
-    if(Math.abs(xR-xL)<0.01)return null;
-
-    // Edge angles in historical frame
-    const azEdgeL_h=azL_h+(0-xL)/(xR-xL)*(azR_h-azL_h);
-    const azEdgeR_h=azL_h+(1-xL)/(xR-xL)*(azR_h-azL_h);
-
-    // Depth = average forward distance of záběr points (historical frame)
-    const depthL=gL.x*fwdX_h+gL.y*fwdY_h;
-    const depthR=gR.x*fwdX_h+gR.y*fwdY_h;
-    const depth=(depthL+depthR)/2;
-    if(depth<1)return null;
-
-    function rayAtDepth_h(az){
-      const rx=fwdX_h+Math.tan(az)*rgtX_h;
-      const ry=fwdY_h+Math.tan(az)*rgtY_h;
-      const fc=rx*fwdX_h+ry*fwdY_h;
-      if(Math.abs(fc)<0.001)return null;
-      const t=depth/fc;
-      return{x:rx*t,y:ry*t};
-    }
-
-    const pLeft_h=rayAtDepth_h(azEdgeL_h);
-    const pRight_h=rayAtDepth_h(azEdgeR_h);
-    if(!pLeft_h||!pRight_h)return null;
-
-    // Convert to GPS
-    const tlGps=mToLatLng(pLeft_h.x,pLeft_h.y);
-    const trGps=mToLatLng(pRight_h.x,pRight_h.y);
-    const planeW=Math.sqrt((pRight_h.x-pLeft_h.x)**2+(pRight_h.y-pLeft_h.y)**2);
-    const aspect=calData.plane?(calData.plane.widthM/calData.plane.heightM):16/9;
-    const planeH=planeW/aspect;
-    const halfH=planeH/2;
-    const eyeH=p.heightM||0.5;
-    const altTop=eyeH+halfH, altBot=eyeH-halfH;
-
-    const fovEffRad=azEdgeR_h-azEdgeL_h;
-
-    console.log('buildPlane: záběr mode planeW='+planeW.toFixed(1)+'m fovEff='+(fovEffRad*180/Math.PI).toFixed(1)+'°');
-    cameraFovDeg=Math.abs(fovEffRad*180/Math.PI);camFovDetected=true;
-
-    // Now project these corners to screen using current compass heading
-    // Screen nx: angle from current left edge (azEdgeL rotated by azOffset)
-    const azEdgeL_cur=azEdgeL_h+azOffset;
-    const azEdgeR_cur=azEdgeR_h+azOffset;
-    const fovH_screen=getScreenFovs(cameraFovDeg,
-      arCanvas?arCanvas.width:window.innerWidth,
-      arCanvas?arCanvas.height:window.innerHeight).fovHScreen;
-    const fovV_screen=getScreenFovs(cameraFovDeg,
-      arCanvas?arCanvas.width:window.innerWidth,
-      arCanvas?arCanvas.height:window.innerHeight).fovVScreen;
-
-    function cornerToScreen(lat,lng,alt){
-      const brg=bearing(p.lat,p.lng,lat,lng);
-      const brgRad=brg*Math.PI/180;
-      // angle relative to current left edge
-      const dFromLeft_h=Math.atan2(
-        Math.sin((brgRad)-(fwdX_h*Math.PI/180)),
-        Math.cos((brgRad)-(fwdX_h*Math.PI/180))
-      );
-      // Use linear pixel mapping: same as picpin_GPS
-      // nx = (azBrg_in_historical_frame - azEdgeL_h) / (azEdgeR_h - azEdgeL_h)
-      const brgLocal=bearing(p.lat,p.lng,lat,lng)*Math.PI/180;
-      const gPt=gpsFromPhotog(lat,lng);
-      const azPt=Math.atan2(gPt.x*rgtX_h+gPt.y*rgtY_h,gPt.x*fwdX_h+gPt.y*fwdY_h);
-      // Apply compass offset: shift by azOffset
-      const azPt_cur=azPt+azOffset;
-      const nx=azPt_cur/fovEffRad+0.5; // centre=0, left=-0.5, right=+0.5
-      // Wait — use same linear interp as picpin_GPS pixel mapping
-      const nx2=(azPt_cur-azEdgeL_cur)/(azEdgeR_cur-azEdgeL_cur);
-
-      const distH=haversine(p.lat,p.lng,lat,lng);
-      const dV=alt-eyeH;
-      const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
-      const fovVRad=fovV_screen*Math.PI/180;
-      const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVRad/2)*0.5;
-      return{nx:nx2,ny};
-    }
-
-    return{
-      topLeft:    cornerToScreen(tlGps.lat,tlGps.lng,altTop),
-      topRight:   cornerToScreen(trGps.lat,trGps.lng,altTop),
-      bottomLeft: cornerToScreen(tlGps.lat,tlGps.lng,altBot),
-      bottomRight:cornerToScreen(trGps.lat,trGps.lng,altBot),
-    };
-  }
-
-  // ── FALLBACK: optFovDeg or 68° ──
-  const fov=(calData.optFovDeg||68);
-  cameraFovDeg=fov;camFovDetected=!!calData.optFovDeg;
-  const fovRad=fov*Math.PI/180;
-  const dist=p.distM||20;
-  const halfW=dist*Math.tan(fovRad/2);
-  const aspect=calData.plane?(calData.plane.widthM/calData.plane.heightM):16/9;
-  const halfH_fb=halfW/aspect;
-  const eyeH=p.heightM||0.5;
-  const tlGps=mToLatLng(fwdX*dist-rgtX*halfW, fwdY*dist-rgtY*halfW);
-  const trGps=mToLatLng(fwdX*dist+rgtX*halfW, fwdY*dist+rgtY*halfW);
-  const {fovVScreen}=getScreenFovs(fov,
-    arCanvas?arCanvas.width:window.innerWidth,
-    arCanvas?arCanvas.height:window.innerHeight);
-  function fbCorner(lat,lng,alt){
-    const brg=bearing(p.lat,p.lng,lat,lng);
-    let dH=brg-compassHeading; while(dH>180)dH-=360; while(dH<-180)dH+=360;
-    const nx=0.5+Math.tan(dH*Math.PI/180)/Math.tan(fovRad/2)*0.5;
-    const distH=haversine(p.lat,p.lng,lat,lng);
-    const dV=alt-eyeH;
-    const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
-    const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVScreen*Math.PI/180/2)*0.5;
-    return{nx,ny};
-  }
-  return{
-    topLeft:    fbCorner(tlGps.lat,tlGps.lng,eyeH+halfH_fb),
-    topRight:   fbCorner(trGps.lat,trGps.lng,eyeH+halfH_fb),
-    bottomLeft: fbCorner(tlGps.lat,tlGps.lng,eyeH-halfH_fb),
-    bottomRight:fbCorner(trGps.lat,trGps.lng,eyeH-halfH_fb),
+  // Rotační matice: yaw (kolem Z) → pitch (kolem X') → roll (kolem Y'')
+  // Camera basis vectors v world space (East, North, Up):
+  // Forward (kam kamera kouká)
+  const fwd = {
+    x: cy*cp*sy + sr*sp*sy - cr*sp*cy, // zjednodušeno níže
+    y: 0,
+    z: 0
   };
+  // Přímočará rotace: forward = rotace [0,1,0] přes yaw pak pitch
+  const fx =  sy*cp;
+  const fy =  cy*cp;
+  const fz =  sp;
+  // Right = rotace [1,0,0] přes yaw pak pitch pak roll
+  const rx =  cy*cr + sy*sp*sr;
+  const ry = -sy*cr + cy*sp*sr;
+  const rz = -cp*sr;
+  // Up = rotace [0,0,1] přes yaw pak pitch pak roll
+  const ux =  cy*sr - sy*sp*cr; // vlastně cross(right, forward)
+  const uy = -sy*sr - cy*sp*cr; // ale počítám přímo
+  const uz =  cp*cr;
+
+  // FOV — používáme optFovDeg z JSONu (kalibrovaný)
+  const fovSensor = calData.optFovDeg || 62.5;
+  // Portrait: sensor hFOV → screen vFOV, sensor vFOV → screen hFOV
+  const portrait = H > W;
+  const fovVScreen = portrait ? fovSensor : 2*Math.atan(Math.tan(fovSensor*Math.PI/180/2)/(16/9))*180/Math.PI;
+  const fovHScreen = portrait ? 2*Math.atan(Math.tan(fovSensor*Math.PI/180/2)/(16/9))*180/Math.PI : fovSensor;
+  cameraFovDeg = fovSensor; camFovDetected = !!calData.optFovDeg;
+
+  const tanHalf_h = Math.tan(fovHScreen*Math.PI/180/2);
+  const tanHalf_v = Math.tan(fovVScreen*Math.PI/180/2);
+
+  // Projekce jednoho 3D bodu → normalizované screen coords
+  function project(lat,lng,alt){
+    const p3 = toLocal(lat,lng,alt);
+    // Transformace do camera space
+    const camX = p3.x*rx + p3.y*ry + p3.z*rz; // vpravo
+    const camY = p3.x*fx + p3.y*fy + p3.z*fz; // dopředu (depth)
+    const camZ = p3.x*ux + p3.y*uy + p3.z*uz; // nahoru
+    if(camY < 0.5) return null; // za kamerou nebo příliš blízko
+    // Perspektivní dělení
+    const nx = 0.5 + (camX/camY) / (2*tanHalf_h);
+    const ny = 0.5 - (camZ/camY) / (2*tanHalf_v);
+    return {nx, ny};
+  }
+
+  const tl = project(C.topLeft.lat,    C.topLeft.lng,    C.topLeft.alt);
+  const tr = project(C.topRight.lat,   C.topRight.lng,   C.topRight.alt);
+  const bl = project(C.bottomLeft.lat, C.bottomLeft.lng, C.bottomLeft.alt);
+  const br = project(C.bottomRight.lat,C.bottomRight.lng,C.bottomRight.alt);
+
+  if(!tl||!tr||!bl||!br) return null;
+
+  return {topLeft:tl, topRight:tr, bottomLeft:bl, bottomRight:br};
 }
 
-function detectCameraFov(stream){
-  try{
-    const track=stream.getVideoTracks()[0];
-    const settings=track&&track.getSettings?track.getSettings():{};
-    if(settings.field_of_view&&settings.field_of_view>20){
-      cameraFovDeg=settings.field_of_view;camFovDetected=true;return;
-    }
-  }catch(e){}
-  cameraFovDeg=calData&&calData.optFovDeg?calData.optFovDeg:68;
-  camFovDetected=!!calData?.optFovDeg;
-}
 
 // ── CANVAS AR RENDERING ──
 // Draws the historical photo warped to match the GPS-computed screen position of the 4 plane corners.
@@ -987,15 +924,7 @@ function initCanvas(){
   arCanvas.width=window.innerWidth||390;
   arCanvas.height=window.innerHeight||844;
   arCtx=arCanvas.getContext('2d');
-  console.log('initCanvas: canvas='+arCanvas.width+'x'+arCanvas.height+' ctx='+!!arCtx);
-  // Immediate test draw — bright red rect, always visible if canvas works
-  if(arCtx){
-    arCtx.fillStyle='rgba(255,0,0,0.8)';
-    arCtx.fillRect(20,80,200,40);
-    arCtx.fillStyle='#fff';
-    arCtx.font='bold 13px monospace';
-    arCtx.fillText('CANVAS OK '+arCanvas.width+'x'+arCanvas.height,28,105);
-  }
+
 }
 
 // Draw a quadrilateral by triangulating: TL→TR→BL and TR→BR→BL
@@ -1046,7 +975,7 @@ function computeCornerScreenPos(compassHeading){
   const W=arCanvas?arCanvas.width:window.innerWidth;
   const H=arCanvas?arCanvas.height:window.innerHeight;
 
-  const norms=buildPlaneScreenCorners(compassHeading);
+  const norms=project3D(compassHeading);
   if(!norms)return null;
 
   const result={};
@@ -1073,58 +1002,7 @@ function renderARCanvas(){
   const W=arCanvas.width,H=arCanvas.height;
   arCtx.clearRect(0,0,W,H);
 
-  // ── DEBUG OVERLAY: always visible, shows what's happening ──
-  const ctx=arCtx;
-  ctx.save();
-  ctx.font='bold 11px JetBrains Mono,monospace';
-  ctx.textBaseline='top';
 
-  function dbgLine(txt,y,col){
-    ctx.fillStyle='rgba(0,0,0,.55)';
-    ctx.fillRect(6,y-1,ctx.measureText(txt).width+6,14);
-    ctx.fillStyle=col||'#fff';
-    ctx.fillText(txt,9,y);
-  }
-  function dbgDot(x,y,label,col){
-    ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
-    ctx.fillStyle=col||'#f00';ctx.fill();
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold 10px monospace';
-    ctx.fillText(label,x+9,y-5);
-  }
-
-  const heading=getCurrentHeading();
-  const headingTxt=heading!==null?Math.round(heading)+'°':'null';
-  dbgLine('phase='+phase+' heading='+headingTxt+' fov='+cameraFovDeg.toFixed(0)+'°',8,'#F59E0B');
-  dbgLine('photoImg='+(photoImg?photoImg.naturalWidth+'x'+photoImg.naturalHeight:'null'),24,'#60a5fa');
-  dbgLine('arCtx='+(arCtx?'OK':'NULL')+' canvas='+W+'x'+H,40,'#10B981');
-
-  if(heading!==null&&calData&&calData.plane){
-    const scr=computeCornerScreenPos(heading);
-    if(scr){
-      dbgLine('GPS OK: TL('+scr.topLeft.x.toFixed(0)+','+scr.topLeft.y.toFixed(0)+') TR('+scr.topRight.x.toFixed(0)+','+scr.topRight.y.toFixed(0)+')',56,'#10B981');
-      // Draw corner dots
-      dbgDot(scr.topLeft.x,scr.topLeft.y,'TL','#ef4444');
-      dbgDot(scr.topRight.x,scr.topRight.y,'TR','#f59e0b');
-      dbgDot(scr.bottomLeft.x,scr.bottomLeft.y,'BL','#3b82f6');
-      dbgDot(scr.bottomRight.x,scr.bottomRight.y,'BR','#10b981');
-      // Draw outline
-      ctx.beginPath();
-      ctx.moveTo(scr.topLeft.x,scr.topLeft.y);
-      ctx.lineTo(scr.topRight.x,scr.topRight.y);
-      ctx.lineTo(scr.bottomRight.x,scr.bottomRight.y);
-      ctx.lineTo(scr.bottomLeft.x,scr.bottomLeft.y);
-      ctx.closePath();
-      ctx.strokeStyle='rgba(255,255,0,.7)';ctx.lineWidth=2;ctx.setLineDash([8,4]);ctx.stroke();
-      ctx.setLineDash([]);
-    } else {
-      dbgLine('GPS: computeCornerScreenPos=NULL',56,'#ef4444');
-    }
-  } else {
-    dbgLine('GPS: no heading or no calData.plane',56,'#ef4444');
-  }
-  ctx.restore();
-  // ── END DEBUG ──
 
   if(phase!=='align'&&phase!=='anchored')return;
   if(!photoImg)return;
@@ -1189,7 +1067,7 @@ function updateGpsPlacementUI(active,heading){
 // Start canvas render loop
 function startCanvasLoop(){
   if(arCanvasRafId)cancelAnimationFrame(arCanvasRafId);
-  console.log('startCanvasLoop: arCanvas='+!!arCanvas+' arCtx='+!!arCtx);
+
   function loop(){
     renderARCanvas();
     arCanvasRafId=requestAnimationFrame(loop);
