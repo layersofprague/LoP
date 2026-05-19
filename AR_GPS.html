@@ -377,7 +377,16 @@ const on=(el,cls,add)=>el.classList[add?'add':'remove'](cls);
 // ── URL PARAMS ──
 const _params=new URLSearchParams(location.search);
 const _urlNum=_params.get('num')||'';
-const GITHUB_BASE='https://raw.githubusercontent.com/layersofprague/LoP/main/';
+// Dynamická detekce base URL — stejná logika jako picpin_GPS
+function getGithubBase(){
+  const loc=window.location.href;
+  const rawMatch=loc.match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//);
+  const ghMatch=loc.match(/^(https:\/\/[^/]+\/[^/]+\/)/);
+  if(rawMatch)return `https://${rawMatch[1]}.github.io/${rawMatch[2]}/`;
+  if(ghMatch&&!loc.startsWith('file://'))return ghMatch[1];
+  return 'https://layersofprague.github.io/LoP/';
+}
+const GITHUB_BASE=getGithubBase();
 
 // ── STATE ──
 let calData=null,photoImg=null,photoFileName='ar';
@@ -450,31 +459,47 @@ function doGithubLoad(){
 }
 
 async function autoLoad(num){
-  const slug=numToPhotoSlug(num);   // h_001h (case-sensitive, correct folder)
-  const jsonUrl=GITHUB_BASE+'GPS/'+slug+'_GPS_export_step3.json';
-  const photoUrl=GITHUB_BASE+'foto/'+slug+'.jpg';
+  const base=GITHUB_BASE;
+  const slug=numToPhotoSlug(num);
+  // Zkus obě varianty jména + step3 i step2 (stejně jako picpin_GPS)
+  const names=[slug];
+  // H001 → h_001h pokud ještě není
+  const m=String(num).match(/^([A-Z]+)(\d+)$/);
+  if(m){const alt=m[1].toLowerCase()+'_'+m[2]+'h';if(alt!==slug)names.push(alt);}
   showLoading('Načítám '+slug+'…');
-  let json;
-  try{
-    const r=await fetch(jsonUrl);
-    if(!r.ok)throw new Error('HTTP '+r.status+'\n'+jsonUrl);
-    json=await r.json();
-    if(!json.photographer)throw new Error('Chybí pole photographer v JSON');
-  }catch(e){
-    showManualUpload('GitHub: '+e.message);
+  let json=null,usedSlug=slug;
+  outer:for(const n of names){
+    for(const suffix of ['_GPS_export_step3.json','_GPS_export_step2.json']){
+      const url=base+'GPS/'+n+suffix;
+      try{
+        const r=await fetch(url);
+        if(!r.ok){console.warn('fetch',url,r.status);continue;}
+        json=await r.json();
+        if(!json.photographer){console.warn('no photographer',url);json=null;continue;}
+        usedSlug=n;
+        console.log('Loaded:',url);
+        break outer;
+      }catch(e){console.warn('fetch error',url,e.message);}
+    }
+  }
+  if(!json){
+    showManualUpload('Nenalezeno na GitHubu:\n'+base+'GPS/'+slug+'_GPS_export_step3.json\n\nNahraj soubory ručně.');
     $('inp-num').value=slug;
     return;
   }
   showLoading('Načítám fotografii…');
+  const photoId=json.photoId||usedSlug+'.jpg';
+  const photoSlugClean=photoId.replace(/\.[^.]+$/,'');
+  const photoUrl=base+'foto/'+photoSlugClean+'.jpg';
   try{
     const img=await loadImage(photoUrl);
-    calData=json;photoImg=img;photoFileName=slug;
+    calData=json;photoImg=img;photoFileName=usedSlug;
     $('ov-photo').src=img.src;
     startNav();
   }catch(e){
-    showManualUpload('Fotografie nenalezena ('+slug+'.jpg).\nNahraj ji ručně.');
+    showManualUpload('JSON OK, fotografie nenalezena ('+photoUrl+').\nNahraj ji ručně.');
     calData=json;
-    $('iz-json-val').textContent=slug+'_GPS_export_step3.json';
+    $('iz-json-val').textContent=usedSlug+'_GPS_export_step3.json';
     $('iz-json').classList.add('done');
     checkReady();
   }
@@ -716,66 +741,184 @@ function getVerticalFov(fovH,W,H){
   return getScreenFovs(fovH,W,H).fovVScreen;
 }
 
-// Derive camera FOV and heading from zaberL/R (primary) or optFovDeg or fallback.
-// Returns {fovDeg, azLeftEdge, azRightEdge} — azimuts of left/right screen edge.
-function computeCameraFovFromZaber(){
-  if(!calData)return null;
+// Port of picpin_GPS buildPlane() — computes screen corners using
+// the same local metric coordinate system (forward/right vectors).
+// Returns {tl,tr,bl,br} in normalised screen coords [0-1], or null.
+function buildPlaneScreenCorners(compassHeading){
+  if(!calData||!calData.photographer)return null;
   const p=calData.photographer;
+  const R=6371000;
+  const cosLat=Math.cos(p.lat*Math.PI/180);
 
-  // Primary: zaberL/R GPS + zaberPts pixel positions
-  if(calData.zaberL&&calData.zaberR&&calData.zaberPts&&calData.zaberPts.length>=2){
-    const zL=calData.zaberPts.find(z=>z.side==='L');
-    const zR=calData.zaberPts.find(z=>z.side==='R');
-    if(zL&&zR){
-      const brgL=bearing(p.lat,p.lng,calData.zaberL.lat,calData.zaberL.lng);
-      const brgR=bearing(p.lat,p.lng,calData.zaberR.lat,calData.zaberR.lng);
-      // Angular span between the two zaber points
-      let spanAng=brgR-brgL;
-      while(spanAng>180)spanAng-=360;
-      while(spanAng<-180)spanAng+=360;
-      const pixSpan=zR.x-zL.x; // normalised pixel distance
-      if(Math.abs(pixSpan)>0.05){
-        // Extrapolate to full frame edges (x=0 and x=1)
-        const angPerPix=spanAng/pixSpan;
-        const azLeft=((brgL-zL.x*angPerPix)+360)%360;
-        const azRight=((azLeft+angPerPix)+360)%360;
-        const fov=Math.abs(angPerPix);
-        console.log('FOV from zaberL/R: '+fov.toFixed(1)+'° azLeft='+azLeft.toFixed(1)+'° azRight='+azRight.toFixed(1)+'°');
-        return{fovDeg:fov, azLeftEdge:azLeft, azRightEdge:azRight};
-      }
+  // Convert GPS→local metres from photographer
+  function gpsFromPhotog(lat,lng){
+    return{
+      x:(lng-p.lng)*Math.PI/180*R*cosLat,
+      y:(lat-p.lat)*Math.PI/180*R
+    };
+  }
+  function mToLatLng(mx,my){
+    return{
+      lat:p.lat+my/(R*Math.PI/180),
+      lng:p.lng+mx/(R*Math.PI/180*cosLat)
+    };
+  }
+
+  // Forward direction from photographer toward scene.
+  // In picpin_GPS this comes from S.photographer.x/y (local metres from ref).
+  // Here we derive it from azimutDeg + compassHeading offset.
+  const historicalAz=(calData.azimutDeg||0)*Math.PI/180;
+  const currentAz=compassHeading*Math.PI/180;
+  const azOffset=currentAz-historicalAz;
+
+  // Historical forward = direction photographer was looking
+  const fwdX0=Math.sin(historicalAz), fwdY0=Math.cos(historicalAz);
+  // Rotated by current compass delta
+  const fwdX=Math.sin(currentAz), fwdY=Math.cos(currentAz);
+  const rgtX=-fwdY, rgtY=fwdX;
+
+  // ── ZÁBĚR MODE (exact port of picpin_GPS) ──
+  const zL=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='L');
+  const zR=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='R');
+  if(zL&&zR&&calData.zaberL&&calData.zaberR){
+    const gL=gpsFromPhotog(calData.zaberL.lat,calData.zaberL.lng);
+    const gR=gpsFromPhotog(calData.zaberR.lat,calData.zaberR.lng);
+
+    // Angles relative to HISTORICAL forward axis (same as picpin_GPS)
+    const fwdX_h=fwdX0, fwdY_h=fwdY0;
+    const rgtX_h=-fwdY0, rgtY_h=fwdX0;
+    const azL_h=Math.atan2(gL.x*rgtX_h+gL.y*rgtY_h, gL.x*fwdX_h+gL.y*fwdY_h);
+    const azR_h=Math.atan2(gR.x*rgtX_h+gR.y*rgtY_h, gR.x*fwdX_h+gR.y*fwdY_h);
+
+    const xL=zL.x, xR=zR.x;
+    if(Math.abs(xR-xL)<0.01)return null;
+
+    // Edge angles in historical frame
+    const azEdgeL_h=azL_h+(0-xL)/(xR-xL)*(azR_h-azL_h);
+    const azEdgeR_h=azL_h+(1-xL)/(xR-xL)*(azR_h-azL_h);
+
+    // Depth = average forward distance of záběr points (historical frame)
+    const depthL=gL.x*fwdX_h+gL.y*fwdY_h;
+    const depthR=gR.x*fwdX_h+gR.y*fwdY_h;
+    const depth=(depthL+depthR)/2;
+    if(depth<1)return null;
+
+    function rayAtDepth_h(az){
+      const rx=fwdX_h+Math.tan(az)*rgtX_h;
+      const ry=fwdY_h+Math.tan(az)*rgtY_h;
+      const fc=rx*fwdX_h+ry*fwdY_h;
+      if(Math.abs(fc)<0.001)return null;
+      const t=depth/fc;
+      return{x:rx*t,y:ry*t};
     }
+
+    const pLeft_h=rayAtDepth_h(azEdgeL_h);
+    const pRight_h=rayAtDepth_h(azEdgeR_h);
+    if(!pLeft_h||!pRight_h)return null;
+
+    // Convert to GPS
+    const tlGps=mToLatLng(pLeft_h.x,pLeft_h.y);
+    const trGps=mToLatLng(pRight_h.x,pRight_h.y);
+    const planeW=Math.sqrt((pRight_h.x-pLeft_h.x)**2+(pRight_h.y-pLeft_h.y)**2);
+    const aspect=calData.plane?(calData.plane.widthM/calData.plane.heightM):16/9;
+    const planeH=planeW/aspect;
+    const halfH=planeH/2;
+    const eyeH=p.heightM||0.5;
+    const altTop=eyeH+halfH, altBot=eyeH-halfH;
+
+    const fovEffRad=azEdgeR_h-azEdgeL_h;
+
+    console.log('buildPlane: záběr mode planeW='+planeW.toFixed(1)+'m fovEff='+(fovEffRad*180/Math.PI).toFixed(1)+'°');
+    cameraFovDeg=Math.abs(fovEffRad*180/Math.PI);camFovDetected=true;
+
+    // Now project these corners to screen using current compass heading
+    // Screen nx: angle from current left edge (azEdgeL rotated by azOffset)
+    const azEdgeL_cur=azEdgeL_h+azOffset;
+    const azEdgeR_cur=azEdgeR_h+azOffset;
+    const fovH_screen=getScreenFovs(cameraFovDeg,
+      arCanvas?arCanvas.width:window.innerWidth,
+      arCanvas?arCanvas.height:window.innerHeight).fovHScreen;
+    const fovV_screen=getScreenFovs(cameraFovDeg,
+      arCanvas?arCanvas.width:window.innerWidth,
+      arCanvas?arCanvas.height:window.innerHeight).fovVScreen;
+
+    function cornerToScreen(lat,lng,alt){
+      const brg=bearing(p.lat,p.lng,lat,lng);
+      const brgRad=brg*Math.PI/180;
+      // angle relative to current left edge
+      const dFromLeft_h=Math.atan2(
+        Math.sin((brgRad)-(fwdX_h*Math.PI/180)),
+        Math.cos((brgRad)-(fwdX_h*Math.PI/180))
+      );
+      // Use linear pixel mapping: same as picpin_GPS
+      // nx = (azBrg_in_historical_frame - azEdgeL_h) / (azEdgeR_h - azEdgeL_h)
+      const brgLocal=bearing(p.lat,p.lng,lat,lng)*Math.PI/180;
+      const gPt=gpsFromPhotog(lat,lng);
+      const azPt=Math.atan2(gPt.x*rgtX_h+gPt.y*rgtY_h,gPt.x*fwdX_h+gPt.y*fwdY_h);
+      // Apply compass offset: shift by azOffset
+      const azPt_cur=azPt+azOffset;
+      const nx=azPt_cur/fovEffRad+0.5; // centre=0, left=-0.5, right=+0.5
+      // Wait — use same linear interp as picpin_GPS pixel mapping
+      const nx2=(azPt_cur-azEdgeL_cur)/(azEdgeR_cur-azEdgeL_cur);
+
+      const distH=haversine(p.lat,p.lng,lat,lng);
+      const dV=alt-eyeH;
+      const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
+      const fovVRad=fovV_screen*Math.PI/180;
+      const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVRad/2)*0.5;
+      return{nx:nx2,ny};
+    }
+
+    return{
+      topLeft:    cornerToScreen(tlGps.lat,tlGps.lng,altTop),
+      topRight:   cornerToScreen(trGps.lat,trGps.lng,altTop),
+      bottomLeft: cornerToScreen(tlGps.lat,tlGps.lng,altBot),
+      bottomRight:cornerToScreen(trGps.lat,trGps.lng,altBot),
+    };
   }
 
-  // Secondary: optFovDeg from JSON + azimutDeg as camera center
-  if(calData.optFovDeg&&calData.azimutDeg!=null){
-    const fov=calData.optFovDeg;
-    const azLeft=((calData.azimutDeg-fov/2)+360)%360;
-    const azRight=((calData.azimutDeg+fov/2)+360)%360;
-    console.log('FOV from optFovDeg: '+fov.toFixed(1)+'°');
-    return{fovDeg:fov, azLeftEdge:azLeft, azRightEdge:azRight};
+  // ── FALLBACK: optFovDeg or 68° ──
+  const fov=(calData.optFovDeg||68);
+  cameraFovDeg=fov;camFovDetected=!!calData.optFovDeg;
+  const fovRad=fov*Math.PI/180;
+  const dist=p.distM||20;
+  const halfW=dist*Math.tan(fovRad/2);
+  const aspect=calData.plane?(calData.plane.widthM/calData.plane.heightM):16/9;
+  const halfH_fb=halfW/aspect;
+  const eyeH=p.heightM||0.5;
+  const tlGps=mToLatLng(fwdX*dist-rgtX*halfW, fwdY*dist-rgtY*halfW);
+  const trGps=mToLatLng(fwdX*dist+rgtX*halfW, fwdY*dist+rgtY*halfW);
+  const {fovVScreen}=getScreenFovs(fov,
+    arCanvas?arCanvas.width:window.innerWidth,
+    arCanvas?arCanvas.height:window.innerHeight);
+  function fbCorner(lat,lng,alt){
+    const brg=bearing(p.lat,p.lng,lat,lng);
+    let dH=brg-compassHeading; while(dH>180)dH-=360; while(dH<-180)dH+=360;
+    const nx=0.5+Math.tan(dH*Math.PI/180)/Math.tan(fovRad/2)*0.5;
+    const distH=haversine(p.lat,p.lng,lat,lng);
+    const dV=alt-eyeH;
+    const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
+    const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVScreen*Math.PI/180/2)*0.5;
+    return{nx,ny};
   }
-
-  // Fallback
-  const fov=68;
-  const az=calData.azimutDeg||0;
-  return{fovDeg:fov, azLeftEdge:((az-fov/2)+360)%360, azRightEdge:((az+fov/2)+360)%360};
+  return{
+    topLeft:    fbCorner(tlGps.lat,tlGps.lng,eyeH+halfH_fb),
+    topRight:   fbCorner(trGps.lat,trGps.lng,eyeH+halfH_fb),
+    bottomLeft: fbCorner(tlGps.lat,tlGps.lng,eyeH-halfH_fb),
+    bottomRight:fbCorner(trGps.lat,trGps.lng,eyeH-halfH_fb),
+  };
 }
 
 function detectCameraFov(stream){
-  // Try browser-reported FOV
   try{
     const track=stream.getVideoTracks()[0];
     const settings=track&&track.getSettings?track.getSettings():{};
     if(settings.field_of_view&&settings.field_of_view>20){
-      cameraFovDeg=settings.field_of_view;
-      camFovDetected=true;
-      return;
+      cameraFovDeg=settings.field_of_view;camFovDetected=true;return;
     }
   }catch(e){}
-  // FOV set later per-frame from computeCameraFovFromZaber
-  const r=computeCameraFovFromZaber();
-  if(r){cameraFovDeg=r.fovDeg;camFovDetected=true;}
-  else{cameraFovDeg=68;camFovDetected=false;}
+  cameraFovDeg=calData&&calData.optFovDeg?calData.optFovDeg:68;
+  camFovDetected=!!calData?.optFovDeg;
 }
 
 // ── CANVAS AR RENDERING ──
@@ -842,40 +985,16 @@ function drawTriangle(img,s0,s1,s2,d0,d1,d2,opacity){
 
 // Compute screen positions of 4 plane corners from GPS data + current compass heading
 function computeCornerScreenPos(compassHeading){
-  if(!calData||!calData.plane||!calData.plane.corners)return null;
-  const C=calData.plane.corners;
-  const p=calData.photographer;
-  if(!p||!p.lat||!p.lng)return null;
+  if(!calData||!calData.photographer)return null;
   const W=arCanvas?arCanvas.width:window.innerWidth;
   const H=arCanvas?arCanvas.height:window.innerHeight;
 
-  // Compute zaber-based FOV info, adjusted for current compass heading offset
-  const zaberBase=computeCameraFovFromZaber();
-  let zaberInfo=null;
-  if(zaberBase&&smoothH!==null){
-    // Offset zaber azimuts by (currentHeading - historicalAzimut)
-    const historicalAz=calData.azimutDeg||0;
-    const headingOffset=compassHeading-historicalAz;
-    zaberInfo={
-      azLeftEdge:(zaberBase.azLeftEdge+headingOffset+360)%360,
-      azRightEdge:(zaberBase.azRightEdge+headingOffset+360)%360,
-    };
-  } else if(zaberBase) {
-    zaberInfo=zaberBase; // no compass — use as-is (static preview)
-  }
+  const norms=buildPlaneScreenCorners(compassHeading);
+  if(!norms)return null;
 
-  const fovH=zaberBase?zaberBase.fovDeg:cameraFovDeg;
-  const {fovHScreen,fovVScreen}=getScreenFovs(fovH,W,H);
-  const fovV=fovVScreen;
-  const photographerPos={lat:p.lat,lng:p.lng,heightM:p.heightM||1.6};
-  const corners=['topLeft','topRight','bottomLeft','bottomRight'];
   const result={};
-  for(const name of corners){
-    const c=C[name];
-    if(!c||c.lat==null)return null;
-    const proj=gpsToScreenNorm(c.lat,c.lng,c.alt||0,compassHeading,fovH,fovV,photographerPos,zaberInfo);
-    if(!proj)return null;
-    result[name]={x:proj.nx*W,y:proj.ny*H};
+  for(const[name,n] of Object.entries(norms)){
+    result[name]={x:n.nx*W, y:n.ny*H};
   }
   // Debug log (throttled)
   const now=performance.now();

@@ -2190,9 +2190,10 @@ function loadFromGitHub() {
 
   // Pokud vypadá jako H001, zkus také h_001h variantu
   function toAlt(n) {
+    // H001 → h_001h, H002 → h_002h atd.
     const m = n.match(/^([A-Z]+)(\d+)$/);
     if (!m) return null;
-    return m[1].toLowerCase() + '_0' + m[2] + 'h';
+    return m[1].toLowerCase() + '_' + m[2] + 'h';
   }
   const altName = toAlt(name);
   // Strip suffix if user pasted full filename
