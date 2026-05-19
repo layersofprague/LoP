@@ -1752,16 +1752,13 @@ function buildPlane() {
     const azEdgeL = azL + (0   - xL) / (xR - xL) * (azR - azL);
     const azEdgeR = azL + (1.0 - xL) / (xR - xL) * (azR - azL);
 
-    // Hloubka roviny = průměr forward vzdáleností záběr bodů
+    // Hloubka každého záběr bodu zvlášť
     const depthL = gL.x*fwdX + gL.y*fwdY;
     const depthR = gR.x*fwdX + gR.y*fwdY;
-    const depth  = (depthL + depthR) / 2;
-    if (depth < 1) return;
+    if (depthL < 1 || depthR < 1) return;
 
-    // Průsečík okrajového paprsku s rovinou x=depth (kolmá na forward)
-    // Paprsek: (fwdX + tan(az)*rgtX, fwdY + tan(az)*rgtY)
-    // Škálování: t = depth / forward_component
-    function rayAtDepth(az) {
+    // Průsečík okrajového paprsku s rovinou ve hloubce příslušného záběr bodu
+    function rayAtDepth(az, depth) {
       const rx = fwdX + Math.tan(az)*rgtX;
       const ry = fwdY + Math.tan(az)*rgtY;
       const fc = rx*fwdX + ry*fwdY;
@@ -1770,8 +1767,8 @@ function buildPlane() {
       return { x: rx*t, y: ry*t };
     }
 
-    const pLeft  = rayAtDepth(azEdgeL);
-    const pRight = rayAtDepth(azEdgeR);
+    const pLeft  = rayAtDepth(azEdgeL, depthL);
+    const pRight = rayAtDepth(azEdgeR, depthR);
     if (!pLeft || !pRight) return;
 
     S.planeW = Math.sqrt((pRight.x-pLeft.x)**2 + (pRight.y-pLeft.y)**2);
