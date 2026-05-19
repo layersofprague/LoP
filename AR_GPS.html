@@ -531,6 +531,13 @@ function showPhase(id){
   if(id==='ph-nav')setTimeout(()=>{if(navMap)navMap.invalidateSize();},100);
 }
 
+// Corners jsou přímo z plane.corners v JSONu — picpin_GPS je tam exportuje
+// po buildPlane() ze záběr bodů. Nepřepočítáváme, jen použijeme.
+function computeNavCorners(){
+  if(!calData||!calData.plane||!calData.plane.corners)return null;
+  return calData.plane.corners; // {topLeft,topRight,bottomLeft,bottomRight} s lat/lng/alt
+}
+
 // ── NAV ──
 function startNav(){showPhase('ph-nav');initNavMap();startSensors();}
 
@@ -549,30 +556,43 @@ function initNavMap(){
     L.polyline([[arr[0].lat,arr[0].lng],[arr[1].lat,arr[1].lng]],{color:FC[k],weight:3,opacity:.85}).addTo(navMap);
   });
 
-  // Rovina — kreslíme jen horní hranu TL→TR (bottom má stejné GPS jako top)
-  if(calData.plane&&calData.plane.corners){
-    const c=calData.plane.corners;
+  // Vypočítej rohy roviny stejnou logikou jako picpin_GPS buildPlane()
+  const navCorners = computeNavCorners();
+  if(navCorners){
+    const c=navCorners;
+    // Horní hrana TL→TR (černá čárkovaná)
     L.polyline([[c.topLeft.lat,c.topLeft.lng],[c.topRight.lat,c.topRight.lng]],
       {color:'#1a1a14',weight:3,dashArray:'6,4',opacity:.85}).addTo(navMap);
+    // FOV čáry fotograf → TL a TR
+    L.polyline([[p.lat,p.lng],[c.topLeft.lat,c.topLeft.lng]],
+      {color:'#3b82f6',weight:1,dashArray:'4,6',opacity:.4}).addTo(navMap);
+    L.polyline([[p.lat,p.lng],[c.topRight.lat,c.topRight.lng]],
+      {color:'#3b82f6',weight:1,dashArray:'4,6',opacity:.4}).addTo(navMap);
+    // TL / TR markery
+    ['topLeft','topRight'].forEach(k=>{
+      const icon=L.divIcon({html:'<div style="width:6px;height:6px;border-radius:50%;background:#1a1a14;border:1px solid #fff"></div>',className:'',iconSize:[6,6],iconAnchor:[3,3]});
+      L.marker([c[k].lat,c[k].lng],{icon}).addTo(navMap);
+    });
   }
 
-  // Azimutová šipka fotografa (jako v picpin_GPS)
+  // Azimutová šipka (15m)
   if(p.lat&&p.lng&&calData.azimutDeg!=null){
-    const az=calData.azimutDeg*Math.PI/180;
-    const R=6371000,L15=15;
+    const az=calData.azimutDeg*Math.PI/180,R=6371000,L15=15;
     const tipLat=p.lat+(L15/R)*(180/Math.PI)*Math.cos(az);
     const tipLng=p.lng+(L15/R)*(180/Math.PI)/Math.cos(p.lat*Math.PI/180)*Math.sin(az);
     L.polyline([[p.lat,p.lng],[tipLat,tipLng]],{color:'#3b82f6',weight:3,opacity:.9}).addTo(navMap);
   }
 
-  // FOV trojúhelník (přibližný, z azimutDeg + FOV 70°)
-  if(p.lat&&p.lng&&calData.azimutDeg!=null&&calData.plane&&calData.plane.corners){
-    const c=calData.plane.corners;
-    // FOV = čára fotograf → TL a fotograf → TR
-    L.polyline([[p.lat,p.lng],[c.topLeft.lat,c.topLeft.lng]],
-      {color:'#3b82f6',weight:1,dashArray:'4,6',opacity:.4}).addTo(navMap);
-    L.polyline([[p.lat,p.lng],[c.topRight.lat,c.topRight.lng]],
-      {color:'#3b82f6',weight:1,dashArray:'4,6',opacity:.4}).addTo(navMap);
+  // Záběr L/P markery
+  if(calData.zaberL){
+    const icon=L.divIcon({html:'<div style="background:#fff;border:1px solid #333;font-size:9px;padding:1px 3px;border-radius:2px;white-space:nowrap">L</div>',className:'',iconAnchor:[6,10]});
+    L.marker([calData.zaberL.lat,calData.zaberL.lng],{icon}).addTo(navMap);
+    L.polyline([[p.lat,p.lng],[calData.zaberL.lat,calData.zaberL.lng]],{color:'rgba(255,255,255,0.4)',weight:1,dashArray:'3,5'}).addTo(navMap);
+  }
+  if(calData.zaberR){
+    const icon=L.divIcon({html:'<div style="background:#fff;border:1px solid #333;font-size:9px;padding:1px 3px;border-radius:2px;white-space:nowrap">P</div>',className:'',iconAnchor:[6,10]});
+    L.marker([calData.zaberR.lat,calData.zaberR.lng],{icon}).addTo(navMap);
+    L.polyline([[p.lat,p.lng],[calData.zaberR.lat,calData.zaberR.lng]],{color:'rgba(255,255,255,0.4)',weight:1,dashArray:'3,5'}).addTo(navMap);
   }
   navMap.on('dragstart zoomstart',()=>{isLocked=false;if(relockTimer)clearTimeout(relockTimer);});
   navMap.on('dragend zoomend',()=>{if(relockTimer)clearTimeout(relockTimer);relockTimer=setTimeout(()=>{isLocked=true;if(userPos)navMap.setView([userPos.lat,userPos.lng],navMap.getZoom(),{animate:true});},3000);});
@@ -778,6 +798,44 @@ function buildPlaneScreenCorners(compassHeading){
   const rgtX=-fwdY, rgtY=fwdX;
 
   // ── ZÁBĚR MODE (exact port of picpin_GPS) ──
+  // Use plane.corners directly from JSON (computed by picpin_GPS buildPlane)
+  if(calData.plane&&calData.plane.corners){
+    const C=calData.plane.corners;
+    const eyeH=p.heightM||0.5;
+    const fovH_sensor=calData.optFovDeg||60;
+    const {fovVScreen}=getScreenFovs(fovH_sensor,
+      arCanvas?arCanvas.width:window.innerWidth,
+      arCanvas?arCanvas.height:window.innerHeight);
+    cameraFovDeg=fovH_sensor;camFovDetected=!!calData.optFovDeg;
+
+    function cornerToScreen(lat,lng,alt){
+      const g=gpsFromPhotog(lat,lng);
+      // Project using historical forward/right axes
+      const azPt=Math.atan2(g.x*rgtX+g.y*rgtY,g.x*fwdX+g.y*fwdY);
+      // Apply compass offset
+      const azPt_cur=azPt+azOffset;
+      // Derive edge angles from corners themselves
+      const gTL=gpsFromPhotog(C.topLeft.lat,C.topLeft.lng);
+      const gTR=gpsFromPhotog(C.topRight.lat,C.topRight.lng);
+      const azTL=Math.atan2(gTL.x*rgtX+gTL.y*rgtY,gTL.x*fwdX+gTL.y*fwdY)+azOffset;
+      const azTR=Math.atan2(gTR.x*rgtX+gTR.y*rgtY,gTR.x*fwdX+gTR.y*fwdY)+azOffset;
+      const nx=(azPt_cur-azTL)/(azTR-azTL);
+      const distH=haversine(p.lat,p.lng,lat,lng);
+      const dV=alt-eyeH;
+      const vertAngleDeg=Math.atan2(dV,distH)*180/Math.PI;
+      const fovVRad=fovVScreen*Math.PI/180;
+      const ny=0.5-Math.tan(vertAngleDeg*Math.PI/180)/Math.tan(fovVRad/2)*0.5;
+      return{nx,ny};
+    }
+    return{
+      topLeft:    cornerToScreen(C.topLeft.lat,   C.topLeft.lng,   C.topLeft.alt),
+      topRight:   cornerToScreen(C.topRight.lat,  C.topRight.lng,  C.topRight.alt),
+      bottomLeft: cornerToScreen(C.bottomLeft.lat, C.bottomLeft.lng, C.bottomLeft.alt),
+      bottomRight:cornerToScreen(C.bottomRight.lat,C.bottomRight.lng,C.bottomRight.alt),
+    };
+  }
+
+  // ── ZÁBĚR fallback (no plane.corners) ──
   const zL=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='L');
   const zR=calData.zaberPts&&calData.zaberPts.find(z=>z.side==='R');
   if(zL&&zR&&calData.zaberL&&calData.zaberR){
