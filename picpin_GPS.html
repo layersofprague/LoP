@@ -1577,40 +1577,36 @@ function buildPlane() {
     const rayLx = fwdX + Math.tan(angL)*rgtX, rayLy = fwdY + Math.tan(angL)*rgtY;
     const rayRx = fwdX + Math.tan(angR)*rgtX, rayRy = fwdY + Math.tan(angR)*rgtY;
 
-    // Distance along ray: project GPS point onto ray direction (normalized)
+    // Distance along ray: t = projection of GPS point onto normalized ray
     const lenL = Math.sqrt(rayLx**2 + rayLy**2);
     const lenR = Math.sqrt(rayRx**2 + rayRy**2);
-    const dL = (gL.x*(rayLx/lenL) + gL.y*(rayLy/lenL)); // metres along ray
-    const dR = (gR.x*(rayRx/lenR) + gR.y*(rayRy/lenR)); // metres along ray
+    const tL = (gL.x*(rayLx/lenL) + gL.y*(rayLy/lenL));
+    const tR = (gR.x*(rayRx/lenR) + gR.y*(rayRy/lenR));
 
-    // Use average depth for plane (or individual depths — average is more stable)
-    const depthL = dL / lenL; // forward depth for L ray
-    const depthR = dR / lenR;
+    // Forward depth = how far along forward axis the záběr point lies
+    const depthL = gL.x*fwdX + gL.y*fwdY; // dot product with forward unit vector
+    const depthR = gR.x*fwdX + gR.y*fwdY;
 
-    // Left edge of frame (x=0): paprsek pod úhlem -FOV/2
-    const edgeLang = -halfFov;
-    const edgeRang = +halfFov;
-    const edgeLx = fwdX + Math.tan(edgeLang)*rgtX, edgeLy = fwdY + Math.tan(edgeLang)*rgtY;
-    const edgeRx = fwdX + Math.tan(edgeRang)*rgtX, edgeRy = fwdY + Math.tan(edgeRang)*rgtY;
+    // Use average depth for the plane (more stable than per-side)
+    const depth = (depthL + depthR) / 2;
 
-    // Scale edge rays to same depth as corresponding záběr point
-    const normLx = edgeLx/Math.sqrt(edgeLx**2+edgeLy**2);
-    const normLy = edgeLy/Math.sqrt(edgeLx**2+edgeLy**2);
-    const normRx = edgeRx/Math.sqrt(edgeRx**2+edgeRy**2);
-    const normRy = edgeRy/Math.sqrt(edgeRx**2+edgeRy**2);
+    // Left edge (x=0) and right edge (x=1) rays at this depth
+    // Point on ray at depth d: ray_normalized * (d / forward_component)
+    // forward_component of edge ray = dot(normalized_edge_ray, forward)
+    const edgeLx = fwdX + Math.tan(-halfFov)*rgtX;
+    const edgeLy = fwdY + Math.tan(-halfFov)*rgtY;
+    const edgeRx = fwdX + Math.tan(+halfFov)*rgtX;
+    const edgeRy = fwdY + Math.tan(+halfFov)*rgtY;
 
-    // Forward component of each edge ray
-    const fwdCompL = normLx*fwdX + normLy*fwdY;
-    const fwdCompR = normRx*fwdX + normRy*fwdY;
+    // Forward component of edge rays (dot with forward unit vec)
+    const fcL = edgeLx*fwdX + edgeLy*fwdY;
+    const fcR = edgeRx*fwdX + edgeRy*fwdY;
 
-    // Scale so forward depth matches záběr depth
-    const tEL = depthL / fwdCompL;
-    const tER = depthR / fwdCompR;
-
-    const planeLeftX  = normLx * tEL;
-    const planeLeftY  = normLy * tEL;
-    const planeRightX = normRx * tER;
-    const planeRightY = normRy * tER;
+    // Scale edge rays so forward depth = depth
+    const planeLeftX  = edgeLx * (depth / fcL);
+    const planeLeftY  = edgeLy * (depth / fcL);
+    const planeRightX = edgeRx * (depth / fcR);
+    const planeRightY = edgeRy * (depth / fcR);
 
     S.planeW = Math.sqrt((planeRightX-planeLeftX)**2 + (planeRightY-planeLeftY)**2);
     const aspect = S.photoW>0 ? S.photoW/S.photoH : 16/9;
