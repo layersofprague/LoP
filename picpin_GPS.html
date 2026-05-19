@@ -1539,51 +1539,46 @@ function buildPlane() {
   const zaberR = S.zaberPts.find(p=>p.side==='R');
 
   if (zaberL && zaberR && S.zaberL && S.zaberR) {
-    // ── ZÁBĚR MODE: rovinu definují reálné okrajové body ──
-    // Convert GPS záběr points to local metres
-    const gL = gpsToM(S.zaberL.lat, S.zaberL.lng, ref.lat, ref.lng);
-    const gR = gpsToM(S.zaberR.lat, S.zaberR.lng, ref.lat, ref.lng);
+    // ── ZÁBĚR MODE ──
+    // GPS záběr bod přímo definuje okraj roviny.
+    // Paprsek z fotografa k GPS záběr bodu = okrajový paprsek záběru.
+    // Průsečík s "rovinou ve vzdálenosti dist" není potřeba —
+    // jednoduše použijeme GPS body jako levý a pravý okraj.
 
-    // Pixel x of each záběr point (normalised 0–1, 0=left edge, 1=right edge)
-    // The záběr point on photo corresponds to the angle from optical axis
-    const fovH = 60 * Math.PI / 180;
-    const halfFov = Math.tan(fovH/2);
+    const ph_lat = S.photographer.lat, ph_lng = S.photographer.lng;
 
-    // Angle from optical axis for each záběr point pixel
-    const angL = (zaberL.x - 0.5) * 2 * halfFov; // negative = left
-    const angR = (zaberR.x - 0.5) * 2 * halfFov; // positive = right
+    // Convert to local metres from photographer position
+    const R = 6371000;
+    const cosLat = Math.cos(ph_lat * Math.PI / 180);
 
-    // Ray from photographer: forward = (dx,dy), right = (-dy,dx)
-    const rx = -dy, ry = dx; // right perpendicular
+    function gpsToLocal(lat, lng) {
+      return {
+        x: (lng - ph_lng) * Math.PI/180 * R * cosLat,
+        y: (lat - ph_lat) * Math.PI/180 * R
+      };
+    }
 
-    // For záběr point: direction = forward + angle * right
-    // Find where ray intersects the plane defined by GPS záběr point
-    // Simple approach: scale the GPS point to lie on the ray
-    // Ray direction for L: (dx + angL*rx, dy + angL*ry)
-    const rayLx = dx + angL*rx, rayLy = dy + angL*ry;
-    const rayRx = dx + angR*rx, rayRy = dy + angR*ry;
+    const gL = gpsToLocal(S.zaberL.lat, S.zaberL.lng);
+    const gR = gpsToLocal(S.zaberR.lat, S.zaberR.lng);
 
-    // Scale: find t such that photographer + t*ray = gPS point (least squares)
-    const tL = (gL.x*rayLx + gL.y*rayLy) / (rayLx**2 + rayLy**2);
-    const tR = (gR.x*rayRx + gR.y*rayRy) / (rayRx**2 + rayRy**2);
+    // Plane left = GPS záběr L, plane right = GPS záběr R
+    // (these are the actual ground positions of the edge objects)
+    const planeLeftLat  = S.zaberL.lat,  planeLeftLng  = S.zaberL.lng;
+    const planeRightLat = S.zaberR.lat,  planeRightLng = S.zaberR.lng;
 
-    // Left and right edge of plane = photographer + t*ray
-    const planeLeftX  = tL * rayLx;
-    const planeLeftY  = tL * rayLy;
-    const planeRightX = tR * rayRx;
-    const planeRightY = tR * rayRy;
-
-    // Plane width = distance between left and right edge
-    S.planeW = Math.sqrt((planeRightX-planeLeftX)**2 + (planeRightY-planeLeftY)**2);
+    // Plane width = horizontal distance between L and R
+    S.planeW = Math.sqrt(
+      (gR.x - gL.x)**2 + (gR.y - gL.y)**2
+    );
     const aspect = S.photoW>0 ? S.photoW/S.photoH : 16/9;
     S.planeH = S.planeW / aspect;
-    const halfH = S.planeH/2;
+    const halfH = S.planeH / 2;
 
     S.corners = {
-      topLeft:     { ...mToGps(planeLeftX,  planeLeftY,  ref.lat,ref.lng), alt: ph+halfH },
-      topRight:    { ...mToGps(planeRightX, planeRightY, ref.lat,ref.lng), alt: ph+halfH },
-      bottomLeft:  { ...mToGps(planeLeftX,  planeLeftY,  ref.lat,ref.lng), alt: ph-halfH },
-      bottomRight: { ...mToGps(planeRightX, planeRightY, ref.lat,ref.lng), alt: ph-halfH },
+      topLeft:     { lat:planeLeftLat,  lng:planeLeftLng,  alt: ph+halfH },
+      topRight:    { lat:planeRightLat, lng:planeRightLng, alt: ph+halfH },
+      bottomLeft:  { lat:planeLeftLat,  lng:planeLeftLng,  alt: ph-halfH },
+      bottomRight: { lat:planeRightLat, lng:planeRightLng, alt: ph-halfH },
     };
 
     S._debug && (S._debug.planeSource = 'záběr L+P (' + S.planeW.toFixed(1) + 'm)');
