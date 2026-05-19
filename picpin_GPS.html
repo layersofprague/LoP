@@ -2319,17 +2319,20 @@ function loadProjectData(p) {
   if(S.photographer&&S.photographer.lat) drawPhotographerMarker();
   document.getElementById('btn-map-next').disabled=!(S.facadeA[0]&&S.facadeA[1]);
 
-  const isExport = !!p.azimutDeg;
-  if(isExport) {
-    gotoStep(1);
-  } else if(S.photographer&&S.planeW) {
-    if(confirm('Projekt načten. Přejít rovnou na krok 3?')) gotoStep(3);
+  const isStep3 = !!p.azimutDeg || !!p.plane;           // export step3
+  const isStep2 = !isStep3 && (!!p.lines || !!p.savedAt); // pracovní projekt step2
+  // isStep1: jen fasády, žádné čáry ani azimut
+
+  if(isStep3) {
+    gotoStep(1); // zobraz mapu s body, uživatel může pokračovat
+  } else if(isStep2) {
+    gotoStep(2); // přejdi na fotku s čarami
   } else {
     gotoStep(1);
   }
 
-  // Záběr markery až po gotoStep — mapa musí být viditelná
-  setTimeout(() => {
+  // Záběr markery — umístit po gotoStep
+  const _placeZaber = () => {
     if(S.zaberL) {
       placeZaberMarker('L', S.zaberL.lat, S.zaberL.lng);
       const czl=document.getElementById('chip-zl');
@@ -2340,7 +2343,11 @@ function loadProjectData(p) {
       const czr=document.getElementById('chip-zr');
       if(czr){ czr.classList.add('set'); document.getElementById('cv-zr').textContent=S.zaberR.lat.toFixed(5)+', '+S.zaberR.lng.toFixed(5); }
     }
-  }, 200);
+    const cz=document.getElementById('chip-zaber');
+    if(cz&&S.zaberPts.length) cz.textContent='Záběr: '+S.zaberPts.length+'/2';
+  };
+  if(typeof map !== 'undefined' && map) _placeZaber();
+  else setTimeout(_placeZaber, 300);
 }
 
 function exportStep1() {
@@ -2352,6 +2359,8 @@ function exportStep1() {
     facadeC: S.facadeC.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
     facadeD: S.facadeD.filter(Boolean).map(p=>({lat:p.lat,lng:p.lng})),
     viewpoint: S.viewpoint,
+    zaberL: S.zaberL || null,
+    zaberR: S.zaberR || null,
     timestamp: new Date().toISOString()
   };
   const base = _photoBase();
