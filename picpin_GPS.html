@@ -2201,61 +2201,63 @@ function loadFromGitHub() {
     base = 'https://layersofprague.github.io/LoP/';
   }
 
-  const jsonUrl = base + 'place/' + name + '_GPS_export_step2.json';
-  const jsonUrl3 = base + 'place/' + name + '_GPS_export_step3.json';
+  const jsonUrl  = base + 'GPS/' + name + '_GPS_export_step2.json';
+  const jsonUrl3 = base + 'GPS/' + name + '_GPS_export_step3.json';
 
-  // Show loading state
   const btn = document.querySelector('[onclick="loadFromGitHub()"]');
   if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Načítám…'; btn.disabled = true; }
-  const resetBtn = () => { if (btn) { btn.textContent = btn._orig; btn.disabled = false; } };
+  const resetBtn = () => { if (btn) { btn.textContent = btn._orig||'📡 GitHub'; btn.disabled = false; } };
 
-  // Try step3 first (more complete data), then step2
-  const tryFetch = url => fetch(url).then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  });
+  async function doLoad() {
+    // Try step3, then step2
+    let p = null, usedUrl = '';
+    console.log('Trying URLs:', jsonUrl3, jsonUrl);
+    for (const url of [jsonUrl3, jsonUrl]) {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) { console.warn('fetch', url, r.status); continue; }
+        p = await r.json();
+        usedUrl = url;
+        break;
+      } catch(e) { console.warn('fetch error', url, e.message); }
+    }
 
-  tryFetch(jsonUrl3)
-    .catch(() => tryFetch(jsonUrl))
-    .then(p => {
-      loadProjectData(p);
-      // Load photo from /foto/{photoId}
-      const photoId = p.photoId || p.photoFileName || (name + '.jpg');
-      const photoUrl = base + 'foto/' + photoId;
-      return fetch(photoUrl)
-        .then(r => {
-          if (!r.ok) throw new Error('foto/' + photoId + ' nenalezena (HTTP ' + r.status + ')');
-          return r.blob();
-        })
-        .then(blob => {
-          const img = new Image();
-          img.onload = () => {
-            photoImg = img;
-            S.photoW = img.naturalWidth;
-            S.photoH = img.naturalHeight;
-            // Set ov-photo for step 2
-            document.getElementById('ov-photo') && (document.getElementById('ov-photo').src = img.src);
-            // Redraw step 2 if active
-            if (S.step === 2) { resizeCvs(); fitPhotoToCanvas(); redraw(); }
-            resetBtn();
-          };
-          img.onerror = () => { resetBtn(); alert('Chyba načítání fotografie.'); };
-          img.src = URL.createObjectURL(blob);
-          // Also set as S.photoFile substitute for export names
-          S._photoName = photoId;
-        })
-        .catch(err => {
-          resetBtn();
-          alert('JSON načten ✓\nFotografie: ' + err.message + '\nNačti ji ručně v kroku 2.');
-        });
-    })
-    .catch(err => {
+    if (!p) {
       resetBtn();
-      const tryLocal = confirm(
-        'GitHub nenalezen:\n' + jsonUrl + '\n(ani step3 varianta)\n\nNačíst ze lokálu?'
-      );
-      if (tryLocal) document.getElementById('project-input').click();
-    });
+      const msg = 'Nepodařilo se načíst:\n' + jsonUrl3 + '\n' + jsonUrl + '\n\nNačíst ze lokálu?';
+      if (confirm(msg)) document.getElementById('project-input').click();
+      return;
+    }
+
+    loadProjectData(p);
+
+    // Load photo
+    const photoId = p.photoId || p.photoFileName || (name + '.jpg');
+    const photoUrl = base + 'foto/' + photoId;
+    try {
+      const r = await fetch(photoUrl);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const blob = await r.blob();
+      const img = new Image();
+      img.onload = () => {
+        photoImg = img;
+        S.photoW = img.naturalWidth;
+        S.photoH = img.naturalHeight;
+        const op = document.getElementById('ov-photo');
+        if (op) op.src = img.src;
+        if (S.step === 2) { resizeCvs(); fitPhotoToCanvas(); redraw(); }
+        S._photoName = photoId;
+        resetBtn();
+      };
+      img.onerror = () => { resetBtn(); alert('Chyba načítání fotografie.'); };
+      img.src = URL.createObjectURL(blob);
+    } catch(e) {
+      resetBtn();
+      alert('JSON načten ✓ (' + usedUrl.split('/').pop() + ')\nFotografie: ' + e.message + '\nNačti ji ručně v kroku 2.');
+    }
+  }
+
+  doLoad();
 }
 
 function _photoBase() {
