@@ -706,7 +706,7 @@ function selectChip(facade, idx) {
       input.value = '';
     }
     S.mapMode = 'eye';
-    ['a','b','c','d','eye','r'].forEach(x => {
+    ['a','b','c','d','eye','r','zl','zr'].forEach(x => {
       const btn = document.getElementById('mode-btn-' + x);
       if (btn) btn.className = 'mode-btn' + ('eye'===x ? ' active-eye' : '');
     });
@@ -716,9 +716,11 @@ function selectChip(facade, idx) {
   }
 
   activeChip = { facade, idx };
-  document.getElementById(`chip-${facade}${idx+1}`).classList.add('editing');
+  const chipEl = document.getElementById(`chip-${facade}${idx+1}`);
+  if (chipEl) chipEl.classList.add('editing');
 
   const facades = { a:S.facadeA, b:S.facadeB, c:S.facadeC, d:S.facadeD };
+  if (!facades[facade]) return; // unknown facade (e.g. zl/zr — handled separately)
   const pt = facades[facade][idx];
   const input = document.getElementById('coord-input');
   if (pt) {
