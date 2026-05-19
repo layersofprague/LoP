@@ -1540,25 +1540,20 @@ function buildPlane() {
 
   if (zaberL && zaberR && S.zaberL && S.zaberR) {
     // ── ZÁBĚR MODE ──
-    // Záběr L/P jsou identifikovatelné body se známou GPS a pixelovou pozicí.
-    // Z nich dopočítáme kde leží skutečné okraje záběru (x=0 a x=1 na fotografii).
+    // Odvozujeme FOV přímo z dat — nepředpokládáme 60°.
     //
-    // Pro každý záběr bod:
-    //   - úhel od osy pohledu: α = (x_pixel - 0.5) * FOV
-    //   - paprsek z fotografa: forward + tan(α) * right
-    //   - GPS bod musí ležet na tomto paprsku → zjistíme vzdálenost d podél paprsku
-    //   - okraj záběru (x=0 nebo x=1) je paprsek pod úhlem ±FOV/2 ve stejné vzdálenosti
+    // Postup:
+    // 1. Azimut fotografa → záběr L = α_L (ze GPS)
+    // 2. Azimut fotografa → záběr R = α_R (ze GPS)
+    // 3. Pixel x_L → mapuje na α_L, pixel x_R → mapuje na α_R
+    //    → lineární interpolace: α(x) = α_L + (x - x_L)/(x_R - x_L) * (α_R - α_L)
+    // 4. Levý okraj (x=0) → α_edge_L, pravý okraj (x=1) → α_edge_R
+    // 5. Průsečík paprsku s hloubkovou rovinou → GPS okraje fotografie
 
-    const fovH = 60 * Math.PI / 180;
-    const halfFov = fovH / 2;
-
-    // Forward direction (od fotografa ke scéně), right perpendicular
-    const fwdX = dx, fwdY = dy;
-    const rgtX = -dy, rgtY = dx;
-
-    // Convert GPS záběr points to metres from photographer
     const R = 6371000;
     const cosLat = Math.cos(S.photographer.lat * Math.PI / 180);
+
+    // Vector from photographer to záběr point in metres
     function gpsFromPhotog(lat, lng) {
       return {
         x: (lng - S.photographer.lng) * Math.PI/180 * R * cosLat,
@@ -1569,58 +1564,59 @@ function buildPlane() {
     const gL = gpsFromPhotog(S.zaberL.lat, S.zaberL.lng);
     const gR = gpsFromPhotog(S.zaberR.lat, S.zaberR.lng);
 
-    // Pixel angle for each záběr point
-    const angL = Math.atan((zaberL.x - 0.5) * 2 * Math.tan(halfFov));
-    const angR = Math.atan((zaberR.x - 0.5) * 2 * Math.tan(halfFov));
+    // Azimut od fotografa k záběr bodům (v radiánech od forward osy)
+    // forward = (dx, dy), right = (-dy, dx)
+    // angle = atan2(dot(g, right), dot(g, forward))
+    const rgtX = -dy, rgtY = dx;
+    const fwdX = dx, fwdY = dy;
+    const azL = Math.atan2(gL.x*rgtX + gL.y*rgtY, gL.x*fwdX + gL.y*fwdY);
+    const azR = Math.atan2(gR.x*rgtX + gR.y*rgtY, gR.x*fwdX + gR.y*fwdY);
 
-    // Ray direction for each záběr point
-    const rayLx = fwdX + Math.tan(angL)*rgtX, rayLy = fwdY + Math.tan(angL)*rgtY;
-    const rayRx = fwdX + Math.tan(angR)*rgtX, rayRy = fwdY + Math.tan(angR)*rgtY;
+    // Pixel → úhel: lineární mapování z (x_L, azL) a (x_R, azR)
+    // az(x) = azL + (x - x_L) / (x_R - x_L) * (azR - azL)
+    const xL = zaberL.x, xR = zaberR.x;
+    if (Math.abs(xR - xL) < 0.01) return; // příliš blízko u sebe
 
-    // Distance along ray: t = projection of GPS point onto normalized ray
-    const lenL = Math.sqrt(rayLx**2 + rayLy**2);
-    const lenR = Math.sqrt(rayRx**2 + rayRy**2);
-    const tL = (gL.x*(rayLx/lenL) + gL.y*(rayLy/lenL));
-    const tR = (gR.x*(rayRx/lenR) + gR.y*(rayRy/lenR));
+    const azEdgeL = azL + (0   - xL) / (xR - xL) * (azR - azL);
+    const azEdgeR = azL + (1.0 - xL) / (xR - xL) * (azR - azL);
 
-    // Forward depth = how far along forward axis the záběr point lies
-    const depthL = gL.x*fwdX + gL.y*fwdY; // dot product with forward unit vector
+    // Hloubka roviny = průměr forward vzdáleností záběr bodů
+    const depthL = gL.x*fwdX + gL.y*fwdY;
     const depthR = gR.x*fwdX + gR.y*fwdY;
+    const depth  = (depthL + depthR) / 2;
+    if (depth < 1) return;
 
-    // Use average depth for the plane (more stable than per-side)
-    const depth = (depthL + depthR) / 2;
+    // Průsečík okrajového paprsku s rovinou x=depth (kolmá na forward)
+    // Paprsek: (fwdX + tan(az)*rgtX, fwdY + tan(az)*rgtY)
+    // Škálování: t = depth / forward_component
+    function rayAtDepth(az) {
+      const rx = fwdX + Math.tan(az)*rgtX;
+      const ry = fwdY + Math.tan(az)*rgtY;
+      const fc = rx*fwdX + ry*fwdY;
+      if (Math.abs(fc) < 0.001) return null;
+      const t = depth / fc;
+      return { x: rx*t, y: ry*t };
+    }
 
-    // Left edge (x=0) and right edge (x=1) rays at this depth
-    // Point on ray at depth d: ray_normalized * (d / forward_component)
-    // forward_component of edge ray = dot(normalized_edge_ray, forward)
-    const edgeLx = fwdX + Math.tan(-halfFov)*rgtX;
-    const edgeLy = fwdY + Math.tan(-halfFov)*rgtY;
-    const edgeRx = fwdX + Math.tan(+halfFov)*rgtX;
-    const edgeRy = fwdY + Math.tan(+halfFov)*rgtY;
+    const pLeft  = rayAtDepth(azEdgeL);
+    const pRight = rayAtDepth(azEdgeR);
+    if (!pLeft || !pRight) return;
 
-    // Forward component of edge rays (dot with forward unit vec)
-    const fcL = edgeLx*fwdX + edgeLy*fwdY;
-    const fcR = edgeRx*fwdX + edgeRy*fwdY;
-
-    // Scale edge rays so forward depth = depth
-    const planeLeftX  = edgeLx * (depth / fcL);
-    const planeLeftY  = edgeLy * (depth / fcL);
-    const planeRightX = edgeRx * (depth / fcR);
-    const planeRightY = edgeRy * (depth / fcR);
-
-    S.planeW = Math.sqrt((planeRightX-planeLeftX)**2 + (planeRightY-planeLeftY)**2);
+    S.planeW = Math.sqrt((pRight.x-pLeft.x)**2 + (pRight.y-pLeft.y)**2);
     const aspect = S.photoW>0 ? S.photoW/S.photoH : 16/9;
     S.planeH = S.planeW / aspect;
     const halfH = S.planeH / 2;
 
     S.corners = {
-      topLeft:     { ...mToGps(planeLeftX,  planeLeftY,  S.photographer.lat, S.photographer.lng), alt: ph+halfH },
-      topRight:    { ...mToGps(planeRightX, planeRightY, S.photographer.lat, S.photographer.lng), alt: ph+halfH },
-      bottomLeft:  { ...mToGps(planeLeftX,  planeLeftY,  S.photographer.lat, S.photographer.lng), alt: ph-halfH },
-      bottomRight: { ...mToGps(planeRightX, planeRightY, S.photographer.lat, S.photographer.lng), alt: ph-halfH },
+      topLeft:     { ...mToGps(pLeft.x,  pLeft.y,  S.photographer.lat, S.photographer.lng), alt: ph+halfH },
+      topRight:    { ...mToGps(pRight.x, pRight.y, S.photographer.lat, S.photographer.lng), alt: ph+halfH },
+      bottomLeft:  { ...mToGps(pLeft.x,  pLeft.y,  S.photographer.lat, S.photographer.lng), alt: ph-halfH },
+      bottomRight: { ...mToGps(pRight.x, pRight.y, S.photographer.lat, S.photographer.lng), alt: ph-halfH },
     };
 
-    S._debug && (S._debug.planeSource = 'záběr L+P ray (' + S.planeW.toFixed(1) + 'm)');
+    // Effective FOV from data
+    const fovEff = (azEdgeR - azEdgeL) * 180 / Math.PI;
+    S._debug && (S._debug.planeSource = `záběr L+P (${S.planeW.toFixed(1)}m, FOV ${fovEff.toFixed(1)}°)`);
 
   } else {
     // ── FALLBACK: FOV estimate ──
