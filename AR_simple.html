@@ -129,81 +129,106 @@ html, body {
   z-index: 100;
 }
 .cam-side-btn {
-  width: 48px; height: 48px; border-radius: 50%;
-  background: var(--glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.1);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(13,11,8,.32);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.07);
   display: flex; align-items: center; justify-content: center;
-  color: var(--paper); cursor: pointer;
+  color: rgba(238,239,235,.7); cursor: pointer;
   transition: background .15s, transform .1s;
   flex-shrink: 0; position: relative;
 }
-.cam-side-btn:active { background: rgba(255,255,255,.15); transform: scale(.92); }
-.cam-side-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-/* Shutter — ar-flow style */
+.cam-side-btn:active { background: rgba(255,255,255,.12); transform: scale(.92); }
+.cam-side-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Shutter — camera button style: outer gray ring + white disk */
 #shutter {
-  width: 68px; height: 68px;
+  width: 72px; height: 72px;
   border-radius: 50%;
-  background: rgba(238,239,235,.12);
-  border: 2px solid rgba(238,239,235,.55);
-  box-shadow: 0 0 0 6px rgba(238,239,235,.08);
+  background: rgba(200,200,196,.28);
+  border: none;
+  box-shadow: inset 0 0 0 3px rgba(200,200,196,.55);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: transform .12s, box-shadow .12s;
+  transition: transform .1s;
   flex-shrink: 0;
+  padding: 5px;
 }
-#shutter:active {
-  transform: scale(.9);
-  box-shadow: 0 0 0 3px rgba(238,239,235,.06);
-}
+#shutter:active { transform: scale(.88); }
 #shutter-inner {
-  width: 50px; height: 50px; border-radius: 50%;
-  background: var(--paper);
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: #f4f4f2;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
 }
-/* Opacity panel */
+/* Opacity panel — portrait: vertical above btn; landscape: horizontal expanding left */
 #opacity-panel {
   position: absolute;
-  bottom: 58px; left: 50%; transform: translateX(-50%);
-  background: rgba(13,11,8,.75);
+  /* portrait default: centered above the button */
+  bottom: 50px; left: 50%; transform: translateX(-50%) translateY(4px);
+  background: rgba(13,11,8,.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,.1);
   border-radius: 14px;
-  padding: 14px 18px 10px;
+  padding: 14px 10px;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   opacity: 0; pointer-events: none;
   transition: opacity .25s, transform .25s;
-  transform: translateX(-50%) translateY(6px);
-  white-space: nowrap;
-  min-width: 170px;
 }
 #opacity-panel.open {
   opacity: 1; pointer-events: all;
   transform: translateX(-50%) translateY(0);
 }
-.op-row { display:flex; align-items:center; gap:10px; width:100%; }
-.op-lbl { font-size:8px; letter-spacing:.14em; color:rgba(238,239,235,.5); text-transform:uppercase; flex-shrink:0; }
+/* vertical slider track */
+.op-track-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.op-lbl { font-size: 8px; letter-spacing: .14em; color: rgba(238,239,235,.45); text-transform: uppercase; }
 #opacity-slider {
   -webkit-appearance: none; appearance: none;
-  flex: 1; height: 4px;
-  background: rgba(255,255,255,.2);
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 4px; height: 110px;
+  background: rgba(255,255,255,.18);
   border-radius: 99px; outline: none; cursor: pointer;
 }
 #opacity-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--paper);
-  box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 2px 6px rgba(0,0,0,.4);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.4);
   cursor: pointer;
+  margin-left: -9px;
 }
 #opacity-slider::-moz-range-thumb {
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--paper); border: none;
-  box-shadow: 0 0 0 3px rgba(255,255,255,.2);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18);
   cursor: pointer;
 }
-#op-val { font-size:9px; color:rgba(238,239,235,.45); width:28px; text-align:right; flex-shrink:0; }
+#op-val { font-size: 9px; color: rgba(238,239,235,.4); }
+
+/* Landscape overrides */
+@media (orientation: landscape) {
+  #opacity-panel {
+    /* expand leftward from the button */
+    bottom: 50%; left: auto; right: 50px;
+    transform: translateY(50%) translateX(4px);
+    flex-direction: row;
+    padding: 10px 14px;
+  }
+  #opacity-panel.open {
+    transform: translateY(50%) translateX(0);
+  }
+  .op-track-wrap { flex-direction: row; align-items: center; gap: 8px; }
+  #opacity-slider {
+    writing-mode: horizontal-tb;
+    direction: ltr;
+    width: 120px; height: 4px;
+  }
+  #opacity-slider::-webkit-slider-thumb { margin-left: 0; margin-top: -9px; }
+}
 /* Camera start overlay */
 #cam-start {
   position: fixed; inset: 0;
@@ -279,7 +304,7 @@ html, body {
       <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor" stroke="none" opacity=".7"/>
     </svg>
     <div id="opacity-panel">
-      <div class="op-row">
+      <div class="op-track-wrap">
         <span class="op-lbl">ref</span>
         <input type="range" id="opacity-slider" min="0" max="100" value="50" step="1"/>
         <span class="op-lbl">live</span>
@@ -386,7 +411,7 @@ resize();
 // ─────────────────────────────────────────────────────────
 // TOUCH HANDLING
 // ─────────────────────────────────────────────────────────
-let activeTouches = {};   // id -> {clientX, clientY}
+let activeTouches = {};   // id -> {x, y}
 let gesture = null;
 let hintTimer = null;
 
@@ -406,25 +431,55 @@ function hideHint() {
   }, 900);
 }
 
-// Determine which edge + what corner indices to affect
-// based on where the two fingers sit on screen
-function detectEdge(t1, t2) {
-  const mx = (t1.x + t2.x) / 2;
-  const my = (t1.y + t2.y) / 2;
+// Edge proximity zone: 20 % of screen dimension
+const EDGE_ZONE = 0.20;
+
+// Returns which edge a point is near (within EDGE_ZONE), or null
+function nearEdge(p) {
+  if (p.y < H * EDGE_ZONE)        return 'top';
+  if (p.y > H * (1 - EDGE_ZONE))  return 'bottom';
+  if (p.x < W * EDGE_ZONE)        return 'left';
+  if (p.x > W * (1 - EDGE_ZONE))  return 'right';
+  return null;
+}
+
+// Classify two-finger gesture:
+//   Perspective only when orientation matches AND at least one
+//   finger is within 20 % of the corresponding edge.
+//   Everything else → scale.
+function classifyTwoFinger(t1, t2) {
   const dx = Math.abs(t1.x - t2.x);
   const dy = Math.abs(t1.y - t2.y);
+  const ratio = dy > 0 ? dx / dy : 99;
 
-  if (dx > dy * 1.15) {
-    // Horizontal pinch
-    return my < H * 0.5
-      ? {edge:'top',    idx:[0,1], axis:'h'}   // TL, TR
-      : {edge:'bottom', idx:[3,2], axis:'h'};   // BL, BR
-  } else {
-    // Vertical pinch
-    return mx < W * 0.5
-      ? {edge:'left',  idx:[0,3], axis:'v'}    // TL, BL
-      : {edge:'right', idx:[1,2], axis:'v'};   // TR, BR
+  const candidates = [nearEdge(t1), nearEdge(t2)].filter(Boolean);
+
+  if (ratio > 2.2) {
+    // Strongly horizontal — valid only near top or bottom
+    const hEdge = candidates.find(e => e === 'top' || e === 'bottom');
+    if (hEdge) {
+      return hEdge === 'top'
+        ? { type: 'persp', edge: 'top',    idx: [0,1], axis: 'h' }
+        : { type: 'persp', edge: 'bottom', idx: [3,2], axis: 'h' };
+    }
+  } else if (ratio < 0.45) {
+    // Strongly vertical — valid only near left or right
+    const vEdge = candidates.find(e => e === 'left' || e === 'right');
+    if (vEdge) {
+      return vEdge === 'left'
+        ? { type: 'persp', edge: 'left',  idx: [0,3], axis: 'v' }
+        : { type: 'persp', edge: 'right', idx: [1,2], axis: 'v' };
+    }
   }
+
+  // Default → scale around centroid
+  return { type: 'scale' };
+}
+
+function cornersCentroid(cs) {
+  const cx = cs.reduce((s,c) => s+c.x, 0) / cs.length;
+  const cy = cs.reduce((s,c) => s+c.y, 0) / cs.length;
+  return {x: cx, y: cy};
 }
 
 const edgeLabels = {
@@ -443,24 +498,32 @@ canvas.addEventListener('touchstart', e => {
   const ids = Object.keys(activeTouches);
 
   if (ids.length === 1) {
-    gesture = {
-      mode: 'translate',
-      prev: activeTouches[ids[0]]
-    };
+    gesture = { mode: 'translate', prev: activeTouches[ids[0]] };
     showHint('Posun');
 
   } else if (ids.length >= 2) {
     const t1 = activeTouches[ids[0]];
     const t2 = activeTouches[ids[1]];
-    const {edge, idx, axis} = detectEdge(t1, t2);
-    gesture = {
-      mode: 'persp',
-      edge, idx, axis,
-      startDist: dist2(t1, t2),
-      startMid:  mid2(t1, t2),
-      savedCorners: corners.map(c => ({...c}))
-    };
-    showHint(edgeLabels[edge]);
+    const cl = classifyTwoFinger(t1, t2);
+    const savedCorners = corners.map(c => ({...c}));
+    const startDist = dist2(t1, t2);
+    const startMid  = mid2(t1, t2);
+
+    if (cl.type === 'scale') {
+      const ctr = cornersCentroid(savedCorners);
+      gesture = {
+        mode: 'scale',
+        startDist, startMid, savedCorners, centroid: ctr
+      };
+      showHint('Měřítko');
+    } else {
+      gesture = {
+        mode: 'persp',
+        edge: cl.edge, idx: cl.idx, axis: cl.axis,
+        startDist, startMid, savedCorners
+      };
+      showHint(edgeLabels[cl.edge]);
+    }
   }
 }, { passive: false });
 
@@ -482,27 +545,39 @@ canvas.addEventListener('touchmove', e => {
     }
     gesture.prev = cur;
 
+  } else if (gesture.mode === 'scale' && ids.length >= 2) {
+    const t1 = newPos[ids[0]];
+    const t2 = newPos[ids[1]];
+    const curDist = dist2(t1, t2);
+    const curMid  = mid2(t1, t2);
+    const scaleF  = curDist / gesture.startDist;
+    const mdx = curMid.x - gesture.startMid.x;
+    const mdy = curMid.y - gesture.startMid.y;
+    const sc  = gesture.savedCorners;
+    const ctr = gesture.centroid;
+
+    // Scale each corner relative to the original centroid, then translate
+    corners = sc.map(c => ({
+      x: ctr.x + (c.x - ctr.x) * scaleF + mdx,
+      y: ctr.y + (c.y - ctr.y) * scaleF + mdy
+    }));
+
   } else if (gesture.mode === 'persp' && ids.length >= 2) {
     const t1 = newPos[ids[0]];
     const t2 = newPos[ids[1]];
     const curDist = dist2(t1, t2);
     const curMid  = mid2(t1, t2);
-    const delta   = curDist - gesture.startDist;   // + = spreading apart
+    const delta   = curDist - gesture.startDist;  // + = fingers spreading apart
     const mdx = curMid.x - gesture.startMid.x;
     const mdy = curMid.y - gesture.startMid.y;
     const sc  = gesture.savedCorners;
-
-    // Translate all corners by midpoint movement
-    corners = sc.map(c => ({x: c.x + mdx, y: c.y + mdy}));
-
-    // Then spread/pinch the two edge corners
-    // half = how much each corner moves outward
     const half = delta * 0.45;
     const [i0, i1] = gesture.idx;
 
+    // Translate all corners first, then adjust the edge pair
+    corners = sc.map(c => ({x: c.x + mdx, y: c.y + mdy}));
+
     if (gesture.axis === 'h') {
-      // Spread horizontally: left corner goes left, right corner goes right
-      // Determine which index is left vs right
       const c0 = sc[i0], c1 = sc[i1];
       if (c0.x <= c1.x) {
         corners[i0] = {x: sc[i0].x + mdx - half, y: sc[i0].y + mdy};
@@ -512,7 +587,6 @@ canvas.addEventListener('touchmove', e => {
         corners[i1] = {x: sc[i1].x + mdx - half, y: sc[i1].y + mdy};
       }
     } else {
-      // Spread vertically: top corner goes up, bottom corner goes down
       const c0 = sc[i0], c1 = sc[i1];
       if (c0.y <= c1.y) {
         corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy - half};
