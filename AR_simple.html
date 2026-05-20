@@ -314,6 +314,32 @@ html, body {
   </div>
 </div>
 
+<!-- Gyro calibration warning -->
+<div id="gyro-warn" style="display:none;position:fixed;bottom:100px;left:16px;right:16px;
+  background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);border-radius:12px;
+  padding:12px 14px;z-index:150;flex-direction:column;gap:8px">
+  <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#f87171">
+    Chybí kalibrace gyroskopu
+  </div>
+  <div style="font-size:11px;color:rgba(238,239,235,.55);line-height:1.5">
+    AR stabilizace nebude fungovat správně. Proveďte kalibraci nebo načtěte JSON ručně.
+  </div>
+  <div style="display:flex;gap:8px">
+    <button onclick="window.location.href='gyro_test.html'"
+      style="flex:1;padding:9px;background:rgba(248,113,113,.2);color:#f87171;border:1px solid rgba(248,113,113,.3);
+      border-radius:99px;font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:.1em;
+      text-transform:uppercase;cursor:pointer">
+      Spustit kalibraci
+    </button>
+    <button onclick="loadCalManual()"
+      style="flex:1;padding:9px;background:rgba(238,239,235,.06);color:rgba(238,239,235,.5);
+      border:1px solid rgba(238,239,235,.1);border-radius:99px;font-family:JetBrains Mono,monospace;
+      font-size:9px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">
+      Načíst JSON
+    </button>
+  </div>
+</div>
+
 <div id="cam-start">
   <div class="c-title">Holešovický přístav<br/><span style="font-size:.72em;color:rgba(238,239,235,.4)">~&thinsp;1930</span></div>
   <div class="c-sub">Zarovnej historický snímek<br/>s živým záběrem kamery</div>
@@ -730,6 +756,59 @@ function updateDistChip() {
 }
 
 // ─────────────────────────────────────────────────────────
+// GYRO KALIBRACE — načtení z JSONu
+// ─────────────────────────────────────────────────────────
+// Kalibrace z gyro_test.html:
+//   portrait_yaw  → alpha, sign +1   (azimut v portrétu)
+//   landscape_yaw → beta,  sign -1   (azimut v landscape)
+//   roll          → alpha, sign +1   (shodné s portrait_yaw → roll ignorujeme)
+//
+// Výsledné mapování os pro updateARPosition:
+//   PORTRAIT:  azimutAxis=alpha, azimutSign=+1, pitchAxis=beta,  pitchSign=+1
+//   LANDSCAPE: azimutAxis=beta,  azimutSign=-1, pitchAxis=alpha, pitchSign=+1
+
+const GYRO_URL = 'https://layersofprague.github.io/LoP/GYRO/gyro_calibration.json';
+
+// Kalibrace — null dokud se nenačte JSON
+let cal = null;
+
+fetch(GYRO_URL)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => {
+    cal = {
+      portrait: {
+        azimutAxis: d.portrait_yaw?.axis   ?? 'alpha',
+        azimutSign: d.portrait_yaw?.sign   ?? 1,
+        pitchAxis:  d.portrait_pitch?.axis ?? 'beta',
+        pitchSign:  d.portrait_pitch?.sign ?? 1,
+      },
+      landscape: {
+        azimutAxis: d.landscape_yaw?.axis   ?? 'beta',
+        azimutSign: d.landscape_yaw?.sign   ?? -1,
+        pitchAxis:  d.landscape_pitch?.axis ?? 'alpha',
+        pitchSign:  d.landscape_pitch?.sign ?? 1,
+      },
+      roll: {
+        axis: d.roll?.axis ?? 'gamma',
+        sign: d.roll?.sign ?? 1,
+      }
+    };
+    document.getElementById('gyro-warn').style.display = 'none';
+  })
+  .catch(() => {
+    // JSON nedostupný — zobraz varování
+    document.getElementById('gyro-warn').style.display = 'flex';
+  });
+
+// Vrátí aktuální kalibraci podle orientace displeje
+function currentCal() {
+  const ls = window.screen?.orientation?.angle === 90
+          || window.screen?.orientation?.angle === 270
+          || (W > H);
+  return ls ? cal.landscape : cal.portrait;
+}
+
+// ─────────────────────────────────────────────────────────
 // DEVICE ORIENTATION
 // ─────────────────────────────────────────────────────────
 let orient = { alpha: null, beta: null, gamma: null };
@@ -748,11 +827,14 @@ async function requestOrientPerm() {
   return true;
 }
 
-// Δúhel na [-180, 180]
+// Δúhel na [-180, 180] — bezpečný i přes přechod 0°/360°
 function angleDiff(a, b) {
   let d = ((a - b) % 360 + 360) % 360;
   return d > 180 ? d - 360 : d;
 }
+
+// Δúhel pro beta/gamma — přímý rozdíl, žádné wrapping
+function linearDiff(a, b) { return a - b; }
 
 // ─────────────────────────────────────────────────────────
 // AR LOCK
@@ -762,29 +844,16 @@ let lockCorners = null;
 let lockOrient  = null;
 let lockDistM   = null;
 
-// Počet canvas pixelů na 1 radián otočení telefonu.
-//
-// Model: telefon se otočí o Δα radiánů kolem svislé osy.
-// Scéna se posune o tan(Δα) × distM metrů.
-// Na plátně to odpovídá: tan(Δα) × distM × (W / sceneSzM) pixelů.
-//
-// sceneSzM = šířka záběru ve vzdálenosti distM při daném FOV:
-//   sceneSzM = 2 × distM × tan(HFOV/2)
-//
-// Dosadíme:
-//   posun = tan(Δα) × distM × W / (2 × distM × tan(HFOV/2))
-//         = tan(Δα) × W / (2 × tan(HFOV/2))
-//
-// → pxPerRad = W / (2 × tan(HFOV/2))
-// distM se zkrátí! Závisí jen na FOV a šířce plátna.
-// Fyzicky to dává smysl: FOV je úhel, distM určuje jen absolutní měřítko scény.
+// pxPerRad = W / (2 × tan(HFOV/2))
+// distM se zkrátí — závisí jen na FOV a rozlišení displeje
 function computePxPerRad() {
-  const hfov = (place.fov * Math.PI / 180);
+  const hfov = place.fov * Math.PI / 180;
   return W / (2 * Math.tan(hfov / 2));
 }
 
 async function lockAR() {
   if (orient.alpha === null) { showHint('Čekám na senzory…'); hideHint(); return; }
+  if (!cal) { showHint('Chybí kalibrace gyra'); hideHint(); return; }
 
   lockDistM   = currentDistM();
   lockCorners = corners.map(c => ({...c}));
@@ -811,25 +880,32 @@ function updateARPosition() {
   if (!arLocked || !lockOrient || orient.alpha === null) return;
 
   const pxPerRad = computePxPerRad();
+  const cl = currentCal();
 
-  // Δazimut → posun X  (otočení doprava = obraz jde doleva)
-  const dA = angleDiff(orient.alpha, lockOrient.alpha) * Math.PI / 180;
-  const shiftX = -Math.tan(dA) * pxPerRad;
+  // Δazimut → posun X
+  // alpha používá angleDiff (wrap 0/360), beta/gamma lineární
+  const rawAzimut = cl.azimutAxis === 'alpha'
+    ? angleDiff(orient[cl.azimutAxis], lockOrient[cl.azimutAxis])
+    : linearDiff(orient[cl.azimutAxis], lockOrient[cl.azimutAxis]);
+  const dAzimut = rawAzimut * cl.azimutSign * Math.PI / 180;
+  const shiftX  = -Math.tan(dAzimut) * pxPerRad;
 
-  // Δpitch → posun Y  (náklon nahoru = obraz jde nahoru)
-  const dB = (orient.beta - lockOrient.beta) * Math.PI / 180;
-  const shiftY = -Math.tan(dB) * pxPerRad;
+  // Δpitch → posun Y
+  const rawPitch = cl.pitchAxis === 'alpha'
+    ? angleDiff(orient[cl.pitchAxis], lockOrient[cl.pitchAxis])
+    : linearDiff(orient[cl.pitchAxis], lockOrient[cl.pitchAxis]);
+  const dPitch  = rawPitch * cl.pitchSign * Math.PI / 180;
+  const shiftY  = -Math.tan(dPitch) * pxPerRad;
 
-  // Δroll → rotace kolem těžiště rohů
-  const dG = (orient.gamma - lockOrient.gamma) * Math.PI / 180;
-
+  // Roll (gamma) → rotace kolem těžiště — experimentální, malý vliv
+  const dRoll = linearDiff(orient.gamma, lockOrient.gamma) * Math.PI / 180;
   const cx = lockCorners.reduce((s,c) => s+c.x, 0) / 4;
   const cy = lockCorners.reduce((s,c) => s+c.y, 0) / 4;
-  const cosG = Math.cos(-dG), sinG = Math.sin(-dG);
+  const cosR = Math.cos(-dRoll), sinR = Math.sin(-dRoll);
 
   corners = lockCorners.map(c => {
-    const rx = cx + (c.x-cx)*cosG - (c.y-cy)*sinG;
-    const ry = cy + (c.x-cx)*sinG + (c.y-cy)*cosG;
+    const rx = cx + (c.x-cx)*cosR - (c.y-cy)*sinR;
+    const ry = cy + (c.x-cx)*sinR + (c.y-cy)*cosR;
     return { x: rx + shiftX, y: ry + shiftY };
   });
 
@@ -851,6 +927,42 @@ document.getElementById('shutter').addEventListener('click', async () => {
     unlockAR();
   }
 });
+
+// ─────────────────────────────────────────────────────────
+// MANUAL CAL LOAD — file picker fallback
+// ─────────────────────────────────────────────────────────
+function loadCalManual() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        cal = {
+          portrait: {
+            azimutAxis: d.portrait_yaw?.axis   ?? 'alpha',
+            azimutSign: d.portrait_yaw?.sign   ?? 1,
+            pitchAxis:  d.portrait_pitch?.axis ?? 'beta',
+            pitchSign:  d.portrait_pitch?.sign ?? 1,
+          },
+          landscape: {
+            azimutAxis: d.landscape_yaw?.axis   ?? 'beta',
+            azimutSign: d.landscape_yaw?.sign   ?? -1,
+            pitchAxis:  d.landscape_pitch?.axis ?? 'alpha',
+            pitchSign:  d.landscape_pitch?.sign ?? 1,
+          },
+          roll: { axis: d.roll?.axis ?? 'gamma', sign: d.roll?.sign ?? 1 }
+        };
+        document.getElementById('gyro-warn').style.display = 'none';
+        showHint('Kalibrace načtena'); hideHint();
+      } catch { showHint('Chyba čtení JSON'); hideHint(); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
 
 // ─────────────────────────────────────────────────────────
 // CAMERA
