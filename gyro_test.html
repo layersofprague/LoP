@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Gyro Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0b08;--paper:#eeefeb;--ink:#0d0b08;
+  --gold:#f0c14e;--ok:#4ade80;--err:#f87171;
+  --glass:rgba(238,239,235,.06);--border:rgba(238,239,235,.1);
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);
+  font-family:'JetBrains Mono',monospace;overflow:hidden;touch-action:manipulation;user-select:none}
+
+#app{display:flex;flex-direction:column;height:100%;
+  padding:max(env(safe-area-inset-top,0px),14px) 16px max(env(safe-area-inset-bottom,0px),14px)}
+
+/* header */
+#hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-shrink:0}
+.hdr-title{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:17px}
+#perm-btn{padding:7px 16px;background:var(--gold);color:var(--ink);border:none;border-radius:99px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  cursor:pointer;font-weight:600;transition:opacity .15s}
+#perm-btn:active{opacity:.75}
+#perm-btn.ok{background:rgba(74,222,128,.15);color:var(--ok);border:1px solid rgba(74,222,128,.3);pointer-events:none}
+
+/* live gauges */
+#gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;flex-shrink:0}
+.g{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
+.g-lbl{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.35);margin-bottom:4px}
+.g-val{font-size:20px;font-weight:600;letter-spacing:-.02em;min-height:26px}
+.g-bar{height:3px;background:rgba(238,239,235,.08);border-radius:99px;margin-top:5px;overflow:hidden;position:relative}
+.g-fill{position:absolute;top:0;height:100%;background:var(--gold);border-radius:99px;transition:left .05s,width .05s}
+
+/* steps scroll */
+#steps{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:0;
+  -webkit-overflow-scrolling:touch;padding-right:2px}
+
+/* step card */
+.card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:14px;flex-shrink:0;transition:border-color .3s}
+.card.active{border-color:rgba(240,193,78,.6)}
+.card.done{border-color:rgba(74,222,128,.4)}
+.card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.card-num{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.3)}
+.card-tag{font-size:7px;letter-spacing:.12em;text-transform:uppercase}
+.card.active .card-tag{color:var(--gold)}
+.card.done  .card-tag{color:var(--ok)}
+.card-title{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:15px;margin-bottom:5px}
+.card-desc{font-size:10px;color:rgba(238,239,235,.45);line-height:1.65;margin-bottom:10px}
+
+/* SVG illustration */
+.illus{display:flex;justify-content:center;align-items:center;margin-bottom:10px;height:72px}
+
+/* recording indicator */
+.rec-wrap{display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:8px;background:rgba(240,193,78,.08);border-radius:8px;margin-bottom:8px;
+  opacity:0;transition:opacity .3s}
+.rec-wrap.show{opacity:1}
+.rec-dot{width:8px;height:8px;border-radius:50%;background:var(--err);animation:pulse-r 1s ease-in-out infinite}
+@keyframes pulse-r{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+.rec-txt{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.rec-bar-wrap{flex:1;height:3px;background:rgba(238,239,235,.1);border-radius:99px;overflow:hidden}
+.rec-bar{height:100%;background:var(--gold);border-radius:99px;width:0;transition:width .1s linear}
+
+/* result grid */
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
+.rc{background:rgba(238,239,235,.04);border-radius:7px;padding:7px 4px;text-align:center}
+.rc-l{font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,239,235,.3);margin-bottom:2px}
+.rc-v{font-size:13px;font-weight:600}
+.rc-v.hi{color:var(--gold)}
+
+/* buttons */
+.btns{display:flex;gap:7px}
+.btn{flex:1;padding:11px 8px;border:none;border-radius:99px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn:active{opacity:.8;transform:scale(.97)}
+.btn-rec{background:var(--gold);color:var(--ink)}
+.btn-skip{background:rgba(238,239,235,.08);color:rgba(238,239,235,.45);border:1px solid var(--border)}
+.btn-done{background:rgba(74,222,128,.15);color:var(--ok);border:1px solid rgba(74,222,128,.3)}
+.btn:disabled{opacity:.3;pointer-events:none}
+
+/* export */
+#export-wrap{flex-shrink:0;margin-top:10px;display:none}
+#export-wrap.show{display:block}
+.export-card{background:rgba(240,193,78,.07);border:1px solid rgba(240,193,78,.25);border-radius:12px;padding:14px}
+.export-title{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:14px;color:var(--gold);margin-bottom:8px}
+.export-json{font-size:9px;line-height:1.7;color:rgba(238,239,235,.6);word-break:break-all;margin-bottom:10px;max-height:100px;overflow-y:auto}
+.export-btns{display:flex;gap:7px}
+.btn-copy{background:var(--gold);color:var(--ink);flex:1}
+.btn-reset{background:rgba(238,239,235,.08);color:rgba(238,239,235,.45);border:1px solid var(--border);flex:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="hdr">
+    <div class="hdr-title">Gyro kalibrace</div>
+    <button id="perm-btn" onclick="requestPerm()">Povolit senzory</button>
+  </div>
+
+  <!-- Live values -->
+  <div id="gauges">
+    <div class="g"><div class="g-lbl">Alpha α</div><div class="g-val" id="va">—</div>
+      <div class="g-bar"><div class="g-fill" id="ba"></div></div></div>
+    <div class="g"><div class="g-lbl">Beta β</div><div class="g-val" id="vb">—</div>
+      <div class="g-bar"><div class="g-fill" id="bb"></div></div></div>
+    <div class="g"><div class="g-lbl">Gamma γ</div><div class="g-val" id="vg">—</div>
+      <div class="g-bar"><div class="g-fill" id="bg"></div></div></div>
+  </div>
+
+  <!-- Test steps -->
+  <div id="steps">
+
+    <!-- STEP 1 — portrait yaw -->
+    <div class="card" id="card-0">
+      <div class="card-hd"><span class="card-num">Test 1 / 3</span><span class="card-tag" id="tag-0">Čeká</span></div>
+      <div class="card-title">Otáčení doleva a doprava — portrét</div>
+      <div class="card-desc">Držte telefon normálně před sebou (portrét, displej k vám). Pomalu otočte doprava cca 30–40°, pak zpět doleva. Nemusí to být přesné.</div>
+      <div class="illus" id="ill-0">
+        <!-- Phone portrait + left-right arrows -->
+        <svg viewBox="0 0 160 80" width="160" height="80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- phone portrait, centered -->
+          <rect x="58" y="12" width="44" height="62" rx="7" stroke="#eeefeb" stroke-width="2"/>
+          <circle cx="80" cy="67" r="3.5" fill="#eeefeb" opacity=".35"/>
+          <rect x="67" y="20" width="26" height="28" rx="2" fill="#eeefeb" opacity=".1"/>
+          <!-- curved arrow going left over top of phone -->
+          <path d="M96 8 Q80 -2 64 8" stroke="#f0c14e" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M64 8 L62 15 M64 8 L70 10" stroke="#f0c14e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- curved arrow going right over top (opposite side, dashed) -->
+          <path d="M64 8 Q80 -2 96 8" stroke="#f0c14e" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="4 3" opacity=".45"/>
+          <path d="M96 8 L98 15 M96 8 L90 10" stroke="#f0c14e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+          <!-- vertical axis line through phone -->
+          <line x1="80" y1="6" x2="80" y2="78" stroke="rgba(238,239,235,.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="80" y="79" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="rgba(238,239,235,.28)" letter-spacing="1">azimut · portrét</text>
+        </svg>
+      </div>
+      <div class="rec-wrap" id="rec-0">
+        <div class="rec-dot"></div>
+        <div class="rec-txt">Nahrávám</div>
+        <div class="rec-bar-wrap"><div class="rec-bar" id="rb-0"></div></div>
+      </div>
+      <div class="res" id="res-0" style="display:none">
+        <div class="rc"><div class="rc-l">Osa</div><div class="rc-v hi" id="r0-axis">—</div></div>
+        <div class="rc"><div class="rc-l">Rozptyl</div><div class="rc-v" id="r0-var">—</div></div>
+        <div class="rc"><div class="rc-l">Znaménko</div><div class="rc-v hi" id="r0-sign">—</div></div>
+      </div>
+      <div class="btns">
+        <button class="btn btn-rec" id="btn-0" onclick="startTest(0)">▶ Spustit</button>
+        <button class="btn btn-skip" onclick="skipTest(0)">Přeskočit</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 — landscape yaw -->
+    <div class="card" id="card-1">
+      <div class="card-hd"><span class="card-num">Test 2 / 3</span><span class="card-tag" id="tag-1">Čeká</span></div>
+      <div class="card-title">Otáčení doleva a doprava — landscape</div>
+      <div class="card-desc">Otočte telefon do landscape (naležato, displej k vám). Pomalu otočte doprava cca 30–40°, pak zpět doleva.</div>
+      <div class="illus" id="ill-1">
+        <svg viewBox="0 0 200 80" width="200" height="80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- phone landscape, centered -->
+          <rect x="48" y="22" width="104" height="40" rx="7" stroke="#eeefeb" stroke-width="2"/>
+          <circle cx="144" cy="42" r="3.5" fill="#eeefeb" opacity=".35"/>
+          <rect x="59" y="28" width="68" height="22" rx="2" fill="#eeefeb" opacity=".1"/>
+          <!-- curved arrow going left — over left short side -->
+          <path d="M44 22 Q28 42 44 62" stroke="#f0c14e" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M44 22 L50 22 M44 22 L46 28" stroke="#f0c14e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- dashed arrow right side -->
+          <path d="M156 22 Q172 42 156 62" stroke="#f0c14e" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="4 3" opacity=".45"/>
+          <path d="M156 62 L150 62 M156 62 L154 56" stroke="#f0c14e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+          <!-- vertical axis line through phone (short side) -->
+          <line x1="100" y1="14" x2="100" y2="76" stroke="rgba(238,239,235,.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="100" y="79" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="rgba(238,239,235,.28)" letter-spacing="1">azimut · landscape</text>
+        </svg>
+      </div>
+      <div class="rec-wrap" id="rec-1">
+        <div class="rec-dot"></div>
+        <div class="rec-txt">Nahrávám</div>
+        <div class="rec-bar-wrap"><div class="rec-bar" id="rb-1"></div></div>
+      </div>
+      <div class="res" id="res-1" style="display:none">
+        <div class="rc"><div class="rc-l">Osa</div><div class="rc-v hi" id="r1-axis">—</div></div>
+        <div class="rc"><div class="rc-l">Rozptyl</div><div class="rc-v" id="r1-var">—</div></div>
+        <div class="rc"><div class="rc-l">Znaménko</div><div class="rc-v hi" id="r1-sign">—</div></div>
+      </div>
+      <div class="btns">
+        <button class="btn btn-rec" id="btn-1" onclick="startTest(1)">▶ Spustit</button>
+        <button class="btn btn-skip" onclick="skipTest(1)">Přeskočit</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 — roll (steering wheel) -->
+    <div class="card" id="card-2">
+      <div class="card-hd"><span class="card-num">Test 3 / 3</span><span class="card-tag" id="tag-2">Čeká</span></div>
+      <div class="card-title">Otáčení jako volantem — svislá osa</div>
+      <div class="card-desc">Držte telefon svisle před sebou (portrét) a otáčejte jím jako volantem doprava a doleva — displej stále míří k vám, horní okraj se pohybuje doleva a doprava.</div>
+      <div class="illus" id="ill-2">
+        <svg viewBox="0 0 160 84" width="160" height="84" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- phone portrait -->
+          <rect x="58" y="12" width="44" height="62" rx="7" stroke="#eeefeb" stroke-width="2"/>
+          <circle cx="80" cy="67" r="3.5" fill="#eeefeb" opacity=".35"/>
+          <rect x="67" y="20" width="26" height="28" rx="2" fill="#eeefeb" opacity=".1"/>
+          <!-- horizontal rotation axis line -->
+          <line x1="20" y1="42" x2="140" y2="42" stroke="rgba(238,239,235,.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <!-- curved arrow: top of phone swings left (over the left long side) -->
+          <path d="M58 18 Q30 42 58 66" stroke="#f0c14e" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M58 18 L64 16 M58 18 L58 26" stroke="#f0c14e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- dashed: right side -->
+          <path d="M102 18 Q130 42 102 66" stroke="#f0c14e" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="4 3" opacity=".45"/>
+          <path d="M102 66 L96 68 M102 66 L102 58" stroke="#f0c14e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+          <text x="80" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="rgba(238,239,235,.28)" letter-spacing="1">roll · volant</text>
+        </svg>
+      </div>
+      <div class="rec-wrap" id="rec-2">
+        <div class="rec-dot"></div>
+        <div class="rec-txt">Nahrávám</div>
+        <div class="rec-bar-wrap"><div class="rec-bar" id="rb-2"></div></div>
+      </div>
+      <div class="res" id="res-2" style="display:none">
+        <div class="rc"><div class="rc-l">Osa</div><div class="rc-v hi" id="r2-axis">—</div></div>
+        <div class="rc"><div class="rc-l">Rozptyl</div><div class="rc-v" id="r2-var">—</div></div>
+        <div class="rc"><div class="rc-l">Znaménko</div><div class="rc-v hi" id="r2-sign">—</div></div>
+      </div>
+      <div class="btns">
+        <button class="btn btn-rec" id="btn-2" onclick="startTest(2)">▶ Spustit</button>
+        <button class="btn btn-skip" onclick="skipTest(2)">Přeskočit</button>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- Export -->
+  <div id="export-wrap">
+    <div class="export-card">
+      <div class="export-title">Výsledek kalibrace</div>
+      <div class="export-json" id="export-json"></div>
+      <div class="export-btns">
+        <button class="btn btn-copy" onclick="copyJSON()">Kopírovat JSON</button>
+        <button class="btn btn-reset btn-skip" onclick="resetAll()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ── Permission ──────────────────────────────────────────
+async function requestPerm() {
+  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    const r = await DeviceOrientationEvent.requestPermission().catch(() => 'denied');
+    if (r === 'granted') {
+      document.getElementById('perm-btn').textContent = 'Senzory OK';
+      document.getElementById('perm-btn').classList.add('ok');
+    } else {
+      document.getElementById('perm-btn').textContent = 'Zamítnuto';
+    }
+  } else {
+    document.getElementById('perm-btn').textContent = 'Senzory OK';
+    document.getElementById('perm-btn').classList.add('ok');
+  }
+  startLive();
+}
+
+// ── Live display ────────────────────────────────────────
+let live = {alpha:null, beta:null, gamma:null};
+
+function startLive() {
+  window.addEventListener('deviceorientation', e => {
+    live.alpha = e.alpha;
+    live.beta  = e.beta;
+    live.gamma = e.gamma;
+    updateGauges();
+    if (recording) collectSample();
+  }, true);
+}
+
+function updateGauges() {
+  const fmt = v => v === null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(1);
+  document.getElementById('va').textContent = fmt(live.alpha);
+  document.getElementById('vb').textContent = fmt(live.beta);
+  document.getElementById('vg').textContent = fmt(live.gamma);
+  // bars: alpha 0-360, beta/gamma -180..180
+  setBar('ba', live.alpha, 0, 360);
+  setBar('bb', live.beta,  -180, 180);
+  setBar('bg', live.gamma, -180, 180);
+}
+
+function setBar(id, val, min, max) {
+  if (val === null) return;
+  const el = document.getElementById(id);
+  const pct = (val - min) / (max - min) * 100;
+  const mid = ((0 - min) / (max - min)) * 100;
+  if (val >= 0) {
+    el.style.left  = mid + '%';
+    el.style.width = (pct - mid) + '%';
+  } else {
+    el.style.left  = pct + '%';
+    el.style.width = (mid - pct) + '%';
+  }
+}
+
+// ── Recording ───────────────────────────────────────────
+const REC_MS  = 4000;  // recording duration
+let recording = false;
+let recTest   = -1;
+let samples   = [];    // [{alpha, beta, gamma, t}]
+let recStart  = 0;
+let recTimer  = null;
+let barTimer  = null;
+
+const results = [null, null, null]; // per test
+const skipped = [false, false, false];
+
+function startTest(i) {
+  if (live.alpha === null) {
+    alert('Nejdříve povol senzory!'); return;
+  }
+  recording = true;
+  recTest   = i;
+  samples   = [];
+  recStart  = Date.now();
+
+  document.getElementById('card-' + i).classList.add('active');
+  document.getElementById('tag-'  + i).textContent = 'Nahrávám…';
+  document.getElementById('rec-'  + i).classList.add('show');
+  document.getElementById('btn-'  + i).disabled = true;
+
+  // Animate progress bar
+  const bar = document.getElementById('rb-' + i);
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  setTimeout(() => {
+    bar.style.transition = 'width ' + REC_MS + 'ms linear';
+    bar.style.width = '100%';
+  }, 30);
+
+  recTimer = setTimeout(() => stopTest(i), REC_MS);
+}
+
+function collectSample() {
+  samples.push({ alpha: live.alpha, beta: live.beta, gamma: live.gamma, t: Date.now() - recStart });
+}
+
+function stopTest(i) {
+  clearTimeout(recTimer);
+  recording = false;
+  document.getElementById('rec-' + i).classList.remove('show');
+
+  const result = analyze(samples);
+  results[i] = result;
+  showResult(i, result);
+
+  document.getElementById('card-' + i).classList.remove('active');
+  document.getElementById('card-' + i).classList.add('done');
+  document.getElementById('tag-'  + i).textContent = 'Hotovo';
+
+  checkAllDone();
+}
+
+function skipTest(i) {
+  skipped[i] = true;
+  results[i] = null;
+  document.getElementById('card-' + i).classList.add('done');
+  document.getElementById('tag-'  + i).textContent = 'Přeskočeno';
+  document.getElementById('btn-'  + i).disabled = true;
+  checkAllDone();
+}
+
+// ── Analysis ────────────────────────────────────────────
+// Unwrap alpha (0-360 wraps around) before variance calculation
+function unwrap(arr) {
+  const out = [arr[0]];
+  for (let i = 1; i < arr.length; i++) {
+    let d = arr[i] - arr[i-1];
+    if (d > 180)  d -= 360;
+    if (d < -180) d += 360;
+    out.push(out[out.length-1] + d);
+  }
+  return out;
+}
+
+function variance(arr) {
+  if (arr.length < 2) return 0;
+  const mean = arr.reduce((s,v) => s+v, 0) / arr.length;
+  return arr.reduce((s,v) => s + (v-mean)**2, 0) / arr.length;
+}
+
+function sign(arr) {
+  // First half max vs second half max → determines direction
+  // Actually: look at first large movement direction
+  const unwrapped = unwrap(arr);
+  const n = unwrapped.length;
+  if (n < 4) return 1;
+  // Slope of first third of movement
+  const slope = unwrapped[Math.floor(n/3)] - unwrapped[0];
+  return slope >= 0 ? 1 : -1;
+}
+
+function analyze(smpls) {
+  if (smpls.length < 5) return null;
+  const a = unwrap(smpls.map(s => s.alpha));
+  const b = smpls.map(s => s.beta);
+  const g = smpls.map(s => s.gamma);
+
+  const vars = { alpha: variance(a), beta: variance(b), gamma: variance(g) };
+  // Dominant axis = highest variance
+  const dominant = Object.entries(vars).sort((x,y) => y[1]-x[1])[0][0];
+  const domArr   = dominant === 'alpha' ? a : dominant === 'beta' ? b : g;
+  const domSign  = sign(domArr);
+  const domVar   = vars[dominant];
+
+  return {
+    axis:     dominant,
+    sign:     domSign,
+    variance: Math.round(domVar * 10) / 10,
+    varAll:   { alpha: Math.round(vars.alpha*10)/10, beta: Math.round(vars.beta*10)/10, gamma: Math.round(vars.gamma*10)/10 }
+  };
+}
+
+function showResult(i, r) {
+  const wrap = document.getElementById('res-' + i);
+  wrap.style.display = 'grid';
+  if (!r) return;
+  document.getElementById('r'+i+'-axis').textContent = r.axis;
+  document.getElementById('r'+i+'-var' ).textContent = r.variance.toFixed(1);
+  document.getElementById('r'+i+'-sign').textContent = r.sign > 0 ? '+1' : '−1';
+}
+
+// ── Export ──────────────────────────────────────────────
+const testNames = ['portrait_yaw', 'landscape_yaw', 'roll'];
+
+function checkAllDone() {
+  const allDone = results.every((r,i) => r !== null || skipped[i]);
+  if (!allDone) return;
+
+  const cal = {};
+  testNames.forEach((name, i) => {
+    if (results[i]) {
+      cal[name] = { axis: results[i].axis, sign: results[i].sign, variance: results[i].variance };
+    }
+  });
+  cal._generated = new Date().toISOString();
+
+  const json = JSON.stringify(cal, null, 2);
+  document.getElementById('export-json').textContent = json;
+  document.getElementById('export-wrap').classList.add('show');
+
+  // Scroll to export
+  setTimeout(() => {
+    document.getElementById('export-wrap').scrollIntoView({ behavior: 'smooth' });
+  }, 300);
+}
+
+function copyJSON() {
+  const txt = document.getElementById('export-json').textContent;
+  navigator.clipboard?.writeText(txt).catch(() => {});
+  document.querySelector('.btn-copy').textContent = 'Zkopírováno ✓';
+  setTimeout(() => { document.querySelector('.btn-copy').textContent = 'Kopírovat JSON'; }, 2000);
+}
+
+function resetAll() {
+  location.reload();
+}
+
+// Auto-start live if permission not needed
+if (typeof DeviceOrientationEvent?.requestPermission !== 'function') {
+  startLive();
+  document.getElementById('perm-btn').textContent = 'Senzory OK';
+  document.getElementById('perm-btn').classList.add('ok');
+}
+</script>
+</body>
+</html>
