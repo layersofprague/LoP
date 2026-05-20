@@ -54,20 +54,16 @@ html, body {
   position: fixed; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  width: 56px; height: 56px;
+  width: 48px; height: 48px;
   z-index: 50;
 }
 #crosshair::before, #crosshair::after {
-  content: ''; position: absolute; background: var(--gold-dim);
+  content: ''; position: absolute; background: rgba(255,255,255,.55);
 }
-#crosshair::before { top:50%; left:-18px; right:-18px; height:1px; margin-top:-.5px; }
-#crosshair::after  { left:50%; top:-18px; bottom:-18px; width:1px; margin-left:-.5px; }
-.ch-ring { position:absolute; inset:0; border:1.5px solid var(--gold-dim); border-radius:50%; }
-.ch-tl,.ch-tr,.ch-bl,.ch-br { position:absolute; width:12px; height:12px; border-color:var(--gold); border-style:solid; }
-.ch-tl { top:-8px; left:-8px;   border-width:1.5px 0 0 1.5px; }
-.ch-tr { top:-8px; right:-8px;  border-width:1.5px 1.5px 0 0; }
-.ch-bl { bottom:-8px; left:-8px;  border-width:0 0 1.5px 1.5px; }
-.ch-br { bottom:-8px; right:-8px; border-width:0 1.5px 1.5px 0; }
+#crosshair::before { top:50%; left:-16px; right:-16px; height:1px; margin-top:-.5px; }
+#crosshair::after  { left:50%; top:-16px; bottom:-16px; width:1px; margin-left:-.5px; }
+.ch-ring { position:absolute; inset:0; border:1px solid rgba(255,255,255,.4); border-radius:50%; }
+.ch-tl,.ch-tr,.ch-bl,.ch-br { display: none; }
 #topbar {
   position: fixed; top: 0; left: 0; right: 0;
   padding-top: max(env(safe-area-inset-top, 0px), 12px);
@@ -129,37 +125,37 @@ html, body {
   z-index: 100;
 }
 .cam-side-btn {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(13,11,8,.32);
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(13,11,8,.18);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.05);
   display: flex; align-items: center; justify-content: center;
-  color: rgba(238,239,235,.7); cursor: pointer;
+  color: rgba(238,239,235,.55); cursor: pointer;
   transition: background .15s, transform .1s;
   flex-shrink: 0; position: relative;
 }
-.cam-side-btn:active { background: rgba(255,255,255,.12); transform: scale(.92); }
-.cam-side-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-/* Shutter — camera button style: outer gray ring + white disk */
+.cam-side-btn:active { background: rgba(255,255,255,.1); transform: scale(.92); }
+.cam-side-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Shutter — outer semi-transparent disk + inner white disk */
 #shutter {
-  width: 72px; height: 72px;
+  width: 68px; height: 68px;
   border-radius: 50%;
-  background: rgba(200,200,196,.28);
+  background: rgba(220,220,216,.22);
   border: none;
-  box-shadow: inset 0 0 0 3px rgba(200,200,196,.55);
+  box-shadow: none;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: transform .1s;
   flex-shrink: 0;
-  padding: 5px;
+  padding: 6px;
 }
 #shutter:active { transform: scale(.88); }
 #shutter-inner {
   width: 100%; height: 100%;
   border-radius: 50%;
-  background: #f4f4f2;
-  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  background: #f2f2f0;
+  box-shadow: 0 1px 5px rgba(0,0,0,.2);
 }
 /* Opacity panel — portrait: vertical above btn; landscape: horizontal expanding left */
 #opacity-panel {
