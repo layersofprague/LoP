@@ -151,6 +151,10 @@ html, body {
   padding: 6px;
 }
 #shutter:active { transform: scale(.88); }
+#shutter.locked #shutter-inner {
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
+}
 #shutter-inner {
   width: 100%; height: 100%;
   border-radius: 50%;
@@ -665,12 +669,187 @@ resetBtn.addEventListener('touchend', e => {
 }, { passive: true });
 
 // ─────────────────────────────────────────────────────────
-// SHUTTER
+// PLACES.JSON — načtení dat místa
 // ─────────────────────────────────────────────────────────
-document.getElementById('shutter').addEventListener('click', () => {
+const PLACE_ID   = 'H001';
+const PLACES_URL = 'https://layersofprague.github.io/LoP/places.json';
+
+// Fallback — H001 hodnoty natvrdo pro případ nedostupnosti JSONu
+let place = {
+  objLat: 50.105626,
+  objLng: 14.455984,
+  fov:    60           // horizontální FOV kamery ve stupních
+};
+
+fetch(PLACES_URL)
+  .then(r => r.json())
+  .then(arr => {
+    const p = arr.find(x => x.id === PLACE_ID);
+    if (!p) return;
+    if (p.objLat !== undefined) place.objLat = p.objLat;
+    if (p.objLng !== undefined) place.objLng = p.objLng;
+    if (p.fov    !== undefined) place.fov    = p.fov;
+    updateDistChip();
+  })
+  .catch(() => {});
+
+// ─────────────────────────────────────────────────────────
+// GPS — kontinuální sledování polohy
+// ─────────────────────────────────────────────────────────
+let gpsPos = null;
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(
+    p => {
+      gpsPos = { lat: p.coords.latitude, lng: p.coords.longitude };
+      if (!arLocked) updateDistChip();
+    },
+    () => {},
+    { enableHighAccuracy: true, maximumAge: 2000 }
+  );
+}
+
+// Haversine vzdálenost v metrech
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r;
+  const dLng = (lng2 - lng1) * r;
+  const a = Math.sin(dLat/2)**2
+          + Math.cos(lat1*r) * Math.cos(lat2*r) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Aktuální vzdálenost uživatele od objektu
+function currentDistM() {
+  if (gpsPos) return haversineM(gpsPos.lat, gpsPos.lng, place.objLat, place.objLng);
+  return 50; // fallback bez GPS
+}
+
+function updateDistChip() {
+  const d = currentDistM();
+  document.getElementById('live-label').textContent = `${Math.round(d)} m`;
+}
+
+// ─────────────────────────────────────────────────────────
+// DEVICE ORIENTATION
+// ─────────────────────────────────────────────────────────
+let orient = { alpha: null, beta: null, gamma: null };
+window.addEventListener('deviceorientation', e => {
+  orient.alpha = e.alpha;
+  orient.beta  = e.beta;
+  orient.gamma = e.gamma;
+  if (arLocked) updateARPosition();
+}, true);
+
+async function requestOrientPerm() {
+  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    const r = await DeviceOrientationEvent.requestPermission().catch(() => 'denied');
+    if (r !== 'granted') { showHint('Povol orientaci v nastavení'); hideHint(); return false; }
+  }
+  return true;
+}
+
+// Δúhel na [-180, 180]
+function angleDiff(a, b) {
+  let d = ((a - b) % 360 + 360) % 360;
+  return d > 180 ? d - 360 : d;
+}
+
+// ─────────────────────────────────────────────────────────
+// AR LOCK
+// ─────────────────────────────────────────────────────────
+let arLocked    = false;
+let lockCorners = null;
+let lockOrient  = null;
+let lockDistM   = null;
+
+// Počet canvas pixelů na 1 radián otočení telefonu.
+//
+// Model: telefon se otočí o Δα radiánů kolem svislé osy.
+// Scéna se posune o tan(Δα) × distM metrů.
+// Na plátně to odpovídá: tan(Δα) × distM × (W / sceneSzM) pixelů.
+//
+// sceneSzM = šířka záběru ve vzdálenosti distM při daném FOV:
+//   sceneSzM = 2 × distM × tan(HFOV/2)
+//
+// Dosadíme:
+//   posun = tan(Δα) × distM × W / (2 × distM × tan(HFOV/2))
+//         = tan(Δα) × W / (2 × tan(HFOV/2))
+//
+// → pxPerRad = W / (2 × tan(HFOV/2))
+// distM se zkrátí! Závisí jen na FOV a šířce plátna.
+// Fyzicky to dává smysl: FOV je úhel, distM určuje jen absolutní měřítko scény.
+function computePxPerRad() {
+  const hfov = (place.fov * Math.PI / 180);
+  return W / (2 * Math.tan(hfov / 2));
+}
+
+async function lockAR() {
+  if (orient.alpha === null) { showHint('Čekám na senzory…'); hideHint(); return; }
+
+  lockDistM   = currentDistM();
+  lockCorners = corners.map(c => ({...c}));
+  lockOrient  = { alpha: orient.alpha, beta: orient.beta, gamma: orient.gamma };
+  arLocked    = true;
+
+  showHint(`Zafixováno · ${Math.round(lockDistM)} m`);
+  hideHint();
+  document.getElementById('shutter').classList.add('locked');
+  document.getElementById('live-label').textContent = `${Math.round(lockDistM)} m 🔒`;
+}
+
+function unlockAR() {
+  arLocked = false;
+  document.getElementById('shutter').classList.remove('locked');
+  showHint('Odemčeno'); hideHint();
+  updateDistChip();
+}
+
+// ─────────────────────────────────────────────────────────
+// AR UPDATE — přepočet polohy rohů při pohybu telefonu
+// ─────────────────────────────────────────────────────────
+function updateARPosition() {
+  if (!arLocked || !lockOrient || orient.alpha === null) return;
+
+  const pxPerRad = computePxPerRad();
+
+  // Δazimut → posun X  (otočení doprava = obraz jde doleva)
+  const dA = angleDiff(orient.alpha, lockOrient.alpha) * Math.PI / 180;
+  const shiftX = -Math.tan(dA) * pxPerRad;
+
+  // Δpitch → posun Y  (náklon nahoru = obraz jde nahoru)
+  const dB = (orient.beta - lockOrient.beta) * Math.PI / 180;
+  const shiftY = -Math.tan(dB) * pxPerRad;
+
+  // Δroll → rotace kolem těžiště rohů
+  const dG = (orient.gamma - lockOrient.gamma) * Math.PI / 180;
+
+  const cx = lockCorners.reduce((s,c) => s+c.x, 0) / 4;
+  const cy = lockCorners.reduce((s,c) => s+c.y, 0) / 4;
+  const cosG = Math.cos(-dG), sinG = Math.sin(-dG);
+
+  corners = lockCorners.map(c => {
+    const rx = cx + (c.x-cx)*cosG - (c.y-cy)*sinG;
+    const ry = cy + (c.x-cx)*sinG + (c.y-cy)*cosG;
+    return { x: rx + shiftX, y: ry + shiftY };
+  });
+
+  draw();
+}
+
+// ─────────────────────────────────────────────────────────
+// SHUTTER — tap = lock / tap znovu = unlock
+// ─────────────────────────────────────────────────────────
+document.getElementById('shutter').addEventListener('click', async () => {
   const fl = document.getElementById('flash');
   fl.classList.add('on');
   setTimeout(() => fl.classList.remove('on'), 110);
+
+  if (!arLocked) {
+    const ok = await requestOrientPerm();
+    if (ok) lockAR();
+  } else {
+    unlockAR();
+  }
 });
 
 // ─────────────────────────────────────────────────────────
