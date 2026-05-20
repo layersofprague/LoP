@@ -1022,7 +1022,8 @@ function renderARCanvas(){
 
   if(phase!=='align'&&phase!=='anchored')return;
   if(!photoImg)return;
-  if(heading===null)return;
+  const heading=getCurrentHeading();
+  if(heading===null){updateGpsPlacementUI(false);return;}
 
   const scr=computeCornerScreenPos(heading);
   if(!scr){
@@ -1030,8 +1031,10 @@ function renderARCanvas(){
     updateGpsPlacementUI(false);
     return;
   }
-  gpsPlacementActive=true;
-  updateGpsPlacementUI(true,heading);
+  if(!gpsPlacementActive){
+    gpsPlacementActive=true;
+    updateGpsPlacementUI(true,heading);
+  }
 
   const opacity=TR.opa/100;
   const scaleMul=TR.sz/100;
