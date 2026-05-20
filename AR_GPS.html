@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>PicPin AR</title>
+<title>AR GPS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
@@ -169,8 +169,8 @@ input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:12px;h
 <!-- IMPORT -->
 <div id="ph-import" class="on">
   <div class="imp-card">
-    <div class="imp-hero">PICPIN</div>
-    <div class="imp-sub">AR · historické fotografie v prostoru</div>
+    <div class="imp-hero">AR GPS</div>
+    <div class="imp-sub">historické fotografie v prostoru</div>
 
     <!-- Loading spinner -->
     <div id="imp-loading" style="display:none;flex-direction:column;align-items:center;gap:14px;padding:24px 0">
@@ -914,6 +914,19 @@ function project3D(compassHeading){
   return {topLeft:tl, topRight:tr, bottomLeft:bl, bottomRight:br};
 }
 
+
+// ── CAMERA FOV ──
+function detectCameraFov(stream){
+  try{
+    const track=stream.getVideoTracks()[0];
+    const settings=track&&track.getSettings?track.getSettings():{};
+    if(settings.field_of_view&&settings.field_of_view>20){
+      cameraFovDeg=settings.field_of_view;camFovDetected=true;return;
+    }
+  }catch(e){}
+  cameraFovDeg=calData&&calData.optFovDeg?calData.optFovDeg:62.5;
+  camFovDetected=!!calData?.optFovDeg;
+}
 
 // ── CANVAS AR RENDERING ──
 // Draws the historical photo warped to match the GPS-computed screen position of the 4 plane corners.
