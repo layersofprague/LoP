@@ -27,13 +27,15 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);
 #perm-btn:active{opacity:.75}
 #perm-btn.ok{background:rgba(74,222,128,.15);color:var(--ok);border:1px solid rgba(74,222,128,.3);pointer-events:none}
 
-/* live gauges */
-#gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;flex-shrink:0}
-.g{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
-.g-lbl{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.35);margin-bottom:4px}
-.g-val{font-size:20px;font-weight:600;letter-spacing:-.02em;min-height:26px}
-.g-bar{height:3px;background:rgba(238,239,235,.08);border-radius:99px;margin-top:5px;overflow:hidden;position:relative}
+/* live gauges — compact strip */
+#gauges{display:flex;gap:6px;margin-bottom:10px;flex-shrink:0;align-items:center;
+  background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:6px 10px}
+.g{display:flex;align-items:center;gap:5px;flex:1}
+.g-lbl{font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,239,235,.3);flex-shrink:0}
+.g-val{font-size:11px;font-weight:600;color:var(--paper);min-width:44px}
+.g-bar{flex:1;height:3px;background:rgba(238,239,235,.08);border-radius:99px;overflow:hidden;position:relative}
 .g-fill{position:absolute;top:0;height:100%;background:var(--gold);border-radius:99px;transition:left .05s,width .05s}
+.g-sep{width:1px;height:16px;background:rgba(238,239,235,.08);flex-shrink:0}
 
 /* steps scroll */
 #steps{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:0;
@@ -101,14 +103,13 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);
     <button id="perm-btn" onclick="requestPerm()">Povolit senzory</button>
   </div>
 
-  <!-- Live values -->
+  <!-- Live values — compact strip -->
   <div id="gauges">
-    <div class="g"><div class="g-lbl">Alpha α</div><div class="g-val" id="va">—</div>
-      <div class="g-bar"><div class="g-fill" id="ba"></div></div></div>
-    <div class="g"><div class="g-lbl">Beta β</div><div class="g-val" id="vb">—</div>
-      <div class="g-bar"><div class="g-fill" id="bb"></div></div></div>
-    <div class="g"><div class="g-lbl">Gamma γ</div><div class="g-val" id="vg">—</div>
-      <div class="g-bar"><div class="g-fill" id="bg"></div></div></div>
+    <div class="g"><div class="g-lbl">α</div><div class="g-val" id="va">—</div><div class="g-bar"><div class="g-fill" id="ba"></div></div></div>
+    <div class="g-sep"></div>
+    <div class="g"><div class="g-lbl">β</div><div class="g-val" id="vb">—</div><div class="g-bar"><div class="g-fill" id="bb"></div></div></div>
+    <div class="g-sep"></div>
+    <div class="g"><div class="g-lbl">γ</div><div class="g-val" id="vg">—</div><div class="g-bar"><div class="g-fill" id="bg"></div></div></div>
   </div>
 
   <!-- Test steps -->
@@ -237,7 +238,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);
       <div class="export-title">Výsledek kalibrace</div>
       <div class="export-json" id="export-json"></div>
       <div class="export-btns">
-        <button class="btn btn-copy" onclick="copyJSON()">Kopírovat JSON</button>
+        <button class="btn btn-copy" onclick="downloadJSON()">Uložit do souborů</button>
         <button class="btn btn-reset btn-skip" onclick="resetAll()">Reset</button>
       </div>
     </div>
@@ -453,11 +454,19 @@ function checkAllDone() {
   }, 300);
 }
 
-function copyJSON() {
+function downloadJSON() {
   const txt = document.getElementById('export-json').textContent;
-  navigator.clipboard?.writeText(txt).catch(() => {});
-  document.querySelector('.btn-copy').textContent = 'Zkopírováno ✓';
-  setTimeout(() => { document.querySelector('.btn-copy').textContent = 'Kopírovat JSON'; }, 2000);
+  const blob = new Blob([txt], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'gyro_calibration.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.querySelector('.btn-copy').textContent = 'Staženo ✓';
+  setTimeout(() => { document.querySelector('.btn-copy').textContent = 'Uložit do souborů'; }, 2500);
 }
 
 function resetAll() {
