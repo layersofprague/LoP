@@ -567,13 +567,13 @@ function startOri() {
     if (oriPaused) return;
     hasAbsolute = true;
     var raw = toHeading(e, true);
-    if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
+    if (raw !== null) addHeadingSample((raw + yawOffset + 360) % 360);
   }
 
   function handleRelative(e) {
     if (oriPaused || hasAbsolute) return;
     var raw = toHeading(e, false);
-    if (raw !== null) addHeadingSample((raw - yawOffset + 360) % 360);
+    if (raw !== null) addHeadingSample((raw + yawOffset + 360) % 360);
   }
 
   window.addEventListener('deviceorientationabsolute', handleAbsolute, true);
