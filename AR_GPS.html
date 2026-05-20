@@ -821,6 +821,8 @@ function getVerticalFov(fovH,W,H){
 //   4. drawQuad() udělá perspektivní zkreslení automaticky
 
 function project3D(compassHeading){
+  // Fallback heading když kompas ještě nemá data
+  if(compassHeading==null) compassHeading=calData&&calData.azimutDeg!=null?calData.azimutDeg:0;
   if(!calData||!calData.plane||!calData.plane.corners)return null;
   const C=calData.plane.corners;
   const W=arCanvas?arCanvas.width:window.innerWidth;
@@ -847,7 +849,7 @@ function project3D(compassHeading){
   const yaw = compassHeading * Math.PI/180;
   // Pitch z ori.beta (telefon nakloněný vpřed/vzad) — 0 = telefon vodorovně
   // V portrait: beta≈90° = telefon svisle, to odpovídá pohledu rovně
-  const pitchRaw = (ori.b||90) * Math.PI/180;
+  const pitchRaw = (ori.b!=null?ori.b:90) * Math.PI/180;
   const pitch = pitchRaw - Math.PI/2; // 0 = rovně před sebe
   // Roll = náklon do strany (osa Z telefonu)
   const roll = (ori.g||0) * Math.PI/180;
@@ -897,7 +899,7 @@ function project3D(compassHeading){
     const camX = p3.x*rx + p3.y*ry + p3.z*rz; // vpravo
     const camY = p3.x*fx + p3.y*fy + p3.z*fz; // dopředu (depth)
     const camZ = p3.x*ux + p3.y*uy + p3.z*uz; // nahoru
-    if(camY < 0.5) return null; // za kamerou nebo příliš blízko
+    if(camY < 0.1) return null; // příliš blízko nebo přesně za kamerou
     // Perspektivní dělení
     const nx = 0.5 + (camX/camY) / (2*tanHalf_h);
     const ny = 0.5 - (camZ/camY) / (2*tanHalf_v);
@@ -984,6 +986,7 @@ function drawTriangle(img,s0,s1,s2,d0,d1,d2,opacity){
 
 // Compute screen positions of 4 plane corners from GPS data + current compass heading
 function computeCornerScreenPos(compassHeading){
+  if(compassHeading==null)compassHeading=calData&&calData.azimutDeg!=null?calData.azimutDeg:0;
   if(!calData||!calData.photographer)return null;
   const W=arCanvas?arCanvas.width:window.innerWidth;
   const H=arCanvas?arCanvas.height:window.innerHeight;
@@ -1072,7 +1075,10 @@ function updateGpsPlacementUI(active,heading){
     if(bgps){bgps.classList.add('on');bgps.textContent='📡 GPS '+cameraFovDeg.toFixed(0)+'°';}
   }else{
     badge.className='gps-mode-badge gps-mode-manual';badge.textContent='MANUÁL';
-    info.textContent='Kompas nebo GPS data nejsou k dispozici';
+    const h=getCurrentHeading();
+    const hasCorners=calData&&calData.plane&&calData.plane.corners;
+    const reason=!hasCorners?'chybí plane.corners':h==null?'čeká na kompas':'projekce mimo záběr';
+    info.textContent=reason;
     if(bgps)bgps.classList.remove('on');
   }
 }
