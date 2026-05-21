@@ -228,21 +228,28 @@ function analyze(smpls) {
   return { axis: dominant, peakSign: mean >= 0 ? 1 : -1, variance: Math.round(vars[dominant]*10)/10 };
 }
 
-// From two opposite-direction measurements, derive axis + compensation sign
-// negResult = measurement when moving in negative dir (e.g. left)
-// posResult = measurement when moving in positive dir (e.g. right)
+// Derive axis + compensation sign from two opposite measurements.
+// We use the higher-variance result to identify the axis.
+// Compensation sign logic:
+//   Moving RIGHT → gyro reads positive on the axis → image must go LEFT → sign = +1
+//   Moving LEFT  → gyro reads negative on the axis → image must go RIGHT → sign = +1
+//   In both cases: compensationSign = -measuredSign * directionSign
+//   where directionSign = +1 for R/D, -1 for L/U
+// Simplified: take the positive-direction measurement's sign directly as compensation sign,
+//   or negate the negative-direction measurement's sign.
 function deriveMapping(negResult, posResult) {
-  // Use the higher-variance result as the reliable one
+  // Pick higher-variance as the more reliable measurement
   const ref = (posResult && negResult)
     ? (posResult.variance >= negResult.variance ? posResult : negResult)
     : (posResult || negResult);
   if (!ref) return null;
-  const isPosDir = ref === posResult;
-  // If moving right (pos dir) produces positive peak on the axis → sign = +1 for raw
-  // Compensation sign: we want shiftX = -sign * angle * ppd
-  // so if right movement → positive rate → we need sign = +1 to move image left
-  const sign = isPosDir ? ref.peakSign : -ref.peakSign;
-  return { axis: ref.axis, sign };
+  const isPos = ref === posResult; // true = measured from positive direction (R or D)
+  // compensation sign = opposite of measured sign for positive dir,
+  //                     same as measured sign for negative dir
+  // Because: moving right → positive gyro → need sign +1 to shift image left
+  //          moving left  → negative gyro → need sign +1 to shift image right (negate)
+  const compSign = isPos ? -ref.peakSign : ref.peakSign;
+  return { axis: ref.axis, sign: compSign };
 }
 
 // ─── SVG ILLUSTRATIONS ──────────────────────────────────────
