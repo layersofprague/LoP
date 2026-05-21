@@ -167,14 +167,14 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);font-fa
 // orient: 'portrait' | 'landscape'
 // axis: which output key this feeds into
 const STEPS = [
-  { orient:'portrait',  dir:'L', title:'Doleva — portrét',         desc:'Telefon normálně před sebou. Otočte pomalu doleva ~40° a zastavte — nevracejte zpět.', key:'portrait_h_neg' },
-  { orient:'portrait',  dir:'R', title:'Doprava — portrét',        desc:'Stejná pozice. Otočte tentokrát doprava ~40° a zastavte — nevracejte zpět.', key:'portrait_h_pos' },
-  { orient:'portrait',  dir:'U', title:'Ke stropu — portrét',         desc:'Namiřte kamerou ke stropu — displej se otočí dolů. Cca 30° a zastavte — nevracejte zpět.', key:'portrait_v_neg' },
-  { orient:'portrait',  dir:'D', title:'K podlaze — portrét',           desc:'Namiřte kamerou k podlaze — displej se otočí nahoru. Cca 30° a zastavte — nevracejte zpět.', key:'portrait_v_pos' },
+  { orient:'portrait',  dir:'L', title:'Doleva — portrét',         desc:'Telefon normálně před sebou. Otočte doleva ~40° a vraťte zpět.', key:'portrait_h_neg' },
+  { orient:'portrait',  dir:'R', title:'Doprava — portrét',        desc:'Stejná pozice. Otočte doprava ~40° a vraťte zpět.', key:'portrait_h_pos' },
+  { orient:'portrait',  dir:'U', title:'Ke stropu — portrét',         desc:'Namiřte kamerou ke stropu — displej se otočí dolů. Cca 30° a vraťte zpět.', key:'portrait_v_neg' },
+  { orient:'portrait',  dir:'D', title:'K podlaze — portrét',           desc:'Namiřte kamerou k podlaze — displej se otočí nahoru. Cca 30° a vraťte zpět.', key:'portrait_v_pos' },
   { orient:'landscape', dir:'L', title:'Doleva — landscape',       desc:'Otočte telefon naležato (landscape). Otočte pomalu doleva ~40° a zastavte — nevracejte zpět.', key:'landscape_h_neg' },
-  { orient:'landscape', dir:'R', title:'Doprava — landscape',      desc:'Landscape. Otočte doprava ~40° a zastavte — nevracejte zpět.', key:'landscape_h_pos' },
-  { orient:'landscape', dir:'U', title:'Ke stropu — landscape',       desc:'Landscape. Namiřte kamerou ke stropu — displej se otočí dolů. Cca 30° a zastavte — nevracejte zpět.', key:'landscape_v_neg' },
-  { orient:'landscape', dir:'D', title:'K podlaze — landscape',         desc:'Landscape. Namiřte kamerou k podlaze — displej se otočí nahoru. Cca 30° a zastavte — nevracejte zpět.', key:'landscape_v_pos' },
+  { orient:'landscape', dir:'R', title:'Doprava — landscape',      desc:'Landscape. Otočte doprava ~40° a vraťte zpět.', key:'landscape_h_pos' },
+  { orient:'landscape', dir:'U', title:'Ke stropu — landscape',       desc:'Landscape. Namiřte kamerou ke stropu — displej se otočí dolů. Cca 30° a vraťte zpět.', key:'landscape_v_neg' },
+  { orient:'landscape', dir:'D', title:'K podlaze — landscape',         desc:'Landscape. Namiřte kamerou k podlaze — displej se otočí nahoru. Cca 30° a vraťte zpět.', key:'landscape_v_pos' },
 ];
 
 const REC_MS = 3500;
@@ -219,11 +219,17 @@ function analyze(smpls) {
   }
   const vars = { alpha: variance(axes.alpha), beta: variance(axes.beta), gamma: variance(axes.gamma) };
   const dominant = Object.entries(vars).sort((a,b)=>b[1]-a[1])[0][0];
-  const arr = axes[dominant];
+  const allVals = axes[dominant];
 
-  // Sign from mean of the whole recording — one-direction move,
-  // so mean reliably reflects the direction of rotation
-  const mean = arr.reduce((s,v)=>s+v,0) / arr.length;
+  // Use only samples above a speed threshold — filters out slow return movement
+  // Threshold = 30% of the max absolute value seen
+  const maxAbs = Math.max(...allVals.map(Math.abs));
+  const threshold = maxAbs * 0.30;
+  const fast = allVals.filter(v => Math.abs(v) >= threshold);
+  const active = fast.length >= 3 ? fast : allVals; // fallback to all if too few
+
+  // Sign from mean of fast samples — dominated by the intentional movement
+  const mean = active.reduce((s,v)=>s+v,0) / active.length;
 
   return { axis: dominant, peakSign: mean >= 0 ? 1 : -1, variance: Math.round(vars[dominant]*10)/10 };
 }
@@ -248,7 +254,7 @@ function deriveMapping(negResult, posResult) {
   //                     same as measured sign for negative dir
   // Because: moving right → positive gyro → need sign +1 to shift image left
   //          moving left  → negative gyro → need sign +1 to shift image right (negate)
-  const compSign = isPos ? -ref.peakSign : ref.peakSign;
+  const compSign = isPos ? ref.peakSign : -ref.peakSign;
   return { axis: ref.axis, sign: compSign };
 }
 
@@ -428,11 +434,30 @@ function showExport() {
     ['Landscape — azimut H', cal.landscape_yaw],
     ['Landscape — pitch V',  cal.landscape_pitch],
   ];
+  // Raw step results for debugging
+  const raw = [
+    ['L portrét', results['portrait_h_neg']],
+    ['R portrét', results['portrait_h_pos']],
+    ['↑ portrét', results['portrait_v_neg']],
+    ['↓ portrét', results['portrait_v_pos']],
+    ['L landscape', results['landscape_h_neg']],
+    ['R landscape', results['landscape_h_pos']],
+    ['↑ landscape', results['landscape_v_neg']],
+    ['↓ landscape', results['landscape_v_pos']],
+  ];
   const container = document.getElementById('exp-results');
-  container.innerHTML = rows.map(([label, v]) => `
+  container.innerHTML =
+    '<div style="font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,239,235,.25);padding:2px 0 4px">Výsledky párů</div>' +
+    rows.map(([label, v]) => `
     <div class="exp-row">
       <span class="exp-key">${label}</span>
       <span class="exp-val ${v?'ok':''}">${v ? axLabel(v.axis)+' × '+signLabel(v.sign) : '—'}</span>
+    </div>`).join('') +
+    '<div style="font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,239,235,.25);padding:6px 0 4px;margin-top:4px;border-top:1px solid rgba(255,255,255,.06)">Surová měření</div>' +
+    raw.map(([label, v]) => `
+    <div class="exp-row" style="opacity:.6">
+      <span class="exp-key">${label}</span>
+      <span class="exp-val" style="color:rgba(238,239,235,.5)">${v ? axLabel(v.axis)+' peak:'+(v.peakSign>0?'+':'')+v.peakSign+' var:'+v.variance : '—'}</span>
     </div>`).join('');
 }
 
