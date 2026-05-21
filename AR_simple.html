@@ -809,55 +809,72 @@ function currentCal() {
 }
 
 // ─────────────────────────────────────────────────────────
-// DEVICE ORIENTATION
+// GYRO — integrace úhlové rychlosti přes devicemotion
+// Stejný přístup jako starý picpin AR (rawRate × dt)
+// gyroAngles.x = horizontální posun (azimut), y = vertikální (pitch)
 // ─────────────────────────────────────────────────────────
-let orient = { alpha: null, beta: null, gamma: null };
-window.addEventListener('deviceorientation', e => {
-  orient.alpha = e.alpha;
-  orient.beta  = e.beta;
-  orient.gamma = e.gamma;
-  if (arLocked) updateARPosition();
+let rawRate    = { a: 0, b: 0, g: 0 };  // °/s z devicemotion
+let gyroLastT  = null;
+let gyroAngles = { x: 0, y: 0 };        // integrované úhly ve stupních od locku
+
+// Kalibrace určuje které osy a znaménka
+function currentCal() {
+  const ls = (W > H);
+  return ls ? cal.landscape : cal.portrait;
+}
+
+window.addEventListener('devicemotion', e => {
+  if (!e.rotationRate) return;
+  const r = e.rotationRate;
+  rawRate = { a: r.alpha || 0, b: r.beta || 0, g: r.gamma || 0 };
+
+  if (!arLocked) { gyroLastT = null; return; }
+
+  const now = performance.now();
+  const dt  = gyroLastT !== null ? (now - gyroLastT) / 1000 : 0;
+  gyroLastT = now;
+
+  if (dt > 0 && dt < 0.2) {
+    const cl = currentCal();
+    const hRate = cl.azimutAxis === 'alpha' ? rawRate.a
+                : cl.azimutAxis === 'beta'  ? rawRate.b : rawRate.g;
+    const vRate = cl.pitchAxis  === 'alpha' ? rawRate.a
+                : cl.pitchAxis  === 'beta'  ? rawRate.b : rawRate.g;
+    gyroAngles.x += hRate * dt;   // °
+    gyroAngles.y += vRate * dt;   // °
+    updateARPosition();
+  }
 }, true);
 
 async function requestOrientPerm() {
-  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
-    const r = await DeviceOrientationEvent.requestPermission().catch(() => 'denied');
-    if (r !== 'granted') { showHint('Povol orientaci v nastavení'); hideHint(); return false; }
+  // iOS vyžaduje povolení pro DeviceMotion i DeviceOrientation
+  if (typeof DeviceMotionEvent?.requestPermission === 'function') {
+    const r = await DeviceMotionEvent.requestPermission().catch(() => 'denied');
+    if (r !== 'granted') { showHint('Povol pohybové senzory'); hideHint(); return false; }
   }
   return true;
 }
-
-// Δúhel na [-180, 180] — bezpečný i přes přechod 0°/360°
-function angleDiff(a, b) {
-  let d = ((a - b) % 360 + 360) % 360;
-  return d > 180 ? d - 360 : d;
-}
-
-// Δúhel pro beta/gamma — přímý rozdíl, žádné wrapping
-function linearDiff(a, b) { return a - b; }
 
 // ─────────────────────────────────────────────────────────
 // AR LOCK
 // ─────────────────────────────────────────────────────────
 let arLocked    = false;
 let lockCorners = null;
-let lockOrient  = null;
 let lockDistM   = null;
 
-// pxPerRad = W / (2 × tan(HFOV/2))
-// distM se zkrátí — závisí jen na FOV a rozlišení displeje
-function computePxPerRad() {
-  const hfov = place.fov * Math.PI / 180;
-  return W / (2 * Math.tan(hfov / 2));
+// pxPerDeg = kolik px odpovídá 1° otočení při daném FOV
+// pxPerDeg = W / FOV
+function computePxPerDeg() {
+  return W / place.fov;
 }
 
 async function lockAR() {
-  if (orient.alpha === null) { showHint('Čekám na senzory…'); hideHint(); return; }
   if (!cal) { showHint('Chybí kalibrace gyra'); hideHint(); return; }
 
   lockDistM   = currentDistM();
   lockCorners = corners.map(c => ({...c}));
-  lockOrient  = { alpha: orient.alpha, beta: orient.beta, gamma: orient.gamma };
+  gyroAngles  = { x: 0, y: 0 };   // vynulujeme integraci
+  gyroLastT   = null;
   arLocked    = true;
 
   showHint(`Zafixováno · ${Math.round(lockDistM)} m`);
@@ -867,39 +884,28 @@ async function lockAR() {
 }
 
 function unlockAR() {
-  arLocked = false;
+  arLocked    = false;
+  gyroAngles  = { x: 0, y: 0 };
+  gyroLastT   = null;
   document.getElementById('shutter').classList.remove('locked');
   showHint('Odemčeno'); hideHint();
   updateDistChip();
 }
 
 // ─────────────────────────────────────────────────────────
-// AR UPDATE — přepočet polohy rohů při pohybu telefonu
+// AR UPDATE
 // ─────────────────────────────────────────────────────────
 function updateARPosition() {
-  if (!arLocked || !lockOrient || orient.alpha === null) return;
-
-  const pxPerRad = computePxPerRad();
+  if (!arLocked || !lockCorners) return;
   const cl = currentCal();
+  const pxPerDeg = computePxPerDeg();
 
-  // Δazimut → posun X
-  // alpha používá angleDiff (wrap 0/360), beta/gamma lineární
-  const rawAzimut = cl.azimutAxis === 'alpha'
-    ? angleDiff(orient[cl.azimutAxis], lockOrient[cl.azimutAxis])
-    : linearDiff(orient[cl.azimutAxis], lockOrient[cl.azimutAxis]);
-  const dAzimut = rawAzimut * cl.azimutSign * Math.PI / 180;
-  const shiftX  = -Math.tan(dAzimut) * pxPerRad;
+  // Otočení doprava = obraz jde doleva → záporný sign pro X
+  const shiftX = -cl.azimutSign * gyroAngles.x * pxPerDeg;
+  // Náklon nahoru = obraz jde nahoru → záporný sign pro Y
+  const shiftY = -cl.pitchSign  * gyroAngles.y * pxPerDeg;
 
-  // Δpitch → posun Y
-  const rawPitch = cl.pitchAxis === 'alpha'
-    ? angleDiff(orient[cl.pitchAxis], lockOrient[cl.pitchAxis])
-    : linearDiff(orient[cl.pitchAxis], lockOrient[cl.pitchAxis]);
-  const dPitch  = rawPitch * cl.pitchSign * Math.PI / 180;
-  const shiftY  = -Math.tan(dPitch) * pxPerRad;
-
-  // Roll vypnut — jen čistý posun X/Y
   corners = lockCorners.map(c => ({ x: c.x + shiftX, y: c.y + shiftY }));
-
   draw();
 }
 
