@@ -897,17 +897,8 @@ function updateARPosition() {
   const dPitch  = rawPitch * cl.pitchSign * Math.PI / 180;
   const shiftY  = -Math.tan(dPitch) * pxPerRad;
 
-  // Roll (gamma) → rotace kolem těžiště — experimentální, malý vliv
-  const dRoll = linearDiff(orient.gamma, lockOrient.gamma) * Math.PI / 180;
-  const cx = lockCorners.reduce((s,c) => s+c.x, 0) / 4;
-  const cy = lockCorners.reduce((s,c) => s+c.y, 0) / 4;
-  const cosR = Math.cos(-dRoll), sinR = Math.sin(-dRoll);
-
-  corners = lockCorners.map(c => {
-    const rx = cx + (c.x-cx)*cosR - (c.y-cy)*sinR;
-    const ry = cy + (c.x-cx)*sinR + (c.y-cy)*cosR;
-    return { x: rx + shiftX, y: ry + shiftY };
-  });
+  // Roll vypnut — jen čistý posun X/Y
+  corners = lockCorners.map(c => ({ x: c.x + shiftX, y: c.y + shiftY }));
 
   draw();
 }
