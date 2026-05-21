@@ -89,6 +89,12 @@ html, body {
   font-style: italic; font-size: 13px;
   letter-spacing: 0; text-transform: none; font-weight: 300;
 }
+#lock-chip { transition: all .2s; }
+#lock-chip.locked {
+  background: rgba(240,193,78,.12);
+  border-color: rgba(240,193,78,.25);
+  color: var(--gold);
+}
 .dot-live {
   width: 6px; height: 6px; border-radius: 50%;
   background: #4ade80;
@@ -342,9 +348,12 @@ html, body {
 
 <div id="topbar">
   <div class="top-chip title">Layers of Prague</div>
-  <div class="top-chip">
-    <div class="dot-live"></div>
-    <span id="live-label">Náhled</span>
+  <div class="top-chip" id="lock-chip" onclick="onLockChip()" style="pointer-events:all;cursor:pointer">
+    <svg id="lock-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+    <span id="lock-label">Volno</span>
   </div>
 </div>
 
@@ -356,6 +365,10 @@ html, body {
 <!-- Settings panel — centered -->
 <div id="ax-panel">
   <div class="ax-panel-title">Nastavení gyra</div>
+  <div class="ax-cal-row">
+    <span class="ax-cal-lbl">Vzdálenost od objektu</span>
+    <span class="ax-cal-val" id="settings-dist" style="color:rgba(238,239,235,.5);font-weight:400">—</span>
+  </div>
   <!-- JSON status + mode -->
   <div class="ax-cal-row">
     <span class="ax-cal-lbl">Kalibrace JSON</span>
@@ -379,29 +392,34 @@ html, body {
 </div>
 
 <div id="bottombar">
+  <!-- Left: reset -->
   <div class="cam-side-btn" id="reset-btn" title="Reset / dlouze: mřížka">
     <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
   </div>
-  <div id="shutter"><div id="shutter-inner"></div></div>
-  <div style="display:flex;gap:6px;align-items:center">
-  <div class="cam-side-btn" id="ax-gear-btn" onclick="toggleAxPanel()" title="Nastavení gyra">
-    <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <!-- Center: shutter (absolutely centered) -->
+  <div id="shutter" style="position:absolute;left:50%;transform:translateX(-50%)">
+    <div id="shutter-inner"></div>
   </div>
-  <div class="cam-side-btn" id="opacity-btn" title="Průhlednost">
-    <svg viewBox="0 0 24 24" stroke-width="1.6">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor" stroke="none" opacity=".7"/>
-    </svg>
-    <div id="opacity-panel">
-      <div class="op-track-wrap">
-        <span class="op-lbl">ref</span>
-        <input type="range" id="opacity-slider" min="0" max="100" value="50" step="1"/>
-        <span class="op-lbl">live</span>
+  <!-- Right: gear + opacity -->
+  <div style="display:flex;gap:6px;align-items:center;margin-left:auto">
+    <div class="cam-side-btn" id="ax-gear-btn" onclick="toggleAxPanel()" title="Nastavení gyra">
+      <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+    <div class="cam-side-btn" id="opacity-btn" title="Průhlednost">
+      <svg viewBox="0 0 24 24" stroke-width="1.6">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor" stroke="none" opacity=".7"/>
+      </svg>
+      <div id="opacity-panel">
+        <div class="op-track-wrap">
+          <span class="op-lbl">ref</span>
+          <input type="range" id="opacity-slider" min="0" max="100" value="50" step="1"/>
+          <span class="op-lbl">live</span>
+        </div>
+        <span id="op-val">50%</span>
       </div>
-      <span id="op-val">50%</span>
     </div>
   </div>
-  </div><!-- /right-btns -->
 </div>
 
 <!-- Gyro calibration warning -->
@@ -842,7 +860,35 @@ function currentDistM() {
 
 function updateDistChip() {
   const d = currentDistM();
-  document.getElementById('live-label').textContent = `${Math.round(d)} m`;
+  const el = document.getElementById('settings-dist');
+  if (el) el.textContent = `${Math.round(d)} m`;
+}
+
+function updateLockChip() {
+  const chip  = document.getElementById('lock-chip');
+  const label = document.getElementById('lock-label');
+  const icon  = document.getElementById('lock-icon');
+  if (!chip) return;
+  if (arLocked) {
+    chip.classList.add('locked');
+    label.textContent = 'Zamčeno';
+    // closed lock icon
+    icon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+  } else {
+    chip.classList.remove('locked');
+    label.textContent = 'Volno';
+    // open lock icon
+    icon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>';
+  }
+}
+
+function onLockChip() {
+  if (arLocked) {
+    unlockAR();
+  } else {
+    // trigger shutter click
+    document.getElementById('shutter').click();
+  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -945,10 +991,10 @@ async function lockAR() {
   gyroLastT   = null;
   arLocked    = true;
 
-  showHint(`Zafixováno · ${Math.round(lockDistM)} m`);
+  showHint('Zafixováno');
   hideHint();
   document.getElementById('shutter').classList.add('locked');
-  document.getElementById('live-label').textContent = `${Math.round(lockDistM)} m 🔒`;
+  updateLockChip();
 }
 
 function unlockAR() {
@@ -957,6 +1003,7 @@ function unlockAR() {
   gyroLastT   = null;
   document.getElementById('shutter').classList.remove('locked');
   showHint('Odemčeno'); hideHint();
+  updateLockChip();
   updateDistChip();
 }
 
