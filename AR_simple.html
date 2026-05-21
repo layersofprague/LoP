@@ -161,6 +161,16 @@ html, body {
   background: var(--gold);
   box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
 }
+/* Unlock state — after evaluation */
+#shutter.unlock #shutter-inner {
+  background: rgba(240,193,78,.35);
+}
+#shutter.unlock #shutter-eval-icon { display: flex; }
+#shutter.unlock #shutter-eval-icon span {
+  content: 'odemknout';
+  font-size: 7px;
+}
+
 /* Evaluate state — pulsing gold ring, scan icon inside */
 #shutter.evaluate {
   box-shadow: 0 0 0 3px rgba(240,193,78,.35);
@@ -610,8 +620,7 @@ html, body {
   <div id="match-pct">—</div>
   <div id="match-label">shoda historické fotky</div>
   <div id="match-detail">—</div>
-  <div id="match-unlock-hint" style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,239,235,.2);margin-top:2px">Spoušť → odemknout</div>
-  <button id="match-close" onclick="closeMatchResult()">Zavřít</button>
+  <button id="match-close" onclick="closeMatchResult()">Zkusit znovu?</button>
 </div>
 
 <script>
@@ -959,10 +968,16 @@ resetBtn.addEventListener('touchend', e => {
   if (resetTimer !== null) {
     clearTimeout(resetTimer);
     resetTimer = null;
-    corners = naturalCorners();
-    draw();
-    showHint('Reset');
-    hideHint();
+    if (shutterState === 'locked' || shutterState === 'evaluated') {
+      // In locked/evaluated state: reset = unlock
+      unlockAR();
+      showHint('Odemčeno'); hideHint();
+    } else {
+      // Normal state: reset corners
+      corners = naturalCorners();
+      draw();
+      showHint('Reset'); hideHint();
+    }
   }
 }, { passive: true });
 
@@ -1168,6 +1183,9 @@ function unlockAR() {
   shutterState = 'free';
   document.getElementById('shutter').classList.remove('locked');
   document.getElementById('shutter').classList.remove('evaluate');
+  document.getElementById('shutter').classList.remove('unlock');
+  const sp2 = document.querySelector('#shutter-eval-icon span');
+  if (sp2) sp2.textContent = 'vyhodnotit';
   showHint('Odemčeno'); hideHint();
   updateLockChip();
   updateDistChip();
@@ -1356,6 +1374,9 @@ function showMatchResult(pct, ncc) {
 function closeMatchResult() {
   document.getElementById('match-result').classList.remove('show');
   document.getElementById('match-backdrop').classList.remove('show');
+  // Update shutter label to "odemknout"
+  const span = document.querySelector('#shutter-eval-icon span');
+  if (span && shutterState === 'evaluated') span.textContent = 'odemknout';
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1377,12 +1398,21 @@ document.getElementById('shutter').addEventListener('click', async () => {
     }
   } else if (shutterState === 'locked') {
     document.getElementById('shutter').classList.remove('evaluate');
+  document.getElementById('shutter').classList.remove('unlock');
+  const sp2 = document.querySelector('#shutter-eval-icon span');
+  if (sp2) sp2.textContent = 'vyhodnotit';
     await runComparison();
     shutterState = 'evaluated';
+    document.getElementById('shutter').classList.add('unlock');
+    const sp = document.querySelector('#shutter-eval-icon span');
+    if (sp) sp.textContent = 'odemknout';
   } else {
     unlockAR();
     shutterState = 'free';
     document.getElementById('shutter').classList.remove('evaluate');
+  document.getElementById('shutter').classList.remove('unlock');
+  const sp2 = document.querySelector('#shutter-eval-icon span');
+  if (sp2) sp2.textContent = 'vyhodnotit';
   }
 });
 
