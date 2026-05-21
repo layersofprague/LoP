@@ -448,8 +448,10 @@ html, body {
   font-size: 15px; color: rgba(238,239,235,.55);
 }
 #match-detail {
-  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-  color: rgba(238,239,235,.25); margin-top: 2px;
+  font-size: 8px; letter-spacing: .06em;
+  color: rgba(238,239,235,.25); margin-top: 4px;
+  max-width: 240px; line-height: 1.5; text-align: center;
+  display: none;
 }
 #match-close {
   margin-top: 8px; padding: 9px 24px;
@@ -621,6 +623,7 @@ html, body {
   <div id="match-label">shoda historické fotky</div>
   <div id="match-detail">—</div>
   <button id="match-close" onclick="closeMatchResult()">Zkusit znovu?</button>
+  <button onclick="exportComparison()" style="margin-top:2px;padding:7px 18px;background:rgba(238,239,235,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;color:rgba(238,239,235,.3);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer">Export PNG</button>
 </div>
 
 <script>
@@ -1346,29 +1349,107 @@ async function runComparison() {
 
   // ── E) NCC ──
   const ncc = normalizedCorrelation(edgesHist, edgesCam, weights);
+  // Store for export
+  window._lastComp = { off, oc, S, SH, edgesHist, edgesCam, weights, maskData, camData, histData };
 
-  // Map NCC 0..1 to % — empirically NCC > 0.3 is good, > 0.5 excellent
-  // Scale: 0→0%, 0.3→50%, 0.5→80%, 0.7→95%, 1.0→100%
+  // Debug stats
+  const activePx = weights.filter(w => w > 0.5).length;
+  const histEdgeMean = edgesHist.reduce((s,v,i) => s + (weights[i] > 0.5 ? v : 0), 0) / (activePx || 1);
+  const camEdgeMean  = edgesCam.reduce((s,v,i)  => s + (weights[i] > 0.5 ? v : 0), 0) / (activePx || 1);
+  const dbg = { activePx, histEdgeMean, camEdgeMean };
+
+  // Map NCC 0..1 to %
+  // Calibration note: raw NCC on mismatched images ~0.0-0.1, good match ~0.2-0.5
+  // Scale: 0→0%, 0.15→30%, 0.3→60%, 0.5→85%, 0.7→100%
   const pct = Math.round(Math.min(100, Math.max(0,
-    ncc < 0.3
-      ? (ncc / 0.3) * 50
-      : 50 + ((ncc - 0.3) / 0.7) * 50
+    ncc < 0.15
+      ? (ncc / 0.15) * 30
+      : ncc < 0.3
+        ? 30 + ((ncc - 0.15) / 0.15) * 30
+        : ncc < 0.5
+          ? 60 + ((ncc - 0.3) / 0.2) * 25
+          : 85 + ((ncc - 0.5) / 0.5) * 15
   )));
 
   scanModal.classList.remove('show');
-  showMatchResult(pct, ncc);
+  showMatchResult(pct, ncc, dbg);
 }
 
-function showMatchResult(pct, ncc) {
+function showMatchResult(pct, ncc, dbg) {
   const el     = document.getElementById('match-pct');
   const label  = document.getElementById('match-label');
   const detail = document.getElementById('match-detail');
   el.textContent = pct + '%';
   el.className = pct >= 70 ? 'great' : pct >= 40 ? 'ok' : 'poor';
   label.textContent = pct >= 70 ? 'výborná shoda' : pct >= 40 ? 'přijatelná shoda' : 'slabá shoda';
-  detail.textContent = '';  // hidden
+  if (dbg) {
+    detail.textContent = `NCC ${ncc.toFixed(3)}  aktivních px: ${dbg.activePx}  hist hrany: ${dbg.histEdgeMean.toFixed(1)}  cam hrany: ${dbg.camEdgeMean.toFixed(1)}`;
+    detail.style.display = 'block';
+  }
   document.getElementById('match-result').classList.add('show');
   document.getElementById('match-backdrop').classList.add('show');
+}
+
+function exportComparison() {
+  const d = window._lastComp;
+  if (!d) return;
+  const { S, SH, histData, camData, maskData, edgesHist, edgesCam, weights } = d;
+
+  // Build a composite PNG: 4 panels side by side
+  // [hist edges] [cam edges] [hist masked] [cam masked]
+  const PW = S * 2, PH = SH * 2;
+  const exp = document.createElement('canvas');
+  exp.width = PW; exp.height = PH;
+  const ec = exp.getContext('2d');
+  ec.fillStyle = '#111'; ec.fillRect(0,0,PW,PH);
+
+  function putPanel(srcData, x, y, w, h, isEdge, edgeArr) {
+    const id = ec.createImageData(w, h);
+    for (let i = 0; i < w*h; i++) {
+      if (isEdge) {
+        // Normalize edge to 0-255
+        const v = Math.min(255, edgeArr[i] * 2);
+        // Tint by mask: active = white, inactive = dark red
+        const active = weights[i] > 0.5;
+        id.data[i*4]   = active ? v : Math.min(255, v * 0.3 + (active ? 0 : 60));
+        id.data[i*4+1] = active ? v : Math.min(255, v * 0.3);
+        id.data[i*4+2] = active ? v : Math.min(255, v * 0.3);
+        id.data[i*4+3] = 255;
+      } else {
+        id.data[i*4]   = srcData[i*4];
+        id.data[i*4+1] = srcData[i*4+1];
+        id.data[i*4+2] = srcData[i*4+2];
+        id.data[i*4+3] = weights[i] > 0.5 ? 255 : 60;
+      }
+    }
+    ec.putImageData(id, x, y);
+  }
+
+  // Top-left: hist image masked
+  putPanel(histData, 0, 0, S, SH, false, null);
+  // Top-right: cam image masked
+  putPanel(camData, S, 0, S, SH, false, null);
+  // Bottom-left: hist edges (white=active, dark red=masked out)
+  putPanel(histData, 0, SH, S, SH, true, edgesHist);
+  // Bottom-right: cam edges
+  putPanel(camData, S, SH, S, SH, true, edgesCam);
+
+  // Labels
+  ec.fillStyle = 'rgba(240,193,78,.9)';
+  ec.font = 'bold 24px monospace';
+  ec.fillText('hist (masked)', 10, 30);
+  ec.fillText('camera (masked)', S+10, 30);
+  ec.fillText('hist edges', 10, SH+30);
+  ec.fillText('camera edges', S+10, SH+30);
+
+  exp.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'comparison_export.png';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
 }
 
 function closeMatchResult() {
