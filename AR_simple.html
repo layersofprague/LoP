@@ -269,35 +269,36 @@ html, body {
 #flash.on { opacity: .8; }
 
 
-/* ── AXIS PANEL ── */
-#ax-toggle {
-  position: fixed; bottom: 130px; left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 16px;
-  background: rgba(13,11,8,.65);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.15); border-radius: 99px;
-  color: rgba(238,239,235,.6); font-size: 9px; letter-spacing: .14em;
-  text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
-  cursor: pointer; z-index: 210; transition: all .2s;
-  pointer-events: all;
-}
-#ax-toggle.active { background: rgba(240,193,78,.1); color: var(--gold); border-color: rgba(240,193,78,.25); }
+/* ── SETTINGS PANEL ── */
 #ax-panel {
-  position: fixed; bottom: 168px; left: 50%; transform: translateX(-50%);
-  background: rgba(13,11,8,.92); backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
-  padding: 10px; z-index: 199; display: none; flex-direction: column; gap: 7px;
-  font-family: 'JetBrains Mono', monospace; min-width: 240px;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(13,11,8,.95); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 16px;
+  padding: 14px; z-index: 300; display: none; flex-direction: column; gap: 8px;
+  font-family: 'JetBrains Mono', monospace; min-width: 260px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
 }
 #ax-panel.show { display: flex; }
-.ax-cal-row { display: flex; justify-content: space-between; align-items: center; }
-.ax-cal-lbl { font-size: 8px; color: rgba(238,239,235,.25); letter-spacing: .08em; }
-.ax-cal-val { font-size: 8px; font-weight: 600; }
+/* backdrop dismiss */
+#ax-backdrop {
+  position: fixed; inset: 0; z-index: 299;
+  display: none;
+}
+#ax-backdrop.show { display: block; }
+
+.ax-panel-title {
+  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(238,239,235,.3); margin-bottom: 2px;
+}
+.ax-cal-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ax-cal-lbl { font-size: 10px; color: rgba(238,239,235,.45); }
+.ax-cal-val { font-size: 9px; font-weight: 600; }
 .ax-cal-val.ok  { color: #4ade80; }
 .ax-cal-val.err { color: #f87171; }
-.ax-divider { height: 1px; background: rgba(255,255,255,.06); }
+.ax-divider { height: 1px; background: rgba(255,255,255,.07); margin: 2px 0; }
 .ax-row { display: flex; align-items: center; gap: 6px; }
 .ax-lbl { font-size: 8px; letter-spacing: .1em; text-transform: uppercase; width: 20px; flex-shrink: 0; }
 .ax-lbl.h { color: #f87171; }
@@ -311,6 +312,18 @@ html, body {
 }
 .ax-cycle.on-h { background: rgba(248,113,113,.15); color: #f87171; border-color: rgba(248,113,113,.4); }
 .ax-cycle.on-v { background: rgba(74,222,128,.12);  color: #4ade80; border-color: rgba(74,222,128,.35); }
+/* manual/json mode toggle */
+.ax-mode-row { display: flex; align-items: center; gap: 6px; }
+.ax-mode-lbl { font-size: 9px; color: rgba(238,239,235,.4); flex: 1; }
+.ax-mode-btn {
+  padding: 5px 10px; border-radius: 99px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; border: 1px solid rgba(255,255,255,.08);
+  background: rgba(238,239,235,.06); color: rgba(238,239,235,.35);
+  transition: all .12s;
+}
+.ax-mode-btn.active-json { background: rgba(74,222,128,.12); color: #4ade80; border-color: rgba(74,222,128,.3); }
+.ax-mode-btn.active-man  { background: rgba(240,193,78,.1);  color: var(--gold); border-color: rgba(240,193,78,.25); }
 </style>
 </head>
 <body>
@@ -336,16 +349,25 @@ html, body {
 </div>
 
 <div id="touch-hint">Táhni pro posun</div>
-<!-- Axis panel toggle -->
-<div id="ax-toggle" onclick="toggleAxPanel()">osy gyra</div>
 
-<!-- Axis panel -->
+<!-- Settings backdrop -->
+<div id="ax-backdrop" onclick="toggleAxPanel()"></div>
+
+<!-- Settings panel — centered -->
 <div id="ax-panel">
+  <div class="ax-panel-title">Nastavení gyra</div>
+  <!-- JSON status + mode -->
   <div class="ax-cal-row">
     <span class="ax-cal-lbl">Kalibrace JSON</span>
     <span class="ax-cal-val" id="ax-cal-status">—</span>
   </div>
+  <div class="ax-mode-row">
+    <span class="ax-mode-lbl">Režim</span>
+    <button class="ax-mode-btn" id="mode-json-btn" onclick="setMode('json')">JSON</button>
+    <button class="ax-mode-btn" id="mode-man-btn"  onclick="setMode('manual')">Manuální</button>
+  </div>
   <div class="ax-divider"></div>
+  <!-- Axis cycles (shown in manual mode, visible but dimmed in json mode) -->
   <div class="ax-row">
     <span class="ax-lbl h">→ H</span>
     <button class="ax-cycle" id="hax-cycle" onclick="cycleAxis('h')">vyp</button>
@@ -361,6 +383,10 @@ html, body {
     <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
   </div>
   <div id="shutter"><div id="shutter-inner"></div></div>
+  <div style="display:flex;gap:6px;align-items:center">
+  <div class="cam-side-btn" id="ax-gear-btn" onclick="toggleAxPanel()" title="Nastavení gyra">
+    <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </div>
   <div class="cam-side-btn" id="opacity-btn" title="Průhlednost">
     <svg viewBox="0 0 24 24" stroke-width="1.6">
       <circle cx="12" cy="12" r="9"/>
@@ -375,6 +401,7 @@ html, body {
       <span id="op-val">50%</span>
     </div>
   </div>
+  </div><!-- /right-btns -->
 </div>
 
 <!-- Gyro calibration warning -->
@@ -1011,9 +1038,7 @@ async function startCamera() {
   }
 }
 // ─────────────────────────────────────────────────────────
-// AXIS PANEL
-// Každá osa (H, V) cykluje: vyp → rα+ → rα− → rβ+ → rβ− → rγ+ → rγ− → vyp
-// Aktivní stav se okamžitě aplikuje na kompenzaci.
+// SETTINGS PANEL — gyro axes + mode
 // ─────────────────────────────────────────────────────────
 const STATES = [
   { label: 'vyp',  axis: null,    sign:  0 },
@@ -1025,18 +1050,31 @@ const STATES = [
   { label: 'rγ −', axis: 'gamma', sign: -1 },
 ];
 
-let hIdx = 0;
-let vIdx = 0;
+let hIdx  = 0;
+let vIdx  = 0;
 let axOpen = false;
+let axMode = 'json';  // 'json' | 'manual'
 
 function toggleAxPanel() {
   axOpen = !axOpen;
   document.getElementById('ax-panel').classList.toggle('show', axOpen);
-  document.getElementById('ax-toggle').classList.toggle('active', axOpen);
+  document.getElementById('ax-backdrop').classList.toggle('show', axOpen);
+  document.getElementById('ax-gear-btn').classList.toggle('active', axOpen);
+  if (axOpen) syncAxPanel();
+}
+
+function setMode(mode) {
+  axMode = mode;
+  if (mode === 'json' && cal) applyCalToPanel();
   syncAxPanel();
+  // Reset integration on mode change
+  gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT  = null;
+  if (lockCorners) { corners = lockCorners.map(c => ({...c})); draw(); }
 }
 
 function cycleAxis(hv) {
+  axMode = 'manual';  // switching axis = entering manual mode
   if (hv === 'h') hIdx = (hIdx + 1) % STATES.length;
   else             vIdx = (vIdx + 1) % STATES.length;
   syncAxPanel();
@@ -1046,12 +1084,30 @@ function cycleAxis(hv) {
 }
 
 function syncAxPanel() {
+  // Cal status
   const cs = document.getElementById('ax-cal-status');
   if (cs) { cs.textContent = cal ? 'OK ✓' : 'Chybí'; cs.className = 'ax-cal-val ' + (cal ? 'ok' : 'err'); }
+
+  // Mode buttons
+  const mj = document.getElementById('mode-json-btn');
+  const mm = document.getElementById('mode-man-btn');
+  if (mj) mj.className = 'ax-mode-btn' + (axMode === 'json'   ? ' active-json' : '');
+  if (mm) mm.className = 'ax-mode-btn' + (axMode === 'manual' ? ' active-man'  : '');
+
+  // Axis buttons — dimmed in json mode, active in manual
+  const alpha = axMode === 'manual' ? 1 : 0.4;
   const hb = document.getElementById('hax-cycle');
-  if (hb) { hb.textContent = STATES[hIdx].label; hb.className = 'ax-cycle' + (hIdx > 0 ? ' on-h' : ''); }
   const vb = document.getElementById('vax-cycle');
-  if (vb) { vb.textContent = STATES[vIdx].label; vb.className = 'ax-cycle' + (vIdx > 0 ? ' on-v' : ''); }
+  if (hb) {
+    hb.textContent = STATES[hIdx].label;
+    hb.className = 'ax-cycle' + (hIdx > 0 ? ' on-h' : '');
+    hb.style.opacity = axMode === 'manual' ? '1' : '0.4';
+  }
+  if (vb) {
+    vb.textContent = STATES[vIdx].label;
+    vb.className = 'ax-cycle' + (vIdx > 0 ? ' on-v' : '');
+    vb.style.opacity = axMode === 'manual' ? '1' : '0.4';
+  }
 }
 
 function applyCalToPanel() {
@@ -1061,15 +1117,19 @@ function applyCalToPanel() {
   const vi = STATES.findIndex(s => s.axis === cl.pitchAxis  && s.sign === cl.pitchSign);
   hIdx = hi > 0 ? hi : 0;
   vIdx = vi > 0 ? vi : 0;
+  axMode = 'json';
   if (axOpen) syncAxPanel();
 }
 
 function panelCal() {
+  if (axMode === 'json' && cal) {
+    // Use cal directly, not panel indices
+    const cl = currentCal();
+    return { hAxis: cl.azimutAxis, hSign: cl.azimutSign, vAxis: cl.pitchAxis, vSign: cl.pitchSign };
+  }
   return {
-    hAxis: STATES[hIdx].axis,
-    hSign: STATES[hIdx].sign,
-    vAxis: STATES[vIdx].axis,
-    vSign: STATES[vIdx].sign,
+    hAxis: STATES[hIdx].axis, hSign: STATES[hIdx].sign,
+    vAxis: STATES[vIdx].axis, vSign: STATES[vIdx].sign,
   };
 }
 
