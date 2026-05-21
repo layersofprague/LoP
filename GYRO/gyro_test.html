@@ -67,6 +67,63 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);font-fa
 .exp-btn:active{opacity:.8}
 .exp-btn-dl{background:var(--paper);color:var(--ink)}
 .exp-btn-re{background:rgba(238,239,235,.08);color:rgba(238,239,235,.4);border:1px solid rgba(255,255,255,.08)}
+
+@media (orientation: landscape) {
+  #app {
+    flex-direction: row; gap: 16px;
+    padding-top: max(env(safe-area-inset-top,0px),10px);
+    padding-bottom: max(env(safe-area-inset-bottom,0px),10px);
+  }
+  /* Progress bar becomes vertical strip on the left */
+  #progress-bar-wrap {
+    flex-shrink: 0; width: 14px; margin-bottom: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  #progress-top { display: none; }
+  #progress-track {
+    flex: 1; width: 3px; height: auto;
+    writing-mode: vertical-lr; /* trick: rotate the bar */
+  }
+  /* Actually easier: just hide progress and show fraction in title */
+  #progress-bar-wrap { display: none; }
+
+  /* Main card fills width */
+  #step-card {
+    flex-direction: row; flex-wrap: nowrap;
+    padding: 12px 14px; gap: 12px; overflow: visible;
+  }
+  /* Left col: title + desc + rec + result + button */
+  #step-card { position: relative; }
+  #step-orient { display: none; }
+  #step-title { font-size: 14px; margin-bottom: 6px; flex-shrink: 0; }
+  #step-desc { font-size: 10px; margin-bottom: 8px; flex-shrink: 0; max-height: 60px; overflow: hidden; }
+  #step-illus { flex: 0 0 auto; width: 110px; align-self: center; margin-bottom: 0; }
+  #step-illus svg { max-height: 80px; }
+  #rec-wrap { margin-bottom: 6px; height: 30px; }
+  #result-badge { margin-bottom: 6px; padding: 6px 8px; }
+  #btn-primary { padding: 11px; }
+
+  /* Two-column layout inside card */
+  #step-card {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+      "orient illus"
+      "title  illus"
+      "desc   illus"
+      "rec    illus"
+      "result illus"
+      "btn    illus";
+  }
+  #step-orient { grid-area: orient; }
+  #step-title  { grid-area: title; }
+  #step-desc   { grid-area: desc; }
+  #step-illus  { grid-area: illus; align-self: center; }
+  #rec-wrap    { grid-area: rec; }
+  #result-badge{ grid-area: result; }
+  #btn-primary { grid-area: btn; }
+}
 </style>
 </head>
 <body>
