@@ -236,7 +236,7 @@ html, body {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 18px;
-  z-index: 200;
+  z-index: 250;
   backdrop-filter: blur(4px);
 }
 #cam-start .c-title {
@@ -358,24 +358,7 @@ html, body {
 
   <div class="ax-divider"></div>
   <!-- H axis row -->
-  <div class="ax-row">
-    <span class="ax-lbl h">→ H</span>
-    <button class="ax-btn" id="hax-a" onclick="setAxis('h','alpha')">rα</button>
-    <button class="ax-btn" id="hax-b" onclick="setAxis('h','beta')">rβ</button>
-    <button class="ax-btn" id="hax-g" onclick="setAxis('h','gamma')">rγ</button>
-    <button class="ax-sign" id="hax-sign" onclick="flipSign('h')">+</button>
-    <button class="ax-io"  id="hax-io"   onclick="toggleIO('h')">I</button>
   </div>
-  <!-- V axis row -->
-  <div class="ax-row">
-    <span class="ax-lbl v">↑ V</span>
-    <button class="ax-btn" id="vax-a" onclick="setAxis('v','alpha')">rα</button>
-    <button class="ax-btn" id="vax-b" onclick="setAxis('v','beta')">rβ</button>
-    <button class="ax-btn" id="vax-g" onclick="setAxis('v','gamma')">rγ</button>
-    <button class="ax-sign" id="vax-sign" onclick="flipSign('v')">+</button>
-    <button class="ax-io"  id="vax-io"   onclick="toggleIO('v')">I</button>
-  </div>
-</div>
 
 <div id="bottombar">
   <div class="cam-side-btn" id="reset-btn" title="Reset / dlouze: mřížka">
