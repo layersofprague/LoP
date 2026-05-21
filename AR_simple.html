@@ -268,57 +268,48 @@ html, body {
 }
 #flash.on { opacity: .8; }
 
-/* ── DEBUG PANEL ── */
-#dbg-toggle {
-  position: fixed; top: 50%; right: 0;
-  transform: translateY(-50%);
-  width: 22px; height: 48px;
-  background: rgba(13,11,8,.45);
-  border: 1px solid rgba(255,255,255,.07);
-  border-right: none;
-  border-radius: 6px 0 0 6px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; z-index: 200;
-  color: rgba(238,239,235,.3);
-  font-size: 9px; writing-mode: vertical-lr;
-  letter-spacing: .12em; text-transform: uppercase;
-  font-family: 'JetBrains Mono', monospace;
-  transition: background .2s, color .2s;
+
+/* ── AXIS PANEL ── */
+#ax-toggle {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  background: rgba(13,11,8,.5);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 99px;
+  color: rgba(238,239,235,.35); font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; z-index: 200; transition: all .2s;
 }
-#dbg-toggle.active { background: rgba(240,193,78,.12); color: var(--gold); border-color: rgba(240,193,78,.2); }
-#dbg-panel {
-  position: fixed; top: 50%; right: 22px;
-  transform: translateY(-50%);
-  background: rgba(13,11,8,.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 10px 0 0 10px;
-  padding: 10px;
-  z-index: 199;
-  display: none; flex-direction: column; gap: 7px;
-  min-width: 160px; max-width: 200px;
+#ax-toggle.active { background: rgba(240,193,78,.1); color: var(--gold); border-color: rgba(240,193,78,.25); }
+#ax-panel {
+  position: fixed; bottom: 116px; left: 50%; transform: translateX(-50%);
+  background: rgba(13,11,8,.92); backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
+  padding: 10px; z-index: 199; display: none; flex-direction: column; gap: 7px;
+  font-family: 'JetBrains Mono', monospace; min-width: 240px;
 }
-#dbg-panel.show { display: flex; }
-.dbg-section { display: flex; flex-direction: column; gap: 3px; }
-.dbg-title { font-size: 7px; letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(238,239,235,.25); margin-bottom: 1px;
-  border-bottom: 1px solid rgba(255,255,255,.05); padding-bottom: 3px; }
-.dbg-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-.dbg-key { font-size: 9px; color: rgba(238,239,235,.35); flex-shrink: 0; }
-.dbg-val { font-size: 9px; color: var(--gold); font-weight: 600; text-align: right; }
-.dbg-val.ok  { color: #4ade80; }
-.dbg-val.err { color: #f87171; }
-.dbg-val.dim { color: rgba(238,239,235,.3); font-weight: 400; }
-.dbg-toggle-row { display: flex; justify-content: space-between; align-items: center;
-  padding: 4px 0; border-top: 1px solid rgba(255,255,255,.05); margin-top: 2px; }
-.dbg-toggle-lbl { font-size: 9px; color: rgba(238,239,235,.4); }
-#ar-comp-btn { padding: 3px 9px; border-radius: 99px; border: none; cursor: pointer;
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .1em;
-  text-transform: uppercase; background: rgba(74,222,128,.15); color: #4ade80;
-  border: 1px solid rgba(74,222,128,.3); transition: background .15s; }
-#ar-comp-btn.off { background: rgba(238,239,235,.06); color: rgba(238,239,235,.3);
-  border-color: rgba(255,255,255,.08); }
+#ax-panel.show { display: flex; }
+.ax-cal-row { display: flex; justify-content: space-between; align-items: center; }
+.ax-cal-lbl { font-size: 8px; color: rgba(238,239,235,.25); letter-spacing: .08em; }
+.ax-cal-val { font-size: 8px; font-weight: 600; }
+.ax-cal-val.ok  { color: #4ade80; }
+.ax-cal-val.err { color: #f87171; }
+.ax-divider { height: 1px; background: rgba(255,255,255,.06); }
+.ax-row { display: flex; align-items: center; gap: 6px; }
+.ax-lbl { font-size: 8px; letter-spacing: .1em; text-transform: uppercase; width: 20px; flex-shrink: 0; }
+.ax-lbl.h { color: #f87171; }
+.ax-lbl.v { color: #4ade80; }
+.ax-cycle {
+  flex: 1; padding: 8px 6px; border-radius: 7px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  text-align: center; border: 1px solid rgba(255,255,255,.08);
+  background: rgba(238,239,235,.05); color: rgba(238,239,235,.2);
+  transition: all .12s; letter-spacing: .02em;
+}
+.ax-cycle.on-h { background: rgba(248,113,113,.15); color: #f87171; border-color: rgba(248,113,113,.4); }
+.ax-cycle.on-v { background: rgba(74,222,128,.12);  color: #4ade80; border-color: rgba(74,222,128,.35); }
 </style>
 </head>
 <body>
@@ -344,38 +335,45 @@ html, body {
 </div>
 
 <div id="touch-hint">Táhni pro posun</div>
+<!-- Axis panel toggle -->
+<div id="ax-toggle" onclick="toggleAxPanel()">osy gyra</div>
 
-<!-- Debug toggle tab -->
-<div id="dbg-toggle" onclick="toggleDbg()">dbg</div>
+<!-- Axis panel -->
+<div id="ax-panel">
+  <div class="ax-cal-row">
+    <span class="ax-cal-lbl">Kalibrace JSON</span>
+    <span class="ax-cal-val" id="ax-cal-status">—</span>
+  </div>
+  <div class="ax-divider"></div>
+  <div class="ax-row">
+    <span class="ax-lbl h">→ H</span>
+    <button class="ax-cycle" id="hax-cycle" onclick="cycleAxis('h')">vyp</button>
+  </div>
+  <div class="ax-row">
+    <span class="ax-lbl v">↑ V</span>
+    <button class="ax-cycle" id="vax-cycle" onclick="cycleAxis('v')">vyp</button>
+  </div>
+</div>
 
-<!-- Debug panel -->
-<div id="dbg-panel">
-  <div class="dbg-section">
-    <div class="dbg-title">Kalibrace gyra</div>
-    <div class="dbg-row"><span class="dbg-key">JSON</span><span class="dbg-val" id="dbg-cal-status">—</span></div>
-    <div class="dbg-row"><span class="dbg-key">Orientace</span><span class="dbg-val dim" id="dbg-orient">—</span></div>
+
+  <div class="ax-divider"></div>
+  <!-- H axis row -->
+  <div class="ax-row">
+    <span class="ax-lbl h">→ H</span>
+    <button class="ax-btn" id="hax-a" onclick="setAxis('h','alpha')">rα</button>
+    <button class="ax-btn" id="hax-b" onclick="setAxis('h','beta')">rβ</button>
+    <button class="ax-btn" id="hax-g" onclick="setAxis('h','gamma')">rγ</button>
+    <button class="ax-sign" id="hax-sign" onclick="flipSign('h')">+</button>
+    <button class="ax-io"  id="hax-io"   onclick="toggleIO('h')">I</button>
   </div>
-  <div class="dbg-section">
-    <div class="dbg-title">Osy (aktuální)</div>
-    <div class="dbg-row"><span class="dbg-key">Azimut H</span><span class="dbg-val" id="dbg-h-axis">—</span></div>
-    <div class="dbg-row"><span class="dbg-key">Pitch V</span><span class="dbg-val" id="dbg-v-axis">—</span></div>
-  </div>
-  <div class="dbg-section">
-    <div class="dbg-title">Gyro °/s</div>
-    <div class="dbg-row"><span class="dbg-key">rα</span><span class="dbg-val dim" id="dbg-ra">0.0</span></div>
-    <div class="dbg-row"><span class="dbg-key">rβ</span><span class="dbg-val dim" id="dbg-rb">0.0</span></div>
-    <div class="dbg-row"><span class="dbg-key">rγ</span><span class="dbg-val dim" id="dbg-rg">0.0</span></div>
-  </div>
-  <div class="dbg-section">
-    <div class="dbg-title">Integrace Δ°</div>
-    <div class="dbg-row"><span class="dbg-key">ΔH</span><span class="dbg-val" id="dbg-gx">0.0</span></div>
-    <div class="dbg-row"><span class="dbg-key">ΔV</span><span class="dbg-val" id="dbg-gy">0.0</span></div>
-    <div class="dbg-row"><span class="dbg-key">ΔPx X</span><span class="dbg-val dim" id="dbg-px">0</span></div>
-    <div class="dbg-row"><span class="dbg-key">ΔPx Y</span><span class="dbg-val dim" id="dbg-py">0</span></div>
-  </div>
-  <div class="dbg-toggle-row">
-    <span class="dbg-toggle-lbl">AR kompenzace</span>
-    <button id="ar-comp-btn" onclick="toggleARComp()">I ●</button>
+  <!-- V axis row -->
+  <div class="ax-row">
+    <span class="ax-lbl v">↑ V</span>
+    <button class="ax-btn" id="vax-a" onclick="setAxis('v','alpha')">rα</button>
+    <button class="ax-btn" id="vax-b" onclick="setAxis('v','beta')">rβ</button>
+    <button class="ax-btn" id="vax-g" onclick="setAxis('v','gamma')">rγ</button>
+    <button class="ax-sign" id="vax-sign" onclick="flipSign('v')">+</button>
+    <button class="ax-io"  id="vax-io"   onclick="toggleIO('v')">I</button>
   </div>
 </div>
 
@@ -880,6 +878,7 @@ fetch(GYRO_URL)
       }
     };
     document.getElementById('gyro-warn').style.display = 'none';
+    applyCalToPanel();
   })
   .catch(() => {
     // JSON nedostupný — zobraz varování
@@ -982,8 +981,10 @@ function unlockAR() {
 // AR UPDATE
 // ─────────────────────────────────────────────────────────
 function updateARPosition() {
-  if (!arLocked || !lockCorners || !arCompOn) return;
-  const cl = currentCal();
+  if (!arLocked || !lockCorners) return;
+  const ec = effectiveCal();
+  if (!ec.azimutAxis && !ec.pitchAxis) return; // both vyp
+  const cl = ec;
   const pxPerDeg = computePxPerDeg();
 
   // Otočení doprava = obraz jde doleva → záporný sign pro X
@@ -1067,85 +1068,3 @@ async function startCamera() {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// DEBUG PANEL
-// ─────────────────────────────────────────────────────────
-let dbgOpen   = false;
-let arCompOn  = true;   // AR compensation I/O
-let dbgTimer  = null;
-
-function toggleDbg() {
-  dbgOpen = !dbgOpen;
-  document.getElementById('dbg-panel').classList.toggle('show', dbgOpen);
-  document.getElementById('dbg-toggle').classList.toggle('active', dbgOpen);
-  if (dbgOpen) startDbgUpdate(); else stopDbgUpdate();
-}
-
-function toggleARComp() {
-  arCompOn = !arCompOn;
-  const btn = document.getElementById('ar-comp-btn');
-  btn.textContent = arCompOn ? 'I ●' : 'O ○';
-  btn.classList.toggle('off', !arCompOn);
-  // If turning off, snap back to locked corners
-  if (!arCompOn && lockCorners) { corners = lockCorners.map(c=>({...c})); draw(); }
-}
-
-function startDbgUpdate() {
-  dbgTimer = setInterval(updateDbgPanel, 150);
-}
-function stopDbgUpdate() {
-  clearInterval(dbgTimer); dbgTimer = null;
-}
-
-function updateDbgPanel() {
-  // Cal status
-  const calEl = document.getElementById('dbg-cal-status');
-  if (cal) {
-    calEl.textContent = 'OK'; calEl.className = 'dbg-val ok';
-  } else {
-    calEl.textContent = 'Chybí'; calEl.className = 'dbg-val err';
-  }
-
-  // Orientation
-  const isLs = W > H;
-  document.getElementById('dbg-orient').textContent = isLs ? 'Landscape' : 'Portrét';
-
-  // Current cal axes
-  if (cal) {
-    const cl = currentCal();
-    document.getElementById('dbg-h-axis').textContent =
-      cl.azimutAxis + ' × ' + (cl.azimutSign > 0 ? '+1' : '−1');
-    document.getElementById('dbg-v-axis').textContent =
-      cl.pitchAxis  + ' × ' + (cl.pitchSign  > 0 ? '+1' : '−1');
-  } else {
-    document.getElementById('dbg-h-axis').textContent = '—';
-    document.getElementById('dbg-v-axis').textContent = '—';
-  }
-
-  // Raw gyro rates
-  document.getElementById('dbg-ra').textContent = rawRate.a.toFixed(1);
-  document.getElementById('dbg-rb').textContent = rawRate.b.toFixed(1);
-  document.getElementById('dbg-rg').textContent = rawRate.g.toFixed(1);
-
-  // Integrated angles + pixel shifts
-  document.getElementById('dbg-gx').textContent = gyroAngles.x.toFixed(1) + '°';
-  document.getElementById('dbg-gy').textContent = gyroAngles.y.toFixed(1) + '°';
-
-  if (cal && arLocked) {
-    const cl = currentCal();
-    const ppd = computePxPerDeg();
-    const px = (-cl.azimutSign * gyroAngles.x * ppd).toFixed(0);
-    const py = (-cl.pitchSign  * gyroAngles.y * ppd).toFixed(0);
-    document.getElementById('dbg-px').textContent = px + ' px';
-    document.getElementById('dbg-py').textContent = py + ' px';
-  } else {
-    document.getElementById('dbg-px').textContent = '—';
-    document.getElementById('dbg-py').textContent = '—';
-  }
-}
-
-// Prevent page scroll/zoom
-document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-</script>
-</body>
-</html>
