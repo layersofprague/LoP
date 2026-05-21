@@ -271,19 +271,20 @@ html, body {
 
 /* ── AXIS PANEL ── */
 #ax-toggle {
-  position: fixed; bottom: 90px; left: 50%;
+  position: fixed; bottom: 130px; left: 50%;
   transform: translateX(-50%);
-  padding: 5px 14px;
-  background: rgba(13,11,8,.5);
+  padding: 6px 16px;
+  background: rgba(13,11,8,.65);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.09); border-radius: 99px;
-  color: rgba(238,239,235,.35); font-size: 8px; letter-spacing: .14em;
+  border: 1px solid rgba(255,255,255,.15); border-radius: 99px;
+  color: rgba(238,239,235,.6); font-size: 9px; letter-spacing: .14em;
   text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
-  cursor: pointer; z-index: 200; transition: all .2s;
+  cursor: pointer; z-index: 210; transition: all .2s;
+  pointer-events: all;
 }
 #ax-toggle.active { background: rgba(240,193,78,.1); color: var(--gold); border-color: rgba(240,193,78,.25); }
 #ax-panel {
-  position: fixed; bottom: 116px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: 168px; left: 50%; transform: translateX(-50%);
   background: rgba(13,11,8,.92); backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
@@ -820,46 +821,38 @@ function updateDistChip() {
 // ─────────────────────────────────────────────────────────
 // GYRO KALIBRACE — načtení z JSONu
 // ─────────────────────────────────────────────────────────
-// Kalibrace z gyro_test.html:
-//   portrait_yaw  → alpha, sign +1   (azimut v portrétu)
-//   landscape_yaw → beta,  sign -1   (azimut v landscape)
-//   roll          → alpha, sign +1   (shodné s portrait_yaw → roll ignorujeme)
-//
-// Výsledné mapování os pro updateARPosition:
-//   PORTRAIT:  azimutAxis=alpha, azimutSign=+1, pitchAxis=beta,  pitchSign=+1
-//   LANDSCAPE: azimutAxis=beta,  azimutSign=-1, pitchAxis=alpha, pitchSign=+1
-
 const GYRO_URL = 'https://layersofprague.github.io/LoP/GYRO/gyro_calibration.json';
 
 // Kalibrace — null dokud se nenačte JSON
 let cal = null;
 
+function parseCal(d) {
+  // Supports both old format (portrait_yaw.axis/sign) and
+  // new gyro_test format (same keys, same structure)
+  return {
+    portrait: {
+      azimutAxis: d.portrait_yaw?.axis   ?? null,
+      azimutSign: d.portrait_yaw?.sign   ?? 1,
+      pitchAxis:  d.portrait_pitch?.axis ?? null,
+      pitchSign:  d.portrait_pitch?.sign ?? 1,
+    },
+    landscape: {
+      azimutAxis: d.landscape_yaw?.axis   ?? null,
+      azimutSign: d.landscape_yaw?.sign   ?? 1,
+      pitchAxis:  d.landscape_pitch?.axis ?? null,
+      pitchSign:  d.landscape_pitch?.sign ?? 1,
+    },
+  };
+}
+
 fetch(GYRO_URL)
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(d => {
-    cal = {
-      portrait: {
-        azimutAxis: d.portrait_yaw?.axis   ?? 'alpha',
-        azimutSign: d.portrait_yaw?.sign   ?? 1,
-        pitchAxis:  d.portrait_pitch?.axis ?? 'beta',
-        pitchSign:  d.portrait_pitch?.sign ?? 1,
-      },
-      landscape: {
-        azimutAxis: d.landscape_yaw?.axis   ?? 'beta',
-        azimutSign: d.landscape_yaw?.sign   ?? -1,
-        pitchAxis:  d.landscape_pitch?.axis ?? 'alpha',
-        pitchSign:  d.landscape_pitch?.sign ?? 1,
-      },
-      roll: {
-        axis: d.roll?.axis ?? 'gamma',
-        sign: d.roll?.sign ?? 1,
-      }
-    };
+    cal = parseCal(d);
     document.getElementById('gyro-warn').style.display = 'none';
     applyCalToPanel();
   })
   .catch(() => {
-    // JSON nedostupný — zobraz varování
     document.getElementById('gyro-warn').style.display = 'flex';
   });
 
@@ -987,22 +980,9 @@ function loadCalManual() {
     reader.onload = ev => {
       try {
         const d = JSON.parse(ev.target.result);
-        cal = {
-          portrait: {
-            azimutAxis: d.portrait_yaw?.axis   ?? 'alpha',
-            azimutSign: d.portrait_yaw?.sign   ?? 1,
-            pitchAxis:  d.portrait_pitch?.axis ?? 'beta',
-            pitchSign:  d.portrait_pitch?.sign ?? 1,
-          },
-          landscape: {
-            azimutAxis: d.landscape_yaw?.axis   ?? 'beta',
-            azimutSign: d.landscape_yaw?.sign   ?? -1,
-            pitchAxis:  d.landscape_pitch?.axis ?? 'alpha',
-            pitchSign:  d.landscape_pitch?.sign ?? 1,
-          },
-          roll: { axis: d.roll?.axis ?? 'gamma', sign: d.roll?.sign ?? 1 }
-        };
+        cal = parseCal(d);
         document.getElementById('gyro-warn').style.display = 'none';
+        applyCalToPanel();
         showHint('Kalibrace načtena'); hideHint();
       } catch { showHint('Chyba čtení JSON'); hideHint(); }
     };
