@@ -349,6 +349,63 @@ html, body {
 }
 .ax-mode-btn.active-json { background: rgba(74,222,128,.12); color: #4ade80; border-color: rgba(74,222,128,.3); }
 .ax-mode-btn.active-man  { background: rgba(240,193,78,.1);  color: var(--gold); border-color: rgba(240,193,78,.25); }
+
+/* ── MATCH RESULT OVERLAY ── */
+#match-result {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(13,11,8,.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 20px;
+  padding: 28px 32px;
+  z-index: 310;
+  display: none; flex-direction: column; align-items: center; gap: 10px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,.7);
+  min-width: 200px;
+}
+#match-result.show { display: flex; }
+#match-pct {
+  font-size: 56px; font-weight: 600; letter-spacing: -.03em;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+#match-pct.great { color: #4ade80; }
+#match-pct.ok    { color: var(--gold); }
+#match-pct.poor  { color: #f87171; }
+#match-label {
+  font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+  font-size: 15px; color: rgba(238,239,235,.55);
+}
+#match-detail {
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(238,239,235,.25); margin-top: 2px;
+}
+#match-close {
+  margin-top: 8px; padding: 9px 24px;
+  background: rgba(238,239,235,.08); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 99px; color: rgba(238,239,235,.5);
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer;
+}
+#match-close:active { background: rgba(255,255,255,.12); }
+#match-backdrop {
+  position: fixed; inset: 0; z-index: 309; display: none;
+}
+#match-backdrop.show { display: block; }
+/* Computing indicator */
+#match-computing {
+  position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+  padding: 8px 18px;
+  background: var(--glass);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px; border: 1px solid rgba(255,255,255,.08);
+  color: var(--paper); font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300; font-size: 13px;
+  pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 100;
+}
+#match-computing.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -475,6 +532,16 @@ html, body {
 
 <div id="flash"></div>
 
+<!-- Match result overlay -->
+<div id="match-backdrop" onclick="closeMatchResult()"></div>
+<div id="match-result">
+  <div id="match-pct">—</div>
+  <div id="match-label">shoda historické fotky</div>
+  <div id="match-detail">—</div>
+  <button id="match-close" onclick="closeMatchResult()">Zavřít</button>
+</div>
+<div id="match-computing">Vyhodnocuji…</div>
+
 <script>
 // ─────────────────────────────────────────────────────────
 // Canvas quad-warp renderer using triangle subdivision
@@ -490,6 +557,12 @@ let corners   = []; // [TL, TR, BR, BL] each {x,y}
 const histImg = new Image();
 histImg.crossOrigin = 'anonymous';
 histImg.src = 'https://layersofprague.github.io/LoP/foto/h_001h.jpg';
+
+// Mask image for comparison (same quad-warp, alpha = include in comparison)
+const maskImg = new Image();
+maskImg.crossOrigin = 'anonymous';
+maskImg.src = 'https://layersofprague.github.io/LoP/foto/h_001mask.png';
+let maskLoaded = false;
 
 function naturalCorners() {
   const iw = histImg.naturalWidth  || 4;
@@ -1020,6 +1093,7 @@ function unlockAR() {
   arLocked    = false;
   gyroAngles  = { alpha: 0, beta: 0, gamma: 0 };
   gyroLastT   = null;
+  shutterState = 'free';
   document.getElementById('shutter').classList.remove('locked');
   showHint('Odemčeno'); hideHint();
   updateLockChip();
@@ -1046,18 +1120,186 @@ function updateARPosition() {
 }
 
 // ─────────────────────────────────────────────────────────
-// SHUTTER — tap = lock / tap znovu = unlock
+// COMPARISON ENGINE
+// Flow: 1) render mask quad-warp to offscreen canvas
+//       2) capture live camera frame to offscreen canvas
+//       3) Sobel edge detection on both, weighted by mask alpha
+//       4) normalized cross-correlation → %
 // ─────────────────────────────────────────────────────────
+// COMP_SIZE = natural mask resolution (set after mask loads)
+let COMP_W = 512, COMP_H = 512;
+maskImg.onload = () => {
+  maskLoaded = true;
+  COMP_W = maskImg.naturalWidth;
+  COMP_H = maskImg.naturalHeight;
+};
+
+function sobel(data, w, h) {
+  // Returns edge magnitude array (same w×h, Float32)
+  const out = new Float32Array(w * h);
+  for (let y = 1; y < h-1; y++) {
+    for (let x = 1; x < w-1; x++) {
+      const idx = (y*w + x) * 4;
+      // Sample luminance of 3×3 neighbourhood
+      const lu = (r,c) => {
+        const i = ((y+r)*w+(x+c))*4;
+        return 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+      };
+      const gx = -lu(-1,-1) + lu(-1,1) - 2*lu(0,-1) + 2*lu(0,1) - lu(1,-1) + lu(1,1);
+      const gy = -lu(-1,-1) - 2*lu(-1,0) - lu(-1,1) + lu(1,-1) + 2*lu(1,0) + lu(1,1);
+      out[y*w+x] = Math.sqrt(gx*gx + gy*gy);
+    }
+  }
+  return out;
+}
+
+function normalizedCorrelation(a, b, mask) {
+  // Weighted NCC between edge arrays a and b, weighted by mask alpha
+  // mask: Float32Array 0..1
+  let sumW = 0, meanA = 0, meanB = 0;
+  for (let i = 0; i < a.length; i++) {
+    sumW  += mask[i];
+    meanA += a[i] * mask[i];
+    meanB += b[i] * mask[i];
+  }
+  if (sumW < 1) return 0;
+  meanA /= sumW; meanB /= sumW;
+
+  let num = 0, varA = 0, varB = 0;
+  for (let i = 0; i < a.length; i++) {
+    const da = (a[i] - meanA) * mask[i];
+    const db = (b[i] - meanB) * mask[i];
+    num  += da * db;
+    varA += da * da;
+    varB += db * db;
+  }
+  const denom = Math.sqrt(varA * varB);
+  if (denom < 1e-6) return 0;
+  return Math.max(0, num / denom); // 0..1
+}
+
+async function runComparison() {
+  if (!maskLoaded) { showHint('Maska se načítá…'); hideHint(); return; }
+  const video = document.getElementById('video');
+  if (video.readyState < 2) { showHint('Kamera není připravena'); hideHint(); return; }
+
+  // Show computing indicator
+  const comp = document.getElementById('match-computing');
+  comp.classList.add('show');
+
+  // Small delay so UI updates before heavy computation
+  await new Promise(r => setTimeout(r, 50));
+
+  const S  = COMP_W;   // full natural width of mask
+  const SH = COMP_H;  // full natural height
+  const off = document.createElement('canvas');
+  off.width = S; off.height = SH;
+  const oc = off.getContext('2d', { willReadFrequently: true });
+
+  // ── A) Render mask quad-warp at natural mask resolution ──
+  const iw = maskImg.naturalWidth;
+  const ih = maskImg.naturalHeight;
+  // Scale screen corners to mask resolution
+  const scx = S / W, scy = SH / H;
+  const scaledCorners = corners.map(p => ({x: p.x*scx, y: p.y*scy}));
+  const [stl, str, sbr, sbl] = scaledCorners;
+  const s_tl={x:0,y:0}, s_tr={x:iw,y:0}, s_br={x:iw,y:ih}, s_bl={x:0,y:ih};
+
+  // Draw mask to offscreen using same drawTriangle logic but with oc
+  function drawTriOff(img, src0,src1,src2, dst0,dst1,dst2) {
+    const sx=[src0.x,src1.x,src2.x], sy=[src0.y,src1.y,src2.y];
+    const dx=[dst0.x,dst1.x,dst2.x], dy=[dst0.y,dst1.y,dst2.y];
+    const det=(sx[1]-sx[0])*(sy[2]-sy[0])-(sx[2]-sx[0])*(sy[1]-sy[0]);
+    if (Math.abs(det)<1e-8) return;
+    const a=((dx[1]-dx[0])*(sy[2]-sy[0])-(dx[2]-dx[0])*(sy[1]-sy[0]))/det;
+    const b=((dy[1]-dy[0])*(sy[2]-sy[0])-(dy[2]-dy[0])*(sy[1]-sy[0]))/det;
+    const cc=((dx[2]-dx[0])*(sx[1]-sx[0])-(dx[1]-dx[0])*(sx[2]-sx[0]))/det;
+    const d=((dy[2]-dy[0])*(sx[1]-sx[0])-(dy[1]-dy[0])*(sx[2]-sx[0]))/det;
+    const e=dx[0]-a*sx[0]-cc*sy[0];
+    const f=dy[0]-b*sx[0]-d*sy[0];
+    oc.save();
+    oc.beginPath();
+    oc.moveTo(dst0.x,dst0.y); oc.lineTo(dst1.x,dst1.y); oc.lineTo(dst2.x,dst2.y);
+    oc.closePath(); oc.clip();
+    oc.transform(a,b,cc,d,e,f);
+    oc.drawImage(img,0,0);
+    oc.restore();
+  }
+
+  oc.clearRect(0,0,S,SH);
+  drawTriOff(maskImg, s_tl,s_tr,s_br, stl,str,sbr);
+  drawTriOff(maskImg, s_tl,s_br,s_bl, stl,sbr,sbl);
+  const maskData = oc.getImageData(0,0,S,SH).data;
+
+  // Extract alpha weights (0..1) from mask
+  const weights = new Float32Array(S*SH);
+  for (let i=0; i<S*SH; i++) weights[i] = maskData[i*4+3] / 255;
+
+  // ── B) Capture camera frame at COMP_SIZE ──
+  oc.clearRect(0,0,S,SH);
+  oc.drawImage(video, 0,0, S,SH);
+  const camData = oc.getImageData(0,0,S,SH).data;
+
+  // ── C) Render hist image (grayscale) at COMP_SIZE for edges ──
+  oc.clearRect(0,0,S,SH);
+  drawTriOff(histImg, s_tl,s_tr,s_br, stl,str,sbr);
+  drawTriOff(histImg, s_tl,s_br,s_bl, stl,sbr,sbl);
+  const histData = oc.getImageData(0,0,S,SH).data;
+
+  // ── D) Sobel edges on both ──
+  const edgesHist = sobel(histData, S, SH);
+  const edgesCam  = sobel(camData,  S, SH);
+
+  // ── E) NCC ──
+  const ncc = normalizedCorrelation(edgesHist, edgesCam, weights);
+
+  // Map NCC 0..1 to % — empirically NCC > 0.3 is good, > 0.5 excellent
+  // Scale: 0→0%, 0.3→50%, 0.5→80%, 0.7→95%, 1.0→100%
+  const pct = Math.round(Math.min(100, Math.max(0,
+    ncc < 0.3
+      ? (ncc / 0.3) * 50
+      : 50 + ((ncc - 0.3) / 0.7) * 50
+  )));
+
+  comp.classList.remove('show');
+  showMatchResult(pct, ncc);
+}
+
+function showMatchResult(pct, ncc) {
+  const el    = document.getElementById('match-pct');
+  const label = document.getElementById('match-label');
+  const detail = document.getElementById('match-detail');
+  el.textContent = pct + '%';
+  el.className = pct >= 70 ? 'great' : pct >= 40 ? 'ok' : 'poor';
+  label.textContent = pct >= 70 ? 'výborná shoda' : pct >= 40 ? 'přijatelná shoda' : 'slabá shoda';
+  detail.textContent = `NCC ${ncc.toFixed(3)} · ${COMP_W}×${COMP_H}px`;
+  document.getElementById('match-result').classList.add('show');
+  document.getElementById('match-backdrop').classList.add('show');
+}
+
+function closeMatchResult() {
+  document.getElementById('match-result').classList.remove('show');
+  document.getElementById('match-backdrop').classList.remove('show');
+}
+
+// ─────────────────────────────────────────────────────────
+// SHUTTER — 1. stisk = lock, 2. stisk = vyhodnotit, 3. stisk = unlock
+// ─────────────────────────────────────────────────────────
+let shutterState = 'free'; // 'free' | 'locked' | 'evaluated'
+
 document.getElementById('shutter').addEventListener('click', async () => {
   const fl = document.getElementById('flash');
   fl.classList.add('on');
   setTimeout(() => fl.classList.remove('on'), 110);
 
-  if (!arLocked) {
+  if (shutterState === 'free') {
     const ok = await requestOrientPerm();
-    if (ok) lockAR();
+    if (ok) { lockAR(); shutterState = 'locked'; }
+  } else if (shutterState === 'locked') {
+    await runComparison();
+    shutterState = 'evaluated';
   } else {
-    unlockAR();
+    unlockAR(); shutterState = 'free';
   }
 });
 
