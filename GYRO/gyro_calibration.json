@@ -1,0 +1,61 @@
+{
+  "portrait_yaw": {
+    "axis": "beta",
+    "sign": -1
+  },
+  "portrait_pitch": {
+    "axis": "alpha",
+    "sign": -1
+  },
+  "landscape_yaw": {
+    "axis": "alpha",
+    "sign": -1
+  },
+  "landscape_pitch": {
+    "axis": "beta",
+    "sign": 1
+  },
+  "_raw": {
+    "portrait_h_neg": {
+      "axis": "beta",
+      "peakSign": 1,
+      "variance": 587.2
+    },
+    "portrait_h_pos": {
+      "axis": "beta",
+      "peakSign": -1,
+      "variance": 442.5
+    },
+    "portrait_v_neg": {
+      "axis": "alpha",
+      "peakSign": 1,
+      "variance": 328
+    },
+    "portrait_v_pos": {
+      "axis": "alpha",
+      "peakSign": -1,
+      "variance": 243.9
+    },
+    "landscape_h_neg": {
+      "axis": "alpha",
+      "peakSign": 1,
+      "variance": 384.9
+    },
+    "landscape_h_pos": {
+      "axis": "alpha",
+      "peakSign": -1,
+      "variance": 472.1
+    },
+    "landscape_v_neg": {
+      "axis": "beta",
+      "peakSign": -1,
+      "variance": 567.4
+    },
+    "landscape_v_pos": {
+      "axis": "beta",
+      "peakSign": 1,
+      "variance": 367.9
+    }
+  },
+  "_generated": "2026-05-21T05:40:07.021Z"
+}
