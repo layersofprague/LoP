@@ -161,6 +161,24 @@ html, body {
   background: var(--gold);
   box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
 }
+/* Evaluate state — pulsing gold ring, scan icon inside */
+#shutter.evaluate {
+  box-shadow: 0 0 0 3px rgba(240,193,78,.35);
+  animation: shutter-pulse 1.8s ease-in-out infinite;
+}
+#shutter.evaluate #shutter-inner {
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
+}
+#shutter-eval-icon {
+  position: absolute; inset: 0;
+  display: none; align-items: center; justify-content: center;
+}
+#shutter.evaluate #shutter-eval-icon { display: flex; }
+@keyframes shutter-pulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(240,193,78,.35); }
+  50%      { box-shadow: 0 0 0 7px rgba(240,193,78,.12); }
+}
 #shutter-inner {
   width: 100%; height: 100%;
   border-radius: 50%;
@@ -217,42 +235,46 @@ html, body {
 
 /* Landscape overrides */
 @media (orientation: landscape) {
-  /* Bottombar moves to right edge, vertical */
+  /* Shutter: fixed center of right (short) edge */
+  #shutter {
+    position: fixed !important;
+    right: max(env(safe-area-inset-right,0px),12px) !important;
+    top: 50% !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    z-index: 110;
+  }
+
+  /* Bottombar: along bottom edge, horizontal */
   #bottombar {
-    top: 0; bottom: 0; right: 0; left: auto; width: auto;
-    flex-direction: column;
-    padding: 20px max(env(safe-area-inset-right,0px),16px) 20px 12px;
+    top: auto; bottom: 0; left: 0;
+    right: max(env(safe-area-inset-right,0px),100px); /* leave space for shutter */
+    width: auto; flex-direction: row;
+    padding: 10px 16px max(env(safe-area-inset-bottom,0px),12px);
     background: none;
     align-items: center;
     justify-content: space-between;
   }
-  /* Shutter: absolutely centered vertically on right bar */
-  #shutter {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-  }
-  /* Right button group: vertical */
-  #bottombar > div[style] { flex-direction: column; gap: 6px; }
+  /* Right button group: keep horizontal */
+  #bottombar > div[style] { flex-direction: row; gap: 6px; }
 
-  /* Touch hint: stays centered on screen */
+  /* Touch hint: centered on screen */
   #touch-hint { bottom: auto; left: 50%; top: 50%; transform: translate(-50%, calc(-50% - 60px)); }
 
-  /* Opacity panel: opens leftward from right edge */
+  /* Opacity panel: opens upward from bottom-right */
   #opacity-panel {
-    bottom: 50%; left: auto; right: 50px;
-    transform: translateY(50%) translateX(4px);
-    flex-direction: row;
-    padding: 10px 14px;
+    bottom: 50px; left: auto; right: 0;
+    transform: translateX(0) translateY(4px);
+    flex-direction: column;
+    padding: 14px 10px;
   }
-  #opacity-panel.open { transform: translateY(50%) translateX(0); }
-  .op-track-wrap { flex-direction: row; align-items: center; gap: 8px; }
+  #opacity-panel.open { transform: translateX(0) translateY(0); }
+  .op-track-wrap { flex-direction: column; align-items: center; gap: 6px; }
   #opacity-slider {
-    writing-mode: horizontal-tb; direction: ltr;
-    width: 120px; height: 4px;
+    writing-mode: vertical-lr; direction: rtl;
+    width: 4px; height: 110px;
   }
-  #opacity-slider::-webkit-slider-thumb { margin-left: 0; margin-top: -9px; }
+  #opacity-slider::-webkit-slider-thumb { margin-left: -9px; margin-top: 0; }
 }
 /* Camera start overlay */
 #cam-start {
@@ -475,6 +497,12 @@ html, body {
   <!-- Center: shutter (absolutely centered) -->
   <div id="shutter" style="position:absolute;left:50%;transform:translateX(-50%)">
     <div id="shutter-inner"></div>
+    <div id="shutter-eval-icon">
+      <!-- scan/compare icon: two overlapping squares -->
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="rgba(13,11,8,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+      </svg>
+    </div>
   </div>
   <!-- Right: gear + opacity -->
   <div style="display:flex;gap:6px;align-items:center;margin-left:auto">
@@ -1095,6 +1123,7 @@ function unlockAR() {
   gyroLastT   = null;
   shutterState = 'free';
   document.getElementById('shutter').classList.remove('locked');
+  document.getElementById('shutter').classList.remove('evaluate');
   showHint('Odemčeno'); hideHint();
   updateLockChip();
   updateDistChip();
@@ -1294,12 +1323,19 @@ document.getElementById('shutter').addEventListener('click', async () => {
 
   if (shutterState === 'free') {
     const ok = await requestOrientPerm();
-    if (ok) { lockAR(); shutterState = 'locked'; }
+    if (ok) {
+      lockAR();
+      shutterState = 'locked';
+      document.getElementById('shutter').classList.add('evaluate');
+    }
   } else if (shutterState === 'locked') {
+    document.getElementById('shutter').classList.remove('evaluate');
     await runComparison();
     shutterState = 'evaluated';
   } else {
-    unlockAR(); shutterState = 'free';
+    unlockAR();
+    shutterState = 'free';
+    document.getElementById('shutter').classList.remove('evaluate');
   }
 });
 
