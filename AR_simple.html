@@ -69,7 +69,7 @@ html, body {
   padding-top: max(env(safe-area-inset-top, 0px), 12px);
   padding-left: 16px; padding-right: 16px; padding-bottom: 12px;
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(180deg, rgba(0,0,0,.65) 0%, transparent 100%);
+  background: none;
   pointer-events: none;
   z-index: 100;
 }
@@ -126,7 +126,7 @@ html, body {
   position: fixed; bottom: 0; left: 0; right: 0;
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 18px);
   padding-top: 14px; padding-left: 28px; padding-right: 28px;
-  background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, transparent 100%);
+  background: none;
   display: flex; align-items: center; justify-content: space-between;
   z-index: 100;
 }
@@ -217,20 +217,39 @@ html, body {
 
 /* Landscape overrides */
 @media (orientation: landscape) {
+  /* Bottombar moves to right edge, vertical */
+  #bottombar {
+    top: 0; bottom: 0; right: 0; left: auto; width: auto;
+    flex-direction: column;
+    padding: 20px max(env(safe-area-inset-right,0px),16px) 20px 12px;
+    background: none;
+    align-items: center;
+    justify-content: space-between;
+  }
+  /* Shutter: absolutely centered vertically on right bar */
+  #shutter {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  /* Right button group: vertical */
+  #bottombar > div[style] { flex-direction: column; gap: 6px; }
+
+  /* Touch hint: stays centered on screen */
+  #touch-hint { bottom: auto; left: 50%; top: 50%; transform: translate(-50%, calc(-50% - 60px)); }
+
+  /* Opacity panel: opens leftward from right edge */
   #opacity-panel {
-    /* expand leftward from the button */
     bottom: 50%; left: auto; right: 50px;
     transform: translateY(50%) translateX(4px);
     flex-direction: row;
     padding: 10px 14px;
   }
-  #opacity-panel.open {
-    transform: translateY(50%) translateX(0);
-  }
+  #opacity-panel.open { transform: translateY(50%) translateX(0); }
   .op-track-wrap { flex-direction: row; align-items: center; gap: 8px; }
   #opacity-slider {
-    writing-mode: horizontal-tb;
-    direction: ltr;
+    writing-mode: horizontal-tb; direction: ltr;
     width: 120px; height: 4px;
   }
   #opacity-slider::-webkit-slider-thumb { margin-left: 0; margin-top: -9px; }
