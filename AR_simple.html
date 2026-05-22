@@ -1287,22 +1287,23 @@ async function runComparison() {
   // Let the modal render before heavy computation
   await new Promise(r => setTimeout(r, 80));
 
-  const S  = COMP_W;   // full natural width of mask
-  const SH = COMP_H;  // full natural height
+  // Work in SCREEN coordinates — both hist and camera share the same space
+  // Downscale to max 1024px wide for performance while keeping aspect ratio
+  const MAX_PX = 1024;
+  const scaleF = Math.min(1, MAX_PX / W);
+  const S  = Math.round(W * scaleF);
+  const SH = Math.round(H * scaleF);
+
   const off = document.createElement('canvas');
   off.width = S; off.height = SH;
   const oc = off.getContext('2d', { willReadFrequently: true });
 
-  // ── A) Render mask quad-warp at natural mask resolution ──
-  const iw = maskImg.naturalWidth;
-  const ih = maskImg.naturalHeight;
-  // Scale screen corners to mask resolution
-  const scx = S / W, scy = SH / H;
-  const scaledCorners = corners.map(p => ({x: p.x*scx, y: p.y*scy}));
+  // Scale screen corners to working resolution
+  const scaledCorners = corners.map(p => ({x: p.x*scaleF, y: p.y*scaleF}));
   const [stl, str, sbr, sbl] = scaledCorners;
+  const iw = maskImg.naturalWidth, ih = maskImg.naturalHeight;
   const s_tl={x:0,y:0}, s_tr={x:iw,y:0}, s_br={x:iw,y:ih}, s_bl={x:0,y:ih};
 
-  // Draw mask to offscreen using same drawTriangle logic but with oc
   function drawTriOff(img, src0,src1,src2, dst0,dst1,dst2) {
     const sx=[src0.x,src1.x,src2.x], sy=[src0.y,src1.y,src2.y];
     const dx=[dst0.x,dst1.x,dst2.x], dy=[dst0.y,dst1.y,dst2.y];
@@ -1323,21 +1324,22 @@ async function runComparison() {
     oc.restore();
   }
 
+  // ── A) Render mask quad-warped in screen coordinates ──
   oc.clearRect(0,0,S,SH);
   drawTriOff(maskImg, s_tl,s_tr,s_br, stl,str,sbr);
   drawTriOff(maskImg, s_tl,s_br,s_bl, stl,sbr,sbl);
   const maskData = oc.getImageData(0,0,S,SH).data;
 
-  // Extract alpha weights (0..1) from mask
+  // Extract alpha weights
   const weights = new Float32Array(S*SH);
   for (let i=0; i<S*SH; i++) weights[i] = maskData[i*4+3] / 255;
 
-  // ── B) Capture camera frame at COMP_SIZE ──
+  // ── B) Camera frame — drawImage fills exactly W×H = screen, scale to S×SH ──
   oc.clearRect(0,0,S,SH);
   oc.drawImage(video, 0,0, S,SH);
   const camData = oc.getImageData(0,0,S,SH).data;
 
-  // ── C) Render hist image (grayscale) at COMP_SIZE for edges ──
+  // ── C) Hist image quad-warped in screen coordinates ──
   oc.clearRect(0,0,S,SH);
   drawTriOff(histImg, s_tl,s_tr,s_br, stl,str,sbr);
   drawTriOff(histImg, s_tl,s_br,s_bl, stl,sbr,sbl);
@@ -1350,7 +1352,7 @@ async function runComparison() {
   // ── E) NCC ──
   const ncc = normalizedCorrelation(edgesHist, edgesCam, weights);
   // Store for export
-  window._lastComp = { off, oc, S, SH, edgesHist, edgesCam, weights, maskData, camData, histData };
+  window._lastComp = { S, SH, edgesHist, edgesCam, weights, maskData, camData, histData };
 
   // Debug stats
   const activePx = weights.filter(w => w > 0.5).length;
