@@ -272,6 +272,7 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/piexifjs/1.0.6/piexif.js"></script>
 </head>
 <body>
 
@@ -548,6 +549,7 @@
   btnStart.addEventListener('click', async () => {
     if (!historicImg) return;
     enterFullscreen();
+    startGeolocation();
     await startCamera();
     await gatherDeviceIds();
     viewfinderActive = true;
@@ -670,23 +672,80 @@
       enterFullscreen();
     }
   });
+  // ── GPS ──
+  let lastGps = null; // { lat, lon, alt, accuracy }
+
+  function startGeolocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.watchPosition(
+      pos => {
+        lastGps = {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          alt: pos.coords.altitude,
+          accuracy: pos.coords.accuracy
+        };
+      },
+      err => { lastGps = null; },
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    );
+  }
+
+  // Convert decimal degrees to EXIF rational format [[deg,1],[min,1],[sec*100,100]]
+  function toExifDeg(dd) {
+    const d = Math.floor(Math.abs(dd));
+    const mFloat = (Math.abs(dd) - d) * 60;
+    const m = Math.floor(mFloat);
+    const s = Math.round((mFloat - m) * 6000); // 1/100 sec
+    return [[d, 1], [m, 1], [s, 100]];
+  }
+
+  function addGpsExif(jpegDataUrl) {
+    if (!lastGps || typeof piexif === 'undefined') return jpegDataUrl;
+    try {
+      const gps = {};
+      gps[piexif.GPSIFD.GPSLatitudeRef]  = lastGps.lat >= 0 ? 'N' : 'S';
+      gps[piexif.GPSIFD.GPSLatitude]     = toExifDeg(lastGps.lat);
+      gps[piexif.GPSIFD.GPSLongitudeRef] = lastGps.lon >= 0 ? 'E' : 'W';
+      gps[piexif.GPSIFD.GPSLongitude]    = toExifDeg(lastGps.lon);
+      if (lastGps.alt !== null && lastGps.alt !== undefined) {
+        gps[piexif.GPSIFD.GPSAltitudeRef] = lastGps.alt >= 0 ? 0 : 1;
+        gps[piexif.GPSIFD.GPSAltitude]    = [Math.round(Math.abs(lastGps.alt) * 100), 100];
+      }
+      const exifObj  = { 'GPS': gps };
+      const exifStr  = piexif.dump(exifObj);
+      return piexif.insert(exifStr, jpegDataUrl);
+    } catch(e) { return jpegDataUrl; }
+  }
+
   btnShutter.addEventListener('click', capturePhoto);
 
   function capturePhoto() {
     if (!stream) return;
     flash.classList.add('go');
     requestAnimationFrame(() => setTimeout(() => flash.classList.remove('go'), 80));
+
     const vw = video.videoWidth, vh = video.videoHeight;
     captureCanvas.width = vw; captureCanvas.height = vh;
     captureCanvas.getContext('2d').drawImage(video, 0, 0, vw, vh);
     shotCount++; updateCounter();
     const filename = `${baseFilename}_${shotCount}.jpg`;
-    captureCanvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-      showToast(`Uloženo: ${filename}`);
-    }, 'image/jpeg', 0.92);
+
+    // Get dataURL, inject GPS EXIF, then save
+    const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.92);
+    const withGps = addGpsExif(dataUrl);
+
+    // Convert dataURL back to blob
+    const byteStr = atob(withGps.split(',')[1]);
+    const ab = new ArrayBuffer(byteStr.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteStr.length; i++) ia[i] = byteStr.charCodeAt(i);
+    const blob = new Blob([ab], { type: 'image/jpeg' });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    showToast(lastGps ? `Uloženo + GPS: ${filename}` : `Uloženo (bez GPS): ${filename}`);
   }
 
   function updateCounter() {
