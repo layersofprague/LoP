@@ -249,6 +249,15 @@ html, body {
     transform: translateY(-50%) !important;
     z-index: 110;
   }
+  /* Lock button: below shutter on right edge */
+  #lock-btn {
+    position: fixed !important;
+    right: max(env(safe-area-inset-right,0px),19px) !important;
+    top: calc(50% + 50px) !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: 110;
+  }
 
   /* Bottombar: along bottom edge, horizontal */
   #bottombar {
