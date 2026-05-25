@@ -1334,9 +1334,29 @@ async function runComparison() {
   const weights = new Float32Array(S*SH);
   for (let i=0; i<S*SH; i++) weights[i] = maskData[i*4+3] / 255;
 
-  // ── B) Camera frame — drawImage fills exactly W×H = screen, scale to S×SH ──
+  // ── B) Camera frame — replicate object-fit:cover crop ──
+  // Video may have different aspect ratio than screen.
+  // We must crop video the same way CSS object-fit:cover does.
   oc.clearRect(0,0,S,SH);
-  oc.drawImage(video, 0,0, S,SH);
+  {
+    const vw = video.videoWidth  || S;
+    const vh = video.videoHeight || SH;
+    const videoAR  = vw / vh;
+    const screenAR = S  / SH;
+    let srcX=0, srcY=0, srcW=vw, srcH=vh;
+    if (videoAR > screenAR) {
+      // Video wider than screen → crop left/right
+      srcH = vh;
+      srcW = Math.round(vh * screenAR);
+      srcX = Math.round((vw - srcW) / 2);
+    } else {
+      // Video taller than screen → crop top/bottom
+      srcW = vw;
+      srcH = Math.round(vw / screenAR);
+      srcY = Math.round((vh - srcH) / 2);
+    }
+    oc.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, S, SH);
+  }
   const camData = oc.getImageData(0,0,S,SH).data;
 
   // ── C) Hist image quad-warped in screen coordinates ──
