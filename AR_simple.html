@@ -89,12 +89,7 @@ html, body {
   font-style: italic; font-size: 13px;
   letter-spacing: 0; text-transform: none; font-weight: 300;
 }
-#lock-chip { transition: all .2s; }
-#lock-chip.locked {
-  background: rgba(240,193,78,.12);
-  border-color: rgba(240,193,78,.25);
-  color: var(--gold);
-}
+
 .dot-live {
   width: 6px; height: 6px; border-radius: 50%;
   background: #4ade80;
@@ -477,6 +472,23 @@ html, body {
   pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 100;
 }
 #match-computing.show { opacity: 1; }
+
+/* Lock button next to shutter */
+#lock-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(13,11,8,.25);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.12);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(238,239,235,.6); cursor: pointer;
+  transition: all .2s; flex-shrink: 0;
+}
+#lock-btn:active { transform: scale(.92); background: rgba(255,255,255,.1); }
+#lock-btn.locked {
+  background: rgba(240,193,78,.15);
+  border-color: rgba(240,193,78,.35);
+  color: var(--gold);
+}
 </style>
 </head>
 <body>
@@ -495,13 +507,7 @@ html, body {
 
 <div id="topbar">
   <div class="top-chip title">Layers of Prague</div>
-  <div class="top-chip" id="lock-chip" onclick="onLockChip()" style="pointer-events:all;cursor:pointer">
-    <svg id="lock-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-    </svg>
-    <span id="lock-label">Volno</span>
-  </div>
+
 </div>
 
 <div id="touch-hint">Táhni pro posun</div>
@@ -543,11 +549,19 @@ html, body {
   <div class="cam-side-btn" id="reset-btn" title="Reset / dlouze: mřížka">
     <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
   </div>
-  <!-- Center: shutter (absolutely centered) -->
-  <div id="shutter" style="position:absolute;left:50%;transform:translateX(-50%)">
-    <div id="shutter-inner"></div>
-    <div id="shutter-eval-icon">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(13,11,8,.75)">vyhodnotit</span>
+  <!-- Center: lock + shutter group, absolutely centered -->
+  <div id="shutter-group" style="position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px">
+    <div id="lock-btn" onclick="onLockBtn()" title="Zamknout / odemknout">
+      <svg id="lock-btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path id="lock-shackle" d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <div id="shutter">
+      <div id="shutter-inner"></div>
+      <div id="shutter-eval-icon">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(13,11,8,.75)">vyhodnotit</span>
+      </div>
     </div>
   </div>
   <!-- Right: gear + opacity -->
@@ -970,10 +984,8 @@ resetBtn.addEventListener('touchend', e => {
   if (resetTimer !== null) {
     clearTimeout(resetTimer);
     resetTimer = null;
-    if (shutterState === 'locked' || shutterState === 'evaluated') {
-      // In locked/evaluated state: reset = unlock
+    if (arLocked) {
       unlockAR();
-      showHint('Odemčeno'); hideHint();
     } else {
       // Normal state: reset corners
       corners = naturalCorners();
@@ -1045,30 +1057,18 @@ function updateDistChip() {
   if (el) el.textContent = `${Math.round(d)} m`;
 }
 
-function updateLockChip() {
-  const chip  = document.getElementById('lock-chip');
-  const label = document.getElementById('lock-label');
-  const icon  = document.getElementById('lock-icon');
-  if (!chip) return;
+function updateLockBtn() {
+  const btn = document.getElementById('lock-btn');
+  if (!btn) return;
+  const shackle = document.getElementById('lock-shackle');
   if (arLocked) {
-    chip.classList.add('locked');
-    label.textContent = 'Zamčeno';
-    // closed lock icon
-    icon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+    btn.classList.add('locked');
+    // closed shackle
+    if (shackle) shackle.setAttribute('d', 'M7 11V7a5 5 0 0 1 10 0v4');
   } else {
-    chip.classList.remove('locked');
-    label.textContent = 'Volno';
-    // open lock icon
-    icon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>';
-  }
-}
-
-function onLockChip() {
-  if (arLocked) {
-    unlockAR();
-  } else {
-    // trigger shutter click
-    document.getElementById('shutter').click();
+    btn.classList.remove('locked');
+    // open shackle
+    if (shackle) shackle.setAttribute('d', 'M7 11V7a5 5 0 0 1 9.9-1');
   }
 }
 
@@ -1174,22 +1174,15 @@ async function lockAR() {
 
   showHint('Zafixováno');
   hideHint();
-  document.getElementById('shutter').classList.add('locked');
-  updateLockChip();
+  updateLockBtn();
 }
 
 function unlockAR() {
   arLocked    = false;
   gyroAngles  = { alpha: 0, beta: 0, gamma: 0 };
   gyroLastT   = null;
-  shutterState = 'free';
-  document.getElementById('shutter').classList.remove('locked');
-  document.getElementById('shutter').classList.remove('evaluate');
-  document.getElementById('shutter').classList.remove('unlock');
-  const sp2 = document.querySelector('#shutter-eval-icon span');
-  if (sp2) sp2.textContent = 'vyhodnotit';
   showHint('Odemčeno'); hideHint();
-  updateLockChip();
+  updateLockBtn();
   updateDistChip();
 }
 
@@ -1269,13 +1262,21 @@ function sobel(data, w, h) {
       raw[y*w+x] = Math.sqrt(gx*gx + gy*gy);
     }
   }
-  // Binarize: keep only top N% of edge pixels by count (not by value)
-  // This ensures both images have roughly equal edge density → NCC works
-  const KEEP_RATIO = 0.08; // keep top 8% of pixels as edges
-  const sorted = Array.from(raw).filter(v => v > 0).sort((a,b) => b-a);
-  const thresh = sorted[Math.floor(sorted.length * KEEP_RATIO)] || 0;
-  const out = new Float32Array(w * h);
-  for (let i = 0; i < raw.length; i++) out[i] = raw[i] > thresh ? 1 : 0;
+  // Return raw magnitudes — caller will binarize per-image using masked pixels only
+  return raw;
+}
+
+// Binarize edge array using only pixels inside mask (weights > 0.5)
+// Keeps top KEEP_RATIO of masked pixels as edges → equal density on both images
+function binarizeMasked(edges, weights, keepRatio) {
+  const masked = [];
+  for (let i = 0; i < edges.length; i++)
+    if (weights[i] > 0.5 && edges[i] > 0) masked.push(edges[i]);
+  masked.sort((a,b) => b-a);
+  const thresh = masked[Math.floor(masked.length * keepRatio)] || 0;
+  const out = new Float32Array(edges.length);
+  for (let i = 0; i < edges.length; i++)
+    out[i] = (weights[i] > 0.5 && edges[i] > thresh) ? 1 : 0;
   return out;
 }
 
@@ -1397,9 +1398,11 @@ async function runComparison() {
   drawTriOff(histImg, s_tl,s_br,s_bl, stl,sbr,sbl);
   const histData = oc.getImageData(0,0,S,SH).data;
 
-  // ── D) Sobel edges on both ──
-  const edgesHist = sobel(histData, S, SH);
-  const edgesCam  = sobel(camData,  S, SH);
+  // ── D) Sobel + binarize using masked pixels only ──
+  const rawHist = sobel(histData, S, SH);
+  const rawCam  = sobel(camData,  S, SH);
+  const edgesHist = binarizeMasked(rawHist, weights, 0.15);
+  const edgesCam  = binarizeMasked(rawCam,  weights, 0.15);
 
   // ── E) NCC ──
   const ncc = normalizedCorrelation(edgesHist, edgesCam, weights);
@@ -1412,17 +1415,19 @@ async function runComparison() {
   const camEdgeMean  = edgesCam.reduce((s,v,i)  => s + (weights[i] > 0.5 ? v : 0), 0) / (activePx || 1);
   const dbg = { activePx, histEdgeMean, camEdgeMean };
 
-  // Map NCC 0..1 to %
-  // Calibration note: raw NCC on mismatched images ~0.0-0.1, good match ~0.2-0.5
-  // Scale: 0→0%, 0.15→30%, 0.3→60%, 0.5→85%, 0.7→100%
+  // Map NCC 0..1 to % — calibrated from real measurements:
+  // Wrong location:    NCC 0.00–0.05 → 0–6%   (confirmed: 0–6% in field)
+  // Poor alignment:    NCC 0.05–0.15 → 6–30%
+  // Good alignment:    NCC 0.15–0.30 → 30–75%  (confirmed: NCC 0.283 → target ~75%)
+  // Excellent:         NCC 0.30+     → 75–100%
   const pct = Math.round(Math.min(100, Math.max(0,
-    ncc < 0.15
-      ? (ncc / 0.15) * 30
-      : ncc < 0.3
-        ? 30 + ((ncc - 0.15) / 0.15) * 30
-        : ncc < 0.5
-          ? 60 + ((ncc - 0.3) / 0.2) * 25
-          : 85 + ((ncc - 0.5) / 0.5) * 15
+    ncc < 0.05
+      ? (ncc / 0.05) * 6
+      : ncc < 0.15
+        ? 6  + ((ncc - 0.05) / 0.10) * 24
+        : ncc < 0.30
+          ? 30 + ((ncc - 0.15) / 0.15) * 45
+          : 75 + ((ncc - 0.30) / 0.35) * 25
   )));
 
   scanModal.classList.remove('show');
@@ -1517,7 +1522,6 @@ function closeMatchResult() {
 // ─────────────────────────────────────────────────────────
 // SHUTTER — 1. stisk = lock, 2. stisk = vyhodnotit, 3. stisk = unlock
 // ─────────────────────────────────────────────────────────
-let shutterState = 'free'; // 'free' | 'locked' | 'evaluated'
 
 document.getElementById('shutter').addEventListener('click', async () => {
   const fl = document.getElementById('flash');
