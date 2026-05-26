@@ -1584,10 +1584,10 @@ async function startCamera() {
     const v = document.getElementById('video');
     v.srcObject = stream;
     v.style.display = 'block';
-    document.getElementById('live-label').textContent = 'Live';
+
   } catch(err) {
     document.getElementById('cam-layer').style.background = '#1a1612';
-    document.getElementById('live-label').textContent = 'Bez kamery';
+
   }
 }
 // ─────────────────────────────────────────────────────────
