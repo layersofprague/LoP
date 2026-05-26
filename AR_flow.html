@@ -703,6 +703,16 @@ maskImg.crossOrigin = 'anonymous';
 maskImg.src = 'https://layersofprague.github.io/LoP/foto/h_001mask.png';
 let maskLoaded = false;
 
+// Tracking mask — defines where in the LIVE frame to pick flow points
+// White = trackable (stable structures), Black = skip (sky, trees, hist photo area)
+// Optional: gracefully falls back to full-frame tracking if missing
+const trackMaskImg = new Image();
+trackMaskImg.crossOrigin = 'anonymous';
+trackMaskImg.src = 'https://layersofprague.github.io/LoP/foto/h_001track.png';
+let trackMaskLoaded = false;
+trackMaskImg.onload  = () => { trackMaskLoaded = true; };
+trackMaskImg.onerror = () => { trackMaskLoaded = false; }; // silently ignore missing
+
 function naturalCorners() {
   const iw = histImg.naturalWidth  || 4;
   const ih = histImg.naturalHeight || 3;
@@ -1253,8 +1263,9 @@ function unlockAR() {
   gyroAngles  = { alpha: 0, beta: 0, gamma: 0 };
   gyroLastT   = null;
   if (flowRafId !== null) { cancelAnimationFrame(flowRafId); flowRafId = null; }
-  flSmooth   = null;
-  flQuality  = 0;
+  flSmooth    = null;
+  flTrackMask = null;
+  flQuality   = 0;
   showHint('Odemčeno'); hideHint();
   updateLockBtn();
   updateDistChip();
@@ -1621,6 +1632,7 @@ let flLockGray  = null;   // uint8 gray při zamknutí — nikdy se nemění
 let flLockPts   = [];     // [{fx,fy,patch}] — fixní od zamknutí
 let flCurPts    = [];     // [{fx,fy}] — predikovaná poloha v aktuálním framu
 let flSmooth    = null;   // EMA-smoothed rohy v screen px
+let flTrackMask = null;   // Uint8Array FL_W*FL_H — tracking maska, null = bez filtru
 let flQuality   = 0;
 let flowRafId   = null;
 let flowMode    = 'flow'; // 'flow' | 'gyro'
@@ -1664,7 +1676,8 @@ function flSobel(g) {
 }
 
 // ── nejlepší bod v každé buňce gridu ────────────────────
-function flPickPts(gray) {
+// trackMask: Uint8Array FL_W*FL_H nebo null (bez filtru)
+function flPickPts(gray, trackMask) {
   const margin=FL_BR+FL_SR+2;
   const cw=Math.floor((FL_W-2*margin)/FL_COLS);
   const ch=Math.floor((FL_H-2*margin)/FL_ROWS);
@@ -1672,10 +1685,15 @@ function flPickPts(gray) {
   for (let r=0;r<FL_ROWS;r++) for (let c=0;c<FL_COLS;c++) {
     const x0=margin+c*cw, y0=margin+r*ch;
     let best=0, bx=x0+(cw>>1), by=y0+(ch>>1);
-    for (let y=y0;y<y0+ch;y++) for (let x=x0;x<x0+cw;x++)
+    for (let y=y0;y<y0+ch;y++) for (let x=x0;x<x0+cw;x++) {
+      // Přeskoč pixely mimo tracking masku
+      if (trackMask && trackMask[y*FL_W+x] < 128) continue;
       if (e[y*FL_W+x]>best){best=e[y*FL_W+x];bx=x;by=y;}
+    }
     if (best>10) pts.push({fx:bx,fy:by});
   }
+  // Fallback: pokud maska vyblokovala příliš mnoho buněk, zkus bez masky
+  if (trackMask && pts.length < 6) return flPickPts(gray, null);
   return pts;
 }
 
@@ -1786,11 +1804,28 @@ function flApplyH(hmat, x, y) {
           y:(hmat[3]*x+hmat[4]*y+hmat[5])/w};
 }
 
+// ── downscale tracking masky na FL_W×FL_H ───────────────
+// Vrátí Uint8Array nebo null (pokud maska není načtena)
+function flBuildTrackMask() {
+  if (!trackMaskLoaded || !trackMaskImg.complete) return null;
+  const tc = document.createElement('canvas');
+  tc.width = FL_W; tc.height = FL_H;
+  const tx = tc.getContext('2d', { willReadFrequently: true });
+  tx.drawImage(trackMaskImg, 0, 0, FL_W, FL_H);
+  const d = tx.getImageData(0, 0, FL_W, FL_H).data;
+  const m = new Uint8Array(FL_W * FL_H);
+  // Maska je čb PNG: bílá = trackovat, černá = přeskočit
+  // Použijeme jas (R kanál stačí pro čb)
+  for (let i = 0; i < m.length; i++) m[i] = d[i*4]; // R
+  return m;
+}
+
 // ── inicializace trackingu při zamknutí ──────────────────
 function initFlowTracking() {
   flInitCanvas();
   const gray=flGrabGray(); if(!gray) return false;
-  const pts=flPickPts(gray); if(pts.length<6) return false;
+  flTrackMask = flBuildTrackMask(); // null pokud h_001track.png chybí
+  const pts=flPickPts(gray, flTrackMask); if(pts.length<6) return false;
   flLockGray = gray;
   flLockPts  = pts.map(p=>({fx:p.fx,fy:p.fy,patch:flPatch(gray,p.fx,p.fy)}));
   flCurPts   = pts.map(p=>({fx:p.fx,fy:p.fy}));
@@ -1882,7 +1917,8 @@ function updateFlowChip(good, total) {
   const show=arLocked && flowMode==='flow';
   chip.classList.toggle('show',show);
   if(!show||!pts) return;
-  pts.textContent=`${good||0}/${total||0} pts`;
+  const maskMark = flTrackMask ? ' ·M' : '';
+  pts.textContent=`${good||0}/${total||0}${maskMark}`;
   if(dot) dot.style.background=flQuality>.6?'#4ade80':flQuality>.3?'var(--gold)':'#f87171';
 }
 
