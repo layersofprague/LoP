@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>AR Simple</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #f0c14e;
+  --gold-dim: rgba(240,193,78,.55);
+  --paper: #eeefeb;
+  --ink: #0d0b08;
+  --glass: rgba(13,11,8,.55);
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'JetBrains Mono', monospace;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+#cam-layer {
+  position: fixed; inset: 0;
+  background: #111;
+}
+#video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+}
+#hist-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: all;
+  touch-action: none;
+}
+#grid {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 33.33% 33.33%;
+  opacity: 0;
+  transition: opacity .4s;
+}
+#grid.visible { opacity: 1; }
+#crosshair {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 48px; height: 48px;
+  z-index: 50;
+}
+#crosshair::before, #crosshair::after {
+  content: ''; position: absolute; background: rgba(255,255,255,.55);
+}
+#crosshair::before { top:50%; left:-16px; right:-16px; height:1px; margin-top:-.5px; }
+#crosshair::after  { left:50%; top:-16px; bottom:-16px; width:1px; margin-left:-.5px; }
+.ch-ring { position:absolute; inset:0; border:1px solid rgba(255,255,255,.4); border-radius:50%; }
+.ch-tl,.ch-tr,.ch-bl,.ch-br { display: none; }
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+  padding-left: 16px; padding-right: 16px; padding-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(180deg, rgba(0,0,0,.65) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 100;
+}
+.top-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 99px;
+  color: var(--paper);
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.top-chip.title {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-size: 13px;
+  letter-spacing: 0; text-transform: none; font-weight: 300;
+}
+.dot-live {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74,222,128,.25);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+#touch-hint {
+  position: fixed;
+  bottom: 112px; left: 50%; transform: translateX(-50%);
+  padding: 8px 16px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  color: var(--paper);
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s;
+  z-index: 100;
+  border: 1px solid rgba(255,255,255,.08);
+}
+#touch-hint.show { opacity: 1; }
+#bottombar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 18px);
+  padding-top: 14px; padding-left: 28px; padding-right: 28px;
+  background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, transparent 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 100;
+}
+.cam-side-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(13,11,8,.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.05);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(238,239,235,.55); cursor: pointer;
+  transition: background .15s, transform .1s;
+  flex-shrink: 0; position: relative;
+}
+.cam-side-btn:active { background: rgba(255,255,255,.1); transform: scale(.92); }
+.cam-side-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Shutter — outer semi-transparent disk + inner white disk */
+#shutter {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: rgba(220,220,216,.22);
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .1s;
+  flex-shrink: 0;
+  padding: 6px;
+}
+#shutter:active { transform: scale(.88); }
+#shutter.locked #shutter-inner {
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
+}
+#shutter-inner {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: #f2f2f0;
+  box-shadow: 0 1px 5px rgba(0,0,0,.2);
+}
+/* Opacity panel — portrait: vertical above btn; landscape: horizontal expanding left */
+#opacity-panel {
+  position: absolute;
+  /* portrait default: centered above the button */
+  bottom: 50px; left: 50%; transform: translateX(-50%) translateY(4px);
+  background: rgba(13,11,8,.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+}
+#opacity-panel.open {
+  opacity: 1; pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+/* vertical slider track */
+.op-track-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.op-lbl { font-size: 8px; letter-spacing: .14em; color: rgba(238,239,235,.45); text-transform: uppercase; }
+#opacity-slider {
+  -webkit-appearance: none; appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 4px; height: 110px;
+  background: rgba(255,255,255,.18);
+  border-radius: 99px; outline: none; cursor: pointer;
+}
+#opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.4);
+  cursor: pointer;
+  margin-left: -9px;
+}
+#opacity-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper); border: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18);
+  cursor: pointer;
+}
+#op-val { font-size: 9px; color: rgba(238,239,235,.4); }
+
+/* Landscape overrides */
+@media (orientation: landscape) {
+  #opacity-panel {
+    /* expand leftward from the button */
+    bottom: 50%; left: auto; right: 50px;
+    transform: translateY(50%) translateX(4px);
+    flex-direction: row;
+    padding: 10px 14px;
+  }
+  #opacity-panel.open {
+    transform: translateY(50%) translateX(0);
+  }
+  .op-track-wrap { flex-direction: row; align-items: center; gap: 8px; }
+  #opacity-slider {
+    writing-mode: horizontal-tb;
+    direction: ltr;
+    width: 120px; height: 4px;
+  }
+  #opacity-slider::-webkit-slider-thumb { margin-left: 0; margin-top: -9px; }
+}
+/* Camera start overlay */
+#cam-start {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.88);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  z-index: 250;
+  backdrop-filter: blur(4px);
+}
+#cam-start .c-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 26px; color: var(--paper);
+  text-align: center; line-height: 1.25;
+}
+#cam-start .c-sub {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(238,239,235,.4); text-align: center;
+  max-width: 220px; line-height: 1.7;
+}
+#cam-start-btn {
+  padding: 14px 34px;
+  background: var(--paper); color: var(--ink);
+  border: none; border-radius: 99px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer; font-weight: 500;
+  transition: transform .1s, opacity .1s;
+}
+#cam-start-btn:active { transform: scale(.95); opacity: .85; }
+#flash {
+  position: fixed; inset: 0;
+  background: #fff; opacity: 0;
+  pointer-events: none; z-index: 300;
+  transition: opacity .05s;
+}
+#flash.on { opacity: .8; }
+
+
+/* ── AXIS PANEL ── */
+#ax-toggle {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  background: rgba(13,11,8,.5);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 99px;
+  color: rgba(238,239,235,.35); font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; z-index: 200; transition: all .2s;
+}
+#ax-toggle.active { background: rgba(240,193,78,.1); color: var(--gold); border-color: rgba(240,193,78,.25); }
+#ax-panel {
+  position: fixed; bottom: 116px; left: 50%; transform: translateX(-50%);
+  background: rgba(13,11,8,.92); backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
+  padding: 10px; z-index: 199; display: none; flex-direction: column; gap: 7px;
+  font-family: 'JetBrains Mono', monospace; min-width: 240px;
+}
+#ax-panel.show { display: flex; }
+.ax-cal-row { display: flex; justify-content: space-between; align-items: center; }
+.ax-cal-lbl { font-size: 8px; color: rgba(238,239,235,.25); letter-spacing: .08em; }
+.ax-cal-val { font-size: 8px; font-weight: 600; }
+.ax-cal-val.ok  { color: #4ade80; }
+.ax-cal-val.err { color: #f87171; }
+.ax-divider { height: 1px; background: rgba(255,255,255,.06); }
+.ax-row { display: flex; align-items: center; gap: 6px; }
+.ax-lbl { font-size: 8px; letter-spacing: .1em; text-transform: uppercase; width: 20px; flex-shrink: 0; }
+.ax-lbl.h { color: #f87171; }
+.ax-lbl.v { color: #4ade80; }
+.ax-cycle {
+  flex: 1; padding: 8px 6px; border-radius: 7px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  text-align: center; border: 1px solid rgba(255,255,255,.08);
+  background: rgba(238,239,235,.05); color: rgba(238,239,235,.2);
+  transition: all .12s; letter-spacing: .02em;
+}
+.ax-cycle.on-h { background: rgba(248,113,113,.15); color: #f87171; border-color: rgba(248,113,113,.4); }
+.ax-cycle.on-v { background: rgba(74,222,128,.12);  color: #4ade80; border-color: rgba(74,222,128,.35); }
+</style>
+</head>
+<body>
+
+<div id="cam-layer">
+  <video id="video" autoplay playsinline muted></video>
+</div>
+
+<canvas id="hist-canvas"></canvas>
+<div id="grid"></div>
+<div id="crosshair">
+  <div class="ch-ring"></div>
+  <div class="ch-tl"></div><div class="ch-tr"></div>
+  <div class="ch-bl"></div><div class="ch-br"></div>
+</div>
+
+<div id="topbar">
+  <div class="top-chip title">Layers of Prague</div>
+  <div class="top-chip">
+    <div class="dot-live"></div>
+    <span id="live-label">Náhled</span>
+  </div>
+</div>
+
+<div id="touch-hint">Táhni pro posun</div>
+<!-- Axis panel toggle -->
+<div id="ax-toggle" onclick="toggleAxPanel()">osy gyra</div>
+
+<!-- Axis panel -->
+<div id="ax-panel">
+  <div class="ax-cal-row">
+    <span class="ax-cal-lbl">Kalibrace JSON</span>
+    <span class="ax-cal-val" id="ax-cal-status">—</span>
+  </div>
+  <div class="ax-divider"></div>
+  <div class="ax-row">
+    <span class="ax-lbl h">→ H</span>
+    <button class="ax-cycle" id="hax-cycle" onclick="cycleAxis('h')">vyp</button>
+  </div>
+  <div class="ax-row">
+    <span class="ax-lbl v">↑ V</span>
+    <button class="ax-cycle" id="vax-cycle" onclick="cycleAxis('v')">vyp</button>
+  </div>
+</div>
+
+<div id="bottombar">
+  <div class="cam-side-btn" id="reset-btn" title="Reset / dlouze: mřížka">
+    <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+  </div>
+  <div id="shutter"><div id="shutter-inner"></div></div>
+  <div class="cam-side-btn" id="opacity-btn" title="Průhlednost">
+    <svg viewBox="0 0 24 24" stroke-width="1.6">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor" stroke="none" opacity=".7"/>
+    </svg>
+    <div id="opacity-panel">
+      <div class="op-track-wrap">
+        <span class="op-lbl">ref</span>
+        <input type="range" id="opacity-slider" min="0" max="100" value="50" step="1"/>
+        <span class="op-lbl">live</span>
+      </div>
+      <span id="op-val">50%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Gyro calibration warning -->
+<div id="gyro-warn" style="display:none;position:fixed;bottom:100px;left:16px;right:16px;
+  background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);border-radius:12px;
+  padding:12px 14px;z-index:150;flex-direction:column;gap:8px">
+  <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#f87171">
+    Chybí kalibrace gyroskopu
+  </div>
+  <div style="font-size:11px;color:rgba(238,239,235,.55);line-height:1.5">
+    AR stabilizace nebude fungovat správně. Proveďte kalibraci nebo načtěte JSON ručně.
+  </div>
+  <div style="display:flex;gap:8px">
+    <button onclick="window.location.href='gyro_test.html'"
+      style="flex:1;padding:9px;background:rgba(248,113,113,.2);color:#f87171;border:1px solid rgba(248,113,113,.3);
+      border-radius:99px;font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:.1em;
+      text-transform:uppercase;cursor:pointer">
+      Spustit kalibraci
+    </button>
+    <button onclick="loadCalManual()"
+      style="flex:1;padding:9px;background:rgba(238,239,235,.06);color:rgba(238,239,235,.5);
+      border:1px solid rgba(238,239,235,.1);border-radius:99px;font-family:JetBrains Mono,monospace;
+      font-size:9px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">
+      Načíst JSON
+    </button>
+  </div>
+</div>
+
+<div id="cam-start">
+  <div class="c-title">Holešovický přístav<br/><span style="font-size:.72em;color:rgba(238,239,235,.4)">~&thinsp;1930</span></div>
+  <div class="c-sub">Zarovnej historický snímek<br/>s živým záběrem kamery</div>
+  <button id="cam-start-btn" onclick="startCamera()">Spustit kameru</button>
+</div>
+
+<div id="flash"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// Canvas quad-warp renderer using triangle subdivision
+// ─────────────────────────────────────────────────────────
+const canvas = document.getElementById('hist-canvas');
+const ctx    = canvas.getContext('2d');
+
+let W = 0, H = 0;
+let imgLoaded = false;
+let opacity   = 0.5;
+let corners   = []; // [TL, TR, BR, BL] each {x,y}
+
+const histImg = new Image();
+histImg.crossOrigin = 'anonymous';
+histImg.src = 'https://layersofprague.github.io/LoP/foto/h_001h.jpg';
+
+function naturalCorners() {
+  const iw = histImg.naturalWidth  || 4;
+  const ih = histImg.naturalHeight || 3;
+  const scale = Math.min(W / iw, H / ih);
+  const fw = iw * scale, fh = ih * scale;
+  const ox = (W - fw) / 2, oy = (H - fh) / 2;
+  return [
+    {x: ox,    y: oy},
+    {x: ox+fw, y: oy},
+    {x: ox+fw, y: oy+fh},
+    {x: ox,    y: oy+fh}
+  ];
+}
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  corners = naturalCorners();
+  draw();
+}
+
+function drawTriangle(image, src0, src1, src2, dst0, dst1, dst2) {
+  const sx = [src0.x, src1.x, src2.x];
+  const sy = [src0.y, src1.y, src2.y];
+  const dx = [dst0.x, dst1.x, dst2.x];
+  const dy = [dst0.y, dst1.y, dst2.y];
+  const det = (sx[1]-sx[0])*(sy[2]-sy[0]) - (sx[2]-sx[0])*(sy[1]-sy[0]);
+  if (Math.abs(det) < 1e-8) return;
+  const a = ((dx[1]-dx[0])*(sy[2]-sy[0]) - (dx[2]-dx[0])*(sy[1]-sy[0])) / det;
+  const b = ((dy[1]-dy[0])*(sy[2]-sy[0]) - (dy[2]-dy[0])*(sy[1]-sy[0])) / det;
+  const c = ((dx[2]-dx[0])*(sx[1]-sx[0]) - (dx[1]-dx[0])*(sx[2]-sx[0])) / det;
+  const d = ((dy[2]-dy[0])*(sx[1]-sx[0]) - (dy[1]-dy[0])*(sx[2]-sx[0])) / det;
+  const e = dx[0] - a*sx[0] - c*sy[0];
+  const f = dy[0] - b*sx[0] - d*sy[0];
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(dst0.x, dst0.y);
+  ctx.lineTo(dst1.x, dst1.y);
+  ctx.lineTo(dst2.x, dst2.y);
+  ctx.closePath();
+  ctx.clip();
+  ctx.transform(a, b, c, d, e, f);
+  ctx.drawImage(image, 0, 0);
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  if (!imgLoaded) return;
+  const iw = histImg.naturalWidth;
+  const ih = histImg.naturalHeight;
+  const [tl, tr, br, bl] = corners;
+  // Source quad corners (full image)
+  const s_tl = {x:0,  y:0};
+  const s_tr = {x:iw, y:0};
+  const s_br = {x:iw, y:ih};
+  const s_bl = {x:0,  y:ih};
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  // Two triangles covering the quad
+  drawTriangle(histImg, s_tl, s_tr, s_br, tl, tr, br);
+  drawTriangle(histImg, s_tl, s_br, s_bl, tl, br, bl);
+  ctx.restore();
+}
+
+histImg.onload = () => { imgLoaded = true; resize(); };
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+resize();
+
+// ─────────────────────────────────────────────────────────
+// TOUCH HANDLING
+// ─────────────────────────────────────────────────────────
+let activeTouches = {};   // id -> {x, y}
+let gesture = null;
+let hintTimer = null;
+
+function touchPos(t) { return {x: t.clientX, y: t.clientY}; }
+function dist2(a, b) { const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+function mid2(a, b)  { return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+
+function showHint(txt) {
+  const el = document.getElementById('touch-hint');
+  el.textContent = txt;
+  el.classList.add('show');
+  clearTimeout(hintTimer);
+}
+function hideHint() {
+  hintTimer = setTimeout(() => {
+    document.getElementById('touch-hint').classList.remove('show');
+  }, 900);
+}
+
+// Edge proximity zone: 20 % of screen dimension
+const EDGE_ZONE = 0.20;
+
+// Returns which edge a point is near (within EDGE_ZONE), or null
+function nearEdge(p) {
+  if (p.y < H * EDGE_ZONE)        return 'top';
+  if (p.y > H * (1 - EDGE_ZONE))  return 'bottom';
+  if (p.x < W * EDGE_ZONE)        return 'left';
+  if (p.x > W * (1 - EDGE_ZONE))  return 'right';
+  return null;
+}
+
+// Classify two-finger gesture:
+//   Perspective only when orientation matches AND at least one
+//   finger is within 20 % of the corresponding edge.
+//   Everything else → scale.
+function classifyTwoFinger(t1, t2) {
+  const dx = Math.abs(t1.x - t2.x);
+  const dy = Math.abs(t1.y - t2.y);
+  const ratio = dy > 0 ? dx / dy : 99;
+
+  const candidates = [nearEdge(t1), nearEdge(t2)].filter(Boolean);
+
+  if (ratio > 2.2) {
+    // Strongly horizontal — valid only near top or bottom
+    const hEdge = candidates.find(e => e === 'top' || e === 'bottom');
+    if (hEdge) {
+      return hEdge === 'top'
+        ? { type: 'persp', edge: 'top',    idx: [0,1], axis: 'h' }
+        : { type: 'persp', edge: 'bottom', idx: [3,2], axis: 'h' };
+    }
+  } else if (ratio < 0.45) {
+    // Strongly vertical — valid only near left or right
+    const vEdge = candidates.find(e => e === 'left' || e === 'right');
+    if (vEdge) {
+      return vEdge === 'left'
+        ? { type: 'persp', edge: 'left',  idx: [0,3], axis: 'v' }
+        : { type: 'persp', edge: 'right', idx: [1,2], axis: 'v' };
+    }
+  }
+
+  // Default → scale around centroid
+  return { type: 'scale' };
+}
+
+function cornersCentroid(cs) {
+  const cx = cs.reduce((s,c) => s+c.x, 0) / cs.length;
+  const cy = cs.reduce((s,c) => s+c.y, 0) / cs.length;
+  return {x: cx, y: cy};
+}
+
+const edgeLabels = {
+  top:    'Perspektiva — horní okraj',
+  bottom: 'Perspektiva — dolní okraj',
+  left:   'Perspektiva — levý okraj',
+  right:  'Perspektiva — pravý okraj',
+};
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => {
+    activeTouches[t.identifier] = touchPos(t);
+  });
+
+  const ids = Object.keys(activeTouches);
+
+  if (ids.length === 1) {
+    gesture = { mode: 'translate', prev: activeTouches[ids[0]] };
+    showHint('Posun');
+
+  } else if (ids.length >= 2) {
+    const t1 = activeTouches[ids[0]];
+    const t2 = activeTouches[ids[1]];
+    const cl = classifyTwoFinger(t1, t2);
+    const savedCorners = corners.map(c => ({...c}));
+    const startDist = dist2(t1, t2);
+    const startMid  = mid2(t1, t2);
+
+    if (cl.type === 'scale') {
+      const ctr = cornersCentroid(savedCorners);
+      gesture = {
+        mode: 'scale',
+        startDist, startMid, savedCorners, centroid: ctr
+      };
+      showHint('Měřítko');
+    } else {
+      gesture = {
+        mode: 'persp',
+        edge: cl.edge, idx: cl.idx, axis: cl.axis,
+        startDist, startMid, savedCorners
+      };
+      showHint(edgeLabels[cl.edge]);
+    }
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const newPos = {};
+  Array.from(e.touches).forEach(t => { newPos[t.identifier] = touchPos(t); });
+  const ids = Object.keys(newPos);
+
+  if (!gesture) { activeTouches = newPos; return; }
+
+  if (gesture.mode === 'translate' && ids.length === 1) {
+    const cur = newPos[ids[0]];
+    const prev = gesture.prev;
+    if (prev) {
+      const dx = cur.x - prev.x;
+      const dy = cur.y - prev.y;
+      corners = corners.map(c => ({x: c.x + dx, y: c.y + dy}));
+    }
+    gesture.prev = cur;
+
+  } else if (gesture.mode === 'scale' && ids.length >= 2) {
+    const t1 = newPos[ids[0]];
+    const t2 = newPos[ids[1]];
+    const curDist = dist2(t1, t2);
+    const curMid  = mid2(t1, t2);
+    const scaleF  = curDist / gesture.startDist;
+    const mdx = curMid.x - gesture.startMid.x;
+    const mdy = curMid.y - gesture.startMid.y;
+    const sc  = gesture.savedCorners;
+    const ctr = gesture.centroid;
+
+    // Scale each corner relative to the original centroid, then translate
+    corners = sc.map(c => ({
+      x: ctr.x + (c.x - ctr.x) * scaleF + mdx,
+      y: ctr.y + (c.y - ctr.y) * scaleF + mdy
+    }));
+
+  } else if (gesture.mode === 'persp' && ids.length >= 2) {
+    const t1 = newPos[ids[0]];
+    const t2 = newPos[ids[1]];
+    const curDist = dist2(t1, t2);
+    const curMid  = mid2(t1, t2);
+    const delta   = curDist - gesture.startDist;  // + = fingers spreading apart
+    const mdx = curMid.x - gesture.startMid.x;
+    const mdy = curMid.y - gesture.startMid.y;
+    const sc  = gesture.savedCorners;
+    const half = delta * 0.45;
+    const [i0, i1] = gesture.idx;
+
+    // Translate all corners first, then adjust the edge pair
+    corners = sc.map(c => ({x: c.x + mdx, y: c.y + mdy}));
+
+    if (gesture.axis === 'h') {
+      const c0 = sc[i0], c1 = sc[i1];
+      if (c0.x <= c1.x) {
+        corners[i0] = {x: sc[i0].x + mdx - half, y: sc[i0].y + mdy};
+        corners[i1] = {x: sc[i1].x + mdx + half, y: sc[i1].y + mdy};
+      } else {
+        corners[i0] = {x: sc[i0].x + mdx + half, y: sc[i0].y + mdy};
+        corners[i1] = {x: sc[i1].x + mdx - half, y: sc[i1].y + mdy};
+      }
+    } else {
+      const c0 = sc[i0], c1 = sc[i1];
+      if (c0.y <= c1.y) {
+        corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy - half};
+        corners[i1] = {x: sc[i1].x + mdx, y: sc[i1].y + mdy + half};
+      } else {
+        corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy + half};
+        corners[i1] = {x: sc[i1].x + mdx, y: sc[i1].y + mdy - half};
+      }
+    }
+  }
+
+  activeTouches = newPos;
+  draw();
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => { delete activeTouches[t.identifier]; });
+  const ids = Object.keys(activeTouches);
+
+  if (ids.length === 0) {
+    gesture = null;
+    hideHint();
+  } else if (ids.length === 1) {
+    gesture = { mode: 'translate', prev: activeTouches[ids[0]] };
+  }
+}, { passive: false });
+
+// ─────────────────────────────────────────────────────────
+// OPACITY SLIDER
+// ─────────────────────────────────────────────────────────
+const sliderEl = document.getElementById('opacity-slider');
+const opValEl  = document.getElementById('op-val');
+const opPanel  = document.getElementById('opacity-panel');
+const opBtn    = document.getElementById('opacity-btn');
+
+sliderEl.addEventListener('input', e => {
+  opacity = e.target.value / 100;
+  opValEl.textContent = e.target.value + '%';
+  draw();
+});
+// Stop panel from propagating to canvas
+opPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+opPanel.addEventListener('touchmove',  e => e.stopPropagation(), { passive: true });
+
+opBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  opPanel.classList.toggle('open');
+});
+document.addEventListener('touchstart', e => {
+  if (!opBtn.contains(e.target)) opPanel.classList.remove('open');
+}, { passive: true });
+
+// ─────────────────────────────────────────────────────────
+// RESET (tap) / GRID (long press)
+// ─────────────────────────────────────────────────────────
+let resetTimer = null;
+const resetBtn = document.getElementById('reset-btn');
+
+resetBtn.addEventListener('touchstart', e => {
+  e.stopPropagation();
+  resetTimer = setTimeout(() => {
+    resetTimer = null;
+    document.getElementById('grid').classList.toggle('visible');
+    showHint('Mřížka');
+    hideHint();
+  }, 550);
+}, { passive: true });
+
+resetBtn.addEventListener('touchend', e => {
+  e.stopPropagation();
+  if (resetTimer !== null) {
+    clearTimeout(resetTimer);
+    resetTimer = null;
+    corners = naturalCorners();
+    draw();
+    showHint('Reset');
+    hideHint();
+  }
+}, { passive: true });
+
+// ─────────────────────────────────────────────────────────
+// PLACES.JSON — načtení dat místa
+// ─────────────────────────────────────────────────────────
+const PLACE_ID   = 'H001';
+const PLACES_URL = 'https://layersofprague.github.io/LoP/places.json';
+
+// Fallback — H001 hodnoty natvrdo pro případ nedostupnosti JSONu
+let place = {
+  objLat: 50.105626,
+  objLng: 14.455984,
+  fov:    60           // horizontální FOV kamery ve stupních
+};
+
+fetch(PLACES_URL)
+  .then(r => r.json())
+  .then(arr => {
+    const p = arr.find(x => x.id === PLACE_ID);
+    if (!p) return;
+    if (p.objLat !== undefined) place.objLat = p.objLat;
+    if (p.objLng !== undefined) place.objLng = p.objLng;
+    if (p.fov    !== undefined) place.fov    = p.fov;
+    updateDistChip();
+  })
+  .catch(() => {});
+
+// ─────────────────────────────────────────────────────────
+// GPS — kontinuální sledování polohy
+// ─────────────────────────────────────────────────────────
+let gpsPos = null;
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(
+    p => {
+      gpsPos = { lat: p.coords.latitude, lng: p.coords.longitude };
+      if (!arLocked) updateDistChip();
+    },
+    () => {},
+    { enableHighAccuracy: true, maximumAge: 2000 }
+  );
+}
+
+// Haversine vzdálenost v metrech
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r;
+  const dLng = (lng2 - lng1) * r;
+  const a = Math.sin(dLat/2)**2
+          + Math.cos(lat1*r) * Math.cos(lat2*r) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Aktuální vzdálenost uživatele od objektu
+function currentDistM() {
+  if (gpsPos) return haversineM(gpsPos.lat, gpsPos.lng, place.objLat, place.objLng);
+  return 50; // fallback bez GPS
+}
+
+function updateDistChip() {
+  const d = currentDistM();
+  document.getElementById('live-label').textContent = `${Math.round(d)} m`;
+}
+
+// ─────────────────────────────────────────────────────────
+// GYRO KALIBRACE — načtení z JSONu
+// ─────────────────────────────────────────────────────────
+// Kalibrace z gyro_test.html:
+//   portrait_yaw  → alpha, sign +1   (azimut v portrétu)
+//   landscape_yaw → beta,  sign -1   (azimut v landscape)
+//   roll          → alpha, sign +1   (shodné s portrait_yaw → roll ignorujeme)
+//
+// Výsledné mapování os pro updateARPosition:
+//   PORTRAIT:  azimutAxis=alpha, azimutSign=+1, pitchAxis=beta,  pitchSign=+1
+//   LANDSCAPE: azimutAxis=beta,  azimutSign=-1, pitchAxis=alpha, pitchSign=+1
+
+const GYRO_URL = 'https://layersofprague.github.io/LoP/GYRO/gyro_calibration.json';
+
+// Kalibrace — null dokud se nenačte JSON
+let cal = null;
+
+fetch(GYRO_URL)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => {
+    cal = {
+      portrait: {
+        azimutAxis: d.portrait_yaw?.axis   ?? 'alpha',
+        azimutSign: d.portrait_yaw?.sign   ?? 1,
+        pitchAxis:  d.portrait_pitch?.axis ?? 'beta',
+        pitchSign:  d.portrait_pitch?.sign ?? 1,
+      },
+      landscape: {
+        azimutAxis: d.landscape_yaw?.axis   ?? 'beta',
+        azimutSign: d.landscape_yaw?.sign   ?? -1,
+        pitchAxis:  d.landscape_pitch?.axis ?? 'alpha',
+        pitchSign:  d.landscape_pitch?.sign ?? 1,
+      },
+      roll: {
+        axis: d.roll?.axis ?? 'gamma',
+        sign: d.roll?.sign ?? 1,
+      }
+    };
+    document.getElementById('gyro-warn').style.display = 'none';
+    applyCalToPanel();
+  })
+  .catch(() => {
+    // JSON nedostupný — zobraz varování
+    document.getElementById('gyro-warn').style.display = 'flex';
+  });
+
+// ─────────────────────────────────────────────────────────
+// GYRO — integrace úhlové rychlosti přes devicemotion
+// ─────────────────────────────────────────────────────────
+let rawRate    = { a: 0, b: 0, g: 0 };
+let gyroLastT  = null;
+let gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+
+function currentCal() {
+  const ls = (W > H);
+  return ls ? cal.landscape : cal.portrait;
+}
+
+window.addEventListener('devicemotion', e => {
+  if (!e.rotationRate) return;
+  const r = e.rotationRate;
+  rawRate = { a: r.alpha || 0, b: r.beta || 0, g: r.gamma || 0 };
+
+  if (!arLocked) { gyroLastT = null; return; }
+
+  const now = performance.now();
+  const dt  = gyroLastT !== null ? (now - gyroLastT) / 1000 : 0;
+  gyroLastT = now;
+
+  if (dt > 0 && dt < 0.2) {
+    gyroAngles.alpha += rawRate.a * dt;
+    gyroAngles.beta  += rawRate.b * dt;
+    gyroAngles.gamma += rawRate.g * dt;
+    updateARPosition();
+  }
+}, true);
+
+async function requestOrientPerm() {
+  // iOS vyžaduje povolení pro DeviceMotion i DeviceOrientation
+  if (typeof DeviceMotionEvent?.requestPermission === 'function') {
+    const r = await DeviceMotionEvent.requestPermission().catch(() => 'denied');
+    if (r !== 'granted') { showHint('Povol pohybové senzory'); hideHint(); return false; }
+  }
+  return true;
+}
+
+// ─────────────────────────────────────────────────────────
+// AR LOCK
+// ─────────────────────────────────────────────────────────
+let arLocked    = false;
+let lockCorners = null;
+let lockDistM   = null;
+
+// pxPerDeg = kolik px odpovídá 1° otočení při daném FOV
+// pxPerDeg = W / FOV
+function computePxPerDeg() {
+  return W / place.fov;
+}
+
+async function lockAR() {
+  if (!cal) { showHint('Chybí kalibrace gyra'); hideHint(); return; }
+
+  lockDistM   = currentDistM();
+  lockCorners = corners.map(c => ({...c}));
+  gyroAngles  = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT   = null;
+  arLocked    = true;
+
+  showHint(`Zafixováno · ${Math.round(lockDistM)} m`);
+  hideHint();
+  document.getElementById('shutter').classList.add('locked');
+  document.getElementById('live-label').textContent = `${Math.round(lockDistM)} m 🔒`;
+}
+
+function unlockAR() {
+  arLocked    = false;
+  gyroAngles  = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT   = null;
+  document.getElementById('shutter').classList.remove('locked');
+  showHint('Odemčeno'); hideHint();
+  updateDistChip();
+}
+
+// ─────────────────────────────────────────────────────────
+// AR UPDATE
+// ─────────────────────────────────────────────────────────
+function updateARPosition() {
+  if (!arLocked || !lockCorners) return;
+  const pxPerDeg = computePxPerDeg();
+  // panelCal() returns {hAxis, hSign, vAxis, vSign} or null axes when vyp
+  const pc = panelCal();
+  const rateOf = axis => axis === 'alpha' ? rawRate.a : axis === 'beta' ? rawRate.b : rawRate.g;
+
+  // Recompute integrated values based on panel axes
+  let shiftX = 0, shiftY = 0;
+  if (pc.hAxis) shiftX = -pc.hSign * gyroAngles[pc.hAxis] * pxPerDeg;
+  if (pc.vAxis) shiftY = -pc.vSign * gyroAngles[pc.vAxis] * pxPerDeg;
+
+  corners = lockCorners.map(c => ({ x: c.x + shiftX, y: c.y + shiftY }));
+  draw();
+}
+
+// ─────────────────────────────────────────────────────────
+// SHUTTER — tap = lock / tap znovu = unlock
+// ─────────────────────────────────────────────────────────
+document.getElementById('shutter').addEventListener('click', async () => {
+  const fl = document.getElementById('flash');
+  fl.classList.add('on');
+  setTimeout(() => fl.classList.remove('on'), 110);
+
+  if (!arLocked) {
+    const ok = await requestOrientPerm();
+    if (ok) lockAR();
+  } else {
+    unlockAR();
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// MANUAL CAL LOAD — file picker fallback
+// ─────────────────────────────────────────────────────────
+function loadCalManual() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        cal = {
+          portrait: {
+            azimutAxis: d.portrait_yaw?.axis   ?? 'alpha',
+            azimutSign: d.portrait_yaw?.sign   ?? 1,
+            pitchAxis:  d.portrait_pitch?.axis ?? 'beta',
+            pitchSign:  d.portrait_pitch?.sign ?? 1,
+          },
+          landscape: {
+            azimutAxis: d.landscape_yaw?.axis   ?? 'beta',
+            azimutSign: d.landscape_yaw?.sign   ?? -1,
+            pitchAxis:  d.landscape_pitch?.axis ?? 'alpha',
+            pitchSign:  d.landscape_pitch?.sign ?? 1,
+          },
+          roll: { axis: d.roll?.axis ?? 'gamma', sign: d.roll?.sign ?? 1 }
+        };
+        document.getElementById('gyro-warn').style.display = 'none';
+        showHint('Kalibrace načtena'); hideHint();
+      } catch { showHint('Chyba čtení JSON'); hideHint(); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// ─────────────────────────────────────────────────────────
+// CAMERA
+// ─────────────────────────────────────────────────────────
+async function startCamera() {
+  document.getElementById('cam-start').style.display = 'none';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:'environment', width:{ideal:1920}, height:{ideal:1080} },
+      audio: false
+    });
+    const v = document.getElementById('video');
+    v.srcObject = stream;
+    v.style.display = 'block';
+    document.getElementById('live-label').textContent = 'Live';
+  } catch(err) {
+    document.getElementById('cam-layer').style.background = '#1a1612';
+    document.getElementById('live-label').textContent = 'Bez kamery';
+  }
+}
+// ─────────────────────────────────────────────────────────
+// AXIS PANEL
+// Každá osa (H, V) cykluje: vyp → rα+ → rα− → rβ+ → rβ− → rγ+ → rγ− → vyp
+// Aktivní stav se okamžitě aplikuje na kompenzaci.
+// ─────────────────────────────────────────────────────────
+const STATES = [
+  { label: 'vyp',  axis: null,    sign:  0 },
+  { label: 'rα +', axis: 'alpha', sign:  1 },
+  { label: 'rα −', axis: 'alpha', sign: -1 },
+  { label: 'rβ +', axis: 'beta',  sign:  1 },
+  { label: 'rβ −', axis: 'beta',  sign: -1 },
+  { label: 'rγ +', axis: 'gamma', sign:  1 },
+  { label: 'rγ −', axis: 'gamma', sign: -1 },
+];
+
+let hIdx = 0;
+let vIdx = 0;
+let axOpen = false;
+
+function toggleAxPanel() {
+  axOpen = !axOpen;
+  document.getElementById('ax-panel').classList.toggle('show', axOpen);
+  document.getElementById('ax-toggle').classList.toggle('active', axOpen);
+  syncAxPanel();
+}
+
+function cycleAxis(hv) {
+  if (hv === 'h') hIdx = (hIdx + 1) % STATES.length;
+  else             vIdx = (vIdx + 1) % STATES.length;
+  syncAxPanel();
+  gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT  = null;
+  if (lockCorners) { corners = lockCorners.map(c => ({...c})); draw(); }
+}
+
+function syncAxPanel() {
+  const cs = document.getElementById('ax-cal-status');
+  if (cs) { cs.textContent = cal ? 'OK ✓' : 'Chybí'; cs.className = 'ax-cal-val ' + (cal ? 'ok' : 'err'); }
+  const hb = document.getElementById('hax-cycle');
+  if (hb) { hb.textContent = STATES[hIdx].label; hb.className = 'ax-cycle' + (hIdx > 0 ? ' on-h' : ''); }
+  const vb = document.getElementById('vax-cycle');
+  if (vb) { vb.textContent = STATES[vIdx].label; vb.className = 'ax-cycle' + (vIdx > 0 ? ' on-v' : ''); }
+}
+
+function applyCalToPanel() {
+  if (!cal) return;
+  const cl = currentCal();
+  const hi = STATES.findIndex(s => s.axis === cl.azimutAxis && s.sign === cl.azimutSign);
+  const vi = STATES.findIndex(s => s.axis === cl.pitchAxis  && s.sign === cl.pitchSign);
+  hIdx = hi > 0 ? hi : 0;
+  vIdx = vi > 0 ? vi : 0;
+  if (axOpen) syncAxPanel();
+}
+
+function panelCal() {
+  return {
+    hAxis: STATES[hIdx].axis,
+    hSign: STATES[hIdx].sign,
+    vAxis: STATES[vIdx].axis,
+    vSign: STATES[vIdx].sign,
+  };
+}
+
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+</script>
+</body>
+</html>

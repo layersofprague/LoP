@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>AR Simple</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #f0c14e;
+  --gold-dim: rgba(240,193,78,.55);
+  --paper: #eeefeb;
+  --ink: #0d0b08;
+  --glass: rgba(13,11,8,.55);
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'JetBrains Mono', monospace;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+#cam-layer {
+  position: fixed; inset: 0;
+  background: #111;
+}
+#video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+}
+#hist-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: all;
+  touch-action: none;
+}
+#grid {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 33.33% 33.33%;
+  opacity: 0;
+  transition: opacity .4s;
+}
+#grid.visible { opacity: 1; }
+#crosshair {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 56px; height: 56px;
+  z-index: 50;
+}
+#crosshair::before, #crosshair::after {
+  content: ''; position: absolute; background: var(--gold-dim);
+}
+#crosshair::before { top:50%; left:-18px; right:-18px; height:1px; margin-top:-.5px; }
+#crosshair::after  { left:50%; top:-18px; bottom:-18px; width:1px; margin-left:-.5px; }
+.ch-ring { position:absolute; inset:0; border:1.5px solid var(--gold-dim); border-radius:50%; }
+.ch-tl,.ch-tr,.ch-bl,.ch-br { position:absolute; width:12px; height:12px; border-color:var(--gold); border-style:solid; }
+.ch-tl { top:-8px; left:-8px;   border-width:1.5px 0 0 1.5px; }
+.ch-tr { top:-8px; right:-8px;  border-width:1.5px 1.5px 0 0; }
+.ch-bl { bottom:-8px; left:-8px;  border-width:0 0 1.5px 1.5px; }
+.ch-br { bottom:-8px; right:-8px; border-width:0 1.5px 1.5px 0; }
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+  padding-left: 16px; padding-right: 16px; padding-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(180deg, rgba(0,0,0,.65) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 100;
+}
+.top-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 99px;
+  color: var(--paper);
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.top-chip.title {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-size: 13px;
+  letter-spacing: 0; text-transform: none; font-weight: 300;
+}
+.dot-live {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74,222,128,.25);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+#touch-hint {
+  position: fixed;
+  bottom: 112px; left: 50%; transform: translateX(-50%);
+  padding: 8px 16px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  color: var(--paper);
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s;
+  z-index: 100;
+  border: 1px solid rgba(255,255,255,.08);
+}
+#touch-hint.show { opacity: 1; }
+#bottombar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 18px);
+  padding-top: 14px; padding-left: 28px; padding-right: 28px;
+  background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, transparent 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 100;
+}
+.cam-side-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--paper); cursor: pointer;
+  transition: background .15s, transform .1s;
+  flex-shrink: 0; position: relative;
+}
+.cam-side-btn:active { background: rgba(255,255,255,.15); transform: scale(.92); }
+.cam-side-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Shutter — ar-flow style */
+#shutter {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: rgba(238,239,235,.12);
+  border: 2px solid rgba(238,239,235,.55);
+  box-shadow: 0 0 0 6px rgba(238,239,235,.08);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .12s, box-shadow .12s;
+  flex-shrink: 0;
+}
+#shutter:active {
+  transform: scale(.9);
+  box-shadow: 0 0 0 3px rgba(238,239,235,.06);
+}
+#shutter-inner {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: var(--paper);
+}
+/* Opacity panel */
+#opacity-panel {
+  position: absolute;
+  bottom: 58px; left: 50%; transform: translateX(-50%);
+  background: rgba(13,11,8,.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  padding: 14px 18px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  transform: translateX(-50%) translateY(6px);
+  white-space: nowrap;
+  min-width: 170px;
+}
+#opacity-panel.open {
+  opacity: 1; pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+.op-row { display:flex; align-items:center; gap:10px; width:100%; }
+.op-lbl { font-size:8px; letter-spacing:.14em; color:rgba(238,239,235,.5); text-transform:uppercase; flex-shrink:0; }
+#opacity-slider {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 4px;
+  background: rgba(255,255,255,.2);
+  border-radius: 99px; outline: none; cursor: pointer;
+}
+#opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 2px 6px rgba(0,0,0,.4);
+  cursor: pointer;
+}
+#opacity-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper); border: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.2);
+  cursor: pointer;
+}
+#op-val { font-size:9px; color:rgba(238,239,235,.45); width:28px; text-align:right; flex-shrink:0; }
+/* Camera start overlay */
+#cam-start {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.88);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+#cam-start .c-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 26px; color: var(--paper);
+  text-align: center; line-height: 1.25;
+}
+#cam-start .c-sub {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(238,239,235,.4); text-align: center;
+  max-width: 220px; line-height: 1.7;
+}
+#cam-start-btn {
+  padding: 14px 34px;
+  background: var(--paper); color: var(--ink);
+  border: none; border-radius: 99px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer; font-weight: 500;
+  transition: transform .1s, opacity .1s;
+}
+#cam-start-btn:active { transform: scale(.95); opacity: .85; }
+#flash {
+  position: fixed; inset: 0;
+  background: #fff; opacity: 0;
+  pointer-events: none; z-index: 300;
+  transition: opacity .05s;
+}
+#flash.on { opacity: .8; }
+</style>
+</head>
+<body>
+
+<div id="cam-layer">
+  <video id="video" autoplay playsinline muted></video>
+</div>
+
+<canvas id="hist-canvas"></canvas>
+<div id="grid"></div>
+<div id="crosshair">
+  <div class="ch-ring"></div>
+  <div class="ch-tl"></div><div class="ch-tr"></div>
+  <div class="ch-bl"></div><div class="ch-br"></div>
+</div>
+
+<div id="topbar">
+  <div class="top-chip title">Layers of Prague</div>
+  <div class="top-chip">
+    <div class="dot-live"></div>
+    <span id="live-label">Náhled</span>
+  </div>
+</div>
+
+<div id="touch-hint">Táhni pro posun</div>
+
+<div id="bottombar">
+  <div class="cam-side-btn" id="reset-btn" title="Reset / dlouze: mřížka">
+    <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+  </div>
+  <div id="shutter"><div id="shutter-inner"></div></div>
+  <div class="cam-side-btn" id="opacity-btn" title="Průhlednost">
+    <svg viewBox="0 0 24 24" stroke-width="1.6">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor" stroke="none" opacity=".7"/>
+    </svg>
+    <div id="opacity-panel">
+      <div class="op-row">
+        <span class="op-lbl">ref</span>
+        <input type="range" id="opacity-slider" min="0" max="100" value="50" step="1"/>
+        <span class="op-lbl">live</span>
+      </div>
+      <span id="op-val">50%</span>
+    </div>
+  </div>
+</div>
+
+<div id="cam-start">
+  <div class="c-title">Holešovický přístav<br/><span style="font-size:.72em;color:rgba(238,239,235,.4)">~&thinsp;1930</span></div>
+  <div class="c-sub">Zarovnej historický snímek<br/>s živým záběrem kamery</div>
+  <button id="cam-start-btn" onclick="startCamera()">Spustit kameru</button>
+</div>
+
+<div id="flash"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// Canvas quad-warp renderer using triangle subdivision
+// ─────────────────────────────────────────────────────────
+const canvas = document.getElementById('hist-canvas');
+const ctx    = canvas.getContext('2d');
+
+let W = 0, H = 0;
+let imgLoaded = false;
+let opacity   = 0.5;
+let corners   = []; // [TL, TR, BR, BL] each {x,y}
+
+const histImg = new Image();
+histImg.crossOrigin = 'anonymous';
+histImg.src = 'https://layersofprague.github.io/LoP/foto/h_001h.jpg';
+
+function naturalCorners() {
+  const iw = histImg.naturalWidth  || 4;
+  const ih = histImg.naturalHeight || 3;
+  const scale = Math.min(W / iw, H / ih);
+  const fw = iw * scale, fh = ih * scale;
+  const ox = (W - fw) / 2, oy = (H - fh) / 2;
+  return [
+    {x: ox,    y: oy},
+    {x: ox+fw, y: oy},
+    {x: ox+fw, y: oy+fh},
+    {x: ox,    y: oy+fh}
+  ];
+}
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  corners = naturalCorners();
+  draw();
+}
+
+function drawTriangle(image, src0, src1, src2, dst0, dst1, dst2) {
+  const sx = [src0.x, src1.x, src2.x];
+  const sy = [src0.y, src1.y, src2.y];
+  const dx = [dst0.x, dst1.x, dst2.x];
+  const dy = [dst0.y, dst1.y, dst2.y];
+  const det = (sx[1]-sx[0])*(sy[2]-sy[0]) - (sx[2]-sx[0])*(sy[1]-sy[0]);
+  if (Math.abs(det) < 1e-8) return;
+  const a = ((dx[1]-dx[0])*(sy[2]-sy[0]) - (dx[2]-dx[0])*(sy[1]-sy[0])) / det;
+  const b = ((dy[1]-dy[0])*(sy[2]-sy[0]) - (dy[2]-dy[0])*(sy[1]-sy[0])) / det;
+  const c = ((dx[2]-dx[0])*(sx[1]-sx[0]) - (dx[1]-dx[0])*(sx[2]-sx[0])) / det;
+  const d = ((dy[2]-dy[0])*(sx[1]-sx[0]) - (dy[1]-dy[0])*(sx[2]-sx[0])) / det;
+  const e = dx[0] - a*sx[0] - c*sy[0];
+  const f = dy[0] - b*sx[0] - d*sy[0];
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(dst0.x, dst0.y);
+  ctx.lineTo(dst1.x, dst1.y);
+  ctx.lineTo(dst2.x, dst2.y);
+  ctx.closePath();
+  ctx.clip();
+  ctx.transform(a, b, c, d, e, f);
+  ctx.drawImage(image, 0, 0);
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  if (!imgLoaded) return;
+  const iw = histImg.naturalWidth;
+  const ih = histImg.naturalHeight;
+  const [tl, tr, br, bl] = corners;
+  // Source quad corners (full image)
+  const s_tl = {x:0,  y:0};
+  const s_tr = {x:iw, y:0};
+  const s_br = {x:iw, y:ih};
+  const s_bl = {x:0,  y:ih};
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  // Two triangles covering the quad
+  drawTriangle(histImg, s_tl, s_tr, s_br, tl, tr, br);
+  drawTriangle(histImg, s_tl, s_br, s_bl, tl, br, bl);
+  ctx.restore();
+}
+
+histImg.onload = () => { imgLoaded = true; resize(); };
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+resize();
+
+// ─────────────────────────────────────────────────────────
+// TOUCH HANDLING
+// ─────────────────────────────────────────────────────────
+let activeTouches = {};   // id -> {clientX, clientY}
+let gesture = null;
+let hintTimer = null;
+
+function touchPos(t) { return {x: t.clientX, y: t.clientY}; }
+function dist2(a, b) { const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+function mid2(a, b)  { return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+
+function showHint(txt) {
+  const el = document.getElementById('touch-hint');
+  el.textContent = txt;
+  el.classList.add('show');
+  clearTimeout(hintTimer);
+}
+function hideHint() {
+  hintTimer = setTimeout(() => {
+    document.getElementById('touch-hint').classList.remove('show');
+  }, 900);
+}
+
+// Determine which edge + what corner indices to affect
+// based on where the two fingers sit on screen
+function detectEdge(t1, t2) {
+  const mx = (t1.x + t2.x) / 2;
+  const my = (t1.y + t2.y) / 2;
+  const dx = Math.abs(t1.x - t2.x);
+  const dy = Math.abs(t1.y - t2.y);
+
+  if (dx > dy * 1.15) {
+    // Horizontal pinch
+    return my < H * 0.5
+      ? {edge:'top',    idx:[0,1], axis:'h'}   // TL, TR
+      : {edge:'bottom', idx:[3,2], axis:'h'};   // BL, BR
+  } else {
+    // Vertical pinch
+    return mx < W * 0.5
+      ? {edge:'left',  idx:[0,3], axis:'v'}    // TL, BL
+      : {edge:'right', idx:[1,2], axis:'v'};   // TR, BR
+  }
+}
+
+const edgeLabels = {
+  top:    'Perspektiva — horní okraj',
+  bottom: 'Perspektiva — dolní okraj',
+  left:   'Perspektiva — levý okraj',
+  right:  'Perspektiva — pravý okraj',
+};
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => {
+    activeTouches[t.identifier] = touchPos(t);
+  });
+
+  const ids = Object.keys(activeTouches);
+
+  if (ids.length === 1) {
+    gesture = {
+      mode: 'translate',
+      prev: activeTouches[ids[0]]
+    };
+    showHint('Posun');
+
+  } else if (ids.length >= 2) {
+    const t1 = activeTouches[ids[0]];
+    const t2 = activeTouches[ids[1]];
+    const {edge, idx, axis} = detectEdge(t1, t2);
+    gesture = {
+      mode: 'persp',
+      edge, idx, axis,
+      startDist: dist2(t1, t2),
+      startMid:  mid2(t1, t2),
+      savedCorners: corners.map(c => ({...c}))
+    };
+    showHint(edgeLabels[edge]);
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const newPos = {};
+  Array.from(e.touches).forEach(t => { newPos[t.identifier] = touchPos(t); });
+  const ids = Object.keys(newPos);
+
+  if (!gesture) { activeTouches = newPos; return; }
+
+  if (gesture.mode === 'translate' && ids.length === 1) {
+    const cur = newPos[ids[0]];
+    const prev = gesture.prev;
+    if (prev) {
+      const dx = cur.x - prev.x;
+      const dy = cur.y - prev.y;
+      corners = corners.map(c => ({x: c.x + dx, y: c.y + dy}));
+    }
+    gesture.prev = cur;
+
+  } else if (gesture.mode === 'persp' && ids.length >= 2) {
+    const t1 = newPos[ids[0]];
+    const t2 = newPos[ids[1]];
+    const curDist = dist2(t1, t2);
+    const curMid  = mid2(t1, t2);
+    const delta   = curDist - gesture.startDist;   // + = spreading apart
+    const mdx = curMid.x - gesture.startMid.x;
+    const mdy = curMid.y - gesture.startMid.y;
+    const sc  = gesture.savedCorners;
+
+    // Translate all corners by midpoint movement
+    corners = sc.map(c => ({x: c.x + mdx, y: c.y + mdy}));
+
+    // Then spread/pinch the two edge corners
+    // half = how much each corner moves outward
+    const half = delta * 0.45;
+    const [i0, i1] = gesture.idx;
+
+    if (gesture.axis === 'h') {
+      // Spread horizontally: left corner goes left, right corner goes right
+      // Determine which index is left vs right
+      const c0 = sc[i0], c1 = sc[i1];
+      if (c0.x <= c1.x) {
+        corners[i0] = {x: sc[i0].x + mdx - half, y: sc[i0].y + mdy};
+        corners[i1] = {x: sc[i1].x + mdx + half, y: sc[i1].y + mdy};
+      } else {
+        corners[i0] = {x: sc[i0].x + mdx + half, y: sc[i0].y + mdy};
+        corners[i1] = {x: sc[i1].x + mdx - half, y: sc[i1].y + mdy};
+      }
+    } else {
+      // Spread vertically: top corner goes up, bottom corner goes down
+      const c0 = sc[i0], c1 = sc[i1];
+      if (c0.y <= c1.y) {
+        corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy - half};
+        corners[i1] = {x: sc[i1].x + mdx, y: sc[i1].y + mdy + half};
+      } else {
+        corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy + half};
+        corners[i1] = {x: sc[i1].x + mdx, y: sc[i1].y + mdy - half};
+      }
+    }
+  }
+
+  activeTouches = newPos;
+  draw();
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => { delete activeTouches[t.identifier]; });
+  const ids = Object.keys(activeTouches);
+
+  if (ids.length === 0) {
+    gesture = null;
+    hideHint();
+  } else if (ids.length === 1) {
+    gesture = { mode: 'translate', prev: activeTouches[ids[0]] };
+  }
+}, { passive: false });
+
+// ─────────────────────────────────────────────────────────
+// OPACITY SLIDER
+// ─────────────────────────────────────────────────────────
+const sliderEl = document.getElementById('opacity-slider');
+const opValEl  = document.getElementById('op-val');
+const opPanel  = document.getElementById('opacity-panel');
+const opBtn    = document.getElementById('opacity-btn');
+
+sliderEl.addEventListener('input', e => {
+  opacity = e.target.value / 100;
+  opValEl.textContent = e.target.value + '%';
+  draw();
+});
+// Stop panel from propagating to canvas
+opPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+opPanel.addEventListener('touchmove',  e => e.stopPropagation(), { passive: true });
+
+opBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  opPanel.classList.toggle('open');
+});
+document.addEventListener('touchstart', e => {
+  if (!opBtn.contains(e.target)) opPanel.classList.remove('open');
+}, { passive: true });
+
+// ─────────────────────────────────────────────────────────
+// RESET (tap) / GRID (long press)
+// ─────────────────────────────────────────────────────────
+let resetTimer = null;
+const resetBtn = document.getElementById('reset-btn');
+
+resetBtn.addEventListener('touchstart', e => {
+  e.stopPropagation();
+  resetTimer = setTimeout(() => {
+    resetTimer = null;
+    document.getElementById('grid').classList.toggle('visible');
+    showHint('Mřížka');
+    hideHint();
+  }, 550);
+}, { passive: true });
+
+resetBtn.addEventListener('touchend', e => {
+  e.stopPropagation();
+  if (resetTimer !== null) {
+    clearTimeout(resetTimer);
+    resetTimer = null;
+    corners = naturalCorners();
+    draw();
+    showHint('Reset');
+    hideHint();
+  }
+}, { passive: true });
+
+// ─────────────────────────────────────────────────────────
+// SHUTTER
+// ─────────────────────────────────────────────────────────
+document.getElementById('shutter').addEventListener('click', () => {
+  const fl = document.getElementById('flash');
+  fl.classList.add('on');
+  setTimeout(() => fl.classList.remove('on'), 110);
+});
+
+// ─────────────────────────────────────────────────────────
+// CAMERA
+// ─────────────────────────────────────────────────────────
+async function startCamera() {
+  document.getElementById('cam-start').style.display = 'none';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:'environment', width:{ideal:1920}, height:{ideal:1080} },
+      audio: false
+    });
+    const v = document.getElementById('video');
+    v.srcObject = stream;
+    v.style.display = 'block';
+    document.getElementById('live-label').textContent = 'Live';
+  } catch(err) {
+    document.getElementById('cam-layer').style.background = '#1a1612';
+    document.getElementById('live-label').textContent = 'Bez kamery';
+  }
+}
+
+// Prevent page scroll/zoom
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+</script>
+</body>
+</html>
