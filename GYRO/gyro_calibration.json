@@ -1,61 +1,77 @@
 {
   "portrait_yaw": {
     "axis": "beta",
-    "sign": -1
+    "sign": -1,
+    "pxPerDeg": 4.13
   },
   "portrait_pitch": {
     "axis": "alpha",
-    "sign": -1
+    "sign": -1,
+    "pxPerDeg": 7.69
   },
   "landscape_yaw": {
     "axis": "alpha",
-    "sign": -1
+    "sign": -1,
+    "pxPerDeg": 6.8
   },
   "landscape_pitch": {
     "axis": "beta",
-    "sign": 1
+    "sign": 1,
+    "pxPerDeg": 4.25
+  },
+  "screen": {
+    "cssW": 360,
+    "cssH": 595
   },
   "_raw": {
     "portrait_h_neg": {
       "axis": "beta",
       "peakSign": 1,
-      "variance": 587.2
+      "variance": 672.6,
+      "totalAngleDeg": 86.7
     },
     "portrait_h_pos": {
       "axis": "beta",
       "peakSign": -1,
-      "variance": 442.5
+      "variance": 659.2,
+      "totalAngleDeg": 87.6
     },
     "portrait_v_neg": {
       "axis": "alpha",
       "peakSign": 1,
-      "variance": 328
+      "variance": 592.3,
+      "totalAngleDeg": 87.9
     },
     "portrait_v_pos": {
       "axis": "alpha",
       "peakSign": -1,
-      "variance": 243.9
+      "variance": 711.1,
+      "totalAngleDeg": 66.8
     },
     "landscape_h_neg": {
       "axis": "alpha",
       "peakSign": 1,
-      "variance": 384.9
+      "variance": 497.4,
+      "totalAngleDeg": 84
     },
     "landscape_h_pos": {
       "axis": "alpha",
       "peakSign": -1,
-      "variance": 472.1
+      "variance": 558.6,
+      "totalAngleDeg": 90.9
     },
     "landscape_v_neg": {
       "axis": "beta",
       "peakSign": -1,
-      "variance": 567.4
+      "variance": 492.3,
+      "totalAngleDeg": 98.3
     },
     "landscape_v_pos": {
       "axis": "beta",
       "peakSign": 1,
-      "variance": 367.9
+      "variance": 836.3,
+      "totalAngleDeg": 71
     }
   },
-  "_generated": "2026-05-21T05:40:07.021Z"
+  "_generated": "2026-05-27T08:41:03.549Z"
 }
