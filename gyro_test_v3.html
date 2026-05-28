@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Gyro kalibrace</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0b08;--paper:#eeefeb;--ink:#0d0b08;--gold:#f0c14e;--ok:#4ade80;--err:#f87171;--glass:rgba(238,239,235,.06);--border:rgba(238,239,235,.1)}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--paper);font-family:'JetBrains Mono',monospace;overflow:hidden;touch-action:manipulation;user-select:none}
+
+#app{display:flex;flex-direction:column;height:100%;padding:max(env(safe-area-inset-top,0px),16px) 20px max(env(safe-area-inset-bottom,0px),16px)}
+
+/* progress */
+#progress-bar-wrap{flex-shrink:0;margin-bottom:16px}
+#progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+#progress-label{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,239,235,.3)}
+#progress-frac{font-size:8px;color:rgba(238,239,235,.25)}
+#progress-track{height:3px;background:rgba(238,239,235,.08);border-radius:99px;overflow:hidden}
+#progress-fill{height:100%;background:var(--gold);border-radius:99px;transition:width .4s ease}
+
+/* step card */
+#step-card{flex:1;display:flex;flex-direction:column;background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px;overflow:hidden}
+#step-orient{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.3);margin-bottom:6px}
+#step-title{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:22px;line-height:1.2;margin-bottom:10px;color:var(--paper)}
+#step-desc{font-size:11px;color:rgba(238,239,235,.45);line-height:1.65;margin-bottom:16px}
+
+/* illustration */
+#step-illus{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;margin-bottom:16px}
+#step-illus svg{max-height:100%;max-width:100%}
+
+/* recording bar */
+#rec-wrap{height:40px;display:flex;align-items:center;gap:10px;padding:0 4px;margin-bottom:14px;opacity:0;transition:opacity .3s}
+#rec-wrap.show{opacity:1}
+#rec-dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0;animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#rec-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);flex-shrink:0}
+#rec-track{flex:1;height:3px;background:rgba(238,239,235,.1);border-radius:99px;overflow:hidden}
+#rec-fill{height:100%;background:var(--gold);border-radius:99px;width:0}
+
+/* result badge */
+#result-badge{display:none;align-items:center;justify-content:center;gap:8px;padding:10px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:8px;margin-bottom:14px}
+#result-badge.show{display:flex}
+#result-text{font-size:11px;color:var(--ok);font-weight:600}
+
+/* buttons */
+#btn-primary{width:100%;padding:14px;border:none;border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;cursor:pointer;background:var(--paper);color:var(--ink);transition:opacity .15s,transform .1s;flex-shrink:0}
+#btn-primary:active{opacity:.8;transform:scale(.97)}
+#btn-primary.secondary{background:rgba(238,239,235,.08);color:rgba(238,239,235,.4);border:1px solid rgba(255,255,255,.08)}
+
+/* export screen */
+#export-screen{display:none;flex-direction:column;gap:12px;height:100%}
+#export-screen.show{display:flex}
+#step-card.hidden{display:none}
+#progress-bar-wrap.hidden{display:none}
+
+.exp-title{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:22px;color:var(--gold);flex-shrink:0}
+.exp-sub{font-size:10px;color:rgba(238,239,235,.35);letter-spacing:.08em;flex-shrink:0}
+.exp-results{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;min-height:0}
+.exp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--glass);border:1px solid var(--border);border-radius:8px}
+.exp-key{font-size:9px;color:rgba(238,239,235,.4);letter-spacing:.06em}
+.exp-val{font-size:11px;font-weight:600;color:var(--gold)}
+.exp-val.ok{color:var(--ok)}
+.exp-btns{display:flex;gap:8px;flex-shrink:0}
+.exp-btn{flex:1;padding:13px;border:none;border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:opacity .15s}
+.exp-btn:active{opacity:.8}
+.exp-btn-dl{background:var(--paper);color:var(--ink)}
+.exp-btn-re{background:rgba(238,239,235,.08);color:rgba(238,239,235,.4);border:1px solid rgba(255,255,255,.08)}
+
+@media (orientation: landscape) {
+  #app {
+    flex-direction: row; gap: 16px;
+    padding-top: max(env(safe-area-inset-top,0px),10px);
+    padding-bottom: max(env(safe-area-inset-bottom,0px),10px);
+  }
+  /* Progress bar becomes vertical strip on the left */
+  #progress-bar-wrap {
+    flex-shrink: 0; width: 14px; margin-bottom: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  #progress-top { display: none; }
+  #progress-track {
+    flex: 1; width: 3px; height: auto;
+    writing-mode: vertical-lr; /* trick: rotate the bar */
+  }
+  /* Actually easier: just hide progress and show fraction in title */
+  #progress-bar-wrap { display: none; }
+
+  /* Main card fills width */
+  #step-card {
+    flex-direction: row; flex-wrap: nowrap;
+    padding: 12px 14px; gap: 12px; overflow: visible;
+  }
+  /* Left col: title + desc + rec + result + button */
+  #step-card { position: relative; }
+  #step-orient { display: none; }
+  #step-title { font-size: 14px; margin-bottom: 6px; flex-shrink: 0; }
+  #step-desc { font-size: 10px; margin-bottom: 8px; flex-shrink: 0; max-height: 60px; overflow: hidden; }
+  #step-illus { flex: 0 0 auto; width: 110px; align-self: center; margin-bottom: 0; }
+  #step-illus svg { max-height: 80px; }
+  #rec-wrap { margin-bottom: 6px; height: 30px; }
+  #result-badge { margin-bottom: 6px; padding: 6px 8px; }
+  #btn-primary { padding: 11px; }
+
+  /* Two-column layout inside card */
+  #step-card {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+      "orient illus"
+      "title  illus"
+      "desc   illus"
+      "rec    illus"
+      "result illus"
+      "btn    illus";
+  }
+  #step-orient { grid-area: orient; }
+  #step-title  { grid-area: title; }
+  #step-desc   { grid-area: desc; }
+  #step-illus  { grid-area: illus; align-self: center; }
+  #rec-wrap    { grid-area: rec; }
+  #result-badge{ grid-area: result; }
+  #btn-primary { grid-area: btn; }
+}
+</style>
+</head>
+<body>
+<video id="bg-video" autoplay playsinline muted style="display:none"></video>
+<div id="app">
+
+  <!-- Progress -->
+  <div id="progress-bar-wrap">
+    <div id="progress-top">
+      <span id="progress-label">Kalibrace gyroskopu</span>
+      <span id="progress-frac">1 / 8</span>
+    </div>
+    <div id="progress-track"><div id="progress-fill" style="width:12.5%"></div></div>
+  </div>
+
+  <!-- Step card -->
+  <div id="step-card">
+    <div id="step-orient">—</div>
+    <div id="step-title">—</div>
+    <div id="step-desc">—</div>
+    <div id="step-illus"><svg id="illus-svg" viewBox="0 0 200 160" width="200" height="160" fill="none" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div id="rec-wrap"><div id="rec-dot"></div><div id="rec-label">Nahrávám</div><div id="rec-track"><div id="rec-fill"></div></div></div>
+    <div id="result-badge"><span id="result-text">—</span></div>
+    <button id="btn-primary" onclick="onPrimary()">—</button>
+  </div>
+
+  <!-- Export screen -->
+  <div id="export-screen">
+    <div class="exp-title">Kalibrace hotova</div>
+    <div class="exp-sub">Uložte soubor a nahrajte na GitHub do /GYRO/</div>
+    <div class="exp-results" id="exp-results"></div>
+    <div class="exp-btns">
+      <button class="exp-btn exp-btn-dl" onclick="downloadJSON()">Uložit JSON</button>
+      <button class="exp-btn exp-btn-re" onclick="location.reload()">Znovu</button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ─── STEPS DEFINITION ───────────────────────────────────────
+// dir: 'L'=left, 'R'=right, 'U'=up, 'D'=down
+// orient: 'portrait' | 'landscape'
+// axis: which output key this feeds into
+const STEPS = [
+  { orient:'portrait',  dir:'L', title:'Doleva — portrét',         desc:'Telefon normálně před sebou. Otočte doleva ~40° a držte. Po ukončení měření vraťte zpět.', key:'portrait_h_neg' },
+  { orient:'portrait',  dir:'R', title:'Doprava — portrét',        desc:'Stejná pozice. Otočte doprava ~40° a držte. Po ukončení měření vraťte zpět.', key:'portrait_h_pos' },
+  { orient:'portrait',  dir:'U', title:'Ke stropu — portrét',         desc:'Namiřte kamerou ke stropu — displej se otočí dolů. Cca 30° a držte. Po ukončení měření vraťte zpět.', key:'portrait_v_neg' },
+  { orient:'portrait',  dir:'D', title:'K podlaze — portrét',           desc:'Namiřte kamerou k podlaze — displej se otočí nahoru. Cca 30° a držte. Po ukončení měření vraťte zpět.', key:'portrait_v_pos' },
+  { orient:'landscape', dir:'L', title:'Doleva — landscape',       desc:'Otočte telefon naležato (landscape). Otočte doleva ~40° a držte. Po ukončení měření vraťte zpět.', key:'landscape_h_neg' },
+  { orient:'landscape', dir:'R', title:'Doprava — landscape',      desc:'Landscape. Otočte doprava ~40° a držte. Po ukončení měření vraťte zpět.', key:'landscape_h_pos' },
+  { orient:'landscape', dir:'U', title:'Ke stropu — landscape',       desc:'Landscape. Namiřte kamerou ke stropu — displej se otočí dolů. Cca 30° a držte. Po ukončení měření vraťte zpět.', key:'landscape_v_neg' },
+  { orient:'landscape', dir:'D', title:'K podlaze — landscape',         desc:'Landscape. Namiřte kamerou k podlaze — displej se otočí nahoru. Cca 30° a držte. Po ukončení měření vraťte zpět.', key:'landscape_v_pos' },
+];
+
+const REC_MS = 3500;
+let stepIdx   = 0;
+let recording = false;
+let samples   = [];
+let recTimer  = null;
+let results   = {}; // key → {axis, peakSign, variance}
+let stepState = 'ready'; // ready | recording | done
+let gyroOk    = false;
+
+// ─── PERMISSION ─────────────────────────────────────────────
+async function ensureGyro() {
+  if (gyroOk) return true;
+  if (typeof DeviceMotionEvent?.requestPermission === 'function') {
+    const r = await DeviceMotionEvent.requestPermission().catch(() => 'denied');
+    gyroOk = r === 'granted';
+  } else {
+    gyroOk = true;
+  }
+  if (gyroOk) {
+    startListening();
+    startBgCamera();  // start camera to get real FOV dimensions
+  }
+  return gyroOk;
+}
+
+// ─── GYRO LISTENER ──────────────────────────────────────────
+window.addEventListener('devicemotion', e => {
+  if (!recording || !e.rotationRate) return;
+  const r = e.rotationRate;
+  samples.push({ a: r.alpha || 0, b: r.beta || 0, g: r.gamma || 0, t: performance.now() });
+}, true);
+
+function startListening() {} // just to have the listener active
+
+// ─── ANALYSIS ───────────────────────────────────────────────
+function analyze(smpls) {
+  if (smpls.length < 5) return null;
+  const axes = { alpha: smpls.map(s=>s.a), beta: smpls.map(s=>s.b), gamma: smpls.map(s=>s.g) };
+
+  function variance(arr) {
+    const m = arr.reduce((s,v)=>s+v,0)/arr.length;
+    return arr.reduce((s,v)=>s+(v-m)**2,0)/arr.length;
+  }
+  const vars = { alpha: variance(axes.alpha), beta: variance(axes.beta), gamma: variance(axes.gamma) };
+  const dominant = Object.entries(vars).sort((a,b)=>b[1]-a[1])[0][0];
+  const allVals = axes[dominant];
+
+  // Use only samples above a speed threshold
+  const maxAbs = Math.max(...allVals.map(Math.abs));
+  const threshold = maxAbs * 0.30;
+  const fast = allVals.filter(v => Math.abs(v) >= threshold);
+  const active = fast.length >= 3 ? fast : allVals;
+
+  // Sign from mean of fast samples
+  const mean = active.reduce((s,v)=>s+v,0) / active.length;
+
+  // Integrate angle over time using timestamps
+  // smpls[i] = {a, b, g, t} where t is ms from start
+  // Integrate dominant axis: angle = sum(rate * dt)
+  let totalAngle = 0;
+  for (let i = 1; i < smpls.length; i++) {
+    const dt = (smpls[i].t - smpls[i-1].t) / 1000; // seconds
+    const rate = dominant === 'alpha' ? smpls[i].a
+               : dominant === 'beta'  ? smpls[i].b : smpls[i].g;
+    totalAngle += rate * dt;
+  }
+  // Use absolute value — we don't care about direction for pxPerDeg
+  const absAngle = Math.abs(totalAngle);
+
+  return {
+    axis: dominant,
+    peakSign: mean >= 0 ? 1 : -1,
+    variance: Math.round(vars[dominant]*10)/10,
+    totalAngleDeg: Math.round(absAngle * 10) / 10  // degrees swept
+  };
+}
+
+// Derive axis + compensation sign from two opposite measurements.
+// We use the higher-variance result to identify the axis.
+// Compensation sign logic:
+//   Moving RIGHT → gyro reads positive on the axis → image must go LEFT → sign = +1
+//   Moving LEFT  → gyro reads negative on the axis → image must go RIGHT → sign = +1
+//   In both cases: compensationSign = -measuredSign * directionSign
+//   where directionSign = +1 for R/D, -1 for L/U
+// Simplified: take the positive-direction measurement's sign directly as compensation sign,
+//   or negate the negative-direction measurement's sign.
+function deriveMapping(negResult, posResult) {
+  // Pick higher-variance as the more reliable measurement
+  const ref = (posResult && negResult)
+    ? (posResult.variance >= negResult.variance ? posResult : negResult)
+    : (posResult || negResult);
+  if (!ref) return null;
+  const isPos = ref === posResult; // true = measured from positive direction (R or D)
+  // compensation sign = opposite of measured sign for positive dir,
+  //                     same as measured sign for negative dir
+  // Because: moving right → positive gyro → need sign +1 to shift image left
+  //          moving left  → negative gyro → need sign +1 to shift image right (negate)
+  const compSign = isPos ? ref.peakSign : -ref.peakSign;
+  return { axis: ref.axis, sign: compSign };
+}
+
+// ─── SVG ILLUSTRATIONS ──────────────────────────────────────
+function makeIllus(orient, dir) {
+  const gold = '#f0c14e', dim = 'rgba(238,239,235,.25)', paper = '#eeefeb';
+  if (orient === 'portrait') {
+    // phone rect
+    const ph = `<rect x="80" y="20" width="40" height="66" rx="6" stroke="${paper}" stroke-width="2"/>
+<circle cx="100" cy="79" r="3" fill="${paper}" opacity=".3"/>
+<rect x="88" y="28" width="24" height="26" rx="2" fill="${paper}" opacity=".08"/>`;
+    const axis = `<line x1="100" y1="8" x2="100" y2="92" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="100" cy="92" r="2.5" fill="${dim}"/>`;
+    let arrow = '';
+    if (dir === 'L') {
+      arrow = `<path d="M100 12 A28 8 0 0 0 62 12" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M62 12 L66 18 M62 12 L68 11" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M100 12 A28 8 0 0 1 138 12" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    } else if (dir === 'R') {
+      arrow = `<path d="M100 12 A28 8 0 0 1 138 12" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M138 12 L134 18 M138 12 L132 11" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M100 12 A28 8 0 0 0 62 12" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    } else if (dir === 'U') {
+      // horizontal axis, tilt fwd
+      arrow = `<line x1="40" y1="53" x2="160" y2="53" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="160" cy="53" r="2.5" fill="${dim}"/>
+<path d="M120 22 A8 26 0 0 1 120 84" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M120 22 L114 24 M120 22 L124 28" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M80 22 A8 26 0 0 0 80 84" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    } else {
+      arrow = `<line x1="40" y1="53" x2="160" y2="53" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="160" cy="53" r="2.5" fill="${dim}"/>
+<path d="M120 84 A8 26 0 0 0 120 22" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M120 84 L114 82 M120 84 L124 78" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M80 84 A8 26 0 0 1 80 22" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    }
+    return `<svg viewBox="0 0 200 110" width="200" height="110" fill="none" xmlns="http://www.w3.org/2000/svg">${dir==='L'||dir==='R'?axis:''}${ph}${arrow}</svg>`;
+  } else {
+    // landscape phone
+    const ph = `<rect x="50" y="47" width="100" height="56" rx="6" stroke="${paper}" stroke-width="2"/>
+<circle cx="143" cy="75" r="3" fill="${paper}" opacity=".3"/>
+<rect x="60" y="55" width="64" height="28" rx="2" fill="${paper}" opacity=".08"/>`;
+    let arrow = '';
+    if (dir === 'L') {
+      const axis = `<line x1="100" y1="34" x2="100" y2="110" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="100" cy="110" r="2.5" fill="${dim}"/>`;
+      arrow = axis + `<path d="M100 38 A34 9 0 0 0 56 38" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M56 38 L60 44 M56 38 L62 37" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M100 38 A34 9 0 0 1 144 38" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    } else if (dir === 'R') {
+      const axis = `<line x1="100" y1="34" x2="100" y2="110" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="100" cy="110" r="2.5" fill="${dim}"/>`;
+      arrow = axis + `<path d="M100 38 A34 9 0 0 1 144 38" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M144 38 L140 44 M144 38 L138 37" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M100 38 A34 9 0 0 0 56 38" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    } else if (dir === 'U') {
+      const axis = `<line x1="20" y1="75" x2="180" y2="75" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="180" cy="75" r="2.5" fill="${dim}"/>`;
+      arrow = axis + `<path d="M150 49 A9 28 0 0 1 150 103" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M150 49 L144 51 M150 49 L154 55" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M50 49 A9 28 0 0 0 50 103" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    } else {
+      const axis = `<line x1="20" y1="75" x2="180" y2="75" stroke="${dim}" stroke-width="1.5" stroke-dasharray="3 2"/>
+<circle cx="180" cy="75" r="2.5" fill="${dim}"/>`;
+      arrow = axis + `<path d="M150 103 A9 28 0 0 0 150 49" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+<path d="M150 103 L144 101 M150 103 L154 97" stroke="${gold}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M50 103 A9 28 0 0 1 50 49" stroke="${gold}" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-dasharray="5 3" opacity=".3"/>`;
+    }
+    return `<svg viewBox="0 0 200 130" width="200" height="130" fill="none" xmlns="http://www.w3.org/2000/svg">${ph}${arrow}</svg>`;
+  }
+}
+
+// Effective screen dimensions for pxPerDeg — updated after camera starts
+// Default: CSS pixels of current window
+let CSS_W = window.innerWidth;
+let CSS_H = window.innerHeight;
+
+// Start camera on background to get real video dimensions
+// This lets us compute effective FOV-matched pixel dimensions
+async function startBgCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    const vid = document.getElementById('bg-video');
+    vid.srcObject = stream;
+    await new Promise(r => { vid.onloadedmetadata = r; });
+    await vid.play();
+
+    // Compute effective screen pixels = how many CSS px the video covers
+    // using object-fit:cover logic (same as AR_simple)
+    const vw = vid.videoWidth, vh = vid.videoHeight;
+    const winW = window.innerWidth, winH = window.innerHeight;
+    const videoAR = vw / vh, winAR = winW / winH;
+
+    if (videoAR > winAR) {
+      // Video wider — crops left/right, full height used
+      CSS_H = winH;
+      CSS_W = Math.round(winH * videoAR);
+    } else {
+      // Video taller — crops top/bottom, full width used
+      CSS_W = winW;
+      CSS_H = Math.round(winW / videoAR);
+    }
+    console.log(`Camera: ${vw}×${vh}, effective CSS: ${CSS_W}×${CSS_H}`);
+  } catch(e) {
+    // No camera access — fall back to window dimensions
+    CSS_W = window.innerWidth;
+    CSS_H = window.innerHeight;
+    console.warn('Camera unavailable, using window dims:', CSS_W, CSS_H);
+  }
+}
+
+// ─── RENDER STEP ────────────────────────────────────────────
+function renderStep() {
+  const s = STEPS[stepIdx];
+  document.getElementById('progress-frac').textContent = `${stepIdx+1} / ${STEPS.length}`;
+  document.getElementById('progress-fill').style.width = `${((stepIdx+1)/STEPS.length)*100}%`;
+  document.getElementById('step-orient').textContent = s.orient === 'portrait' ? '📱 Portrét' : '📱 Landscape';
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+  document.getElementById('step-illus').innerHTML = makeIllus(s.orient, s.dir);
+  document.getElementById('rec-wrap').classList.remove('show');
+  document.getElementById('result-badge').classList.remove('show');
+  document.getElementById('btn-primary').textContent = 'Spustit';
+  document.getElementById('btn-primary').className = '';
+  document.getElementById('btn-primary').id = 'btn-primary';
+  stepState = 'ready';
+}
+
+// ─── PRIMARY BUTTON ─────────────────────────────────────────
+async function onPrimary() {
+  if (stepState === 'ready') {
+    const ok = await ensureGyro();
+    if (!ok) { alert('Nelze získat přístup k gyroskopu.'); return; }
+    startRec();
+  } else if (stepState === 'done') {
+    nextStep();
+  }
+}
+
+function startRec() {
+  stepState = 'recording';
+  samples = [];
+  recording = true;
+  document.getElementById('rec-wrap').classList.add('show');
+  document.getElementById('btn-primary').textContent = '…';
+  document.getElementById('btn-primary').className = 'secondary';
+
+  const fill = document.getElementById('rec-fill');
+  fill.style.transition = 'none'; fill.style.width = '0%';
+  setTimeout(() => { fill.style.transition = `width ${REC_MS}ms linear`; fill.style.width = '100%'; }, 30);
+
+  recTimer = setTimeout(stopRec, REC_MS);
+}
+
+function stopRec() {
+  clearTimeout(recTimer);
+  recording = false;
+  document.getElementById('rec-wrap').classList.remove('show');
+
+  const r = analyze(samples);
+  if (r) {
+    r.screenW = CSS_W;
+    r.screenH = CSS_H;
+  }
+  const s = STEPS[stepIdx];
+  results[s.key] = r;
+
+  if (r) {
+    const axLabel = r.axis === 'alpha' ? 'rα' : r.axis === 'beta' ? 'rβ' : 'rγ';
+    const signLabel = r.peakSign > 0 ? '+' : '−';
+    const angleStr = r.totalAngleDeg ? `  ${r.totalAngleDeg}°` : '';
+    document.getElementById('result-text').textContent = `${axLabel} ${signLabel}${angleStr}  (var ${r.variance})`;
+    document.getElementById('result-badge').classList.add('show');
+  }
+
+  stepState = 'done';
+  const isLast = stepIdx === STEPS.length - 1;
+  document.getElementById('btn-primary').textContent = isLast ? 'Dokončit' : 'Další →';
+  document.getElementById('btn-primary').className = '';
+}
+
+function nextStep() {
+  if (stepIdx === STEPS.length - 1) {
+    showExport();
+  } else {
+    stepIdx++;
+    renderStep();
+  }
+}
+
+// ─── EXPORT ─────────────────────────────────────────────────
+// Compute pxPerDeg from a pair of measurements + screen dimension
+// screenPx: W for H movements, H for V movements
+function derivePxPerDeg(negResult, posResult, screenPxFn) {
+  // screenPxFn: function(result) -> number of screen pixels for that measurement
+  const entries = [];
+  if (negResult?.totalAngleDeg > 2) entries.push({ r: negResult, px: screenPxFn(negResult) });
+  if (posResult?.totalAngleDeg > 2) entries.push({ r: posResult, px: screenPxFn(posResult) });
+  if (entries.length === 0) return null;
+  // Average pxPerDeg across both measurements
+  const ppds = entries.map(e => e.px / e.r.totalAngleDeg);
+  const avg = ppds.reduce((s,v)=>s+v,0) / ppds.length;
+  return Math.round(avg * 100) / 100;
+}
+
+function buildCalJSON() {
+  const pH  = deriveMapping(results['portrait_h_neg'],  results['portrait_h_pos']);
+  const pV  = deriveMapping(results['portrait_v_neg'],  results['portrait_v_pos']);
+  const lH  = deriveMapping(results['landscape_h_neg'], results['landscape_h_pos']);
+  const lV  = deriveMapping(results['landscape_v_neg'], results['landscape_v_pos']);
+
+  // pxPerDeg: H movements use screen width, V use screen height
+  // In portrait: W=narrow, H=tall. In landscape: W=wide, H=narrow.
+  // We use CSS pixels (innerWidth/innerHeight at time of test)
+  const screenW = CSS_W;
+  const screenH = CSS_H;
+
+  // Use per-step screen dimensions — each step records its own CSS_W/H
+  // Portrait H: movement uses portrait width
+  const ppd_portrait_h  = derivePxPerDeg(results['portrait_h_neg'],  results['portrait_h_pos'],  r => r.screenW);
+  // Portrait V: movement uses portrait height
+  const ppd_portrait_v  = derivePxPerDeg(results['portrait_v_neg'],  results['portrait_v_pos'],  r => r.screenH);
+  // Landscape H: movement in landscape — uses landscape width (which is the wider dimension)
+  const ppd_landscape_h = derivePxPerDeg(results['landscape_h_neg'], results['landscape_h_pos'], r => r.screenW);
+  // Landscape V: movement in landscape — uses landscape height (shorter dimension)
+  const ppd_landscape_v = derivePxPerDeg(results['landscape_v_neg'], results['landscape_v_pos'], r => r.screenH);
+
+  return {
+    portrait_yaw:      pH ? { axis: pH.axis,  sign: pH.sign,  pxPerDeg: ppd_portrait_h  } : null,
+    portrait_pitch:    pV ? { axis: pV.axis,  sign: pV.sign,  pxPerDeg: ppd_portrait_v  } : null,
+    landscape_yaw:     lH ? { axis: lH.axis,  sign: lH.sign,  pxPerDeg: ppd_landscape_h } : null,
+    landscape_pitch:   lV ? { axis: lV.axis,  sign: lV.sign,  pxPerDeg: ppd_landscape_v } : null,
+    screen: { cssW: screenW, cssH: screenH },
+    screenPortrait:  {
+      cssW: results['portrait_h_neg']?.screenW  || results['portrait_h_pos']?.screenW  || screenW,
+      cssH: results['portrait_h_neg']?.screenH  || results['portrait_h_pos']?.screenH  || screenH,
+    },
+    screenLandscape: {
+      cssW: results['landscape_h_neg']?.screenW || results['landscape_h_pos']?.screenW || screenW,
+      cssH: results['landscape_h_neg']?.screenH || results['landscape_h_pos']?.screenH || screenH,
+    },
+    _raw: results,
+    _generated: new Date().toISOString()
+  };
+}
+
+function axLabel(a) { return a === 'alpha' ? 'rα' : a === 'beta' ? 'rβ' : a === 'gamma' ? 'rγ' : '—'; }
+function signLabel(s) { return s > 0 ? '+1' : s < 0 ? '−1' : '—'; }
+
+function showExport() {
+  document.getElementById('step-card').classList.add('hidden');
+  document.getElementById('progress-bar-wrap').classList.add('hidden');
+  document.getElementById('export-screen').classList.add('show');
+
+  const cal = buildCalJSON();
+  const rows = [
+    ['Portrét — azimut H', cal.portrait_yaw],
+    ['Portrét — pitch V',  cal.portrait_pitch],
+    ['Landscape — azimut H', cal.landscape_yaw],
+    ['Landscape — pitch V',  cal.landscape_pitch],
+  ];
+  // Raw step results for debugging
+  const raw = [
+    ['L portrét', results['portrait_h_neg']],
+    ['R portrét', results['portrait_h_pos']],
+    ['↑ portrét', results['portrait_v_neg']],
+    ['↓ portrét', results['portrait_v_pos']],
+    ['L landscape', results['landscape_h_neg']],
+    ['R landscape', results['landscape_h_pos']],
+    ['↑ landscape', results['landscape_v_neg']],
+    ['↓ landscape', results['landscape_v_pos']],
+  ];
+  const container = document.getElementById('exp-results');
+  container.innerHTML =
+    `<div style="font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,239,235,.25);padding:2px 0 4px">Výsledky · displej ${cal.screen?.cssW}×${cal.screen?.cssH}px</div>` +
+    rows.map(([label, v]) => `
+    <div class="exp-row">
+      <span class="exp-key">${label}</span>
+      <span class="exp-val ${v?'ok':''}">${v ? axLabel(v.axis)+' × '+signLabel(v.sign)+(v.pxPerDeg ? ' · <b>'+v.pxPerDeg+'px/°</b>' : '') : '—'}</span>
+    </div>`).join('') +
+    '<div style="font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,239,235,.25);padding:6px 0 4px;margin-top:4px;border-top:1px solid rgba(255,255,255,.06)">Surová měření · úhel</div>' +
+    raw.map(([label, v]) => `
+    <div class="exp-row" style="opacity:.6">
+      <span class="exp-key">${label}</span>
+      <span class="exp-val" style="color:rgba(238,239,235,.5)">${v ? axLabel(v.axis)+' '+(v.peakSign>0?'+':'-')+'  '+( v.totalAngleDeg ? v.totalAngleDeg+'°' : '—') : '—'}</span>
+    </div>`).join('');
+}
+
+function downloadJSON() {
+  const cal = buildCalJSON();
+  const blob = new Blob([JSON.stringify(cal, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'gyro_calibration.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  document.querySelector('.exp-btn-dl').textContent = 'Staženo ✓';
+  setTimeout(() => { document.querySelector('.exp-btn-dl').textContent = 'Uložit JSON'; }, 2500);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+// Auto-enable on non-iOS
+if (typeof DeviceMotionEvent?.requestPermission !== 'function') {
+  gyroOk = true;
+  startBgCamera();
+}
+
+renderStep();
+</script>
+</body>
+</html>
