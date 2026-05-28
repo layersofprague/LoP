@@ -2,76 +2,100 @@
   "portrait_yaw": {
     "axis": "beta",
     "sign": -1,
-    "pxPerDeg": 4.13
+    "pxPerDeg": 3.81
   },
   "portrait_pitch": {
     "axis": "alpha",
     "sign": -1,
-    "pxPerDeg": 7.69
+    "pxPerDeg": 7.82
   },
   "landscape_yaw": {
     "axis": "alpha",
     "sign": -1,
-    "pxPerDeg": 6.8
+    "pxPerDeg": 8.03
   },
   "landscape_pitch": {
     "axis": "beta",
     "sign": 1,
-    "pxPerDeg": 4.25
+    "pxPerDeg": 4.65
   },
   "screen": {
     "cssW": 360,
-    "cssH": 595
+    "cssH": 640
+  },
+  "screenPortrait": {
+    "cssW": 360,
+    "cssH": 640
+  },
+  "screenLandscape": {
+    "cssW": 699,
+    "cssH": 393
   },
   "_raw": {
     "portrait_h_neg": {
       "axis": "beta",
       "peakSign": 1,
-      "variance": 672.6,
-      "totalAngleDeg": 86.7
+      "variance": 1344.2,
+      "totalAngleDeg": 92.8,
+      "screenW": 360,
+      "screenH": 640
     },
     "portrait_h_pos": {
       "axis": "beta",
       "peakSign": -1,
-      "variance": 659.2,
-      "totalAngleDeg": 87.6
+      "variance": 1095.5,
+      "totalAngleDeg": 96.3,
+      "screenW": 360,
+      "screenH": 640
     },
     "portrait_v_neg": {
       "axis": "alpha",
       "peakSign": 1,
-      "variance": 592.3,
-      "totalAngleDeg": 87.9
+      "variance": 749.9,
+      "totalAngleDeg": 95.6,
+      "screenW": 360,
+      "screenH": 640
     },
     "portrait_v_pos": {
       "axis": "alpha",
       "peakSign": -1,
-      "variance": 711.1,
-      "totalAngleDeg": 66.8
+      "variance": 794.9,
+      "totalAngleDeg": 71.5,
+      "screenW": 360,
+      "screenH": 640
     },
     "landscape_h_neg": {
       "axis": "alpha",
       "peakSign": 1,
-      "variance": 497.4,
-      "totalAngleDeg": 84
+      "variance": 878.2,
+      "totalAngleDeg": 88.4,
+      "screenW": 699,
+      "screenH": 393
     },
     "landscape_h_pos": {
       "axis": "alpha",
       "peakSign": -1,
-      "variance": 558.6,
-      "totalAngleDeg": 90.9
+      "variance": 1125.9,
+      "totalAngleDeg": 85.7,
+      "screenW": 699,
+      "screenH": 393
     },
     "landscape_v_neg": {
       "axis": "beta",
       "peakSign": -1,
-      "variance": 492.3,
-      "totalAngleDeg": 98.3
+      "variance": 1041.7,
+      "totalAngleDeg": 87.8,
+      "screenW": 699,
+      "screenH": 393
     },
     "landscape_v_pos": {
       "axis": "beta",
       "peakSign": 1,
-      "variance": 836.3,
-      "totalAngleDeg": 71
+      "variance": 1037.2,
+      "totalAngleDeg": 81.6,
+      "screenW": 699,
+      "screenH": 393
     }
   },
-  "_generated": "2026-05-27T08:41:03.549Z"
+  "_generated": "2026-05-28T09:54:52.119Z"
 }
