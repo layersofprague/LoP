@@ -66,9 +66,6 @@ a { color: inherit; text-decoration: none; }
   display: flex; flex-direction: column;
   background: var(--paper);
 }
-#app-header-spacer {
-  flex: 0 0 var(--header-h, 52px);
-}
 #topbar {
   flex: 0 0 auto;
   display: flex; flex-direction: column;
@@ -1617,11 +1614,12 @@ a { color: inherit; text-decoration: none; }
 </head>
 <body>
 
+<div id="lop-header"></div>
+<script src="header.js"></script>
+
 <div id="app">
-  <!-- Topbar -->
-  <div id="app-header-spacer"></div>
-  <div id="lop-header"></div>
-  <script src="header.js"></script>
+  <!-- Topbar placeholder — výšku nastaví adjustTopbarOffset -->
+  <div id="_header_ph" style="flex:0 0 auto"></div>
 
   <div id="topSearch">
     <div class="ts-field">
@@ -3329,11 +3327,10 @@ window.addEventListener('resize', alignPuck);
 function adjustTopbarOffset() {
   const tb  = document.getElementById('lop-header');
   const nav = document.getElementById('nav');
+  const ph  = document.getElementById('_header_ph');
   const h   = tb ? tb.offsetHeight : 0;
   if (!h) return;
-  document.documentElement.style.setProperty('--header-h', h + 'px');
-  const spacer = document.getElementById('app-header-spacer');
-  if (spacer) spacer.style.height = h + 'px';
+  if (ph) ph.style.height = h + 'px';
   if (nav && window.innerWidth >= 820) {
     nav.style.paddingTop = h + 'px';
   } else if (nav) {
