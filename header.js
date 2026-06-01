@@ -155,9 +155,10 @@ function _inject() {
   // HTML
   el.innerHTML = _html();
 
-  // Kompenzace fixed headeru — přidej padding-top na body
+  // Kompenzace fixed headeru — stránka si řídí offset sama
   requestAnimationFrame(() => {
-    document.body.style.paddingTop = el.offsetHeight + 'px';
+    if (typeof adjustTopbarOffset === 'function') adjustTopbarOffset();
+    else document.body.style.paddingTop = el.offsetHeight + 'px';
   });
 
   // Auth
