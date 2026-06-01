@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>AR flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #f0c14e;
+  --gold-dim: rgba(240,193,78,.55);
+  --paper: #eeefeb;
+  --ink: #0d0b08;
+  --glass: rgba(13,11,8,.55);
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'JetBrains Mono', monospace;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+#cam-layer {
+  position: fixed; inset: 0;
+  background: #111;
+}
+#video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+}
+#hist-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: all;
+  touch-action: none;
+}
+#grid {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 33.33% 33.33%;
+  opacity: 0;
+  transition: opacity .4s;
+}
+#grid.visible { opacity: 1; }
+#crosshair {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 48px; height: 48px;
+  z-index: 50;
+}
+#crosshair::before, #crosshair::after {
+  content: ''; position: absolute; background: rgba(255,255,255,.55);
+}
+#crosshair::before { top:50%; left:-16px; right:-16px; height:1px; margin-top:-.5px; }
+#crosshair::after  { left:50%; top:-16px; bottom:-16px; width:1px; margin-left:-.5px; }
+.ch-ring { position:absolute; inset:0; border:1px solid rgba(255,255,255,.4); border-radius:50%; }
+.ch-tl,.ch-tr,.ch-bl,.ch-br { display: none; }
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+  padding-left: 16px; padding-right: 16px; padding-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: none;
+  pointer-events: none;
+  z-index: 100;
+}
+.top-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 99px;
+  color: var(--paper);
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.top-chip.title {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-size: 13px;
+  letter-spacing: 0; text-transform: none; font-weight: 300;
+}
+
+.dot-live {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74,222,128,.25);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+#touch-hint {
+  position: fixed;
+  bottom: 112px; left: 50%; transform: translateX(-50%);
+  padding: 8px 16px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  color: var(--paper);
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s;
+  z-index: 100;
+  border: 1px solid rgba(255,255,255,.08);
+}
+#touch-hint.show { opacity: 1; }
+#bottombar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 18px);
+  padding-top: 14px; padding-left: 28px; padding-right: 28px;
+  background: none;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 100;
+}
+.cam-side-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(13,11,8,.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.05);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(238,239,235,.55); cursor: pointer;
+  transition: background .15s, transform .1s;
+  flex-shrink: 0; position: relative;
+}
+.cam-side-btn:active { background: rgba(255,255,255,.1); transform: scale(.92); }
+.cam-side-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Shutter — outer semi-transparent disk + inner white disk */
+#shutter {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: rgba(220,220,216,.22);
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .1s;
+  flex-shrink: 0;
+  padding: 6px;
+}
+#shutter:active { transform: scale(.88); }
+#shutter.locked #shutter-inner {
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
+}
+/* Unlock state — after evaluation */
+#shutter.unlock #shutter-inner {
+  background: rgba(240,193,78,.35);
+}
+#shutter.unlock #shutter-eval-icon { display: flex; }
+#shutter.unlock #shutter-eval-icon span {
+  content: 'odemknout';
+  font-size: 7px;
+}
+
+/* Evaluate state — pulsing gold ring, scan icon inside */
+#shutter.evaluate {
+  box-shadow: 0 0 0 3px rgba(240,193,78,.35);
+  animation: shutter-pulse 1.8s ease-in-out infinite;
+}
+#shutter.evaluate #shutter-inner {
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,193,78,.3), 0 1px 5px rgba(0,0,0,.2);
+}
+#shutter-eval-icon {
+  position: absolute; inset: 0;
+  display: none; align-items: center; justify-content: center;
+}
+#shutter.evaluate #shutter-eval-icon { display: flex; }
+@keyframes shutter-pulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(240,193,78,.35); }
+  50%      { box-shadow: 0 0 0 7px rgba(240,193,78,.12); }
+}
+#shutter-inner {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: #f2f2f0;
+  box-shadow: 0 1px 5px rgba(0,0,0,.2);
+}
+/* Opacity panel — portrait: vertical above btn; landscape: horizontal expanding left */
+#opacity-panel {
+  position: absolute;
+  /* portrait default: centered above the button */
+  bottom: 50px; left: 50%; transform: translateX(-50%) translateY(4px);
+  background: rgba(13,11,8,.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+}
+#opacity-panel.open {
+  opacity: 1; pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+/* vertical slider track */
+.op-track-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.op-lbl { font-size: 8px; letter-spacing: .14em; color: rgba(238,239,235,.45); text-transform: uppercase; }
+#opacity-slider {
+  -webkit-appearance: none; appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 4px; height: 110px;
+  background: rgba(255,255,255,.18);
+  border-radius: 99px; outline: none; cursor: pointer;
+}
+#opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.4);
+  cursor: pointer;
+  margin-left: -9px;
+}
+#opacity-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper); border: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18);
+  cursor: pointer;
+}
+#op-val { font-size: 9px; color: rgba(238,239,235,.4); }
+
+/* Landscape overrides */
+@media (orientation: landscape) {
+  /* Shutter: fixed center of right (short) edge */
+  #shutter {
+    position: fixed !important;
+    right: max(env(safe-area-inset-right,0px),12px) !important;
+    top: 50% !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    z-index: 110;
+  }
+  /* Lock button: below shutter on right edge */
+  #lock-btn {
+    position: fixed !important;
+    right: max(env(safe-area-inset-right,0px),19px) !important;
+    top: calc(50% + 50px) !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: 110;
+  }
+
+  /* Bottombar: along bottom edge, horizontal */
+  #bottombar {
+    top: auto; bottom: 0; left: 0;
+    right: max(env(safe-area-inset-right,0px),100px); /* leave space for shutter */
+    width: auto; flex-direction: row;
+    padding: 10px 16px max(env(safe-area-inset-bottom,0px),12px);
+    background: none;
+    align-items: center;
+    justify-content: space-between;
+  }
+  /* Right button group: keep horizontal */
+  #bottombar > div[style] { flex-direction: row; gap: 6px; }
+
+  /* Touch hint: centered on screen */
+  #touch-hint { bottom: auto; left: 50%; top: 50%; transform: translate(-50%, calc(-50% - 60px)); }
+
+  /* Opacity panel: opens upward from bottom-right */
+  #opacity-panel {
+    bottom: 50px; left: auto; right: 0;
+    transform: translateX(0) translateY(4px);
+    flex-direction: column;
+    padding: 14px 10px;
+  }
+  #opacity-panel.open { transform: translateX(0) translateY(0); }
+  .op-track-wrap { flex-direction: column; align-items: center; gap: 6px; }
+  #opacity-slider {
+    writing-mode: vertical-lr; direction: rtl;
+    width: 4px; height: 110px;
+  }
+  #opacity-slider::-webkit-slider-thumb { margin-left: -9px; margin-top: 0; }
+}
+/* Camera start overlay */
+#cam-start {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.88);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  z-index: 250;
+  backdrop-filter: blur(4px);
+}
+#cam-start .c-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 26px; color: var(--paper);
+  text-align: center; line-height: 1.25;
+}
+#cam-start .c-sub {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(238,239,235,.4); text-align: center;
+  max-width: 220px; line-height: 1.7;
+}
+#cam-start-btn {
+  padding: 14px 34px;
+  background: var(--paper); color: var(--ink);
+  border: none; border-radius: 99px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer; font-weight: 500;
+  transition: transform .1s, opacity .1s;
+}
+#cam-start-btn:active { transform: scale(.95); opacity: .85; }
+#flash {
+  position: fixed; inset: 0;
+  background: #fff; opacity: 0;
+  pointer-events: none; z-index: 300;
+  transition: opacity .05s;
+}
+#flash.on { opacity: .8; }
+
+/* Scanning modal */
+#scan-modal {
+  position: fixed; inset: 0; z-index: 305;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(13,11,8,.6);
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+}
+#scan-modal.show { display: flex; }
+#scan-box {
+  position: relative; overflow: hidden;
+  width: min(340px, 85vw); height: min(220px, 55vw);
+  border-radius: 12px; border: 1px solid rgba(240,193,78,.3);
+  background: #000;
+}
+#scan-video-thumb {
+  width: 100%; height: 100%; object-fit: cover; opacity: .55;
+}
+/* Scanning line */
+#scan-line {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  box-shadow: 0 0 12px 3px rgba(240,193,78,.5);
+  animation: scan-move 1.6s ease-in-out infinite;
+  top: 0;
+}
+@keyframes scan-move {
+  0%   { top: 0%; opacity: 1; }
+  90%  { top: 100%; opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+#scan-label {
+  position: absolute; bottom: 10px; left: 0; right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); opacity: .8;
+}
+
+
+/* ── SETTINGS PANEL ── */
+#ax-panel {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(13,11,8,.95); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 16px;
+  padding: 14px; z-index: 300; display: none; flex-direction: column; gap: 8px;
+  font-family: 'JetBrains Mono', monospace; min-width: 260px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
+}
+#ax-panel.show { display: flex; }
+/* backdrop dismiss */
+#ax-backdrop {
+  position: fixed; inset: 0; z-index: 299;
+  display: none;
+}
+#ax-backdrop.show { display: block; }
+
+.ax-panel-title {
+  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(238,239,235,.3); margin-bottom: 2px;
+}
+.ax-cal-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ax-cal-lbl { font-size: 10px; color: rgba(238,239,235,.45); }
+.ax-cal-val { font-size: 9px; font-weight: 600; }
+.ax-cal-val.ok  { color: #4ade80; }
+.ax-cal-val.err { color: #f87171; }
+.ax-divider { height: 1px; background: rgba(255,255,255,.07); margin: 2px 0; }
+.ax-row { display: flex; align-items: center; gap: 6px; }
+.ax-lbl { font-size: 8px; letter-spacing: .1em; text-transform: uppercase; width: 20px; flex-shrink: 0; }
+.ax-lbl.h { color: #f87171; }
+.ax-lbl.v { color: #4ade80; }
+.ax-cycle {
+  flex: 1; padding: 8px 6px; border-radius: 7px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  text-align: center; border: 1px solid rgba(255,255,255,.08);
+  background: rgba(238,239,235,.05); color: rgba(238,239,235,.2);
+  transition: all .12s; letter-spacing: .02em;
+}
+.ax-cycle.on-h { background: rgba(248,113,113,.15); color: #f87171; border-color: rgba(248,113,113,.4); }
+.ax-cycle.on-v { background: rgba(74,222,128,.12);  color: #4ade80; border-color: rgba(74,222,128,.35); }
+/* manual/json mode toggle */
+.ax-mode-row { display: flex; align-items: center; gap: 6px; }
+.ax-mode-lbl { font-size: 9px; color: rgba(238,239,235,.4); flex: 1; }
+.ax-mode-btn {
+  padding: 5px 10px; border-radius: 99px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; border: 1px solid rgba(255,255,255,.08);
+  background: rgba(238,239,235,.06); color: rgba(238,239,235,.35);
+  transition: all .12s;
+}
+.ax-mode-btn.active-json { background: rgba(74,222,128,.12); color: #4ade80; border-color: rgba(74,222,128,.3); }
+.ax-mode-btn.active-man  { background: rgba(240,193,78,.1);  color: var(--gold); border-color: rgba(240,193,78,.25); }
+
+/* ── MATCH RESULT OVERLAY ── */
+#match-result {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(13,11,8,.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 20px;
+  padding: 28px 32px;
+  z-index: 310;
+  display: none; flex-direction: column; align-items: center; gap: 10px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,.7);
+  min-width: 200px;
+}
+#match-result.show { display: flex; }
+#match-pct {
+  font-size: 56px; font-weight: 600; letter-spacing: -.03em;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+#match-pct.great { color: #4ade80; }
+#match-pct.ok    { color: var(--gold); }
+#match-pct.poor  { color: #f87171; }
+#match-label {
+  font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+  font-size: 15px; color: rgba(238,239,235,.55);
+}
+#match-detail {
+  font-size: 8px; letter-spacing: .06em;
+  color: rgba(238,239,235,.25); margin-top: 4px;
+  max-width: 240px; line-height: 1.5; text-align: center;
+}
+#match-close {
+  margin-top: 8px; padding: 9px 24px;
+  background: rgba(238,239,235,.08); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 99px; color: rgba(238,239,235,.5);
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer;
+}
+#match-close:active { background: rgba(255,255,255,.12); }
+#match-backdrop {
+  position: fixed; inset: 0; z-index: 309; display: none;
+}
+#match-backdrop.show { display: block; }
+/* Computing indicator */
+#match-computing {
+  position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+  padding: 8px 18px;
+  background: var(--glass);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px; border: 1px solid rgba(255,255,255,.08);
+  color: var(--paper); font-family: 'Fraunces', serif;
+  font-style: italic; font-weight: 300; font-size: 13px;
+  pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 100;
+}
+#match-computing.show { opacity: 1; }
+
+/* Flow mode button variant */
+.ax-mode-btn.active-flow { background: rgba(96,165,250,.12); color: #60a5fa; border-color: rgba(96,165,250,.3); }
+/* Flow quality chip in topbar */
+#flow-chip {
+  display: none; align-items: center; gap: 5px;
+  padding: 5px 11px;
+  background: var(--glass);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 99px; color: var(--paper);
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.08);
+}
+#flow-chip.show { display: flex; }
+.flow-dot { width:6px; height:6px; border-radius:50%; background:#4ade80; transition: background .4s; }
+/* Lock button next to shutter */
+#lock-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(13,11,8,.25);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.12);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(238,239,235,.6); cursor: pointer;
+  transition: all .2s; flex-shrink: 0;
+}
+#lock-btn:active { transform: scale(.92); background: rgba(255,255,255,.1); }
+#lock-btn.locked {
+  background: rgba(240,193,78,.15);
+  border-color: rgba(240,193,78,.35);
+  color: var(--gold);
+}
+</style>
+</head>
+<body>
+
+<div id="cam-layer">
+  <video id="video" autoplay playsinline muted></video>
+</div>
+
+<canvas id="hist-canvas"></canvas>
+<div id="grid"></div>
+<div id="crosshair">
+  <div class="ch-ring"></div>
+  <div class="ch-tl"></div><div class="ch-tr"></div>
+  <div class="ch-bl"></div><div class="ch-br"></div>
+</div>
+
+<div id="topbar">
+  <div class="top-chip title">Layers of Prague</div>
+  <div id="flow-chip">
+    <div class="flow-dot" id="flow-dot"></div>
+    <span id="flow-pts">—</span>
+  </div>
+</div>
+
+<div id="touch-hint">Táhni pro posun</div>
+
+<!-- Settings backdrop -->
+<div id="ax-backdrop" onclick="toggleAxPanel()"></div>
+
+<!-- Settings panel — centered -->
+<div id="ax-panel">
+  <div class="ax-panel-title">Nastavení</div>
+  <div class="ax-cal-row">
+    <span class="ax-cal-lbl">Vzdálenost od objektu</span>
+    <span class="ax-cal-val" id="settings-dist" style="color:rgba(238,239,235,.5);font-weight:400">—</span>
+  </div>
+  <!-- Stabilization mode -->
+  <div class="ax-divider"></div>
+  <div class="ax-panel-title">Stabilizace pohybu</div>
+  <div class="ax-mode-row">
+    <span class="ax-mode-lbl">Metoda</span>
+    <button class="ax-mode-btn" id="mode-flow-btn" onclick="setFlowMode('flow')">Flow</button>
+    <button class="ax-mode-btn" id="mode-gyro2-btn" onclick="setFlowMode('gyro')">Gyro</button>
+  </div>
+  <!-- JSON status + mode -->
+  <div class="ax-divider"></div>
+  <div class="ax-panel-title">Gyro kalibrace</div>
+  <div class="ax-cal-row">
+    <span class="ax-cal-lbl">Kalibrace JSON</span>
+    <span class="ax-cal-val" id="ax-cal-status">—</span>
+  </div>
+  <div class="ax-mode-row">
+    <span class="ax-mode-lbl">Režim</span>
+    <button class="ax-mode-btn" id="mode-json-btn" onclick="setMode('json')">JSON</button>
+    <button class="ax-mode-btn" id="mode-man-btn"  onclick="setMode('manual')">Manuální</button>
+  </div>
+  <div class="ax-divider"></div>
+  <!-- Axis cycles (shown in manual mode, visible but dimmed in json mode) -->
+  <div class="ax-row">
+    <span class="ax-lbl h">→ H</span>
+    <button class="ax-cycle" id="hax-cycle" onclick="cycleAxis('h')">vyp</button>
+  </div>
+  <div class="ax-row">
+    <span class="ax-lbl v">↑ V</span>
+    <button class="ax-cycle" id="vax-cycle" onclick="cycleAxis('v')">vyp</button>
+  </div>
+</div>
+
+<div id="bottombar">
+  <!-- Left: reset -->
+  <div class="cam-side-btn" id="reset-btn" title="Reset / dlouze: mřížka">
+    <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+  </div>
+  <!-- Center: shutter absolutely centered, lock beside it -->
+  <div id="shutter" style="position:absolute;left:50%;transform:translateX(-50%)">
+    <div id="shutter-inner"></div>
+    <div id="shutter-eval-icon">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(13,11,8,.75)">vyhodnotit</span>
+    </div>
+  </div>
+  <!-- Lock button: left of shutter, offset from center -->
+  <div id="lock-btn" onclick="onLockBtn()" title="Zamknout / odemknout"
+       style="position:absolute;left:calc(50% - 58px);transform:translateX(-100%)">
+    <svg id="lock-btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path id="lock-shackle" d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  </div>
+  <!-- Right: gear + opacity -->
+  <div style="display:flex;gap:6px;align-items:center;margin-left:auto">
+    <div class="cam-side-btn" id="ax-gear-btn" onclick="toggleAxPanel()" title="Nastavení gyra">
+      <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+    <div class="cam-side-btn" id="opacity-btn" title="Průhlednost">
+      <svg viewBox="0 0 24 24" stroke-width="1.6">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor" stroke="none" opacity=".7"/>
+      </svg>
+      <div id="opacity-panel">
+        <div class="op-track-wrap">
+          <span class="op-lbl">ref</span>
+          <input type="range" id="opacity-slider" min="0" max="100" value="50" step="1"/>
+          <span class="op-lbl">live</span>
+        </div>
+        <span id="op-val">50%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gyro calibration warning -->
+<div id="gyro-warn" style="display:none;position:fixed;bottom:100px;left:16px;right:16px;
+  background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);border-radius:12px;
+  padding:12px 14px;z-index:150;flex-direction:column;gap:8px">
+  <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#f87171">
+    Chybí kalibrace gyroskopu
+  </div>
+  <div style="font-size:11px;color:rgba(238,239,235,.55);line-height:1.5">
+    Použij <strong style="color:#60a5fa">Flow</strong> stabilizaci (nevyžaduje kalibraci), nebo proveď kalibraci gyra.
+  </div>
+  <div style="display:flex;gap:8px">
+    <button onclick="setFlowMode('flow');toggleAxPanel()"
+      style="flex:1;padding:9px;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);
+      border-radius:99px;font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:.1em;
+      text-transform:uppercase;cursor:pointer">
+      Použít Flow
+    </button>
+    <button onclick="window.location.href='gyro_test.html'"
+      style="flex:1;padding:9px;background:rgba(248,113,113,.2);color:#f87171;border:1px solid rgba(248,113,113,.3);
+      border-radius:99px;font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:.1em;
+      text-transform:uppercase;cursor:pointer">
+      Kalibrovat
+    </button>
+    <button onclick="loadCalManual()"
+      style="flex:1;padding:9px;background:rgba(238,239,235,.06);color:rgba(238,239,235,.5);
+      border:1px solid rgba(238,239,235,.1);border-radius:99px;font-family:JetBrains Mono,monospace;
+      font-size:9px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">
+      JSON
+    </button>
+  </div>
+</div>
+
+<div id="cam-start">
+  <div class="c-title">Holešovický přístav<br/><span style="font-size:.72em;color:rgba(238,239,235,.4)">~&thinsp;1930</span></div>
+  <div class="c-sub">Zarovnej historický snímek<br/>s živým záběrem kamery</div>
+  <button id="cam-start-btn" onclick="startCamera()">Spustit kameru</button>
+</div>
+
+<div id="flash"></div>
+
+<!-- Scanning modal -->
+<div id="scan-modal">
+  <div id="scan-box">
+    <video id="scan-video-thumb" autoplay playsinline muted></video>
+    <div id="scan-line"></div>
+    <div id="scan-label">Vyhodnocuji shodu…</div>
+  </div>
+</div>
+
+<!-- Match result overlay -->
+<div id="match-backdrop" onclick="closeMatchResult()"></div>
+<div id="match-result">
+  <div id="match-pct">—</div>
+  <div id="match-label">shoda historické fotky</div>
+  <div id="match-detail">—</div>
+  <button id="match-close" onclick="closeMatchResult()">Zkusit znovu?</button>
+  <button onclick="exportComparison()" style="margin-top:2px;padding:7px 18px;background:rgba(238,239,235,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;color:rgba(238,239,235,.3);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer">Export PNG</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// Canvas quad-warp renderer using triangle subdivision
+// ─────────────────────────────────────────────────────────
+const canvas = document.getElementById('hist-canvas');
+const ctx    = canvas.getContext('2d');
+
+let W = 0, H = 0;
+let imgLoaded = false;
+let opacity   = 0.5;
+let corners   = []; // [TL, TR, BR, BL] each {x,y}
+
+const histImg = new Image();
+histImg.crossOrigin = 'anonymous';
+histImg.src = 'https://layersofprague.github.io/LoP/foto/h_001h.jpg';
+
+// Mask image for comparison (same quad-warp, alpha = include in comparison)
+// h001_hist_mask.png — bílé oblasti = kde porovnávat (NCC comparison)
+const maskImg = new Image();
+maskImg.crossOrigin = 'anonymous';
+maskImg.src = 'https://layersofprague.github.io/LoP/foto/h001_hist_mask.png';
+let maskLoaded = false;
+
+// Cam mask — bílé oblasti = kde hledat tracking body (flow)
+// Zarovnaná s hist_mask: stejný formát + rozměry
+const camMaskImg = new Image();
+camMaskImg.crossOrigin = 'anonymous';
+camMaskImg.src = 'https://layersofprague.github.io/LoP/foto/h001_cam_mask.png';
+let camMaskLoaded = false;
+let flCamMaskBuf = null;   // Uint8Array FL_W × FL_H — 0=zakázáno, 255=povoleno
+
+function naturalCorners() {
+  const iw = histImg.naturalWidth  || 4;
+  const ih = histImg.naturalHeight || 3;
+  const scale = Math.min(W / iw, H / ih);
+  const fw = iw * scale, fh = ih * scale;
+  const ox = (W - fw) / 2, oy = (H - fh) / 2;
+  return [
+    {x: ox,    y: oy},
+    {x: ox+fw, y: oy},
+    {x: ox+fw, y: oy+fh},
+    {x: ox,    y: oy+fh}
+  ];
+}
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  corners = naturalCorners();
+  draw();
+}
+
+function drawTriangle(image, src0, src1, src2, dst0, dst1, dst2) {
+  const sx = [src0.x, src1.x, src2.x];
+  const sy = [src0.y, src1.y, src2.y];
+  const dx = [dst0.x, dst1.x, dst2.x];
+  const dy = [dst0.y, dst1.y, dst2.y];
+  const det = (sx[1]-sx[0])*(sy[2]-sy[0]) - (sx[2]-sx[0])*(sy[1]-sy[0]);
+  if (Math.abs(det) < 1e-8) return;
+  const a = ((dx[1]-dx[0])*(sy[2]-sy[0]) - (dx[2]-dx[0])*(sy[1]-sy[0])) / det;
+  const b = ((dy[1]-dy[0])*(sy[2]-sy[0]) - (dy[2]-dy[0])*(sy[1]-sy[0])) / det;
+  const c = ((dx[2]-dx[0])*(sx[1]-sx[0]) - (dx[1]-dx[0])*(sx[2]-sx[0])) / det;
+  const d = ((dy[2]-dy[0])*(sx[1]-sx[0]) - (dy[1]-dy[0])*(sx[2]-sx[0])) / det;
+  const e = dx[0] - a*sx[0] - c*sy[0];
+  const f = dy[0] - b*sx[0] - d*sy[0];
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(dst0.x, dst0.y);
+  ctx.lineTo(dst1.x, dst1.y);
+  ctx.lineTo(dst2.x, dst2.y);
+  ctx.closePath();
+  ctx.clip();
+  ctx.transform(a, b, c, d, e, f);
+  ctx.drawImage(image, 0, 0);
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  if (!imgLoaded) return;
+  const iw = histImg.naturalWidth;
+  const ih = histImg.naturalHeight;
+  const [tl, tr, br, bl] = corners;
+  // Source quad corners (full image)
+  const s_tl = {x:0,  y:0};
+  const s_tr = {x:iw, y:0};
+  const s_br = {x:iw, y:ih};
+  const s_bl = {x:0,  y:ih};
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  // Two triangles covering the quad
+  drawTriangle(histImg, s_tl, s_tr, s_br, tl, tr, br);
+  drawTriangle(histImg, s_tl, s_br, s_bl, tl, br, bl);
+  ctx.restore();
+}
+
+histImg.onload = () => { imgLoaded = true; resize(); };
+camMaskImg.onload = () => { camMaskLoaded = true; flBuildCamMask(); };
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+resize();
+
+// ─────────────────────────────────────────────────────────
+// TOUCH HANDLING
+// ─────────────────────────────────────────────────────────
+let activeTouches = {};   // id -> {x, y}
+let gesture = null;
+let hintTimer = null;
+
+function touchPos(t) { return {x: t.clientX, y: t.clientY}; }
+function dist2(a, b) { const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+function mid2(a, b)  { return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+
+function showHint(txt) {
+  const el = document.getElementById('touch-hint');
+  el.textContent = txt;
+  el.classList.add('show');
+  clearTimeout(hintTimer);
+}
+function hideHint() {
+  hintTimer = setTimeout(() => {
+    document.getElementById('touch-hint').classList.remove('show');
+  }, 900);
+}
+
+// Edge proximity zone: 20 % of screen dimension
+const EDGE_ZONE = 0.20;
+
+// Returns which edge a point is near (within EDGE_ZONE), or null
+function nearEdge(p) {
+  if (p.y < H * EDGE_ZONE)        return 'top';
+  if (p.y > H * (1 - EDGE_ZONE))  return 'bottom';
+  if (p.x < W * EDGE_ZONE)        return 'left';
+  if (p.x > W * (1 - EDGE_ZONE))  return 'right';
+  return null;
+}
+
+// Classify two-finger gesture:
+//   Perspective only when orientation matches AND at least one
+//   finger is within 20 % of the corresponding edge.
+//   Everything else → scale.
+function classifyTwoFinger(t1, t2) {
+  const dx = Math.abs(t1.x - t2.x);
+  const dy = Math.abs(t1.y - t2.y);
+  const ratio = dy > 0 ? dx / dy : 99;
+
+  const candidates = [nearEdge(t1), nearEdge(t2)].filter(Boolean);
+
+  if (ratio > 2.2) {
+    // Strongly horizontal — valid only near top or bottom
+    const hEdge = candidates.find(e => e === 'top' || e === 'bottom');
+    if (hEdge) {
+      return hEdge === 'top'
+        ? { type: 'persp', edge: 'top',    idx: [0,1], axis: 'h' }
+        : { type: 'persp', edge: 'bottom', idx: [3,2], axis: 'h' };
+    }
+  } else if (ratio < 0.45) {
+    // Strongly vertical — valid only near left or right
+    const vEdge = candidates.find(e => e === 'left' || e === 'right');
+    if (vEdge) {
+      return vEdge === 'left'
+        ? { type: 'persp', edge: 'left',  idx: [0,3], axis: 'v' }
+        : { type: 'persp', edge: 'right', idx: [1,2], axis: 'v' };
+    }
+  }
+
+  // Default → scale around centroid
+  return { type: 'scale' };
+}
+
+function cornersCentroid(cs) {
+  const cx = cs.reduce((s,c) => s+c.x, 0) / cs.length;
+  const cy = cs.reduce((s,c) => s+c.y, 0) / cs.length;
+  return {x: cx, y: cy};
+}
+
+const edgeLabels = {
+  top:    'Perspektiva — horní okraj',
+  bottom: 'Perspektiva — dolní okraj',
+  left:   'Perspektiva — levý okraj',
+  right:  'Perspektiva — pravý okraj',
+};
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => {
+    activeTouches[t.identifier] = touchPos(t);
+  });
+
+  const ids = Object.keys(activeTouches);
+
+  if (ids.length === 1) {
+    gesture = { mode: 'translate', prev: activeTouches[ids[0]] };
+    showHint('Posun');
+
+  } else if (ids.length >= 2) {
+    const t1 = activeTouches[ids[0]];
+    const t2 = activeTouches[ids[1]];
+    const cl = classifyTwoFinger(t1, t2);
+    const savedCorners = corners.map(c => ({...c}));
+    const startDist = dist2(t1, t2);
+    const startMid  = mid2(t1, t2);
+
+    if (cl.type === 'scale') {
+      const ctr = cornersCentroid(savedCorners);
+      gesture = {
+        mode: 'scale',
+        startDist, startMid, savedCorners, centroid: ctr
+      };
+      showHint('Měřítko');
+    } else {
+      gesture = {
+        mode: 'persp',
+        edge: cl.edge, idx: cl.idx, axis: cl.axis,
+        startDist, startMid, savedCorners
+      };
+      showHint(edgeLabels[cl.edge]);
+    }
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const newPos = {};
+  Array.from(e.touches).forEach(t => { newPos[t.identifier] = touchPos(t); });
+  const ids = Object.keys(newPos);
+
+  if (!gesture) { activeTouches = newPos; return; }
+
+  if (gesture.mode === 'translate' && ids.length === 1) {
+    const cur = newPos[ids[0]];
+    const prev = gesture.prev;
+    if (prev) {
+      const dx = cur.x - prev.x;
+      const dy = cur.y - prev.y;
+      corners = corners.map(c => ({x: c.x + dx, y: c.y + dy}));
+    }
+    gesture.prev = cur;
+
+  } else if (gesture.mode === 'scale' && ids.length >= 2) {
+    const t1 = newPos[ids[0]];
+    const t2 = newPos[ids[1]];
+    const curDist = dist2(t1, t2);
+    const curMid  = mid2(t1, t2);
+    const scaleF  = curDist / gesture.startDist;
+    const mdx = curMid.x - gesture.startMid.x;
+    const mdy = curMid.y - gesture.startMid.y;
+    const sc  = gesture.savedCorners;
+    const ctr = gesture.centroid;
+
+    // Scale each corner relative to the original centroid, then translate
+    corners = sc.map(c => ({
+      x: ctr.x + (c.x - ctr.x) * scaleF + mdx,
+      y: ctr.y + (c.y - ctr.y) * scaleF + mdy
+    }));
+
+  } else if (gesture.mode === 'persp' && ids.length >= 2) {
+    const t1 = newPos[ids[0]];
+    const t2 = newPos[ids[1]];
+    const curDist = dist2(t1, t2);
+    const curMid  = mid2(t1, t2);
+    const delta   = curDist - gesture.startDist;  // + = fingers spreading apart
+    const mdx = curMid.x - gesture.startMid.x;
+    const mdy = curMid.y - gesture.startMid.y;
+    const sc  = gesture.savedCorners;
+    const half = delta * 0.45;
+    const [i0, i1] = gesture.idx;
+
+    // Translate all corners first, then adjust the edge pair
+    corners = sc.map(c => ({x: c.x + mdx, y: c.y + mdy}));
+
+    if (gesture.axis === 'h') {
+      const c0 = sc[i0], c1 = sc[i1];
+      if (c0.x <= c1.x) {
+        corners[i0] = {x: sc[i0].x + mdx - half, y: sc[i0].y + mdy};
+        corners[i1] = {x: sc[i1].x + mdx + half, y: sc[i1].y + mdy};
+      } else {
+        corners[i0] = {x: sc[i0].x + mdx + half, y: sc[i0].y + mdy};
+        corners[i1] = {x: sc[i1].x + mdx - half, y: sc[i1].y + mdy};
+      }
+    } else {
+      const c0 = sc[i0], c1 = sc[i1];
+      if (c0.y <= c1.y) {
+        corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy - half};
+        corners[i1] = {x: sc[i1].x + mdx, y: sc[i1].y + mdy + half};
+      } else {
+        corners[i0] = {x: sc[i0].x + mdx, y: sc[i0].y + mdy + half};
+        corners[i1] = {x: sc[i1].x + mdx, y: sc[i1].y + mdy - half};
+      }
+    }
+  }
+
+  activeTouches = newPos;
+  draw();
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => { delete activeTouches[t.identifier]; });
+  const ids = Object.keys(activeTouches);
+
+  if (ids.length === 0) {
+    gesture = null;
+    hideHint();
+  } else if (ids.length === 1) {
+    gesture = { mode: 'translate', prev: activeTouches[ids[0]] };
+  }
+}, { passive: false });
+
+// ─────────────────────────────────────────────────────────
+// OPACITY SLIDER
+// ─────────────────────────────────────────────────────────
+const sliderEl = document.getElementById('opacity-slider');
+const opValEl  = document.getElementById('op-val');
+const opPanel  = document.getElementById('opacity-panel');
+const opBtn    = document.getElementById('opacity-btn');
+
+sliderEl.addEventListener('input', e => {
+  opacity = e.target.value / 100;
+  opValEl.textContent = e.target.value + '%';
+  draw();
+});
+// Stop panel from propagating to canvas
+opPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+opPanel.addEventListener('touchmove',  e => e.stopPropagation(), { passive: true });
+
+opBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  opPanel.classList.toggle('open');
+});
+document.addEventListener('touchstart', e => {
+  if (!opBtn.contains(e.target)) opPanel.classList.remove('open');
+}, { passive: true });
+
+// ─────────────────────────────────────────────────────────
+// RESET (tap) / GRID (long press)
+// ─────────────────────────────────────────────────────────
+let resetTimer = null;
+const resetBtn = document.getElementById('reset-btn');
+
+resetBtn.addEventListener('touchstart', e => {
+  e.stopPropagation();
+  resetTimer = setTimeout(() => {
+    resetTimer = null;
+    document.getElementById('grid').classList.toggle('visible');
+    showHint('Mřížka');
+    hideHint();
+  }, 550);
+}, { passive: true });
+
+resetBtn.addEventListener('touchend', e => {
+  e.stopPropagation();
+  if (resetTimer !== null) {
+    clearTimeout(resetTimer);
+    resetTimer = null;
+    if (arLocked) {
+      unlockAR();
+    } else {
+      // Normal state: reset corners
+      corners = naturalCorners();
+      draw();
+      showHint('Reset'); hideHint();
+    }
+  }
+}, { passive: true });
+
+// ─────────────────────────────────────────────────────────
+// PLACES.JSON — načtení dat místa
+// ─────────────────────────────────────────────────────────
+const PLACE_ID   = 'H001';
+const PLACES_URL = 'https://layersofprague.github.io/LoP/places.json';
+
+// Fallback — H001 hodnoty natvrdo pro případ nedostupnosti JSONu
+let place = {
+  objLat: 50.105626,
+  objLng: 14.455984,
+  fov:    60           // horizontální FOV kamery ve stupních
+};
+
+fetch(PLACES_URL)
+  .then(r => r.json())
+  .then(arr => {
+    const p = arr.find(x => x.id === PLACE_ID);
+    if (!p) return;
+    if (p.objLat !== undefined) place.objLat = p.objLat;
+    if (p.objLng !== undefined) place.objLng = p.objLng;
+    if (p.fov    !== undefined) place.fov    = p.fov;
+    updateDistChip();
+  })
+  .catch(() => {});
+
+// ─────────────────────────────────────────────────────────
+// GPS — kontinuální sledování polohy
+// ─────────────────────────────────────────────────────────
+let gpsPos = null;
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(
+    p => {
+      gpsPos = { lat: p.coords.latitude, lng: p.coords.longitude };
+      if (!arLocked) updateDistChip();
+    },
+    () => {},
+    { enableHighAccuracy: true, maximumAge: 2000 }
+  );
+}
+
+// Haversine vzdálenost v metrech
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r;
+  const dLng = (lng2 - lng1) * r;
+  const a = Math.sin(dLat/2)**2
+          + Math.cos(lat1*r) * Math.cos(lat2*r) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Aktuální vzdálenost uživatele od objektu
+function currentDistM() {
+  if (gpsPos) return haversineM(gpsPos.lat, gpsPos.lng, place.objLat, place.objLng);
+  return 50; // fallback bez GPS
+}
+
+function updateDistChip() {
+  const d = currentDistM();
+  const el = document.getElementById('settings-dist');
+  if (el) el.textContent = `${Math.round(d)} m`;
+}
+
+function updateLockBtn() {
+  const btn = document.getElementById('lock-btn');
+  if (!btn) return;
+  const shackle = document.getElementById('lock-shackle');
+  if (arLocked) {
+    btn.classList.add('locked');
+    // closed shackle
+    if (shackle) shackle.setAttribute('d', 'M7 11V7a5 5 0 0 1 10 0v4');
+  } else {
+    btn.classList.remove('locked');
+    // open shackle
+    if (shackle) shackle.setAttribute('d', 'M7 11V7a5 5 0 0 1 9.9-1');
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// GYRO KALIBRACE — načtení z JSONu
+// ─────────────────────────────────────────────────────────
+const GYRO_URL = 'https://layersofprague.github.io/LoP/GYRO/gyro_calibration.json';
+
+// Kalibrace — null dokud se nenačte JSON
+let cal = null;
+
+function parseCal(d) {
+  // Supports both old format (portrait_yaw.axis/sign) and
+  // new gyro_test format (same keys, same structure)
+  return {
+    portrait: {
+      azimutAxis: d.portrait_yaw?.axis   ?? null,
+      azimutSign: d.portrait_yaw?.sign   ?? 1,
+      pitchAxis:  d.portrait_pitch?.axis ?? null,
+      pitchSign:  d.portrait_pitch?.sign ?? 1,
+    },
+    landscape: {
+      azimutAxis: d.landscape_yaw?.axis   ?? null,
+      azimutSign: d.landscape_yaw?.sign   ?? 1,
+      pitchAxis:  d.landscape_pitch?.axis ?? null,
+      pitchSign:  d.landscape_pitch?.sign ?? 1,
+    },
+  };
+}
+
+fetch(GYRO_URL)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => {
+    cal = parseCal(d);
+    document.getElementById('gyro-warn').style.display = 'none';
+    applyCalToPanel();
+  })
+  .catch(() => {
+    // Show warn only in gyro mode
+    if (flowMode === 'gyro') {
+      document.getElementById('gyro-warn').style.display = 'flex';
+    }
+  });
+
+// ─────────────────────────────────────────────────────────
+// GYRO — integrace úhlové rychlosti přes devicemotion
+// ─────────────────────────────────────────────────────────
+let rawRate    = { a: 0, b: 0, g: 0 };
+let gyroLastT  = null;
+let gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+
+function currentCal() {
+  const ls = (W > H);
+  return ls ? cal.landscape : cal.portrait;
+}
+
+window.addEventListener('devicemotion', e => {
+  if (!e.rotationRate) return;
+  const r = e.rotationRate;
+  rawRate = { a: r.alpha || 0, b: r.beta || 0, g: r.gamma || 0 };
+
+  if (!arLocked || (flowMode !== 'gyro' && flAutoMode !== 'fallback')) { gyroLastT = null; return; }
+
+  const now = performance.now();
+  const dt  = gyroLastT !== null ? (now - gyroLastT) / 1000 : 0;
+  gyroLastT = now;
+
+  if (dt > 0 && dt < 0.2) {
+    gyroAngles.alpha += rawRate.a * dt;
+    gyroAngles.beta  += rawRate.b * dt;
+    gyroAngles.gamma += rawRate.g * dt;
+    updateARPositionGyro();
+  }
+}, true);
+
+async function requestOrientPerm() {
+  // iOS vyžaduje povolení pro DeviceMotion i DeviceOrientation
+  if (typeof DeviceMotionEvent?.requestPermission === 'function') {
+    const r = await DeviceMotionEvent.requestPermission().catch(() => 'denied');
+    if (r !== 'granted') { showHint('Povol pohybové senzory'); hideHint(); return false; }
+  }
+  return true;
+}
+
+// ─────────────────────────────────────────────────────────
+// AR LOCK
+// ─────────────────────────────────────────────────────────
+let arLocked    = false;
+let lockCorners = null;
+let lockDistM   = null;
+
+// pxPerDeg = kolik px odpovídá 1° otočení při daném FOV
+// pxPerDeg = W / FOV
+function computePxPerDeg() {
+  return W / place.fov;
+}
+
+async function lockAR() {
+  // In gyro mode, calibration is required
+  if (flowMode === 'gyro' && !cal) {
+    showHint('Chybí kalibrace gyra'); hideHint(); return;
+  }
+
+  lockDistM   = currentDistM();
+  lockCorners = corners.map(c => ({...c}));
+  arLocked    = true;
+  updateLockBtn();
+
+  if (flowMode === 'flow') {
+    const ok = initFlowTracking();
+    if (ok) {
+      showHint('Zafixováno — flow');
+      flowRafId = requestAnimationFrame(flowTick);
+    } else {
+      // Video not ready yet or too few features — try gyro fallback
+      if (cal) {
+        gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+        gyroLastT  = null;
+        showHint('Flow: málo bodů → gyro');
+      } else {
+        showHint('Flow: kamera není připravena');
+        arLocked = false;
+        updateLockBtn();
+        return;
+      }
+    }
+  } else {
+    gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+    gyroLastT  = null;
+    showHint('Zafixováno — gyro');
+  }
+
+  hideHint();
+  syncFlowModeUI();
+  updateFlowChip();
+}
+
+function unlockAR() {
+  arLocked    = false;
+  gyroAngles  = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT   = null;
+  if (flowRafId !== null) { cancelAnimationFrame(flowRafId); flowRafId = null; }
+  flKalman    = null;
+  flPrevRaw   = null;
+  flLowCount  = 0;
+  flAutoMode  = 'flow';
+  flFBFrame   = 0;
+  flQuality   = 0;
+  showHint('Odemčeno'); hideHint();
+  updateLockBtn();
+  updateDistChip();
+  updateFlowChip(0, 0);
+}
+
+// ─────────────────────────────────────────────────────────
+// AR UPDATE — gyro path
+// ─────────────────────────────────────────────────────────
+function updateARPositionGyro() {
+  if (!arLocked || !lockCorners) return;
+  const pxPerDeg = computePxPerDeg();
+  // panelCal() returns {hAxis, hSign, vAxis, vSign} or null axes when vyp
+  const pc = panelCal();
+  const rateOf = axis => axis === 'alpha' ? rawRate.a : axis === 'beta' ? rawRate.b : rawRate.g;
+
+  // Recompute integrated values based on panel axes
+  let shiftX = 0, shiftY = 0;
+  if (pc.hAxis) shiftX = -pc.hSign * gyroAngles[pc.hAxis] * pxPerDeg;
+  if (pc.vAxis) shiftY = -pc.vSign * gyroAngles[pc.vAxis] * pxPerDeg;
+
+  corners = lockCorners.map(c => ({ x: c.x + shiftX, y: c.y + shiftY }));
+  draw();
+}
+
+// ─────────────────────────────────────────────────────────
+// COMPARISON ENGINE
+// Flow: 1) render mask quad-warp to offscreen canvas
+//       2) capture live camera frame to offscreen canvas
+//       3) Sobel edge detection on both, weighted by mask alpha
+//       4) normalized cross-correlation → %
+// ─────────────────────────────────────────────────────────
+// COMP_SIZE = natural mask resolution (set after mask loads)
+let COMP_W = 512, COMP_H = 512;
+maskImg.onload = () => {
+  maskLoaded = true;
+  COMP_W = maskImg.naturalWidth;
+  COMP_H = maskImg.naturalHeight;
+};
+
+// Box blur — suppresses fine texture (leaves) before edge detection
+function boxBlur(data, w, h, radius) {
+  const lum = new Float32Array(w * h);
+  for (let i = 0; i < w*h; i++)
+    lum[i] = 0.299*data[i*4] + 0.587*data[i*4+1] + 0.114*data[i*4+2];
+  const tmp = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let sum = 0, cnt = 0;
+      for (let dx = -radius; dx <= radius; dx++) {
+        const nx = x + dx;
+        if (nx >= 0 && nx < w) { sum += lum[y*w+nx]; cnt++; }
+      }
+      tmp[y*w+x] = sum / cnt;
+    }
+  }
+  const out = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let sum = 0, cnt = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        const ny = y + dy;
+        if (ny >= 0 && ny < h) { sum += tmp[ny*w+x]; cnt++; }
+      }
+      out[y*w+x] = sum / cnt;
+    }
+  }
+  return out;
+}
+
+function sobel(data, w, h) {
+  // Blur first — radius 2 suppresses leaf texture, keeps architectural edges
+  const lum = boxBlur(data, w, h, 2);
+  const raw = new Float32Array(w * h);
+  for (let y = 1; y < h-1; y++) {
+    for (let x = 1; x < w-1; x++) {
+      const lu = (r, cc) => lum[(y+r)*w+(x+cc)];
+      const gx = -lu(-1,-1) + lu(-1,1) - 2*lu(0,-1) + 2*lu(0,1) - lu(1,-1) + lu(1,1);
+      const gy = -lu(-1,-1) - 2*lu(-1,0) - lu(-1,1) + lu(1,-1) + 2*lu(1,0) + lu(1,1);
+      raw[y*w+x] = Math.sqrt(gx*gx + gy*gy);
+    }
+  }
+  // Return raw magnitudes — caller will binarize per-image using masked pixels only
+  return raw;
+}
+
+// Binarize edge array using only pixels inside mask (weights > 0.5)
+// Keeps top KEEP_RATIO of masked pixels as edges → equal density on both images
+function binarizeMasked(edges, weights, keepRatio) {
+  const masked = [];
+  for (let i = 0; i < edges.length; i++)
+    if (weights[i] > 0.5 && edges[i] > 0) masked.push(edges[i]);
+  masked.sort((a,b) => b-a);
+  const thresh = masked[Math.floor(masked.length * keepRatio)] || 0;
+  const out = new Float32Array(edges.length);
+  for (let i = 0; i < edges.length; i++)
+    out[i] = (weights[i] > 0.5 && edges[i] > thresh) ? 1 : 0;
+  return out;
+}
+
+function normalizedCorrelation(a, b, mask) {
+  // Weighted NCC between edge arrays a and b, weighted by mask alpha
+  // mask: Float32Array 0..1
+  let sumW = 0, meanA = 0, meanB = 0;
+  for (let i = 0; i < a.length; i++) {
+    sumW  += mask[i];
+    meanA += a[i] * mask[i];
+    meanB += b[i] * mask[i];
+  }
+  if (sumW < 1) return 0;
+  meanA /= sumW; meanB /= sumW;
+
+  let num = 0, varA = 0, varB = 0;
+  for (let i = 0; i < a.length; i++) {
+    const da = (a[i] - meanA) * mask[i];
+    const db = (b[i] - meanB) * mask[i];
+    num  += da * db;
+    varA += da * da;
+    varB += db * db;
+  }
+  const denom = Math.sqrt(varA * varB);
+  if (denom < 1e-6) return 0;
+  return Math.max(0, num / denom); // 0..1
+}
+
+async function runComparison() {
+  if (!maskLoaded) { showHint('Maska se načítá…'); hideHint(); return; }
+  const video = document.getElementById('video');
+  if (video.readyState < 2) { showHint('Kamera není připravena'); hideHint(); return; }
+
+  // Show scan modal — mirror live video into it
+  const scanModal = document.getElementById('scan-modal');
+  const scanThumb = document.getElementById('scan-video-thumb');
+  const liveVideo = document.getElementById('video');
+  if (liveVideo.srcObject) scanThumb.srcObject = liveVideo.srcObject;
+  scanModal.classList.add('show');
+
+  // Let the modal render before heavy computation
+  await new Promise(r => setTimeout(r, 80));
+
+  // Work in SCREEN coordinates — both hist and camera share the same space
+  // Downscale to max 1024px wide for performance while keeping aspect ratio
+  const MAX_PX = 1024;
+  const scaleF = Math.min(1, MAX_PX / W);
+  const S  = Math.round(W * scaleF);
+  const SH = Math.round(H * scaleF);
+
+  const off = document.createElement('canvas');
+  off.width = S; off.height = SH;
+  const oc = off.getContext('2d', { willReadFrequently: true });
+
+  // Scale screen corners to working resolution
+  const scaledCorners = corners.map(p => ({x: p.x*scaleF, y: p.y*scaleF}));
+  const [stl, str, sbr, sbl] = scaledCorners;
+  const iw = maskImg.naturalWidth, ih = maskImg.naturalHeight;
+  const s_tl={x:0,y:0}, s_tr={x:iw,y:0}, s_br={x:iw,y:ih}, s_bl={x:0,y:ih};
+
+  function drawTriOff(img, src0,src1,src2, dst0,dst1,dst2) {
+    const sx=[src0.x,src1.x,src2.x], sy=[src0.y,src1.y,src2.y];
+    const dx=[dst0.x,dst1.x,dst2.x], dy=[dst0.y,dst1.y,dst2.y];
+    const det=(sx[1]-sx[0])*(sy[2]-sy[0])-(sx[2]-sx[0])*(sy[1]-sy[0]);
+    if (Math.abs(det)<1e-8) return;
+    const a=((dx[1]-dx[0])*(sy[2]-sy[0])-(dx[2]-dx[0])*(sy[1]-sy[0]))/det;
+    const b=((dy[1]-dy[0])*(sy[2]-sy[0])-(dy[2]-dy[0])*(sy[1]-sy[0]))/det;
+    const cc=((dx[2]-dx[0])*(sx[1]-sx[0])-(dx[1]-dx[0])*(sx[2]-sx[0]))/det;
+    const d=((dy[2]-dy[0])*(sx[1]-sx[0])-(dy[1]-dy[0])*(sx[2]-sx[0]))/det;
+    const e=dx[0]-a*sx[0]-cc*sy[0];
+    const f=dy[0]-b*sx[0]-d*sy[0];
+    oc.save();
+    oc.beginPath();
+    oc.moveTo(dst0.x,dst0.y); oc.lineTo(dst1.x,dst1.y); oc.lineTo(dst2.x,dst2.y);
+    oc.closePath(); oc.clip();
+    oc.transform(a,b,cc,d,e,f);
+    oc.drawImage(img,0,0);
+    oc.restore();
+  }
+
+  // ── A) Render mask quad-warped in screen coordinates ──
+  oc.clearRect(0,0,S,SH);
+  drawTriOff(maskImg, s_tl,s_tr,s_br, stl,str,sbr);
+  drawTriOff(maskImg, s_tl,s_br,s_bl, stl,sbr,sbl);
+  const maskData = oc.getImageData(0,0,S,SH).data;
+
+  // Extract alpha weights
+  const weights = new Float32Array(S*SH);
+  for (let i=0; i<S*SH; i++) weights[i] = maskData[i*4+3] / 255;
+
+  // ── B) Camera frame — replicate object-fit:cover crop ──
+  // Video may have different aspect ratio than screen.
+  // We must crop video the same way CSS object-fit:cover does.
+  oc.clearRect(0,0,S,SH);
+  {
+    const vw = video.videoWidth  || S;
+    const vh = video.videoHeight || SH;
+    const videoAR  = vw / vh;
+    const screenAR = S  / SH;
+    let srcX=0, srcY=0, srcW=vw, srcH=vh;
+    if (videoAR > screenAR) {
+      // Video wider than screen → crop left/right
+      srcH = vh;
+      srcW = Math.round(vh * screenAR);
+      srcX = Math.round((vw - srcW) / 2);
+    } else {
+      // Video taller than screen → crop top/bottom
+      srcW = vw;
+      srcH = Math.round(vw / screenAR);
+      srcY = Math.round((vh - srcH) / 2);
+    }
+    oc.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, S, SH);
+  }
+  const camData = oc.getImageData(0,0,S,SH).data;
+
+  // ── C) Hist image quad-warped in screen coordinates ──
+  oc.clearRect(0,0,S,SH);
+  drawTriOff(histImg, s_tl,s_tr,s_br, stl,str,sbr);
+  drawTriOff(histImg, s_tl,s_br,s_bl, stl,sbr,sbl);
+  const histData = oc.getImageData(0,0,S,SH).data;
+
+  // ── D) Sobel + binarize using masked pixels only ──
+  const rawHist = sobel(histData, S, SH);
+  const rawCam  = sobel(camData,  S, SH);
+  const edgesHist = binarizeMasked(rawHist, weights, 0.15);
+  const edgesCam  = binarizeMasked(rawCam,  weights, 0.15);
+
+  // ── E) NCC ──
+  const ncc = normalizedCorrelation(edgesHist, edgesCam, weights);
+  // Store for export
+  window._lastComp = { S, SH, edgesHist, edgesCam, weights, maskData, camData, histData };
+
+  // Debug stats
+  const activePx = weights.filter(w => w > 0.5).length;
+  const histEdgeMean = edgesHist.reduce((s,v,i) => s + (weights[i] > 0.5 ? v : 0), 0) / (activePx || 1);
+  const camEdgeMean  = edgesCam.reduce((s,v,i)  => s + (weights[i] > 0.5 ? v : 0), 0) / (activePx || 1);
+  const dbg = { activePx, histEdgeMean, camEdgeMean };
+
+  // Map NCC 0..1 to % — calibrated from real measurements:
+  // Wrong location:    NCC 0.00–0.05 → 0–6%   (confirmed: 0–6% in field)
+  // Poor alignment:    NCC 0.05–0.15 → 6–30%
+  // Good alignment:    NCC 0.15–0.30 → 30–75%  (confirmed: NCC 0.283 → target ~75%)
+  // Excellent:         NCC 0.30+     → 75–100%
+  const pct = Math.round(Math.min(100, Math.max(0,
+    ncc < 0.05
+      ? (ncc / 0.05) * 6
+      : ncc < 0.15
+        ? 6  + ((ncc - 0.05) / 0.10) * 24
+        : ncc < 0.30
+          ? 30 + ((ncc - 0.15) / 0.15) * 45
+          : 75 + ((ncc - 0.30) / 0.35) * 25
+  )));
+
+  scanModal.classList.remove('show');
+  showMatchResult(pct, ncc, dbg);
+}
+
+function showMatchResult(pct, ncc, dbg) {
+  const el     = document.getElementById('match-pct');
+  const label  = document.getElementById('match-label');
+  const detail = document.getElementById('match-detail');
+  el.textContent = pct + '%';
+  el.className = pct >= 70 ? 'great' : pct >= 40 ? 'ok' : 'poor';
+  label.textContent = pct >= 70 ? 'výborná shoda' : pct >= 40 ? 'přijatelná shoda' : 'slabá shoda';
+  if (dbg) {
+    detail.textContent = `NCC ${ncc.toFixed(3)}  aktivních px: ${dbg.activePx}  hist hrany: ${dbg.histEdgeMean.toFixed(1)}  cam hrany: ${dbg.camEdgeMean.toFixed(1)}`;
+    detail.style.display = 'block';
+  }
+  document.getElementById('match-result').classList.add('show');
+  document.getElementById('match-backdrop').classList.add('show');
+}
+
+function exportComparison() {
+  const d = window._lastComp;
+  if (!d) return;
+  const { S, SH, histData, camData, maskData, edgesHist, edgesCam, weights } = d;
+
+  // Build a composite PNG: 4 panels side by side
+  // [hist edges] [cam edges] [hist masked] [cam masked]
+  const PW = S * 2, PH = SH * 2;
+  const exp = document.createElement('canvas');
+  exp.width = PW; exp.height = PH;
+  const ec = exp.getContext('2d');
+  ec.fillStyle = '#111'; ec.fillRect(0,0,PW,PH);
+
+  function putPanel(srcData, x, y, w, h, isEdge, edgeArr) {
+    const id = ec.createImageData(w, h);
+    for (let i = 0; i < w*h; i++) {
+      if (isEdge) {
+        // Normalize edge to 0-255
+        const v = Math.min(255, edgeArr[i] * 2);
+        // Tint by mask: active = white, inactive = dark red
+        const active = weights[i] > 0.5;
+        id.data[i*4]   = active ? v : Math.min(255, v * 0.3 + (active ? 0 : 60));
+        id.data[i*4+1] = active ? v : Math.min(255, v * 0.3);
+        id.data[i*4+2] = active ? v : Math.min(255, v * 0.3);
+        id.data[i*4+3] = 255;
+      } else {
+        id.data[i*4]   = srcData[i*4];
+        id.data[i*4+1] = srcData[i*4+1];
+        id.data[i*4+2] = srcData[i*4+2];
+        id.data[i*4+3] = weights[i] > 0.5 ? 255 : 60;
+      }
+    }
+    ec.putImageData(id, x, y);
+  }
+
+  // Top-left: hist image masked
+  putPanel(histData, 0, 0, S, SH, false, null);
+  // Top-right: cam image masked
+  putPanel(camData, S, 0, S, SH, false, null);
+  // Bottom-left: hist edges (white=active, dark red=masked out)
+  putPanel(histData, 0, SH, S, SH, true, edgesHist);
+  // Bottom-right: cam edges
+  putPanel(camData, S, SH, S, SH, true, edgesCam);
+
+  // Labels
+  ec.fillStyle = 'rgba(240,193,78,.9)';
+  ec.font = 'bold 24px monospace';
+  ec.fillText('hist (masked)', 10, 30);
+  ec.fillText('camera (masked)', S+10, 30);
+  ec.fillText('hist edges', 10, SH+30);
+  ec.fillText('camera edges', S+10, SH+30);
+
+  exp.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'comparison_export.png';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+function closeMatchResult() {
+  document.getElementById('match-result').classList.remove('show');
+  document.getElementById('match-backdrop').classList.remove('show');
+  // Update shutter label to "odemknout"
+  const span = document.querySelector('#shutter-eval-icon span');
+
+}
+
+// ─────────────────────────────────────────────────────────
+// OPTICAL FLOW v4
+//  1. 3-úrovňová pyramida  — 1/4 + 1/2 + full, range ~±160px
+//  2. RANSAC homografie    — robustní vůči ~45% outlierů
+//                            (auta, chodci, pohybující se větve)
+//  3. Sanity check         — inovační gate na Kalman update;
+//                            velké skoky → jen predikce
+//  4. Kalman filtr         — pozice+rychlost per roh
+//  5. Auto gyro↔flow       — fallback na gyro při ztrátě kvality,
+//                            reinit flow při návratu do oblasti
+// ─────────────────────────────────────────────────────────
+const FL_W         = 320;
+let   FL_H         = 180;
+let   FL_WC, FL_HC, FL_WM, FL_HM;   // coarse + mid dimensions
+
+const FL_BR        = 8;    // full patch polomer → 17×17
+const FL_BR_M      = 4;    // mid patch polomer  →  9×9
+const FL_BR_C      = 2;    // coarse patch pol.  →  5×5
+const FL_SR_C      = 20;   // coarse search radius
+const FL_SR_M      = 8;    // mid search radius
+const FL_SR_F      = 4;    // fine search radius
+const FL_COLS      = 5;
+const FL_ROWS      = 4;
+const FL_SAD       = 18;   // max SAD/px (fine level)
+const FL_MAD_T     = 8;
+const FL_RANSAC_IT = 40;   // RANSAC iterací
+const FL_RANSAC_T  = 3.5;  // inlier threshold [px flow-space]
+const FL_SANITY_T  = 12;   // max dovolený skok rohu za frame [screen px]
+const FL_REINIT_T  = 20;   // počet slabých framů → fallback
+const FL_REINIT_F  = 45;   // každých N framů zkoušíme reinit v fallbacku
+const KQ = 0.4, KR = 2.5;
+
+let flCanvas  = null, flCtx  = null;   // full  FL_W  × FL_H
+let flMCanvas = null, flMCtx = null;   // mid   FL_WM × FL_HM
+let flCCanvas = null, flCCtx = null;   // coarse FL_WC × FL_HC
+
+let flLockGray  = null, flLockGrayM = null, flLockGrayC = null;
+let flLockPts   = [];   // [{fx,fy,weight,patch,patchM,patchC}]
+let flCurPts    = [];   // [{fx,fy}] — předpovídaná poloha
+let flKalman    = null; // [{x:{x,v,P}, y:{x,v,P}}] per roh
+let flPrevRaw   = null; // poslední akceptovaná raw pozice rohů
+let flQuality   = 0;
+let flLowCount  = 0;    // po sobě jdoucí slabé framy
+let flFBFrame   = 0;    // čítač framů v fallback stavu
+let flAutoMode  = 'flow'; // 'flow' | 'fallback' | 'hold'
+let flowRafId   = null;
+let flowMode    = 'flow'; // user-selected: 'flow' | 'gyro'
+
+// ── canvas setup ─────────────────────────────────────────
+function flInitCanvas() {
+  FL_H  = Math.max(4, Math.round(FL_W * H / W));
+  FL_WC = FL_W >> 2;              FL_HC = Math.round(FL_H / 4);
+  FL_WM = FL_W >> 1;              FL_HM = Math.round(FL_H / 2);
+  if (!flCanvas) {
+    flCanvas  = document.createElement('canvas');
+    flCtx     = flCanvas.getContext('2d', { willReadFrequently: true });
+    flMCanvas = document.createElement('canvas');
+    flMCtx    = flMCanvas.getContext('2d', { willReadFrequently: true });
+    flCCanvas = document.createElement('canvas');
+    flCCtx    = flCCanvas.getContext('2d', { willReadFrequently: true });
+  }
+  flCanvas.width  = FL_W;  flCanvas.height  = FL_H;
+  flMCanvas.width = FL_WM; flMCanvas.height = FL_HM;
+  flCCanvas.width = FL_WC; flCCanvas.height = FL_HC;
+  // Přepočítej cam masku při každém resize (nové FL_W/FL_H)
+  flBuildCamMask();
+}
+
+// ── cam maska → Uint8Array FL_W × FL_H ───────────────────
+// Maska je černobílá PNG (bílá = trackovat, černá = přeskočit).
+// Downscalujeme ji do flow prostoru (FL_W × FL_H) jednou při
+// initCanvas; pak ji čteme v flPickPts bez další alokace.
+function flBuildCamMask() {
+  if (!camMaskLoaded) { flCamMaskBuf = null; return; }
+  const tmpC = document.createElement('canvas');
+  tmpC.width = FL_W; tmpC.height = FL_H;
+  const tmpX = tmpC.getContext('2d', { willReadFrequently: true });
+  tmpX.drawImage(camMaskImg, 0, 0, FL_W, FL_H);
+  const d = tmpX.getImageData(0, 0, FL_W, FL_H).data;
+  flCamMaskBuf = new Uint8Array(FL_W * FL_H);
+  // Prahujeme na luminanci > 128 → povolená oblast
+  for (let i = 0; i < flCamMaskBuf.length; i++)
+    flCamMaskBuf[i] = (0.299*d[i*4] + 0.587*d[i*4+1] + 0.114*d[i*4+2]) > 128 ? 255 : 0;
+}
+
+// ── grab gray frame — object-fit:cover crop ──────────────
+// level: 0=full, 1=mid(1/2), 2=coarse(1/4)
+function flGrab(level) {
+  const v = document.getElementById('video');
+  if (v.readyState < 2 || !flCanvas) return null;
+  const vw=v.videoWidth||FL_W, vh=v.videoHeight||FL_H;
+  const vAR=vw/vh, sAR=FL_W/FL_H;
+  let sx=0,sy=0,sw=vw,sh=vh;
+  if (vAR>sAR){sw=Math.round(vh*sAR);sx=(vw-sw)>>1;}
+  else        {sh=Math.round(vw/sAR);sy=(vh-sh)>>1;}
+  const tw=[FL_W,FL_WM,FL_WC][level], th=[FL_H,FL_HM,FL_HC][level];
+  const fc=[flCtx,flMCtx,flCCtx][level];
+  fc.drawImage(v,sx,sy,sw,sh,0,0,tw,th);
+  const d=fc.getImageData(0,0,tw,th).data;
+  const g=new Uint8Array(tw*th);
+  for(let i=0;i<g.length;i++) g[i]=(77*d[i*4]+150*d[i*4+1]+29*d[i*4+2])>>8;
+  return g;
+}
+
+// ── Sobel — šířka w, výška h ─────────────────────────────
+function flSobel(g,w,h) {
+  const e=new Float32Array(w*h);
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
+    const p=(dr,dc)=>g[(y+dr)*w+x+dc];
+    const gx=-p(-1,-1)+p(-1,1)-2*p(0,-1)+2*p(0,1)-p(1,-1)+p(1,1);
+    const gy=-p(-1,-1)-2*p(-1,0)-p(-1,1)+p(1,-1)+2*p(1,0)+p(1,1);
+    e[y*w+x]=Math.sqrt(gx*gx+gy*gy);
+  }
+  return e;
+}
+
+// ── výběr bodů s váhou dle vzdálenosti od středu ─────────
+// Pokud je k dispozici camMask, vybíráme body jen v bílých oblastech.
+// Bez masky (fallback) funguje jako dřív — celý frame.
+function flPickPts(gray) {
+  // margin: jen FL_BR pro patch + FL_SR_F pro fine hledání
+  // flCurPts se pohybuje uvnitř canvasu sám — lock pozice nemusí mít velký margin
+  const margin = FL_BR + FL_SR_F + 2;
+  const usableW = FL_W - 2*margin, usableH = FL_H - 2*margin;
+  if(usableW < 4 || usableH < 4) return [];
+  const cw=Math.floor(usableW/FL_COLS), ch=Math.floor(usableH/FL_ROWS);
+  const e=flSobel(gray,FL_W,FL_H), pts=[];
+  const cx=FL_W/2, cy=FL_H/2;
+  const maxD=Math.sqrt(cx*cx+cy*cy);
+  const mask=flCamMaskBuf; // null = bez masky (fallback)
+  for(let r=0;r<FL_ROWS;r++) for(let c=0;c<FL_COLS;c++){
+    const x0=margin+c*cw, y0=margin+r*ch;
+    let best=0,bx=x0+(cw>>1),by=y0+(ch>>1);
+    for(let y=y0;y<y0+ch;y++) for(let x=x0;x<x0+cw;x++){
+      // Přeskočí pixely mimo cam masku (je-li dostupná)
+      if(mask && mask[y*FL_W+x]<128) continue;
+      if(e[y*FL_W+x]>best){best=e[y*FL_W+x];bx=x;by=y;}
+    }
+    if(best>10){
+      const d=Math.sqrt((bx-cx)*(bx-cx)+(by-cy)*(by-cy));
+      pts.push({fx:bx,fy:by,weight:1+1.5*(d/maxD)});
+    }
+  }
+  // Fallback: pokud maska omezila příliš mnoho buněk (<6 bodů),
+  // zkusíme znovu bez masky aby flow nezůstal bez bodů
+  if(pts.length < 6 && mask){
+    for(let r=0;r<FL_ROWS;r++) for(let c=0;c<FL_COLS;c++){
+      const x0=margin+c*cw, y0=margin+r*ch;
+      let best=0,bx=x0+(cw>>1),by=y0+(ch>>1);
+      for(let y=y0;y<y0+ch;y++) for(let x=x0;x<x0+cw;x++)
+        if(e[y*FL_W+x]>best){best=e[y*FL_W+x];bx=x;by=y;}
+      if(best>10){
+        const alreadyIn=pts.some(p=>p.fx===bx&&p.fy===by);
+        if(!alreadyIn){
+          const d=Math.sqrt((bx-cx)*(bx-cx)+(by-cy)*(by-cy));
+          pts.push({fx:bx,fy:by,weight:0.5+0.75*(d/maxD)}); // nižší váha — mimo masku
+        }
+      }
+    }
+  }
+  return pts;
+}
+
+// ── patch r px kolem (cx,cy), array šířky w ──────────────
+function flPatch(g,w,cx,cy,r){
+  const s=r*2+1,p=new Uint8Array(s*s);
+  for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++)
+    p[(dy+r)*s+dx+r]=g[(cy+dy)*w+cx+dx];
+  return p;
+}
+
+// ── block match — hledá patch v gray kolem (cx,cy) ───────
+function flMatch(gray,w,h,cx,cy,patch,r,sr){
+  const s=r*2+1;
+  let bSAD=1e9,bdx=0,bdy=0;
+  for(let dy=-sr;dy<=sr;dy++){
+    const ny=cy+dy; if(ny-r<0||ny+r>=h) continue;
+    for(let dx=-sr;dx<=sr;dx++){
+      const nx=cx+dx; if(nx-r<0||nx+r>=w) continue;
+      let sad=0;
+      for(let py=0;py<s;py++) for(let px=0;px<s;px++)
+        sad+=Math.abs(gray[(ny-r+py)*w+nx-r+px]-patch[py*s+px]);
+      if(sad<bSAD){bSAD=sad;bdx=dx;bdy=dy;}
+    }
+  }
+  return{dx:bdx,dy:bdy,sad:bSAD/(s*s)};
+}
+
+// ── clamp + median ────────────────────────────────────────
+function flClamp(v,lo,hi){return v<lo?lo:v>hi?hi:v;}
+function flMed(a){
+  if(!a.length) return 0;
+  const s=[...a].sort((x,y)=>x-y),m=s.length>>1;
+  return s.length&1?s[m]:(s[m-1]+s[m])*.5;
+}
+
+// ── 3-úrovňová pyramidová shoda ──────────────────────────
+// Vstup: 3 grayscale buffery, aktuální odhadovaná pozice (cx,cy)
+//        v plném rozlišení, 3 lock patche.
+// Výstup: {dx,dy} v plném rozlišení, sad z fine levelu.
+function flPyramid(gF,gM,gC, cx,cy, pF,pM,pC){
+  // Coarse (1/4)
+  const cxC=flClamp(Math.round(cx/4),FL_BR_C+1,FL_WC-FL_BR_C-2);
+  const cyC=flClamp(Math.round(cy/4),FL_BR_C+1,FL_HC-FL_BR_C-2);
+  const mc=flMatch(gC,FL_WC,FL_HC,cxC,cyC,pC,FL_BR_C,FL_SR_C);
+  // Mid (1/2) — start od coarse výsledku
+  const cxM=flClamp(Math.round(cx/2)+mc.dx*2,FL_BR_M+1,FL_WM-FL_BR_M-2);
+  const cyM=flClamp(Math.round(cy/2)+mc.dy*2,FL_BR_M+1,FL_HM-FL_BR_M-2);
+  const mm=flMatch(gM,FL_WM,FL_HM,cxM,cyM,pM,FL_BR_M,FL_SR_M);
+  // Fine (full) — start od mid výsledku
+  const cxF=flClamp(cx+mc.dx*4+mm.dx*2,FL_BR+1,FL_W-FL_BR-2);
+  const cyF=flClamp(cy+mc.dy*4+mm.dy*2,FL_BR+1,FL_H-FL_BR-2);
+  const mf=flMatch(gF,FL_W,FL_H,cxF,cyF,pF,FL_BR,FL_SR_F);
+  return{dx:(cxF+mf.dx)-cx, dy:(cyF+mf.dy)-cy, sad:mf.sad};
+}
+
+// ── Weighted DLT homografie ───────────────────────────────
+function flHomography(src,dst,W){
+  const n=src.length; if(n<4) return null;
+  const w=W||src.map(()=>1);
+  let msx=0,msy=0,mdx=0,mdy=0,ws=0;
+  for(let i=0;i<n;i++){msx+=src[i].x*w[i];msy+=src[i].y*w[i];mdx+=dst[i].x*w[i];mdy+=dst[i].y*w[i];ws+=w[i];}
+  msx/=ws;msy/=ws;mdx/=ws;mdy/=ws;
+  let sss=0,sds=0;
+  for(let i=0;i<n;i++){
+    const dx=src[i].x-msx,dy=src[i].y-msy;sss+=Math.sqrt(dx*dx+dy*dy)*w[i];
+    const ex=dst[i].x-mdx,ey=dst[i].y-mdy;sds+=Math.sqrt(ex*ex+ey*ey)*w[i];
+  }
+  const ss=Math.max(1e-6,sss/ws*Math.SQRT2), sd=Math.max(1e-6,sds/ws*Math.SQRT2);
+  const ns=src.map(p=>({x:(p.x-msx)/ss,y:(p.y-msy)/ss}));
+  const nd=dst.map(p=>({x:(p.x-mdx)/sd,y:(p.y-mdy)/sd}));
+  const AtA=Array.from({length:8},()=>new Float64Array(8));
+  const Atb=new Float64Array(8);
+  for(let i=0;i<n;i++){
+    const wi=w[i],{x:xi,y:yi}=ns[i],{x:Xi,y:Yi}=nd[i];
+    const r1=[xi,yi,1,0,0,0,-Xi*xi,-Xi*yi],r2=[0,0,0,xi,yi,1,-Yi*xi,-Yi*yi];
+    for(let j=0;j<8;j++){Atb[j]+=(r1[j]*Xi+r2[j]*Yi)*wi;for(let k=0;k<8;k++)AtA[j][k]+=(r1[j]*r1[k]+r2[j]*r2[k])*wi;}
+  }
+  const aug=AtA.map((row,i)=>[...row,Atb[i]]);
+  for(let col=0;col<8;col++){
+    let piv=col;
+    for(let rr=col+1;rr<8;rr++) if(Math.abs(aug[rr][col])>Math.abs(aug[piv][col])) piv=rr;
+    [aug[col],aug[piv]]=[aug[piv],aug[col]];
+    if(Math.abs(aug[col][col])<1e-10) return null;
+    for(let rr=0;rr<8;rr++){if(rr===col) continue;const f=aug[rr][col]/aug[col][col];for(let c=col;c<=8;c++) aug[rr][c]-=f*aug[col][c];}
+  }
+  const hn=[...aug.map((row,i)=>row[8]/row[i]),1];
+  function mMul(A,B){const C=new Float64Array(9);for(let r=0;r<3;r++)for(let c=0;c<3;c++)for(let k=0;k<3;k++)C[r*3+c]+=A[r*3+k]*B[k*3+c];return C;}
+  const Ts=[1/ss,0,-msx/ss,0,1/ss,-msy/ss,0,0,1];
+  const Ti=[sd,0,mdx,0,sd,mdy,0,0,1];
+  const HR=mMul(Ti,mMul(new Float64Array(hn),Ts));
+  const sc=HR[8]; if(Math.abs(sc)<1e-10) return null;
+  return Array.from(HR).map(v=>v/sc);
+}
+function flApplyH(H,x,y){const w=H[6]*x+H[7]*y+H[8];return{x:(H[0]*x+H[1]*y+H[2])/w,y:(H[3]*x+H[4]*y+H[5])/w};}
+
+// ── RANSAC homografie — robustní vůči outlierům ──────────
+// pts: [{src:{x,y}, dst:{x,y}, weight}]
+function flRansac(pts){
+  const n=pts.length; if(n<4) return null;
+  let bestH=null, bestInl=[], bestCnt=0;
+  for(let it=0;it<FL_RANSAC_IT;it++){
+    // Náhodný vzorek 4 bodů
+    const idx=[],used=new Set();
+    while(idx.length<4){const i=Math.floor(Math.random()*n);if(!used.has(i)){used.add(i);idx.push(i);}}
+    const H=flHomography(idx.map(i=>pts[i].src),idx.map(i=>pts[i].dst),null);
+    if(!H) continue;
+    // Spočítej inliery
+    const inl=[];
+    for(let i=0;i<n;i++){
+      const p=flApplyH(H,pts[i].src.x,pts[i].src.y);
+      if(Math.hypot(p.x-pts[i].dst.x,p.y-pts[i].dst.y)<FL_RANSAC_T) inl.push(i);
+    }
+    if(inl.length>bestCnt){bestCnt=inl.length;bestInl=inl;bestH=H;}
+    if(bestCnt>=Math.ceil(n*0.8)) break; // dost inlierů — konec
+  }
+  if(bestCnt<4) return null;
+  // Přepočítej H ze všech inlierů s váhami
+  const H=flHomography(bestInl.map(i=>pts[i].src),bestInl.map(i=>pts[i].dst),bestInl.map(i=>pts[i].weight));
+  return H?{H,inlierCount:bestCnt,totalCount:n}:null;
+}
+
+// ── Kalman 1D (pozice + rychlost) ────────────────────────
+function kInit(x0){return{x:x0,v:0,P:[[1,0],[0,1]]};}
+function kPred(k){
+  const decay=0.80; // tlumení rychlosti → zabrání "doběhu" po zastavení
+  const px=k.x+k.v, pv=k.v*decay;
+  return{x:px,v:pv,P:[[k.P[0][0]+k.P[0][1]+k.P[1][0]+k.P[1][1]+KQ,k.P[0][1]+k.P[1][1]],[k.P[1][0]+k.P[1][1],k.P[1][1]+KQ]]};
+}
+function kUpd(k,z){
+  const S=k.P[0][0]+KR,K0=k.P[0][0]/S,K1=k.P[1][0]/S,inn=z-k.x;
+  return{x:k.x+K0*inn,v:k.v+K1*inn,P:[[(1-K0)*k.P[0][0],(1-K0)*k.P[0][1]],[k.P[1][0]-K1*k.P[0][0],k.P[1][1]-K1*k.P[0][1]]]};
+}
+function flInitKalman(cs){return cs.map(c=>({x:kInit(c.x),y:kInit(c.y)}));}
+
+// ── inicializace ─────────────────────────────────────────
+function initFlowTracking(){
+  flInitCanvas();
+  const gF=flGrab(0),gM=flGrab(1),gC=flGrab(2);
+  if(!gF||!gM||!gC) return false;
+  const pts=flPickPts(gF); if(pts.length<6) return false;
+  flLockGray=gF; flLockGrayM=gM; flLockGrayC=gC;
+  flLockPts=pts.map(p=>({
+    fx:p.fx,fy:p.fy,weight:p.weight,
+    patch :flPatch(gF,FL_W, p.fx,           p.fy,           FL_BR),
+    patchM:flPatch(gM,FL_WM,Math.round(p.fx/2),Math.round(p.fy/2),FL_BR_M),
+    patchC:flPatch(gC,FL_WC,Math.round(p.fx/4),Math.round(p.fy/4),FL_BR_C)
+  }));
+  flCurPts=pts.map(p=>({fx:p.fx,fy:p.fy}));
+  flKalman=flInitKalman(lockCorners);
+  flPrevRaw=lockCorners.map(c=>({...c}));
+  flQuality=1; flLowCount=0; flAutoMode='flow'; flFBFrame=0;
+  return true;
+}
+
+// ── tiché přezamknutí (zachová Kalman stav) ──────────────
+function flReinit(){
+  const gF=flGrab(0),gM=flGrab(1),gC=flGrab(2);
+  if(!gF||!gM||!gC) return false;
+  const pts=flPickPts(gF); if(pts.length<6) return false;
+  flLockGray=gF; flLockGrayM=gM; flLockGrayC=gC;
+  flLockPts=pts.map(p=>({
+    fx:p.fx,fy:p.fy,weight:p.weight,
+    patch :flPatch(gF,FL_W, p.fx,           p.fy,           FL_BR),
+    patchM:flPatch(gM,FL_WM,Math.round(p.fx/2),Math.round(p.fy/2),FL_BR_M),
+    patchC:flPatch(gC,FL_WC,Math.round(p.fx/4),Math.round(p.fy/4),FL_BR_C)
+  }));
+  flCurPts=pts.map(p=>({fx:p.fx,fy:p.fy}));
+  // Kalman zachováme — jen reset kvality
+  flQuality=1; flLowCount=0;
+  return true;
+}
+
+// ── hlavní loop ───────────────────────────────────────────
+function flowTick(){
+  if(!arLocked||flowMode!=='flow') return;
+  flowRafId=requestAnimationFrame(flowTick);
+
+  // V fallback módu řídí pozici gyro; sem dohlédneme jen na reinit
+  if(flAutoMode==='fallback'){
+    flFBFrame++;
+    if(flFBFrame%FL_REINIT_F===0){
+      if(flReinit()){
+        flAutoMode='flow';
+        flKalman=flInitKalman(corners); // reinit Kalman z aktuální pozice
+        flPrevRaw=corners.map(c=>({...c}));
+      }
+    }
+    return;
+  }
+
+  const gF=flGrab(0),gM=flGrab(1),gC=flGrab(2);
+  if(!gF||!gM||!gC) return;
+
+  const n=flLockPts.length;
+  const matchPts=[];
+
+  // 1) Pyramid match všech bodů
+  for(let i=0;i<n;i++){
+    const lp=flLockPts[i],cp=flCurPts[i];
+    const m=flPyramid(gF,gM,gC,Math.round(cp.fx),Math.round(cp.fy),lp.patch,lp.patchM,lp.patchC);
+    const nfx=flClamp(cp.fx+m.dx,FL_BR+1,FL_W-FL_BR-2);
+    const nfy=flClamp(cp.fy+m.dy,FL_BR+1,FL_H-FL_BR-2);
+    flCurPts[i]={fx:nfx,fy:nfy};
+    if(m.sad<FL_SAD) matchPts.push({src:{x:lp.fx,y:lp.fy},dst:{x:nfx,y:nfy},weight:lp.weight});
+  }
+
+  // 2) RANSAC homografie
+  const result=flRansac(matchPts);
+  flQuality=result?(result.inlierCount/n):0;
+  updateFlowChip(result?result.inlierCount:0,n);
+
+  // Přechod do fallback módu
+  if(!result||result.inlierCount<4){
+    flLowCount++;
+    if(flLowCount>=FL_REINIT_T){
+      flAutoMode='fallback';
+      flFBFrame=0;
+      gyroAngles={alpha:0,beta:0,gamma:0};
+      gyroLastT=null;
+    }
+    // Hold: projikuj Kalman bez update
+    flKalman=flKalman.map(k=>({x:kPred(k.x),y:kPred(k.y)}));
+    corners=flKalman.map(k=>({x:k.x.x,y:k.y.x}));
+    draw();
+    return;
+  }
+  flLowCount=0;
+
+  // 3) Výpočet rawCorners z homografie
+  const sX=FL_W/W,sY=FL_H/H;
+  const rawCorners=lockCorners.map(c=>{
+    const fp=flApplyH(result.H,c.x*sX,c.y*sY);
+    return{x:fp.x/sX,y:fp.y/sY};
+  });
+
+  // 4) Sanity check — inovační gate
+  const maxJump=flPrevRaw
+    ?Math.max(...rawCorners.map((c,i)=>Math.hypot(c.x-flPrevRaw[i].x,c.y-flPrevRaw[i].y)))
+    :0;
+
+  if(maxJump<=FL_SANITY_T){
+    flPrevRaw=rawCorners.map(c=>({...c}));
+    // 5) Kalman update
+    flKalman=flKalman.map((k,i)=>{
+      const kxp=kPred(k.x),kyp=kPred(k.y);
+      return{x:kUpd(kxp,rawCorners[i].x),y:kUpd(kyp,rawCorners[i].y)};
+    });
+  } else {
+    // Skok příliš velký (auto, prudký pohyb) — jen predikce
+    flKalman=flKalman.map(k=>({x:kPred(k.x),y:kPred(k.y)}));
+  }
+
+  corners=flKalman.map(k=>({x:k.x.x,y:k.y.x}));
+  draw();
+}
+
+// ── chip ─────────────────────────────────────────────────
+function updateFlowChip(good,total){
+  const chip=document.getElementById('flow-chip');
+  const dot =document.getElementById('flow-dot');
+  const pts =document.getElementById('flow-pts');
+  if(!chip) return;
+  const show=arLocked&&flowMode==='flow';
+  chip.classList.toggle('show',show);
+  if(!show||!pts) return;
+  const tag=flAutoMode==='fallback'?'·G':'';
+  pts.textContent=`${good||0}/${total||0}${tag}`;
+  if(dot) dot.style.background=flAutoMode==='fallback'?'var(--gold)':flQuality>.6?'#4ade80':flQuality>.3?'var(--gold)':'#f87171';
+}
+
+function setFlowMode(mode){
+  if(arLocked) unlockAR();
+  flowMode=mode;
+  const warn=document.getElementById('gyro-warn');
+  if(warn) warn.style.display=flowMode==='flow'?'none':(cal?'none':'flex');
+  syncFlowModeUI();
+}
+
+function syncFlowModeUI(){
+  const fb=document.getElementById('mode-flow-btn');
+  const gb=document.getElementById('mode-gyro2-btn');
+  if(fb) fb.className='ax-mode-btn'+(flowMode==='flow'?' active-flow':'');
+  if(gb) gb.className='ax-mode-btn'+(flowMode==='gyro'?' active-man':'');
+}
+
+// ─────────────────────────────────────────────────────────
+// LOCK BUTTON
+// ─────────────────────────────────────────────────────────
+async function onLockBtn() {
+  if (arLocked) {
+    unlockAR();
+  } else {
+    const ok = await requestOrientPerm();
+    if (ok) lockAR();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// SHUTTER — vždy jen vyhodnotí
+// ─────────────────────────────────────────────────────────
+document.getElementById('shutter').addEventListener('click', async () => {
+  await runComparison();
+});
+
+// ─────────────────────────────────────────────────────────
+// MANUAL CAL LOAD — file picker fallback
+// ─────────────────────────────────────────────────────────
+function loadCalManual() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        cal = parseCal(d);
+        document.getElementById('gyro-warn').style.display = 'none';
+        applyCalToPanel();
+        showHint('Kalibrace načtena'); hideHint();
+      } catch { showHint('Chyba čtení JSON'); hideHint(); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// ─────────────────────────────────────────────────────────
+// CAMERA
+// ─────────────────────────────────────────────────────────
+async function startCamera() {
+  document.getElementById('cam-start').style.display = 'none';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:'environment', width:{ideal:1920}, height:{ideal:1080} },
+      audio: false
+    });
+    const v = document.getElementById('video');
+    v.srcObject = stream;
+    v.style.display = 'block';
+    document.getElementById('live-label').textContent = 'Live';
+  } catch(err) {
+    document.getElementById('cam-layer').style.background = '#1a1612';
+    document.getElementById('live-label').textContent = 'Bez kamery';
+  }
+}
+// ─────────────────────────────────────────────────────────
+// SETTINGS PANEL — gyro axes + mode
+// ─────────────────────────────────────────────────────────
+const STATES = [
+  { label: 'vyp',  axis: null,    sign:  0 },
+  { label: 'rα +', axis: 'alpha', sign:  1 },
+  { label: 'rα −', axis: 'alpha', sign: -1 },
+  { label: 'rβ +', axis: 'beta',  sign:  1 },
+  { label: 'rβ −', axis: 'beta',  sign: -1 },
+  { label: 'rγ +', axis: 'gamma', sign:  1 },
+  { label: 'rγ −', axis: 'gamma', sign: -1 },
+];
+
+let hIdx  = 0;
+let vIdx  = 0;
+let axOpen = false;
+let axMode = 'json';  // 'json' | 'manual'
+
+function toggleAxPanel() {
+  axOpen = !axOpen;
+  document.getElementById('ax-panel').classList.toggle('show', axOpen);
+  document.getElementById('ax-backdrop').classList.toggle('show', axOpen);
+  document.getElementById('ax-gear-btn').classList.toggle('active', axOpen);
+  if (axOpen) syncAxPanel();
+}
+
+function setMode(mode) {
+  axMode = mode;
+  if (mode === 'json' && cal) applyCalToPanel();
+  syncAxPanel();
+  // Reset integration on mode change
+  gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT  = null;
+  if (lockCorners) { corners = lockCorners.map(c => ({...c})); draw(); }
+}
+
+function cycleAxis(hv) {
+  axMode = 'manual';  // switching axis = entering manual mode
+  if (hv === 'h') hIdx = (hIdx + 1) % STATES.length;
+  else             vIdx = (vIdx + 1) % STATES.length;
+  syncAxPanel();
+  gyroAngles = { alpha: 0, beta: 0, gamma: 0 };
+  gyroLastT  = null;
+  if (lockCorners) { corners = lockCorners.map(c => ({...c})); draw(); }
+}
+
+function syncAxPanel() {
+  // Cal status
+  const cs = document.getElementById('ax-cal-status');
+  if (cs) { cs.textContent = cal ? 'OK ✓' : 'Chybí'; cs.className = 'ax-cal-val ' + (cal ? 'ok' : 'err'); }
+
+  // Mode buttons
+  const mj = document.getElementById('mode-json-btn');
+  const mm = document.getElementById('mode-man-btn');
+  if (mj) mj.className = 'ax-mode-btn' + (axMode === 'json'   ? ' active-json' : '');
+  if (mm) mm.className = 'ax-mode-btn' + (axMode === 'manual' ? ' active-man'  : '');
+
+  // Axis buttons — dimmed in json mode, active in manual
+  const alpha = axMode === 'manual' ? 1 : 0.4;
+  const hb = document.getElementById('hax-cycle');
+  const vb = document.getElementById('vax-cycle');
+  if (hb) {
+    hb.textContent = STATES[hIdx].label;
+    hb.className = 'ax-cycle' + (hIdx > 0 ? ' on-h' : '');
+    hb.style.opacity = axMode === 'manual' ? '1' : '0.4';
+  }
+  if (vb) {
+    vb.textContent = STATES[vIdx].label;
+    vb.className = 'ax-cycle' + (vIdx > 0 ? ' on-v' : '');
+    vb.style.opacity = axMode === 'manual' ? '1' : '0.4';
+  }
+}
+
+function applyCalToPanel() {
+  if (!cal) return;
+  const cl = currentCal();
+  const hi = STATES.findIndex(s => s.axis === cl.azimutAxis && s.sign === cl.azimutSign);
+  const vi = STATES.findIndex(s => s.axis === cl.pitchAxis  && s.sign === cl.pitchSign);
+  hIdx = hi > 0 ? hi : 0;
+  vIdx = vi > 0 ? vi : 0;
+  axMode = 'json';
+  if (axOpen) syncAxPanel();
+}
+
+function panelCal() {
+  if (axMode === 'json' && cal) {
+    // Use cal directly, not panel indices
+    const cl = currentCal();
+    return { hAxis: cl.azimutAxis, hSign: cl.azimutSign, vAxis: cl.pitchAxis, vSign: cl.pitchSign };
+  }
+  return {
+    hAxis: STATES[hIdx].axis, hSign: STATES[hIdx].sign,
+    vAxis: STATES[vIdx].axis, vSign: STATES[vIdx].sign,
+  };
+}
+
+// Init flow mode UI on startup
+syncFlowModeUI();
+
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+</script>
+</body>
+</html>
