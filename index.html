@@ -62,11 +62,12 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════════ APP SHELL ═══════════════ */
 #app {
   position: fixed; inset: 0;
-  top: var(--header-h, 0px);
-  left: 0; right: 0; bottom: 0;
   margin: 0;
   display: flex; flex-direction: column;
   background: var(--paper);
+}
+#app-header-spacer {
+  flex: 0 0 var(--header-h, 52px);
 }
 #topbar {
   flex: 0 0 auto;
@@ -1618,6 +1619,7 @@ a { color: inherit; text-decoration: none; }
 
 <div id="app">
   <!-- Topbar -->
+  <div id="app-header-spacer"></div>
   <div id="lop-header"></div>
   <script src="header.js"></script>
 
@@ -3330,6 +3332,8 @@ function adjustTopbarOffset() {
   const h   = tb ? tb.offsetHeight : 0;
   if (!h) return;
   document.documentElement.style.setProperty('--header-h', h + 'px');
+  const spacer = document.getElementById('app-header-spacer');
+  if (spacer) spacer.style.height = h + 'px';
   if (nav && window.innerWidth >= 820) {
     nav.style.paddingTop = h + 'px';
   } else if (nav) {
