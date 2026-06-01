@@ -74,6 +74,14 @@ const CSS = `
   background: var(--accent, #b04020);
 }
 .lop-h-btn.logged-in { color: var(--ink, #1a1a18); }
+.lop-h-profile-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--ink, #1a1a18); color: var(--paper, #eeefeb);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 13px; font-weight: 500; line-height: 1;
+  flex-shrink: 0;
+}
 `;
 
 /* ── HTML ── */
@@ -89,7 +97,7 @@ function _html() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </button>
       <a class="lop-h-btn" href="${ROOT}oprojektu.html" title="O projektu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       </a>
       <button class="lop-h-btn" id="lopHNotif" title="Notifikace">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
@@ -113,6 +121,8 @@ function _updateAuth() {
     if (loggedIn) {
       btn.classList.add('logged-in');
       btn.title = s.user.email || 'Profil';
+      const initial = (s.user.email || '?')[0].toUpperCase();
+      btn.innerHTML = `<span class="lop-h-profile-avatar">${initial}</span>`;
       btn.onclick = () => {
         if (window.lopAuth) window.lopAuth.open('loggedIn');
         else location.href = ROOT + 'profil.html';
@@ -120,6 +130,7 @@ function _updateAuth() {
     } else {
       btn.classList.remove('logged-in');
       btn.title = 'Přihlásit se';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
       btn.onclick = () => {
         if (window.lopAuth) window.lopAuth.open('signin');
         else location.href = ROOT + 'login.html?return=' + encodeURIComponent(location.href);
