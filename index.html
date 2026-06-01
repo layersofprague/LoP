@@ -3326,8 +3326,14 @@ window.addEventListener('resize', alignPuck);
 function adjustTopbarOffset() {
   const tb  = document.getElementById('lop-header');
   const nav = document.getElementById('nav');
-  if (tb && nav && window.innerWidth >= 820) {
-    nav.style.paddingTop = tb.offsetHeight + 'px';
+  const app = document.getElementById('app');
+  const h   = tb ? tb.offsetHeight : 0;
+  if (!h) return;
+  // Posuň #app dolů o výšku headeru
+  if (app) app.style.paddingTop = h + 'px';
+  // Desktop: nav potřebuje padding-top
+  if (nav && window.innerWidth >= 820) {
+    nav.style.paddingTop = h + 'px';
   } else if (nav) {
     nav.style.paddingTop = '';
   }
