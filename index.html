@@ -3332,7 +3332,7 @@ function adjustTopbarOffset() {
   if (!h) return;
   // #app je fixed inset:0 — posuň jen #main a desktop nav
   if (app) app.style.paddingTop = '';
-  if (main) main.style.top = h + 'px';
+  if (main) { main.style.top = ''; main.style.marginTop = h + 'px'; }
   if (nav && window.innerWidth >= 820) {
     nav.style.paddingTop = h + 'px';
   } else if (nav) {
