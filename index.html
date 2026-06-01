@@ -62,7 +62,8 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════════ APP SHELL ═══════════════ */
 #app {
   position: fixed; inset: 0;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: var(--header-h, 0px);
+  left: 0; right: 0; bottom: 0;
   margin: 0;
   display: flex; flex-direction: column;
   background: var(--paper);
@@ -3326,13 +3327,9 @@ window.addEventListener('resize', alignPuck);
 function adjustTopbarOffset() {
   const tb  = document.getElementById('lop-header');
   const nav = document.getElementById('nav');
-  const main = document.getElementById('main');
-  const app = document.getElementById('app');
   const h   = tb ? tb.offsetHeight : 0;
   if (!h) return;
-  // #app je fixed inset:0 — posuň jen #main a desktop nav
-  if (app) app.style.paddingTop = '';
-  if (main) { main.style.top = ''; main.style.marginTop = h + 'px'; }
+  document.documentElement.style.setProperty('--header-h', h + 'px');
   if (nav && window.innerWidth >= 820) {
     nav.style.paddingTop = h + 'px';
   } else if (nav) {
