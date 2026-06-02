@@ -636,6 +636,35 @@ a.place-wish-btn { text-decoration: none; display: flex; flex-direction: column;
 }
 .map-header { position: relative; top: auto; left: auto; right: auto; pointer-events: auto; margin-bottom: 20px; }
 
+
+/* ── Landscape mobil — navbar vpravo ── */
+@media (max-width: 819px) and (orientation: landscape) {
+  #lop-nav {
+    position: fixed !important;
+    top: 0 !important; bottom: 0 !important;
+    right: 0 !important; left: auto !important;
+    width: 64px !important; height: auto !important;
+    flex-direction: column !important;
+    border-top: none !important;
+    border-left: 1px solid var(--rule) !important;
+    padding: 8px 0 14px !important;
+    padding-top: var(--header-h, 52px) !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+  }
+  #lop-nav .nav-item {
+    flex: 0 0 auto !important;
+    padding: 10px 4px !important;
+  }
+  #lop-nav .nav-item .nav-lbl { font-size: 9px !important; }
+  #lop-nav .nav-item.active::before {
+    top: 50% !important; left: -1px !important;
+    transform: translateY(-50%) !important;
+    width: 2px !important; height: 20px !important;
+    bottom: auto !important;
+  }
+  .page { padding-right: 78px !important; }
+}
 </style>
 </head>
 <body>
