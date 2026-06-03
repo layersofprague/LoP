@@ -2688,7 +2688,7 @@ function showTooltip(loc, m, rt) {
 
   const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
   const isDesktop = window.innerWidth >= 820;
-  const navW = (isLandscapeMobile || isDesktop) ? 64 : 0;
+  const navW = isDesktop ? 84 : (isLandscapeMobile ? 64 : 0);
   const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
   const rightLimit = window.innerWidth - navW - margin;
   const bottomLimit = window.innerHeight - margin;
@@ -2698,9 +2698,9 @@ function showTooltip(loc, m, rt) {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
     tipLeft = Math.max(margin, Math.min(rightLimit - tipW, tipLeft));
-    tipTop  = tipTop < margin ? rect.bottom + 8 : tipTop;
-    // Ořízni spodek navbarem
+    if (tipTop < headerH + margin) tipTop = rect.bottom + 8;
     if (tipTop + tipH > bottomLimit) tipTop = bottomLimit - tipH;
+    if (tipTop < headerH + margin) tipTop = headerH + margin;
   } else if (isLandscapeMobile) {
     // Landscape mobil — tooltip vedle pinu (vlevo nebo vpravo)
     tipTop  = Math.max(headerH + margin, Math.min(bottomLimit - tipH, rect.top + rect.height/2 - tipH/2));
