@@ -309,6 +309,33 @@ function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
 }
 
+function getValidSession() {
+  return new Promise(function(resolve) {
+    var s = getSession();
+    if (!s || !s.access_token || !s.user) { resolve(null); return; }
+    var nowSec = Math.floor(Date.now() / 1000);
+    if ((s.expires_at || 0) > nowSec + 60) { resolve(s); return; }
+    if (!s.refresh_token) { resolve(null); return; }
+    fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (data) {
+        var ns = Object.assign({}, data, { user: data.user || s.user });
+        localStorage.setItem('lop_auth_session', JSON.stringify(ns));
+        resolve(ns);
+      } else {
+        localStorage.removeItem('lop_auth_session');
+        resolve(null);
+      }
+    })
+    .catch(function() { resolve(null); });
+  });
+}
+
 function applyCalData(cal) {
   var disabled = localStorage.getItem('lop_cal_disabled') === '1';
   if (cal && !disabled) { yawOffset = (cal.offsets && cal.offsets.yaw) || 0; calEnabled = true; }
@@ -401,21 +428,19 @@ function showArrival() {
       localStorage.setItem('lop_visited_v1', JSON.stringify(visited));
     }
   } catch(e) {}
-  try {
-    var s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
-    if (s && s.user) {
-      fetch('https://lomtaoctzetpweuepesp.supabase.co/rest/v1/visited', {
-        method: 'POST',
-        headers: {
-          'apikey': 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5',
-          'Authorization': 'Bearer ' + s.access_token,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify({ user_id: s.user.id, place_id: String(TARGET.id) })
-      }).catch(function(){});
-    }
-  } catch(e) {}
+  getValidSession().then(function(s) {
+    if (!s || !s.user) return;
+    fetch(SUPABASE_URL + '/rest/v1/visited', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + s.access_token,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ user_id: s.user.id, place_id: String(TARGET.id) })
+    }).catch(function(){});
+  });
   var nameEl = document.getElementById('arrivalName');
   var ov = document.getElementById('arrivalOverlay');
   if (!ov) return;
