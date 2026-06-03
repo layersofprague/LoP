@@ -2460,6 +2460,8 @@ async function loadData() {
 
   // Spustí zbytek aplikace až po načtení dat
   initMap();
+  // Automatická poloha při startu
+  setTimeout(locateMe, 800);
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
@@ -3637,6 +3639,7 @@ function alignPuck() {
   if (filterWrap) filterWrap.style.right = right + 'px';
 }
 window.addEventListener('resize', alignPuck);
+window.addEventListener('orientationchange', () => setTimeout(alignPuck, 400));
 
 function adjustTopbarOffset() {
   const tb  = document.getElementById('lop-header');
