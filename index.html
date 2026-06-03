@@ -2674,12 +2674,11 @@ function showTooltip(loc, m, rt) {
   const margin = 8;
   let tipLeft, tipTop;
   if (window.innerWidth < 820) {
-    // Nad pinem, vycentrovaný horizontálně
+    const pinH = rect.height || 40;
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, rect.left + rect.width/2 - tipW/2));
-    tipTop  = rect.top - tipH - 12;
-    // Pokud by vyšel mimo obrazovku nahoře, zobraz pod pinem
+    tipTop  = rect.top - tipH - pinH - 8;
     const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
-    if (tipTop < headerH + margin) tipTop = rect.bottom + 12;
+    if (tipTop < headerH + margin) tipTop = rect.bottom + pinH + 8;
   } else {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
