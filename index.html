@@ -1819,7 +1819,7 @@ a { color: inherit; text-decoration: none; }
 
       <div class="map-header"></div>
 
-      <div class="map-puck-wrap">
+      <div class="map-puck-wrap" id="mapPuckWrap">
         <button class="map-puck" id="locateBtn" title="Moje poloha" onclick="locateMe()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
         </button>
@@ -2720,14 +2720,17 @@ const DIST_STATE = { max: null };
 function toggleFilter() {
   const bd   = document.getElementById('filterBackdrop');
   const puck = document.getElementById('filterPuck');
+  const puckWrap = document.getElementById('mapPuckWrap');
   if (!bd) return;
   const isOpen = bd.classList.contains('open');
   if (isOpen) {
     bd.classList.remove('open');
     if (puck) puck.classList.remove('active');
+    if (puckWrap) puckWrap.style.visibility = '';
   } else {
     bd.classList.add('open');
     if (puck) puck.classList.add('active');
+    if (puckWrap) puckWrap.style.visibility = 'hidden';
     requestAnimationFrame(() => buildEraTimeline());
   }
 }
@@ -3080,6 +3083,7 @@ function initMap() {
     if (bd && bd.classList.contains('open') && modal && !modal.contains(e.target) && (!puck || !puck.contains(e.target))) {
       bd.classList.remove('open');
       if (puck) puck.classList.remove('active');
+      const pw = document.getElementById('mapPuckWrap'); if(pw) pw.style.visibility = '';
     }
   }, true);
   // user location will be set by locateMe()
