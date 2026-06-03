@@ -523,16 +523,21 @@ a { color: inherit; text-decoration: none; }
 }
 .chip-state-lbl {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  font-size: 9px; letter-spacing: .04em; text-transform: none;
   color: var(--ink-4); line-height: 1;
-  padding-left: 2px;
+  width: 72px; /* pevná šířka = nejdelší chip (Architektura) */
+  padding-left: 13px; /* zarovnání se začátkem textu chipu (swatch 8px + gap 5px) */
   transition: color .15s;
 }
 
-/* Portrait — label vpravo od chipu */
+/* Portrait — label vpravo od chipu, pevná šířka */
 @media (max-width: 819px) and (orientation: portrait) {
   .chip-wrap { flex-direction: row; align-items: center; gap: 8px; }
-  .chip-state-lbl { padding-left: 0; }
+  .chip-state-lbl {
+    padding-left: 0;
+    width: 52px; /* pevná šířka = nejdelší stav "výchozí" */
+    text-align: left;
+  }
 }
 
 .map-puck-wrap {
