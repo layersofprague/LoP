@@ -2723,14 +2723,17 @@ function toggleFilter() {
   const puckWrap = document.getElementById('mapPuckWrap');
   if (!bd) return;
   const isOpen = bd.classList.contains('open');
+  const zoomCtrl = document.querySelector('.leaflet-control-zoom');
   if (isOpen) {
     bd.classList.remove('open');
     if (puck) puck.classList.remove('active');
     if (puckWrap) puckWrap.style.visibility = '';
+    if (zoomCtrl) zoomCtrl.style.visibility = '';
   } else {
     bd.classList.add('open');
     if (puck) puck.classList.add('active');
     if (puckWrap) puckWrap.style.visibility = 'hidden';
+    if (zoomCtrl) zoomCtrl.style.visibility = 'hidden';
     requestAnimationFrame(() => buildEraTimeline());
   }
 }
@@ -3084,6 +3087,7 @@ function initMap() {
       bd.classList.remove('open');
       if (puck) puck.classList.remove('active');
       const pw = document.getElementById('mapPuckWrap'); if(pw) pw.style.visibility = '';
+      const zc2 = document.querySelector('.leaflet-control-zoom'); if(zc2) zc2.style.visibility = '';
     }
   }, true);
   // user location will be set by locateMe()
