@@ -2701,8 +2701,28 @@ const ERA_STATE = { from: ERA_START, to: ERA_END };
 const DIST_STATE = { max: null };
 
 function toggleFilter() {
-  const bar = document.getElementById('filterBar');
-  bar.classList.toggle('open');
+  const bd   = document.getElementById('filterBackdrop');
+  const puck = document.getElementById('filterPuck');
+  if (!bd) return;
+  const isOpen = bd.classList.contains('open');
+  if (isOpen) {
+    bd.classList.remove('open');
+    if (puck) puck.classList.remove('active');
+  } else {
+    bd.classList.add('open');
+    if (puck) puck.classList.add('active');
+    requestAnimationFrame(() => buildEraTimeline());
+  }
+}
+
+function updateFilterPuck() {
+  const puck = document.getElementById('filterPuck');
+  if (!puck) return;
+  const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.fun !== 'full'
+    || FILTER.visited !== 'full' || FILTER.wished !== 'full'
+    || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
+    || DIST_STATE.max !== null;
+  puck.classList.toggle('filtered', active);
 }
 
 function pinLabel(num) {
