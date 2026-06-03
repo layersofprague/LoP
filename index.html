@@ -2623,6 +2623,14 @@ function renderWishlist() {
 }
 
 /* ═══════════════ TOOLTIP ═══════════════ */
+
+function _resetPinScale() {
+  if (window._activePinEl) {
+    window._activePinEl.style.transform = '';
+    window._activePinEl.style.zIndex = '';
+    window._activePinEl = null;
+  }
+}
 function showTooltip(loc, m, rt) {
   clearTimeout(window._rtHideTimer);
   const c = CAT[loc.cat];
@@ -2676,9 +2684,9 @@ function showTooltip(loc, m, rt) {
   if (window.innerWidth < 820) {
     const pinH = rect.height || 40;
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, rect.left + rect.width/2 - tipW/2));
-    tipTop  = rect.top - tipH - pinH - 8;
+    tipTop  = rect.top - tipH - 8;
     const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
-    if (tipTop < headerH + margin) tipTop = rect.bottom + pinH + 8;
+    if (tipTop < headerH + margin) tipTop = rect.bottom + 6;
   } else {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
@@ -2687,6 +2695,10 @@ function showTooltip(loc, m, rt) {
   }
   rt.style.left = tipLeft + 'px';
   rt.style.top  = tipTop  + 'px';
+  // Zvětši aktivní pin
+  _resetPinScale();
+  const pinEl = m.getElement();
+  if (pinEl) { window._activePinEl = pinEl; pinEl.style.transform = 'scale(1.45)'; pinEl.style.zIndex = '1000'; pinEl.style.transition = 'transform .15s'; }
   rt.classList.add('visible');
   if (loc.photoThen) {
     const imgEl = new Image();
@@ -3147,7 +3159,7 @@ function initMap() {
   });
 
   // Zavři tooltip při kliknutí na mapu mimo pin
-  map.on('click', () => rt.classList.remove('visible'));
+  map.on('click', () => { rt.classList.remove('visible'); _resetPinScale(); });
 
   buildChips();
   updateWishBadge();
