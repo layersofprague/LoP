@@ -2698,6 +2698,8 @@ function showTooltip(loc, m, rt) {
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, tipLeft));
     tipTop  = tipTop < margin ? rect.bottom + 8 : tipTop;
   }
+  // Debug — zobraz rect hodnoty
+  console.log('rect:', JSON.stringify({top: Math.round(rect.top), bottom: Math.round(rect.bottom), height: Math.round(rect.height), width: Math.round(rect.width)}), 'tipH:', tipH, 'tipTop:', Math.round(tipTop));
   rt.style.left = tipLeft + 'px';
   rt.style.top  = tipTop  + 'px';
   // Zvětši aktivní pin
