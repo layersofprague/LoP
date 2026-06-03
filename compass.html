@@ -167,7 +167,10 @@ applyClipBounds();
 setAnchor(); // run before Leaflet init so #mapWrap has dimensions
 
 // ── MAP ──
-var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: false });
+var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: 'center', dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false });
+
+// touchZoom: 'center' — zoomuje na střed mapy, ne na střed gest → žádný posun
+map.dragging.disable();
 
 // Po zoomu vrať střed mapy na polohu uživatele
 map.on('zoomend', function() {
