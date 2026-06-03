@@ -168,6 +168,13 @@ setAnchor(); // run before Leaflet init so #mapWrap has dimensions
 
 // ── MAP ──
 var map = L.map('map', { zoomControl: false, attributionControl: false, touchZoom: true, dragging: false });
+
+// Po zoomu vrať střed mapy na polohu uživatele
+map.on('zoomend', function() {
+  if (userPos) {
+    map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
+  }
+});
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 20, keepBuffer: 4
 }).addTo(map);
