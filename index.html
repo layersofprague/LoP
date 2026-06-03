@@ -527,7 +527,7 @@ a { color: inherit; text-decoration: none; }
 .filter-puck-wrap {
   position: fixed;
   top: calc(var(--header-h, 52px) + 8px);
-  right: 14px;
+  right: 78px;
   z-index: 500;
   display: flex; flex-direction: column; gap: 0;
   border: 1px solid var(--rule);
@@ -545,13 +545,9 @@ a { color: inherit; text-decoration: none; }
 .filter-puck:hover { background: var(--paper-2); }
 .filter-puck svg { width: 14px; height: 14px; }
 .filter-puck.active { background: var(--ink); color: var(--paper); }
-.filter-puck-dot {
-  position: absolute; top: 3px; right: 3px;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent); display: none;
-  pointer-events: none;
-}
-.filter-puck.filtered .filter-puck-dot { display: block; }
+.filter-puck.filtered { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.filter-puck.filtered svg { color: var(--paper); }
+.filter-puck-dot { display: none; }
 .filter-puck-badge {
   position: absolute; right: 34px; top: 50%; transform: translateY(-50%);
   background: var(--paper); border: 1px solid var(--rule);
