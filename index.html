@@ -238,57 +238,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
 }
 .map-header > * { pointer-events: auto; }
-
-/* Filter puck button */
-.filter-puck-wrap {
-  position: absolute; top: 8px; right: 14px; z-index: 500;
-  display: flex; flex-direction: column; gap: 0;
-  border: 1px solid var(--rule);
-  box-shadow: 0 2px 10px rgba(26,24,20,.08);
-  border-radius: 4px; overflow: hidden;
-  pointer-events: auto;
-}
-.filter-puck {
-  width: 26px; height: 26px; border-radius: 0;
-  background: var(--paper); border: none;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: background .15s; color: var(--ink);
-  position: relative;
-}
-.filter-puck:hover { background: var(--paper-2); }
-.filter-puck svg { width: 14px; height: 14px; }
-.filter-puck.active { background: var(--ink); color: var(--paper); }
-.filter-puck-dot {
-  position: absolute; top: 4px; right: 4px;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent); display: none;
-}
-.filter-puck.filtered .filter-puck-dot { display: block; }
-
-/* Filter modal */
-.filter-modal-backdrop {
-  position: fixed; inset: 0; z-index: 450;
-  display: none;
-}
-.filter-modal-backdrop.open { display: block; }
-.filter-modal {
-  position: absolute; top: 42px; right: 14px;
-  width: min(320px, calc(100vw - 28px));
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(26,24,20,.14);
-  overflow: hidden;
-  opacity: 0; transform: scale(.96) translateY(-6px);
-  transition: opacity .18s var(--ease), transform .18s var(--ease);
-  pointer-events: none;
-}
-.filter-modal-backdrop.open .filter-modal {
-  opacity: 1; transform: none; pointer-events: auto;
-}
-.filter-modal-inner {
-  padding: 14px 16px 12px;
-}
 .map-search {
   display: flex; align-items: center; gap: 10px;
   padding: 11px 14px;
@@ -573,6 +522,78 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 2px 10px rgba(26,24,20,.06) !important;
   border-radius: 4px;
   overflow: hidden;
+}
+/* Filter puck — stejný styl jako map-puck-wrap */
+.filter-puck-wrap {
+  position: absolute; top: 8px; right: 14px; z-index: 500;
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--rule);
+  box-shadow: 0 2px 10px rgba(26,24,20,.06);
+  border-radius: 4px; overflow: hidden;
+  pointer-events: auto;
+}
+.filter-puck {
+  width: 26px; height: 26px; border-radius: 0;
+  background: var(--paper); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s; color: var(--ink);
+  position: relative;
+}
+.filter-puck:hover { background: var(--paper-2); }
+.filter-puck svg { width: 14px; height: 14px; }
+.filter-puck.active { background: var(--ink); color: var(--paper); }
+.filter-puck-dot {
+  position: absolute; top: 3px; right: 3px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); display: none;
+  pointer-events: none;
+}
+.filter-puck.filtered .filter-puck-dot { display: block; }
+/* Filter count badge vedle pucku */
+.filter-puck-badge {
+  position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
+  background: var(--paper); border: 1px solid var(--rule);
+  border-radius: 100px; padding: 2px 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .04em; color: var(--ink-3);
+  box-shadow: 0 2px 8px rgba(26,24,20,.06);
+  white-space: nowrap; pointer-events: none;
+}
+/* Filter modal — využívá plochu mapy */
+.filter-modal-backdrop {
+  position: absolute; inset: 0; z-index: 450;
+  display: none;
+}
+.filter-modal-backdrop.open { display: block; }
+.filter-modal {
+  position: absolute; top: 0; right: 44px;
+  bottom: 0;
+  width: min(340px, calc(100vw - 80px));
+  background: var(--paper);
+  border-right: 1px solid var(--rule);
+  box-shadow: 4px 0 24px rgba(26,24,20,.10);
+  opacity: 0; transform: translateX(12px);
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+  pointer-events: none;
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.filter-modal-backdrop.open .filter-modal {
+  opacity: 1; transform: none; pointer-events: auto;
+}
+.filter-modal-inner {
+  padding: 14px 16px 24px;
+  flex: 1;
+}
+.filter-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 0;
+  margin-bottom: 2px;
+}
+.filter-modal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-3);
 }
 .map-puck {
   width: 26px; height: 26px; border-radius: 0;
@@ -1523,6 +1544,31 @@ a { color: inherit; text-decoration: none; }
 .wl-empty p { font-size: 14px; line-height: 1.5; max-width: 26em; margin: 0 auto; }
 
 /* ═══════════════ DESKTOP ═══════════════ */
+
+/* ═══════════════ LANDSCAPE MOBIL ═══════════════ */
+@media (max-width: 819px) and (orientation: landscape) {
+  #app { flex-direction: row; }
+  #nav {
+    flex-direction: column;
+    border-top: none;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    width: 64px;
+    padding: 8px 0 14px;
+    padding-top: var(--header-h, 52px);
+    gap: 0;
+    justify-content: flex-start;
+  }
+  .nav-item { flex: 0 0 auto; padding: 10px 4px; }
+  .nav-item .nav-lbl { font-size: 9px; }
+  .nav-item.active::before {
+    top: 50%; left: -1px; transform: translateY(-50%);
+    width: 2px; height: 20px; bottom: auto;
+  }
+  .map-hint   { left: 14px; right: 14px; bottom: 16px; }
+  .map-puck-wrap { right: 14px; }
+  .filter-puck-wrap { right: 14px; }
+}
 @media (min-width: 820px) {
   #app {
     flex-direction: row;
@@ -1569,10 +1615,11 @@ a { color: inherit; text-decoration: none; }
   .sheet-title { font-size: clamp(36px, 4vw, 54px); }
   .sheet-lede { font-size: 19px; max-width: 36em; }
   .map-header { left: 100px; right: 24px; top: 66px; padding: 0; }
-  .filter-puck-wrap { top: 66px; right: 24px; }
-  .filter-modal { top: 42px; right: 0; }
   .map-hint { left: 100px; right: 24px; bottom: 24px; }
   .map-puck-wrap { right: 24px; bottom: 80px; }
+  .filter-modal { right: 44px; top: 0; bottom: 0; width: min(320px, 40vw); border-right: 1px solid var(--rule); }
+  .filter-puck-wrap { top: 8px; right: 24px; }
+  .filter-puck-badge { right: 50px; }
 
   #routesView, #wishView { padding: 28px clamp(24px, 5vw, 64px) 40px; }
   .routes-hero { max-width: 820px; margin: 0 auto 28px; }
@@ -1712,26 +1759,24 @@ a { color: inherit; text-decoration: none; }
     <section class="view active" id="mapView">
       <div id="map"></div>
 
-      <div class="map-header">
-        <!-- prázdné — filtr je nyní v modal -->
-      </div>
-
-      <!-- Filter puck + modal -->
-      <div class="filter-puck-wrap">
+      <!-- Filter puck + modal panel -->
+      <div class="filter-puck-wrap" id="filterPuckWrap">
+        <span class="filter-puck-badge" id="filterBadge">8 / 8</span>
         <button class="filter-puck" id="filterPuck" title="Filtr" onclick="toggleFilter()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           <span class="filter-puck-dot"></span>
         </button>
       </div>
 
-      <div class="filter-modal-backdrop" id="filterBackdrop" onclick="closeFilterIfOutside(event)">
+      <div class="filter-modal-backdrop" id="filterBackdrop">
         <div class="filter-modal" id="filterModal">
+          <div class="filter-modal-header">
+            <span class="filter-modal-title">Filtr</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4)" id="filterHeadCnt"><span id="filterHeadActive">—</span> / <span id="filterTotal">—</span> MÍST</span>
+          </div>
           <div class="filter-modal-inner">
             <div class="filter-row">
-              <div class="filter-lbl">
-                <span>Kategorie</span>
-                <span class="filter-lbl-val" id="filterHeadCnt">· <span id="filterHeadActive">—</span> MÍST</span>
-              </div>
+              <div class="filter-lbl"><span>Kategorie</span></div>
               <div class="filter-chips" id="mapChips"></div>
             </div>
             <div class="filter-row">
@@ -1754,6 +1799,8 @@ a { color: inherit; text-decoration: none; }
           </div>
         </div>
       </div>
+
+      <div class="map-header"></div>
 
       <div class="map-puck-wrap">
         <button class="map-puck" id="locateBtn" title="Moje poloha" onclick="locateMe()">
@@ -2654,36 +2701,8 @@ const ERA_STATE = { from: ERA_START, to: ERA_END };
 const DIST_STATE = { max: null };
 
 function toggleFilter() {
-  const bd   = document.getElementById('filterBackdrop');
-  const puck = document.getElementById('filterPuck');
-  if (!bd) return;
-  const isOpen = bd.classList.contains('open');
-  if (isOpen) {
-    bd.classList.remove('open');
-    if (puck) puck.classList.remove('active');
-  } else {
-    bd.classList.add('open');
-    if (puck) puck.classList.add('active');
-    requestAnimationFrame(() => buildEraTimeline());
-  }
-}
-
-function closeFilterIfOutside(e) {
-  if (e.target === document.getElementById('filterBackdrop')) {
-    document.getElementById('filterBackdrop').classList.remove('open');
-    const puck = document.getElementById('filterPuck');
-    if (puck) puck.classList.remove('active');
-  }
-}
-
-function updateFilterPuck() {
-  const puck = document.getElementById('filterPuck');
-  if (!puck) return;
-  const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.fun !== 'full'
-    || FILTER.visited !== 'full' || FILTER.wished !== 'full'
-    || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
-    || DIST_STATE.max !== null;
-  puck.classList.toggle('filtered', active);
+  const bar = document.getElementById('filterBar');
+  bar.classList.toggle('open');
 }
 
 function pinLabel(num) {
@@ -2904,13 +2923,12 @@ function resetFilters() {
   const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
   renderEra();
   applyFilter();
-  updateFilterPuck();
 }
 
-
-
 function locYear(loc) {
+  // Nové schema: yearBuilt je přímé číslo
   if (loc.yearBuilt) return loc.yearBuilt;
+
   const parseYearOrCentury = (s) => {
     const v = String(s);
     const y = v.match(/\d{3,4}/);
@@ -2922,13 +2940,20 @@ function locYear(loc) {
   if (loc.facts && loc.facts.length) {
     const buildKeys = /postaveno|otevřeno|dokončeno|vybudováno|výstavba|první zmínka|orloj od|od\b/i;
     for (const f of loc.facts) {
-      if (buildKeys.test(f.k)) { const y = parseYearOrCentury(f.v); if (y != null) return y; }
+      if (buildKeys.test(f.k)) {
+        const y = parseYearOrCentury(f.v);
+        if (y != null) return y;
+      }
     }
     for (const f of loc.facts) {
-      const y = parseYearOrCentury(f.v); if (y != null) return y;
+      const y = parseYearOrCentury(f.v);
+      if (y != null) return y;
     }
   }
-  if (loc.yearThen) { const y = parseYearOrCentury(loc.yearThen); if (y != null) return y; }
+  if (loc.yearThen) {
+    const y = parseYearOrCentury(loc.yearThen);
+    if (y != null) return y;
+  }
   return null;
 }
 
@@ -2991,6 +3016,10 @@ function applyFilter() {
 
   const cnt = document.getElementById('filterHeadActive');
   if (cnt) cnt.textContent = activeCount;
+  const tot = document.getElementById('filterTotal');
+  if (tot) tot.textContent = _markers ? _markers.length : '—';
+  const badge = document.getElementById('filterBadge');
+  if (badge) badge.textContent = activeCount + ' / ' + (_markers ? _markers.length : '—');
   updateFilterPuck();
 }
 
@@ -3003,15 +3032,12 @@ function initMap() {
   });
   window._map = map;
   map.on('click', () => {
-    const bd = document.getElementById('filterBackdrop');
-    if (bd && bd.classList.contains('open')) {
-      bd.classList.remove('open');
-      const p = document.getElementById('filterPuck'); if(p) p.classList.remove('active');
-    }
+    const bar = document.getElementById('filterBar');
+    if (bar && bar.classList.contains('open')) bar.classList.remove('open');
   });
-  // Zavři filtr při kliknutí mimo modal
+  // Zavři filtr při kliknutí mimo filterBar (header, navbar, atd.)
   document.addEventListener('click', (e) => {
-    const bd   = document.getElementById('filterBackdrop');
+    const bd    = document.getElementById('filterBackdrop');
     const modal = document.getElementById('filterModal');
     const puck  = document.getElementById('filterPuck');
     if (bd && bd.classList.contains('open') && modal && !modal.contains(e.target) && (!puck || !puck.contains(e.target))) {
