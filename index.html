@@ -438,6 +438,7 @@ a { color: inherit; text-decoration: none; }
   transition: all .15s;
   box-shadow: 0 1px 6px rgba(26,24,20,.05);
   white-space: nowrap;
+  justify-content: flex-start;
 }
 .chip:hover { border-color: var(--ink-3); }
 .chip .chip-swatch {
@@ -502,6 +503,8 @@ a { color: inherit; text-decoration: none; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; color: var(--ink-4);
   margin-left: 2px;
+  min-width: 2ch; /* místo pro 2 číslice — pro 3: 3ch */
+  display: inline-block; text-align: right;
 }
 .chip .chip-filter-icon {
   display: none;
@@ -2891,35 +2894,35 @@ function buildChips() {
   el.innerHTML = `
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
-      <button class="chip" data-cat="hist">
+      <button class="chip" data-cat="hist" style="width:110px">
         <span class="chip-swatch" style="background: var(--cat-hist)"></span>
         Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-arch">výchozí</span>
-      <button class="chip" data-cat="arch">
+      <button class="chip" data-cat="arch" style="width:145px">
         <span class="chip-swatch" style="background: var(--cat-arch)"></span>
         Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
-      <button class="chip" data-cat="fun">
+      <button class="chip" data-cat="fun" style="width:130px">
         <span class="chip-swatch" style="background: var(--cat-fun)"></span>
         Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
-      <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
+      <button class="chip" id="chipVisited" data-filter="visited" style="width:130px" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
         <span class="chip-swatch chip-icon chip-icon-check"></span>
         Navštíveno <span id="ctVisitedWrap"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-wished">výchozí</span>
-      <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
+      <button class="chip" id="chipWished" data-filter="wished" style="width:90px" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         Plán <span id="ctWishedWrap"></span>
       </button>
