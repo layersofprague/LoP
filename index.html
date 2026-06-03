@@ -62,6 +62,7 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════════ APP SHELL ═══════════════ */
 #app {
   position: fixed; inset: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   margin: 0;
   display: flex; flex-direction: column;
   background: var(--paper);
@@ -237,6 +238,57 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
 }
 .map-header > * { pointer-events: auto; }
+
+/* Filter puck button */
+.filter-puck-wrap {
+  position: absolute; top: 8px; right: 14px; z-index: 500;
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--rule);
+  box-shadow: 0 2px 10px rgba(26,24,20,.08);
+  border-radius: 4px; overflow: hidden;
+  pointer-events: auto;
+}
+.filter-puck {
+  width: 26px; height: 26px; border-radius: 0;
+  background: var(--paper); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s; color: var(--ink);
+  position: relative;
+}
+.filter-puck:hover { background: var(--paper-2); }
+.filter-puck svg { width: 14px; height: 14px; }
+.filter-puck.active { background: var(--ink); color: var(--paper); }
+.filter-puck-dot {
+  position: absolute; top: 4px; right: 4px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); display: none;
+}
+.filter-puck.filtered .filter-puck-dot { display: block; }
+
+/* Filter modal */
+.filter-modal-backdrop {
+  position: fixed; inset: 0; z-index: 450;
+  display: none;
+}
+.filter-modal-backdrop.open { display: block; }
+.filter-modal {
+  position: absolute; top: 42px; right: 14px;
+  width: min(320px, calc(100vw - 28px));
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(26,24,20,.14);
+  overflow: hidden;
+  opacity: 0; transform: scale(.96) translateY(-6px);
+  transition: opacity .18s var(--ease), transform .18s var(--ease);
+  pointer-events: none;
+}
+.filter-modal-backdrop.open .filter-modal {
+  opacity: 1; transform: none; pointer-events: auto;
+}
+.filter-modal-inner {
+  padding: 14px 16px 12px;
+}
 .map-search {
   display: flex; align-items: center; gap: 10px;
   padding: 11px 14px;
@@ -1517,6 +1569,8 @@ a { color: inherit; text-decoration: none; }
   .sheet-title { font-size: clamp(36px, 4vw, 54px); }
   .sheet-lede { font-size: 19px; max-width: 36em; }
   .map-header { left: 100px; right: 24px; top: 66px; padding: 0; }
+  .filter-puck-wrap { top: 66px; right: 24px; }
+  .filter-modal { top: 42px; right: 0; }
   .map-hint { left: 100px; right: 24px; bottom: 24px; }
   .map-puck-wrap { right: 24px; bottom: 80px; }
 
@@ -1530,35 +1584,6 @@ a { color: inherit; text-decoration: none; }
   .rc-img { width: 140px; height: 140px; }
   .rc-title { font-size: 22px; }
   .rc-desc { font-size: 13.5px; -webkit-line-clamp: 3; }
-}
-
-/* ═══════════════ LANDSCAPE MOBIL ═══════════════ */
-@media (max-width: 819px) and (orientation: landscape) {
-  #app { flex-direction: row; }
-  #nav {
-    flex-direction: column;
-    border-top: none;
-    border-left: 1px solid var(--rule);
-    border-right: 1px solid var(--rule);
-    width: 64px;
-    padding: 8px 0 14px;
-    padding-top: var(--header-h, 52px);
-    gap: 0;
-    justify-content: flex-start;
-  }
-  .nav-item {
-    flex: 0 0 auto;
-    padding: 10px 4px;
-  }
-  .nav-item .nav-lbl { font-size: 9px; }
-  .nav-item.active::before {
-    top: 50%; left: -1px;
-    transform: translateY(-50%);
-    width: 2px; height: 20px;
-  }
-  .map-header { left: 14px; right: 78px; }
-  .map-hint   { left: 14px; right: 78px; bottom: 16px; }
-  .map-puck-wrap { right: 80px; bottom: 60px; }
 }
 
 /* ═══════════════ TWEAKS ═══════════════ */
@@ -1643,12 +1668,29 @@ a { color: inherit; text-decoration: none; }
 </head>
 <body>
 
-<div id="lop-header"></div>
-<script src="header.js"></script>
-
 <div id="app">
-  <!-- Topbar placeholder — výšku nastaví adjustTopbarOffset -->
-  <div id="_header_ph" style="flex:0 0 auto"></div>
+  <!-- Topbar -->
+  <!-- ⚠️  POZOR: Header je zde napevno. Změny synchronizuj také do header.js -->
+  <header id="topbar">
+    <div class="topbar-main">
+      <div class="brand">
+        <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
+      </div>
+      <div class="top-actions">
+        <a class="top-btn" href="oprojektu.html" title="O projektu" aria-label="O projektu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </a>
+        <button class="top-btn" title="Notifikace" aria-label="Notifikace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <button class="top-btn" id="profileBtn" title="Profil" aria-label="Profil"
+                onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
 
   <div id="topSearch">
     <div class="ts-field">
@@ -1671,44 +1713,43 @@ a { color: inherit; text-decoration: none; }
       <div id="map"></div>
 
       <div class="map-header">
-        <div class="filter-bar" id="filterBar">
-          <button class="filter-head" id="filterHead" onclick="toggleFilter()">
-            <span class="filter-head-lead">
-              <span class="filter-head-dots">
-                <span style="background:var(--cat-hist)"></span>
-                <span style="background:var(--cat-arch)"></span>
-                <span style="background:var(--cat-fun)"></span>
-              </span>
-              <span class="filter-head-lbl">Filtr</span>
-              <span class="filter-head-cnt" id="filterHeadCnt">· <span id="filterHeadActive">26</span> MÍST</span>
-            </span>
-            <span class="filter-head-chev">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
-          </button>
-          <div class="filter-panel" id="filterPanel">
-            <div class="filter-panel-inner">
-              <div class="filter-row">
-                <div class="filter-lbl"><span>Kategorie</span></div>
-                <div class="filter-chips" id="mapChips"></div>
+        <!-- prázdné — filtr je nyní v modal -->
+      </div>
+
+      <!-- Filter puck + modal -->
+      <div class="filter-puck-wrap">
+        <button class="filter-puck" id="filterPuck" title="Filtr" onclick="toggleFilter()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          <span class="filter-puck-dot"></span>
+        </button>
+      </div>
+
+      <div class="filter-modal-backdrop" id="filterBackdrop" onclick="closeFilterIfOutside(event)">
+        <div class="filter-modal" id="filterModal">
+          <div class="filter-modal-inner">
+            <div class="filter-row">
+              <div class="filter-lbl">
+                <span>Kategorie</span>
+                <span class="filter-lbl-val" id="filterHeadCnt">· <span id="filterHeadActive">—</span> MÍST</span>
               </div>
-              <div class="filter-row">
-                <div class="filter-lbl">
-                  <span>Období</span>
-                  <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
-                </div>
-                <div class="filter-timeline" id="eraTimeline"></div>
+              <div class="filter-chips" id="mapChips"></div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-lbl">
+                <span>Období</span>
+                <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
               </div>
-              <div class="filter-row">
-                <div class="filter-lbl">
-                  <span>Vzdálenost od vás</span>
-                  <span class="filter-lbl-val" id="distV">libovolná</span>
-                </div>
-                <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+              <div class="filter-timeline" id="eraTimeline"></div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-lbl">
+                <span>Vzdálenost od vás</span>
+                <span class="filter-lbl-val" id="distV">libovolná</span>
               </div>
-              <div class="filter-footer">
-                <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
-              </div>
+              <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+            </div>
+            <div class="filter-footer">
+              <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
             </div>
           </div>
         </div>
@@ -2613,8 +2654,36 @@ const ERA_STATE = { from: ERA_START, to: ERA_END };
 const DIST_STATE = { max: null };
 
 function toggleFilter() {
-  const bar = document.getElementById('filterBar');
-  bar.classList.toggle('open');
+  const bd   = document.getElementById('filterBackdrop');
+  const puck = document.getElementById('filterPuck');
+  if (!bd) return;
+  const isOpen = bd.classList.contains('open');
+  if (isOpen) {
+    bd.classList.remove('open');
+    if (puck) puck.classList.remove('active');
+  } else {
+    bd.classList.add('open');
+    if (puck) puck.classList.add('active');
+    requestAnimationFrame(() => buildEraTimeline());
+  }
+}
+
+function closeFilterIfOutside(e) {
+  if (e.target === document.getElementById('filterBackdrop')) {
+    document.getElementById('filterBackdrop').classList.remove('open');
+    const puck = document.getElementById('filterPuck');
+    if (puck) puck.classList.remove('active');
+  }
+}
+
+function updateFilterPuck() {
+  const puck = document.getElementById('filterPuck');
+  if (!puck) return;
+  const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.fun !== 'full'
+    || FILTER.visited !== 'full' || FILTER.wished !== 'full'
+    || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
+    || DIST_STATE.max !== null;
+  puck.classList.toggle('filtered', active);
 }
 
 function pinLabel(num) {
@@ -2835,9 +2904,8 @@ function resetFilters() {
   const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
   renderEra();
   applyFilter();
+  updateFilterPuck();
 }
-
-function locYear(loc) {
   // Nové schema: yearBuilt je přímé číslo
   if (loc.yearBuilt) return loc.yearBuilt;
 
@@ -2928,6 +2996,7 @@ function applyFilter() {
 
   const cnt = document.getElementById('filterHeadActive');
   if (cnt) cnt.textContent = activeCount;
+  updateFilterPuck();
 }
 
 function initMap() {
@@ -2939,14 +3008,20 @@ function initMap() {
   });
   window._map = map;
   map.on('click', () => {
-    const bar = document.getElementById('filterBar');
-    if (bar && bar.classList.contains('open')) bar.classList.remove('open');
+    const bd = document.getElementById('filterBackdrop');
+    if (bd && bd.classList.contains('open')) {
+      bd.classList.remove('open');
+      const p = document.getElementById('filterPuck'); if(p) p.classList.remove('active');
+    }
   });
-  // Zavři filtr při kliknutí mimo filterBar (header, navbar, atd.)
+  // Zavři filtr při kliknutí mimo modal
   document.addEventListener('click', (e) => {
-    const bar = document.getElementById('filterBar');
-    if (bar && bar.classList.contains('open') && !bar.contains(e.target)) {
-      bar.classList.remove('open');
+    const bd   = document.getElementById('filterBackdrop');
+    const modal = document.getElementById('filterModal');
+    const puck  = document.getElementById('filterPuck');
+    if (bd && bd.classList.contains('open') && modal && !modal.contains(e.target) && (!puck || !puck.contains(e.target))) {
+      bd.classList.remove('open');
+      if (puck) puck.classList.remove('active');
     }
   }, true);
   // user location will be set by locateMe()
@@ -3338,7 +3413,16 @@ function renderRoutes() {
 /* ═══════════════ INIT ═══════════════ */
 applyTweaks();
 
-// Auth stav řeší header.js
+// Auth stav profil tlačítka
+(function() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    if (s && s.access_token && s.user) {
+      const btn = document.getElementById('profileBtn');
+      if (btn) btn.style.color = 'var(--ink)';
+    }
+  } catch(e) {}
+})();
 
 // Zarovnej puck s Leaflet zoom controls
 function alignPuck() {
@@ -3354,14 +3438,10 @@ function alignPuck() {
 window.addEventListener('resize', alignPuck);
 
 function adjustTopbarOffset() {
-  const tb  = document.getElementById('lop-header');
+  const tb  = document.getElementById('topbar');
   const nav = document.getElementById('nav');
-  const ph  = document.getElementById('_header_ph');
-  const h   = tb ? tb.offsetHeight : 0;
-  if (!h) return;
-  if (ph) ph.style.height = h + 'px';
-  if (nav && window.innerWidth >= 820) {
-    nav.style.paddingTop = h + 'px';
+  if (tb && nav && window.innerWidth >= 820) {
+    nav.style.paddingTop = tb.offsetHeight + 'px';
   } else if (nav) {
     nav.style.paddingTop = '';
   }
@@ -3380,7 +3460,7 @@ window.addEventListener('resize', adjustTopbarOffset);
 <script>
 // Po přihlášení přes modal: obnov header, badge a sync DB
 window.lopAuth.onLogin(() => {
-  const btn = document.getElementById('lopHProfile');
+  const btn = document.getElementById('profileBtn');
   if (btn) {
     const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
     if (s?.user) { btn.title = s.user.email || 'Profil'; btn.onclick = () => window.lopAuth.open(); }
