@@ -2688,8 +2688,8 @@ function showTooltip(loc, m, rt) {
 
   const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
   const isDesktop = window.innerWidth >= 820;
-  // Šířka navbaru — vpravo v landscape a desktop
   const navW = (isLandscapeMobile || isDesktop) ? 64 : 0;
+  const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
   const rightLimit = window.innerWidth - navW - margin;
   const bottomLimit = window.innerHeight - margin;
 
