@@ -118,6 +118,32 @@ const CSS = `
   }
 }
 
+@media (max-width: 819px) and (orientation: landscape) {
+  #lop-nav {
+    position: fixed;
+    top: 0; bottom: 0; right: 0; left: auto;
+    width: 64px;
+    flex-direction: column;
+    border-top: none;
+    border-left: 1px solid var(--rule, #cbcec5);
+    padding-top: var(--header-h, 52px);
+    padding-bottom: 14px;
+    gap: 0;
+    justify-content: flex-start;
+  }
+  .lop-n-item {
+    flex: 0 0 auto;
+    padding: 10px 4px;
+  }
+  .lop-n-label { font-size: 9px; }
+  .lop-n-item.active::before {
+    top: 50%; left: -1px;
+    transform: translateY(-50%);
+    width: 2px; height: 20px;
+    bottom: auto;
+  }
+}
+
 .lop-n-badge-lock {
   position: absolute; top: 6px; right: calc(50% - 18px);
   width: 14px; height: 14px;
@@ -200,14 +226,16 @@ function _inject() {
   // Kompenzace fixed nav
   const setCompensation = () => {
     const app = document.getElementById('app');
-    if (window.innerWidth < 820) {
+    const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
+    if (window.innerWidth >= 820 || isLandscapeMobile) {
+      const navW = window.innerWidth >= 820 ? 84 : 64;
+      document.body.style.paddingBottom = '';
+      document.body.style.paddingRight = navW + 'px';
+      if (app) { app.style.paddingBottom = ''; app.style.paddingRight = navW + 'px'; }
+    } else {
       document.body.style.paddingBottom = el.offsetHeight + 'px';
       document.body.style.paddingRight = '';
       if (app) { app.style.paddingBottom = el.offsetHeight + 'px'; app.style.paddingRight = ''; }
-    } else {
-      document.body.style.paddingBottom = '';
-      document.body.style.paddingRight = '';
-      if (app) { app.style.paddingRight = '84px'; app.style.paddingBottom = ''; }
     }
   };
   requestAnimationFrame(setCompensation);
