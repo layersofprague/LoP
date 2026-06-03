@@ -2667,7 +2667,7 @@ function _resetPinScale() {
 function showTooltip(loc, m, rt) {
   clearTimeout(window._rtHideTimer);
   const c = CAT[loc.cat];
-  const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}`;
+  const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}${loc.arRadius ? '&radius=' + loc.arRadius : ''}`;
   const wBtn = isWished(loc.id);
   const wishHtml = isLoggedIn()
     ? `<button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">

@@ -106,7 +106,8 @@ var TARGET = {
   lat:   parseFloat(params.get('lat')),
   lng:   parseFloat(params.get('lng')),
   name:  params.get('name') || '',
-  thumb: params.get('thumb') || ''
+  thumb: params.get('thumb') || '',
+  radius: parseFloat(params.get('radius')) || 20
 };
 
 // ── ANCHOR ──
@@ -555,6 +556,11 @@ navigator.geolocation && navigator.geolocation.watchPosition(
       map.setView([userPos.lat, userPos.lng], map.getZoom(), { animate: false });
     }
     updateDist();
+    // Detekce příchodu
+    if (!_arrivalShown && !isNaN(TARGET.lat)) {
+      var dist = calcDist(userPos, { lat: TARGET.lat, lng: TARGET.lng });
+      if (dist <= TARGET.radius) showArrival();
+    }
     document.getElementById('dbg').textContent = 'GPS ±' + Math.round(pos.coords.accuracy) + 'm | ' + Math.round(smoothH||0) + '°';
   },
   function(err) {
