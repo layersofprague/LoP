@@ -2686,17 +2686,34 @@ function showTooltip(loc, m, rt) {
   const tipH = rt.offsetHeight || 150;
   rt.classList.remove('visible');
 
+  const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
+  const isDesktop = window.innerWidth >= 820;
+  // Šířka navbaru — vpravo v landscape a desktop
+  const navW = (isLandscapeMobile || isDesktop) ? 64 : 0;
+  const rightLimit = window.innerWidth - navW - margin;
+  const bottomLimit = window.innerHeight - margin;
+
   let tipLeft, tipTop;
-  if (window.innerWidth < 820) {
-    tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, rect.left + rect.width/2 - tipW/2));
-    tipTop  = rect.top + rect.height/2 - 23 - tipH - 6;
-    const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
-    if (tipTop < headerH + margin) tipTop = rect.bottom + 2;
-  } else {
+  if (isDesktop) {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
-    tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, tipLeft));
+    tipLeft = Math.max(margin, Math.min(rightLimit - tipW, tipLeft));
     tipTop  = tipTop < margin ? rect.bottom + 8 : tipTop;
+    // Ořízni spodek navbarem
+    if (tipTop + tipH > bottomLimit) tipTop = bottomLimit - tipH;
+  } else if (isLandscapeMobile) {
+    // Landscape mobil — tooltip vedle pinu (vlevo nebo vpravo)
+    tipTop  = Math.max(headerH + margin, Math.min(bottomLimit - tipH, rect.top + rect.height/2 - tipH/2));
+    tipLeft = rect.left - tipW - 8;
+    if (tipLeft < margin) tipLeft = rect.right + 8;
+    tipLeft = Math.max(margin, Math.min(rightLimit - tipW, tipLeft));
+  } else {
+    // Portrait mobil
+    tipLeft = Math.max(margin, Math.min(rightLimit - tipW, rect.left + rect.width/2 - tipW/2));
+    tipTop  = rect.top + rect.height/2 - 23 - tipH - 6;
+    if (tipTop < headerH + margin) tipTop = rect.bottom + 2;
+    // Ořízni spodní hranu
+    if (tipTop + tipH > bottomLimit) tipTop = bottomLimit - tipH;
   }
   rt.style.left = tipLeft + 'px';
   rt.style.top  = tipTop  + 'px';
