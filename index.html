@@ -2906,9 +2906,11 @@ function resetFilters() {
   applyFilter();
   updateFilterPuck();
 }
-  // Nové schema: yearBuilt je přímé číslo
-  if (loc.yearBuilt) return loc.yearBuilt;
 
+
+
+function locYear(loc) {
+  if (loc.yearBuilt) return loc.yearBuilt;
   const parseYearOrCentury = (s) => {
     const v = String(s);
     const y = v.match(/\d{3,4}/);
@@ -2920,20 +2922,13 @@ function resetFilters() {
   if (loc.facts && loc.facts.length) {
     const buildKeys = /postaveno|otevřeno|dokončeno|vybudováno|výstavba|první zmínka|orloj od|od\b/i;
     for (const f of loc.facts) {
-      if (buildKeys.test(f.k)) {
-        const y = parseYearOrCentury(f.v);
-        if (y != null) return y;
-      }
+      if (buildKeys.test(f.k)) { const y = parseYearOrCentury(f.v); if (y != null) return y; }
     }
     for (const f of loc.facts) {
-      const y = parseYearOrCentury(f.v);
-      if (y != null) return y;
+      const y = parseYearOrCentury(f.v); if (y != null) return y;
     }
   }
-  if (loc.yearThen) {
-    const y = parseYearOrCentury(loc.yearThen);
-    if (y != null) return y;
-  }
+  if (loc.yearThen) { const y = parseYearOrCentury(loc.yearThen); if (y != null) return y; }
   return null;
 }
 
