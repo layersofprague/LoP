@@ -517,6 +517,24 @@ a { color: inherit; text-decoration: none; }
 .chip.all { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .chip.all .chip-count { color: rgba(255,255,255,.55); }
 
+/* Chip wrapper se stavovým popiskem */
+.chip-wrap {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+}
+.chip-state-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-4); line-height: 1;
+  padding-left: 2px;
+  transition: color .15s;
+}
+
+/* Portrait — label vpravo od chipu */
+@media (max-width: 819px) and (orientation: portrait) {
+  .chip-wrap { flex-direction: row; align-items: center; gap: 8px; }
+  .chip-state-lbl { padding-left: 0; }
+}
+
 .map-puck-wrap {
   position: fixed;
   right: 14px;
@@ -2866,26 +2884,41 @@ function buildChips() {
   const counts = { hist:0, arch:0, fun:0 };
   LOCATIONS.forEach(l => counts[l.cat]++);
   el.innerHTML = `
-    <button class="chip" data-cat="hist">
-      <span class="chip-swatch" style="background: var(--cat-hist)"></span>
-      Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="chip" data-cat="arch">
-      <span class="chip-swatch" style="background: var(--cat-arch)"></span>
-      Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="chip" data-cat="fun">
-      <span class="chip-swatch" style="background: var(--cat-fun)"></span>
-      Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
-    </button>
-    <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
-      <span class="chip-swatch chip-icon chip-icon-check"></span>
-      Navštíveno <span id="ctVisitedWrap"></span>
-    </button>
-    <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      Plán <span id="ctWishedWrap"></span>
-    </button>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
+      <button class="chip" data-cat="hist">
+        <span class="chip-swatch" style="background: var(--cat-hist)"></span>
+        Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
+      </button>
+    </div>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-arch">výchozí</span>
+      <button class="chip" data-cat="arch">
+        <span class="chip-swatch" style="background: var(--cat-arch)"></span>
+        Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
+      </button>
+    </div>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
+      <button class="chip" data-cat="fun">
+        <span class="chip-swatch" style="background: var(--cat-fun)"></span>
+        Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
+      </button>
+    </div>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
+      <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
+        <span class="chip-swatch chip-icon chip-icon-check"></span>
+        Navštíveno <span id="ctVisitedWrap"></span>
+      </button>
+    </div>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-wished">výchozí</span>
+      <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        Plán <span id="ctWishedWrap"></span>
+      </button>
+    </div>
   `;
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2894,6 +2927,7 @@ function buildChips() {
       btn.classList.remove('state-dim', 'state-hide');
       if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
       else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
+      updateChipLabels();
       applyFilter();
     });
   });
@@ -2910,12 +2944,25 @@ function buildChips() {
       if (FILTER[f] === 'dim')   btn.classList.add('state-dim');
       else if (FILTER[f] === 'hide')  btn.classList.add('state-hide');
       else if (FILTER[f] === 'force') btn.classList.add('state-force');
+      updateChipLabels();
       applyFilter();
     });
   });
   buildEraTimeline();
   initDistSlider();
   updateChipCounts();
+  updateChipLabels();
+}
+
+function updateChipLabels() {
+  const LABELS_CAT  = { full: 'výchozí', dim: 'utlumeno', hide: 'skryto' };
+  const LABELS_WISH = { full: 'výchozí', dim: 'utlumeno', hide: 'skryto', force: 'vždy' };
+  const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  set('lbl-hist',    LABELS_CAT[FILTER.hist]    || '');
+  set('lbl-arch',    LABELS_CAT[FILTER.arch]    || '');
+  set('lbl-fun',     LABELS_CAT[FILTER.fun]     || '');
+  set('lbl-visited', LABELS_WISH[FILTER.visited]|| '');
+  set('lbl-wished',  LABELS_WISH[FILTER.wished] || '');
 }
 
 const eraPct = (y) => ((y - ERA_START) / (ERA_END - ERA_START)) * 100;
@@ -3038,9 +3085,9 @@ function resetFilters() {
   const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
   renderEra();
   applyFilter();
+  updateFilterPuck();
+  updateChipLabels();
 }
-
-function locYear(loc) {
   // Nové schema: yearBuilt je přímé číslo
   if (loc.yearBuilt) return loc.yearBuilt;
 
