@@ -641,6 +641,7 @@ a { color: inherit; text-decoration: none; }
 .map-puck:hover { background: var(--paper-2); }
 .map-puck svg { width: 14px; height: 14px; }
 #locateBtn.located svg circle:first-child { stroke: var(--accent); }
+#locateBtn.located .locate-ring-fill { fill: var(--accent); }
 
 .map-hint {
   position: absolute; bottom: 16px; left: 14px; right: 14px;
@@ -1842,7 +1843,18 @@ a { color: inherit; text-decoration: none; }
 
       <div class="map-puck-wrap" id="mapPuckWrap">
         <button class="map-puck" id="locateBtn" title="Moje poloha" onclick="locateMe()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <defs>
+              <mask id="ringMask">
+                <circle cx="12" cy="12" r="8" fill="white"/>
+                <circle cx="12" cy="12" r="3" fill="black"/>
+              </mask>
+            </defs>
+            <circle class="locate-ring-fill" cx="12" cy="12" r="8" fill="none" mask="url(#ringMask)" stroke="none"/>
+            <circle cx="12" cy="12" r="8"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          </svg>
         </button>
       </div>
 
