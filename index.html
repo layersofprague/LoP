@@ -2691,7 +2691,7 @@ function showTooltip(loc, m, rt) {
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, rect.left + rect.width/2 - tipW/2));
     tipTop  = rect.top - tipH - 10;
     const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
-    if (tipTop < headerH + margin) tipTop = rect.bottom + 10;
+    if (tipTop < headerH + margin) tipTop = rect.bottom + 4;
   } else {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
