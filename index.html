@@ -2689,9 +2689,9 @@ function showTooltip(loc, m, rt) {
   let tipLeft, tipTop;
   if (window.innerWidth < 820) {
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, rect.left + rect.width/2 - tipW/2));
-    tipTop  = rect.top - tipH - 10;
+    tipTop  = rect.top + rect.height/2 - 23 - tipH - 6;
     const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
-    if (tipTop < headerH + margin) tipTop = rect.bottom - 8;
+    if (tipTop < headerH + margin) tipTop = rect.top + rect.height/2 + 28;
   } else {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
