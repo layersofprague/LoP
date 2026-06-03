@@ -129,7 +129,7 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   border-top: 1px solid var(--rule);
   background: var(--paper);
-  z-index: 20;
+  z-index: 500;
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .nav-item {
@@ -176,7 +176,7 @@ a { color: inherit; text-decoration: none; }
 .view.active { opacity: 1; pointer-events: all; }
 
 /* ═══════════════ MAP VIEW ═══════════════ */
-#mapView { display: flex; flex-direction: column; position: relative; }
+#mapView { display: flex; flex-direction: column; }
 #map {
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   background: var(--paper-2);
@@ -559,13 +559,16 @@ a { color: inherit; text-decoration: none; }
 }
 /* Filter modal */
 .filter-modal-backdrop {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: var(--header-h, 52px);
+  left: 0; right: 0;
+  bottom: 0;
   z-index: 450;
   display: none;
   pointer-events: none;
   background: transparent;
   transition: background .22s;
+  /* Oříznutí na oblast mapy — nav je fixed bottom/right, nepřekrýváme ho */
 }
 .filter-modal-backdrop.open {
   display: block; pointer-events: auto;
@@ -573,6 +576,7 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
+/* Nav a header nejsou ovlivněné — jsou fixed s vyšším z-index */
 .filter-modal {
   position: absolute;
   top: 12px; left: 12px; right: 12px;
