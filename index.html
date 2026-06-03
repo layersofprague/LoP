@@ -2691,15 +2691,13 @@ function showTooltip(loc, m, rt) {
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, rect.left + rect.width/2 - tipW/2));
     tipTop  = rect.top + rect.height/2 - 23 - tipH - 6;
     const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 52;
-    if (tipTop < headerH + margin) tipTop = rect.top + rect.height/2 + 28;
+    if (tipTop < headerH + margin) tipTop = rect.bottom + 2;
   } else {
     tipLeft = rect.left + rect.width/2 - tipW/2;
     tipTop  = rect.top - tipH - 8;
     tipLeft = Math.max(margin, Math.min(window.innerWidth - tipW - margin, tipLeft));
     tipTop  = tipTop < margin ? rect.bottom + 8 : tipTop;
   }
-  // Debug — zobraz rect hodnoty
-  console.log('rect:', JSON.stringify({top: Math.round(rect.top), bottom: Math.round(rect.bottom), height: Math.round(rect.height), width: Math.round(rect.width)}), 'tipH:', tipH, 'tipTop:', Math.round(tipTop));
   rt.style.left = tipLeft + 'px';
   rt.style.top  = tipTop  + 'px';
   // Zvětši aktivní pin
