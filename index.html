@@ -1719,29 +1719,11 @@ a { color: inherit; text-decoration: none; }
 </head>
 <body>
 
+<div id="lop-header"></div>
+<script src="header.js"></script>
+
 <div id="app">
-  <!-- Topbar -->
-  <!-- ⚠️  POZOR: Header je zde napevno. Změny synchronizuj také do header.js -->
-  <header id="topbar">
-    <div class="topbar-main">
-      <div class="brand">
-        <img class="brand-logo" src="logo-tight.png" alt="Layers of Prague"/>
-      </div>
-      <div class="top-actions">
-        <a class="top-btn" href="oprojektu.html" title="O projektu" aria-label="O projektu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </a>
-        <button class="top-btn" title="Notifikace" aria-label="Notifikace">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-          <span class="dot"></span>
-        </button>
-        <button class="top-btn" id="profileBtn" title="Profil" aria-label="Profil"
-                onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-        </button>
-      </div>
-    </div>
-  </header>
+  <div id="_header_ph" style="flex:0 0 auto"></div>
 
   <div id="topSearch">
     <div class="ts-field">
@@ -3483,11 +3465,18 @@ function alignPuck() {
 window.addEventListener('resize', alignPuck);
 
 function adjustTopbarOffset() {
-  const tb  = document.getElementById('topbar');
+  const tb  = document.getElementById('lop-header');
   const nav = document.getElementById('nav');
-  if (tb && nav && window.innerWidth >= 820) {
-    nav.style.paddingTop = tb.offsetHeight + 'px';
-  } else if (nav) {
+  const ph  = document.getElementById('_header_ph');
+  const h   = tb ? tb.offsetHeight : 0;
+  if (!h) return;
+  document.documentElement.style.setProperty('--header-h', h + 'px');
+  const isLandscapeMobile = window.innerWidth <= 819 && window.innerWidth > window.innerHeight;
+  // Placeholder zabírá místo v portrait flex column layoutu
+  if (ph) ph.style.height = isLandscapeMobile ? '0' : h + 'px';
+  if (nav && (window.innerWidth >= 820 || isLandscapeMobile)) {
+    nav.style.paddingTop = h + 'px';
+  } else {
     nav.style.paddingTop = '';
   }
 }
@@ -3499,6 +3488,7 @@ if (document.readyState === 'loading') {
   loadData();
 }
 window.addEventListener('resize', adjustTopbarOffset);
+window.addEventListener('orientationchange', () => setTimeout(adjustTopbarOffset, 100));
 </script>
 <div id="lop-snackbar"></div>
 <script src="auth-modal.js"></script>
