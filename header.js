@@ -94,14 +94,14 @@ function _html() {
     </a>
     <div class="lop-h-actions">
       <button class="lop-h-btn" id="lopHSearch" title="Hledat" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </button>
       <button class="lop-h-btn" id="lopHNotif" title="Notifikace">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
         <span class="lop-h-dot"></span>
       </button>
       <a class="lop-h-btn" href="${ROOT}oprojektu.html" title="O projektu / Nastavení">
-        <svg viewBox="-38 -38 76 76" fill="none" stroke="currentColor" stroke-width="3.45" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px">
+        <svg viewBox="-38 -38 76 76" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px">
           <path d="M-5.43,-30.52 L-3.48,-35.83 L3.48,-35.83 L5.43,-30.52 L13.55,-27.88 L18.25,-31.03 L23.88,-26.94 L22.33,-21.50 L27.35,-14.59 L33.00,-14.38 L35.15,-7.76 L30.70,-4.27 L30.70,4.27 L35.15,7.76 L33.00,14.38 L27.35,14.59 L22.33,21.50 L23.88,26.94 L18.25,31.03 L13.55,27.88 L5.43,30.52 L3.48,35.83 L-3.48,35.83 L-5.43,30.52 L-13.55,27.88 L-18.25,31.03 L-23.88,26.94 L-22.33,21.50 L-27.35,14.59 L-33.00,14.38 L-35.15,7.76 L-30.70,4.27 L-30.70,-4.27 L-35.15,-7.76 L-33.00,-14.38 L-27.35,-14.59 L-22.33,-21.50 L-23.88,-26.94 L-18.25,-31.03 L-13.55,-27.88 Z"/>
           <circle cx="0" cy="0" r="22"/>
           <circle cx="0" cy="-8.4" r="1.7" fill="currentColor" stroke="none"/>
@@ -110,7 +110,7 @@ function _html() {
       </a>
       <button class="lop-h-btn" id="lopHProfile" title="Profil"
               onclick="window.lopAuth ? window.lopAuth.open() : location.href='${loginHref}'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
       </button>
     </div>
   `;
@@ -135,7 +135,7 @@ function _updateAuth() {
     } else {
       btn.classList.remove('logged-in');
       btn.title = 'Přihlásit se';
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
       btn.onclick = () => {
         if (window.lopAuth) window.lopAuth.open('signin');
         else location.href = ROOT + 'login.html?return=' + encodeURIComponent(location.href);
