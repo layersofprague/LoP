@@ -101,21 +101,11 @@ function _html() {
         <span class="lop-h-dot"></span>
       </button>
       <a class="lop-h-btn" href="${ROOT}oprojektu.html" title="O projektu / Nastavení">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px">
-          <!-- Kroužek -->
-          <circle cx="12" cy="12" r="5.5"/>
-          <!-- i uvnitř -->
-          <line x1="12" y1="11" x2="12" y2="14.5"/>
-          <circle cx="12" cy="9.5" r="0.4" fill="currentColor" stroke="none"/>
-          <!-- Zuby kolem -->
-          <line x1="12" y1="1.5" x2="12" y2="3.5"/>
-          <line x1="12" y1="20.5" x2="12" y2="22.5"/>
-          <line x1="1.5" y1="12" x2="3.5" y2="12"/>
-          <line x1="20.5" y1="12" x2="22.5" y2="12"/>
-          <line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/>
-          <line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/>
-          <line x1="19.8" y1="4.2" x2="18.4" y2="5.6"/>
-          <line x1="5.6" y1="18.4" x2="4.2" y2="19.8"/>
+        <svg viewBox="-38 -38 76 76" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px">
+          <path d="M-5.43,-30.52 L-3.48,-35.83 L3.48,-35.83 L5.43,-30.52 L13.55,-27.88 L18.25,-31.03 L23.88,-26.94 L22.33,-21.50 L27.35,-14.59 L33.00,-14.38 L35.15,-7.76 L30.70,-4.27 L30.70,4.27 L35.15,7.76 L33.00,14.38 L27.35,14.59 L22.33,21.50 L23.88,26.94 L18.25,31.03 L13.55,27.88 L5.43,30.52 L3.48,35.83 L-3.48,35.83 L-5.43,30.52 L-13.55,27.88 L-18.25,31.03 L-23.88,26.94 L-22.33,21.50 L-27.35,14.59 L-33.00,14.38 L-35.15,7.76 L-30.70,4.27 L-30.70,-4.27 L-35.15,-7.76 L-33.00,-14.38 L-27.35,-14.59 L-22.33,-21.50 L-23.88,-26.94 L-18.25,-31.03 L-13.55,-27.88 Z"/>
+          <circle cx="0" cy="0" r="22"/>
+          <circle cx="0" cy="-8.4" r="1.7" fill="currentColor" stroke="none"/>
+          <line x1="0" y1="-2.6" x2="0" y2="10.6" stroke-width="2"/>
         </svg>
       </a>
       <button class="lop-h-btn" id="lopHProfile" title="Profil"
