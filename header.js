@@ -101,7 +101,7 @@ function _html() {
         <span class="lop-h-dot"></span>
       </button>
       <a class="lop-h-btn" href="${ROOT}oprojektu.html" title="O projektu / Nastavení">
-        <svg viewBox="-38 -38 76 76" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px">
+        <svg viewBox="-38 -38 76 76" fill="none" stroke="currentColor" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px">
           <path d="M-5.43,-30.52 L-3.48,-35.83 L3.48,-35.83 L5.43,-30.52 L13.55,-27.88 L18.25,-31.03 L23.88,-26.94 L22.33,-21.50 L27.35,-14.59 L33.00,-14.38 L35.15,-7.76 L30.70,-4.27 L30.70,4.27 L35.15,7.76 L33.00,14.38 L27.35,14.59 L22.33,21.50 L23.88,26.94 L18.25,31.03 L13.55,27.88 L5.43,30.52 L3.48,35.83 L-3.48,35.83 L-5.43,30.52 L-13.55,27.88 L-18.25,31.03 L-23.88,26.94 L-22.33,21.50 L-27.35,14.59 L-33.00,14.38 L-35.15,7.76 L-30.70,4.27 L-30.70,-4.27 L-35.15,-7.76 L-33.00,-14.38 L-27.35,-14.59 L-22.33,-21.50 L-23.88,-26.94 L-18.25,-31.03 L-13.55,-27.88 Z"/>
           <circle cx="0" cy="0" r="22"/>
           <circle cx="0" cy="-8.4" r="1.7" fill="currentColor" stroke="none"/>
