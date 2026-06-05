@@ -2022,16 +2022,10 @@ a { color: inherit; text-decoration: none; }
 
   </main>
 
-  <!-- Nav — sestavuje nav.js (lopNav.buildIndex) -->
+  <!-- Nav — sestavuje nav.js -->
   <nav id="nav"></nav>
   <script src="nav.js?v=2"></script>
-  <script>
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() { if (window.lopNav) window.lopNav.buildIndex(); });
-    } else {
-      if (window.lopNav) window.lopNav.buildIndex();
-    }
-  </script>
+  <script>window.lopNav && window.lopNav.buildIndex();</script>
 </div>
 
 <!-- Tweaks panel -->
@@ -2534,8 +2528,6 @@ function updateWishBadge() {
   const customCt = document.getElementById('customCt');
   if (customCt) customCt.textContent = String(n).padStart(2, '0') + ' míst';
   updateChipCounts();
-  // Refresh inline nav (badge + lock stav)
-  if (window.lopNav && window.lopNav.refreshIndex) window.lopNav.refreshIndex();
 }
 
 function renderWishlist() {
