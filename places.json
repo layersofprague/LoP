@@ -1,6 +1,7 @@
 [
   {
     "id": "H101",
+    "district": "Nové Město",
     "name": "Šítkovská věž",
     "lat": 50.0784,
     "lng": 14.4133,
@@ -90,6 +91,7 @@
   },
   {
     "id": "H102",
+    "district": "Nové Město",
     "name": "Václavské náměstí",
     "lat": 50.0815,
     "lng": 14.4278,
@@ -163,6 +165,7 @@
   },
   {
     "id": "H201",
+    "district": "Staré Město",
     "name": "Staroměstské náměstí",
     "lat": 50.0875,
     "lng": 14.4213,
@@ -236,6 +239,7 @@
   },
   {
     "id": "H202",
+    "district": "Nové Město",
     "name": "Národní divadlo",
     "lat": 50.0808,
     "lng": 14.4133,
@@ -309,6 +313,7 @@
   },
   {
     "id": "H301",
+    "district": "Hradčany",
     "name": "Pražský hrad",
     "lat": 50.0911,
     "lng": 14.4016,
@@ -383,6 +388,7 @@
   },
   {
     "id": "H001",
+    "district": "Holešovice",
     "name": "Holešovický přístav",
     "lat": 50.105164,
     "lng": 14.456314,
@@ -472,6 +478,7 @@
   },
   {
     "id": "H302",
+    "district": "Letná",
     "name": "Letenské sady",
     "lat": 50.0939,
     "lng": 14.4224,
@@ -542,6 +549,7 @@
   },
   {
     "id": "H203",
+    "district": "Nové Město",
     "name": "Tančící dům",
     "lat": 50.0754,
     "lng": 14.4141,
