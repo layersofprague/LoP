@@ -774,14 +774,12 @@ async function saveToCollection() {
   // Ulož do Supabase
   const s = await _getValidSession();
   if (s?.user) {
-    // score → int2 v Supabase, musí být celé číslo
-    const scoreInt = Math.round(score);
     // Body: 100 za návštěvu + score na desetiny
     const points = Math.round((100 + score) * 10) / 10;
     const payload = {
       user_id: s.user.id,
       place_id: String(placeId),
-      score: scoreInt,
+      score: score,  // numeric(5,1) — desetiny
       points: points,
       visited_at: new Date().toISOString(),
     };
