@@ -22,7 +22,6 @@ const ROOT = _root();
 function _activePage() {
   const path = location.pathname;
   if (path.includes('prehled')) return 'prehled';
-  if (path.includes('sbirky')) return 'sbirky';
   if (path.includes('trasy')) return 'routes';
   if (path.includes('login') || path.includes('profil')) return '';
   if (path.includes('place/') || path.includes('ar-intro') || path.includes('compass')) return '';
@@ -43,7 +42,7 @@ function _wishCount() {
   try {
     const w = JSON.parse(localStorage.getItem('lop_wishlist_v2') || '[]');
     if (!Array.isArray(w)) return 0;
-    return new Set(w.map(String).filter(x => x && x !== 'undefined' && x !== 'null' && /^H\d+$/.test(x))).size;
+    return new Set(w.map(String).filter(x => x && x !== 'undefined' && x !== 'null')).size;
   } catch(e) { return 0; }
 }
 
@@ -180,12 +179,6 @@ function _html() {
       href: root + 'prehled.html',
       label: 'Přehled',
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`
-    },
-    {
-      id: 'sbirky',
-      href: root + 'sbirky.html',
-      label: 'Sbírka',
-      svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.5"/><circle cx="16" cy="8" r="3.5"/><circle cx="12" cy="16" r="3.5"/></svg>`
     },
     {
       id: 'routes',

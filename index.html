@@ -2022,28 +2022,16 @@ a { color: inherit; text-decoration: none; }
 
   </main>
 
-  <!-- Nav -->
-  <!-- ⚠️  POZOR: Nav je zde napevno. Změny synchronizuj také do nav.js -->
-  <nav id="nav">
-    <button class="nav-item active" data-view="mapView" onclick="switchView('mapView')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>
-      <span class="nav-label">Mapa</span>
-    </button>
-    <button class="nav-item" onclick="location.href='prehled.html'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <span class="nav-label">Přehled</span>
-    </button>
-    <button class="nav-item" onclick="location.href='trasy.html'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>
-      <span class="nav-label">Trasy</span>
-    </button>
-    <button class="nav-item" data-view="wishView" onclick="isLoggedIn() ? location.href='prehled.html?filter=wished' : (window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href))">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      <span class="nav-label">Plán</span>
-      <span class="nav-badge" id="wishBadge">3</span>
-      <span class="nav-badge-lock" id="wishLock"></span>
-    </button>
-  </nav>
+  <!-- Nav — sestavuje nav.js (lopNav.buildIndex) -->
+  <nav id="nav"></nav>
+  <script src="nav.js?v=2"></script>
+  <script>
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() { if (window.lopNav) window.lopNav.buildIndex(); });
+    } else {
+      if (window.lopNav) window.lopNav.buildIndex();
+    }
+  </script>
 </div>
 
 <!-- Tweaks panel -->
@@ -2546,6 +2534,8 @@ function updateWishBadge() {
   const customCt = document.getElementById('customCt');
   if (customCt) customCt.textContent = String(n).padStart(2, '0') + ' míst';
   updateChipCounts();
+  // Refresh inline nav (badge + lock stav)
+  if (window.lopNav && window.lopNav.refreshIndex) window.lopNav.refreshIndex();
 }
 
 function renderWishlist() {
