@@ -568,6 +568,7 @@ function toggleSection(idx, name) {
 let _allSections = [];
 
 function renderAll() {
+  try {
   const visited = getVisited();
   const scores = getScores();
 
@@ -632,6 +633,11 @@ function renderAll() {
     const el = document.getElementById('sec-' + i);
     if (el) { el._sIdx = i; }
   });
+  } catch(err) {
+    const page = document.getElementById('page');
+    if (page) page.innerHTML = '<div style="padding:40px 20px;font-family:monospace;font-size:13px;color:#b04020;white-space:pre-wrap">Chyba: ' + err.message + '</div>';
+    console.error('renderAll error:', err);
+  }
 }
 
 // Globální toggle — musí být přístupný z onclick
