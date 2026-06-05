@@ -707,11 +707,90 @@ html, body {
   <div id="match-pct">—</div>
   <div id="match-label">shoda historické fotky</div>
   <div id="match-detail">—</div>
+  <button id="match-save" onclick="saveToCollection()" style="margin-top:10px;padding:11px 28px;background:var(--accent,#b04020);border:none;border-radius:99px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;display:none">Uložit do sbírky</button>
   <button id="match-close" onclick="closeMatchResult()">Zkusit znovu?</button>
   <button onclick="exportComparison()" style="margin-top:2px;padding:7px 18px;background:rgba(238,239,235,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;color:rgba(238,239,235,.3);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer">Export PNG</button>
 </div>
 
 <script>
+// ─────────────────────────────────────────────────────────
+// URL params + Supabase save
+// ─────────────────────────────────────────────────────────
+const _arParams   = new URLSearchParams(location.search);
+const _arPlaceId  = _arParams.get('id') || null;
+let   _savedThisSession = false;
+
+const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
+const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+
+function _getSession() {
+  try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
+}
+async function _getValidSession() {
+  const s = _getSession();
+  if (!s?.access_token || !s?.user) return null;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if ((s.expires_at || 0) > nowSec + 60) return s;
+  if (!s.refresh_token) return null;
+  try {
+    const r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    });
+    if (!r.ok) { localStorage.removeItem('lop_auth_session'); return null; }
+    const data = await r.json();
+    localStorage.setItem('lop_auth_session', JSON.stringify({ ...data, user: data.user || s.user }));
+    return data;
+  } catch(e) { return null; }
+}
+
+async function saveToCollection() {
+  const score = window._lastScore ?? 100;
+  const placeId = _arPlaceId;
+  if (!placeId) { alert('Chybí ID místa — nelze uložit.'); return; }
+
+  const btn = document.getElementById('match-save');
+  if (btn) { btn.textContent = 'Ukládám…'; btn.disabled = true; }
+
+  // Ulož lokálně
+  try {
+    const visited = JSON.parse(localStorage.getItem('lop_visited_v1') || '[]').map(String);
+    if (!visited.includes(String(placeId))) {
+      visited.push(String(placeId));
+      localStorage.setItem('lop_visited_v1', JSON.stringify(visited));
+    }
+    const scores = JSON.parse(localStorage.getItem('lop_scores_v1') || '{}');
+    scores[String(placeId)] = { score, date: new Date().toISOString() };
+    localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
+  } catch(e) {}
+
+  // Ulož do Supabase
+  const s = await _getValidSession();
+  if (s?.user) {
+    try {
+      await fetch(SUPA_URL + '/rest/v1/visited', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + s.access_token,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates',
+        },
+        body: JSON.stringify({
+          user_id: s.user.id,
+          place_id: String(placeId),
+          score: Math.round(score),
+          visited_at: new Date().toISOString(),
+        }),
+      });
+    } catch(e) {}
+  }
+
+  _savedThisSession = true;
+  if (btn) { btn.textContent = '✓ Uloženo'; btn.style.background = '#3d7a4a'; }
+}
+
 // ─────────────────────────────────────────────────────────
 // Canvas quad-warp renderer using triangle subdivision
 // ─────────────────────────────────────────────────────────
@@ -1611,6 +1690,11 @@ function showMatchResult(pct, ncc, dbg) {
     detail.textContent = `NCC ${ncc.toFixed(3)}  aktivních px: ${dbg.activePx}  hist hrany: ${dbg.histEdgeMean.toFixed(1)}  cam hrany: ${dbg.camEdgeMean.toFixed(1)}`;
     detail.style.display = 'block';
   }
+  // Ulož pct pro saveToCollection
+  window._lastScore = pct;
+  // Zobraz save button jen pokud máme place_id a uživatel ještě neuložil
+  const saveBtn = document.getElementById('match-save');
+  if (saveBtn) saveBtn.style.display = _arPlaceId && !_savedThisSession ? 'block' : 'none';
   document.getElementById('match-result').classList.add('show');
   document.getElementById('match-backdrop').classList.add('show');
 }
