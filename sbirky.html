@@ -67,34 +67,50 @@ a { color: inherit; text-decoration: none; }
   max-width: 34em;
 }
 
-/* ── STAT STRIP ── */
-.stat-strip {
-  display: flex; gap: 0;
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 26px;
+/* ── HERO META ── */
+.hero-meta {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 8px;
+  row-gap: 3px;
+  align-items: baseline;
+  flex-shrink: 0;
+  justify-content: end;
 }
-.stat-item {
-  flex: 1; padding: 12px 14px;
-  border-right: 1px solid var(--rule);
-  text-align: center;
-}
-.stat-item:last-child { border-right: none; }
-.stat-val {
+.hero-num {
   font-family: 'Fraunces', serif;
-  font-size: 26px; font-weight: 500;
-  line-height: 1; color: var(--ink);
+  font-weight: 500; font-size: 22px;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  text-align: right;
+  line-height: 1;
 }
-.stat-val span {
-  font-size: 14px; color: var(--ink-4);
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 400;
+.hero-num-sub {
+  font-family: 'Fraunces', serif;
+  font-weight: 400; font-size: 15px;
+  letter-spacing: -.01em;
+  color: var(--ink-3);
+  text-align: right;
+  line-height: 1;
 }
-.stat-key {
+.hero-lbl {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-4); margin-top: 4px;
+  font-size: 11px; letter-spacing: .08em;
+  color: var(--ink-3);
+  white-space: nowrap;
+  line-height: 1;
+}
+.hero-lbl-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .08em;
+  color: var(--ink-4);
+  white-space: nowrap;
+  line-height: 1;
+}
+.hero-slash {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--rule-2);
 }
 
 /* ── SEKCE KICKER ── */
@@ -603,7 +619,6 @@ function renderAll() {
     const pts = Number.isFinite(s.score) ? Math.round((100 + s.score) * 10) / 10 : 100.0;
     return sum + pts;
   }, 0);
-  const sharpCount = scoreVals.filter(s => s > 75).length;
 
   const catSections = sections.filter(s => s.kind === 'cat');
   const distSections = sections.filter(s => s.kind === 'district');
@@ -611,23 +626,16 @@ function renderAll() {
   let html = `
   <div class="hero-section">
     <div class="kick">Layers of Prague</div>
-    <h1 class="page-title">Sbírka <em>razítek</em></h1>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+      <h1 class="page-title">Sbírka <em>razítek</em></h1>
+      <div class="hero-meta">
+        <span class="hero-num" id="statCount">—</span>
+        <span class="hero-lbl">/ <span id="statTotal" style="color:var(--ink-4)">—</span> razítek</span>
+        <span class="hero-num-sub" id="statPoints">—</span>
+        <span class="hero-lbl-sub">bodů</span>
+      </div>
+    </div>
     <p class="page-intro">Otevři kategorii nebo čtvrť a prohlédni si své otisky. Každé místo, které navštívíš přes AR záběr, zanechá razítko.</p>
-  </div>
-
-  <div class="stat-strip">
-    <div class="stat-item">
-      <div class="stat-val">${visitedCount}<span> / ${totalPlaces}</span></div>
-      <div class="stat-key">Razítek</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">${totalPoints.toFixed(1)}<span> b</span></div>
-      <div class="stat-key">Body</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">${sharpCount}<span> ★</span></div>
-      <div class="stat-key">Ostrých</div>
-    </div>
   </div>
 
   <div id="sections-wrap">
@@ -649,6 +657,13 @@ function renderAll() {
   // Připoj reference sekcí na wrap aby toggleSection fungoval bez full re-renderu
   const wrap = document.getElementById('sections-wrap');
   if (wrap) wrap._sections = sections;
+  // Aktualizuj hero meta
+  const elCount  = document.getElementById('statCount');
+  const elTotal  = document.getElementById('statTotal');
+  const elPoints = document.getElementById('statPoints');
+  if (elCount)  elCount.textContent  = visitedCount;
+  if (elTotal)  elTotal.textContent  = totalPlaces;
+  if (elPoints) elPoints.textContent = totalPoints.toFixed(1);
   // Připoj _sections na všechny sec-N prvky
   sections.forEach((s, i) => {
     const el = document.getElementById('sec-' + i);
