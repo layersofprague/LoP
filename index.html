@@ -2218,11 +2218,17 @@ function dbRemoveWish(placeId) {
       { method:'DELETE', headers: authHeaders() }).catch(()=>{});
   });
 }
-function dbAddVisited(placeId) {
+function dbAddVisited(placeId, score) {
   getValidSession().then(s => {
     if (!s?.user) return;
+    const payload = {
+      user_id: s.user.id,
+      place_id: String(placeId),
+      visited_at: new Date().toISOString(),
+      score: (score != null && Number.isFinite(+score)) ? Math.round(+score) : null,
+    };
     fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
-      body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+      body: JSON.stringify(payload) }).catch(()=>{});
   });
 }
 
@@ -2460,13 +2466,19 @@ function isVisited(id) {
   const loc = LOCATIONS.find(l => String(l.id) === sid);
   return loc?.visited ?? false;
 }
-function markVisited(id) {
+function markVisited(id, score) {
   const sid = String(id);
   const v = getVisited().map(String);
   if (!v.includes(sid)) { v.push(sid); setVisited(v); }
   const loc = LOCATIONS.find(l => String(l.id) === sid);
   if (loc) loc.visited = true;
-  dbAddVisited(sid);
+  dbAddVisited(sid, score);
+  // Ulož score a datum lokálně pro sbirky.html
+  try {
+    const scores = JSON.parse(localStorage.getItem('lop_scores_v1') || '{}');
+    scores[sid] = { score: score ?? 100, date: new Date().toISOString() };
+    localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
+  } catch(e) {}
 }
 
 /* ═══════════════ WISHLIST ═══════════════ */
@@ -2528,6 +2540,7 @@ function updateWishBadge() {
   const customCt = document.getElementById('customCt');
   if (customCt) customCt.textContent = String(n).padStart(2, '0') + ' míst';
   updateChipCounts();
+  if (window.lopNav && window.lopNav.refreshIndex) window.lopNav.refreshIndex();
 }
 
 function renderWishlist() {
@@ -3398,6 +3411,7 @@ function initHeroSlider() {
 /* ═══════════════ AR ═══════════════ */
 let arState = 'aligning';
 function openArFor(id) {
+  window._arLocId = id;
   const loc = LOCATIONS.find(l => l.id === id);
   if (!loc) return;
   let url = 'ar-intro.html?id=' + encodeURIComponent(loc.id)
@@ -3417,6 +3431,7 @@ function simulateAR() {
   const compassLbl = document.getElementById('arCompassLbl');
 
   ghost.classList.remove('active');
+  btn.disabled = false;
   status.textContent = '● GPS 12 m';
   status.style.background = 'rgba(61,122,74,.25)';
   status.style.color = '#9fd4a8';
@@ -3446,6 +3461,18 @@ function simulateAR() {
   }, 1500);
 }
 function arLock() {
+  if (arState === 'locked') {
+    // Druhé kliknutí = "Uložit do sbírky"
+    const slider = document.getElementById('arSlider');
+    const score = slider ? Math.round(+slider.value) : 100;
+    const locId = window._arLocId;
+    if (locId) {
+      markVisited(locId, score);
+      document.getElementById('arLockBtn').textContent = '✓ Uloženo';
+      document.getElementById('arLockBtn').disabled = true;
+    }
+    return;
+  }
   arState = 'locked';
   document.getElementById('arStatus').textContent = '● Zamčeno';
   document.getElementById('arStatus').style.background = 'rgba(176,64,32,.25)';

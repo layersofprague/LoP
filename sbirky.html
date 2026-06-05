@@ -102,17 +102,21 @@ a { color: inherit; text-decoration: none; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-4);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 /* ── FLAT SECTION (layout 4b) ── */
 .flat-section {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--paper);
 }
 .flat-section-btn {
   width: 100%;
   background: transparent; border: none; cursor: pointer;
-  padding: 0; font-family: inherit; text-align: left;
+  padding: 13px 15px 0; font-family: inherit; text-align: left;
   display: block;
 }
 .flat-section-header {
@@ -137,7 +141,7 @@ a { color: inherit; text-decoration: none; }
 
 .flat-section-progress {
   height: 2px; background: var(--rule);
-  position: relative; margin-bottom: 0;
+  position: relative; margin-bottom: 0; margin: 0 -0px;
 }
 .flat-section-progress-fill {
   position: absolute; left: 0; top: 0; height: 100%;
@@ -149,7 +153,7 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 @media (min-width: 480px) {
   .stamps-grid { grid-template-columns: repeat(4, 1fr); }
@@ -171,21 +175,21 @@ a { color: inherit; text-decoration: none; }
 
 /* ── ODZNAK TIP ── */
 .badge-tip {
-  margin-top: 14px;
-  padding: 11px 14px;
+  margin-top: 10px;
+  padding: 7px 12px;
   background: var(--paper-2);
   border: 1px dashed var(--rule-2);
-  border-radius: 10px;
-  display: flex; align-items: center; gap: 11px;
-  font-size: 12.5px; color: var(--ink-2); line-height: 1.45;
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12px; color: var(--ink-2); line-height: 1.4;
 }
 .badge-tip-icon {
-  width: 34px; height: 34px; flex-shrink: 0;
+  width: 24px; height: 24px; flex-shrink: 0;
   border-radius: 50%;
-  border: 2px solid var(--rule-2);
+  border: 1.5px solid var(--rule-2);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Fraunces', serif; font-style: italic;
-  color: var(--ink-4); font-size: 16px;
+  color: var(--ink-4); font-size: 12px;
 }
 
 /* ── FLAT SECTION BODY ── */
@@ -198,6 +202,7 @@ a { color: inherit; text-decoration: none; }
 .flat-section-body.open {
   max-height: 2400px;
   opacity: 1;
+  padding: 0 15px 15px;
 }
 
 /* ── AUTH CTA (nepřihlášen) ── */
@@ -398,7 +403,7 @@ function buildSectionData(places, visited, scores) {
       return {
         code: id,
         name: isVis ? p.name : null,
-        year: p.year,
+        year: p.yearBuilt || p.year,
         cat: cat,
         score: sc ? sc.score : (isVis ? 100 : undefined),
         dateLabel: sc ? fmtDate(sc.date) : undefined,
@@ -427,7 +432,7 @@ function buildSectionData(places, visited, scores) {
       return {
         code: id,
         name: isVis ? p.name : null,
-        year: p.year,
+        year: p.yearBuilt || p.year,
         cat: p.cat,
         score: sc ? sc.score : (isVis ? 100 : undefined),
         dateLabel: sc ? fmtDate(sc.date) : undefined,
