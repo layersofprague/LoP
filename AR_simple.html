@@ -708,6 +708,7 @@ html, body {
   <div id="match-label">shoda historické fotky</div>
   <div id="match-detail">—</div>
   <button id="match-save" onclick="saveToCollection()" style="margin-top:10px;padding:11px 28px;background:var(--accent,#b04020);border:none;border-radius:99px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;display:none">Uložit do sbírky</button>
+  <div id="dbg-panel" style="margin-top:10px;padding:8px 12px;background:rgba(0,0,0,.5);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9fd4a8;text-align:left;line-height:1.7;display:none"></div>
   <button id="match-close" onclick="closeMatchResult()">Zkusit znovu?</button>
   <button onclick="exportComparison()" style="margin-top:2px;padding:7px 18px;background:rgba(238,239,235,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;color:rgba(238,239,235,.3);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer">Export PNG</button>
 </div>
@@ -746,7 +747,11 @@ async function _getValidSession() {
 }
 
 async function saveToCollection() {
-  const score = window._lastScore ?? 100;
+  // Zajisti číslo 0–100; NaN/null/undefined → 1 (nejnižší stupeň = "byl tam")
+  const rawScore = window._lastScore;
+  const score = (Number.isFinite(rawScore) && rawScore >= 0 && rawScore <= 100)
+    ? Math.round(rawScore)
+    : 1;
   const placeId = _arPlaceId;
   if (!placeId) { alert('Chybí ID místa — nelze uložit.'); return; }
 
@@ -768,8 +773,15 @@ async function saveToCollection() {
   // Ulož do Supabase
   const s = await _getValidSession();
   if (s?.user) {
+    const payload = {
+      user_id: s.user.id,
+      place_id: String(placeId),
+      score: score,
+      visited_at: new Date().toISOString(),
+    };
+    console.log('[LoP] saveToCollection payload:', payload);
     try {
-      await fetch(SUPA_URL + '/rest/v1/visited', {
+      const res = await fetch(SUPA_URL + '/rest/v1/visited', {
         method: 'POST',
         headers: {
           'apikey': SUPA_KEY,
@@ -777,18 +789,23 @@ async function saveToCollection() {
           'Content-Type': 'application/json',
           'Prefer': 'resolution=merge-duplicates',
         },
-        body: JSON.stringify({
-          user_id: s.user.id,
-          place_id: String(placeId),
-          score: Math.round(score),
-          visited_at: new Date().toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
-    } catch(e) {}
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('[LoP] Supabase error:', res.status, err);
+      }
+    } catch(e) { console.error('[LoP] fetch error:', e); }
+  } else {
+    console.warn('[LoP] saveToCollection: no valid session');
   }
 
   _savedThisSession = true;
   if (btn) { btn.textContent = '✓ Uloženo'; btn.style.background = '#3d7a4a'; }
+  const dbg3 = document.getElementById('dbg-panel');
+  if (dbg3) {
+    dbg3.innerHTML += '<br>→ odeslaný score: ' + score + '<br>→ visited_at: ' + new Date().toISOString();
+  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1692,6 +1709,18 @@ function showMatchResult(pct, ncc, dbg) {
   }
   // Ulož pct pro saveToCollection
   window._lastScore = pct;
+  // Debug panel
+  const dbg2 = document.getElementById('dbg-panel');
+  if (dbg2) {
+    const sess = _getSession();
+    dbg2.style.display = 'block';
+    dbg2.innerHTML =
+      'window._lastScore: ' + window._lastScore + '<br>' +
+      'typeof: ' + typeof window._lastScore + '<br>' +
+      'isFinite: ' + Number.isFinite(window._lastScore) + '<br>' +
+      'place_id: ' + (_arPlaceId || '⚠ chybí') + '<br>' +
+      'session: ' + (sess?.user ? '✓ ' + (sess.user.email || sess.user.id) : '⚠ nepřihlášen');
+  }
   // Zobraz save button jen pokud máme place_id a uživatel ještě neuložil
   const saveBtn = document.getElementById('match-save');
   if (saveBtn) saveBtn.style.display = _arPlaceId && !_savedThisSession ? 'block' : 'none';
