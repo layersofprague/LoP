@@ -355,7 +355,7 @@ async function syncFromDB() {
     localStorage.setItem(VISIT_KEY, JSON.stringify(rows.map(r => String(r.place_id))));
     // Uložíme skóre per place
     const scores = {};
-    rows.forEach(r => { scores[String(r.place_id)] = { score: r.score || 100, date: r.visited_at }; });
+    rows.forEach(r => { scores[String(r.place_id)] = { score: r.score ?? 100, date: r.visited_at }; });
     localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
     // Pokus o wishlist
     const wRes = await fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() });
@@ -396,7 +396,7 @@ function buildSectionData(places, visited, scores) {
       const isVis = visited.includes(id);
       const sc = scores[id];
       return {
-        code: (CAT_PREFIX[cat] || 'H') + String(p.id).padStart(3, '0'),
+        code: id,
         name: isVis ? p.name : null,
         year: p.year,
         cat: cat,
@@ -425,7 +425,7 @@ function buildSectionData(places, visited, scores) {
       const isVis = visited.includes(id);
       const sc = scores[id];
       return {
-        code: (CAT_PREFIX[p.cat] || 'H') + String(p.id).padStart(3, '0'),
+        code: id,
         name: isVis ? p.name : null,
         year: p.year,
         cat: p.cat,
