@@ -2221,11 +2221,14 @@ function dbRemoveWish(placeId) {
 function dbAddVisited(placeId, score) {
   getValidSession().then(s => {
     if (!s?.user) return;
+    const safeScore = (score != null && Number.isFinite(+score)) ? Math.round(+score) : null;
+    const points = safeScore != null ? Math.round((100 + safeScore) * 10) / 10 : 100;
     const payload = {
       user_id: s.user.id,
       place_id: String(placeId),
       visited_at: new Date().toISOString(),
-      score: (score != null && Number.isFinite(+score)) ? Math.round(+score) : null,
+      score: safeScore,
+      points: points,
     };
     fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
       body: JSON.stringify(payload) }).catch(()=>{});
@@ -2473,10 +2476,12 @@ function markVisited(id, score) {
   const loc = LOCATIONS.find(l => String(l.id) === sid);
   if (loc) loc.visited = true;
   dbAddVisited(sid, score);
-  // Ulož score a datum lokálně pro sbirky.html
+  // Ulož score, points a datum lokálně pro sbirky.html
   try {
+    const safeScore = (score != null && Number.isFinite(+score)) ? Math.round(+score) : null;
+    const points = safeScore != null ? Math.round((100 + safeScore) * 10) / 10 : 100;
     const scores = JSON.parse(localStorage.getItem('lop_scores_v1') || '{}');
-    scores[sid] = { score: score ?? 100, date: new Date().toISOString() };
+    scores[sid] = { score: safeScore, points, date: new Date().toISOString() };
     localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
   } catch(e) {}
 }

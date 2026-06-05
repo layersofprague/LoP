@@ -750,7 +750,7 @@ async function saveToCollection() {
   // Zajisti číslo 0–100; NaN/null/undefined → 1 (nejnižší stupeň = "byl tam")
   const rawScore = window._lastScore;
   const score = (Number.isFinite(rawScore) && rawScore >= 0 && rawScore <= 100)
-    ? Math.round(rawScore)
+    ? Math.round(rawScore * 10) / 10  // desetiny
     : 1;
   const placeId = _arPlaceId;
   if (!placeId) { alert('Chybí ID místa — nelze uložit.'); return; }
@@ -773,10 +773,13 @@ async function saveToCollection() {
   // Ulož do Supabase
   const s = await _getValidSession();
   if (s?.user) {
+    // Body: 100 za návštěvu + 1 bod za každé procento zarovnání (na desetiny)
+    const points = Math.round((100 + score) * 10) / 10;
     const payload = {
       user_id: s.user.id,
       place_id: String(placeId),
       score: score,
+      points: points,
       visited_at: new Date().toISOString(),
     };
     console.log('[LoP] saveToCollection payload:', payload);
@@ -804,7 +807,7 @@ async function saveToCollection() {
   if (btn) { btn.textContent = '✓ Uloženo'; btn.style.background = '#3d7a4a'; }
   const dbg3 = document.getElementById('dbg-panel');
   if (dbg3) {
-    dbg3.innerHTML += '<br>→ odeslaný score: ' + score + '<br>→ visited_at: ' + new Date().toISOString();
+    dbg3.innerHTML += '<br>→ odeslaný score: ' + score + '<br>→ points: ' + (Math.round((100 + score) * 10) / 10) + '<br>→ visited_at: ' + new Date().toISOString();
   }
 }
 
@@ -1690,7 +1693,7 @@ async function runComparison() {
         : ncc < 0.30
           ? 30 + ((ncc - 0.15) / 0.15) * 45
           : 75 + ((ncc - 0.30) / 0.35) * 25
-  )));
+  )) * 10) / 10;  // desetiny
 
   scanModal.classList.remove('show');
   showMatchResult(pct, ncc, dbg);
@@ -1700,7 +1703,7 @@ function showMatchResult(pct, ncc, dbg) {
   const el     = document.getElementById('match-pct');
   const label  = document.getElementById('match-label');
   const detail = document.getElementById('match-detail');
-  el.textContent = pct + '%';
+  el.textContent = pct.toFixed(1) + '%';
   el.className = pct >= 70 ? 'great' : pct >= 40 ? 'ok' : 'poor';
   label.textContent = pct >= 70 ? 'výborná shoda' : pct >= 40 ? 'přijatelná shoda' : 'slabá shoda';
   if (dbg) {

@@ -580,9 +580,13 @@ function renderAll() {
   // Stats
   const totalPlaces = PLACES.length;
   const visitedCount = visited.filter(id => PLACES.some(p => String(p.id) === id)).length;
-  const scoreVals = Object.values(getScores()).map(s => s.score).filter(Number.isFinite);
-  const avgScore = scoreVals.length ? Math.round(scoreVals.reduce((a, b) => a + b, 0) / scoreVals.length) : 0;
-  const sharpCount = scoreVals.filter(s => s > 80).length;
+  const scoreEntries = Object.values(getScores());
+  const scoreVals = scoreEntries.map(s => s.score).filter(Number.isFinite);
+  const totalPoints = scoreEntries.reduce((sum, s) => {
+    const pts = Number.isFinite(s.points) ? s.points : (Number.isFinite(s.score) ? Math.round((100 + s.score) * 10) / 10 : 100);
+    return sum + pts;
+  }, 0);
+  const sharpCount = scoreVals.filter(s => s > 75).length;
 
   const catSections = sections.filter(s => s.kind === 'cat');
   const distSections = sections.filter(s => s.kind === 'district');
@@ -600,8 +604,8 @@ function renderAll() {
       <div class="stat-key">Razítek</div>
     </div>
     <div class="stat-item">
-      <div class="stat-val">${avgScore}<span> %</span></div>
-      <div class="stat-key">Ø kvalita</div>
+      <div class="stat-val">${totalPoints.toFixed(1)}<span> b</span></div>
+      <div class="stat-key">Body</div>
     </div>
     <div class="stat-item">
       <div class="stat-val">${sharpCount}<span> ★</span></div>
