@@ -748,7 +748,9 @@ async function _getValidSession() {
 
 async function saveToCollection() {
   // Zajisti číslo 0–100; NaN/null/undefined → 1 (nejnižší stupeň = "byl tam")
-  const rawScore = window._lastScore;
+  // Čti score přímo z tlačítka — zabrání race condition s window._lastScore
+  const btn0 = document.getElementById('match-save');
+  const rawScore = btn0 && btn0.dataset.score ? parseFloat(btn0.dataset.score) : window._lastScore;
   const score = (Number.isFinite(rawScore) && rawScore >= 0 && rawScore <= 100)
     ? Math.round(rawScore * 10) / 10  // desetiny
     : 1;
@@ -1725,9 +1727,13 @@ function showMatchResult(pct, ncc, dbg) {
       'place_id: ' + (_arPlaceId || '⚠ chybí') + '<br>' +
       'session: ' + (sess?.user ? '✓ ' + (sess.user.email || sess.user.id) : '⚠ nepřihlášen');
   }
-  // Zobraz save button jen pokud máme place_id a uživatel ještě neuložil
+  // Zobraz save button se score hodnotou
   const saveBtn = document.getElementById('match-save');
-  if (saveBtn) saveBtn.style.display = _arPlaceId && !_savedThisSession ? 'block' : 'none';
+  if (saveBtn) {
+    saveBtn.style.display = _arPlaceId && !_savedThisSession ? 'block' : 'none';
+    saveBtn.textContent = 'Uložit do sbírky (' + pct.toFixed(1) + '%)';
+    saveBtn.dataset.score = pct;  // ulož score přímo na tlačítko
+  }
   document.getElementById('match-result').classList.add('show');
   document.getElementById('match-backdrop').classList.add('show');
 }
