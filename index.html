@@ -1158,226 +1158,6 @@ a { color: inherit; text-decoration: none; }
 .nav-btn:hover { background: var(--ink-2); }
 .nav-btn svg { width: 16px; height: 16px; }
 
-/* ═══════════════ AR VIEW ═══════════════ */
-#arView { background: #060504; }
-.ar-camera {
-  position: absolute; inset: 0;
-  overflow: hidden;
-  background: #0d0b08;
-}
-.ar-camera::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 40%, #2a2620 0%, #141211 50%, #0a0907 100%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.2'/></svg>");
-  background-blend-mode: overlay;
-}
-.ar-camera::after {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(180deg, transparent 0%, transparent 55%, rgba(26,24,20,.5) 100%),
-    linear-gradient(90deg, rgba(26,24,20,.3) 0%, transparent 30%, transparent 70%, rgba(26,24,20,.3) 100%);
-}
-.ar-scene {
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(180deg,
-      #3d3328 0%, #4a3d2e 20%, #5a4a36 40%,
-      #6b5842 55%, #7a6a54 68%, #8a7c68 80%,
-      #9d927d 92%, #a89d85 100%);
-}
-.ar-scene::before {
-  content: '';
-  position: absolute;
-  left: 5%; right: 3%; bottom: 18%;
-  height: 45%;
-  background:
-    linear-gradient(180deg, rgba(26,24,20,.15) 0%, rgba(26,24,20,.6) 100%);
-  clip-path: polygon(
-    0% 100%, 0% 55%, 5% 55%, 5% 30%, 12% 30%, 12% 45%,
-    22% 45%, 22% 20%, 32% 20%, 32% 10%, 40% 10%, 40% 25%,
-    52% 25%, 52% 40%, 62% 40%, 62% 15%, 72% 15%, 72% 30%,
-    84% 30%, 84% 50%, 94% 50%, 94% 35%, 100% 35%, 100% 100%);
-}
-.ar-scene::after {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.35'/></svg>");
-  mix-blend-mode: overlay;
-}
-
-.ar-ghost {
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  width: 78%; max-width: 640px;
-  aspect-ratio: 3/2;
-  background: var(--paper-3);
-  border-radius: 2px;
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity 1.2s var(--ease), transform 1.2s var(--ease);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 55%, transparent 100%);
-          mask-image: radial-gradient(ellipse at center, black 55%, transparent 100%);
-  filter: sepia(.7) contrast(.9) brightness(1.05);
-}
-.ar-ghost.active { opacity: .85; }
-.ar-ghost-inner {
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(170deg, #6b5a44 0%, #8a7558 30%, #b2997a 55%, #cdb795 80%, #d9c8a8 100%);
-}
-.ar-ghost-inner::before {
-  content: '';
-  position: absolute;
-  left: 10%; right: 8%; bottom: 22%; height: 52%;
-  background: rgba(40,30,22,.7);
-  clip-path: polygon(
-    0% 100%, 0% 40%, 8% 40%, 8% 20%, 20% 20%, 20% 35%,
-    32% 35%, 32% 8%, 44% 8%, 44% 25%, 58% 25%, 58% 40%,
-    72% 40%, 72% 15%, 86% 15%, 86% 35%, 100% 35%, 100% 100%);
-}
-.ar-ghost-inner::after {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.5'/></svg>");
-  mix-blend-mode: multiply;
-  opacity: .5;
-}
-
-.ar-top {
-  position: absolute; top: 0; left: 0; right: 0;
-  z-index: 10;
-  padding: 16px 16px 28px;
-  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
-  background: linear-gradient(180deg, rgba(0,0,0,.55), transparent);
-}
-.ar-back {
-  appearance: none; border: none;
-  width: 38px; height: 38px; border-radius: 50%;
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(10px);
-  color: var(--paper);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.ar-back svg { width: 18px; height: 18px; }
-
-.ar-place {
-  flex: 1; text-align: center;
-}
-.ar-place-kick {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(243,237,225,.6);
-}
-.ar-place-name {
-  font-family: 'Fraunces', serif;
-  font-size: 16px; font-weight: 500;
-  color: var(--paper);
-  margin-top: 2px;
-}
-
-.ar-status {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  padding: 6px 10px; border-radius: 20px;
-  background: rgba(61,122,74,.25);
-  color: #9fd4a8;
-  border: 1px solid rgba(61,122,74,.5);
-  white-space: nowrap;
-  align-self: flex-start;
-}
-
-.ar-reticle {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  z-index: 5;
-  width: 140px; height: 140px;
-  pointer-events: none;
-  opacity: .4;
-}
-.ar-reticle svg { width: 100%; height: 100%; }
-.ar-reticle.locked { opacity: 0; }
-
-.ar-compass {
-  position: absolute; top: 76px; left: 50%;
-  transform: translateX(-50%);
-  z-index: 6;
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 14px;
-  background: rgba(0,0,0,.4);
-  border: 1px solid rgba(243,237,225,.15);
-  border-radius: 20px;
-  backdrop-filter: blur(8px);
-  color: rgba(243,237,225,.8);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: .08em;
-  transition: opacity .4s;
-}
-.ar-compass.locked { opacity: 0; }
-.ar-compass svg { width: 12px; height: 12px; }
-
-.ar-bottom {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  z-index: 10;
-  padding: 16px 16px 24px;
-  background: linear-gradient(0deg, rgba(0,0,0,.75), transparent);
-  display: flex; flex-direction: column; gap: 12px;
-}
-.ar-slider-row {
-  display: flex; align-items: center; gap: 12px;
-  opacity: 0; pointer-events: none;
-  transition: opacity .4s var(--ease);
-}
-.ar-slider-row.visible { opacity: 1; pointer-events: auto; }
-.ar-era {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .15em; text-transform: uppercase;
-  color: rgba(243,237,225,.55);
-  white-space: nowrap;
-}
-.ar-slider {
-  appearance: none; -webkit-appearance: none;
-  flex: 1; height: 3px; border-radius: 3px;
-  background: linear-gradient(to right, var(--cat-fun) var(--val,60%), rgba(243,237,225,.15) var(--val,60%));
-  outline: none;
-}
-.ar-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--paper);
-  border: 2px solid var(--cat-fun);
-  box-shadow: 0 2px 6px rgba(0,0,0,.5);
-}
-.ar-actions {
-  display: flex; gap: 8px;
-}
-.ar-btn {
-  flex: 1;
-  appearance: none; border: none;
-  padding: 14px; border-radius: 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase;
-  cursor: pointer;
-  transition: all .2s;
-}
-.ar-btn.primary {
-  background: var(--cat-fun);
-  color: #1a1410;
-}
-.ar-btn.primary:hover { background: #c69b2e; }
-.ar-btn.ghost {
-  background: rgba(243,237,225,.08);
-  color: rgba(243,237,225,.75);
-  border: 1px solid rgba(243,237,225,.15);
-}
-
 /* ═══════════════ ROUTES VIEW ═══════════════ */
 #routesView {
   overflow-y: auto;
@@ -1912,52 +1692,6 @@ a { color: inherit; text-decoration: none; }
       <div class="sheet-body" id="sheetBody"></div>
     </section>
 
-    <!-- AR VIEW -->
-    <section class="view" id="arView">
-      <div class="ar-camera">
-        <div class="ar-scene"></div>
-      </div>
-      <div class="ar-ghost" id="arGhost">
-        <div class="ar-ghost-inner"></div>
-      </div>
-
-      <div class="ar-top">
-        <button class="ar-back" onclick="switchView('mapView')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
-        </button>
-        <div class="ar-place">
-          <div class="ar-place-kick">Step into the past</div>
-          <div class="ar-place-name" id="arPlaceName">Šítkovská věž</div>
-        </div>
-        <div class="ar-status" id="arStatus">● GPS 12 m</div>
-      </div>
-
-      <div class="ar-compass" id="arCompass">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="8"/></svg>
-        <span id="arCompassLbl">Zamiř na jihozápad · 218°</span>
-      </div>
-
-      <div class="ar-reticle" id="arReticle">
-        <svg viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,.7)" stroke-width=".8">
-          <rect x="10" y="10" width="80" height="80" rx="2"/>
-          <path d="M20 10v-4M80 10v-4M20 90v4M80 90v4M10 20h-4M10 80h-4M90 20h4M90 80h4"/>
-          <circle cx="50" cy="50" r="1.5" fill="rgba(255,255,255,.7)"/>
-        </svg>
-      </div>
-
-      <div class="ar-bottom">
-        <div class="ar-slider-row" id="arSliderRow">
-          <span class="ar-era">1895</span>
-          <input type="range" class="ar-slider" id="arSlider" min="0" max="100" value="75" style="--val:75%"/>
-          <span class="ar-era">2026</span>
-        </div>
-        <div class="ar-actions">
-          <button class="ar-btn ghost" onclick="arRetry()">Znovu</button>
-          <button class="ar-btn primary" id="arLockBtn" onclick="arLock()">Zamknout polohu</button>
-        </div>
-      </div>
-    </section>
-
     <!-- ROUTES VIEW -->
     <section class="view" id="routesView">
       <div class="routes-hero">
@@ -2218,22 +1952,6 @@ function dbRemoveWish(placeId) {
       { method:'DELETE', headers: authHeaders() }).catch(()=>{});
   });
 }
-function dbAddVisited(placeId, score) {
-  getValidSession().then(s => {
-    if (!s?.user) return;
-    const safeScore = (score != null && Number.isFinite(+score)) ? Math.round(+score) : null;
-    const points = safeScore != null ? Math.round((100 + safeScore) * 10) / 10 : 100;
-    const payload = {
-      user_id: s.user.id,
-      place_id: String(placeId),
-      visited_at: new Date().toISOString(),
-      score: safeScore,
-      points: points,
-    };
-    fetch(`${SUPA_URL}/rest/v1/visited`, { method:'POST', headers: authHeaders(),
-      body: JSON.stringify(payload) }).catch(()=>{});
-  });
-}
 
 /* ═══════════════ TWEAKS ═══════════════ */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -2454,7 +2172,6 @@ function switchView(id) {
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === id));
   if (id === 'mapView' && window._map) setTimeout(() => window._map.invalidateSize(), 60);
-  if (id === 'arView') simulateAR();
   if (id === 'wishView') renderWishlist();
 }
 
@@ -2468,22 +2185,6 @@ function isVisited(id) {
   if (getVisited().map(String).includes(sid)) return true;
   const loc = LOCATIONS.find(l => String(l.id) === sid);
   return loc?.visited ?? false;
-}
-function markVisited(id, score) {
-  const sid = String(id);
-  const v = getVisited().map(String);
-  if (!v.includes(sid)) { v.push(sid); setVisited(v); }
-  const loc = LOCATIONS.find(l => String(l.id) === sid);
-  if (loc) loc.visited = true;
-  dbAddVisited(sid, score);
-  // Ulož score, points a datum lokálně pro sbirky.html
-  try {
-    const safeScore = (score != null && Number.isFinite(+score)) ? Math.round(+score) : null;
-    const points = safeScore != null ? Math.round((100 + safeScore) * 10) / 10 : 100;
-    const scores = JSON.parse(localStorage.getItem('lop_scores_v1') || '{}');
-    scores[sid] = { score: safeScore, points, date: new Date().toISOString() };
-    localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
-  } catch(e) {}
 }
 
 /* ═══════════════ WISHLIST ═══════════════ */
@@ -3413,8 +3114,7 @@ function initHeroSlider() {
   }, { passive: true });
 }
 
-/* ═══════════════ AR ═══════════════ */
-let arState = 'aligning';
+/* ═══════════════ AR — navigace ═══════════════ */
 function openArFor(id) {
   window._arLocId = id;
   const loc = LOCATIONS.find(l => l.id === id);
@@ -3426,75 +3126,6 @@ function openArFor(id) {
   if (loc.photoThumb) url += '&thumb=' + encodeURIComponent(loc.photoThumb);
   location.href = url;
 }
-function simulateAR() {
-  const ghost = document.getElementById('arGhost');
-  const status = document.getElementById('arStatus');
-  const compass = document.getElementById('arCompass');
-  const reticle = document.getElementById('arReticle');
-  const sliderRow = document.getElementById('arSliderRow');
-  const btn = document.getElementById('arLockBtn');
-  const compassLbl = document.getElementById('arCompassLbl');
-
-  ghost.classList.remove('active');
-  btn.disabled = false;
-  status.textContent = '● GPS 12 m';
-  status.style.background = 'rgba(61,122,74,.25)';
-  status.style.color = '#9fd4a8';
-  status.style.borderColor = 'rgba(61,122,74,.5)';
-  compass.classList.remove('locked');
-  reticle.classList.remove('locked');
-  sliderRow.classList.remove('visible');
-  btn.textContent = 'Zamknout polohu';
-  arState = 'aligning';
-
-  let angle = 224;
-  clearInterval(window._arTick);
-  window._arTick = setInterval(() => {
-    if (arState !== 'aligning') return;
-    angle -= 0.6;
-    if (angle < 219) angle = 224;
-    compassLbl.textContent = `Zamiř na jihozápad · ${Math.round(angle)}°`;
-  }, 80);
-
-  clearTimeout(window._arGhost1);
-  window._arGhost1 = setTimeout(() => {
-    ghost.classList.add('active');
-    compassLbl.textContent = 'Zarovnáno · 218°';
-    compass.style.background = 'rgba(176,64,32,.15)';
-    compass.style.borderColor = 'rgba(176,64,32,.4)';
-    compass.style.color = 'rgba(255,210,195,.9)';
-  }, 1500);
-}
-function arLock() {
-  if (arState === 'locked') {
-    // Druhé kliknutí = "Uložit do sbírky"
-    const slider = document.getElementById('arSlider');
-    const score = slider ? Math.round(+slider.value) : 100;
-    const locId = window._arLocId;
-    if (locId) {
-      markVisited(locId, score);
-      document.getElementById('arLockBtn').textContent = '✓ Uloženo';
-      document.getElementById('arLockBtn').disabled = true;
-    }
-    return;
-  }
-  arState = 'locked';
-  document.getElementById('arStatus').textContent = '● Zamčeno';
-  document.getElementById('arStatus').style.background = 'rgba(176,64,32,.25)';
-  document.getElementById('arStatus').style.color = '#e9a58f';
-  document.getElementById('arStatus').style.borderColor = 'rgba(176,64,32,.5)';
-  document.getElementById('arCompass').classList.add('locked');
-  document.getElementById('arReticle').classList.add('locked');
-  document.getElementById('arSliderRow').classList.add('visible');
-  document.getElementById('arLockBtn').textContent = 'Uložit do sbírky';
-}
-function arRetry() { simulateAR(); }
-
-document.getElementById('arSlider').addEventListener('input', e => {
-  const v = e.target.value;
-  e.target.style.setProperty('--val', v + '%');
-  document.getElementById('arGhost').style.opacity = (1 - v/100 * 0.85).toFixed(2);
-});
 
 /* ═══════════════ ROUTES ═══════════════ */
 function renderRoutes() {
