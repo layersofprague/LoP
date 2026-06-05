@@ -1,0 +1,16 @@
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # každé pondělí v 8:00 UTC
+  workflow_dispatch:       # možnost spustit ručně
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            "https://lomtaoctzetpweuepesp.supabase.co/rest/v1/visited?limit=1" \
+            -H "apikey: sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5"
