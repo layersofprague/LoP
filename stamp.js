@@ -145,12 +145,12 @@
     let rot = 0, dx = 0, dy = 0;
     if (o.eccentric) {
       const sr = ((seed % 9) - 4) / 4;
-      const mag = style === 'skew' ? 13 : 8.5;
-      rot = ((sr || 0.5) * mag + dir * 2) * miss;
+      const mag = style === 'skew' ? 18 : 14;
+      rot = ((sr || 0.5) * mag + dir * 3) * miss;
       const ox = ((seed * 3) % 11) - 5;
       const oy = ((seed * 5) % 9) - 4;
-      dx = (ox >= 0 ? 1 : -1) * (3.5 + Math.abs(ox)) * 1.4 * miss;
-      dy = (oy >= 0 ? 1 : -1) * (3.5 + Math.abs(oy)) * 1.4 * miss;
+      dx = (ox >= 0 ? 1 : -1) * (5 + Math.abs(ox)) * 2.2 * miss;
+      dy = (oy >= 0 ? 1 : -1) * (5 + Math.abs(oy)) * 2.2 * miss;
     } else {
       rot = (style === 'skew' ? 1.7 : 0.7) * dir * miss;
     }
