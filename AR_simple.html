@@ -707,6 +707,7 @@ html, body {
   <div id="match-pct">—</div>
   <div id="match-label">shoda historické fotky</div>
   <div id="match-detail">—</div>
+  <div id="match-feedback" style="display:none;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;max-width:260px;text-align:center;line-height:1.5"></div>
   <button id="match-save" onclick="saveToCollection()" style="margin-top:10px;padding:11px 28px;background:var(--accent,#b04020);border:none;border-radius:99px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;display:none">Uložit do sbírky</button>
   <div id="dbg-panel" style="margin-top:10px;padding:8px 12px;background:rgba(0,0,0,.5);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9fd4a8;text-align:left;line-height:1.7;display:none"></div>
   <button id="match-close" onclick="closeMatchResult()">Zkusit znovu?</button>
@@ -714,106 +715,6 @@ html, body {
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────
-// URL params + Supabase save
-// ─────────────────────────────────────────────────────────
-const _arParams   = new URLSearchParams(location.search);
-const _arPlaceId  = _arParams.get('id') || null;
-let   _savedThisSession = false;
-
-const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
-const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
-
-function _getSession() {
-  try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
-}
-async function _getValidSession() {
-  const s = _getSession();
-  if (!s?.access_token || !s?.user) return null;
-  const nowSec = Math.floor(Date.now() / 1000);
-  if ((s.expires_at || 0) > nowSec + 60) return s;
-  if (!s.refresh_token) return null;
-  try {
-    const r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
-      method: 'POST',
-      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: s.refresh_token })
-    });
-    if (!r.ok) { localStorage.removeItem('lop_auth_session'); return null; }
-    const data = await r.json();
-    localStorage.setItem('lop_auth_session', JSON.stringify({ ...data, user: data.user || s.user }));
-    return data;
-  } catch(e) { return null; }
-}
-
-async function saveToCollection() {
-  // Zajisti číslo 0–100; NaN/null/undefined → 1 (nejnižší stupeň = "byl tam")
-  // Čti score přímo z tlačítka — zabrání race condition s window._lastScore
-  const btn0 = document.getElementById('match-save');
-  const rawScore = btn0 && btn0.dataset.score ? parseFloat(btn0.dataset.score) : window._lastScore;
-  const score = (Number.isFinite(rawScore) && rawScore >= 0 && rawScore <= 100)
-    ? Math.round(rawScore * 10) / 10  // desetiny
-    : 1;
-  const placeId = _arPlaceId;
-  if (!placeId) { alert('Chybí ID místa — nelze uložit.'); return; }
-
-  const btn = document.getElementById('match-save');
-  if (btn) { btn.textContent = 'Ukládám…'; btn.disabled = true; }
-
-  // Ulož lokálně
-  try {
-    const visited = JSON.parse(localStorage.getItem('lop_visited_v1') || '[]').map(String);
-    if (!visited.includes(String(placeId))) {
-      visited.push(String(placeId));
-      localStorage.setItem('lop_visited_v1', JSON.stringify(visited));
-    }
-    const scores = JSON.parse(localStorage.getItem('lop_scores_v1') || '{}');
-    // Ukládej jen score a date — points se počítají za letu v sbirky.html
-    scores[String(placeId)] = { score: Math.round(score), date: new Date().toISOString() };
-    localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
-  } catch(e) {}
-
-  // Ulož do Supabase
-  const s = await _getValidSession();
-  if (s?.user) {
-    // Body: 100 za návštěvu + score na desetiny
-    const points = Math.round((100 + score) * 10) / 10;
-    const payload = {
-      user_id: s.user.id,
-      place_id: String(placeId),
-      score: score,  // numeric(5,1) — desetiny
-      points: points,
-      visited_at: new Date().toISOString(),
-    };
-    console.log('[LoP] saveToCollection payload:', payload);
-    try {
-      const res = await fetch(SUPA_URL + '/rest/v1/visited?on_conflict=user_id,place_id', {
-        method: 'POST',
-        headers: {
-          'apikey': SUPA_KEY,
-          'Authorization': 'Bearer ' + s.access_token,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates,return=minimal',
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const err = await res.text();
-        console.error('[LoP] Supabase error:', res.status, err);
-      }
-    } catch(e) { console.error('[LoP] fetch error:', e); }
-  } else {
-    console.warn('[LoP] saveToCollection: no valid session');
-  }
-
-  _savedThisSession = true;
-  if (btn) { btn.textContent = '✓ Uloženo'; btn.style.background = '#3d7a4a'; }
-  const dbg3 = document.getElementById('dbg-panel');
-  if (dbg3) {
-    dbg3.innerHTML += '<br>→ odeslaný score: ' + score + '<br>→ points: ' + (Math.round((100 + score) * 10) / 10) + '<br>→ visited_at: ' + new Date().toISOString();
-  }
-}
-
 // ─────────────────────────────────────────────────────────
 // Canvas quad-warp renderer using triangle subdivision
 // ─────────────────────────────────────────────────────────
@@ -1696,7 +1597,7 @@ async function runComparison() {
         : ncc < 0.30
           ? 30 + ((ncc - 0.15) / 0.15) * 45
           : 75 + ((ncc - 0.30) / 0.35) * 25
-  )) * 10) / 10;  // desetiny
+  )));
 
   scanModal.classList.remove('show');
   showMatchResult(pct, ncc, dbg);
@@ -1713,7 +1614,6 @@ function showMatchResult(pct, ncc, dbg) {
     detail.textContent = `NCC ${ncc.toFixed(3)}  aktivních px: ${dbg.activePx}  hist hrany: ${dbg.histEdgeMean.toFixed(1)}  cam hrany: ${dbg.camEdgeMean.toFixed(1)}`;
     detail.style.display = 'block';
   }
-  // Ulož pct pro saveToCollection
   window._lastScore = pct;
   // Debug panel
   const dbg2 = document.getElementById('dbg-panel');
@@ -1727,13 +1627,19 @@ function showMatchResult(pct, ncc, dbg) {
       'place_id: ' + (_arPlaceId || '⚠ chybí') + '<br>' +
       'session: ' + (sess?.user ? '✓ ' + (sess.user.email || sess.user.id) : '⚠ nepřihlášen');
   }
-  // Zobraz save button se score hodnotou
+  // Save button
   const saveBtn = document.getElementById('match-save');
   if (saveBtn) {
     saveBtn.style.display = _arPlaceId && !_savedThisSession ? 'block' : 'none';
     saveBtn.textContent = 'Uložit do sbírky (' + pct.toFixed(1) + '%)';
-    saveBtn.dataset.score = pct;  // ulož score přímo na tlačítko
+    saveBtn.dataset.score = pct;
+    saveBtn.disabled = false;
+    saveBtn.style.background = 'var(--accent,#b04020)';
+    saveBtn.style.color = '#fff';
   }
+  // Reset feedback
+  const fb = document.getElementById('match-feedback');
+  if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
   document.getElementById('match-result').classList.add('show');
   document.getElementById('match-backdrop').classList.add('show');
 }
@@ -1803,9 +1709,9 @@ function exportComparison() {
 function closeMatchResult() {
   document.getElementById('match-result').classList.remove('show');
   document.getElementById('match-backdrop').classList.remove('show');
-  // Update shutter label to "odemknout"
-  const span = document.querySelector('#shutter-eval-icon span');
-
+  const fb = document.getElementById('match-feedback');
+  if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+  _savedThisSession = false;
 }
 
 // ─────────────────────────────────────────────────────────
