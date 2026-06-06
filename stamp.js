@@ -144,13 +144,15 @@
     const miss = Math.min(1, Math.max(0, (100 - scoreVal) / 70));
     let rot = 0, dx = 0, dy = 0;
     if (o.eccentric) {
-      const sr = ((seed % 9) - 4) / 4;
+      // Směr náklonu — náhodný podle seed (deterministický per místo)
+      const rotDir = ((seed % 7) - 3) >= 0 ? 1 : -1;
+      const dxDir  = ((seed * 3) % 11) >= 5 ? 1 : -1;
+      const dyDir  = ((seed * 5) % 9)  >= 4 ? 1 : -1;
+      // Velikost — čistě ze score (miss): level 1=max, level 5=0
       const mag = style === 'skew' ? 18 : 14;
-      rot = ((sr || 0.5) * mag + dir * 3) * miss;
-      const ox = ((seed * 3) % 11) - 5;
-      const oy = ((seed * 5) % 9) - 4;
-      dx = (ox >= 0 ? 1 : -1) * (5 + Math.abs(ox)) * 2.2 * miss;
-      dy = (oy >= 0 ? 1 : -1) * (5 + Math.abs(oy)) * 2.2 * miss;
+      rot = rotDir * mag * miss;
+      dx  = dxDir  * 18  * miss;
+      dy  = dyDir  * 14  * miss;
     } else {
       rot = (style === 'skew' ? 1.7 : 0.7) * dir * miss;
     }
