@@ -241,47 +241,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 6;
 }
 
-/* ── SCORE BADGE pod fotografií ── */
-.hero-score {
-  display: none;
-  margin-top: 8px;
-  padding: 7px 12px;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  display: flex; align-items: center; gap: 10px;
-}
-.hero-score-stamp {
-  width: 44px; height: 44px; flex-shrink: 0;
-}
-.hero-score-body { flex: 1; }
-.hero-score-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-4); margin-bottom: 3px;
-}
-.hero-score-val {
-  font-family: 'Fraunces', serif;
-  font-size: 20px; font-weight: 500;
-  color: var(--ink); line-height: 1;
-}
-.hero-score-val span {
-  font-size: 12px; font-weight: 400;
-  color: var(--ink-4);
-  font-family: 'JetBrains Mono', monospace;
-}
-.hero-score-pts {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; color: var(--ink-4);
-  margin-top: 2px;
-}
-.hero-score-date {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .06em;
-  color: var(--ink-4);
-  text-align: right;
-  flex-shrink: 0;
-}
+
 
 /* AR CTA */
 .ar-cta {
@@ -681,6 +641,42 @@ a { color: inherit; text-decoration: none; }
   font-size: 9px; color: var(--ink-3);
 }
 
+.lb-my-row {
+  margin-top: 8px;
+  padding: 9px 12px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  display: none;
+  align-items: center; gap: 10px;
+}
+.lb-my-row.visible { display: flex; }
+.lb-my-stamp { width: 40px; height: 40px; flex-shrink: 0; }
+.lb-my-body { flex: 1; }
+.lb-my-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 2px;
+}
+.lb-my-val {
+  font-family: 'Fraunces', serif;
+  font-size: 18px; font-weight: 500; line-height: 1;
+  color: var(--ink);
+}
+.lb-my-val span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 400; color: var(--ink-4);
+}
+.lb-my-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4); margin-top: 2px;
+}
+.lb-my-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4);
+  text-align: right; flex-shrink: 0;
+}
+
 @media (max-width: 819px) and (orientation: landscape) {
   body { padding-right: 64px !important; padding-bottom: 0 !important; }
 }
@@ -768,22 +764,13 @@ a { color: inherit; text-decoration: none; }
   </div>
 </div>
 <!-- Razítko v rohu fotografie -->
-<div id="heroStamp" style="display:none;position:absolute;top:12px;right:10px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
+<div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
   <div class="sl-kicker">Tehdy &amp; Dnes</div>
   <div class="sl-lbl active" id="lblHist">~1930</div>
 </div>
-<!-- Score badge — výsledek AR zarovnání -->
-<div class="hero-score" id="heroScore" style="display:none">
-  <div class="hero-score-stamp" id="heroScoreStamp"></div>
-  <div class="hero-score-body">
-    <div class="hero-score-label">Tvůj AR záběr</div>
-    <div class="hero-score-val"><span id="heroScoreVal">—</span><span> % shody</span></div>
-    <div class="hero-score-pts" id="heroScorePts"></div>
-  </div>
-  <div class="hero-score-date" id="heroScoreDate"></div>
-</div>
+
 </div><!-- /hero-wrap -->
 
 <!-- FULLSCREEN MODAL -->
@@ -964,6 +951,17 @@ a { color: inherit; text-decoration: none; }
         <div class="lb-bar-wrap"><div class="lb-bar" style="width:58%"></div></div>
       </div>
     </div>
+    <!-- Tvůj výsledek -->
+    <div class="lb-my-row" id="lbMyRow">
+      <div class="lb-my-stamp" id="lbMyStamp"></div>
+      <div class="lb-my-body">
+        <div class="lb-my-label">Tvůj záběr</div>
+        <div class="lb-my-val"><span id="lbMyPts">—</span> <span>bodů</span></div>
+        <div class="lb-my-sub"><span id="lbMyScore">—</span> % shody</div>
+      </div>
+      <div class="lb-my-date" id="lbMyDate"></div>
+    </div>
+
     <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg">
       <div class="ar-cta-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -1433,32 +1431,37 @@ async function loadVisitedStamp() {
       }
     }
 
-    // Score badge
-    const scoreEl  = document.getElementById('heroScore');
-    const scoreVal = document.getElementById('heroScoreVal');
-    const scorePts = document.getElementById('heroScorePts');
-    const scoreDate= document.getElementById('heroScoreDate');
-    const scoreStamp = document.getElementById('heroScoreStamp');
-    if (scoreEl) {
-      scoreEl.style.display = 'flex';
-      if (scoreVal) scoreVal.textContent = score != null ? score.toFixed(1) : '—';
-      if (scorePts) scorePts.textContent = points.toFixed(1) + ' bodů';
-      if (scoreDate && visitedAt) {
-        scoreDate.textContent = visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear();
-      }
-      // Malé razítko ve score badge
-      if (scoreStamp && window.stampSVG) {
-        const stampScore = arScoreToStampScore(score);
-        scoreStamp.innerHTML = window.stampSVG({
-          orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
-          code: PLACE_ID, name: 'Holešovický přístav', year: 1894, cat: 'hist',
-          score: stampScore,
-          dateLabel: visitedAt ? visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear() : '',
-          k: PLACE_ID + '-sm',
-        });
-      }
-    }
+
+    // Ulož pro žebříček
+    window._myVisit = { score, points, visitedAt };
+    renderMyLeaderboardRow();
   } catch(e) { console.warn('loadVisitedStamp failed:', e); }
+}
+
+function renderMyLeaderboardRow() {
+  const v = window._myVisit;
+  if (!v) return;
+  const row = document.getElementById('lbMyRow');
+  if (row) row.classList.add('visible');
+  const ptsEl   = document.getElementById('lbMyPts');
+  const scoreEl = document.getElementById('lbMyScore');
+  const dateEl  = document.getElementById('lbMyDate');
+  const stampEl = document.getElementById('lbMyStamp');
+  if (ptsEl)   ptsEl.textContent   = v.points != null ? v.points.toFixed(1) : '—';
+  if (scoreEl) scoreEl.textContent = v.score  != null ? v.score.toFixed(1)  : '0.0';
+  if (dateEl && v.visitedAt) {
+    const d = v.visitedAt;
+    dateEl.textContent = d.getDate() + '. ' + (d.getMonth()+1) + '. ' + d.getFullYear();
+  }
+  if (stampEl && window.stampSVG) {
+    stampEl.innerHTML = window.stampSVG({
+      orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+      code: PLACE_ID, name: 'Holešovický přístav', year: 1894, cat: 'hist',
+      score: arScoreToStampScore(v.score),
+      dateLabel: v.visitedAt ? v.visitedAt.getDate() + '. ' + (v.visitedAt.getMonth()+1) + '. ' + v.visitedAt.getFullYear() : '',
+      k: PLACE_ID + '-lb',
+    });
+  }
 }
 
 function arScoreToStampScore(arScore) {
@@ -1561,6 +1564,29 @@ function share() {
 
 /* ── INIT ── */
 updateWishUI();
+
+function positionStamp() {
+  const stamp = document.getElementById('heroStamp');
+  const hero  = document.getElementById('hero');
+  if (!stamp || !hero) return;
+  const size    = 88;
+  const overlap = Math.round(size / 5);  // ~18px
+  // Hero má padding 20px v hero-wrap — razítko přesahuje o overlap doprava i nahoru
+  // Pozicujeme absolutně v hero-wrap:
+  //   top = offsetTop(hero) - overlap
+  //   right = 20px (padding) - overlap  → záporné = přesah doprava
+  const heroTop = hero.offsetTop;
+  stamp.style.top   = (heroTop - overlap) + 'px';
+  stamp.style.right = (20 - overlap) + 'px';  // padding 20px - overlap = ~2px = 18px přes okraj
+}
+window.addEventListener('resize', positionStamp);
+window.addEventListener('load',   positionStamp);
+// Zavolej po načtení stamp obsahu
+const _origLoadStamp = loadVisitedStamp;
+loadVisitedStamp = async function() {
+  await _origLoadStamp();
+  positionStamp();
+};
 </script>
 <script src="../auth-modal.js"></script>
 <script>
