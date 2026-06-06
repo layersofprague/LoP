@@ -222,6 +222,66 @@ a { color: inherit; text-decoration: none; }
 }
 .fs-close svg { width: 18px; height: 18px; pointer-events: none; }
 
+/* ── RAZÍTKO V ROHU ── */
+.hero-stamp {
+  position: absolute;
+  top: -18px; right: -18px;
+  width: 90px; height: 90px;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.18));
+}
+.hero-stamp-wrap {
+  position: absolute;
+  top: 0; right: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 6;
+}
+
+/* ── SCORE BADGE pod fotografií ── */
+.hero-score {
+  display: none;
+  margin-top: 8px;
+  padding: 7px 12px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-score-stamp {
+  width: 44px; height: 44px; flex-shrink: 0;
+}
+.hero-score-body { flex: 1; }
+.hero-score-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 3px;
+}
+.hero-score-val {
+  font-family: 'Fraunces', serif;
+  font-size: 20px; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.hero-score-val span {
+  font-size: 12px; font-weight: 400;
+  color: var(--ink-4);
+  font-family: 'JetBrains Mono', monospace;
+}
+.hero-score-pts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-4);
+  margin-top: 2px;
+}
+.hero-score-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .06em;
+  color: var(--ink-4);
+  text-align: right;
+  flex-shrink: 0;
+}
+
 /* AR CTA */
 .ar-cta {
   position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 3;
@@ -305,7 +365,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink);
   margin-bottom: 6px;
   text-wrap: pretty;
-  white-space: nowrap;
+  white-space: normal;
 }
 .place-title em { font-style: italic; color: var(--ink-2); font-size: .72em; font-weight: 300; }
 
@@ -625,6 +685,8 @@ a { color: inherit; text-decoration: none; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+<script src="../castle-data.js"></script>
+<script src="../stamp.js"></script>
 </head>
 <body>
 
@@ -685,6 +747,10 @@ a { color: inherit; text-decoration: none; }
     </svg>
   </button>
   <button class="sl-copy-btn" id="slCopyBtn" title="Autorská práva" onclick="openCopyright()">©</button>
+  <!-- Razítko v rohu — zobrazí se jen přihlášeným uživatelům s otiskem -->
+  <div class="hero-stamp-wrap">
+    <div class="hero-stamp" id="heroStamp" style="display:none"></div>
+  </div>
 
   <!-- Copyright modal -->
   <div class="copy-modal" id="copyModal">
@@ -705,6 +771,16 @@ a { color: inherit; text-decoration: none; }
   <div class="sl-lbl" id="lblNow">2026</div>
   <div class="sl-kicker">Tehdy &amp; Dnes</div>
   <div class="sl-lbl active" id="lblHist">~1930</div>
+</div>
+<!-- Score badge — výsledek AR zarovnání -->
+<div class="hero-score" id="heroScore" style="display:none">
+  <div class="hero-score-stamp" id="heroScoreStamp"></div>
+  <div class="hero-score-body">
+    <div class="hero-score-label">Tvůj AR záběr</div>
+    <div class="hero-score-val"><span id="heroScoreVal">—</span><span> % shody</span></div>
+    <div class="hero-score-pts" id="heroScorePts"></div>
+  </div>
+  <div class="hero-score-date" id="heroScoreDate"></div>
 </div>
 </div><!-- /hero-wrap -->
 
@@ -1017,7 +1093,7 @@ function _closeCopyOutside(e) {
 }
 
 /* ── SYNC ── */
-syncFromDB().then(() => updateWishUI());
+syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); });
 
 /* ── AUTH CHECK ── */
 function updateInsiderGate() {
@@ -1319,6 +1395,78 @@ async function vote(type) {
   }
 }
 
+/* ── RAZÍTKO + SCORE ── */
+async function loadVisitedStamp() {
+  const s = getSession();
+  if (!s?.access_token || !s?.user) return;
+  try {
+    const r = await fetch(
+      SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&place_id=eq.' + PLACE_ID + '&select=score,points,visited_at',
+      { headers: authHeaders() }
+    );
+    if (!r.ok) return;
+    const rows = await r.json();
+    if (!rows.length) return;
+    const row = rows[0];
+    const score = row.score != null ? parseFloat(row.score) : null;
+    const points = row.points != null ? parseFloat(row.points) : 100;
+    const visitedAt = row.visited_at ? new Date(row.visited_at) : null;
+
+    // Stamp v rohu
+    if (window.stampSVG) {
+      const stampEl = document.getElementById('heroStamp');
+      if (stampEl) {
+        const stampScore = arScoreToStampScore(score);
+        stampEl.innerHTML = window.stampSVG({
+          orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+          code: PLACE_ID,
+          name: 'Holešovický přístav',
+          year: 1894,
+          cat: 'hist',
+          score: stampScore,
+          dateLabel: visitedAt ? visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear() : '',
+          k: PLACE_ID,
+        });
+        stampEl.style.display = 'block';
+      }
+    }
+
+    // Score badge
+    const scoreEl  = document.getElementById('heroScore');
+    const scoreVal = document.getElementById('heroScoreVal');
+    const scorePts = document.getElementById('heroScorePts');
+    const scoreDate= document.getElementById('heroScoreDate');
+    const scoreStamp = document.getElementById('heroScoreStamp');
+    if (scoreEl) {
+      scoreEl.style.display = 'flex';
+      if (scoreVal) scoreVal.textContent = score != null ? score.toFixed(1) : '—';
+      if (scorePts) scorePts.textContent = points.toFixed(1) + ' bodů';
+      if (scoreDate && visitedAt) {
+        scoreDate.textContent = visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear();
+      }
+      // Malé razítko ve score badge
+      if (scoreStamp && window.stampSVG) {
+        const stampScore = arScoreToStampScore(score);
+        scoreStamp.innerHTML = window.stampSVG({
+          orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+          code: PLACE_ID, name: 'Holešovický přístav', year: 1894, cat: 'hist',
+          score: stampScore,
+          dateLabel: visitedAt ? visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear() : '',
+          k: PLACE_ID + '-sm',
+        });
+      }
+    }
+  } catch(e) { console.warn('loadVisitedStamp failed:', e); }
+}
+
+function arScoreToStampScore(arScore) {
+  if (arScore == null || arScore === 0) return 1;
+  if (arScore <= 25) return 25;
+  if (arScore <= 50) return 45;
+  if (arScore <= 75) return 65;
+  return 90;
+}
+
 // Načti počty při startu
 loadVotes();
 function getWish() { try { return JSON.parse(localStorage.getItem(WISH_KEY)||'[]'); } catch(e) { return []; } }
@@ -1418,6 +1566,7 @@ window.lopAuth.onLogin(() => {
   if (typeof syncFromDB === 'function') syncFromDB().then(() => {
     updateWishUI();
     updateInsiderGate();
+    loadVisitedStamp();
   });
   else { updateWishUI(); updateInsiderGate(); }
   if (window.lopHeader) window.lopHeader.refresh();
