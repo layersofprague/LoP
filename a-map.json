@@ -34,9 +34,9 @@
   {
     "id": "Ro005",
     "style": "Ro",
-    "name": "Bazilika sv. Václava (Prosek — románský základ)",
-    "lat": 50.1254,
-    "lng": 14.4865,
+    "name": "Rotunda sv. Václava (Prosek)",
+    "lat": 50.12538,
+    "lng": 14.48648,
     "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_V%C3%A1clava_(Prosek)"
   },
   {
@@ -50,9 +50,9 @@
   {
     "id": "Go001",
     "style": "Go",
-    "name": "Katedrála sv. Víta, Václava a Vojtěcha",
-    "lat": 50.0906,
-    "lng": 14.4,
+    "name": "Katedrála sv. Víta (Pražský hrad)",
+    "lat": 50.09062,
+    "lng": 14.39997,
     "wiki": "https://cs.wikipedia.org/wiki/Katedr%C3%A1la_svat%C3%A9ho_V%C3%ADta_(Praha)"
   },
   {
@@ -147,8 +147,8 @@
     "id": "Go013",
     "style": "Go",
     "name": "Vladislavský sál (Pražský hrad)",
-    "lat": 50.0896,
-    "lng": 14.3998,
+    "lat": 50.08963,
+    "lng": 14.39978,
     "wiki": "https://cs.wikipedia.org/wiki/Vladislavsk%C3%BD_s%C3%A1l"
   },
   {
@@ -195,30 +195,30 @@
     "id": "Re001",
     "style": "Re",
     "name": "Letohrádek královny Anny (Belvedere)",
-    "lat": 50.0943,
-    "lng": 14.3998,
+    "lat": 50.0952,
+    "lng": 14.39962,
     "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_kr%C3%A1lovny_Anny"
   },
   {
     "id": "Re002",
     "style": "Re",
-    "name": "Míčovna (Pražský hrad)",
-    "lat": 50.09191,
-    "lng": 14.39638,
+    "name": "Míčovna (Pražský hrad — Královská zahrada)",
+    "lat": 50.09328,
+    "lng": 14.39712,
     "wiki": "https://cs.wikipedia.org/wiki/M%C3%AD%C4%8Dovna_(Praha)"
   },
   {
     "id": "Re003",
     "style": "Re",
-    "name": "Schwarzenberský palác",
-    "lat": 50.0905,
-    "lng": 14.3971,
+    "name": "Schwarzenberský palác (Hradčanské nám.)",
+    "lat": 50.09055,
+    "lng": 14.39632,
     "wiki": "https://cs.wikipedia.org/wiki/Schwarzenberk%C3%BD_pal%C3%A1c_(Praha)"
   },
   {
     "id": "Re004",
     "style": "Re",
-    "name": "Letohrádek Hvězda (Obora Hvězda)",
+    "name": "Letohrádek Hvězda (Obora Hvězda, Liboc)",
     "lat": 50.07437,
     "lng": 14.33625,
     "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_Hv%C4%9Bzda"
@@ -264,19 +264,11 @@
     "wiki": "https://cs.wikipedia.org/wiki/Ungelt"
   },
   {
-    "id": "Re010",
-    "style": "Re",
-    "name": "Letohrádek Hvězda — sgrafita (duplikát odstraněn)",
-    "lat": 50.07437,
-    "lng": 14.33625,
-    "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_Hv%C4%9Bzda"
-  },
-  {
     "id": "Re011",
     "style": "Re",
-    "name": "Vladislavský sál — pozdněgotická klenba, renesanční portály",
-    "lat": 50.0896,
-    "lng": 14.3998,
+    "name": "Vladislavský sál (Pražský hrad)",
+    "lat": 50.08963,
+    "lng": 14.39978,
     "wiki": "https://cs.wikipedia.org/wiki/Vladislavsk%C3%BD_s%C3%A1l"
   },
   {
@@ -291,8 +283,8 @@
     "id": "Ba001",
     "style": "Ba",
     "name": "Kostel sv. Mikuláše (Malá Strana)",
-    "lat": 50.0879,
-    "lng": 14.4027,
+    "lat": 50.08793,
+    "lng": 14.40274,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Mikul%C3%A1%C5%A1e_(Mal%C3%A1_Strana)"
   },
   {
@@ -314,9 +306,9 @@
   {
     "id": "Ba004",
     "style": "Ba",
-    "name": "Černínský palác",
-    "lat": 50.0929,
-    "lng": 14.39257,
+    "name": "Černínský palác (Loretánské nám.)",
+    "lat": 50.09289,
+    "lng": 14.39261,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cern%C3%ADnsk%C3%BD_pal%C3%A1c"
   },
   {
@@ -338,9 +330,9 @@
   {
     "id": "Ba007",
     "style": "Ba",
-    "name": "Loreta Praha (Hradčany)",
-    "lat": 50.09213,
-    "lng": 14.39019,
+    "name": "Loreta Praha (Loretánské nám.)",
+    "lat": 50.09215,
+    "lng": 14.39023,
     "wiki": "https://cs.wikipedia.org/wiki/Loreta_(Praha)"
   },
   {
@@ -426,9 +418,9 @@
   {
     "id": "Ba018",
     "style": "Ba",
-    "name": "Břevnovský klášter",
-    "lat": 50.0803,
-    "lng": 14.3568,
+    "name": "Břevnovský klášter (Markétská)",
+    "lat": 50.08025,
+    "lng": 14.35702,
     "wiki": "https://cs.wikipedia.org/wiki/B%C5%99evnovsk%C3%BD_kl%C3%A1%C5%A1ter"
   },
   {
@@ -506,9 +498,9 @@
   {
     "id": "Kl008",
     "style": "Kl",
-    "name": "Hrzánský palác (Loretánská)",
-    "lat": 50.0921,
-    "lng": 14.3928,
+    "name": "Hrzánský palác (Loretánské nám. 1)",
+    "lat": 50.09212,
+    "lng": 14.39277,
     "wiki": "https://cs.wikipedia.org/wiki/Hrz%C3%A1nsk%C3%BD_pal%C3%A1c"
   },
   {
@@ -538,9 +530,9 @@
   {
     "id": "Hi003",
     "style": "Hi",
-    "name": "Národní muzeum",
-    "lat": 50.0754,
-    "lng": 14.4305,
+    "name": "Národní muzeum (Václavské nám.)",
+    "lat": 50.07524,
+    "lng": 14.43049,
     "wiki": "https://cs.wikipedia.org/wiki/N%C3%A1rodn%C3%AD_muzeum"
   },
   {
@@ -562,9 +554,9 @@
   {
     "id": "Hi006",
     "style": "Hi",
-    "name": "Kostel sv. Ludmily (Vinohrady)",
+    "name": "Kostel sv. Ludmily (náměstí Míru, Vinohrady)",
     "lat": 50.0745,
-    "lng": 14.4389,
+    "lng": 14.43893,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9_Ludmily_(Praha)"
   },
   {
@@ -602,9 +594,9 @@
   {
     "id": "Hi011",
     "style": "Hi",
-    "name": "Hanavský pavilon (Letná)",
-    "lat": 50.0958,
-    "lng": 14.4113,
+    "name": "Hanavský pavilon (Letenské sady)",
+    "lat": 50.09582,
+    "lng": 14.41132,
     "wiki": "https://cs.wikipedia.org/wiki/Hanavsk%C3%BD_pavilon"
   },
   {
@@ -706,9 +698,9 @@
   {
     "id": "Se008",
     "style": "Se",
-    "name": "Penzion Na Hradčanech (Starkův dům)",
-    "lat": 50.093,
-    "lng": 14.3925,
+    "name": "Dům Starkův (Hradčany — secesní)",
+    "lat": 50.09256,
+    "lng": 14.39412,
     "wiki": "https://cs.wikipedia.org/wiki/Secese_v_%C4%8Cech%C3%A1ch"
   },
   {
@@ -730,17 +722,17 @@
   {
     "id": "Se011",
     "style": "Se",
-    "name": "Okresní dům (Praha 2)",
-    "lat": 50.076,
-    "lng": 14.4365,
+    "name": "Palác Šlechtova (Praha 2 — Vinohrady)",
+    "lat": 50.07566,
+    "lng": 14.43595,
     "wiki": "https://cs.wikipedia.org/wiki/Secese_v_architektu%C5%99e"
   },
   {
     "id": "Se012",
     "style": "Se",
-    "name": "Dům U Zlatého prstenu — nájemní dům Vinohrady",
-    "lat": 50.0751,
-    "lng": 14.4385,
+    "name": "Secesní nájemní domy (náměstí Míru, Vinohrady)",
+    "lat": 50.07509,
+    "lng": 14.43849,
     "wiki": "https://cs.wikipedia.org/wiki/Vinohrady"
   },
   {
@@ -1264,14 +1256,6 @@
     "wiki": "https://cs.wikipedia.org/wiki/Plyn%C3%A1rna_Michle"
   },
   {
-    "id": "In006",
-    "style": "In",
-    "name": "Negrelliho viadukt (opakování — sjednoceno)",
-    "lat": 50.09399,
-    "lng": 14.43683,
-    "wiki": "https://cs.wikipedia.org/wiki/Negrelliho_viadukt"
-  },
-  {
     "id": "In007",
     "style": "In",
     "name": "Pražský přístav Holešovice (skladiště)",
@@ -1426,9 +1410,9 @@
   {
     "id": "U001",
     "style": "U",
-    "name": "Jezdecká socha sv. Václava (Myslbek)",
-    "lat": 50.0783,
-    "lng": 14.4276,
+    "name": "Jezdecká socha sv. Václava (Václavské nám.)",
+    "lat": 50.07832,
+    "lng": 14.42763,
     "wiki": "https://cs.wikipedia.org/wiki/Socha_svat%C3%A9ho_V%C3%A1clava_(Praha)"
   },
   {
@@ -1458,9 +1442,9 @@
   {
     "id": "U005",
     "style": "U",
-    "name": "Pomník Franze Kafky (Jaroslav Róna)",
-    "lat": 50.0887,
-    "lng": 14.4211,
+    "name": "Pomník Franze Kafky (Dušní ul., Josefov)",
+    "lat": 50.08893,
+    "lng": 14.4187,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Franze_Kafky_(Praha)"
   },
   {
@@ -1474,9 +1458,9 @@
   {
     "id": "U007",
     "style": "U",
-    "name": "Čurající postavy (David Černý, Hergetova cihelna)",
-    "lat": 50.0882,
-    "lng": 14.41937,
+    "name": "Čurající postavy (David Černý, před Kafkovým muzeem)",
+    "lat": 50.08656,
+    "lng": 14.41028,
     "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD"
   },
   {
@@ -1490,7 +1474,7 @@
   {
     "id": "U009",
     "style": "U",
-    "name": "Hlava Franze Kafky (David Černý, Obchodní centrum Quadrio)",
+    "name": "Hlava Franze Kafky — Metalmorphosis (Černý, Národní třída)",
     "lat": 50.07967,
     "lng": 14.42655,
     "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD"
@@ -1538,9 +1522,9 @@
   {
     "id": "U015",
     "style": "U",
-    "name": "Jezdecká socha Jana Žižky (Vítkov)",
-    "lat": 50.08884,
-    "lng": 14.46075,
+    "name": "Jezdecká socha Jana Žižky (Vítkov, Žižkov)",
+    "lat": 50.0893,
+    "lng": 14.46219,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Jana_%C5%BDi%C5%BEky_na_V%C3%ADtkově"
   },
   {
@@ -1571,7 +1555,7 @@
     "id": "U019",
     "style": "U",
     "name": "Alegorie Vltavy a Labe (Čechův most)",
-    "lat": 50.0928,
+    "lat": 50.09281,
     "lng": 14.41748,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cech%C5%AFv_most"
   },
@@ -1579,16 +1563,16 @@
     "id": "U020",
     "style": "U",
     "name": "Pomník Edvarda Beneše (Loretánské nám.)",
-    "lat": 50.0921,
-    "lng": 14.3927,
+    "lat": 50.09215,
+    "lng": 14.39272,
     "wiki": "https://cs.wikipedia.org/wiki/Edvard_Bene%C5%A1"
   },
   {
     "id": "U021",
     "style": "U",
-    "name": "Socha Winstona Churchilla (nábřeží)",
-    "lat": 50.0879,
-    "lng": 14.4107,
+    "name": "Socha Winstona Churchilla (Thunovská)",
+    "lat": 50.08792,
+    "lng": 14.40729,
     "wiki": "https://cs.wikipedia.org/wiki/Winston_Churchill"
   },
   {
@@ -1746,9 +1730,9 @@
   {
     "id": "Op013",
     "style": "Op",
-    "name": "Černá věž (Pražský hrad, románsko-gotická)",
-    "lat": 50.0901,
-    "lng": 14.40196,
+    "name": "Černá věž (Pražský hrad)",
+    "lat": 50.08985,
+    "lng": 14.40367,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cern%C3%A1_v%C4%9B%C5%BE_(Pra%C5%BEsk%C3%BD_hrad)"
   },
   {
@@ -1756,23 +1740,23 @@
     "style": "Op",
     "name": "Bílá věž (Pražský hrad)",
     "lat": 50.09109,
-    "lng": 14.39978,
+    "lng": 14.40083,
     "wiki": "https://cs.wikipedia.org/wiki/B%C3%ADl%C3%A1_v%C4%9B%C5%BE_(Pra%C5%BEsk%C3%BD_hrad)"
   },
   {
     "id": "Op015",
     "style": "Op",
-    "name": "Daliborka — gotická věžní věznice (Pražský hrad)",
-    "lat": 50.0909,
-    "lng": 14.40127,
+    "name": "Daliborka (Pražský hrad)",
+    "lat": 50.09104,
+    "lng": 14.40147,
     "wiki": "https://cs.wikipedia.org/wiki/Daliborka"
   },
   {
     "id": "Op016",
     "style": "Op",
     "name": "Mihulka — Prašná věž (Pražský hrad)",
-    "lat": 50.09166,
-    "lng": 14.40087,
+    "lat": 50.09192,
+    "lng": 14.40049,
     "wiki": "https://cs.wikipedia.org/wiki/Mihu%C4%BCka"
   },
   {
@@ -1819,16 +1803,16 @@
     "id": "Op022",
     "style": "Op",
     "name": "Písecká brána (Prašný most)",
-    "lat": 50.09476,
-    "lng": 14.39501,
+    "lat": 50.09512,
+    "lng": 14.39468,
     "wiki": "https://cs.wikipedia.org/wiki/P%C3%ADseck%C3%A1_br%C3%A1na_(Praha)"
   },
   {
     "id": "Op023",
     "style": "Op",
     "name": "Bruska — barokní brána (Chotkovy sady)",
-    "lat": 50.09438,
-    "lng": 14.3962,
+    "lat": 50.09619,
+    "lng": 14.39578,
     "wiki": "https://cs.wikipedia.org/wiki/Bruska_(Praha)"
   },
   {
@@ -1866,10 +1850,10 @@
   {
     "id": "Op028",
     "style": "Op",
-    "name": "Pražský hrad — Jirská věž (gotická hradba)",
-    "lat": 50.0902,
+    "name": "Pražský hrad — Jirská brána (gotická)",
+    "lat": 50.0901,
     "lng": 14.4029,
-    "wiki": "https://cs.wikipedia.org/wiki/Ji%C5%99sk%C3%A1_ul%C4%ADce"
+    "wiki": "https://cs.wikipedia.org/wiki/Ji%C5%99sk%C3%A1_br%C3%A1na"
   },
   {
     "id": "Op029",
@@ -1882,9 +1866,9 @@
   {
     "id": "Op030",
     "style": "Op",
-    "name": "Hladová zeď (Karlovo opevnění, Petřín)",
-    "lat": 50.0815,
-    "lng": 14.3985,
+    "name": "Hladová zeď (Petřín)",
+    "lat": 50.0832,
+    "lng": 14.3962,
     "wiki": "https://cs.wikipedia.org/wiki/Hladov%C3%A1_ze%C4%8F"
   }
 ]
