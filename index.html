@@ -1574,6 +1574,84 @@ a { color: inherit; text-decoration: none; }
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
+
+/* ═══════════════ ARCH PINS (a-map.json) ═══════════════ */
+.arch-pin {
+  background: #fff;
+  border: 1.5px solid #1a1a18;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(26,24,20,.22);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  cursor: pointer;
+  line-height: 1;
+  transition: transform .15s, box-shadow .15s;
+  font-family: 'JetBrains Mono', monospace;
+  color: #1a1a18;
+  padding: 2px;
+}
+.arch-pin:hover { transform: scale(1.12); box-shadow: 0 4px 14px rgba(26,24,20,.28); }
+.arch-pin-style { font-size: 10px; font-weight: 700; letter-spacing: .02em; line-height: 1; }
+.arch-pin-num   { font-size: 7px; font-weight: 500; opacity: .7; line-height: 1; margin-top: 1px; }
+.arch-filter-wrap {
+  position: fixed;
+  top: calc(var(--header-h, 52px) + 8px);
+  z-index: 500;
+  pointer-events: auto;
+}
+#archFilterBtn {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0 8px;
+  height: 26px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(26,24,20,.06);
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+#archFilterBtn:hover { background: var(--paper-2); color: var(--ink); }
+#archFilterBtn.state-dim { color: var(--ink-4); border-color: var(--ink-4); }
+#archFilterBtn.state-off { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+#archFilterBtn .arch-btn-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0;
+}
+.arch-tip {
+  position: fixed; z-index: 950;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 13px 12px;
+  box-shadow: 0 8px 28px rgba(26,24,20,.18);
+  width: 230px;
+  pointer-events: none;
+  opacity: 0; transition: opacity .14s;
+}
+.arch-tip.visible { opacity: 1; pointer-events: auto; }
+.arch-tip-style {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 4px;
+}
+.arch-tip-name {
+  font-family: 'Fraunces', serif;
+  font-size: 14px; font-weight: 500; line-height: 1.3;
+  color: var(--ink); margin-bottom: 8px;
+}
+.arch-tip-wiki {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
+  background: var(--ink); color: var(--paper);
+  border-radius: 5px; padding: 5px 9px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.arch-tip-wiki:hover { opacity: .8; }
 </style>
 </head>
 <body>
@@ -1615,9 +1693,9 @@ a { color: inherit; text-decoration: none; }
         </button>
       </div>
 
-      <!-- Arch filter button -->
+      <!-- Arch layer filter button -->
       <div class="arch-filter-wrap" id="archFilterWrap">
-        <button id="archFilterBtn" onclick="cycleArchFilter()" title="Architektonické slohy — zobrazit / utlumit / skrýt">
+        <button id="archFilterBtn" onclick="cycleArchFilter()" title="Architektonické slohy — on / dim / off">
           <span class="arch-btn-dot"></span>
           Slohy: <span id="archFilterLbl">on</span>
         </button>
@@ -3124,92 +3202,6 @@ function initHeroSlider() {
   }, { passive: true });
 }
 
-/* ═══════════════ ARCH PINS (a-map.json) ═══════════════ */
-.arch-pin {
-  background: #fff;
-  border: 1.5px solid #1a1a18;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(26,24,20,.22);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 36px; height: 36px;
-  cursor: pointer;
-  line-height: 1;
-  transition: transform .15s, box-shadow .15s;
-  font-family: 'JetBrains Mono', monospace;
-  color: #1a1a18;
-  padding: 2px;
-}
-.arch-pin:hover { transform: scale(1.12); box-shadow: 0 4px 14px rgba(26,24,20,.28); }
-.arch-pin-style {
-  font-size: 10px; font-weight: 700; letter-spacing: .02em;
-  line-height: 1;
-}
-.arch-pin-num {
-  font-size: 7px; font-weight: 500; opacity: .7;
-  line-height: 1; margin-top: 1px;
-}
-/* Arch filter button */
-.arch-filter-wrap {
-  position: fixed;
-  top: calc(var(--header-h, 52px) + 8px);
-  z-index: 500;
-  pointer-events: auto;
-}
-#archFilterBtn {
-  display: flex; align-items: center; gap: 5px;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 26px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ink-3);
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(26,24,20,.06);
-  transition: background .15s, color .15s, border-color .15s;
-  white-space: nowrap;
-}
-#archFilterBtn:hover { background: var(--paper-2); color: var(--ink); }
-#archFilterBtn.state-dim { color: var(--ink-4); border-color: var(--ink-4); }
-#archFilterBtn.state-off  { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-#archFilterBtn .arch-btn-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0;
-}
-/* Arch tooltip */
-.arch-tip {
-  position: fixed; z-index: 950;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  padding: 10px 13px 12px;
-  box-shadow: 0 8px 28px rgba(26,24,20,.18);
-  width: 230px;
-  pointer-events: none;
-  opacity: 0; transition: opacity .14s;
-}
-.arch-tip.visible { opacity: 1; pointer-events: auto; }
-.arch-tip-style {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-4); margin-bottom: 4px;
-}
-.arch-tip-name {
-  font-family: 'Fraunces', serif;
-  font-size: 14px; font-weight: 500; line-height: 1.3;
-  color: var(--ink); margin-bottom: 8px;
-}
-.arch-tip-wiki {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
-  background: var(--ink); color: var(--paper);
-  border-radius: 5px; padding: 5px 9px;
-  text-decoration: none;
-  transition: opacity .15s;
-}
-.arch-tip-wiki:hover { opacity: .8; }
-
 /* ═══════════════ AR — navigace ═══════════════ */
 function openArFor(id) {
   window._arLocId = id;
@@ -3253,6 +3245,7 @@ function renderRoutes() {
 const STYLE_NAMES = {
   Ro: 'Románský sloh',
   Go: 'Gotika',
+  Op: 'Opevnění & brány',
   Re: 'Renesance',
   Ba: 'Baroko & Rokoko',
   Kl: 'Klasicismus & Empír',
@@ -3266,7 +3259,6 @@ const STYLE_NAMES = {
   In: 'Industrial',
   De: 'Dekonstruktivismus',
   Sa: 'Současná architektura',
-  Op: 'Opevnění & brány',
   U:  'Umění ve veřejném prostoru'
 };
 
@@ -3274,8 +3266,7 @@ let _archMarkers = [];
 let _archState = 'on'; // 'on' | 'dim' | 'off'
 
 function cycleArchFilter() {
-  const next = { 'on': 'dim', 'dim': 'off', 'off': 'on' };
-  _archState = next[_archState];
+  _archState = { 'on': 'dim', 'dim': 'off', 'off': 'on' }[_archState];
   applyArchFilter();
 }
 
@@ -3300,65 +3291,63 @@ function applyArchFilter() {
   });
 }
 
-function positionArchFilterBtn() {
-  const filterWrap = document.getElementById('filterPuckWrap');
-  const archWrap   = document.getElementById('archFilterWrap');
-  if (!filterWrap || !archWrap) return;
-  const fr = filterWrap.getBoundingClientRect();
-  archWrap.style.top   = filterWrap.style.top || (fr.top + 'px');
-  archWrap.style.right = (parseInt(filterWrap.style.right || '14') + filterWrap.offsetWidth + 6) + 'px';
-}
-
 async function loadArchMap() {
   try {
     const res = await fetch('a-map.json');
     if (!res.ok) return;
     const data = await res.json();
     const tip = document.getElementById('archTip');
+    if (!tip) return;
     let hideTimer = null;
 
     data.forEach(item => {
       const styleCode = item.id.replace(/\d+$/, '');
-      const num = item.id.replace(/^[A-Z]+/, '');
-      const html = `<div class="arch-pin" data-id="${item.id}"><span class="arch-pin-style">${styleCode}</span><span class="arch-pin-num">${num}</span></div>`;
-      const icon = L.divIcon({ html, className: '', iconSize: [36, 36], iconAnchor: [18, 18] });
+      const num = item.id.replace(/^[A-Za-z]+/, '');
+      const icon = L.divIcon({
+        html: `<div class="arch-pin"><span class="arch-pin-style">${styleCode}</span><span class="arch-pin-num">${num}</span></div>`,
+        className: '',
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+      });
       const m = L.marker([item.lat, item.lng], { icon });
-      m._archItem = item;
 
       function showArchTip(markerEl) {
         clearTimeout(hideTimer);
+        if (!markerEl) return;
         const styleName = STYLE_NAMES[styleCode] || styleCode;
         tip.innerHTML = `
-          <div class="arch-tip-style">${styleName}</div>
+          <div class="arch-tip-style">${styleName} · ${item.id}</div>
           <div class="arch-tip-name">${item.name}</div>
           <a class="arch-tip-wiki" href="${item.wiki}" target="_blank" rel="noopener">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Otevřít zdroj
           </a>`;
         const rect = markerEl.getBoundingClientRect();
-        const tipW = 230, tipH = 120, margin = 8;
+        const tipW = 230, margin = 8;
+        tip.style.left = '-9999px'; tip.style.top = '-9999px';
+        tip.classList.add('visible');
+        const tipH = tip.offsetHeight || 110;
+        tip.classList.remove('visible');
         let left = rect.left + rect.width / 2 - tipW / 2;
         let top  = rect.top - tipH - 8;
         left = Math.max(margin, Math.min(window.innerWidth - tipW - margin, left));
         if (top < margin) top = rect.bottom + 8;
         tip.style.left = left + 'px';
         tip.style.top  = top  + 'px';
+        tip._forId = item.id;
         tip.classList.add('visible');
       }
 
       m.on('mouseover', () => { if (_archState !== 'off') showArchTip(m.getElement()); });
-      m.on('mouseout',  () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 120); });
+      m.on('mouseout',  () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
       m.on('click',     () => { if (_archState !== 'off') window.open(item.wiki, '_blank', 'noopener'); });
-
-      // Touch: tap = show tip + click wiki
-      m.on('touchend', (e) => {
+      m.on('touchend',  (e) => {
         L.DomEvent.stopPropagation(e);
         if (_archState === 'off') return;
         if (tip.classList.contains('visible') && tip._forId === item.id) {
           window.open(item.wiki, '_blank', 'noopener');
         } else {
           showArchTip(m.getElement());
-          tip._forId = item.id;
         }
       });
 
@@ -3366,12 +3355,11 @@ async function loadArchMap() {
     });
 
     tip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-    tip.addEventListener('mouseleave', () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 120); });
+    tip.addEventListener('mouseleave', () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
 
     applyArchFilter();
-    // position button
-    setTimeout(positionArchFilterBtn, 200);
-  } catch (e) {
+    setTimeout(alignPuck, 300);
+  } catch(e) {
     console.warn('a-map.json load error:', e);
   }
 }
@@ -3405,9 +3393,7 @@ function alignPuck() {
   // Arch filter button — vlevo od filter pucku
   const archWrap = document.getElementById('archFilterWrap');
   if (archWrap && filterWrap) {
-    // filterWrap width is known after layout; use offsetWidth
-    const fwRight = right + (filterWrap.offsetWidth || 26) + 6;
-    archWrap.style.right = fwRight + 'px';
+    archWrap.style.right = (right + (filterWrap.offsetWidth || 60) + 6) + 'px';
   }
 }
 window.addEventListener('resize', alignPuck);
