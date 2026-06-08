@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+body { margin: 0; font-family: monospace; }
+#map { width: 100vw; height: 100vh; }
+.ref-pin { background: red; border: 2px solid #800; border-radius: 50%; width: 14px; height: 14px; margin: -7px; }
+.our-pin { background: blue; border: 2px solid #00f; border-radius: 3px; width: 14px; height: 14px; margin: -7px; }
+#info { position: fixed; top: 10px; left: 10px; background: white; padding: 12px; border: 1px solid #ccc; z-index: 999; font-size: 12px; max-width: 300px; }
+</style>
+</head>
+<body>
+<div id="info">
+  <b>Diagnostika souřadnic</b><br><br>
+  🔴 = referenční bod (100% správně z OSM)<br>
+  🔵 = náš bod z a-map.json<br><br>
+  Pokud jsou od sebe, máme chybu v datech.<br><br>
+  <div id="log"></div>
+</div>
+<div id="map"></div>
+<script>
+const map = L.map('map', { center: [50.0905, 14.3997], zoom: 16 });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 20
+}).addTo(map);
+
+// Referenční body — vzaté přímo z OSM node/way středů, 100% přesné
+const REF = [
+  // [lat, lng, label]
+  [50.09062, 14.39997, "Sv. Vít (OSM)"],
+  [50.09519, 14.39967, "Belvedere (OSM)"],
+  [50.09328, 14.39712, "Míčovna (OSM)"],
+  [50.09215, 14.39023, "Loreta (OSM)"],
+  [50.09476, 14.39501, "Písecká brána (OSM)"],
+  [50.09619, 14.39578, "Bruska (OSM)"],
+  [50.08166, 14.41492, "Národní divadlo (OSM)"],
+  [50.08652, 14.41141, "Karlův most (OSM)"],
+  [50.07493, 14.41381, "Tančící dům (OSM)"],
+  [50.10076, 14.43241, "Veletržní palác (OSM)"],
+  [50.09957, 14.37126, "Müllerova vila (OSM)"],
+];
+
+const refIcon = L.divIcon({ html: '<div class="ref-pin"></div>', className: '', iconSize: [14,14], iconAnchor: [7,7] });
+const ourIcon = L.divIcon({ html: '<div class="our-pin"></div>', className: '', iconSize: [14,14], iconAnchor: [7,7] });
+
+REF.forEach(([lat, lng, label]) => {
+  L.marker([lat, lng], { icon: refIcon }).bindPopup(`<b>🔴 REF</b><br>${label}<br>${lat}, ${lng}`).addTo(map);
+});
+
+// Načteme a-map.json
+const OUR_KEY = {
+  "Go001": "Sv. Vít", "Re001": "Belvedere", "Re002": "Míčovna",
+  "Ba007": "Loreta", "Op022": "Písecká brána", "Op023": "Bruska",
+  "Hi001": "ND", "Go002": "Karlův most", "De001": "Tančící dům",
+  "Fu001": "Veletržní", "Fu002": "Müllerova"
+};
+
+fetch('a-map.json').then(r => r.json()).then(data => {
+  const log = document.getElementById('log');
+  data.forEach(item => {
+    if (OUR_KEY[item.id]) {
+      L.marker([item.lat, item.lng], { icon: ourIcon })
+        .bindPopup(`<b>🔵 NÁŠ ${item.id}</b><br>${item.name}<br>${item.lat}, ${item.lng}`)
+        .addTo(map);
+      log.innerHTML += `${item.id}: ${item.lat.toFixed(5)}, ${item.lng.toFixed(5)}<br>`;
+    }
+  });
+});
+</script>
+</body>
+</html>
