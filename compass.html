@@ -773,6 +773,26 @@ window.addEventListener('resize', function() {
     Gratuluji! Získal/a jsi razítko do své sbírky a 100 bodů.
   </div>
 
+  <!-- AR animace — ukázka prolnutí -->
+  <div style="width:100%;max-width:320px;height:160px;border-radius:12px;overflow:hidden;margin-bottom:16px;position:relative;border:1px solid #cbcec5">
+    <!-- Současná fotka — základ -->
+    <img src="foto/h_001ove_now.jpg" onerror="this.style.background='#dadcd4';this.removeAttribute('src')"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block">
+    <!-- Historická fotka — animovaná -->
+    <img id="arrAnimHist" src="https://layersofprague.github.io/LoP/foto/h_001ove.jpg"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;animation:arrFade 4s ease-in-out infinite alternate">
+    <!-- Label -->
+    <div style="position:absolute;bottom:8px;left:10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,239,235,.8);background:rgba(26,24,20,.45);padding:3px 7px;border-radius:4px">Tehdy &amp; dnes</div>
+  </div>
+  <style>
+    @keyframes arrFade {
+      0%   { opacity: 0; transform: translate(0,0) scale(1); }
+      30%  { opacity: 0; }
+      60%  { opacity: 0.85; transform: translate(-4px, 2px) scale(1.02); }
+      100% { opacity: 0.85; transform: translate(0,0) scale(1); }
+    }
+  </style>
+
   <!-- Razítko + body -->
   <div style="display:flex;align-items:center;gap:16px;background:#e6e7e2;border:1px solid #cbcec5;border-radius:14px;padding:16px 20px;width:100%;max-width:320px;margin-bottom:16px">
     <div id="arrivalStamp" style="width:110px;height:110px;flex-shrink:0"></div>
@@ -792,13 +812,13 @@ window.addEventListener('resize', function() {
     <!-- Náhled: nejhorší → nejlepší razítko + body -->
     <div id="arrivalPreviewRow" style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
       <!-- Nejhorší razítko -->
-      <div id="arrPreviewWorst" style="width:44px;height:44px;flex-shrink:0;display:block"></div>
+      <div id="arrPreviewWorst" style="width:44px;height:44px;flex-shrink:0;overflow:hidden;border-radius:50%"></div>
       <!-- Šipka -->
       <svg width="18" height="14" viewBox="0 0 18 14" fill="none" style="flex-shrink:0">
         <path d="M1 7h16M11 1l6 6-6 6" stroke="#cbcec5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <!-- Nejlepší razítko -->
-      <div id="arrPreviewBest" style="width:44px;height:44px;flex-shrink:0;display:block"></div>
+      <div id="arrPreviewBest" style="width:44px;height:44px;flex-shrink:0;overflow:hidden;border-radius:50%"></div>
     </div>
     <!-- Body pod razítky -->
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-left:2px">
