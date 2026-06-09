@@ -20,6 +20,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 .arrival-visible { display: flex !important; }
 /* dbg styled inline */
 </style>
+<script src="castle-data.js"></script>
+<script src="stamp.js"></script>
 <script src="header.js"></script>
 <script src="nav.js"></script>
 </head>
@@ -32,6 +34,14 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 
 <!-- Overlays — all position:fixed, top/bottom set by applyClipBounds() -->
 <input type="file" id="calFile" accept=".json" style="display:none" onchange="importCal(this)"/>
+
+<!-- TEST: arrival trigger (remove before production) -->
+<button onclick="_arrivalShown=false;showArrival()" style="position:fixed;bottom:80px;left:8px;z-index:200;
+  padding:6px 10px;border-radius:8px;
+  background:#b04020;color:#fff;border:none;
+  font-family:monospace;font-size:10px;cursor:pointer;opacity:.7;">
+  TEST arrival
+</button>
 
 <!-- Cal button: top-left -->
 <button id="calBtn" onclick="toggleCal()" ontouchstart="calTouchStart()" ontouchend="calTouchEnd()"
@@ -61,13 +71,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
     box-shadow:0 2px 10px rgba(26,24,20,.06);
     cursor:pointer;display:flex;align-items:center;justify-content:center;color:#1a1a18;font-size:16px;line-height:1;">−</button>
 
-<!-- TEST: arrival trigger (remove before production) -->
-<button onclick="_arrivalShown=false;showArrival()" style="position:fixed;bottom:80px;left:8px;z-index:200;
-  padding:6px 10px;border-radius:8px;
-  background:#b04020;color:#fff;border:none;
-  font-family:monospace;font-size:10px;cursor:pointer;opacity:.7;">
-  TEST arrival
-</button>
+
 
 <!-- GPS debug: below calBtn -->
 <div id="dbg" style="position:fixed;top:80px;left:8px;z-index:200;background:rgba(26,24,20,.65);color:#fff;font-family:monospace;font-size:11px;padding:5px 10px;border-radius:20px;white-space:nowrap;pointer-events:none;">GPS: čeká…</div>
@@ -408,33 +412,79 @@ function toggleCal() {
 // ── ARRIVAL ──
 var _arrivalShown = false;
 
+function arScoreToStampScore(arScore) {
+  if (arScore == null || arScore === 0) return 1;
+  if (arScore <= 25) return 25;
+  if (arScore <= 50) return 45;
+  if (arScore <= 75) return 65;
+  return 90;
+}
+
 function showArrival() {
   if (_arrivalShown) return;
   _arrivalShown = true;
+
+  // Ulož lokálně (score null = jen návštěva, 100 bodů)
   try {
     var visited = JSON.parse(localStorage.getItem('lop_visited_v1') || '[]').map(String);
     if (!visited.includes(String(TARGET.id))) {
       visited.push(String(TARGET.id));
       localStorage.setItem('lop_visited_v1', JSON.stringify(visited));
     }
+    var scores = JSON.parse(localStorage.getItem('lop_scores_v1') || '{}');
+    if (!scores[String(TARGET.id)]) {
+      scores[String(TARGET.id)] = { score: null, date: new Date().toISOString() };
+      localStorage.setItem('lop_scores_v1', JSON.stringify(scores));
+    }
   } catch(e) {}
+
+  // Ulož do Supabase
   getValidSession().then(function(s) {
     if (!s || !s.user) return;
-    fetch(SUPABASE_URL + '/rest/v1/visited', {
+    fetch(SUPABASE_URL + '/rest/v1/visited?on_conflict=user_id,place_id', {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + s.access_token,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
       },
-      body: JSON.stringify({ user_id: s.user.id, place_id: String(TARGET.id) })
+      body: JSON.stringify({
+        user_id: s.user.id,
+        place_id: String(TARGET.id),
+        score: null,
+        points: 100.0,
+        visited_at: new Date().toISOString()
+      })
     }).catch(function(){});
   });
-  var nameEl = document.getElementById('arrivalName');
+
   var ov = document.getElementById('arrivalOverlay');
   if (!ov) return;
-  if (nameEl) nameEl.textContent = TARGET.name || 'Testovací místo';
+
+  // Název
+  var nameEl = document.getElementById('arrivalName');
+  if (nameEl) nameEl.textContent = TARGET.name || 'Místo';
+
+  // Razítko
+  if (window.stampSVG) {
+    var stampEl = document.getElementById('arrivalStamp');
+    if (stampEl) {
+      var today = new Date();
+      var dateLabel = today.getDate() + '. ' + (today.getMonth()+1) + '. ' + today.getFullYear();
+      stampEl.innerHTML = window.stampSVG({
+        orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+        code: String(TARGET.num || TARGET.id),
+        name: TARGET.name || '',
+        year: null,
+        cat: 'hist',
+        score: 1,  // level 1 — jen návštěva
+        dateLabel: dateLabel,
+        k: TARGET.id + '-arrival',
+      });
+    }
+  }
+
   ov.classList.remove('arrival-hidden');
   ov.classList.add('arrival-visible');
 }
@@ -706,57 +756,69 @@ window.addEventListener('resize', function() {
 <!-- Arrival overlay -->
 <div id="arrivalOverlay" class="arrival-hidden" style="
   position:fixed; top:0;left:0;right:0;bottom:0; z-index:99999;
-  background:rgba(26,24,20,.85); backdrop-filter:blur(16px);
+  background:rgba(26,24,20,.92); backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
   flex-direction:column; align-items:center; justify-content:center;
   padding:32px 24px; text-align:center;
   font-family:'Inter',system-ui,sans-serif;
+  overflow-y:auto;
 ">
-  <!-- Check -->
-  <div style="margin-bottom:24px">
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
-      <circle cx="36" cy="36" r="36" fill="rgba(61,122,74,.2)"/>
-      <circle cx="36" cy="36" r="28" fill="rgba(61,122,74,.35)"/>
-      <circle cx="36" cy="36" r="20" fill="#3d7a4a"/>
-      <polyline points="24,36 32,44 48,28" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </div>
-
   <!-- Kicker -->
-  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.5);margin-bottom:8px">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,239,235,.45);margin-bottom:10px">
     Místo navštíveno
   </div>
 
   <!-- Název -->
-  <div id="arrivalName" style="font-family:'Fraunces',serif;font-size:32px;font-weight:400;color:#eeefeb;line-height:1.1;margin-bottom:8px;letter-spacing:-.015em"></div>
+  <div id="arrivalName" style="font-family:'Fraunces',serif;font-size:clamp(24px,7vw,36px);font-weight:400;color:#eeefeb;line-height:1.1;margin-bottom:4px;letter-spacing:-.015em"></div>
 
-  <!-- Subtext -->
-  <div style="font-size:13px;color:rgba(238,239,235,.5);margin-bottom:36px">
-    Výborně! Pokračuj dál.
+  <!-- Gratulace -->
+  <div style="font-size:13px;color:rgba(238,239,235,.45);margin-bottom:24px">
+    Gratuluji! Získal/a jsi razítko a 100 bodů.
   </div>
 
-  <!-- Tlačítka -->
-  <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px">
-    <button id="arrBtnAR" onclick="arrGoAR()" style="
-      width:100%;padding:15px;border-radius:10px;border:none;
-      background:#eeefeb;color:#1a1a18;
-      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
-      letter-spacing:.14em;text-transform:uppercase;cursor:pointer;">
-      Spustit AR →
+  <!-- Razítko + body -->
+  <div style="display:flex;align-items:center;gap:16px;background:rgba(238,239,235,.06);border:1px solid rgba(238,239,235,.12);border-radius:14px;padding:16px 20px;width:100%;max-width:320px;margin-bottom:24px">
+    <div id="arrivalStamp" style="width:80px;height:80px;flex-shrink:0"></div>
+    <div style="text-align:left">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,239,235,.4);margin-bottom:6px">Získáno</div>
+      <div style="font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:#eeefeb;line-height:1">100<span style="font-size:14px;font-weight:400;color:rgba(238,239,235,.5);font-family:'JetBrains Mono',monospace"> bodů</span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(238,239,235,.4);margin-top:4px">Level 1 razítko</div>
+    </div>
+  </div>
+
+  <!-- AR CTA -->
+  <div style="width:100%;max-width:320px;background:rgba(176,64,32,.15);border:1px solid rgba(176,64,32,.35);border-radius:12px;padding:14px 16px;margin-bottom:20px;text-align:left">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(176,64,32,.8);margin-bottom:6px">Chceš více?</div>
+    <div style="font-family:'Fraunces',serif;font-size:15px;font-weight:400;color:#eeefeb;line-height:1.45;margin-bottom:12px">
+      Prolni současnost s minulostí. Čím lépe se ti to povede, tím ostřejší razítko a až 100 bodů navíc.
+    </div>
+    <button onclick="arrGoAR()" style="
+      width:100%;padding:12px;border-radius:8px;border:none;
+      background:#b04020;color:#eeefeb;
+      font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+      Spustit AR záběr
     </button>
-    <button id="arrBtnDetail" onclick="arrGoDetail()" style="
-      width:100%;padding:15px;border-radius:10px;border:none;
-      background:rgba(238,239,235,.1);color:#eeefeb;
-      border:1px solid rgba(238,239,235,.2);
-      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
-      letter-spacing:.14em;text-transform:uppercase;cursor:pointer;">
+  </div>
+
+  <!-- Sekundární akce -->
+  <div style="width:100%;max-width:320px;display:flex;gap:8px">
+    <button onclick="arrGoDetail()" style="
+      flex:1;padding:12px;border-radius:8px;border:none;
+      background:rgba(238,239,235,.08);color:rgba(238,239,235,.7);
+      border:1px solid rgba(238,239,235,.15);
+      font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+      letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">
       Detail místa
     </button>
     <button onclick="arrGoMap()" style="
-      width:100%;padding:15px;border-radius:10px;border:none;
-      background:transparent;color:rgba(238,239,235,.4);
-      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
-      letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">
+      flex:1;padding:12px;border-radius:8px;border:none;
+      background:rgba(238,239,235,.08);color:rgba(238,239,235,.7);
+      border:1px solid rgba(238,239,235,.15);
+      font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+      letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">
       Zpět na mapu
     </button>
   </div>
