@@ -758,38 +758,55 @@ window.addEventListener('resize', function() {
   position:fixed; top:0;left:0;right:0;bottom:0; z-index:99999;
   background:#eeefeb;
   flex-direction:column; align-items:center; justify-content:center;
-  padding:32px 24px; text-align:center;
+  padding:28px 24px; text-align:center;
   font-family:'Inter',system-ui,sans-serif;
   overflow-y:auto;
 ">
   <!-- Kicker -->
-  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a94;margin-bottom:10px">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a94;margin-bottom:8px">
     Místo navštíveno
   </div>
 
   <!-- Název -->
-  <div id="arrivalName" style="font-family:'Fraunces',serif;font-size:clamp(24px,7vw,36px);font-weight:400;color:#1a1a18;line-height:1.1;margin-bottom:4px;letter-spacing:-.015em"></div>
+  <div id="arrivalName" style="font-family:'Fraunces',serif;font-size:clamp(24px,7vw,36px);font-weight:400;color:#1a1a18;line-height:1.1;margin-bottom:6px;letter-spacing:-.015em"></div>
 
   <!-- Gratulace -->
-  <div style="font-size:13px;color:#6a6a64;margin-bottom:24px">
-    Gratuluji! Získal/a jsi razítko a 100 bodů.
+  <div style="font-size:13px;color:#6a6a64;margin-bottom:20px">
+    Gratuluji! Získal/a jsi razítko do své sbírky a 100 bodů.
   </div>
 
   <!-- Razítko + body -->
-  <div style="display:flex;align-items:center;gap:16px;background:#e6e7e2;border:1px solid #cbcec5;border-radius:14px;padding:16px 20px;width:100%;max-width:320px;margin-bottom:20px">
-    <div id="arrivalStamp" style="width:80px;height:80px;flex-shrink:0"></div>
+  <div style="display:flex;align-items:center;gap:16px;background:#e6e7e2;border:1px solid #cbcec5;border-radius:14px;padding:16px 20px;width:100%;max-width:320px;margin-bottom:16px">
+    <div id="arrivalStamp" style="width:110px;height:110px;flex-shrink:0"></div>
     <div style="text-align:left">
       <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a94;margin-bottom:6px">Získáno</div>
-      <div style="font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:#1a1a18;line-height:1">100<span style="font-size:14px;font-weight:400;color:#9a9a94;font-family:'JetBrains Mono',monospace"> bodů</span></div>
+      <div style="font-family:'Fraunces',serif;font-size:30px;font-weight:500;color:#1a1a18;line-height:1">100<span style="font-size:14px;font-weight:400;color:#9a9a94;font-family:'JetBrains Mono',monospace"> bodů</span></div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#9a9a94;margin-top:4px">Level 1 razítko</div>
     </div>
   </div>
 
   <!-- AR CTA -->
-  <div style="width:100%;max-width:320px;background:#e6e7e2;border:1px solid #cbcec5;border-left:3px solid #b04020;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:20px;text-align:left">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#b04020;margin-bottom:6px">Chceš více?</div>
-    <div style="font-family:'Fraunces',serif;font-size:15px;font-style:italic;font-weight:400;color:#3a3a36;line-height:1.5;margin-bottom:12px">
-      Prolni současnost s minulostí. Čím lépe se ti to povede, tím ostřejší razítko a až 100 bodů navíc.
+  <div style="width:100%;max-width:320px;background:#e6e7e2;border:1px solid #cbcec5;border-left:3px solid #b04020;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:16px;text-align:left">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#b04020;margin-bottom:8px">Zkusíš více?</div>
+    <div style="font-family:'Fraunces',serif;font-size:14px;font-style:italic;font-weight:400;color:#3a3a36;line-height:1.5;margin-bottom:12px">
+      Prolni současnost s minulostí. Čím lépe se ti to povede, tím ostřejší razítko a více bodů.
+    </div>
+    <!-- Náhled: nejhorší → nejlepší razítko + body -->
+    <div id="arrivalPreviewRow" style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <!-- Nejhorší razítko -->
+      <div id="arrPreviewWorst" style="width:44px;height:44px;flex-shrink:0"></div>
+      <!-- Šipka -->
+      <svg width="18" height="14" viewBox="0 0 18 14" fill="none" style="flex-shrink:0">
+        <path d="M1 7h16M11 1l6 6-6 6" stroke="#cbcec5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <!-- Nejlepší razítko -->
+      <div id="arrPreviewBest" style="width:44px;height:44px;flex-shrink:0"></div>
+    </div>
+    <!-- Body pod razítky -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-left:2px">
+      <div style="width:44px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9a9a94">+0 b</div>
+      <div style="width:18px"></div>
+      <div style="width:44px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#1a1a18;font-weight:600">+100 b</div>
     </div>
     <button onclick="arrGoAR()" style="
       width:100%;padding:12px;border-radius:8px;border:none;
@@ -805,19 +822,27 @@ window.addEventListener('resize', function() {
   <!-- Sekundární akce -->
   <div style="width:100%;max-width:320px;display:flex;gap:8px">
     <button onclick="arrGoDetail()" style="
-      flex:1;padding:12px;border-radius:8px;
+      flex:1;padding:10px 6px;border-radius:8px;
       background:#e6e7e2;color:#3a3a36;
       border:1px solid #cbcec5;
-      font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
-      letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">
+      font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;
+      letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">
       Detail místa
     </button>
-    <button onclick="arrGoMap()" style="
-      flex:1;padding:12px;border-radius:8px;
+    <button onclick="location.href='sbirky.html'" style="
+      flex:1;padding:10px 6px;border-radius:8px;
       background:#e6e7e2;color:#3a3a36;
       border:1px solid #cbcec5;
-      font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
-      letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">
+      font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;
+      letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">
+      Sbírka
+    </button>
+    <button onclick="arrGoMap()" style="
+      flex:1;padding:10px 6px;border-radius:8px;
+      background:#e6e7e2;color:#3a3a36;
+      border:1px solid #cbcec5;
+      font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;
+      letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">
       Zpět na mapu
     </button>
   </div>
