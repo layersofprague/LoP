@@ -2143,8 +2143,21 @@ async function initArrival() {
 
   ov.style.display = 'flex';
 
+  // Debug — zobraz loading stav
+  const kickerEl = document.getElementById('arrKicker');
+  if (kickerEl) kickerEl.textContent = 'Načítám…';
+
   const s = await _getValidSession();
-  if (!s?.user || !_arPlaceId) { ov.style.display = 'none'; return; }
+  if (!_arPlaceId) { ov.style.display = 'none'; return; }
+  if (!s?.user) {
+    // Nepřihlášen — zobraz jen AR CTA bez razítka
+    if (kickerEl) kickerEl.textContent = '';
+    document.getElementById('arrName').textContent = _arParams.get('name') || '';
+    document.getElementById('arrCtaLabel').textContent = 'AR záběr';
+    document.getElementById('arrCtaText').textContent = 'Prolni současnost s minulostí. Čím lépe se ti to povede, tím ostřejší razítko a více bodů.';
+    document.getElementById('arrArBtn').textContent = 'Spustit AR záběr';
+    return;
+  }
 
   let prevRow = null;
   try {
