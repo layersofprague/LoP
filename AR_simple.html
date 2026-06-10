@@ -2204,8 +2204,13 @@ async function initArrival() {
   }
 }
 
-window.addEventListener('load', function() { setTimeout(initArrival, 300); });
+// initArrival se volá inline po načtení skriptů níže
 
 </script>
+<script src="castle-data.js"></script>
+<script src="stamp.js"></script>
+<script src="header.js?v=2"></script>
+<script src="nav.js?v=2"></script>
+<script>setTimeout(initArrival, 100);</script>
 </body>
 </html>
