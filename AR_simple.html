@@ -499,8 +499,104 @@ html, body {
   color: var(--gold);
 }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<!-- Arrival overlay — zobrazí se při načtení, dokud AR nezačne -->
+<div id="arArrivalOverlay" style="
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:#eeefeb; flex-direction:column;
+  font-family:'Inter',system-ui,sans-serif;
+  overflow-y:auto;
+">
+  <div id="lop-header-arrival"></div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 24px 80px;text-align:center">
+
+    <!-- Kicker -->
+    <div id="arrKicker" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a94;margin-bottom:8px"></div>
+
+    <!-- Název -->
+    <div id="arrName" style="font-family:'Fraunces',serif;font-size:clamp(22px,6vw,34px);font-weight:400;color:#1a1a18;line-height:1.1;margin-bottom:6px;letter-spacing:-.015em"></div>
+
+    <!-- Popis -->
+    <div id="arrDesc" style="font-size:13px;color:#6a6a64;margin-bottom:20px;max-width:300px;line-height:1.5"></div>
+
+    <!-- Razítko + body (jen při první návštěvě) -->
+    <div id="arrStampBox" style="display:none;align-items:center;gap:16px;background:#e6e7e2;border:1px solid #cbcec5;border-radius:14px;padding:16px 20px;width:100%;max-width:320px;margin-bottom:16px">
+      <div id="arrStamp" style="width:100px;height:100px;flex-shrink:0"></div>
+      <div style="text-align:left">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a94;margin-bottom:6px">Získáno</div>
+        <div style="font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:#1a1a18;line-height:1">100<span style="font-size:14px;font-weight:400;color:#9a9a94;font-family:'JetBrains Mono',monospace"> bodů</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#9a9a94;margin-top:4px">Level 1 razítko</div>
+      </div>
+    </div>
+
+    <!-- Skóre box (při opakované návštěvě) -->
+    <div id="arrScoreBox" style="display:none;background:#e6e7e2;border:1px solid #cbcec5;border-radius:14px;padding:14px 18px;width:100%;max-width:320px;margin-bottom:16px;text-align:left">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a94;margin-bottom:8px">Tvůj dosavadní výsledek</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="arrScoreStamp" style="width:64px;height:64px;flex-shrink:0"></div>
+        <div>
+          <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:500;color:#1a1a18;line-height:1"><span id="arrScoreVal">—</span><span style="font-size:13px;font-weight:400;color:#9a9a94;font-family:'JetBrains Mono',monospace"> % shody</span></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9a9a94;margin-top:3px"><span id="arrScorePts">—</span> bodů</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AR CTA box -->
+    <div style="width:100%;max-width:320px;background:#e6e7e2;border:1px solid #cbcec5;border-left:3px solid #b04020;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:16px;text-align:left">
+      <div id="arrCtaLabel" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#b04020;margin-bottom:8px"></div>
+      <div id="arrCtaText" style="font-family:'Fraunces',serif;font-size:14px;font-style:italic;color:#3a3a36;line-height:1.5;margin-bottom:12px"></div>
+
+      <!-- Animace prolnutí -->
+      <div style="width:100%;height:130px;border-radius:8px;overflow:hidden;margin-bottom:12px;position:relative;border:1px solid #cbcec5">
+        <img id="arrImgNow" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <img id="arrImgHist" src="" style="position:absolute;inset:0;width:110%;height:110%;object-fit:cover;opacity:0.5;animation:arrDrift 16s ease-in-out infinite alternate">
+        <div style="position:absolute;bottom:6px;left:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(238,239,235,.9);text-shadow:0 1px 3px rgba(0,0,0,.4)">Dnes</div>
+        <div id="arrHistYear" style="position:absolute;bottom:6px;right:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(238,239,235,.9);text-shadow:0 1px 3px rgba(0,0,0,.4)"></div>
+      </div>
+      <style>
+        @keyframes arrDrift {
+          0%   { transform: translate(-4%,-3%) rotate(-1.5deg); }
+          25%  { transform: translate(2%,-1%) rotate(0.5deg); }
+          60%  { transform: translate(-1%,3%) rotate(-0.8deg); }
+          100% { transform: translate(3%,1%) rotate(1.2deg); }
+        }
+      </style>
+
+      <!-- Náhled razítek (jen první návštěva) -->
+      <div id="arrPreviewRow" style="display:none;align-items:center;gap:6px;margin-bottom:4px">
+        <div id="arrPreviewWorst" style="width:44px;height:44px;flex-shrink:0"></div>
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" style="flex-shrink:0"><path d="M1 7h16M11 1l6 6-6 6" stroke="#cbcec5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div id="arrPreviewBest" style="width:44px;height:44px;flex-shrink:0"></div>
+      </div>
+      <div id="arrPreviewPts" style="display:none;align-items:center;gap:6px;margin-bottom:14px;padding-left:2px">
+        <div style="width:44px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9a9a94">+0 b</div>
+        <div style="width:18px"></div>
+        <div style="width:44px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#1a1a18;font-weight:600">+100 b</div>
+      </div>
+
+      <button onclick="startAR()" style="width:100%;padding:12px;border-radius:8px;border:none;background:#1a1a18;color:#eeefeb;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+        <span id="arrArBtn">Spustit AR záběr</span>
+      </button>
+    </div>
+
+    <!-- Sekundární akce -->
+    <div style="width:100%;max-width:320px;display:flex;gap:8px">
+      <button onclick="location.href='place/'+_arPlaceId+'.html'" style="flex:1;padding:10px 6px;border-radius:8px;background:#e6e7e2;color:#3a3a36;border:1px solid #cbcec5;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Detail místa</button>
+      <button onclick="location.href='sbirky.html'" style="flex:1;padding:10px 6px;border-radius:8px;background:#e6e7e2;color:#3a3a36;border:1px solid #cbcec5;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Sbírka</button>
+      <button onclick="location.href='index.html'" style="flex:1;padding:10px 6px;border-radius:8px;background:#e6e7e2;color:#3a3a36;border:1px solid #cbcec5;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Mapa</button>
+    </div>
+  </div>
+
+  <div id="lop-nav-arrival"></div>
+</div>
+
 
 <div id="cam-layer">
   <video id="video" autoplay playsinline muted></video>
@@ -2005,6 +2101,111 @@ function exportDebugSnapshot() {
 }
 
 document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+/* ── ARRIVAL OVERLAY ── */
+function startAR() {
+  const ov = document.getElementById('arArrivalOverlay');
+  if (ov) ov.style.display = 'none';
+}
+
+function arScoreToStampScore(s) {
+  if (s == null || s === 0) return 1;
+  if (s <= 25) return 25;
+  if (s <= 50) return 45;
+  if (s <= 75) return 65;
+  return 90;
+}
+
+async function initArrival() {
+  const ov = document.getElementById('arArrivalOverlay');
+  if (!ov) return;
+
+  // Header + nav
+  const hdrWrap = document.getElementById('lop-header-arrival');
+  if (hdrWrap) { const d = document.createElement('div'); d.id = 'lop-header'; hdrWrap.appendChild(d); }
+  const navWrap = document.getElementById('lop-nav-arrival');
+  if (navWrap) { const n = document.createElement('nav'); n.id = 'lop-nav'; navWrap.appendChild(n); }
+
+  // Počkej na header.js / nav.js
+  await new Promise(r => setTimeout(r, 200));
+  if (window.lopHeader && window.lopHeader.init) window.lopHeader.init();
+  if (window.lopNav) window.lopNav.buildIndex ? window.lopNav.buildIndex() : window.lopNav.refresh();
+
+  // Fotky v animaci
+  const imgNow = document.getElementById('arrImgNow');
+  const imgHist = document.getElementById('arrImgHist');
+  if (imgNow)  imgNow.src  = _arParams.get('thumb') || '';
+  if (imgHist) imgHist.src = 'https://layersofprague.github.io/LoP/foto/h_001ove.jpg';
+  const histYear = document.getElementById('arrHistYear');
+  if (histYear) histYear.textContent = '~1930';
+  const nameEl = document.getElementById('arrName');
+  if (nameEl) nameEl.textContent = _arParams.get('name') || '';
+
+  ov.style.display = 'flex';
+
+  const s = await _getValidSession();
+  if (!s?.user || !_arPlaceId) { ov.style.display = 'none'; return; }
+
+  let prevRow = null;
+  try {
+    const r = await fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&place_id=eq.' + encodeURIComponent(_arPlaceId) + '&select=score,points,visited_at', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + s.access_token }
+    });
+    if (r.ok) { const rows = await r.json(); if (rows.length) prevRow = rows[0]; }
+  } catch(e) {}
+
+  const today = new Date();
+  const dateLabel = today.getDate() + '. ' + (today.getMonth()+1) + '. ' + today.getFullYear();
+  const stampOpts = {
+    orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+    code: _arParams.get('num') || _arPlaceId,
+    name: _arParams.get('name') || '', year: null, cat: 'hist', dateLabel,
+  };
+
+  if (prevRow && prevRow.score === null) {
+    // PRVNÍ NÁVŠTĚVA
+    document.getElementById('arrKicker').textContent = 'Místo navštíveno';
+    document.getElementById('arrDesc').textContent = 'Gratuluji! Získal/a jsi razítko do své sbírky a 100 bodů.';
+    const stampBox = document.getElementById('arrStampBox');
+    if (stampBox) stampBox.style.display = 'flex';
+    if (window.stampSVG) {
+      const el = document.getElementById('arrStamp');
+      if (el) el.innerHTML = window.stampSVG(Object.assign({}, stampOpts, { score: 1, k: _arPlaceId+'-arr' }));
+      const worst = document.getElementById('arrPreviewWorst');
+      if (worst) worst.innerHTML = window.stampSVG(Object.assign({}, stampOpts, { score: 1, k: _arPlaceId+'-w' }));
+      const best = document.getElementById('arrPreviewBest');
+      if (best) best.innerHTML = window.stampSVG(Object.assign({}, stampOpts, { score: 90, eccentric: false, k: _arPlaceId+'-b' }));
+    }
+    const pr = document.getElementById('arrPreviewRow'); if (pr) pr.style.display = 'flex';
+    const pp = document.getElementById('arrPreviewPts'); if (pp) pp.style.display = 'flex';
+    document.getElementById('arrCtaLabel').textContent = 'Zkusíš více?';
+    document.getElementById('arrCtaText').textContent = 'Prolni současnost s minulostí. Čím lépe se ti to povede, tím ostřejší razítko a až 100 bodů navíc.';
+    document.getElementById('arrArBtn').textContent = 'Spustit AR záběr';
+
+  } else if (prevRow && prevRow.score !== null) {
+    // OPAKOVANÁ NÁVŠTĚVA
+    const prevScore = parseFloat(prevRow.score);
+    const prevPts = parseFloat(prevRow.points || 100);
+    document.getElementById('arrKicker').textContent = 'Vítej zpět';
+    document.getElementById('arrDesc').textContent = '';
+    const scoreBox = document.getElementById('arrScoreBox');
+    if (scoreBox) scoreBox.style.display = 'block';
+    document.getElementById('arrScoreVal').textContent = prevScore.toFixed(1);
+    document.getElementById('arrScorePts').textContent = prevPts.toFixed(1);
+    if (window.stampSVG) {
+      const ss = document.getElementById('arrScoreStamp');
+      if (ss) ss.innerHTML = window.stampSVG(Object.assign({}, stampOpts, { score: arScoreToStampScore(prevScore), k: _arPlaceId+'-sc' }));
+    }
+    document.getElementById('arrCtaLabel').textContent = 'Zkusíš to vylepšit?';
+    document.getElementById('arrCtaText').textContent = 'Zarovnej historický záběr co nejpřesněji. Pokud se ti to povede lépe než minule, razítko se zpřesní a získáš více bodů.';
+    document.getElementById('arrArBtn').textContent = 'Zkusit znovu';
+  } else {
+    ov.style.display = 'none';
+  }
+}
+
+window.addEventListener('load', function() { setTimeout(initArrival, 300); });
+
 </script>
 </body>
 </html>
