@@ -512,9 +512,9 @@ html, body {
   font-family:'Inter',system-ui,sans-serif;
   overflow-y:auto;
 ">
-  <div id="lop-header-arrival"></div>
+  <div id="lop-header"></div>
 
-  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 24px 80px;text-align:center">
+  <div style="padding:calc(var(--header-h,52px) + 20px) 24px 100px;text-align:center;display:flex;flex-direction:column;align-items:center">
 
     <!-- Kicker -->
     <div id="arrKicker" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a94;margin-bottom:8px"></div>
@@ -594,7 +594,7 @@ html, body {
     </div>
   </div>
 
-  <div id="lop-nav-arrival"></div>
+  <div id="lop-nav"></div>
 </div>
 
 
@@ -2147,14 +2147,8 @@ async function initArrival() {
   }
 
   // Header + nav
-  const hdrWrap = document.getElementById('lop-header-arrival');
-  if (hdrWrap) { const d = document.createElement('div'); d.id = 'lop-header'; hdrWrap.appendChild(d); }
-  const navWrap = document.getElementById('lop-nav-arrival');
-  if (navWrap) { const n = document.createElement('nav'); n.id = 'lop-nav'; navWrap.appendChild(n); }
-
-  // Počkej na header.js / nav.js
   await new Promise(r => setTimeout(r, 200));
-  if (window.lopHeader && window.lopHeader.init) window.lopHeader.init();
+  if (window.lopHeader) window.lopHeader.init ? window.lopHeader.init() : null;
   if (window.lopNav) window.lopNav.buildIndex ? window.lopNav.buildIndex() : window.lopNav.refresh();
 
   // Fotky v animaci
