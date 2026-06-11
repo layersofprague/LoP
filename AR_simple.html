@@ -507,7 +507,7 @@ html, body {
 
 <!-- Arrival overlay — zobrazí se při načtení, dokud AR nezačne -->
 <div id="arArrivalOverlay" style="
-  display:none; position:fixed; inset:0; z-index:99999;
+  display:flex; position:fixed; inset:0; z-index:99999;
   background:#eeefeb; flex-direction:column;
   font-family:'Inter',system-ui,sans-serif;
   overflow-y:auto;
@@ -2106,6 +2106,7 @@ document.addEventListener('touchmove', e => e.preventDefault(), { passive: false
 function startAR() {
   const ov = document.getElementById('arArrivalOverlay');
   if (ov) ov.style.display = 'none';
+  startCamera();
 }
 
 function arScoreToStampScore(s) {
@@ -2166,8 +2167,18 @@ async function initArrival() {
     const r = await fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&place_id=eq.' + encodeURIComponent(_arPlaceId) + '&select=score,points,visited_at', {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + s.access_token }
     });
-    if (r.ok) { const rows = await r.json(); if (rows.length) prevRow = rows[0]; }
-  } catch(e) {}
+    if (r.ok) {
+      const rows = await r.json();
+      console.log('[LoP] visited rows:', rows);
+      if (rows.length) prevRow = rows[0];
+    }
+  } catch(e) { console.warn('[LoP] initArrival fetch error:', e); }
+
+  // Fallback — pokud žádný záznam, zobraz jako první návštěvu
+  if (!prevRow) {
+    prevRow = { score: null, points: 100, visited_at: new Date().toISOString() };
+    console.log('[LoP] no visited row, using fallback (first visit)');
+  }
 
   const today = new Date();
   const dateLabel = today.getDate() + '. ' + (today.getMonth()+1) + '. ' + today.getFullYear();
