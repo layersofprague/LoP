@@ -2112,6 +2112,8 @@ document.addEventListener('touchmove', e => {
 function startAR() {
   const ov = document.getElementById('arArrivalOverlay');
   if (ov) ov.style.display = 'none';
+  // Obnov rozměry canvasu po skrytí overlaye
+  if (typeof resize === 'function') resize();
   startCamera();
 }
 
