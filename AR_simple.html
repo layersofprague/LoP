@@ -511,7 +511,7 @@ html, body {
   background:#eeefeb; flex-direction:column;
   font-family:'Inter',system-ui,sans-serif;
   overflow-y:scroll; -webkit-overflow-scrolling:touch;
-  height:100%; box-sizing:border-box;
+  height:100%; box-sizing:border-box; touch-action:pan-y;
 ">
   <div id="lop-header"></div>
 
@@ -2101,7 +2101,12 @@ function exportDebugSnapshot() {
   }, 'image/png');
 }
 
-document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+document.addEventListener('touchmove', e => {
+  // Nechej scrollovat arrival overlay
+  if (document.getElementById('arArrivalOverlay')?.style.display !== 'none' &&
+      document.getElementById('arArrivalOverlay')?.contains(e.target)) return;
+  e.preventDefault();
+}, { passive: false });
 
 /* ── ARRIVAL OVERLAY ── */
 function startAR() {
