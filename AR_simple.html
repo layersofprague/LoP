@@ -2119,6 +2119,8 @@ function arScoreToStampScore(s) {
 async function initArrival() {
   const ov = document.getElementById('arArrivalOverlay');
   if (!ov) return;
+  const _arParams = new URLSearchParams(location.search);
+  const _arPlaceId = _arParams.get('id') || null;
 
   // Header + nav
   const hdrWrap = document.getElementById('lop-header-arrival');
