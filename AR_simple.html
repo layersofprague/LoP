@@ -2217,13 +2217,13 @@ async function initArrival() {
   }
 }
 
-// initArrival se volá inline po načtení skriptů níže
+// Spusť arrival overlay
+document.addEventListener('DOMContentLoaded', function() { setTimeout(initArrival, 300); });
 
 </script>
 <script src="castle-data.js"></script>
 <script src="stamp.js"></script>
 <script src="header.js?v=2"></script>
 <script src="nav.js?v=2"></script>
-<script>setTimeout(initArrival, 100);</script>
 </body>
 </html>
