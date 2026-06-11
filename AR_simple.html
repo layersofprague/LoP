@@ -2122,6 +2122,29 @@ async function initArrival() {
   if (!ov) return;
   const _arParams = new URLSearchParams(location.search);
   const _arPlaceId = _arParams.get('id') || null;
+  const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
+  const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+  function _getSession() {
+    try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
+  }
+  async function _getValidSession() {
+    const s = _getSession();
+    if (!s?.access_token || !s?.user) return null;
+    const nowSec = Math.floor(Date.now() / 1000);
+    if ((s.expires_at || 0) > nowSec + 60) return s;
+    if (!s.refresh_token) return null;
+    try {
+      const r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: s.refresh_token })
+      });
+      if (!r.ok) return null;
+      const data = await r.json();
+      localStorage.setItem('lop_auth_session', JSON.stringify({ ...data, user: data.user || s.user }));
+      return data;
+    } catch(e) { return null; }
+  }
 
   // Header + nav
   const hdrWrap = document.getElementById('lop-header-arrival');
