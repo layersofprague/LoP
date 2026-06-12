@@ -2053,6 +2053,9 @@ document.addEventListener('touchmove', e => { var ov=document.getElementById('ar
 function startAR() {
   var ov=document.getElementById('arArrivalOverlay');
   if(ov) ov.style.display='none';
+  var h=document.getElementById('lop-header'),n=document.getElementById('lop-nav');
+  if(h) h.style.display='none';
+  if(n) n.style.display='none';
   startCamera();
 }
 
@@ -2087,6 +2090,9 @@ async function saveToCollection() {
 
 async function initArrival() {
   var ov=document.getElementById('arArrivalOverlay');if(!ov)return;
+  var h=document.getElementById('lop-header'),n=document.getElementById('lop-nav');
+  if(h) h.style.display='';
+  if(n) n.style.display='';
   var params=new URLSearchParams(location.search),placeId=params.get('id');
   var nameEl=document.getElementById('arrName');if(nameEl)nameEl.textContent=params.get('name')||'';
   await new Promise(function(r){setTimeout(r,200);});
