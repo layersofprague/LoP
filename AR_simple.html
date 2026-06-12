@@ -502,7 +502,7 @@ html, body {
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="arArrivalOverlay" style="display:flex;position:fixed;inset:0;z-index:99999;background:#eeefeb;flex-direction:column;font-family:'Inter',system-ui,sans-serif;overflow-y:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-y;">
+<div id="arArrivalOverlay" style="display:flex;position:fixed;inset:0;z-index:99999;background:#eeefeb;flex-direction:column;font-family:'Inter',system-ui,sans-serif;overflow-y:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-y;animation:arrSlideIn .4s cubic-bezier(.22,.8,.36,1) both;">
   <div id="lop-header"></div>
   <div style="padding:calc(var(--header-h,52px) + 20px) 24px 100px;text-align:center;display:flex;flex-direction:column;align-items:center">
     <div id="arrKicker" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a94;margin-bottom:8px">Načítám…</div>
@@ -535,13 +535,22 @@ html, body {
         <div style="position:absolute;bottom:6px;left:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(238,239,235,.9);text-shadow:0 1px 3px rgba(0,0,0,.4)">Dnes</div>
         <div style="position:absolute;bottom:6px;right:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(238,239,235,.9);text-shadow:0 1px 3px rgba(0,0,0,.4)">~1930</div>
       </div>
-      <style>@keyframes arrDrift{0%{transform:translate(-4%,-3%) rotate(-1.5deg)}25%{transform:translate(2%,-1%) rotate(.5deg)}60%{transform:translate(-1%,3%) rotate(-.8deg)}100%{transform:translate(3%,1%) rotate(1.2deg)}}</style>
-      <div id="arrPreviewRow" style="display:none;align-items:center;gap:6px;margin-bottom:4px">
+      <style>
+@keyframes arrSlideIn {
+  from { transform: translateY(-24px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes arrFadeUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes arrDrift {0%{transform:translate(-4%,-3%) rotate(-1.5deg)}25%{transform:translate(2%,-1%) rotate(.5deg)}60%{transform:translate(-1%,3%) rotate(-.8deg)}100%{transform:translate(3%,1%) rotate(1.2deg)}}</style>
+      <div id="arrPreviewRow" style="display:none;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;width:100%;">
         <div id="arrPreviewWorst" style="width:44px;height:44px;flex-shrink:0;overflow:hidden"></div>
         <svg width="18" height="14" viewBox="0 0 18 14" fill="none" style="flex-shrink:0"><path d="M1 7h16M11 1l6 6-6 6" stroke="#cbcec5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <div id="arrPreviewBest" style="width:44px;height:44px;flex-shrink:0;overflow:hidden"></div>
       </div>
-      <div id="arrPreviewPts" style="display:none;align-items:center;gap:6px;margin-bottom:14px">
+      <div id="arrPreviewPts" style="display:none;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;width:100%;">
         <div style="width:44px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9a9a94">+0 b</div>
         <div style="width:18px"></div>
         <div style="width:44px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#1a1a18;font-weight:600">+100 b</div>
@@ -2099,7 +2108,7 @@ async function initArrival() {
   if(prevRow.score===null){
     document.getElementById('arrKicker').textContent='Místo navštíveno';
     document.getElementById('arrDesc').textContent='Gratuluji! Získal/a jsi razítko do své sbírky a 100 bodů.';
-    var sb=document.getElementById('arrStampBox');if(sb)sb.style.display='flex';
+    var sb=document.getElementById('arrStampBox');if(sb){sb.style.display='flex';sb.style.animation='arrFadeUp .4s .15s cubic-bezier(.22,.8,.36,1) both';}
     if(window.stampSVG){
       var el=document.getElementById('arrStamp');if(el)el.innerHTML=window.stampSVG(Object.assign({},stampOpts,{score:1,k:placeId+'-arr'}));
       var w=document.getElementById('arrPreviewWorst');if(w)w.innerHTML=window.stampSVG(Object.assign({},stampOpts,{score:1,k:placeId+'-w'}));
@@ -2107,9 +2116,11 @@ async function initArrival() {
     }
     var pr=document.getElementById('arrPreviewRow');if(pr)pr.style.display='flex';
     var pp=document.getElementById('arrPreviewPts');if(pp)pp.style.display='flex';
+    var ctaBox=document.querySelector('[id="arrCtaLabel"]')&&document.querySelector('[id="arrCtaLabel"]').closest('div[style*="border-left"]');if(ctaBox)ctaBox.style.animation='arrFadeUp .4s .3s cubic-bezier(.22,.8,.36,1) both';
     document.getElementById('arrCtaLabel').textContent='Zkusíš více?';
     document.getElementById('arrCtaText').textContent='Prolni současnost s minulostí. Čím lépe se ti to povede, tím ostřejší razítko a až 100 bodů navíc.';
     document.getElementById('arrArBtn').textContent='Spustit AR záběr';
+    var btnsRow=document.querySelector('button[onclick*="sbirky"]')&&document.querySelector('button[onclick*="sbirky"]').parentElement;if(btnsRow)btnsRow.style.animation='arrFadeUp .4s .45s cubic-bezier(.22,.8,.36,1) both';
   } else {
     var ps=parseFloat(prevRow.score),pp2=parseFloat(prevRow.points||100);
     document.getElementById('arrKicker').textContent='Vítej zpět';
