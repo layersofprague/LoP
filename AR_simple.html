@@ -502,8 +502,8 @@ html, body {
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+<div id="lop-header"></div>
 <div id="arArrivalOverlay" style="display:flex;position:fixed;inset:0;z-index:99999;background:#eeefeb;flex-direction:column;font-family:'Inter',system-ui,sans-serif;overflow-y:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-y;">
-  <div id="lop-header" style="position:sticky;top:0;z-index:10;flex-shrink:0"></div>
   <div style="padding:calc(var(--header-h,52px) + 20px) 24px 100px;text-align:center;display:flex;flex-direction:column;align-items:center;animation:arrSlideIn .4s cubic-bezier(.22,.8,.36,1) both;">
     <div id="arrKicker" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a94;margin-bottom:8px">Načítám…</div>
     <div id="arrName" style="font-family:'Fraunces',serif;font-size:clamp(22px,6vw,34px);font-weight:400;color:#1a1a18;line-height:1.1;margin-bottom:6px;letter-spacing:-.015em"></div>
@@ -2055,6 +2055,7 @@ document.addEventListener('touchmove', e => { var ov=document.getElementById('ar
 function startAR() {
   var ov=document.getElementById('arArrivalOverlay');
   if(ov) ov.style.display='none';
+  var h=document.getElementById('lop-header');if(h){h.style.display='none';h.style.zIndex='';}
   var n=document.getElementById('lop-nav');if(n){n.style.display='none';n.style.zIndex='';}
   startCamera();
 }
@@ -2090,7 +2091,8 @@ async function saveToCollection() {
 
 async function initArrival() {
   var ov=document.getElementById('arArrivalOverlay');if(!ov)return;
-  var n=document.getElementById('lop-nav');if(n){n.style.display='';n.style.zIndex='100000';}
+  var h=document.getElementById('lop-header');if(h){h.style.display='';h.style.zIndex='100000';}
+  var n=document.getElementById('lop-nav');if(n){n.style.display='';n.style.zIndex='99999';}
   var params=new URLSearchParams(location.search),placeId=params.get('id');
   var nameEl=document.getElementById('arrName');if(nameEl)nameEl.textContent=params.get('name')||'';
   await new Promise(function(r){setTimeout(r,200);});
