@@ -249,8 +249,6 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
   color: var(--ink); letter-spacing: -.01em; line-height: 1.2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  /* prostor vpravo pro razítko */
-  padding-right: 52px;
   transition: color .15s;
 }
 .place-sub {
@@ -267,16 +265,42 @@ a { color: inherit; text-decoration: none; }
 }
 .place-stamp-body svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-/* meta column — jen vzdálenost + wish */
+/* meta column — pevná šířka v listu, nikdy se nemění */
 .place-meta {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 5px; padding: 8px 10px;
   border-left: 1px solid var(--paper-2);
-  min-width: 46px; flex-shrink: 0;
+  width: 52px; flex-shrink: 0; flex-grow: 0;
 }
-.place-dist { font-size: 10px; color: var(--ink-5); font-family: 'Inter', sans-serif; text-align: center; }
-.place-dist-hint { font-size: 10px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.place-dist { font-size: 10px; color: var(--ink-5); font-family: 'Inter', sans-serif; text-align: center; white-space: nowrap; }
+.place-dist-hint { font-size: 9px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; text-align: center; }
 .place-dist-hint:hover { color: var(--ink-4); }
+
+/* V listu: meta-right (votes+wish) schováno, wish je přímý potomek meta */
+.place-meta-right { display: none; }
+/* wish přímo v meta (list) */
+.place-meta > .place-wish-btn { display: flex; }
+
+/* like/dislike tlačítka */
+.place-votes {
+  display: flex; align-items: center; gap: 1px;
+}
+.place-vote-btn {
+  appearance: none; background: transparent; border: none;
+  display: flex; align-items: center; gap: 2px;
+  padding: 2px 3px; border-radius: 4px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: var(--ink-5); transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.place-vote-btn:hover { background: var(--paper-2); color: var(--ink-3); }
+.place-vote-btn.up.voted   { color: var(--ok); }
+.place-vote-btn.down.voted { color: var(--accent); }
+.place-vote-btn svg { width: 11px; height: 11px; pointer-events: none; }
+/* v kick (lista): votes vpravo */
+.place-kick .place-votes { margin-left: auto; }
+/* v kick: votes se zobrazí */
+.place-kick .place-votes { display: flex; }
 
 /* wish button */
 .place-wish-btn {
@@ -327,19 +351,26 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--paper-2);
   padding: 10px 12px 0;
 }
-#placesList.grid-mode .place-name { padding-right: 54px; }
+#placesList.grid-mode .place-name { padding-right: 0; }
 #placesList.grid-mode .place-kick { display: none; }
 #placesList.grid-mode .place-sub {
   font-size: 11px; -webkit-line-clamp: 2;
 }
+/* grid meta: row, dist vlevo, votes+wish vpravo */
 #placesList.grid-mode .place-meta {
   border-left: none;
   border-top: 1px solid var(--paper-2);
-  flex-direction: row; justify-content: flex-end;
-  padding: 7px 12px 10px;
-  min-width: unset;
+  flex-direction: row; justify-content: space-between; align-items: center;
+  padding: 5px 10px;
+  width: unset; height: auto;
 }
-/* stamp v grid body — stejná pozice jako v listu */
+/* v gridu zobrazit meta-right (votes+wish) */
+#placesList.grid-mode .place-meta-right {
+  display: flex; align-items: center; gap: 0;
+}
+/* v gridu schovat přímý wish v meta (je v meta-right) */
+#placesList.grid-mode .place-meta > .place-wish-btn { display: none; }
+/* stamp v grid body */
 #placesList.grid-mode .place-stamp-body {
   width: 50px; height: 50px;
   top: 50%; right: 10px;
@@ -804,10 +835,22 @@ function cardHTML(p, visited, wished) {
     ? `<div class="place-stamp-body">${makeStampSVG(p, arScore)}</div>`
     : '';
 
-  // Vzdálenost — vždy v meta
+  // Vzdálenost
   const distHtml = dist
     ? `<div class="place-dist">${dist}</div>`
-    : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit polohu</span>`;
+    : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit</span>`;
+
+  // Like/dislike — TODO: napojit na Supabase, zatím lokální stav
+  const voteUp   = p._voteUp   || 0;
+  const voteDown = p._voteDown || 0;
+  const votedUp   = p._votedUp   || false;
+  const votedDown = p._votedDown || false;
+  const thumbUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-6 0v4"/><path d="M20 8H9.5a2 2 0 0 0-1.98 2.28l1 6A2 2 0 0 0 10.5 18H18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/></svg>`;
+  const thumbDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 6 0v-4"/><path d="M4 16h10.5a2 2 0 0 0 1.98-2.28l-1-6A2 2 0 0 0 13.5 6H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2z"/></svg>`;
+  const votesHtml = `<div class="place-votes">
+    <button class="place-vote-btn up${votedUp?' voted':''}" onclick="votePlace(event,'${p.id}','up')" title="Líbí se">${thumbUp}</button>
+    <button class="place-vote-btn down${votedDown?' voted':''}" onclick="votePlace(event,'${p.id}','down')" title="Nelíbí se">${thumbDown}</button>
+  </div>`;
 
   const wishBtn = loggedIn
     ? `<button class="place-wish-btn ${wish?'wished':''}" onclick="toggleWish(event,'${p.id}')" title="${wish?'Odebrat z plánu':'Přidat do plánu'}">
@@ -826,19 +869,39 @@ function cardHTML(p, visited, wished) {
       <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
     </div>
     <div class="place-body">
-      <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>
+      <div class="place-kick">
+        <span class="dot" style="background:${color}"></span>
+        <span>${catName}</span>
+        ${votesHtml}
+      </div>
       <div class="place-name">${p.name}</div>
       <div class="place-sub">${lede}</div>
       ${stampHtml}
     </div>
     <div class="place-meta">
-      ${distHtml}
-      ${wishBtn}
+      <span class="place-dist-wrap">${distHtml}</span>
+      <div class="place-meta-right">${votesHtml}${wishBtn}</div>
     </div>
   </div>`;
 }
 
-function toggleWish(e, id) {
+function votePlace(e, id, dir) {
+  e.preventDefault(); e.stopPropagation();
+  // TODO: napojit na Supabase votes tabulku
+  const btn = e.currentTarget;
+  const card = btn.closest('.place-card');
+  const allUp   = card.querySelectorAll('.place-vote-btn.up');
+  const allDown = card.querySelectorAll('.place-vote-btn.down');
+  if (dir === 'up') {
+    const wasVoted = btn.classList.contains('voted');
+    allUp.forEach(b => b.classList.toggle('voted', !wasVoted));
+    allDown.forEach(b => b.classList.remove('voted'));
+  } else {
+    const wasVoted = btn.classList.contains('voted');
+    allDown.forEach(b => b.classList.toggle('voted', !wasVoted));
+    allUp.forEach(b => b.classList.remove('voted'));
+  }
+}
   e.preventDefault(); e.stopPropagation();
   const btn=e.currentTarget, w=[...new Set(getWished())], idx=w.indexOf(String(id));
   if(idx>=0){ w.splice(idx,1); dbRemoveWish(id); } else{ w.push(String(id)); dbAddWish(id); }
