@@ -744,6 +744,20 @@ a { color: inherit; text-decoration: none; }
 .leaflet-marker-icon { overflow: visible !important; }
 .lop-pin:hover { transform: scale(1.1); }
 .lop-pin.rt-active { transform: scale(1.2); }
+
+/* Ztmavení mapy při aktivním tooltipu */
+#map::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 400;
+  background: rgba(26,24,20,.45);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease;
+}
+#map.tip-active::after { opacity: 1; }
+/* Vybraný pin zůstane viditelný nad overlay */
+.lop-pin.rt-active { z-index: 410 !important; position: relative; }
+/* Ostatní piny ztmavnou */
+#map.tip-active .lop-pin:not(.rt-active) { opacity: 0.35; transition: opacity .2s; }
 .lop-pin.cat-hist { background: var(--cat-hist); }
 .lop-pin.cat-arch { background: var(--cat-arch); }
 .lop-pin.cat-fun  { background: var(--cat-fun); }
@@ -2537,6 +2551,7 @@ function _resetPinScale() {
     window._activePinEl.classList.remove('rt-active');
     window._activePinEl = null;
   }
+  document.getElementById('map')?.classList.remove('tip-active');
 }
 function showTooltip(loc, m, rt) {
   clearTimeout(window._rtHideTimer);
@@ -2650,6 +2665,7 @@ function showTooltip(loc, m, rt) {
   _resetPinScale();
   const pinEl = m.getElement()?.querySelector('.lop-pin');
   if (pinEl) { window._activePinEl = pinEl; pinEl.classList.add('rt-active'); }
+  document.getElementById('map')?.classList.add('tip-active');
   rt.classList.add('visible');
   if (loc.photoThen) {
     const imgEl = new Image();
