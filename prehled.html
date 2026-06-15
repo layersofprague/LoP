@@ -232,10 +232,10 @@ a { color: inherit; text-decoration: none; }
 .place-thumb-fallback { position: relative; z-index: 1; pointer-events: none; }
 .place-cat-line { position: absolute; top: 0; left: 0; bottom: 0; width: 3px; z-index: 2; }
 
-/* body — stamp překrývá pravý horní roh */
+/* body — stamp v pravém horním rohu, pod kick řádkem */
 .place-body {
   position: relative;
-  padding: 8px 12px 8px 12px;
+  padding: 6px 12px 6px 12px;
   border-left: 1px solid var(--paper-2);
   min-width: 0; display: flex; flex-direction: column; justify-content: center;
 }
@@ -253,22 +253,21 @@ a { color: inherit; text-decoration: none; }
 }
 .place-sub {
   font-size: 11px; color: var(--ink-4); margin-top: 2px; line-height: 1.4;
-  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
-/* stamp přes pravý horní roh textu — list */
+/* stamp — absolutně, zarovnán na střed POPISU (kick+name+sub), ne celé karty */
 .place-stamp-body {
-  position: absolute; top: 50%; right: 8px;
-  transform: translateY(-50%);
+  position: absolute; bottom: 6px; right: 8px;
   width: 46px; height: 46px;
   pointer-events: none; z-index: 3;
 }
 .place-stamp-body svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-/* meta column — pevná šířka v listu, nikdy se nemění */
+/* meta column — pevná šířka, nikdy se nemění, wish je zde */
 .place-meta {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 5px; padding: 8px 10px;
+  gap: 5px; padding: 6px 10px;
   border-left: 1px solid var(--paper-2);
   width: 52px; flex-shrink: 0; flex-grow: 0;
 }
@@ -276,31 +275,25 @@ a { color: inherit; text-decoration: none; }
 .place-dist-hint { font-size: 9px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; text-align: center; }
 .place-dist-hint:hover { color: var(--ink-4); }
 
-/* V listu: meta-right (votes+wish) schováno, wish je přímý potomek meta */
+/* V listu: meta-right schováno, wish přímo v meta */
 .place-meta-right { display: none; }
-/* wish přímo v meta (list) */
 .place-meta > .place-wish-btn { display: flex; }
 
-/* like/dislike tlačítka */
-.place-votes {
-  display: flex; align-items: center; gap: 1px;
-}
+/* like/dislike */
+.place-votes { display: flex; align-items: center; gap: 2px; }
 .place-vote-btn {
   appearance: none; background: transparent; border: none;
-  display: flex; align-items: center; gap: 2px;
-  padding: 2px 3px; border-radius: 4px; cursor: pointer;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  color: var(--ink-5); transition: color .15s, background .15s;
+  display: flex; align-items: center;
+  padding: 3px; border-radius: 4px; cursor: pointer;
+  color: var(--ink-4); transition: color .15s, background .15s;
   flex-shrink: 0;
 }
-.place-vote-btn:hover { background: var(--paper-2); color: var(--ink-3); }
+.place-vote-btn:hover { background: var(--paper-2); color: var(--ink-2); }
 .place-vote-btn.up.voted   { color: var(--ok); }
 .place-vote-btn.down.voted { color: var(--accent); }
-.place-vote-btn svg { width: 11px; height: 11px; pointer-events: none; }
-/* v kick (lista): votes vpravo */
+.place-vote-btn svg { width: 15px; height: 15px; pointer-events: none; }
+/* v kick (list): votes flush vpravo */
 .place-kick .place-votes { margin-left: auto; }
-/* v kick: votes se zobrazí */
-.place-kick .place-votes { display: flex; }
 
 /* wish button */
 .place-wish-btn {
@@ -356,24 +349,24 @@ a { color: inherit; text-decoration: none; }
 #placesList.grid-mode .place-sub {
   font-size: 11px; -webkit-line-clamp: 2;
 }
-/* grid meta: row, dist vlevo, votes+wish vpravo */
+/* grid meta: row, dist vlevo, votes+wish vpravo — kompaktní výška */
 #placesList.grid-mode .place-meta {
   border-left: none;
   border-top: 1px solid var(--paper-2);
   flex-direction: row; justify-content: space-between; align-items: center;
-  padding: 5px 10px;
+  padding: 6px 10px;
   width: unset; height: auto;
 }
 /* v gridu zobrazit meta-right (votes+wish) */
 #placesList.grid-mode .place-meta-right {
-  display: flex; align-items: center; gap: 0;
+  display: flex; align-items: center; gap: 2px;
 }
 /* v gridu schovat přímý wish v meta (je v meta-right) */
 #placesList.grid-mode .place-meta > .place-wish-btn { display: none; }
-/* stamp v grid body */
+/* grid body: stamp dole vpravo nad footer */
 #placesList.grid-mode .place-stamp-body {
-  width: 50px; height: 50px;
-  top: 50%; right: 10px;
+  width: 52px; height: 52px;
+  bottom: 8px; right: 10px; top: unset;
 }
 
 /* cat pill (grid only) */
@@ -407,8 +400,8 @@ a { color: inherit; text-decoration: none; }
     padding: 8px 0 14px !important; padding-top: var(--header-h, 52px) !important;
     justify-content: flex-start !important; gap: 0 !important;
   }
-  /* pravý padding = nav šířka + stejný okraj jako vlevo */
-  .page { padding-left: 10px !important; padding-right: calc(64px + 10px) !important; }
+  /* pravý padding = nav šířka + stejný okraj jako vlevo (10px) */
+  .page { padding-left: 10px !important; padding-right: 74px !important; }
 }
 </style>
 </head>
@@ -879,7 +872,8 @@ function cardHTML(p, visited, wished) {
       ${stampHtml}
     </div>
     <div class="place-meta">
-      <span class="place-dist-wrap">${distHtml}</span>
+      ${distHtml}
+      ${wishBtn}
       <div class="place-meta-right">${votesHtml}${wishBtn}</div>
     </div>
   </div>`;
