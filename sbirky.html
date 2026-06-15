@@ -65,7 +65,7 @@ a { color: inherit; text-decoration: none; }
 .page-intro {
   font-size: 14px; color: var(--ink-4);
   margin-top: 12px; line-height: 1.6;
-  max-width: 38em; text-wrap: pretty;
+  text-wrap: pretty;
 }
 
 /* ── HERO META ── */
@@ -717,9 +717,9 @@ function renderAll() {
 
   let html = `
   <div class="hero-section">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
       <h1 class="page-title">Sbírka <em>razítek</em></h1>
-      <table class="hero-meta">
+      <table class="hero-meta" style="align-self:flex-end;margin-top:0;margin-bottom:2px">
         <tr>
           <td><span id="statCount">—</span><span class="hero-slash">/</span><span class="hero-total" id="statTotal">—</span></td>
           <td>razítek</td>
