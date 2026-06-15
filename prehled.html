@@ -54,7 +54,7 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--rule);
 }
 .kick { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 12px; font-weight: 500; }
-.page-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(36px, 8.5vw, 52px); line-height: 1; letter-spacing: -.03em; color: var(--ink); }
+.page-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(24px, 6vw, 36px); line-height: 1; letter-spacing: -.03em; color: var(--ink); }
 .page-title em { font-style: italic; font-weight: 300; color: #777772; }
 .page-intro { font-size: 14px; color: var(--ink-4); margin-top: 12px; line-height: 1.6; max-width: 38em; text-wrap: pretty; }
 
@@ -347,12 +347,12 @@ a { color: inherit; text-decoration: none; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
 
-/* dist-hint: šedé, kurzíva */
+/* dist-hint: šedé, kurzíva, bez podtržení */
 .place-dist-hint {
   font-size: 9px; font-family: 'Inter', sans-serif;
   font-style: italic; color: var(--ink-4);
   cursor: pointer; text-align: center; line-height: 1.3;
-  pointer-events: auto;
+  pointer-events: auto; text-decoration: none;
 }
 .place-dist-hint:hover { color: var(--ink-3); }
 
@@ -441,7 +441,6 @@ a { color: inherit; text-decoration: none; }
   padding: 4px 9px 4px 7px;
   font-size: 9px; font-weight: 500; letter-spacing: .12em;
   text-transform: uppercase; color: var(--ink-5);
-  box-shadow: 0 1px 6px rgba(0,0,0,.12);
 }
 .place-cat-pill .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 
@@ -474,8 +473,7 @@ a { color: inherit; text-decoration: none; }
 <script src="header.js?v=2"></script>
 
 <div class="page">
-  <div class="hero-section">
-    <div class="kick">Layers of Prague</div>
+    <div class="hero-section">
     <h1 class="page-title">Přehled <em>míst</em></h1>
     <p class="page-intro">Všechna místa seřazená podle kategorie. Kliknutím otevřete detail, historické fotografie a AR záběr.</p>
   </div>
@@ -927,7 +925,7 @@ function cardHTML(p, visited, wished) {
         <span class="place-dist-icon list">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
-    : `<span class="place-dist-hint place-dist-hint-list" onclick="requestLoc(event)">Povolit<br>polohu</span>`;
+    : `<span class="place-dist-hint place-dist-hint-list" onclick="requestLoc(event)">povolit<br>polohu</span>`;
 
   // Dlaždice: ikona před číslem (flex-row)
   const distGridHtml = dist
@@ -935,7 +933,7 @@ function cardHTML(p, visited, wished) {
         <span class="place-dist-icon grid">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
-    : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit polohu</span>`;
+    : `<span class="place-dist-hint" onclick="requestLoc(event)">povolit polohu</span>`;
 
   // Like/dislike — čisté šipky, s počty (TODO: Supabase)
   const voteUp   = p._voteUp   ?? Math.floor(Math.random()*40+2);  // placeholder
