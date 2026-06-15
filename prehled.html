@@ -902,6 +902,8 @@ function votePlace(e, id, dir) {
     allUp.forEach(b => b.classList.remove('voted'));
   }
 }
+
+function toggleWish(e, id) {
   e.preventDefault(); e.stopPropagation();
   const btn=e.currentTarget, w=[...new Set(getWished())], idx=w.indexOf(String(id));
   if(idx>=0){ w.splice(idx,1); dbRemoveWish(id); } else{ w.push(String(id)); dbAddWish(id); }
