@@ -216,12 +216,12 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Inter', sans-serif; font-size: 11px; color: var(--ink-4); line-height: 1.4;
 }
 .badge-tip-icon {
-  width: 20px; height: 20px; flex-shrink: 0;
+  width: 18px; height: 18px; flex-shrink: 0;
   border-radius: 50%;
-  border: 1.5px solid var(--ink-5);
+  border: 1px solid var(--rule-2);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-style: italic; font-weight: 500;
-  color: var(--ink-4); font-size: 13px; line-height: 1;
+  font-family: 'Inter', sans-serif; font-style: italic; font-weight: 400;
+  color: var(--ink-4); font-size: 12px; line-height: 1;
 }
 
 /* ── FLAT SECTION BODY ── */
@@ -362,28 +362,28 @@ const CAT_TIP = {
 };
 
 const DISTRICT_DATA = {
-  'Staré Město': { title: 'Měšťák a Hausknecht', desc: 'Měšťákům a Hausnknechtům se říkalo bohatým obchodníkům doplněným o rázovité rváče a kočí z přístavních krčem.' },
+  'Staré Město': { title: 'Měšťák a Hausknecht', desc: 'Měšťákům a Hausnknechtům se říkalo bohatým obchodníkům, ale také rázovitým rváčům a kočím z přístavních krčem.' },
   'Nové Město':  { title: 'Rachunbář a Františkán', desc: 'Rachunbářům a Františkánům se říkalo chudším dělníkům, kteří pili v hospodách na dluh, a mnichům z místních klášterů.' },
   'Malá Strana': { title: 'Malostranský Špunt a Lokaj', desc: 'Malostranským Špuntům a Lokajům se říkalo klukům z bojovných part na zamrzlé Vltavě a služebnictvu ze šlechtických paláců.' },
   'Hradčany':    { title: 'Kastelán a Kapucín', desc: 'Kastelánům a Kapucínům se říkalo chudině a řemeslníkům navázaným na Pražský hrad a klášterní život v okolí Lorety.' },
-  'Josefov':     { title: 'Meiselovec', desc: 'Meiselovecem se říkalo obyvateli židovského ghetta pojmenovaným po nejslavnějším historickém starostovi Mordechaji Maiselovi.' },
-  'Žižkov':      { title: 'Žižkovský Pepík', desc: 'Žižkovským Pepíkům se říkalo slavným pouličním frajerkům, dělníkům a bohémům s typickým stylem oblékání a vlastním slangem.' },
-  'Smíchov':     { title: 'Smíchovský Baraba', desc: 'Smíchovským Barabům se říkalo drsným, hlučným a tvrdě pracujícím dělníkům z místních obřích továren a pivovaru.' },
-  'Holešovice':  { title: 'Holešovický Šupák', desc: 'Holešovickým Šupákům se říkalo přístavním dělníkům, kteří šupovali – posouvali a vykládali sudy a bedny z lodí.' },
-  'Karlín':      { title: 'Karlínský kluk', desc: 'Karlínským klukům se říkalo drsnějším dělnickým partám z první pravé průmyslové čtvrti Prahy.' },
-  'Košíře':      { title: 'Košířský rváč', desc: 'Košířským rváčům se říkalo divokým partám z tehdejší periferie, které neustále bojovaly se sousedním Smíchovem.' },
+  'Josefov':     { title: 'Meiselovec', desc: 'Meiselovecem se říkalo obyvateli židovského ghetta, pojmenovaným po nejslavnějším historickém starostovi Mordechaji Maiselovi.' },
+  'Žižkov':      { title: 'Žižkovský Pepík', desc: 'Žižkovskými Pepíky se říkalo slavným pouličním frajerkům, dělníkům a bohémům s typickým stylem oblékání a vlastním slangem.' },
+  'Smíchov':     { title: 'Smíchovský Baraba', desc: 'Smíchovskými Barabami se říkalo drsným, hlučným a tvrdě pracujícím dělníkům z místních obřích továren a pivovaru.' },
+  'Holešovice':  { title: 'Holešovický Šupák', desc: 'Holešovickými Šupáky se říkalo přístavním dělníkům, kteří šupovali – tedy posouvali a vykládali sudy a bedny z lodí.' },
+  'Karlín':      { title: 'Karlínský kluk', desc: 'Karlínskými kluky se říkalo drsnějším dělnickým partám z první pravé průmyslové čtvrti Prahy.' },
+  'Košíře':      { title: 'Košířský rváč', desc: 'Košířskými rváči se říkalo divokým partám z tehdejší periferie, které neustále bojovaly se sousedním Smíchovem.' },
   'Podskalí':    { title: 'Podskalák a Plavec', desc: 'Podskalákům a Plavcům se říkalo hrdé a uzavřené komunitě vorařů, ledařů a rybářů z oblasti dnešní Výtoně.' },
-  'Kampa':       { title: 'Kampán', desc: 'Kampánům se říkalo obyvatelům polovenkovské izolované komunity pradlen, mlynářů a rybářů z vltavského ostrova.' },
-  'Braník':      { title: 'Branský ledař', desc: 'Branským ledařům se říkalo dělníkům, kteří v zimě sekali na zamrzlé Vltavě led a sváželi ho do branických ledáren.' },
-  'Podolí':      { title: 'Podolský cementárník', desc: 'Podolským cementárníkům se říkalo dělníkům z bývalé slavné podolské cementárny, jádru tamní říční komunity.' },
-  'Nusle':       { title: 'Nuselský Kafemlejnek', desc: 'Nuselským Kafemlejnkům se říkalo chudšímu pavlačovému obyvatelstvu, jehož sousedky neustále melely pantem a ráno mlely meltu.' },
-  'Libeň':       { title: 'Libeňský Balonář', desc: 'Libeňským Balonářům se říkalo klukům, kteří fascinovaně sledovali vypouštění prvních pražských balonů v Libeni.' },
-  'Vyšehrad':    { title: 'Vyšehradský Kanovník a Peckář', desc: 'Vyšehradským Kanovníkům a Peckářům se říkalo kněžím z kapituly a pěstitelům třešní a švestek, které prodávali po celé Praze.' },
-  'Vršovice':    { title: 'Vršovický Koloběžkář', desc: 'Vršovickým Koloběžkářům se ironicky říkalo obyvatelům venkovského předměstí bez pořádné dopravy, kde lidé museli neustále popojíždět.' },
-  'Vinohrady':   { title: 'Vinohradský paňáca', desc: 'Vinohradským paňácům se posměšně říkalo bohatším a elegantním měšťanům, a to zejména v ústech jejich žižkovských sousedů.' },
-  'Břevnov':     { title: 'Břevnovský zelinář a Benediktin', desc: 'Břevnovským zelinářům a Benediktinům se říkalo pěstitelům a mnichům spjatým se zahradami patřícími historicky Břevnovskému klášteru.' },
-  'Troja':       { title: 'Trojský vinař', desc: 'Trojským vinařům se říkalo obyvatelům svahů nad Vltavou, kteří po staletí udržovali tradici pěstování vinné révy.' },
-  'Letná':       { title: 'Sparťan', desc: 'Sparťanům se říkalo obyvatelům Letné podle zdejšího fotbalového klubu AC Sparta Praha.' },
+  'Kampa':       { title: 'Kampán', desc: 'Kampány se říkalo obyvatelům polovenkovské izolované komunity pradlen, mlynářů a rybářů z vltavského ostrova.' },
+  'Braník':      { title: 'Branský ledař', desc: 'Branskými ledaři se říkalo dělníkům, kteří v zimě sekali na zamrzlé Vltavě led a sváželi ho do branických ledáren.' },
+  'Podolí':      { title: 'Podolský cementárník', desc: 'Podolskými cementárníky se říkalo dělníkům z bývalé slavné podolské cementárny, kteří tvořili jádro tamní říční komunity.' },
+  'Nusle':       { title: 'Nuselský Kafemlejnek', desc: 'Nuselskými Kafemlejnky se říkalo chudšímu pavlačovému obyvatelstvu, jehož sousedky neustále melely pantem a ráno mlely meltu.' },
+  'Libeň':       { title: 'Libeňský Balonář', desc: 'Libeňskými Balonáři se říkalo klukům, kteří fascinovaně sledovali vypouštění prvních pražských balonů v Libeni.' },
+  'Vyšehrad':    { title: 'Vyšehradský Kanovník a Peckář', desc: 'Vyšehradskými Kanovníky a Peckáři se říkalo kněžím z kapituly a pěstitelům třešní a švestek, které prodávali po celé Praze.' },
+  'Vršovice':    { title: 'Vršovický Koloběžkář', desc: 'Vršovickými Koloběžkáři se ironicky říkalo obyvatelům venkovského předměstí bez pořádné dopravy, kde se lidé museli neustále přesouvat.' },
+  'Vinohrady':   { title: 'Vinohradský paňáca', desc: 'Vinohradskými paňácy se posměšně říkalo bohatším a elegantním měšťanům – a to zejména v ústech jejich žižkovských sousedů.' },
+  'Břevnov':     { title: 'Břevnovský zelinář a Benediktin', desc: 'Břevnovskými zelináři a Benediktiny se říkalo pěstitelům a mnichům spjatým se zahradami, které historicky patřily Břevnovskému klášteru.' },
+  'Troja':       { title: 'Trojský vinař', desc: 'Trojskými vinaři se říkalo obyvatelům svahů nad Vltavou, kteří po staletí udržovali tradici pěstování vinné révy.' },
+  'Letná':       { title: 'Sparťan', desc: 'Sparťany se říkalo obyvatelům Letné – podle zdejšího fotbalového klubu AC Sparta Praha.' },
 };
 
 function getSession() {
@@ -641,7 +641,7 @@ function renderSection(sec, idx) {
         const tipData = isDistrict ? DISTRICT_DATA[sec.name] : (CAT_TIP[sec.cat] || null);
         if (!tipData && !isDistrict) return '';
         const iIcon = '<div class="badge-tip-icon">i</div>';
-        const okIcon = '<div class="badge-tip-icon" style="background:var(--ok);color:#fff;border-color:var(--ok)">i</div>';
+        const okIcon = '<div class="badge-tip-icon">i</div>';
         if (empties.length > 0) {
           const x = '<b>' + empties.length + ' ' + plural(empties.length) + '</b>';
           const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
