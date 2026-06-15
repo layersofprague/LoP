@@ -275,8 +275,9 @@ a { color: inherit; text-decoration: none; }
 .place-dist-hint { font-size: 9px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; text-align: center; }
 .place-dist-hint:hover { color: var(--ink-4); }
 
-/* list: meta-wish-list viditelný, meta-right skrytý */
+/* list: meta-wish-list viditelný, meta-right a meta-wish-grid skryté */
 .meta-wish-list { display: flex; }
+.meta-wish-grid { display: none; }
 .place-meta-right { display: none; }
 
 /* like/dislike */
@@ -375,25 +376,34 @@ a { color: inherit; text-decoration: none; }
 #placesList.grid-mode .place-sub {
   font-size: 11px; -webkit-line-clamp: 2;
 }
-/* grid meta: dist vlevo, votes uprostřed, wish vpravo */
+/* grid meta: dist vlevo, votes absolutně na střed, wish vpravo */
 #placesList.grid-mode .place-meta {
   border-left: none;
   border-top: 1px solid var(--paper-2);
-  flex-direction: row; align-items: center;
-  padding: 6px 10px;
+  flex-direction: row; align-items: center; justify-content: space-between;
+  position: relative;
+  padding: 4px 10px;
   width: unset; height: auto;
 }
 #placesList.grid-mode .place-dist,
-#placesList.grid-mode .place-dist-hint { flex: 1; text-align: left; }
-/* v gridu: schovat list-wish, ukázat meta-right */
-#placesList.grid-mode .meta-wish-list { display: none; }
+#placesList.grid-mode .place-dist-hint { flex-shrink: 0; }
+/* votes absolutně na střed spodní lišty */
 #placesList.grid-mode .place-meta-right {
-  display: flex; flex: 2; align-items: center; justify-content: space-between;
+  display: flex; align-items: center;
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
 }
-#placesList.grid-mode .place-meta-right .place-votes {
-  flex: 1; display: flex; justify-content: center;
-}
-#placesList.grid-mode .place-meta-right .place-wish-wrap { flex-shrink: 0; }
+#placesList.grid-mode .place-meta-right .place-wish-wrap { display: none; }
+/* wish-wrap jako přímý potomek meta zůstane vpravo (meta-wish-list skrytý → nový wish přímo) */
+#placesList.grid-mode .meta-wish-list { display: none; }
+#placesList.grid-mode .meta-wish-grid { display: flex; flex-shrink: 0; }
+
+/* více místa pod textem před dělicí čárou */
+#placesList.grid-mode .place-body { padding-bottom: 12px; }
+/* menší padding v meta liště */
+#placesList.grid-mode .place-vote-btn { padding: 2px 4px; }
+#placesList.grid-mode .place-vote-count { font-size: 9px; }
 /* grid body: stamp dole vpravo */
 #placesList.grid-mode .place-stamp-body {
   width: 52px; height: 52px;
@@ -943,6 +953,7 @@ function cardHTML(p, visited, wished) {
       ${distHtml}
       <span class="meta-wish-list">${wishBtn}</span>
       <div class="place-meta-right">${votesHtml}${wishBtn}</div>
+      <span class="meta-wish-grid">${wishBtn}</span>
     </div>
   </div>`;
 }
