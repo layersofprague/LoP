@@ -59,53 +59,83 @@ a { color: inherit; text-decoration: none; }
 .page-intro { font-size: 14px; color: var(--ink-4); margin-top: 12px; line-height: 1.6; max-width: 38em; text-wrap: pretty; }
 
 /* ── TOOLBAR (filtr + toggle) ── */
-.toolbar {
-  display: flex; align-items: stretch; gap: 8px;
-  margin-bottom: 12px;
-}
-.toolbar .filter-bar { flex: 1; }
-
-/* ── VIEW TOGGLE ── */
-.view-toggle {
-  display: flex;
-  border: 1.5px solid var(--rule);
-  border-radius: 10px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2px 16px rgba(0,0,0,.05);
-  flex-shrink: 0;
-}
-.view-btn {
-  appearance: none; border: none; background: transparent;
-  width: 38px; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--ink-4);
-  transition: background .15s, color .15s;
-}
-.view-btn:first-child { border-right: 1px solid var(--rule); }
-.view-btn.active { background: var(--ink); color: #fff; }
-.view-btn svg { width: 16px; height: 16px; pointer-events: none; }
-
-/* ── FILTER BAR ── */
-.filter-bar {
+/* ── CONTROLS BAR ── */
+.controls-bar {
+  display: flex; align-items: center;
   background: #fff; border: 1.5px solid var(--rule);
   border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,.05);
-  overflow: visible; pointer-events: auto;
+  margin-bottom: 12px; overflow: hidden;
 }
-.filter-head {
-  width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; background: transparent; border: none; cursor: pointer;
-  font-family: inherit; color: var(--ink);
+.ctrl-btn {
+  appearance: none; border: none; background: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  cursor: pointer; color: var(--ink-4);
+  transition: background .15s, color .15s;
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  white-space: nowrap; flex-shrink: 0;
 }
-.filter-head-lead { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.filter-head-dots { display: flex; gap: 4px; }
-.filter-head-dots span { width: 7px; height: 7px; border-radius: 50%; }
-.filter-head-lbl { font-weight: 600; }
-.filter-head-cnt { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em; color: var(--ink-5); text-transform: uppercase; }
-.filter-head-chev { color: var(--ink-4); transition: transform .28s var(--ease); display: flex; }
-.filter-bar.open .filter-head-chev { transform: rotate(180deg); }
-.filter-panel { max-height: 0; overflow: hidden; transition: max-height .32s var(--ease); border-top: 0 solid var(--rule); }
-.filter-bar.open .filter-panel { max-height: 500px; border-top: 1px solid var(--rule); }
-.filter-panel-inner { padding: 16px 18px 14px; background: var(--paper-2); border-radius: 0 0 10px 10px; }
+.ctrl-btn:hover { background: var(--paper-2); color: var(--ink-2); }
+.ctrl-btn.active { background: var(--ink); color: #fff; }
+.ctrl-btn svg { width: 14px; height: 14px; pointer-events: none; flex-shrink: 0; }
+.ctrl-btn-filter {
+  flex: 1; justify-content: flex-start;
+  padding: 10px 12px;
+  border-right: 1px solid var(--rule);
+}
+.ctrl-btn-filter .filter-dots { display: flex; gap: 3px; }
+.ctrl-btn-filter .filter-dots span { width: 6px; height: 6px; border-radius: 50%; }
+.ctrl-btn-filter .filter-cnt { font-size: 10px; color: var(--ink-5); margin-left: 2px; }
+.ctrl-btn-filter.has-filter .filter-cnt { color: var(--accent); font-weight: 600; }
+.ctrl-btn-view { width: 42px; padding: 10px 0; }
+.ctrl-btn-view + .ctrl-btn-view { border-left: 1px solid var(--rule); }
+
+/* ── FILTER MODAL ── */
+.filter-modal-backdrop {
+  position: fixed;
+  top: var(--header-h, 52px); left: 0; right: 0; bottom: 0;
+  z-index: 450;
+  display: none; pointer-events: none;
+  background: transparent; transition: background .22s;
+}
+.filter-modal-backdrop.open {
+  display: block; pointer-events: auto;
+  background: rgba(17,17,17,.18);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+}
+.filter-modal {
+  position: absolute;
+  top: 12px; left: 12px; right: 12px;
+  max-width: 500px; margin: 0 auto;
+  background: rgba(248,248,246,.97);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid var(--rule); border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.14);
+  opacity: 0; transform: scale(.97) translateY(-6px);
+  transition: opacity .22s var(--ease), transform .22s var(--ease);
+  pointer-events: none; overflow-y: auto;
+  max-height: calc(100vh - 80px);
+}
+.filter-modal-backdrop.open .filter-modal {
+  opacity: 1; transform: none; pointer-events: auto;
+}
+.filter-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 0;
+}
+.filter-modal-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-4); font-weight: 500;
+}
+.filter-modal-close {
+  appearance: none; background: transparent; border: none;
+  width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-4); transition: background .15s, color .15s;
+}
+.filter-modal-close:hover { background: var(--paper-2); color: var(--ink); }
+.filter-modal-close svg { width: 14px; height: 14px; }
+.filter-modal-inner { padding: 14px 16px 20px; }
 .filter-row { padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .filter-row:first-child { padding-top: 4px; }
 .filter-row:last-of-type { border-bottom: none; }
@@ -478,63 +508,64 @@ a { color: inherit; text-decoration: none; }
     <p class="page-intro">Všechna místa seřazená podle kategorie. Kliknutím otevřete detail, historické fotografie a AR záběr.</p>
   </div>
 
-  <div class="toolbar">
-    <div class="filter-bar" id="filterBar">
-      <button class="filter-head" id="filterHead" onclick="toggleFilter()">
-        <span class="filter-head-lead">
-          <span class="filter-head-dots">
-            <span style="background:var(--cat-hist)"></span>
-            <span style="background:var(--cat-arch)"></span>
-            <span style="background:var(--cat-fun)"></span>
-          </span>
-          <span class="filter-head-lbl">Filtr</span>
-          <span class="filter-head-cnt" id="filterHeadCnt">· <span id="filterHeadActive">—</span> MÍST</span>
-        </span>
-        <span class="filter-head-chev">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </span>
-      </button>
-      <div class="filter-panel" id="filterPanel">
-        <div class="filter-panel-inner">
-          <div class="filter-row">
-            <div class="filter-lbl"><span>Kategorie</span></div>
-            <div class="filter-chips" id="mapChips"></div>
+  <!-- Controls: Filtr + Seznam + Dlaždice -->
+  <div class="controls-bar">
+    <button class="ctrl-btn ctrl-btn-filter" id="filterBtn" onclick="toggleFilter()">
+      <span class="filter-dots">
+        <span style="background:var(--cat-hist)"></span>
+        <span style="background:var(--cat-arch)"></span>
+        <span style="background:var(--cat-fun)"></span>
+      </span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filtr
+      <span class="filter-cnt" id="filterHeadCnt"><span id="filterHeadActive">—</span></span>
+    </button>
+    <button class="ctrl-btn ctrl-btn-view active" id="btnList" onclick="setView('list')" title="Seznam">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+    </button>
+    <button class="ctrl-btn ctrl-btn-view" id="btnGrid" onclick="setView('grid')" title="Dlaždice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Filter modal -->
+  <div class="filter-modal-backdrop" id="filterBackdrop">
+    <div class="filter-modal" id="filterModal">
+      <div class="filter-modal-header">
+        <span class="filter-modal-title">Filtr</span>
+        <button class="filter-modal-close" onclick="toggleFilter()" title="Zavřít">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="filter-modal-inner">
+        <div class="filter-row">
+          <div class="filter-lbl"><span>Kategorie</span></div>
+          <div class="filter-chips" id="mapChips"></div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-lbl">
+            <span>Období</span>
+            <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
           </div>
-          <div class="filter-row">
-            <div class="filter-lbl">
-              <span>Období</span>
-              <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
-            </div>
-            <div class="filter-timeline" id="eraTimeline"></div>
+          <div class="filter-timeline" id="eraTimeline"></div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-lbl">
+            <span>Vzdálenost od vás</span>
+            <span class="filter-lbl-val" id="distV">libovolná</span>
           </div>
-          <div class="filter-row">
-            <div class="filter-lbl">
-              <span>Vzdálenost od vás</span>
-              <span class="filter-lbl-val" id="distV">libovolná</span>
-            </div>
-            <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
-          </div>
-          <div class="filter-footer">
-            <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
-          </div>
+          <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+        </div>
+        <div class="filter-footer">
+          <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
         </div>
       </div>
-    </div>
-
-    <!-- VIEW TOGGLE -->
-    <div class="view-toggle">
-      <button class="view-btn active" id="btnList" onclick="setView('list')" title="Seznam">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-      </button>
-      <button class="view-btn" id="btnGrid" onclick="setView('grid')" title="Dlaždice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-      </button>
     </div>
   </div>
 
@@ -598,6 +629,8 @@ function setView(mode) {
   list.classList.toggle('grid-mode', mode === 'grid');
   btnList.classList.toggle('active', mode === 'list');
   btnGrid.classList.toggle('active', mode === 'grid');
+  // Zavři modal pokud je otevřen
+  document.getElementById('filterBackdrop')?.classList.remove('open');
 }
 
 /* ── Stamp — napojení na stamp.js (stejné jako sbirky.html) ── */
@@ -697,14 +730,10 @@ const eraPct    = y => ((y-ERA_START)/(ERA_END-ERA_START))*100;
 const pctToYear = p => Math.round(ERA_START+p*(ERA_END-ERA_START));
 
 function toggleFilter() {
-  const bar = document.getElementById('filterBar');
-  const wasOpen = bar.classList.contains('open');
-  bar.classList.toggle('open');
-  if (!wasOpen) {
-    const panel = document.getElementById('filterPanel');
-    const onEnd = () => { panel.removeEventListener('transitionend',onEnd); buildEraTimeline(); };
-    panel.addEventListener('transitionend', onEnd);
-  }
+  const backdrop = document.getElementById('filterBackdrop');
+  const wasOpen = backdrop.classList.contains('open');
+  backdrop.classList.toggle('open');
+  if (!wasOpen) buildEraTimeline();
 }
 
 function buildChips() {
@@ -822,8 +851,10 @@ function locYear(p) {
 function applyFilter() { render(); }
 
 document.addEventListener('click', e=>{
-  const bar=document.getElementById('filterBar');
-  if(bar&&bar.classList.contains('open')&&!bar.contains(e.target)) bar.classList.remove('open');
+  const backdrop=document.getElementById('filterBackdrop');
+  const modal=document.getElementById('filterModal');
+  if(backdrop&&backdrop.classList.contains('open')&&!modal.contains(e.target)&&!document.getElementById('filterBtn').contains(e.target))
+    backdrop.classList.remove('open');
 }, true);
 
 async function loadPlaces() {
@@ -891,6 +922,8 @@ function render() {
   list.innerHTML=html;
   list.classList.toggle('grid-mode', viewMode==='grid');
   const _cnt=document.getElementById('filterHeadActive'); if(_cnt) _cnt.textContent=filtered.length;
+  const _fbtn=document.getElementById('filterBtn');
+  if(_fbtn) _fbtn.classList.toggle('has-filter', filtered.length < PLACES.length);
   updateChipCounts();
 }
 
