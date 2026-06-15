@@ -769,9 +769,9 @@ a { color: inherit; text-decoration: none; }
 
 .rt-tip {
   position: fixed; z-index: 900;
-  width: 220px;
-  background: var(--paper);
-  border: 1px solid var(--rule);
+  width: 230px;
+  background: #fff;
+  border: 1.5px solid var(--rule);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(26,24,20,.18);
@@ -781,43 +781,122 @@ a { color: inherit; text-decoration: none; }
 }
 .rt-tip.visible { opacity: 1; pointer-events: auto; }
 .rt-tip.visible.rt-blocked { pointer-events: none !important; }
-/* Neviditelný most mezi pinem a tooltipem — zabraňuje problikávání */
 .rt-tip.visible::after {
   content: '';
   position: absolute;
   bottom: -16px; left: 0; right: 0;
   height: 16px;
 }
-.rt-tip-img { width: 100%; height: 110px; object-fit: cover; display: block; background: var(--paper-3); }
-.rt-tip-body { padding: 9px 12px 11px; }
-.rt-tip-kick {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--ink-4);
+/* foto */
+.rt-tip-img {
+  width: 100%; aspect-ratio: 3/2;
+  object-fit: cover; display: block;
+  background: #EFEFED;
+  position: relative; overflow: hidden;
+}
+.rt-tip-img[data-cat="arch"] { background: #EEF2F7; }
+.rt-tip-img[data-cat="fun"]  { background: #F5F2E8; }
+/* fallback písmeno ve foto */
+.rt-tip-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 700;
+  letter-spacing: -.04em; color: rgba(0,0,0,.08); pointer-events: none;
+}
+/* category pill */
+.rt-tip-pill {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  display: flex; align-items: center; gap: 5px;
+  background: #fff; border: 1px solid var(--rule); border-radius: 6px;
+  padding: 4px 9px 4px 7px;
+  font-size: 9px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-5);
+}
+.rt-tip-pill .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+/* cat border left */
+.rt-tip-cat-line {
+  position: absolute; top: 0; left: 0; bottom: 0; width: 3px; z-index: 2;
+}
+/* text sekce */
+.rt-tip-body {
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--paper-2);
+  position: relative;
+}
+.rt-tip-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; line-height: 1.2;
+  color: var(--ink); letter-spacing: -.01em;
   margin-bottom: 3px;
 }
-.rt-tip-title {
-  font-family: 'Fraunces', serif;
-  font-size: 14px; font-weight: 500; line-height: 1.25;
+.rt-tip-lede {
+  font-size: 11px; color: var(--ink-4); line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.rt-tip-actions { display:flex; gap:5px; margin-top:8px; }
-.rt-tip-btn {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center; gap: 4px;
-  padding: 6px 4px;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
-  cursor: pointer; text-decoration: none;
-  border: 1px solid var(--rule);
-  background: var(--paper-2);
-  color: var(--ink-2);
-  white-space: nowrap; overflow: hidden;
-  transition: background .12s, color .12s, border-color .12s;
+/* spodní lišta */
+.rt-tip-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 10px 7px;
+  border-top: 1px solid var(--paper-2);
+  position: relative;
 }
-.rt-tip-btn.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.rt-tip-btn.active  { background: var(--accent); border-color: var(--accent); color: #fff; }
-.rt-tip-btn svg { flex-shrink: 0; }
+.rt-tip-dist {
+  display: flex; flex-direction: row; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--ink-5); font-family: 'Inter', sans-serif;
+  text-decoration: none; flex-shrink: 0;
+  transition: color .15s;
+}
+.rt-tip-dist:hover { color: var(--ink-3); }
+.rt-tip-dist svg { width: 11px; height: 11px; flex-shrink: 0; }
+.rt-tip-dist-hint {
+  font-size: 9px; font-style: italic; color: var(--ink-4);
+  cursor: pointer;
+}
+/* votes uprostřed */
+.rt-tip-votes {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 4px;
+}
+.rt-tip-vote-btn {
+  appearance: none; background: transparent; border: none;
+  display: flex; align-items: center; gap: 3px;
+  padding: 2px 4px; border-radius: 4px; cursor: pointer;
+  color: var(--ink-5); font-size: 11px; font-family: 'Inter', sans-serif;
+  transition: color .15s; flex-shrink: 0;
+}
+.rt-tip-vote-btn:hover { color: var(--ink-2); }
+.rt-tip-vote-btn svg { width: 14px; height: 14px; pointer-events: none; }
+/* wish vpravo */
+.rt-tip-wish-wrap {
+  display: flex; flex-direction: row; align-items: center; gap: 3px;
+  cursor: pointer; flex-shrink: 0;
+}
+.rt-tip-wish-lbl {
+  font-size: 9px; font-family: 'Inter', sans-serif;
+  color: var(--ink-5); white-space: nowrap; pointer-events: none;
+  width: 40px; text-align: right;
+}
+.rt-tip-wish-lbl.active { color: var(--accent); }
+.rt-tip-wish-btn {
+  appearance: none; background: transparent; border: none;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2px; cursor: pointer; color: var(--ink-5);
+  transition: color .15s;
+}
+.rt-tip-wish-btn:hover { color: var(--ink-3); }
+.rt-tip-wish-btn.wished { color: var(--accent); }
+.rt-tip-wish-btn svg { width: 15px; height: 15px; pointer-events: none; }
+/* detail tlačítko */
+.rt-tip-detail {
+  display: block; width: calc(100% - 20px); margin: 0 10px 8px;
+  padding: 7px; border-radius: 7px;
+  background: var(--ink); color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+  text-align: center; text-decoration: none; letter-spacing: .01em;
+  transition: background .12s;
+}
+.rt-tip-detail:hover { background: var(--ink-2); }
 
 /* ═══════════════ SHEET ═══════════════ */
 .sheet {
@@ -2480,49 +2559,69 @@ function showTooltip(loc, m, rt) {
   const c = CAT[loc.cat];
   const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}${loc.arRadius ? '&radius=' + loc.arRadius : ''}`;
   const wBtn = isWished(loc.id);
-  const wishHtml = isLoggedIn()
-    ? `<button id="rtWishBtn_${loc.id}" class="rt-tip-btn${wBtn ? ' active' : ''}" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="${wBtn ? 'white' : '#b04020'}" stroke="${wBtn ? 'white' : '#b04020'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        ${wBtn ? 'V plánu' : 'Plán'}
-      </button>`
-    : `<button class="rt-tip-btn" onclick="event.stopPropagation(); window.lopAuth ? window.lopAuth.open() : location.href='login.html?return='+encodeURIComponent(location.href);" title="Pro správu plánovaných míst je nutné přihlášení">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        Plán
-        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.6;margin-left:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      </button>`;
   rt._forId = loc.id;
 
-  // Živá vzdálenost z GPS
-  let distLabel = '';
+  // Vzdálenost
+  const compassIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`;
+  let distHtml = '';
   if (window._userLatLng && loc.lat && loc.lng) {
     const km = haversineKm(window._userLatLng, [loc.lat, loc.lng]);
-    distLabel = km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1).replace('.', ',') + ' km';
+    const distLabel = km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1).replace('.', ',') + ' km';
+    distHtml = `<a class="rt-tip-dist" href="${compassUrl}" onclick="event.stopPropagation()" title="Navigovat">${compassIcon}<span>${distLabel}</span></a>`;
   } else {
-    distLabel = '<span style="line-height:1.2;text-align:right">? m<br><span style="font-size:8px;opacity:.6;cursor:pointer" onclick="locateMe()">povolit?</span></span>';
+    distHtml = `<span class="rt-tip-dist-hint" onclick="locateMe();event.stopPropagation()">povolit polohu</span>`;
   }
+
+  // Votes (placeholder)
+  const thumbUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+  const thumbDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
+  const vUp = Math.floor(Math.random()*40+2), vDown = Math.floor(Math.random()*8);
+  const votesHtml = `<div class="rt-tip-votes">
+    <button class="rt-tip-vote-btn" onclick="event.stopPropagation()" title="Líbí se">${thumbUp} ${vUp}</button>
+    <button class="rt-tip-vote-btn" onclick="event.stopPropagation()" title="Nelíbí se">${thumbDown} ${vDown}</button>
+  </div>`;
+
+  // Wish
+  const wLbl = wBtn ? 'v plánu' : 'do plánu?';
+  const wishFooterHtml = isLoggedIn()
+    ? `<div class="rt-tip-wish-wrap" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
+        <span class="rt-tip-wish-lbl${wBtn?' active':''}">${wLbl}</span>
+        <button class="rt-tip-wish-btn${wBtn?' wished':''}" id="rtWishBtn_${loc.id}">
+          <svg viewBox="0 0 24 24" fill="${wBtn?'currentColor':'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+      </div>`
+    : `<div class="rt-tip-wish-wrap" onclick="event.stopPropagation();window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href);">
+        <span class="rt-tip-wish-lbl">do plánu?</span>
+        <button class="rt-tip-wish-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+      </div>`;
+
+  // Foto
+  const catLetter = {hist:'H', arch:'A', fun:'Z'}[loc.cat] || 'H';
+  const imgHtml = loc.photoThumb
+    ? `<img src="${loc.photoThumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+    : '';
+
   rt.innerHTML = `
-    <div class="rt-tip-img" id="rtTipImg" style="background: linear-gradient(135deg, ${c.color}aa, ${c.color}); position:relative; overflow:hidden;">
-      <div style="position:absolute;top:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;">№ ${loc.num}</div>
+    <div class="rt-tip-img" data-cat="${loc.cat}">
+      ${imgHtml}
+      <div class="rt-tip-fallback">${catLetter}</div>
+      <div class="rt-tip-cat-line" style="background:${c.color}"></div>
+      <div class="rt-tip-pill"><span class="dot" style="background:${c.color}"></span>${c.name}</div>
     </div>
     <div class="rt-tip-body">
-      <div class="rt-tip-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">
-        <span>${loc.name}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);white-space:nowrap;flex-shrink:0;">${distLabel}</span>
-      </div>
-      <div class="rt-tip-actions">
-        <a href="place/${loc.id}.html" class="rt-tip-btn primary" title="Detail místa" onclick="event.stopPropagation()">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Detail
-        </a>
-        <a href="${compassUrl}" class="rt-tip-btn" title="Navigovat na místo" onclick="event.stopPropagation()">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-          Kompas
-        </a>
-        ${wishHtml}
-      </div>
+      <div class="rt-tip-name">${loc.name}</div>
+      <div class="rt-tip-lede">${loc.lede||''}</div>
+    </div>
+    <a href="place/${loc.id}.html" class="rt-tip-detail" onclick="event.stopPropagation()">Otevřít detail →</a>
+    <div class="rt-tip-footer">
+      ${distHtml}
+      ${votesHtml}
+      ${wishFooterHtml}
     </div>`;
   const rect = m.getElement().getBoundingClientRect();
-  const tipW = 220;
+  const tipW = 230;
   const margin = 8;
   // Nejdřív zobraz mimo viewport aby šlo změřit výšku
   rt.style.left = '-9999px'; rt.style.top = '-9999px';
@@ -3071,13 +3170,21 @@ function initMap() {
 }
 
 /* ═══════════════ TOOLTIP WISHLIST TOGGLE ═══════════════ */
-function rtToggleWish(id, btn) {
+function rtToggleWish(id, el) {
   if (!isLoggedIn()) { showLoginSnackbar(); return; }
   const now = toggleWish(id);
-  btn.classList.toggle('active', now);
-  btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
-  btn.querySelector('svg').setAttribute('stroke', now ? 'white' : '#b04020');
-  btn.innerHTML = btn.innerHTML.replace(/V plánu|Plán/, now ? 'V plánu' : 'Do plánu');
+  const wrap = el.closest ? el.closest('.rt-tip-wish-wrap') : el;
+  const btn  = wrap ? wrap.querySelector('.rt-tip-wish-btn') : null;
+  const lbl  = wrap ? wrap.querySelector('.rt-tip-wish-lbl') : null;
+  if (btn) {
+    btn.classList.toggle('wished', now);
+    const svg = btn.querySelector('svg');
+    if (svg) svg.setAttribute('fill', now ? 'currentColor' : 'none');
+  }
+  if (lbl) {
+    lbl.textContent = now ? 'v plánu' : 'do plánu?';
+    lbl.classList.toggle('active', now);
+  }
   rebuildMarkers();
   updateWishBadge();
 }
