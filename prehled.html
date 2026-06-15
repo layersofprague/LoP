@@ -272,8 +272,19 @@ a { color: inherit; text-decoration: none; }
   width: 52px; flex-shrink: 0; flex-grow: 0;
 }
 .place-dist { font-size: 10px; color: var(--ink-5); font-family: 'Inter', sans-serif; text-align: center; white-space: nowrap; }
+.place-dist-link {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  text-decoration: none; color: var(--ink-5);
+  transition: color .15s;
+}
+.place-dist-link:hover { color: var(--ink-3); }
+.place-dist-link.place-dist-grid { flex-direction: row; gap: 4px; }
+.place-dist-icon svg { width: 12px; height: 12px; display: block; }
 .place-dist-hint { font-size: 9px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; text-align: center; }
 .place-dist-hint:hover { color: var(--ink-4); }
+
+/* meta-dist-grid: skrytý v listu, viditelný v gridu */
+.meta-dist-grid { display: none; }
 
 /* list: meta-wish-list viditelný, meta-right a meta-wish-grid skryté */
 .meta-wish-list { display: flex; }
@@ -385,8 +396,11 @@ a { color: inherit; text-decoration: none; }
   padding: 4px 10px;
   width: unset; height: auto;
 }
-#placesList.grid-mode .place-dist,
-#placesList.grid-mode .place-dist-hint { flex-shrink: 0; }
+/* v gridu: skrýt list dist, ukázat grid dist */
+#placesList.grid-mode .place-meta > .place-dist-link,
+#placesList.grid-mode .place-meta > .place-dist-hint,
+#placesList.grid-mode .place-meta > .place-dist { display: none; }
+#placesList.grid-mode .meta-dist-grid { display: flex; flex-shrink: 0; }
 /* votes absolutně na střed spodní lišty */
 #placesList.grid-mode .place-meta-right {
   display: flex; align-items: center;
@@ -395,7 +409,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: auto;
 }
 #placesList.grid-mode .place-meta-right .place-wish-wrap { display: none; }
-/* wish-wrap jako přímý potomek meta zůstane vpravo (meta-wish-list skrytý → nový wish přímo) */
 #placesList.grid-mode .meta-wish-list { display: none; }
 #placesList.grid-mode .meta-wish-grid { display: flex; flex-shrink: 0; }
 
@@ -891,9 +904,27 @@ function cardHTML(p, visited, wished) {
     ? `<div class="place-stamp-body">${makeStampSVG(p, arScore)}</div>`
     : '';
 
-  // Vzdálenost
-  const distHtml = dist
-    ? `<div class="place-dist">${dist}</div>`
+  // Vzdálenost + odkaz na kompas
+  const compassUrl = p.lat && p.lng
+    ? `compass.html?id=${p.id}&lat=${p.lat}&lng=${p.lng}&name=${encodeURIComponent(p.name)}${p.thumb?'&thumb='+encodeURIComponent(p.thumb):''}${p.arRadius?'&radius='+p.arRadius:''}`
+    : null;
+
+  const compassIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`;
+
+  // Seznam: ikona nad číslem (flex-column)
+  const distListHtml = dist
+    ? `<a class="place-dist place-dist-link" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="Navigovat na místo">
+        <span class="place-dist-icon list">${compassIcon}</span>
+        <span>${dist}</span>
+       </a>`
+    : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit</span>`;
+
+  // Dlaždice: ikona před číslem (flex-row)
+  const distGridHtml = dist
+    ? `<a class="place-dist place-dist-link place-dist-grid" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="Navigovat na místo">
+        <span class="place-dist-icon grid">${compassIcon}</span>
+        <span>${dist}</span>
+       </a>`
     : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit</span>`;
 
   // Like/dislike — čisté šipky, s počty (TODO: Supabase)
@@ -950,10 +981,11 @@ function cardHTML(p, visited, wished) {
       ${stampHtml}
     </div>
     <div class="place-meta">
-      ${distHtml}
+      ${distListHtml}
       <span class="meta-wish-list">${wishBtn}</span>
       <div class="place-meta-right">${votesHtml}${wishBtn}</div>
       <span class="meta-wish-grid">${wishBtn}</span>
+      <span class="meta-dist-grid">${distGridHtml}</span>
     </div>
   </div>`;
 }
