@@ -867,36 +867,26 @@ a { color: inherit; text-decoration: none; }
 }
 .rt-tip-vote-btn:hover { color: var(--ink-2); }
 .rt-tip-vote-btn svg { width: 14px; height: 14px; pointer-events: none; }
-/* wish vpravo */
+/* wish vpravo — přesně jako grid */
 .rt-tip-wish-wrap {
-  display: flex; flex-direction: row; align-items: center; gap: 3px;
+  display: flex; flex-direction: row; align-items: center; gap: 4px;
   cursor: pointer; flex-shrink: 0;
 }
 .rt-tip-wish-lbl {
   font-size: 9px; font-family: 'Inter', sans-serif;
   color: var(--ink-5); white-space: nowrap; pointer-events: none;
-  width: 40px; text-align: right;
+  width: 44px; text-align: right;
 }
 .rt-tip-wish-lbl.active { color: var(--accent); }
 .rt-tip-wish-btn {
   appearance: none; background: transparent; border: none;
   display: flex; align-items: center; justify-content: center;
   padding: 2px; cursor: pointer; color: var(--ink-5);
-  transition: color .15s;
+  transition: color .15s; flex-shrink: 0;
 }
 .rt-tip-wish-btn:hover { color: var(--ink-3); }
 .rt-tip-wish-btn.wished { color: var(--accent); }
-.rt-tip-wish-btn svg { width: 15px; height: 15px; pointer-events: none; }
-/* detail tlačítko */
-.rt-tip-detail {
-  display: block; width: calc(100% - 20px); margin: 0 10px 8px;
-  padding: 7px; border-radius: 7px;
-  background: var(--ink); color: #fff;
-  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
-  text-align: center; text-decoration: none; letter-spacing: .01em;
-  transition: background .12s;
-}
-.rt-tip-detail:hover { background: var(--ink-2); }
+.rt-tip-wish-btn svg { width: 16px; height: 16px; pointer-events: none; }
 
 /* ═══════════════ SHEET ═══════════════ */
 .sheet {
@@ -2271,7 +2261,7 @@ function applyTweaks() {
     r.style.setProperty('--ink-3', '#6b6558');
     r.style.setProperty('--ink-4', '#9b9484');
   }
-  document.querySelectorAll('.serif, .brand-mark, .sheet-title, .routes-title, .rc-title, .wl-body h4, .sheet-lede, .fact-v:not(.mono), .step-num, .step-body h4, .tip-text, .sheet-ar-cta .arc-title, .ar-place-name, .pc-title, .pc-num, .wl-num, .rc-num, .rt-tip-title, .map-hint-title, .mh-letter').forEach(el => {
+  document.querySelectorAll('.serif, .brand-mark, .sheet-title, .routes-title, .rc-title, .wl-body h4, .sheet-lede, .fact-v:not(.mono), .step-num, .step-body h4, .tip-text, .sheet-ar-cta .arc-title, .ar-place-name, .pc-title, .pc-num, .wl-num, .rc-num, .map-hint-title, .mh-letter').forEach(el => {
     el.style.fontFamily = TWEAKS.displayFont;
   });
 }
@@ -2604,17 +2594,16 @@ function showTooltip(loc, m, rt) {
     : '';
 
   rt.innerHTML = `
-    <div class="rt-tip-img" data-cat="${loc.cat}">
+    <a href="place/${loc.id}.html" class="rt-tip-img" data-cat="${loc.cat}" onclick="event.stopPropagation()">
       ${imgHtml}
       <div class="rt-tip-fallback">${catLetter}</div>
       <div class="rt-tip-cat-line" style="background:${c.color}"></div>
       <div class="rt-tip-pill"><span class="dot" style="background:${c.color}"></span>${c.name}</div>
-    </div>
-    <div class="rt-tip-body">
+    </a>
+    <a href="place/${loc.id}.html" class="rt-tip-body" onclick="event.stopPropagation()" style="display:block;text-decoration:none;">
       <div class="rt-tip-name">${loc.name}</div>
       <div class="rt-tip-lede">${loc.lede||''}</div>
-    </div>
-    <a href="place/${loc.id}.html" class="rt-tip-detail" onclick="event.stopPropagation()">Otevřít detail →</a>
+    </a>
     <div class="rt-tip-footer">
       ${distHtml}
       ${votesHtml}
