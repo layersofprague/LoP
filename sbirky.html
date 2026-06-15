@@ -355,10 +355,10 @@ const CAT_BADGE = { hist: 'Historik', arch: 'Stavitel', art: 'Galerista', fun: '
 const CAT_PREFIX = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
 
 const CAT_TIP = {
-  hist: { progress: 'Ještě {x} razítek a bude z tebe Archeolog a Historik.', complete: 'Blahopřejeme! Všechna razítka sbírky HISTORIE jsou tvá! Nyní Ti právem náleží titul Archeolog a Historik.' },
-  arch: { progress: 'Ještě {x} razítek a bude z tebe Stavitel a Architekt.', complete: 'Blahopřejeme! Všechna razítka sbírky ARCHITEKTURA jsou tvá! Nyní Ti právem náleží titul Stavitel a Architekt.' },
-  art: { progress: 'Ještě {x} razítek a bude z tebe Umělec a Galerista.', complete: 'Blahopřejeme! Všechna razítka sbírky UMĚNÍ jsou tvá! Nyní Ti právem náleží titul Umělec a Galerista.' },
-  fun: { progress: 'Ještě {x} razítek a bude z tebe Zvědavec a Objevitel.', complete: 'Blahopřejeme! Všechna razítka sbírky ZAJÍMAVOSTI jsou tvá! Nyní Ti právem náleží titul Zvědavec a Objevitel.' },
+  hist: { title: 'Archeolog a Historik', progress: 'Ještě {x} razítek a bude z tebe Archeolog a Historik.', complete: 'Blahopřejeme! Všechna razítka sbírky HISTORIE jsou tvá! Nyní Ti právem náleží titul Archeolog a Historik.' },
+  arch: { title: 'Stavitel a Architekt', progress: 'Ještě {x} razítek a bude z tebe Stavitel a Architekt.', complete: 'Blahopřejeme! Všechna razítka sbírky ARCHITEKTURA jsou tvá! Nyní Ti právem náleží titul Stavitel a Architekt.' },
+  art:  { title: 'Umělec a Galerista',  progress: 'Ještě {x} razítek a bude z tebe Umělec a Galerista.',  complete: 'Blahopřejeme! Všechna razítka sbírky UMĚNÍ jsou tvá! Nyní Ti právem náleží titul Umělec a Galerista.' },
+  fun:  { title: 'Zvědavec a Objevitel', progress: 'Ještě {x} razítek a bude z tebe Zvědavec a Objevitel.', complete: 'Blahopřejeme! Všechna razítka sbírky ZAJÍMAVOSTI jsou tvá! Nyní Ti právem náleží titul Zvědavec a Objevitel.' },
 };
 
 const DISTRICT_DATA = {
@@ -645,16 +645,26 @@ function renderSection(sec, idx) {
         if (empties.length > 0) {
           const x = '<b>' + empties.length + ' ' + plural(empties.length) + '</b>';
           const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
-          const txt = isDistrict
-            ? 'Ještě ' + x + ' razítek a bude z tebe ' + title + '.'
-            : CAT_TIP[sec.cat].progress.replace('{x}', x);
+          let txt;
+          if (isDistrict) {
+            txt = 'Ještě ' + x + ' razítek a bude z tebe ' + title + '.';
+          } else {
+            const t = CAT_TIP[sec.cat];
+            txt = t.progress
+              .replace('{x}', x)
+              .replace(t.title || sec.badge, '<b>' + (t.title || sec.badge) + '</b>');
+          }
           return '<div class="badge-tip">' + iIcon + '<div>' + txt + '</div></div>';
         } else {
           const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
           const descHtml = (tipData && tipData.desc) ? '<br><i style="color:var(--ink-4);font-size:10.5px;">' + tipData.desc + '</i>' : '';
-          const txt = isDistrict
-            ? 'Titul ' + title + ' je tvůj!' + descHtml
-            : CAT_TIP[sec.cat].complete.replace(tipData ? tipData.title : '', '<b>' + (tipData ? tipData.title : '') + '</b>');
+          let txt;
+          if (isDistrict) {
+            txt = 'Titul ' + title + ' je tvůj!' + descHtml;
+          } else {
+            const t = CAT_TIP[sec.cat];
+            txt = t.complete.replace(t.title || sec.badge, '<b>' + (t.title || sec.badge) + '</b>');
+          }
           return '<div class="badge-tip">' + okIcon + '<div>' + txt + '</div></div>';
         }
       })()} 
