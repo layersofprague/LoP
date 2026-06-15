@@ -85,24 +85,24 @@ a { color: inherit; text-decoration: none; }
 .hero-meta tr:first-child td:first-child {
   text-align: right;
   font-family: 'Inter', sans-serif;
-  font-size: 22px; font-weight: 700;
+  font-size: 16px; font-weight: 700;
   color: var(--ink);
   white-space: nowrap;
 }
 .hero-meta tr:first-child td:first-child .hero-total {
-  font-size: 14px; font-weight: 700;
+  font-size: 11px; font-weight: 700;
   font-family: 'Inter', sans-serif;
   color: var(--ink);
 }
 .hero-meta tr:first-child td:first-child .hero-slash {
-  font-size: 14px; font-weight: 700;
+  font-size: 11px; font-weight: 700;
   font-family: 'Inter', sans-serif;
   color: var(--ink);
 }
 .hero-meta tr:first-child td:last-child {
   text-align: left;
   font-family: 'Inter', sans-serif;
-  font-size: 14px; font-weight: 300;
+  font-size: 11px; font-weight: 300;
   font-style: italic;
   letter-spacing: 0;
   color: var(--ink);
@@ -113,14 +113,14 @@ a { color: inherit; text-decoration: none; }
 .hero-meta tr:last-child td:first-child {
   text-align: right;
   font-family: 'Inter', sans-serif;
-  font-size: 16px; font-weight: 400;
+  font-size: 12px; font-weight: 400;
   color: var(--ink-4);
   white-space: nowrap;
 }
 .hero-meta tr:last-child td:last-child {
   text-align: left;
   font-family: 'Inter', sans-serif;
-  font-size: 14px; font-weight: 300;
+  font-size: 11px; font-weight: 300;
   font-style: italic;
   letter-spacing: 0;
   color: var(--ink-4);
@@ -355,10 +355,10 @@ const CAT_BADGE = { hist: 'Historik', arch: 'Stavitel', art: 'Galerista', fun: '
 const CAT_PREFIX = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
 
 const CAT_TIP = {
-  hist: { title: 'Archeolog a Historik', progress: 'Ještě {x} razítek a bude z tebe Archeolog a Historik.', complete: 'Blahopřejeme! Všechna razítka sbírky HISTORIE jsou tvá! Nyní Ti právem náleží titul Archeolog a Historik.' },
-  arch: { title: 'Stavitel a Architekt', progress: 'Ještě {x} razítek a bude z tebe Stavitel a Architekt.', complete: 'Blahopřejeme! Všechna razítka sbírky ARCHITEKTURA jsou tvá! Nyní Ti právem náleží titul Stavitel a Architekt.' },
-  art:  { title: 'Umělec a Galerista',  progress: 'Ještě {x} razítek a bude z tebe Umělec a Galerista.',  complete: 'Blahopřejeme! Všechna razítka sbírky UMĚNÍ jsou tvá! Nyní Ti právem náleží titul Umělec a Galerista.' },
-  fun:  { title: 'Zvědavec a Objevitel', progress: 'Ještě {x} razítek a bude z tebe Zvědavec a Objevitel.', complete: 'Blahopřejeme! Všechna razítka sbírky ZAJÍMAVOSTI jsou tvá! Nyní Ti právem náleží titul Zvědavec a Objevitel.' },
+  hist: { title: 'Archeolog a Historik', progress: 'Ještě {x} a bude z tebe Archeolog a Historik.', complete: 'Blahopřejeme! Všechna razítka sbírky HISTORIE jsou tvá! Nyní Ti právem náleží titul Archeolog a Historik.' },
+  arch: { title: 'Stavitel a Architekt', progress: 'Ještě {x} a bude z tebe Stavitel a Architekt.', complete: 'Blahopřejeme! Všechna razítka sbírky ARCHITEKTURA jsou tvá! Nyní Ti právem náleží titul Stavitel a Architekt.' },
+  art:  { title: 'Umělec a Galerista',  progress: 'Ještě {x} a bude z tebe Umělec a Galerista.',  complete: 'Blahopřejeme! Všechna razítka sbírky UMĚNÍ jsou tvá! Nyní Ti právem náleží titul Umělec a Galerista.' },
+  fun:  { title: 'Zvědavec a Objevitel', progress: 'Ještě {x} a bude z tebe Zvědavec a Objevitel.', complete: 'Blahopřejeme! Všechna razítka sbírky ZAJÍMAVOSTI jsou tvá! Nyní Ti právem náleží titul Zvědavec a Objevitel.' },
 };
 
 const DISTRICT_DATA = {
@@ -647,7 +647,7 @@ function renderSection(sec, idx) {
           const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
           let txt;
           if (isDistrict) {
-            txt = 'Ještě ' + x + ' razítek a bude z tebe ' + title + '.';
+            txt = 'Ještě ' + x + ' a bude z tebe ' + title + '.';
           } else {
             const t = CAT_TIP[sec.cat];
             txt = t.progress
@@ -742,7 +742,7 @@ function renderAll() {
 
   ${!isLoggedIn() ? `<div class="auth-cta">
     <div class="auth-cta-title">Sleduj svůj postup</div>
-    <p class="auth-cta-sub">Přihlas se a tvá razítka se uloží do sbírky. AR záběr místa zanechá otisk — čím přesnější záběr, tím ostřejší razítko.</p>
+    <p class="auth-cta-sub">Přihlas se a razítka se ti budou ukládat do sbírky.</p>
     <button class="auth-cta-btn" onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html'">Přihlásit se</button>
   </div>` : ''}`;
 
