@@ -425,9 +425,8 @@ a { color: inherit; text-decoration: none; }
     padding: 8px 0 14px !important; padding-top: var(--header-h, 52px) !important;
     justify-content: flex-start !important; gap: 0 !important;
   }
-  /* pravý padding = nav (64px) + stejný okraj jako vlevo (10px) */
-  .page { padding-left: 10px !important; padding-right: 74px !important; }
 }
+/* nav.js nastavuje body.style.paddingRight inline — přepíšeme přes JS níže */
 </style>
 </head>
 <body>
@@ -509,6 +508,29 @@ a { color: inherit; text-decoration: none; }
 
 <div id="lop-nav"></div>
 <script src="nav.js?v=2"></script>
+<script>
+// nav.js nastavuje body.style.paddingRight inline — v landscape na mobilu
+// chceme stejný okraj vpravo jako vlevo (10px od .page), ne nav šířku na body
+(function fixLandscapePadding() {
+  function apply() {
+    const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
+    if (isLandscapeMobile) {
+      document.body.style.paddingRight = '0';
+      document.body.style.paddingBottom = '';
+      const page = document.querySelector('.page');
+      if (page) { page.style.paddingRight = '74px'; page.style.paddingLeft = '10px'; }
+    } else if (window.innerWidth < 820) {
+      // portrait — nav je dole, body padding-bottom nastavuje nav.js, page okraje reset
+      const page = document.querySelector('.page');
+      if (page) { page.style.paddingRight = ''; page.style.paddingLeft = ''; }
+    }
+  }
+  // Spustit po nav.js (který běží v rAF)
+  requestAnimationFrame(() => requestAnimationFrame(apply));
+  window.addEventListener('resize', apply);
+  window.addEventListener('orientationchange', () => setTimeout(apply, 100));
+})();
+</script>
 
 <script>
 (function() {
@@ -864,9 +886,9 @@ function cardHTML(p, visited, wished) {
   const votedUp   = p._votedUp   || false;
   const votedDown = p._votedDown || false;
 
-  // Vote ikony — tučnější chevron, vizuálně sjednoceno s UI
-  const arrowUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
-  const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`;
+  // Vote ikony — thumbs up/down, stejná tloušťka a barva linky jako srdce (stroke-width 1.5, var(--ink-5))
+  const arrowUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+  const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
 
   const votesHtml = `<div class="place-votes">
     <button class="place-vote-btn up${votedUp?' voted':''}" onclick="votePlace(event,'${p.id}','up')" title="Líbí se">
