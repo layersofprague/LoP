@@ -147,7 +147,7 @@ a { color: inherit; text-decoration: none; }
 .flat-section-btn {
   width: 100%;
   background: transparent; border: none; cursor: pointer;
-  padding: 13px 15px 8px; font-family: inherit; text-align: left;
+  padding: 8px 15px 6px; font-family: inherit; text-align: left;
   display: block;
 }
 .flat-section-header {
@@ -184,8 +184,8 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   column-gap: 10px;
-  row-gap: 32px;
-  margin-top: 14px;
+  row-gap: 24px;
+  margin-top: 8px;
 }
 @media (min-width: 480px) {
   .stamps-grid { grid-template-columns: repeat(4, 1fr); }
@@ -207,7 +207,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── ODZNAK TIP ── */
 .badge-tip {
-  margin-top: 20px;
+  margin-top: 12px;
   padding: 4px 10px;
   background: var(--paper-2);
   border: 1px solid var(--rule);
@@ -234,7 +234,7 @@ a { color: inherit; text-decoration: none; }
 .flat-section-body.open {
   max-height: 2400px;
   opacity: 1;
-  padding: 0 15px 20px;
+  padding: 0 15px 14px;
   background: #fff;
 }
 
@@ -349,10 +349,41 @@ const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 // VISIT_KEY a WISH_KEY — data jdou přímo ze Supabase (_dbVisited, _dbWished)
 
-const CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
-const CAT_NAME  = { hist: 'Historie', arch: 'Architektura', fun: 'Zajímavosti' };
-const CAT_BADGE = { hist: 'Historik', arch: 'Stavitel', fun: 'Objevitel' };
-const CAT_PREFIX = { hist: 'H', arch: 'A', fun: 'Z' };
+const CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
+const CAT_NAME  = { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
+const CAT_BADGE = { hist: 'Historik', arch: 'Stavitel', art: 'Galerista', fun: 'Objevitel' };
+const CAT_PREFIX = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
+
+const CAT_TIP = {
+  hist: { progress: 'Ještě {x} razítek a bude z tebe Archeolog a Historik.', complete: 'Blahopřejeme! Všechna razítka sbírky HISTORIE jsou tvá! Nyní Ti právem náleží titul Archeolog a Historik.' },
+  arch: { progress: 'Ještě {x} razítek a bude z tebe Stavitel a Architekt.', complete: 'Blahopřejeme! Všechna razítka sbírky ARCHITEKTURA jsou tvá! Nyní Ti právem náleží titul Stavitel a Architekt.' },
+  art: { progress: 'Ještě {x} razítek a bude z tebe Umělec a Galerista.', complete: 'Blahopřejeme! Všechna razítka sbírky UMĚNÍ jsou tvá! Nyní Ti právem náleží titul Umělec a Galerista.' },
+  fun: { progress: 'Ještě {x} razítek a bude z tebe Zvědavec a Objevitel.', complete: 'Blahopřejeme! Všechna razítka sbírky ZAJÍMAVOSTI jsou tvá! Nyní Ti právem náleží titul Zvědavec a Objevitel.' },
+};
+
+const DISTRICT_DATA = {
+  'Staré Město': { title: 'Měšťáci / Hausknechti', desc: 'Bohatí obchodníci doplnění o rázovité rváče a kočí z přístavních krčem.' },
+  'Nové Město': { title: 'Rachunbáři / Františkáni', desc: 'Chudší dělníci, kteří pili v hospodách na dluh („rachunk\"), a mniši z místních klášterů.' },
+  'Malá Strana': { title: 'Malostranští Špunti / Lokajové', desc: 'Klukovské party bojující na zamrzlé Vltavě a služebnictvo z tamních šlechtických paláců.' },
+  'Hradčany': { title: 'Kasteláni / Kapucíni', desc: 'Chudina a řemeslníci navázaní na Pražský hrad a klášterní život v okolí Lorety.' },
+  'Josefov': { title: 'Meiselovci', desc: 'Obyvatelé židovského ghetta pojmenovaní po svém nejslavnějším historickém starostovi Mordechaji Maiselovi.' },
+  'Žižkov': { title: 'Žižkovští Pepíci', desc: 'Slavní pouliční frajeři, dělníci a bohemi s typickým stylem oblékání a vlastním slangem.' },
+  'Smíchov': { title: 'Smíchovští Barabové', desc: 'Drsní, hluční a tvrdě pracující dělníci z místních obřích továren a pivovaru.' },
+  'Holešovice': { title: 'Holešovičtí Šupáci', desc: 'Přístavní dělníci, kteří „šupovali\" (posouvali a vykládali) sudy a bedny z lodí.' },
+  'Karlín': { title: 'Karlínští kluci', desc: 'Drsnější dělnické party z první pravé průmyslové čtvrti Prahy.' },
+  'Košíře': { title: 'Košířští rváči', desc: 'Divoké party z tehdejší periferie, které neustále bojovaly se sousedním Smíchovem.' },
+  'Podskalí': { title: 'Podskaláci / Plavci', desc: 'Hrdá a uzavřená komunita vorařů, ledařů a rybářů z oblasti dnešní Výtoně.' },
+  'Kampa': { title: 'Kampané', desc: 'Polovenkovská, izolovaná komunita pradlen, mlynářů a rybářů z vltavského ostrova.' },
+  'Braník': { title: 'Branští ledaři', desc: 'Dělníci, kteří v zimě sekali na zamrzlé Vltavě led a sváželi ho do branických ledáren.' },
+  'Podolí': { title: 'Podolští cementárníci', desc: 'Jádro tamní říční komunity tvořené dělníky z bývalé slavné podolské cementárny.' },
+  'Nusle': { title: 'Nuselští Kafemlejnci', desc: 'Chudší pavlačové obyvatelstvo; sousedky neustále „melely pantem\" a ráno mlely meltu.' },
+  'Libeň': { title: 'Libeňští Balonáři', desc: 'Podle kluků, kteří fascinovaně sledovali vypouštění prvních pražských balonů v Libeni.' },
+  'Vyšehrad': { title: 'Vyšehradští Kanovníci / Peckáři', desc: 'Kněží z kapituly a pěstitelé třešní a švestek, které prodávali po celé Praze.' },
+  'Vršovice': { title: 'Vršovičtí Koloběžkáři', desc: 'Narážka na venkovské předměstí bez pořádné dopravy, kde lidé museli neustále popojíždět.' },
+  'Vinohrady': { title: 'Vinohradští paňácové', desc: 'Posměšný název od žižkovských sousedů pro tamní bohatší a elegantní měšťany.' },
+  'Břevnov': { title: 'Břevnovští zelináři / Benediktini', desc: 'Podle zahrad a sadů, které historicky patřily místnímu Břevnovskému klášteru.' },
+  'Troja': { title: 'Trojští vinaři', desc: 'Obyvatelé svahů nad Vltavou, kteří po staletí udržovali tradici pěstování vinné révy.' },
+};
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
@@ -512,7 +543,7 @@ function buildSectionData(places, visited, scores) {
       name: district,
       color: '#b04020',
       cat: 'hist',
-      badge: 'Kurátor ' + district,
+      badge: (DISTRICT_DATA[district] ? DISTRICT_DATA[district].title : 'Kurátor ' + district),
       items: items,
     });
   });
@@ -605,13 +636,22 @@ function renderSection(sec, idx) {
     <div class="flat-section-body${isOpen ? ' open' : ''}" id="secbody-${idx}">
       <div class="stamps-grid">${gridHTML}</div>
       <div style="height:10px"></div>
-      ${empties.length > 0 ? `<div class="badge-tip">
-        <div class="badge-tip-icon">${badgeInitial}</div>
-        <div>Zbývá <b>${empties.length} ${plural(empties.length)}</b> k odznaku <i style="font-family:'Inter',sans-serif;">${sec.badge}</i>.</div>
-      </div>` : `<div class="badge-tip">
-        <div class="badge-tip-icon" style="background:var(--ok);color:var(--paper);border-color:var(--ok)">✓</div>
-        <div>Odznak <i style="font-family:'Inter',sans-serif;">${sec.badge}</i> získán! Všechna razítka sbírky jsou tvá.</div>
-      </div>`}
+      ${(function(){
+        const tipData = isDistrict ? DISTRICT_DATA[sec.name] : (CAT_TIP[sec.cat] || null);
+        if (!tipData && !isDistrict) return '';
+        if (empties.length > 0) {
+          const x = empties.length + ' ' + plural(empties.length);
+          const txt = isDistrict
+            ? 'Ještě ' + x + ' a bude z tebe <b>' + (tipData ? tipData.title : sec.badge) + '</b>.'
+            : CAT_TIP[sec.cat].progress.replace('{x}', x);
+          return '<div class="badge-tip"><div class="badge-tip-icon">' + badgeInitial + '</div><div>' + txt + '</div></div>';
+        } else {
+          const txt = isDistrict
+            ? 'Titul <b>' + (tipData ? tipData.title : sec.badge) + '</b> je tvůj! ' + (tipData ? tipData.desc : '')
+            : CAT_TIP[sec.cat].complete;
+          return '<div class="badge-tip"><div class="badge-tip-icon" style="background:var(--ok);color:#fff;border-color:var(--ok)">✓</div><div>' + txt + '</div></div>';
+        }
+      })()} 
     </div>
   </div>`;
 }
