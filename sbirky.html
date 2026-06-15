@@ -744,7 +744,9 @@ function renderAll() {
     <div class="auth-cta-title">Sleduj svůj postup</div>
     <p class="auth-cta-sub">Přihlas se a razítka se ti budou ukládat do sbírky.</p>
     <button class="auth-cta-btn" onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html'">Přihlásit se</button>
-  </div>` : ''}`;
+  </div>` : `<div class="auth-cta" style="text-align:center;padding:18px 20px;">
+    <p style="font-size:14px;color:var(--ink-4);line-height:1.5;">Není důležité vyhrát, ale <b style="font-size:17px;color:var(--ink);font-weight:700;">pobavit se!</b></p>
+  </div>`}`;
 
   const page = document.getElementById('page');
   page.innerHTML = html;
