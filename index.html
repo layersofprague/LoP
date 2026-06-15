@@ -2567,8 +2567,8 @@ function showTooltip(loc, m, rt) {
   const thumbDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
   const vUp = Math.floor(Math.random()*40+2), vDown = Math.floor(Math.random()*8);
   const votesHtml = `<div class="rt-tip-votes">
-    <button class="rt-tip-vote-btn" onclick="event.stopPropagation()" title="Líbí se">${thumbUp} ${vUp}</button>
-    <button class="rt-tip-vote-btn" onclick="event.stopPropagation()" title="Nelíbí se">${thumbDown} ${vDown}</button>
+    <button class="rt-tip-vote-btn" onclick="event.stopPropagation()" title="Líbí se">${thumbUp}<span>${vUp}</span></button>
+    <button class="rt-tip-vote-btn" onclick="event.stopPropagation()" title="Nelíbí se">${thumbDown}<span>${vDown}</span></button>
   </div>`;
 
   // Wish
@@ -2594,15 +2594,17 @@ function showTooltip(loc, m, rt) {
     : '';
 
   rt.innerHTML = `
-    <a href="place/${loc.id}.html" class="rt-tip-img" data-cat="${loc.cat}" onclick="event.stopPropagation()">
+    <a href="place/${loc.id}.html" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${loc.cat==='arch'?'#EEF2F7':loc.cat==='fun'?'#F5F2E8':'#EFEFED'};" onclick="event.stopPropagation()">
       ${imgHtml}
       <div class="rt-tip-fallback">${catLetter}</div>
-      <div class="rt-tip-cat-line" style="background:${c.color}"></div>
-      <div class="rt-tip-pill"><span class="dot" style="background:${c.color}"></span>${c.name}</div>
+      <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${c.color};z-index:2;"></div>
+      <div style="position:absolute;top:8px;left:8px;z-index:3;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 9px 4px 7px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-5);">
+        <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
+      </div>
     </a>
-    <a href="place/${loc.id}.html" class="rt-tip-body" onclick="event.stopPropagation()" style="display:block;text-decoration:none;">
-      <div class="rt-tip-name">${loc.name}</div>
-      <div class="rt-tip-lede">${loc.lede||''}</div>
+    <a href="place/${loc.id}.html" onclick="event.stopPropagation()" style="display:block;text-decoration:none;padding:8px 12px 9px;border-top:1px solid var(--paper-2);">
+      <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${loc.name}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${loc.lede||''}</div>
     </a>
     <div class="rt-tip-footer">
       ${distHtml}
