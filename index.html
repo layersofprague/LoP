@@ -815,22 +815,23 @@ a { color: inherit; text-decoration: none; }
 }
 .rt-tip-pill .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 .rt-tip-cat-line { position: absolute; top: 0; left: 0; bottom: 0; width: 3px; z-index: 2; }
-.rt-tip-body { padding: 6px 10px 7px; border-top: 1px solid var(--paper-2); }
+.rt-tip-body { padding: 5px 10px 6px; border-top: 1px solid var(--paper-2); }
 .rt-tip-name {
   font-family: 'Inter', sans-serif;
   font-size: 14px; font-weight: 600; line-height: 1.2;
   color: var(--ink); letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 .rt-tip-lede {
   font-family: 'Inter', sans-serif;
   font-size: 11px; color: var(--ink-4); line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  margin-top: 0;
 }
 .rt-tip-footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 4px 10px 5px; border-top: 1px solid var(--paper-2); position: relative;
+  padding: 3px 10px 4px; border-top: 1px solid var(--paper-2); position: relative;
 }
 .rt-tip-dist {
   display: flex; flex-direction: row; align-items: center; gap: 4px;
@@ -1194,7 +1195,7 @@ a { color: inherit; text-decoration: none; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--ink-4);
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 .fact-v {
   font-family: 'Fraunces', serif;
@@ -1350,7 +1351,7 @@ a { color: inherit; text-decoration: none; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--ink-3);
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 .rc-title {
   font-family: 'Fraunces', serif;
@@ -1417,7 +1418,7 @@ a { color: inherit; text-decoration: none; }
 .wl-body h4 {
   font-family: 'Fraunces', serif;
   font-size: 17px; font-weight: 500; line-height: 1.2;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 .wl-body .wl-meta {
   font-family: 'JetBrains Mono', monospace;
@@ -2594,7 +2595,7 @@ function showTooltip(loc, m, rt) {
         <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
       </div>
     </a>
-    <a href="place/${loc.id}.html" onclick="event.stopPropagation()" style="display:block;text-decoration:none;padding:8px 12px 9px;border-top:1px solid var(--paper-2);">
+    <a href="place/${loc.id}.html" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${loc.name}</div>
       <div style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${loc.lede||''}</div>
     </a>
