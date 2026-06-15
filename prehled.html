@@ -280,41 +280,68 @@ a { color: inherit; text-decoration: none; }
 .place-meta > .place-wish-btn { display: flex; }
 
 /* like/dislike */
-.place-votes { display: flex; align-items: center; gap: 2px; }
+.place-votes { display: flex; align-items: center; gap: 4px; }
 .place-vote-btn {
   appearance: none; background: transparent; border: none;
-  display: flex; align-items: center;
-  padding: 3px; border-radius: 4px; cursor: pointer;
-  color: var(--ink-4); transition: color .15s, background .15s;
+  display: flex; align-items: center; gap: 3px;
+  padding: 2px 5px; border-radius: 5px; cursor: pointer;
+  color: var(--ink-5); transition: color .15s, background .15s;
   flex-shrink: 0;
 }
-.place-vote-btn:hover { background: var(--paper-2); color: var(--ink-2); }
+.place-vote-btn:hover { background: var(--paper-3); color: var(--ink-2); }
 .place-vote-btn.up.voted   { color: var(--ok); }
 .place-vote-btn.down.voted { color: var(--accent); }
-.place-vote-btn svg { width: 15px; height: 15px; pointer-events: none; }
+/* ikona: tenká čára, neutrální */
+.place-vote-btn svg { width: 13px; height: 13px; pointer-events: none; stroke-width: 1.5; }
+/* počet */
+.place-vote-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; line-height: 1;
+  color: inherit; min-width: 12px; text-align: left;
+}
 /* v kick (list): votes flush vpravo */
 .place-kick .place-votes { margin-left: auto; }
+
+/* wish wrapper — obsahuje tlačítko + label */
+.place-wish-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: pointer;
+}
+/* wish label pod/vedle srdíčka */
+.place-wish-lbl {
+  font-size: 8px; font-family: 'Inter', sans-serif;
+  color: var(--ink-5); text-align: center;
+  white-space: nowrap; letter-spacing: .02em;
+  pointer-events: none;
+}
+.place-wish-lbl.active { color: var(--accent); }
 
 /* wish button */
 .place-wish-btn {
   appearance: none; background: transparent; border: none;
   display: flex; align-items: center; justify-content: center;
-  padding: 4px; border-radius: 6px; cursor: pointer;
-  color: #D0D0CC; position: relative;
-  transition: color .15s, transform .15s; flex-shrink: 0;
+  padding: 3px; border-radius: 6px; cursor: pointer;
+  color: var(--ink-5); position: relative;
+  transition: color .15s; flex-shrink: 0;
 }
-.place-wish-btn:hover { transform: scale(1.2); }
+.place-wish-btn:hover { color: var(--ink-3); }
 .place-wish-btn.wished { color: var(--accent); }
-.place-wish-btn svg { width: 15px; height: 15px; pointer-events: none; }
+.place-wish-btn svg { width: 16px; height: 16px; pointer-events: none; }
 .place-wish-lock {
   position: absolute; top: 0; right: 0;
-  width: 10px; height: 10px; background: var(--accent); border-radius: 50%;
+  width: 9px; height: 9px; background: var(--ink-4); border-radius: 50%;
 }
 .place-wish-lock::after {
-  content: ''; position: absolute; inset: 0; margin: auto; width: 6px; height: 6px; background: white;
+  content: ''; position: absolute; inset: 0; margin: auto; width: 5px; height: 5px; background: white;
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
+
+/* grid: wish-wrap vodorovně (label vlevo od srdíčka) */
+#placesList.grid-mode .place-wish-wrap {
+  flex-direction: row-reverse; align-items: center; gap: 4px;
+}
+#placesList.grid-mode .place-wish-lbl { font-size: 9px; }
 
 /* ── GRID MODE ── */
 #placesList.grid-mode {
@@ -833,26 +860,41 @@ function cardHTML(p, visited, wished) {
     ? `<div class="place-dist">${dist}</div>`
     : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit</span>`;
 
-  // Like/dislike — TODO: napojit na Supabase, zatím lokální stav
-  const voteUp   = p._voteUp   || 0;
-  const voteDown = p._voteDown || 0;
+  // Like/dislike — čisté šipky, s počty (TODO: Supabase)
+  const voteUp   = p._voteUp   ?? Math.floor(Math.random()*40+2);  // placeholder
+  const voteDown = p._voteDown ?? Math.floor(Math.random()*8);      // placeholder
   const votedUp   = p._votedUp   || false;
   const votedDown = p._votedDown || false;
-  const thumbUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-6 0v4"/><path d="M20 8H9.5a2 2 0 0 0-1.98 2.28l1 6A2 2 0 0 0 10.5 18H18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/></svg>`;
-  const thumbDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 6 0v-4"/><path d="M4 16h10.5a2 2 0 0 0 1.98-2.28l-1-6A2 2 0 0 0 13.5 6H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2z"/></svg>`;
+
+  // Ikony: jednoduché šipky — tenká linka, neutrální, v souladu s typografií
+  const arrowUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`;
+  const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+
   const votesHtml = `<div class="place-votes">
-    <button class="place-vote-btn up${votedUp?' voted':''}" onclick="votePlace(event,'${p.id}','up')" title="Líbí se">${thumbUp}</button>
-    <button class="place-vote-btn down${votedDown?' voted':''}" onclick="votePlace(event,'${p.id}','down')" title="Nelíbí se">${thumbDown}</button>
+    <button class="place-vote-btn up${votedUp?' voted':''}" onclick="votePlace(event,'${p.id}','up')" title="Líbí se">
+      ${arrowUp}<span class="place-vote-count">${voteUp}</span>
+    </button>
+    <button class="place-vote-btn down${votedDown?' voted':''}" onclick="votePlace(event,'${p.id}','down')" title="Nelíbí se">
+      ${arrowDown}<span class="place-vote-count">${voteDown}</span>
+    </button>
   </div>`;
 
+  // Wish — s labelem, obaleno v place-wish-wrap
+  const wishLbl = `<span class="place-wish-lbl${wish?' active':''}">${wish?'v plánu':'do plánu?'}</span>`;
   const wishBtn = loggedIn
-    ? `<button class="place-wish-btn ${wish?'wished':''}" onclick="toggleWish(event,'${p.id}')" title="${wish?'Odebrat z plánu':'Přidat do plánu'}">
-        <svg viewBox="0 0 24 24" fill="${wish?'#B04020':'none'}" stroke="${wish?'#B04020':'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-      </button>`
-    : `<button class="place-wish-btn" onclick="event.stopPropagation();window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href);" title="Přihlášení nutné" style="position:relative">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        <span class="place-wish-lock"></span>
-      </button>`;
+    ? `<div class="place-wish-wrap" onclick="toggleWish(event,'${p.id}')">
+        ${wishLbl}
+        <button class="place-wish-btn ${wish?'wished':''}" title="${wish?'Odebrat z plánu':'Přidat do plánu'}">
+          <svg viewBox="0 0 24 24" fill="${wish?'currentColor':'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+      </div>`
+    : `<div class="place-wish-wrap" onclick="event.stopPropagation();window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href);">
+        <span class="place-wish-lbl">do plánu?</span>
+        <button class="place-wish-btn" title="Přihlášení nutné" style="position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <span class="place-wish-lock"></span>
+        </button>
+      </div>`;
 
   return `<div class="place-card" data-cat="${p.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${p.cat}">
@@ -899,14 +941,22 @@ function votePlace(e, id, dir) {
 
 function toggleWish(e, id) {
   e.preventDefault(); e.stopPropagation();
-  const btn=e.currentTarget, w=[...new Set(getWished())], idx=w.indexOf(String(id));
+  const wrap = e.currentTarget.closest ? e.currentTarget.closest('.place-wish-wrap') : e.currentTarget;
+  const btn = wrap ? wrap.querySelector('.place-wish-btn') : null;
+  const lbl = wrap ? wrap.querySelector('.place-wish-lbl') : null;
+  const w=[...new Set(getWished())], idx=w.indexOf(String(id));
   if(idx>=0){ w.splice(idx,1); dbRemoveWish(id); } else{ w.push(String(id)); dbAddWish(id); }
   localStorage.setItem(WISH_KEY, JSON.stringify(w));
   const wished=idx<0;
-  btn.classList.toggle('wished',wished);
-  btn.querySelector('svg').setAttribute('fill', wished?'#B04020':'none');
-  btn.querySelector('svg').setAttribute('stroke', wished?'#B04020':'currentColor');
-  btn.title=wished?'Odebrat z plánu':'Přidat do plánu';
+  if(btn) {
+    btn.classList.toggle('wished', wished);
+    const svg = btn.querySelector('svg');
+    if(svg) svg.setAttribute('fill', wished ? 'currentColor' : 'none');
+  }
+  if(lbl) {
+    lbl.textContent = wished ? 'v plánu' : 'do plánu?';
+    lbl.classList.toggle('active', wished);
+  }
   updateCounts();
   if(window.lopNav) window.lopNav.refresh();
 }
