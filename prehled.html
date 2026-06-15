@@ -427,11 +427,11 @@ a { color: inherit; text-decoration: none; }
 .place-cat-pill {
   display: none;
   position: absolute; top: 8px; left: 8px; z-index: 3;
-  align-items: center; gap: 4px;
+  align-items: center; gap: 5px;
   background: #fff; border: 1px solid var(--rule); border-radius: 6px;
-  padding: 3px 8px 3px 6px;
-  font-size: 10px; font-weight: 600; color: var(--ink);
-  box-shadow: 0 1px 4px rgba(0,0,0,.10);
+  padding: 4px 10px 4px 7px;
+  font-size: 11px; font-weight: 600; letter-spacing: .01em; color: var(--ink);
+  box-shadow: 0 1px 6px rgba(0,0,0,.12);
 }
 .place-cat-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
@@ -983,9 +983,9 @@ function cardHTML(p, visited, wished) {
     <div class="place-meta">
       ${distListHtml}
       <span class="meta-wish-list">${wishBtn}</span>
-      <div class="place-meta-right">${votesHtml}${wishBtn}</div>
-      <span class="meta-wish-grid">${wishBtn}</span>
       <span class="meta-dist-grid">${distGridHtml}</span>
+      <div class="place-meta-right">${votesHtml}</div>
+      <span class="meta-wish-grid">${wishBtn}</span>
     </div>
   </div>`;
 }
