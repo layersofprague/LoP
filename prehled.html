@@ -28,6 +28,7 @@
   --cat-hist: #4A4A48;
   --cat-arch: #3B5F84;
   --cat-fun:  #E0A020;
+  --cat-art:  #C0522A;
   --ease:     cubic-bezier(.22,.8,.36,1);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -521,7 +522,7 @@ a { color: inherit; text-decoration: none; }
 <div class="page">
     <div class="hero-section">
     <h1 class="page-title">Přehled <em>míst</em></h1>
-    <p class="page-intro">Všechna místa seřazená podle kategorie. Kliknutím otevřete detail, historické fotografie a AR záběr.</p>
+    <p class="page-intro">Vyhovuje Vám více forma seznamu než mapa? Všechna místa seřazená přehledně podle kategorií s možností filtrování. Stačí začít prozkoumávat.</p>
   </div>
 
   <!-- Controls: Filtr + Seznam + Dlaždice -->
@@ -530,11 +531,12 @@ a { color: inherit; text-decoration: none; }
       <span class="filter-dots">
         <span style="background:var(--cat-hist)"></span>
         <span style="background:var(--cat-arch)"></span>
+        <span style="background:var(--cat-art)"></span>
         <span style="background:var(--cat-fun)"></span>
       </span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
       Filtr
-      <span class="filter-cnt" id="filterHeadCnt"><span id="filterHeadActive">—</span><span id="filterHeadTotal"></span></span>
+      <span class="filter-cnt" id="filterHeadCnt"><span id="filterHeadActive" style="color:var(--ink-5);font-size:10px;">—</span><span id="filterHeadTotal" style="color:var(--ink);font-size:12px;font-weight:600;"></span></span>
     </button>
     <button class="ctrl-btn ctrl-btn-view active" id="btnList" onclick="setView('list')" title="Seznam">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -627,9 +629,9 @@ a { color: inherit; text-decoration: none; }
   } catch(e) {}
 })();
 
-const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
-const CAT_LETTER = { hist: 'H', arch: 'A', fun: 'Z' };
-const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', fun: 'Zajímavosti' };
+const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
+const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
+const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
 const VISIT_KEY  = 'lop_visited_v1';
 const WISH_KEY   = 'lop_wishlist_v2';
 
@@ -723,10 +725,10 @@ function locateUser() {
     ()=>{}, { enableHighAccuracy:true, timeout:8000 });
 }
 
-const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
+const FILTER = { hist:'full', arch:'full', art:'full', fun:'full', visited:'full', wished:'full' };
 const FILTER_NEXT         = { full:'hide', dim:'full', hide:'full' };
-const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
-const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
+const FILTER_NEXT_WISHED  = { full:'hide', dim:'full', hide:'force', force:'full' };
+const FILTER_NEXT_VISITED = { full:'hide', dim:'full', hide:'force', force:'full' };
 const RANK = { full:0, dim:1, hide:2, force:0 };
 const ERAS = [
   { id:'rom', name:'Románský',    from:1000, to:1230 },
@@ -754,8 +756,8 @@ function toggleFilter() {
 
 function buildChips() {
   const el = document.getElementById('mapChips'); if (!el) return;
-  const counts = { hist:0, arch:0, fun:0 };
-  PLACES.forEach(l => counts[l.cat]++);
+  const counts = { hist:0, arch:0, art:0, fun:0 };
+  PLACES.forEach(l => { if(counts[l.cat] !== undefined) counts[l.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
@@ -764,6 +766,10 @@ function buildChips() {
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-arch">výchozí</span>
       <button class="chip" data-cat="arch" style="width:145px"><span class="chip-swatch" style="background:var(--cat-arch)"></span>Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span></button>
+    </div>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-art">výchozí</span>
+      <button class="chip" data-cat="art" style="width:110px"><span class="chip-swatch" style="background:var(--cat-art)"></span>Umění <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
