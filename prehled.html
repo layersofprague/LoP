@@ -49,38 +49,51 @@ a { color: inherit; text-decoration: none; }
 
 /* ── HERO ── */
 .hero-section {
-  margin-bottom: 28px;
-  padding-bottom: 28px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
   border-bottom: 1px solid var(--rule);
 }
-.kick {
-  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--ink-5); margin-bottom: 12px; font-weight: 500;
-}
-.page-title {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: clamp(36px, 8.5vw, 52px);
-  line-height: 1; letter-spacing: -.03em; color: var(--ink);
-}
+.kick { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 12px; font-weight: 500; }
+.page-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(36px, 8.5vw, 52px); line-height: 1; letter-spacing: -.03em; color: var(--ink); }
 .page-title em { font-style: italic; font-weight: 300; color: #777772; }
-.page-intro {
-  font-size: 14px; color: var(--ink-4);
-  margin-top: 12px; line-height: 1.6; max-width: 38em; text-wrap: pretty;
-}
+.page-intro { font-size: 14px; color: var(--ink-4); margin-top: 12px; line-height: 1.6; max-width: 38em; text-wrap: pretty; }
 
-/* ── MAP HEADER ── */
-.map-header { margin-bottom: 12px; }
+/* ── TOOLBAR (filtr + toggle) ── */
+.toolbar {
+  display: flex; align-items: stretch; gap: 8px;
+  margin-bottom: 12px;
+}
+.toolbar .filter-bar { flex: 1; }
+
+/* ── VIEW TOGGLE ── */
+.view-toggle {
+  display: flex;
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,.05);
+  flex-shrink: 0;
+}
+.view-btn {
+  appearance: none; border: none; background: transparent;
+  width: 38px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink-4);
+  transition: background .15s, color .15s;
+}
+.view-btn:first-child { border-right: 1px solid var(--rule); }
+.view-btn.active { background: var(--ink); color: #fff; }
+.view-btn svg { width: 16px; height: 16px; pointer-events: none; }
 
 /* ── FILTER BAR ── */
 .filter-bar {
   background: #fff; border: 1.5px solid var(--rule);
-  border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,.05);
+  border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,.05);
   overflow: visible; pointer-events: auto;
 }
 .filter-head {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 11px 16px; background: transparent; border: none; cursor: pointer;
+  padding: 10px 14px; background: transparent; border: none; cursor: pointer;
   font-family: inherit; color: var(--ink);
 }
 .filter-head-lead { display: flex; align-items: center; gap: 8px; font-size: 13px; }
@@ -92,15 +105,11 @@ a { color: inherit; text-decoration: none; }
 .filter-bar.open .filter-head-chev { transform: rotate(180deg); }
 .filter-panel { max-height: 0; overflow: hidden; transition: max-height .32s var(--ease); border-top: 0 solid var(--rule); }
 .filter-bar.open .filter-panel { max-height: 500px; border-top: 1px solid var(--rule); }
-.filter-panel-inner { padding: 16px 18px 14px; background: var(--paper-2); border-radius: 0 0 12px 12px; }
+.filter-panel-inner { padding: 16px 18px 14px; background: var(--paper-2); border-radius: 0 0 10px 10px; }
 .filter-row { padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .filter-row:first-child { padding-top: 4px; }
 .filter-row:last-of-type { border-bottom: none; }
-.filter-lbl {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px;
-}
+.filter-lbl { display: flex; justify-content: space-between; align-items: baseline; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px; }
 .filter-lbl-val { color: var(--ink); letter-spacing: .04em; font-size: 10px; }
 .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 
@@ -183,14 +192,26 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; gap: 12px;
   margin-top: 32px; margin-bottom: 10px;
 }
+#placesList.grid-mode .section-label { grid-column: 1 / -1; margin-top: 28px; margin-bottom: 8px; }
 .section-label .sn { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-5); white-space: nowrap; }
 .section-label .sl { flex: 1; height: 1px; background: var(--rule); }
 .section-label .ct { font-size: 10px; color: var(--ink-5); }
 
-/* ── SECTION LIST WRAPPER ── */
+/* ── STAMP SVG inline ── */
+.stamp-wrap {
+  position: absolute; top: 6px; right: 6px; z-index: 4;
+  width: 44px; height: 44px;
+  pointer-events: none;
+}
+.stamp-wrap svg { width: 100%; height: 100%; }
+
+/* ── LIST MODE ── */
+#placesList {
+  display: flex; flex-direction: column; gap: 0;
+}
 .place-section-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
 
-/* ── PLACE CARD (row) ── */
+/* ── LIST CARD ── */
 .place-card {
   display: grid;
   grid-template-columns: 78px 1fr auto;
@@ -202,13 +223,9 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   transition: box-shadow .2s var(--ease), transform .2s var(--ease);
 }
-.place-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,.09);
-  transform: translateY(-1px);
-}
+.place-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.09); transform: translateY(-1px); }
 .place-card:hover .place-name { color: #000; }
 
-/* thumbnail — square box */
 .place-thumb {
   position: relative;
   display: flex; align-items: center; justify-content: center;
@@ -221,15 +238,7 @@ a { color: inherit; text-decoration: none; }
 .place-thumb[data-cat="fun"]  { background: #F5F2E8; }
 .place-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .place-thumb-fallback { position: relative; z-index: 1; pointer-events: none; }
-.place-cat-line {
-  position: absolute; top: 0; left: 0; bottom: 0;
-  width: 3px; z-index: 2;
-}
-.place-id {
-  position: absolute; bottom: 4px; right: 4px; z-index: 3;
-  font-family: 'JetBrains Mono', monospace; font-size: 7px; font-weight: 600;
-  color: #fff; background: rgba(0,0,0,.35); border-radius: 3px; padding: 1px 3px;
-}
+.place-cat-line { position: absolute; top: 0; left: 0; bottom: 0; width: 3px; z-index: 2; }
 
 /* body */
 .place-body {
@@ -257,20 +266,19 @@ a { color: inherit; text-decoration: none; }
 /* meta column */
 .place-meta {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 6px; padding: 10px 14px;
+  gap: 6px; padding: 10px 12px;
   border-left: 1px solid var(--paper-2);
   min-width: 52px; flex-shrink: 0;
 }
-.place-dist { font-size: 11px; color: var(--ink-5); font-family: 'Inter', sans-serif; }
+.place-dist { font-size: 11px; color: var(--ink-5); font-family: 'Inter', sans-serif; text-align: center; }
 .place-dist-hint { font-size: 10px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .place-dist-hint:hover { color: var(--ink-4); }
-.place-visited-lbl { font-size: 9px; color: var(--ok); text-align: center; }
-.place-visited {
-  width: 14px; height: 14px; background: var(--ok); display: none;
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
+
+/* stamp v metě (list) */
+.place-stamp-list {
+  width: 42px; height: 42px; flex-shrink: 0;
 }
-.place-visited.show { display: block; }
+.place-stamp-list svg { width: 100%; height: 100%; }
 
 /* wish button */
 .place-wish-btn {
@@ -283,7 +291,6 @@ a { color: inherit; text-decoration: none; }
 .place-wish-btn:hover { transform: scale(1.2); }
 .place-wish-btn.wished { color: var(--accent); }
 .place-wish-btn svg { width: 15px; height: 15px; pointer-events: none; }
-.place-wish-lbl { display: none; }
 .place-wish-lock {
   position: absolute; top: 0; right: 0;
   width: 10px; height: 10px; background: var(--accent); border-radius: 50%;
@@ -294,6 +301,61 @@ a { color: inherit; text-decoration: none; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
 
+/* ── GRID MODE ── */
+#placesList.grid-mode {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  flex-direction: unset;
+}
+
+/* grid card overrides */
+#placesList.grid-mode .place-section-list {
+  display: contents; /* položky přímo do gridu */
+}
+#placesList.grid-mode .place-card {
+  display: flex; flex-direction: column;
+  grid-template-columns: unset;
+}
+#placesList.grid-mode .place-thumb {
+  width: 100%; aspect-ratio: 3/2; min-height: unset;
+  font-size: 36px;
+}
+#placesList.grid-mode .place-cat-pill {
+  display: flex;
+}
+#placesList.grid-mode .place-body {
+  border-left: none;
+  border-top: 1px solid var(--paper-2);
+  padding: 10px 12px 0;
+}
+#placesList.grid-mode .place-kick { display: none; }
+#placesList.grid-mode .place-sub {
+  font-size: 11px; -webkit-line-clamp: 2;
+}
+#placesList.grid-mode .place-meta {
+  border-left: none;
+  border-top: 1px solid var(--paper-2);
+  flex-direction: row; justify-content: space-between;
+  padding: 7px 12px 10px;
+  min-width: unset;
+}
+#placesList.grid-mode .place-stamp-list {
+  width: 36px; height: 36px;
+}
+
+/* cat pill (grid only) */
+.place-cat-pill {
+  display: none;
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  align-items: center; gap: 4px;
+  background: rgba(255,255,255,.92); border-radius: 6px;
+  padding: 3px 8px 3px 6px;
+  font-size: 10px; font-weight: 600; color: #333;
+  backdrop-filter: blur(4px);
+}
+.place-cat-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
 /* ── EMPTY & LOADING ── */
 .empty { text-align: center; padding: 60px 20px; color: var(--ink-4); }
 .empty h3 { font-size: 20px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
@@ -301,6 +363,9 @@ a { color: inherit; text-decoration: none; }
 .loading { display: flex; align-items: center; justify-content: center; padding: 64px; color: var(--ink-5); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  #placesList.grid-mode { grid-template-columns: 1fr; }
+}
 @media (max-width: 819px) and (orientation: landscape) {
   #lop-nav {
     position: fixed !important; top: 0 !important; bottom: 0 !important;
@@ -317,7 +382,7 @@ a { color: inherit; text-decoration: none; }
 <body>
 
 <div id="lop-header"></div>
-<script src="header.js"></script>
+<script src="header.js?v=2"></script>
 
 <div class="page">
   <div class="hero-section">
@@ -326,7 +391,7 @@ a { color: inherit; text-decoration: none; }
     <p class="page-intro">Všechna místa seřazená podle kategorie. Kliknutím otevřete detail, historické fotografie a AR záběr.</p>
   </div>
 
-  <div class="map-header">
+  <div class="toolbar">
     <div class="filter-bar" id="filterBar">
       <button class="filter-head" id="filterHead" onclick="toggleFilter()">
         <span class="filter-head-lead">
@@ -368,6 +433,22 @@ a { color: inherit; text-decoration: none; }
         </div>
       </div>
     </div>
+
+    <!-- VIEW TOGGLE -->
+    <div class="view-toggle">
+      <button class="view-btn active" id="btnList" onclick="setView('list')" title="Seznam">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </button>
+      <button class="view-btn" id="btnGrid" onclick="setView('grid')" title="Dlaždice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
   <div id="placesList">
@@ -376,7 +457,7 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <div id="lop-nav"></div>
-<script src="nav.js"></script>
+<script src="nav.js?v=2"></script>
 
 <script>
 (function() {
@@ -395,6 +476,46 @@ const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', fun: 'Zajímavosti'
 const VISIT_KEY  = 'lop_visited_v1';
 const WISH_KEY   = 'lop_wishlist_v2';
 
+/* ── View mode ── */
+let viewMode = localStorage.getItem('lop_prehled_view') || 'list';
+
+function setView(mode) {
+  viewMode = mode;
+  localStorage.setItem('lop_prehled_view', mode);
+  const list = document.getElementById('placesList');
+  const btnList = document.getElementById('btnList');
+  const btnGrid = document.getElementById('btnGrid');
+  list.classList.toggle('grid-mode', mode === 'grid');
+  btnList.classList.toggle('active', mode === 'list');
+  btnGrid.classList.toggle('active', mode === 'grid');
+}
+
+/* ── Stamp — napojení na stamp.js (stejné jako sbirky.html) ── */
+const STAMP_PROPS = { orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true };
+
+function arScoreToStampScore(arScore) {
+  if (arScore == null || arScore === 0) return 1;
+  if (arScore <= 25) return 25;
+  if (arScore <= 50) return 45;
+  if (arScore <= 75) return 65;
+  return 90;
+}
+
+function makeStampSVG(p, arScore) {
+  if (!window.stampSVG) return ''; // stamp.js ještě nenačteno
+  return window.stampSVG({
+    ...STAMP_PROPS,
+    code:      p.id,
+    name:      p.name,
+    year:      p.yearBuilt || p.yearThen || '',
+    cat:       p.cat,
+    score:     arScoreToStampScore(arScore),
+    dateLabel: '',
+    k:         p.id,
+  });
+}
+
+/* ── Auth / session ── */
 function getSession() { try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; } }
 async function getValidSession() {
   const s = getSession();
@@ -416,6 +537,10 @@ async function getValidSession() {
 function isLoggedIn() { try { const s = getSession(); return !!(s && s.access_token && s.user); } catch(e) { return false; } }
 function getWished()  { try { return JSON.parse(localStorage.getItem(WISH_KEY)  || '[]').map(String); } catch(e) { return []; } }
 function getVisited() { try { return JSON.parse(localStorage.getItem(VISIT_KEY) || '[]').map(String); } catch(e) { return []; } }
+
+/* ── AR scores (ze Supabase visited tabulky, field score) ── */
+// Ukládáme jako { placeId: score } po syncu
+let _arScores = {};
 
 function haversineM(lat1, lng1, lat2, lng2) {
   const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
@@ -532,12 +657,7 @@ function buildEraTimeline() {
   el.querySelectorAll('.ft-h').forEach(h=>{
     const onDown=ev=>{
       ev.preventDefault(); const which=h.dataset.which, rect=el.getBoundingClientRect();
-      const onMove=e=>{
-        const cx=e.touches?e.touches[0].clientX:e.clientX;
-        const p=Math.max(0,Math.min(1,(cx-rect.left)/rect.width)), y=pctToYear(p);
-        if(which==='from') ERA_STATE.from=Math.min(y,ERA_STATE.to-20); else ERA_STATE.to=Math.max(y,ERA_STATE.from+20);
-        renderEra(); applyFilter();
-      };
+      const onMove=e=>{ const cx=e.touches?e.touches[0].clientX:e.clientX; const p=Math.max(0,Math.min(1,(cx-rect.left)/rect.width)), y=pctToYear(p); if(which==='from') ERA_STATE.from=Math.min(y,ERA_STATE.to-20); else ERA_STATE.to=Math.max(y,ERA_STATE.from+20); renderEra(); applyFilter(); };
       const onUp=()=>{ window.removeEventListener('mousemove',onMove); window.removeEventListener('mouseup',onUp); window.removeEventListener('touchmove',onMove); window.removeEventListener('touchend',onUp); };
       window.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
       window.addEventListener('touchmove',onMove,{passive:false}); window.addEventListener('touchend',onUp);
@@ -657,7 +777,9 @@ function render() {
     html += `</div>`;
   });
 
-  document.getElementById('placesList').innerHTML=html;
+  const list=document.getElementById('placesList');
+  list.innerHTML=html;
+  list.classList.toggle('grid-mode', viewMode==='grid');
   const _cnt=document.getElementById('filterHeadActive'); if(_cnt) _cnt.textContent=filtered.length;
   updateChipCounts();
 }
@@ -674,11 +796,15 @@ function cardHTML(p, visited, wished) {
   const dist = userPos && p.lat && p.lng ? formatDist(haversineM(userPos[0],userPos[1],p.lat,p.lng)) : '';
   const loggedIn = isLoggedIn();
 
-  const visitedHtml = vis && loggedIn
-    ? `<div class="place-visited show"></div><div class="place-visited-lbl">Navštíveno</div>`
-    : dist
-      ? `<div class="place-dist">${dist}</div>`
-      : `<div class="place-dist">? m</div><span class="place-dist-hint" onclick="requestLoc(event)">povolit?</span>`;
+  // Stamp pro navštívená místa
+  const arScore = _arScores[String(p.id)] ?? null;
+  const stampHtml = vis && loggedIn
+    ? `<div class="place-stamp-list">${makeStampSVG(p, arScore)}</div>`
+    : '';
+
+  const distHtml = dist
+    ? `<div class="place-dist">${dist}</div>`
+    : `<span class="place-dist-hint" onclick="requestLoc(event)">Povolit polohu</span>`;
 
   const wishBtn = loggedIn
     ? `<button class="place-wish-btn ${wish?'wished':''}" onclick="toggleWish(event,'${p.id}')" title="${wish?'Odebrat z plánu':'Přidat do plánu'}">
@@ -691,10 +817,10 @@ function cardHTML(p, visited, wished) {
 
   return `<div class="place-card" data-cat="${p.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${p.cat}">
-      ${thumb?`<img src="${thumb}" alt="${p.name}" onerror="this.style.display='none'"/>`:''}
+      ${thumb?`<img src="${thumb}" alt="${p.name}" onerror="this.style.display='none'"/>`:'' }
       <div class="place-thumb-fallback">${letter}</div>
       <div class="place-cat-line" style="background:${color}"></div>
-      <div class="place-id">${p.id}</div>
+      <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
     </div>
     <div class="place-body">
       <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>
@@ -702,7 +828,7 @@ function cardHTML(p, visited, wished) {
       <div class="place-sub">${lede}</div>
     </div>
     <div class="place-meta">
-      ${visitedHtml}
+      ${vis && loggedIn ? stampHtml : distHtml}
       ${wishBtn}
     </div>
   </div>`;
@@ -758,11 +884,15 @@ async function syncFromDB(onDone) {
   try {
     const [wRes,vRes]=await Promise.all([
       ft(SUPA_URL+'/rest/v1/wishlist?user_id=eq.'+s.user.id+'&select=place_id',{headers:authHeaders()}),
-      ft(SUPA_URL+'/rest/v1/visited?user_id=eq.'+s.user.id+'&select=place_id',{headers:authHeaders()}),
+      ft(SUPA_URL+'/rest/v1/visited?user_id=eq.'+s.user.id+'&select=place_id,score',{headers:authHeaders()}),
     ]);
     if(!wRes.ok||!vRes.ok) throw new Error('HTTP '+(!wRes.ok?wRes.status:vRes.status));
     localStorage.setItem(WISH_KEY,  JSON.stringify((await wRes.json()).map(r=>String(r.place_id))));
-    localStorage.setItem(VISIT_KEY, JSON.stringify((await vRes.json()).map(r=>String(r.place_id))));
+    const vRows = await vRes.json();
+    localStorage.setItem(VISIT_KEY, JSON.stringify(vRows.map(r=>String(r.place_id))));
+    // Ulož AR score pro razítka
+    _arScores = {};
+    vRows.forEach(r => { _arScores[String(r.place_id)] = r.score ?? null; });
     fetch(SUPA_URL+'/rest/v1/profiles?user_id=eq.'+s.user.id+'&select=role',{headers:authHeaders()})
       .then(r=>r.ok?r.json():[]).then(rows=>{if(rows[0]?.role) localStorage.setItem('lop_user_role',rows[0].role);}).catch(()=>{});
     _showSyncSpinner(false); _showSyncBar(false); if(onDone) onDone();
@@ -772,6 +902,9 @@ async function syncFromDB(onDone) {
     if(onDone) onDone();
   }
 }
+
+// Inicializace view toggle dle uloženého stavu
+setView(viewMode);
 
 loadPlaces().then(()=>{
   buildChips();
@@ -788,6 +921,8 @@ loadPlaces().then(()=>{
 locateUser();
 requestAnimationFrame(()=>{ if(window.lopNav) window.lopNav.refresh(); });
 </script>
+<script src="castle-data.js"></script>
+<script src="stamp.js?v=2"></script>
 <script src="auth-modal.js"></script>
 <script>
 window.lopAuth.onLogin(()=>{
