@@ -796,6 +796,7 @@ a { color: inherit; text-decoration: none; }
   position: relative; overflow: hidden;
 }
 .rt-tip-img[data-cat="arch"] { background: #EEF2F7; }
+.rt-tip-img[data-cat="art"]  { background: #F5EDE8; }
 .rt-tip-img[data-cat="fun"]  { background: #F5F2E8; }
 /* fallback písmeno ve foto */
 .rt-tip-fallback {
@@ -1836,7 +1837,7 @@ a { color: inherit; text-decoration: none; }
       <!-- Filter puck + modal panel -->
       <div class="filter-puck-wrap" id="filterPuckWrap">
         <div class="filter-puck-badge">
-          <span class="filter-puck-badge-label">Filtr</span>
+          <span class="filter-puck-badge-dots" style="display:flex;gap:3px;align-items:center;"><span style="width:6px;height:6px;border-radius:50%;background:var(--cat-hist);flex-shrink:0;"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cat-arch);flex-shrink:0;"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cat-art);flex-shrink:0;"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cat-fun);flex-shrink:0;"></span></span><span class="filter-puck-badge-label">Filtr</span>
           <span class="filter-puck-badge-count" id="filterBadge">8 / 8</span>
         </div>
         <button class="filter-puck" id="filterPuck" title="Filtr" onclick="toggleFilter()">
@@ -2299,6 +2300,7 @@ function getText(val) {
 const CAT = {
   hist:   { name: 'Historie',      color: '#4A4A48', letter: 'H' },
   arch:   { name: 'Architektura',  color: '#3B5F84', letter: 'A' },
+  art:    { name: 'Umění',          color: '#C0522A', letter: 'U' },
   fun:    { name: 'Zajímavosti',   color: '#E0A020', letter: 'Z' },
   nature: { name: 'Příroda',       color: '#3a6e4a', letter: 'P' },
   legend: { name: 'Legendy',       color: '#6a3a6e', letter: 'L' }
@@ -2586,7 +2588,7 @@ function showTooltip(loc, m, rt) {
       </div>`;
 
   // Foto
-  const catLetter = {hist:'H', arch:'A', fun:'Z'}[loc.cat] || 'H';
+  const catLetter = {hist:'H', arch:'A', art:'U', fun:'Z'}[loc.cat] || 'H';
   const imgHtml = loc.photoThumb
     ? `<img src="${loc.photoThumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
     : '';
@@ -2670,7 +2672,7 @@ function showTooltip(loc, m, rt) {
 /* ═══════════════ MAP ═══════════════ */
 let _markers = [];
 window._markers = _markers;
-const FILTER = { hist:'full', arch:'full', fun:'full', visited:'full', wished:'full' };
+const FILTER = { hist:'full', arch:'full', art:'full', fun:'full', visited:'full', wished:'full' };
 window.FILTER = FILTER;
 const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
 const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
@@ -2714,7 +2716,7 @@ function toggleFilter() {
 function updateFilterPuck() {
   const puck = document.getElementById('filterPuck');
   if (!puck) return;
-  const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.fun !== 'full'
+  const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.art !== 'full' || FILTER.fun !== 'full'
     || FILTER.visited !== 'full' || FILTER.wished !== 'full'
     || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
     || DIST_STATE.max !== null;
@@ -2764,8 +2766,8 @@ function rebuildMarkers() {
 
 function buildChips() {
   const el = document.getElementById('mapChips');
-  const counts = { hist:0, arch:0, fun:0 };
-  LOCATIONS.forEach(l => counts[l.cat]++);
+  const counts = { hist:0, arch:0, art:0, fun:0 };
+  LOCATIONS.forEach(l => { if (l.cat in counts) counts[l.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
@@ -2779,6 +2781,13 @@ function buildChips() {
       <button class="chip" data-cat="arch" style="width:145px">
         <span class="chip-swatch" style="background: var(--cat-arch)"></span>
         Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
+      </button>
+    </div>
+    <div class="chip-wrap">
+      <span class="chip-state-lbl" id="lbl-art">výchozí</span>
+      <button class="chip" data-cat="art" style="width:110px">
+        <span class="chip-swatch" style="background: var(--cat-art)"></span>
+        Umění <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
@@ -2959,7 +2968,7 @@ function haversineKm(a, b) {
 }
 
 function resetFilters() {
-  FILTER.hist = FILTER.arch = FILTER.fun = 'full';
+  FILTER.hist = FILTER.arch = FILTER.art = FILTER.fun = 'full';
   FILTER.visited = FILTER.wished = 'full';
   ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
   DIST_STATE.max = null;
