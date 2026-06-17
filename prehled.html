@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -81,6 +81,7 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap; flex-shrink: 0;
 }
 .ctrl-btn:hover { background: var(--paper-2); color: var(--ink-2); }
+.ctrl-btn:focus { outline: none; }
 .ctrl-btn.active { background: var(--ink); color: #fff; }
 .ctrl-btn svg { width: 14px; height: 14px; pointer-events: none; flex-shrink: 0; }
 .ctrl-btn-filter {
@@ -772,6 +773,7 @@ function toggleFilter() {
   const wasOpen = backdrop.classList.contains('open');
   backdrop.classList.toggle('open');
   if (!wasOpen) buildEraTimeline();
+  document.getElementById('filterBtn')?.blur();
 }
 
 function buildChips() {
