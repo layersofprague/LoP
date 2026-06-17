@@ -127,6 +127,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════ NAV ═══════════════ */
+#lop-header { background: #F8F8F6 !important; }
 #nav {
   flex: 0 0 auto;
   display: flex;
@@ -226,14 +227,14 @@ a { color: inherit; text-decoration: none; }
 }
 .leaflet-control-zoom a {
   width: 26px !important; height: 26px !important; line-height: 26px !important;
-  background: var(--paper) !important;
+  background: #F8F8F6 !important;
   color: var(--ink) !important;
   border-color: var(--rule) !important;
   font-family: 'Inter', sans-serif !important;
   font-weight: 300 !important;
   font-size: 16px !important;
 }
-.leaflet-control-zoom a:hover { background: var(--paper-2) !important; }
+.leaflet-control-zoom a:hover { background: #F0F0EE !important; }
 .leaflet-bottom.leaflet-right { margin-bottom: 4px; margin-right: 14px; }
 
 .map-header {
@@ -566,31 +567,36 @@ a { color: inherit; text-decoration: none; }
   pointer-events: auto;
 }
 .filter-puck {
-  display: flex; flex-direction: row; align-items: center; gap: 6px;
-  padding: 0 10px 0 8px; height: 30px;
-  background: var(--paper); border: 1px solid var(--rule);
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(26,24,20,.08);
-  cursor: pointer; transition: background .15s; color: var(--ink);
+  display: flex; flex-direction: row; align-items: center; gap: 4px;
+  padding: 5px 9px;
+  background: #F8F8F6; border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.05);
+  cursor: pointer; transition: background .15s; color: var(--ink-4);
   font-family: 'Inter', sans-serif;
 }
-.filter-puck:hover { background: var(--paper-2); }
+.filter-puck:hover { background: #F0F0EE; color: var(--ink-2); }
 .filter-puck.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.filter-puck.active .filter-puck-badge-label { color: rgba(238,239,235,.7); }
-.filter-puck.active .filter-puck-badge-count { color: rgba(238,239,235,.5); }
+.filter-puck.active .filter-puck-badge-label { color: rgba(248,248,246,.7); }
+.filter-puck.active .filter-puck-badge-count { color: rgba(248,248,246,.5); }
 .filter-puck.active svg polygon { fill: var(--paper); stroke: var(--paper); }
 .filter-puck.filtered svg polygon { fill: var(--ink); stroke: var(--ink); }
+/* icon wrap — tečky nad ikonou */
+.filter-icon-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.filter-puck-badge-dots { display: flex; gap: 2px; align-items: center; }
+.filter-puck-badge-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
 .filter-puck svg { width: 13px; height: 13px; flex-shrink: 0; }
 .filter-puck-dot { display: none; }
-.filter-puck-badge-dots { display: flex; gap: 3px; align-items: center; }
-.filter-puck-badge-dots span { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+/* label + count */
+.filter-puck-bottom { display: flex; align-items: center; gap: 4px; font-size: 10px; }
 .filter-puck-badge-label {
-  font-size: 11px; font-weight: 500;
+  font-size: 10px; font-weight: 500;
   color: var(--ink-2); line-height: 1;
 }
 .filter-puck-badge-count {
-  font-size: 10px; font-weight: 400;
-  color: var(--ink-5); line-height: 1;
+  font-size: 9px; color: var(--ink-5); line-height: 1;
 }
 .filter-puck-badge-count .cnt-active {
   font-size: 12px; font-weight: 500; color: var(--ink-4);
@@ -658,7 +664,7 @@ a { color: inherit; text-decoration: none; }
 .filter-modal-close svg { width: 14px; height: 14px; }
 .map-puck {
   width: 26px; height: 26px; border-radius: 0;
-  background: var(--paper);
+  background: #F8F8F6;
   border: none;
   border-color: var(--rule) !important;
   box-shadow: none;
@@ -667,7 +673,7 @@ a { color: inherit; text-decoration: none; }
   transition: opacity .3s, background .15s;
   color: var(--ink);
 }
-.map-puck:hover { background: var(--paper-2); }
+.map-puck:hover { background: #F0F0EE; }
 .map-puck svg { width: 14px; height: 14px; }
 #locateBtn.located svg circle:first-child { stroke: var(--accent); }
 #locateBtn.located .locate-ring-fill { fill: var(--accent); }
@@ -1837,10 +1843,19 @@ a { color: inherit; text-decoration: none; }
       <!-- Filter puck -->
       <div class="filter-puck-wrap" id="filterPuckWrap">
         <button class="filter-puck" id="filterPuck" title="Filtr" onclick="toggleFilter()">
-          <span class="filter-puck-badge-dots"><span style="background:var(--cat-hist)"></span><span style="background:var(--cat-arch)"></span><span style="background:var(--cat-art)"></span><span style="background:var(--cat-fun)"></span></span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" fill="none"/></svg>
-          <span class="filter-puck-badge-label">Filtr</span>
-          <span class="filter-puck-badge-count" id="filterBadge"><span class="cnt-active">8</span>/8</span>
+          <span class="filter-icon-wrap">
+            <span class="filter-puck-badge-dots">
+              <span style="background:var(--cat-hist)"></span>
+              <span style="background:var(--cat-arch)"></span>
+              <span style="background:var(--cat-art)"></span>
+              <span style="background:var(--cat-fun)"></span>
+            </span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" fill="none"/></svg>
+          </span>
+          <span class="filter-puck-bottom">
+            <span class="filter-puck-badge-label">Filtr</span>
+            <span class="filter-puck-badge-count" id="filterBadge"><span class="cnt-active">8</span>/8</span>
+          </span>
         </button>
       </div>
 
