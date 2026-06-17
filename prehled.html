@@ -59,7 +59,7 @@ a { color: inherit; text-decoration: none; }
 .kick { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 12px; font-weight: 500; }
 .page-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(24px, 6vw, 36px); line-height: 1; letter-spacing: -.03em; color: var(--ink); white-space: nowrap; }
 .page-title em { font-style: italic; font-weight: 300; color: #777772; }
-.page-intro { font-size: 14px; color: var(--ink-4); line-height: 1.6; text-wrap: pretty; }
+.page-intro { font-size: 13px; color: var(--ink-4); line-height: 1.6; text-wrap: pretty; }
 
 /* ── TOOLBAR (filtr + toggle) ── */
 /* ── CONTROLS BAR ── */
@@ -81,12 +81,18 @@ a { color: inherit; text-decoration: none; }
 .ctrl-btn.active { background: var(--ink); color: #fff; }
 .ctrl-btn svg { width: 14px; height: 14px; pointer-events: none; flex-shrink: 0; }
 .ctrl-btn-filter {
-  padding: 8px 10px;
+  flex-direction: row; gap: 5px;
+  padding: 6px 12px;
   border-right: 1px solid var(--rule);
 }
-.ctrl-btn-filter .filter-dots { display: flex; gap: 3px; }
-.ctrl-btn-filter .filter-dots span { width: 6px; height: 6px; border-radius: 50%; }
-.ctrl-btn-filter .filter-cnt { font-size: 10px; color: var(--ink-5); margin-left: 2px; }
+/* ikona + tečky nad ní */
+.filter-icon-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.ctrl-btn-filter .filter-dots { display: flex; gap: 2px; align-items: center; }
+.ctrl-btn-filter .filter-dots span { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+.ctrl-btn-filter .filter-bottom { display: flex; align-items: center; gap: 5px; }
+.ctrl-btn-filter .filter-cnt { font-size: 10px; color: var(--ink-5); }
 .ctrl-btn-filter.has-filter .filter-cnt { color: var(--accent); font-weight: 600; }
 .ctrl-btn-view { width: 38px; padding: 8px 0; }
 .ctrl-btn-view + .ctrl-btn-view { border-left: 1px solid var(--rule); }
@@ -240,7 +246,7 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; gap: 12px;
   margin-top: 16px; margin-bottom: 10px;
 }
-#placesList.grid-mode .section-label { grid-column: 1 / -1; margin-top: 28px; margin-bottom: 8px; }
+#placesList.grid-mode .section-label { grid-column: 1 / -1; margin-top: 16px; margin-bottom: 8px; }
 .section-label .sn { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-5); white-space: nowrap; }
 .section-label .sl { flex: 1; height: 1px; background: var(--rule); }
 .section-label .ct { font-size: 10px; color: var(--ink-5); }
@@ -527,15 +533,19 @@ a { color: inherit; text-decoration: none; }
       <!-- Controls: Filtr + Seznam + Dlaždice -->
       <div class="controls-bar">
         <button class="ctrl-btn ctrl-btn-filter" id="filterBtn" onclick="toggleFilter()">
-          <span class="filter-dots">
-            <span style="background:var(--cat-hist)"></span>
-            <span style="background:var(--cat-arch)"></span>
-            <span style="background:var(--cat-art)"></span>
-            <span style="background:var(--cat-fun)"></span>
+          <span class="filter-bottom">
+            <span class="filter-icon-wrap">
+              <span class="filter-dots">
+                <span style="background:var(--cat-hist)"></span>
+                <span style="background:var(--cat-arch)"></span>
+                <span style="background:var(--cat-art)"></span>
+                <span style="background:var(--cat-fun)"></span>
+              </span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            </span>
+            Filtr
+            <span class="filter-cnt" id="filterHeadCnt"><span id="filterHeadActive" style="color:var(--ink-5);font-size:12px;font-weight:500;">—</span><span id="filterHeadTotal" style="color:var(--ink-5);font-size:10px;"></span></span>
           </span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          Filtr
-          <span class="filter-cnt" id="filterHeadCnt"><span id="filterHeadActive" style="color:var(--ink-5);font-size:12px;font-weight:500;">—</span><span id="filterHeadTotal" style="color:var(--ink-5);font-size:10px;"></span></span>
         </button>
         <button class="ctrl-btn ctrl-btn-view active" id="btnList" onclick="setView('list')" title="Seznam">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
