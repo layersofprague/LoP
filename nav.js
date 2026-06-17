@@ -54,8 +54,8 @@ const CSS = `
   bottom: 0; left: 0; right: 0;
   z-index: 90;
   display: flex;
-  border-top: 1px solid var(--rule, #cbcec5);
-  background: var(--paper, #eeefeb);
+  border-top: 1px solid var(--rule, #E8E8E6);
+  background: var(--paper, #F8F8F6);
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   padding-bottom: env(safe-area-inset-bottom, 0);
@@ -72,13 +72,13 @@ const CSS = `
   text-decoration: none;
   font-family: inherit;
 }
-.lop-n-item:hover { color: var(--ink, #1a1a18); }
-.lop-n-item.active { color: var(--ink, #1a1a18); }
+.lop-n-item:hover { color: var(--ink, #111111); }
+.lop-n-item.active { color: var(--ink, #111111); }
 .lop-n-item.active::before {
   content: ''; position: absolute; top: -1px; left: 50%;
   transform: translateX(-50%);
   width: 32px; height: 2px;
-  background: var(--ink, #1a1a18);
+  background: var(--ink, #111111);
 }
 .lop-n-item svg { width: 20px; height: 20px; display: block; }
 .lop-n-label {
@@ -102,7 +102,7 @@ const CSS = `
     width: 84px;
     flex-direction: column;
     border-top: none;
-    border-left: 1px solid var(--rule, #cbcec5);
+    border-left: 1px solid var(--rule, #E8E8E6);
     padding-top: 74px;
     padding-bottom: 14px;
     gap: 2px;
@@ -126,7 +126,7 @@ const CSS = `
     width: 64px;
     flex-direction: column;
     border-top: none;
-    border-left: 1px solid var(--rule, #cbcec5);
+    border-left: 1px solid var(--rule, #E8E8E6);
     padding-top: var(--header-h, 52px);
     padding-bottom: 14px;
     gap: 0;

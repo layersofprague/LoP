@@ -36,8 +36,8 @@ const CSS = `
   align-items: center;
   justify-content: space-between;
   padding: 8px 18px 6px;
-  border-bottom: 1px solid var(--rule, #cbcec5);
-  background: var(--paper, #eeefeb);
+  border-bottom: 1px solid var(--rule, #E8E8E6);
+  background: var(--paper, #F8F8F6);
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -66,17 +66,17 @@ const CSS = `
   position: relative;
   text-decoration: none;
 }
-.lop-h-btn:hover { background: var(--paper-2, #e6e7e2); }
+.lop-h-btn:hover { background: var(--paper-2, #F0F0EE); }
 .lop-h-btn svg { width: 19px; height: 19px; }
 .lop-h-btn .lop-h-dot {
   position: absolute; top: 8px; right: 8px;
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent, #b04020);
 }
-.lop-h-btn.logged-in { color: var(--ink, #1a1a18); }
+.lop-h-btn.logged-in { color: var(--ink, #111111); }
 .lop-h-profile-avatar {
   width: 26px; height: 26px; border-radius: 50%;
-  background: var(--ink, #1a1a18); color: var(--paper, #eeefeb);
+  background: var(--ink, #111111); color: var(--paper, #F8F8F6);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Fraunces', serif; font-style: italic;
   font-size: 13px; font-weight: 500; line-height: 1;
