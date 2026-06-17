@@ -668,6 +668,7 @@ function setView(mode) {
 
 function toggleView() {
   setView(viewMode === 'list' ? 'grid' : 'list');
+  document.getElementById('btnView')?.blur();
 }
 
 /* ── Stamp — napojení na stamp.js (stejné jako sbirky.html) ── */
