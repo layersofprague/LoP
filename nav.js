@@ -82,7 +82,7 @@ const CSS = `
 }
 .lop-n-item svg { width: 20px; height: 20px; display: block; }
 .lop-n-label {
-  font-size: 10px; font-weight: 500;
+  font-size: 11px; font-weight: 500;
   letter-spacing: .01em;
 }
 .lop-n-badge {
@@ -90,7 +90,7 @@ const CSS = `
   min-width: 14px; height: 14px; padding: 0 3px;
   border-radius: 7px;
   background: var(--accent, #b04020); color: #fff;
-  font-size: 9px; font-weight: 600; line-height: 14px; text-align: center;
+  font-size: 10px; font-weight: 600; line-height: 14px; text-align: center;
   display: none;
 }
 .lop-n-badge.visible { display: block; }
@@ -136,7 +136,7 @@ const CSS = `
     flex: 0 0 auto;
     padding: 10px 4px;
   }
-  .lop-n-label { font-size: 9px; }
+  .lop-n-label { font-size: 10px; }
   .lop-n-item.active::before {
     top: 50%; left: -1px;
     transform: translateY(-50%);
