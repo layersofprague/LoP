@@ -679,6 +679,17 @@ a { color: inherit; text-decoration: none; }
 
 /* ── poloha / výřez mapy (placeholder) ── */
 .map-frame { position: relative; display: block; aspect-ratio: 16 / 9; border: 1.5px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--paper-2); text-decoration: none; }
+#miniMap { width: 100%; height: 100%; border-radius: 10px; }
+#miniMap .leaflet-control-zoom,
+#miniMap .leaflet-control-attribution { display: none !important; }
+.mini-pin {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(26,24,20,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
+  color: #fff; cursor: pointer;
+}
 .map-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px); background-size: 30px 30px; opacity: .55; }
 .map-river { position: absolute; left: -12%; right: -12%; top: 52%; height: 30%; background: var(--paper-3); transform: rotate(-8deg); opacity: .85; }
 .map-pin { position: absolute; top: 43%; left: 50%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(176,64,32,.14); display: flex; align-items: center; justify-content: center; z-index: 2; transition: background .2s; }
@@ -724,7 +735,9 @@ a { color: inherit; text-decoration: none; }
   body { padding-right: 64px !important; padding-bottom: 0 !important; }
 }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="../castle-data.js"></script>
 <script src="../stamp.js"></script>
 </head>
@@ -896,13 +909,9 @@ a { color: inherit; text-decoration: none; }
       <div class="sec-rule"></div>
       <span class="sec-num">výřez mapy</span>
     </div>
-    <a class="map-frame" href="https://mapy.cz/zakladni?q=50.10543,14.45595&x=14.45595&y=50.10543&z=16" target="_blank" title="Otevřít v Mapy.cz">
-      <div class="map-grid"></div>
-      <div class="map-river"></div>
-      <div class="map-pin"><span class="map-pin-dot"></span></div>
-      <div class="map-coords">50.10543, 14.45595</div>
-      <div class="map-note">výřez mapy</div>
-    </a>
+    <div class="map-frame" id="miniMapWrap">
+      <div id="miniMap"></div>
+    </div>
   </div>
 
   <!-- na místě -->
@@ -1614,6 +1623,68 @@ function toggleWishBtn() {
       }
     }
   } catch(e) {}
+})();
+
+
+/* ── MINI MAPA ── */
+(function() {
+  const LAT = 50.10543, LNG = 14.45595;
+  const PLACE_ID = 'H001';
+  const CAT_COLOR = { hist:'#4A4A48', arch:'#3B5F84', art:'#C0522A', fun:'#E0A020' };
+
+  const map = L.map('miniMap', {
+    center: [LAT, LNG], zoom: 15,
+    zoomControl: false, dragging: false,
+    scrollWheelZoom: false, doubleClickZoom: false,
+    touchZoom: false, keyboard: false,
+    attributionControl: false
+  });
+
+  // Naše CARTO dlaždice
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  // Šachovnicový praporek pro aktivní místo
+  const flagHtml = '<div style="'
+    + 'width:30px;height:30px;border-radius:50%;'
+    + 'border:2px solid #fff;box-shadow:0 2px 6px rgba(26,24,20,.35);'
+    + 'background-image:linear-gradient(45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(-45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(45deg,transparent 75%,#1a1a18 75%),'
+    + 'linear-gradient(-45deg,transparent 75%,#1a1a18 75%);'
+    + 'background-size:7px 7px;background-color:#fff;'
+    + 'background-position:0 0,0 3.5px,3.5px -3.5px,-3.5px 0;'
+    + '"></div>';
+
+  L.marker([LAT, LNG], {
+    icon: L.divIcon({ html: flagHtml, className: '', iconSize: [30,30], iconAnchor: [15,15] }),
+    zIndexOffset: 100
+  }).addTo(map).on('click', () => {
+    location.href = '../index.html#' + PLACE_ID;
+  });
+
+  // Okolní místa z places.json
+  fetch('../places.json').then(r => r.json()).then(places => {
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+    places.filter(p => p.id !== PLACE_ID && p.lat && p.lng && haversine(LAT, LNG, p.lat, p.lng) <= 1).forEach(p => {
+      const color = CAT_COLOR[p.cat] || '#999';
+      const letter = p.id ? p.id.replace(/[0-9]/g,'').charAt(0) : '?';
+      const pinHtml = `<div class="mini-pin" style="background:${color}">${letter}</div>`;
+      L.marker([p.lat, p.lng], {
+        icon: L.divIcon({ html: pinHtml, className: '', iconSize: [26,26], iconAnchor: [13,13] })
+      }).addTo(map).on('click', () => {
+        location.href = '../index.html#' + p.id;
+      });
+    });
+  }).catch(() => {});
+
+  // Klik na mapu → index.html
+  map.on('click', () => { location.href = '../index.html'; });
 })();
 
 /* ── SHARE ── */
