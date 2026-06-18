@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<link rel="manifest" href="../manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#111111"/>
+<title>Holešovický přístav — LayersOfPrague</title>
+<meta name="description" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════ TOKENS ═══════════════ */
+:root {
+  --paper:    #F8F8F6;
+  --paper-2:  #F0F0EE;
+  --paper-3:  #E8E8E6;
+  --ink:      #111111;
+  --ink-2:    #333331;
+  --ink-3:    #666662;
+  --ink-4:    #999994;
+  --ink-5:    #BABAB6;
+  --rule:     #E8E8E6;
+  --rule-2:   #E0E0DE;
+  --cat-hist: #4A4A48;
+  --cat-hist-soft: #d8d8d4;
+  --cat-arch: #3B5F84;
+  --cat-fun:  #E0A020;
+  --cat-art:  #C0522A;
+  --accent:   #B04020;
+  --ok:       #3d7a4a;
+  --ease: cubic-bezier(.22,.8,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+button, input { font-family: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ── HERO / SLIDER ── */
+.hero-wrap {
+  max-width: 640px;
+  margin: 12px auto 0;
+  padding: 0 20px 0;
+  position: relative;
+}
+.hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #0d0b08;
+  overflow: hidden;
+  cursor: default;
+  user-select: none; -webkit-user-select: none;
+  touch-action: pan-y;
+  border-radius: 4px;
+}
+.sl-base, .sl-top {
+  position: absolute; inset: 0;
+}
+.sl-base img, .sl-top img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 30%;
+  pointer-events: none; -webkit-user-drag: none;
+  display: block;
+}
+.sl-top { --pos: 50%; }
+.sl-margin {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 0 2px;
+  margin-top: 2px;
+}
+.sl-kicker { align-self: flex-start; transform: translateY(1px); }
+.sl-lbl {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; line-height: 1;
+  letter-spacing: .02em;
+  color: var(--ink-4);
+  font-weight: 500;
+  transition: color .2s, font-weight .2s;
+}
+.sl-lbl.active { color: var(--ink); font-weight: 500; }
+.sl-kicker {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-4);
+}
+/* Handle — jediný ovládací prvek */
+.sl-handle {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 26px; height: 26px; border-radius: 2px;
+  background: var(--paper);
+  box-shadow: 0 4px 14px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.05);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+  cursor: ew-resize;
+  z-index: 4;
+  pointer-events: auto;
+}
+.sl-handle svg { width: 11px; height: 11px; pointer-events: none; }
+/* Hairline divider */
+.sl-divider {
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 1px; background: rgba(243,237,225,.85);
+  transform: translateX(-.5px);
+  pointer-events: none;
+  z-index: 3;
+}
+.sl-fs-btn {
+  position: absolute; bottom: 14px; right: 14px;
+  background: transparent; border: none; cursor: pointer;
+  padding: 4px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--paper); z-index: 5;
+}
+.sl-fs-btn svg { width: 11px; height: 11px; pointer-events: none; }
+
+/* Copyright tlačítko */
+.sl-copy-btn {
+  position: absolute; bottom: 14px; left: 14px;
+  padding: 4px;
+  background: transparent;
+  border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; letter-spacing: .04em;
+  color: var(--paper); z-index: 5;
+  line-height: 1;
+}
+
+/* Copyright modal — vyjede zdola slideru */
+.copy-modal {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  background: rgba(13,11,8,.55);
+  backdrop-filter: blur(12px);
+  padding: 7px 12px 8px;
+  transform: translateY(100%);
+  transition: transform .3s var(--ease);
+  border-top: 1px solid rgba(243,237,225,.12);
+}
+.copy-modal.open { transform: translateY(0); }
+.copy-close {
+  position: absolute; top: 10px; right: 12px;
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(243,237,225,.5); font-size: 16px; line-height: 1;
+  padding: 2px 4px;
+}
+.copy-close:hover { color: var(--paper); }
+.copy-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px;
+  margin-top: 6px;
+}
+.copy-col-head {
+  font-family: 'Inter', sans-serif;
+  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(243,237,225,.4);
+  margin-bottom: 3px; padding-bottom: 3px;
+  border-bottom: 1px solid rgba(243,237,225,.1);
+}
+.copy-row { margin-bottom: 2px; }
+.copy-key {
+  font-family: 'Inter', sans-serif;
+  font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(243,237,225,.4); margin-bottom: 1px;
+}
+.copy-val { font-size: 10.5px; color: rgba(243,237,225,.8); line-height: 1.3; }
+
+/* Nativní fullscreen */
+#hero:-webkit-full-screen { width: 100vw; height: 100vh; max-height: none; }
+#hero:fullscreen          { width: 100vw; height: 100vh; max-height: none; }
+
+/* Fullscreen modal */
+.fs-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.55);
+  align-items: center; justify-content: center;
+}
+.fs-modal.open { display: flex; }
+.fs-modal-inner {
+  position: relative;
+  width: min(100vw, calc(100dvh * 4 / 3));
+  height: min(100dvh, calc(100vw * 3 / 4));
+  max-width: 100vw; max-height: 100dvh;
+}
+.fs-modal-inner .sl-base,
+.fs-modal-inner .sl-top {
+  position: absolute; inset: 0;
+}
+.fs-modal-inner .sl-base img,
+.fs-modal-inner .sl-top img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  pointer-events: none; -webkit-user-drag: none;
+}
+.fs-modal-inner .sl-lbl {
+  position: absolute; bottom: 14px; z-index: 3;
+  color: rgba(238,239,235,.5);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.fs-modal-inner .sl-lbl.active { color: #ffffff; }
+.fs-modal-inner .sl-lbl-l { left: 14px; }
+.fs-modal-inner .sl-lbl-r { right: 14px; }
+.fs-modal-inner .sl-handle {
+  position: absolute; top: 50%; cursor: ew-resize; z-index: 4; pointer-events: auto;
+}
+.fs-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 5;
+}
+.fs-close svg { width: 18px; height: 18px; pointer-events: none; }
+
+/* ── RAZÍTKO V ROHU ── */
+.hero-stamp {
+  position: absolute;
+  top: -18px; right: -18px;
+  width: 90px; height: 90px;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.18));
+}
+.hero-stamp-wrap {
+  position: absolute;
+  top: 0; right: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 6;
+}
+
+
+
+/* AR CTA */
+.ar-cta {
+  position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 3;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border-radius: 10px;
+  background: rgba(13,11,8,.6);
+  backdrop-filter: blur(14px);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background .2s;
+  text-decoration: none;
+}
+.ar-cta:hover { background: rgba(13,11,8,.8); }
+.ar-cta-ic {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(243,237,225,.14);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ar-cta-ic svg { width: 16px; height: 16px; }
+.ar-cta-body { flex: 1; }
+.ar-cta-kick {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(243,237,225,.5);
+}
+.ar-cta-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 500; line-height: 1.2;
+  margin-top: 1px;
+}
+.ar-cta-badge {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  padding: 4px 8px; border-radius: 4px;
+  background: rgba(243,237,225,.14);
+}
+
+/* ── BODY ── */
+.body {
+  padding: 10px 20px 48px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* kicker */
+.kicker {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+.k-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cat-hist); }
+.k-sep { opacity: .3; }
+.k-votes {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
+}
+.k-vote-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; color: var(--ink-3);
+  padding: 2px 4px; border-radius: 4px;
+  transition: color .15s, background .15s;
+}
+.k-vote-btn:hover { background: var(--paper-2); color: var(--ink); }
+.k-vote-btn.active-like  { color: var(--ok); }
+.k-vote-btn.active-dislike { color: var(--accent); }
+.k-vote-btn svg { width: 13px; height: 13px; }
+
+/* title */
+.place-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: clamp(26px, 7vw, 40px);
+  line-height: 1.0;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  margin-bottom: 6px;
+  text-wrap: pretty;
+  white-space: normal;
+}
+.place-title em { font-style: italic; font-weight: 300; color: #777772; }
+
+/* sub */
+.place-sub {
+  font-size: 13px; color: var(--ink-3);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.place-sub .dot { color: var(--ink-4); }
+.place-sub .coords {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; color: var(--ink-3);
+}
+
+/* actions */
+.actions {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 6px; padding: 12px 8px;
+  margin: -4px -4px 20px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.act-btn {
+  appearance: none; background: transparent; border: none;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 6px 4px; border-radius: 8px;
+  cursor: pointer; color: var(--ink-2);
+  transition: background .15s; text-decoration: none;
+}
+.act-btn:hover { background: var(--paper-2); }
+.act-btn.active { color: var(--accent); }
+.act-btn svg { width: 18px; height: 18px; }
+.act-lbl { font-size: 10px; font-weight: 500; letter-spacing: .01em; }
+
+/* lede */
+.lede {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink-3);
+  letter-spacing: -.005em;
+  margin-bottom: 22px;
+  text-wrap: pretty;
+}
+
+
+/* section */
+.section { margin-bottom: 24px; }
+.sec-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.sec-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-5); white-space: nowrap;
+}
+.sec-rule { flex: 1; height: 1px; background: var(--rule); }
+.sec-num {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; color: var(--ink-5); white-space: nowrap;
+}
+
+/* facts */
+.facts {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--rule);
+  border: 1.5px solid var(--rule); border-radius: 10px; overflow: hidden;
+}
+.fact { background: #fff; padding: 10px 13px; }
+.fact-k {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-5); margin-bottom: 3px;
+}
+.fact-v {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink); line-height: 1.15;
+}
+
+/* steps */
+.steps { display: flex; flex-direction: column; }
+.step {
+  display: flex; gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+.step:first-child { border-top: none; padding-top: 0; }
+.step-num {
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 26px; line-height: 1; font-weight: 300;
+  color: var(--cat-hist); width: 38px; letter-spacing: -.03em;
+}
+.step-body h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 600; line-height: 1.25;
+  letter-spacing: -.01em;
+  margin-bottom: 4px; color: var(--ink);
+}
+.step-body p {
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
+}
+
+/* tip */
+.tip {
+  margin: 4px 0 0;
+  padding: 14px 16px 14px 18px;
+  background: var(--paper-2);
+  border-left: 2px solid var(--cat-fun);
+  border-radius: 0 10px 10px 0;
+}
+.tip-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--cat-fun); margin-bottom: 4px;
+}
+.tip-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
+}
+
+/* nav button */
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 14px 16px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background .15s;
+  text-decoration: none; margin-top: 8px;
+}
+.nav-btn:hover { background: var(--ink-2); }
+.nav-btn svg { width: 16px; height: 16px; }
+.nav-btn-sub {
+  display: flex; gap: 8px; margin-top: 8px;
+}
+.nav-btn-sec {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 12px;
+  background: var(--paper-2); color: var(--ink-2);
+  border: 1px solid var(--rule); border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background .15s; text-decoration: none;
+}
+.nav-btn-sec:hover { background: var(--paper-3); }
+.nav-btn-sec svg { width: 15px; height: 15px; }
+
+/* insider */
+.insider-teaser { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); margin-bottom: 12px; }
+.insider-full { display: none; flex-direction: column; gap: 12px; margin-bottom: 4px; }
+.insider-full p { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
+.insider-full.visible { display: flex; }
+.insider-gate {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 12px 14px;
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: 8px;
+  font-size: 13.5px; color: var(--ink-3);
+}
+.insider-gate.hidden { display: none; }
+.insider-gate a { color: var(--ink); font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+/* autor zastavení */
+.autor-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+.autor-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--cat-hist); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -.02em;
+  flex-shrink: 0;
+}
+.autor-body { flex: 1; min-width: 0; }
+.autor-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 600; letter-spacing: -.01em;
+  color: var(--ink); margin-bottom: 4px;
+}
+.autor-meta {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: 12px; color: var(--ink-3);
+  font-family: 'Inter', sans-serif;
+  letter-spacing: .06em;
+}
+.autor-badge {
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+  background: var(--cat-hist); color: var(--paper);
+  padding: 2px 7px; border-radius: 3px;
+}
+.autor-sep { opacity: .35; }
+.autor-rating {
+  display: flex; align-items: center; gap: 3px;
+  color: var(--cat-fun);
+}
+.autor-link {
+  color: var(--ink-3); flex-shrink: 0;
+  display: flex; align-items: center;
+  transition: color .15s;
+}
+.autor-link:hover { color: var(--ink); }
+
+/* leaderboard */
+.lbm-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.lbm-avatar {
+  flex-shrink: 0;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--cat-hist); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: .04em;
+}
+.lbm-body { flex: 1; min-width: 0; }
+.lbm-meta {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 5px;
+}
+.lbm-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; letter-spacing: -.01em; color: var(--ink);
+}
+.lbm-sep { color: var(--ink-4); font-size: 12px; }
+.lbm-score {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; letter-spacing: .06em;
+  color: #E0A020;
+}
+.lbm-text {
+  font-size: 13px; line-height: 1.55; color: var(--ink-3);
+  font-style: italic;
+}
+.leaderboard {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--rule); border-radius: 10px;
+  overflow: hidden;
+}
+.lb-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 42px 80px;
+  align-items: center; gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+}
+.lb-row:first-child { border-top: none; }
+.lb-gold { background: linear-gradient(90deg, rgba(224,160,32,.08) 0%, transparent 100%); }
+.lb-rank {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; color: var(--ink-4); font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+}
+.lb-name { font-size: 13.5px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-pts { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-2); text-align: right; }
+.lb-bar-wrap { height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.lb-bar { height: 100%; background: #E0A020; border-radius: 2px; }
+.lb-gold .lb-pts { color: #b08010; }
+.ar-cta-light {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 10px;
+  background: var(--ink); color: var(--paper);
+  cursor: pointer; transition: background .2s;
+  text-decoration: none; margin-top: 12px;
+}
+.ar-cta-light:hover { background: var(--ink-2); }
+.ar-cta-light .ar-cta-ic { background: rgba(238,239,235,.12); }
+.ar-cta-light .ar-cta-kick { color: rgba(238,239,235,.5); }
+
+/* keyword tags */
+.kw-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; letter-spacing: .06em;
+  padding: 5px 11px; border-radius: 6px;
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  color: var(--ink-3);
+}
+
+/* placeholder gallery */
+.gallery {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+}
+.gallery-thumb {
+  aspect-ratio: 1; border-radius: 6px; overflow: hidden;
+  background: var(--paper-3); position: relative; cursor: pointer;
+  transition: transform .2s var(--ease);
+}
+.gallery-thumb:hover { transform: scale(1.02); }
+.gallery-thumb::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--paper-3), var(--paper-2));
+}
+.gt-label {
+  position: absolute; bottom: 6px; left: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; color: var(--ink-3);
+}
+
+.lb-my-row {
+  margin-top: 8px;
+  padding: 9px 12px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  display: none;
+  align-items: center; gap: 10px;
+}
+.lb-my-row.visible { display: flex; }
+.lb-my-stamp { width: 40px; height: 40px; flex-shrink: 0; }
+.lb-my-body { flex: 1; }
+.lb-my-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 2px;
+}
+.lb-my-val {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px; font-weight: 700; letter-spacing: -.02em; line-height: 1;
+  color: var(--ink);
+}
+.lb-my-val span {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 400; color: var(--ink-4);
+}
+.lb-my-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; color: var(--ink-4); margin-top: 2px;
+}
+.lb-my-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; color: var(--ink-4);
+  text-align: right; flex-shrink: 0;
+}
+
+/* ── poloha / výřez mapy (placeholder) ── */
+.map-frame { position: relative; display: block; aspect-ratio: 16 / 9; border: 1.5px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--paper-2); text-decoration: none; }
+#miniMap { width: 100%; height: 100%; border-radius: 10px; }
+#miniMap .leaflet-control-zoom,
+#miniMap .leaflet-control-attribution { display: none !important; }
+.mini-pin {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(26,24,20,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
+  color: #fff; cursor: pointer;
+}
+.map-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px); background-size: 30px 30px; opacity: .55; }
+.map-river { position: absolute; left: -12%; right: -12%; top: 52%; height: 30%; background: var(--paper-3); transform: rotate(-8deg); opacity: .85; }
+.map-pin { position: absolute; top: 43%; left: 50%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(176,64,32,.14); display: flex; align-items: center; justify-content: center; z-index: 2; transition: background .2s; }
+.map-pin-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.map-coords { position: absolute; left: 10px; bottom: 10px; z-index: 2; font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: .04em; color: var(--ink-3); background: rgba(248,248,246,.85); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--rule); }
+.map-note { position: absolute; right: 11px; top: 11px; z-index: 2; font-family: 'Inter', sans-serif; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); }
+.map-frame:hover .map-pin { background: rgba(176,64,32,.22); }
+
+/* ── žebříček: spotlight design sladěný s přehledem ── */
+.lh-card { background: #fff; border: 1.5px solid var(--rule); border-radius: 10px; overflow: hidden; }
+.lh-hero { display: flex; align-items: center; gap: 14px; padding: 18px 18px 0; }
+.lh-av { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; background: var(--cat-hist); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; letter-spacing: .02em; position: relative; }
+.lh-badge { position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; background: var(--cat-fun); color: #fff; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; }
+.lh-id { flex: 1; min-width: 0; }
+.lh-kick { font-family: 'Inter', sans-serif; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-5); font-weight: 500; }
+.lh-name { font-size: 18px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); line-height: 1.1; margin-top: 2px; }
+.lh-pts { text-align: right; flex-shrink: 0; }
+.lh-pts .n { font-size: 26px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); line-height: 1; }
+.lh-pts .u { font-family: 'Inter', sans-serif; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-5); margin-top: 4px; }
+.lh-quote-wrap { padding: 15px 18px 17px; }
+.lh-quote { position: relative; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+.lh-quote::before { content: ''; position: absolute; top: -8px; left: 36px; width: 14px; height: 14px; background: var(--paper-2); border-left: 1px solid var(--rule); border-top: 1px solid var(--rule); transform: rotate(45deg); }
+.lh-quote p { font-size: 13px; line-height: 1.6; color: var(--ink-4); font-style: italic; text-wrap: pretty; }
+.lh-quote .by { display: block; text-align: right; margin-top: 10px; font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: .02em; color: var(--ink-5); }
+.lh-row { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 12px; padding: 14px 18px; border-top: 1px solid var(--rule); }
+.lh-row .rk { font-size: 13px; color: var(--ink-5); text-align: center; }
+.lh-row .nm { font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lh-row .pt { font-size: 14px; font-weight: 600; color: var(--ink-2); text-align: right; }
+.lh-skip { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 0; }
+.lh-skip span { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-5); }
+.lh-you { position: relative; overflow: hidden; display: none; grid-template-columns: auto 48px 1fr auto; align-items: center; gap: 14px; background: #fff; border: 1.5px solid var(--rule); border-radius: 12px; padding: 15px 18px 15px 20px; }
+.lh-you.visible { display: grid; }
+.lh-you::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent); }
+.lh-you .rk { font-size: 20px; font-weight: 700; color: var(--accent); }
+.lh-you .av { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+.lh-you .nm { font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.lh-you .sub { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--ink-5); margin-top: 3px; }
+.lh-you .pt-wrap { text-align: right; }
+.lh-you .pt { font-size: 20px; font-weight: 700; color: var(--accent); line-height: 1; }
+.lh-you .u { font-family: 'Inter', sans-serif; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-5); margin-top: 4px; }
+
+@media (max-width: 819px) and (orientation: landscape) {
+  body { padding-right: 64px !important; padding-bottom: 0 !important; }
+}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../castle-data.js"></script>
+<script src="../stamp.js"></script>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="lop-header"></div>
+<script src="../header.js"></script>
+
+<!-- NAV -->
+<div id="lop-nav"></div>
+<script src="../nav.js"></script>
+
+<!-- HERO SLIDER -->
+<div class="hero-wrap">
+
+  <!-- title + votes -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+    <h1 class="place-title">Holešovický <em>přístav</em></h1>
+    <div class="k-votes" style="flex-shrink:0;margin-top:6px">
+      <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+        <span id="dislikeCount">0</span>
+      </button>
+      <button class="k-vote-btn" id="likeBtn" onclick="vote('like')" title="Líbí se">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        <span id="likeCount">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- kicker -->
+  <div class="kicker">
+    <div class="k-dot"></div>
+    <span>Historie</span>
+    <span class="k-sep">·</span>
+    <span>Průmysl</span>
+  </div>
+
+<div class="hero" id="hero">
+  <!-- Základ: současná fotka -->
+  <div class="sl-base">
+    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+  </div>
+  <!-- Overlay: historická fotka, maskována zprava -->
+  <div class="sl-top" id="slTop">
+    <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+  </div>
+  <!-- Hairline divider -->
+  <div class="sl-divider" id="slDivider"></div>
+  <!-- Handle — jediné místo pro tažení -->
+  <div class="sl-handle" id="slHandle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
+    </svg>
+  </div>
+  <!-- Fullscreen tlačítko -->
+  <button class="sl-fs-btn" id="slFsBtn" title="Celá obrazovka" onclick="toggleFullscreen()">
+    <svg id="slFsIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+    </svg>
+  </button>
+  <button class="sl-copy-btn" id="slCopyBtn" title="Autorská práva" onclick="openCopyright()">©</button>
+
+
+  <!-- Copyright modal -->
+  <div class="copy-modal" id="copyModal">
+    <button class="copy-close" onclick="closeCopyright()">✕</button>
+    <div class="copy-grid" id="copyGrid">
+      <div>
+        <div class="copy-col-head">Dnes</div>
+        <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+      <div>
+        <div class="copy-col-head">~1930</div>
+        <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Razítko v rohu fotografie -->
+<div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
+<div class="sl-margin">
+  <div class="sl-lbl" id="lblNow">2026</div>
+  <div class="sl-kicker">Tehdy &amp; Dnes</div>
+  <div class="sl-lbl active" id="lblHist">~1930</div>
+</div>
+
+</div><!-- /hero-wrap -->
+
+<!-- FULLSCREEN MODAL -->
+<div class="fs-modal" id="fsModal">
+  <div class="fs-modal-inner">
+    <div class="sl-base">
+      <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+    </div>
+    <div class="sl-top" id="slTopFs">
+      <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+    </div>
+    <div class="sl-lbl sl-lbl-l" id="lblHistFs">~1930</div>
+    <div class="sl-lbl sl-lbl-r" id="lblNowFs">2026</div>
+    <div class="sl-handle" id="slHandleFs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
+      </svg>
+    </div>
+  </div>
+  <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- actions -->
+  <div class="actions" style="grid-template-columns:repeat(6,1fr)">
+    <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Kompas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span class="act-lbl">Kompas</span>
+    </a>
+    <a href="https://mapy.cz/zakladni?q=50.10543,14.45595&route-end=50.10543,14.45595&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="act-lbl">Mapy.cz</span>
+    </a>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=50.10543,14.45595&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="act-lbl">Google</span>
+    </a>
+    <button class="act-btn" onclick="share()" title="Sdílet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      <span class="act-lbl">Sdílet</span>
+    </button>
+    <a href="../ar-intro.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="act-btn" title="AR">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+      <span class="act-lbl">AR</span>
+    </a>
+    <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
+      <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      <span class="act-lbl" id="wishLbl">Plán</span>
+    </button>
+  </div>
+
+  <!-- lede -->
+  <p class="lede">Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl v letech 1892–1894 umělým vyhloubením bazénu 750 m dlouhého. Secesní budovy přístavního dozorství postavil roku 1906 architekt František Sander. V 90. letech lodní provoz ustal; dnes část areálu tvoří rezidence Prague Marina.</p>
+
+  <!-- fakta -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Fakta</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num">4 položky</span>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="fact-k">Architekt</div><div class="fact-v">F. Sander</div></div>
+      <div class="fact"><div class="fact-k">Vybudováno</div><div class="fact-v">1892–94</div></div>
+      <div class="fact"><div class="fact-k">Památka od</div><div class="fact-v">2002</div></div>
+      <div class="fact"><div class="fact-k">Status</div><div class="fact-v">Prague Marina</div></div>
+    </div>
+  </div>
+
+  <!-- poloha / mapa -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Poloha</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num">výřez mapy</span>
+    </div>
+    <div class="map-frame" id="miniMapWrap">
+      <div id="miniMap"></div>
+    </div>
+  </div>
+
+  <!-- na místě -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Na místě</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num">3 kroky</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Budova dozorčí služby</h4>
+          <p>Postav se čelem k řece — historická budova přístavního dozorčího stojí přímo na hraně nábřeží. Hledej původní průmyslové detaily fasády.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Pohled směrem 136°</h4>
+          <p>Otoč se na jihovýchod (136°) — přesně tímto směrem byl pořízen historický snímek. Srovnej panorama s dobovým záběrem v AR.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Přístavní infrastruktura</h4>
+          <p>Všimni si pozůstatků původních přístavních prvků — kolejí, kotvicích ok a průmyslových sloupů podél nábřeží.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip">
+      <div class="tip-label">Zajímavosti</div>
+      <div class="tip-text" id="insiderTeaser">Věděli jste, že přístav byl původně navržen tak, aby…</div>
+      <div class="insider-full" id="insiderFull" style="margin-top:10px">
+        <div class="tip-text" style="font-style:normal">Věděli jste, že přístav byl původně navržen tak, aby zvládl lodě až 80 metrů dlouhé? Při výstavbě bylo ručně vyhloubeno přes 200 000 m³ zeminy a celý bazén byl dokončen za pouhé dva roky.</div>
+        <div class="tip-text" style="font-style:normal;margin-top:10px">Secesní budova přístavního dozorství od architekta Františka Sandera patří k nejzachovalejším průmyslovým stavbám přelomu 19. a 20. století v Praze. Sander navrhl budovu záměrně ve stylu anglického vesnického domu — tzv. cottage — aby opticky odlehčil industriální charakter přístavu.</div>
+        <div class="tip-text" style="font-style:normal;margin-top:10px">Přístav byl strategicky důležitý i za druhé světové války — Němci ho využívali k přepravě materiálu po Vltavě. Po válce sloužil k dovozu uhlí a stavebního materiálu pro obnovu Prahy. Pravidelná lodní nákladní doprava zde fungovala až do roku 1989.</div>
+        <div class="tip-text" style="font-style:normal;margin-top:10px">Dnes je areál zapsán jako nemovitá kulturní památka. Rezidence Prague Marina vznikla přestavbou starých skladišť v roce 2007 — developeři byli povinni zachovat fasády historických budov.</div>
+      </div>
+      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
+        <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- galerie (placeholder) -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Galerie</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num">Brzy</span>
+    </div>
+    <div class="gallery">
+      <div class="gallery-thumb">
+        <img src="https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
+        <div class="gt-label">~1930</div>
+      </div>
+      <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
+      <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
+    </div>
+  </div>
+
+  <!-- gamifikace — žebříček -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Žebříček</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num">Top 5</span>
+    </div>
+    <div class="lh-card">
+      <div class="lh-hero">
+        <div class="lh-av">JK<span class="lh-badge">1</span></div>
+        <div class="lh-id">
+          <div class="lh-kick">Nejlepší záběr</div>
+          <div class="lh-name">Jan K.</div>
+        </div>
+        <div class="lh-pts"><div class="n">342</div><div class="u">bodů</div></div>
+      </div>
+      <div class="lh-quote-wrap">
+        <div class="lh-quote">
+          <p>„Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.“</p>
+          <span class="by">Jan K., 1. místo</span>
+        </div>
+      </div>
+      <div class="lh-row"><span class="rk">2</span><span class="nm">Tereza M.</span><span class="pt">298</span></div>
+      <div class="lh-row"><span class="rk">3</span><span class="nm">Pavel N.</span><span class="pt">261</span></div>
+      <div class="lh-row"><span class="rk">4</span><span class="nm">Lucie V.</span><span class="pt">244</span></div>
+      <div class="lh-row"><span class="rk">5</span><span class="nm">Martin H.</span><span class="pt">198</span></div>
+    </div>
+    <!-- Tvůj výsledek (mimo Top 5) -->
+    <div class="lh-skip" id="lbMySkip" style="display:none"><span></span><span></span><span></span></div>
+    <div class="lh-you" id="lbMyRow">
+      <span class="rk" id="lbMyRank">—</span>
+      <span class="av">VY</span>
+      <div><div class="nm">Tvůj výsledek</div><div class="sub"><span id="lbMyScore">—</span> % shody · <span id="lbMyDate"></span></div></div>
+      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u">bodů</div></div>
+    </div>
+
+    <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg">
+      <div class="ar-cta-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
+      </div>
+      <div class="ar-cta-body">
+        <div class="ar-cta-kick">Nahlédni do historie</div>
+        <div class="ar-cta-title">Spustit AR — Holešovický přístav</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+  </div>
+
+  <!-- autor zastavení -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Autor zastavení</span>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="autor-card">
+      <div class="autor-avatar">L</div>
+      <div class="autor-body">
+        <div class="autor-name">LayersOfPrague</div>
+        <div class="autor-meta">
+          <span class="autor-badge">Kurátor</span>
+          <span class="autor-sep">·</span>
+          <span id="autorPlaces">12 zastavení</span>
+          <span class="autor-sep">·</span>
+          <span id="autorRoutes">3 trasy</span>
+          <span class="autor-sep">·</span>
+          <span class="autor-rating" id="autorStars">čeká na hodnocení</span>
+        </div>
+      </div>
+      <a class="autor-link" href="../autor.html?id=layersofprague" title="Profil autora">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- klíčová slova -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Klíčová slova</span>
+      <div class="sec-rule"></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <span class="kw-tag">přístav</span>
+      <span class="kw-tag">průmysl</span>
+      <span class="kw-tag">secese</span>
+      <span class="kw-tag">Holešovice</span>
+      <span class="kw-tag">František Sander</span>
+      <span class="kw-tag">lodní doprava</span>
+      <span class="kw-tag">Praha 7</span>
+      <span class="kw-tag">1892</span>
+      <span class="kw-tag">Prague Marina</span>
+      <span class="kw-tag">nábřeží</span>
+      <span class="kw-tag">průmyslová Praha</span>
+      <span class="kw-tag">přístavní dozorství</span>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<script>
+// Pročisti localStorage od duplicit při načtení
+(function() {
+  try {
+    ['lop_wishlist_v2','lop_visited_v1'].forEach(key => {
+      const raw = JSON.parse(localStorage.getItem(key) || '[]');
+      const clean = [...new Set(raw.map(String).filter(x => x && x !== 'undefined' && x !== 'null'))];
+      if (clean.length !== raw.length) localStorage.setItem(key, JSON.stringify(clean));
+    });
+  } catch(e) {}
+})();
+
+const PLACE_ID   = 'H001';
+const WISH_KEY   = 'lop_wishlist_v2';
+const VISIT_KEY  = 'lop_visited_v1';
+
+/* ── COPYRIGHT ── */
+const PHOTO_HIST = '../foto/h_001h.jpg';
+const PHOTO_NOW  = '../foto/h_001s.jpg';
+
+let _exifLoaded = false;
+
+function renderExif(elId, data) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const artist   = data?.Artist || data?.XPAuthor || data?.Creator || data?.['dc:creator'] || null;
+  const copy     = data?.Copyright || data?.Rights || data?.['dc:rights'] || null;
+  if (!artist && !copy) {
+    el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">EXIF data nenalezena</div>';
+    return;
+  }
+  el.innerHTML = `
+    ${artist ? `<div class="copy-row"><div class="copy-key">Autor</div><div class="copy-val">${artist}</div></div>` : ''}
+    ${copy   ? `<div class="copy-row"><div class="copy-key">Copyright</div><div class="copy-val">${copy}</div></div>`   : ''}
+  `;
+}
+
+async function loadExif() {
+  if (_exifLoaded) return;
+  _exifLoaded = true;
+  try {
+    const [histData, nowData] = await Promise.all([
+      exifr.parse(PHOTO_HIST, ['Artist', 'Copyright', 'XPAuthor', 'Creator', 'Rights', 'dc:creator', 'dc:rights']).catch(() => null),
+      exifr.parse(PHOTO_NOW,  ['Artist', 'Copyright', 'XPAuthor', 'Creator', 'Rights', 'dc:creator', 'dc:rights']).catch(() => null),
+    ]);
+    renderExif('copyHist', histData);
+    renderExif('copyNow',  nowData);
+  } catch(e) {
+    ['copyHist','copyNow'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">Nepodařilo se načíst</div>';
+    });
+  }
+}
+
+function openCopyright() {
+  document.getElementById('copyModal').classList.add('open');
+  loadExif();
+  setTimeout(() => {
+    document.addEventListener('click', _closeCopyOutside);
+  }, 10);
+}
+function closeCopyright() {
+  document.getElementById('copyModal').classList.remove('open');
+  document.removeEventListener('click', _closeCopyOutside);
+}
+function _closeCopyOutside(e) {
+  if (!e.target.closest('.copy-modal') && !e.target.closest('#slCopyBtn')) closeCopyright();
+}
+
+/* ── SYNC ── */
+syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); });
+
+/* ── AUTH CHECK ── */
+function updateInsiderGate() {
+  const loggedIn = !!(()=>{ try { const s = JSON.parse(localStorage.getItem('lop_auth_session')||'null'); return s&&s.access_token&&s.user; } catch(e){} })();
+  const role     = localStorage.getItem('lop_user_role') || 'member';
+  const insider  = ['insider','author','admin'].includes(role);
+
+  const full   = document.getElementById('insiderFull');
+  const gate   = document.getElementById('insiderGate');
+  const teaser = document.getElementById('insiderTeaser');
+  const txt    = document.getElementById('insiderGateText');
+  const link   = document.getElementById('insiderGateLink');
+
+  if (full)   full.classList.toggle('visible', insider);
+  if (gate)   gate.classList.toggle('hidden',  insider);
+  if (teaser) teaser.style.display = insider ? 'none' : '';
+
+  if (gate && !insider) {
+    if (!loggedIn) {
+      if (txt)  txt.textContent = 'Pro celý obsah se';
+      if (link) { link.textContent = 'přihlaste'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
+    } else {
+      if (txt)  txt.textContent = 'Pro celý obsah';
+      if (link) { link.textContent = 'upgradujte na Insider'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
+    }
+  }
+
+  const btn = document.getElementById('lopHProfile');
+  if (btn && loggedIn) btn.classList.add('logged-in');
+}
+
+(function() { updateInsiderGate(); })();
+
+/* ── SLIDER ── */
+(function() {
+  const BLEND   = 0;    // px prolnutí — změňte dle chuti
+  const DEFAULT = 0.35;  // výchozí pozice 0–1
+
+  function makeSlider(heroEl, topEl, handleEl, lblLeftEl, lblRightEl) {
+    let dragging = false;
+
+    function setPos(pct) {
+      const w  = heroEl.offsetWidth;
+      const px = pct * w;
+      const lo = ((Math.max(0, px - BLEND) / w) * 100).toFixed(2) + '%';
+      const hi = ((Math.min(w, px + BLEND) / w) * 100).toFixed(2) + '%';
+      topEl.style.webkitMaskImage = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
+      topEl.style.maskImage       = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
+      handleEl.style.left      = (pct * 100) + '%';
+      handleEl.style.transform = 'translate(-50%, -50%)';
+      const divider = heroEl.querySelector('.sl-divider');
+      if (divider) divider.style.left = (pct * 100) + '%';
+      // Aktivní strana (větší plocha) = bělejší letopočet
+      // Levý letopočet (1930 / hist) je aktivní když je vidět víc historické fotky (pct > 0.5)
+      if (lblLeftEl)  lblLeftEl.classList.toggle('active', pct > 0.5);
+      if (lblRightEl) lblRightEl.classList.toggle('active', pct <= 0.5);
+    }
+
+    function posFromX(x) {
+      const r = heroEl.getBoundingClientRect();
+      return Math.max(0, Math.min(1, (x - r.left) / r.width));
+    }
+
+    // Tažení pouze za handle
+    handleEl.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
+    handleEl.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
+    window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+    window.addEventListener('mouseup',  () => dragging = false);
+    window.addEventListener('touchend', () => dragging = false);
+
+    setPos(DEFAULT);
+    return setPos;
+  }
+
+  // Hlavní slider
+  makeSlider(
+    document.getElementById('hero'),
+    document.getElementById('slTop'),
+    document.getElementById('slHandle'),
+    document.getElementById('lblNow'),
+    document.getElementById('lblHist')
+  );
+})();
+
+/* ── FULLSCREEN MODAL ── */
+(function() {
+  const modal = document.getElementById('fsModal');
+  if (!modal) return;
+  const inner = modal.querySelector('.fs-modal-inner');
+
+  // Vlastní instance slideru pro modal
+  const BLEND = 0;
+  let dragging = false;
+
+  function setPos(pct) {
+    const w = inner.offsetWidth;
+    const px = pct * w;
+    const lo = ((Math.max(0, px - BLEND) / w) * 100).toFixed(2) + '%';
+    const hi = ((Math.min(w, px + BLEND) / w) * 100).toFixed(2) + '%';
+    const top = document.getElementById('slTopFs');
+    const handle = document.getElementById('slHandleFs');
+    if (top) {
+      top.style.webkitMaskImage = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
+      top.style.maskImage = `linear-gradient(to right, transparent ${lo}, black ${hi})`;
+    }
+    if (handle) {
+      handle.style.left = (pct * 100) + '%';
+      handle.style.transform = 'translate(-50%,-50%)';
+    }
+    const lblL = document.getElementById('lblHistFs');
+    const lblR = document.getElementById('lblNowFs');
+    if (lblL) lblL.classList.toggle('active', pct > 0.5);
+    if (lblR) lblR.classList.toggle('active', pct <= 0.5);
+  }
+
+  function posFromX(x) {
+    const r = inner.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (x - r.left) / r.width));
+  }
+
+  const handleFs = document.getElementById('slHandleFs');
+  if (handleFs) {
+    handleFs.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
+    handleFs.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+  }
+  window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
+  window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+  window.addEventListener('mouseup',  () => dragging = false);
+  window.addEventListener('touchend', () => dragging = false);
+
+  // Klik na pozadí modalu (mimo inner) zavře
+  modal.addEventListener('click', e => { if (e.target === modal) toggleFullscreen(); });
+
+  window._fsSetPos = setPos;
+})();
+
+let _fsOpen = false;
+function toggleFullscreen() {
+  const modal = document.getElementById('fsModal');
+  const ico   = document.getElementById('slFsIco');
+  _fsOpen = !_fsOpen;
+  modal.classList.toggle('open', _fsOpen);
+  // Přepni ikonu: expand ↔ collapse
+  if (ico) ico.innerHTML = _fsOpen
+    ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+    : '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  if (_fsOpen && window._fsSetPos) window._fsSetPos(0.35);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
+
+/* ── SUPABASE VOTES ── */
+const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
+const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
+}
+async function getValidSession() {
+  const s = getSession();
+  if (!s?.access_token || !s?.user) return null;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if ((s.expires_at || 0) > nowSec + 60) return s;
+  if (!s.refresh_token) return null;
+  try {
+    const r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    });
+    if (!r.ok) { localStorage.removeItem('lop_auth_session'); return null; }
+    const data = await r.json();
+    localStorage.setItem('lop_auth_session', JSON.stringify({ ...data, user: data.user || s.user }));
+    return data;
+  } catch(e) { return null; }
+}
+
+function authHeaders() {
+  const s = getSession();
+  return { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (s?.access_token || SUPA_KEY),
+    'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+}
+function dbAddWish(placeId) {
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ user_id: s.user.id, place_id: String(placeId) }) }).catch(()=>{});
+  });
+}
+function dbRemoveWish(placeId) {
+  getValidSession().then(s => {
+    if (!s?.user) return;
+    fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&place_id=eq.' + placeId,
+      { method:'DELETE', headers: authHeaders() }).catch(()=>{});
+  });
+}
+async function syncFromDB() {
+  const s = getSession(); if (!s?.access_token || !s?.user) return;
+  try {
+    const [wRes, vRes] = await Promise.all([
+      fetch(SUPA_URL + '/rest/v1/wishlist?user_id=eq.' + s.user.id + '&select=place_id', { headers: authHeaders() }),
+      fetch(SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&select=place_id',  { headers: authHeaders() })
+    ]);
+    if (wRes.ok) {
+      const remote = (await wRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem(WISH_KEY)||'[]').map(String))];
+      localStorage.setItem(WISH_KEY, JSON.stringify([...new Set([...remote, ...local])]));
+      local.filter(id => !remote.includes(id)).forEach(id => {
+        fetch(SUPA_URL + '/rest/v1/wishlist', { method:'POST', headers: authHeaders(),
+          body: JSON.stringify({ user_id: s.user.id, place_id: id }) }).catch(()=>{});
+      });
+    }
+    if (vRes.ok) {
+      const remote = (await vRes.json()).map(r => r.place_id);
+      const local  = [...new Set(JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String))];
+      localStorage.setItem(VISIT_KEY, JSON.stringify([...new Set([...remote, ...local])]));
+    }
+    // Načti roli z profiles
+    const rRes = await fetch(SUPA_URL + '/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=role', { headers: authHeaders() });
+    if (rRes.ok) {
+      const rows = await rRes.json();
+      if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role);
+    }
+  } catch(e) { console.warn('Sync failed:', e); }
+}
+const VOTE_KEY = 'lop_vote_' + PLACE_ID; // localStorage — pamatuje hlas uživatele
+
+// Unikátní token pro tohoto uživatele (anonymní, bez přihlášení)
+function getUserToken() {
+  let t = localStorage.getItem('lop_user_token');
+  if (!t) { t = crypto.randomUUID(); localStorage.setItem('lop_user_token', t); }
+  return t;
+}
+
+function updateVoteUI(myVote, likes, dislikes) {
+  const likeBtn      = document.getElementById('likeBtn');
+  const dislikeBtn   = document.getElementById('dislikeBtn');
+  const likeCount    = document.getElementById('likeCount');
+  const dislikeCount = document.getElementById('dislikeCount');
+  likeBtn.classList.toggle('active-like',     myVote === 'like');
+  dislikeBtn.classList.toggle('active-dislike', myVote === 'dislike');
+  likeBtn.querySelector('svg').setAttribute('fill',     myVote === 'like'    ? 'currentColor' : 'none');
+  dislikeBtn.querySelector('svg').setAttribute('fill',  myVote === 'dislike' ? 'currentColor' : 'none');
+  if (likes    !== null) likeCount.textContent    = likes;
+  if (dislikes !== null) dislikeCount.textContent = dislikes;
+}
+
+async function loadVotes() {
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/vote_counts?place_id=eq.${PLACE_ID}&select=likes,dislikes`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
+    );
+    const data = await res.json();
+    const row = data[0] || { likes: 0, dislikes: 0 };
+    const myVote = localStorage.getItem(VOTE_KEY) || null;
+    updateVoteUI(myVote, row.likes, row.dislikes);
+  } catch(e) {
+    console.warn('Votes load failed:', e);
+  }
+}
+
+async function vote(type) {
+  const token  = getUserToken();
+  const myVote = localStorage.getItem(VOTE_KEY) || null;
+  const next   = myVote === type ? null : type;
+
+  // Optimistická aktualizace UI
+  localStorage.setItem(VOTE_KEY, next || '');
+  updateVoteUI(next, null, null);
+
+  try {
+    if (!next) {
+      // Odeber hlas
+      await fetch(
+        `${SUPA_URL}/rest/v1/votes?place_id=eq.${PLACE_ID}&user_token=eq.${token}`,
+        { method: 'DELETE', headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
+      );
+    } else {
+      // Vlož nebo přepiš hlas (upsert)
+      await fetch(
+        `${SUPA_URL}/rest/v1/votes`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': SUPA_KEY,
+            'Authorization': `Bearer ${SUPA_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({ place_id: PLACE_ID, vote_type: next, user_token: token })
+        }
+      );
+    }
+    // Načti aktuální počty ze serveru
+    await loadVotes();
+  } catch(e) {
+    console.warn('Vote failed:', e);
+  }
+}
+
+/* ── RAZÍTKO + SCORE ── */
+async function loadVisitedStamp() {
+  const s = getSession();
+  if (!s?.access_token || !s?.user) return;
+  try {
+    const r = await fetch(
+      SUPA_URL + '/rest/v1/visited?user_id=eq.' + s.user.id + '&place_id=eq.' + PLACE_ID + '&select=score,points,visited_at',
+      { headers: authHeaders() }
+    );
+    if (!r.ok) return;
+    const rows = await r.json();
+    if (!rows.length) return;
+    const row = rows[0];
+    const score = row.score != null ? parseFloat(row.score) : null;
+    const points = row.points != null ? parseFloat(row.points) : 100;
+    const visitedAt = row.visited_at ? new Date(row.visited_at) : null;
+
+    // Stamp v rohu
+    if (window.stampSVG) {
+      const stampEl = document.getElementById('heroStamp');
+      if (stampEl) {
+        const stampScore = arScoreToStampScore(score);
+        stampEl.innerHTML = window.stampSVG({
+          orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+          code: PLACE_ID,
+          name: 'Holešovický přístav',
+          year: 1894,
+          cat: 'hist',
+          score: stampScore,
+          dateLabel: visitedAt ? visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear() : '',
+          k: PLACE_ID,
+        });
+        stampEl.style.display = 'block';
+      }
+    }
+
+
+    // Ulož pro žebříček
+    window._myVisit = { score, points, visitedAt };
+    renderMyLeaderboardRow();
+  } catch(e) { console.warn('loadVisitedStamp failed:', e); }
+}
+
+function renderMyLeaderboardRow() {
+  const v = window._myVisit;
+  if (!v) return;
+  const row = document.getElementById('lbMyRow');
+  if (row) row.classList.add('visible');
+  const skipEl = document.getElementById('lbMySkip');
+  if (skipEl) skipEl.style.display = 'flex';
+  loadMyRank(v.points);
+  const ptsEl   = document.getElementById('lbMyPts');
+  const scoreEl = document.getElementById('lbMyScore');
+  const dateEl  = document.getElementById('lbMyDate');
+  const stampEl = document.getElementById('lbMyStamp');
+  if (ptsEl)   ptsEl.textContent   = v.points != null ? v.points.toFixed(1) : '—';
+  if (scoreEl) scoreEl.textContent = v.score  != null ? v.score.toFixed(1)  : '0.0';
+  if (dateEl && v.visitedAt) {
+    const d = v.visitedAt;
+    dateEl.textContent = d.getDate() + '. ' + (d.getMonth()+1) + '. ' + d.getFullYear();
+  }
+  if (stampEl && window.stampSVG) {
+    stampEl.innerHTML = window.stampSVG({
+      orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
+      code: PLACE_ID, name: 'Holešovický přístav', year: 1894, cat: 'hist',
+      score: arScoreToStampScore(v.score),
+      dateLabel: v.visitedAt ? v.visitedAt.getDate() + '. ' + (v.visitedAt.getMonth()+1) + '. ' + v.visitedAt.getFullYear() : '',
+      k: PLACE_ID + '-lb',
+    });
+  }
+}
+
+// Pořadí přihlášeného uživatele — počet záznamů s vyšším skóre pro toto místo + 1
+async function loadMyRank(myPoints) {
+  const el = document.getElementById('lbMyRank');
+  if (!el || myPoints == null) return;
+  try {
+    const r = await fetch(
+      SUPA_URL + '/rest/v1/visited?place_id=eq.' + PLACE_ID + '&points=gt.' + myPoints + '&select=place_id',
+      { headers: { ...authHeaders(), 'Prefer': 'count=exact', 'Range': '0-0' } }
+    );
+    const cr = r.headers.get('content-range');
+    const total = cr && cr.indexOf('/') >= 0 ? parseInt(cr.split('/')[1], 10) : null;
+    if (total != null && !isNaN(total)) el.textContent = total + 1;
+  } catch(e) {}
+}
+
+function arScoreToStampScore(arScore) {
+  if (arScore == null || arScore === 0) return 1;
+  if (arScore <= 25) return 25;
+  if (arScore <= 50) return 45;
+  if (arScore <= 75) return 65;
+  return 90;
+}
+
+// Načti počty při startu
+loadVotes();
+function getWish() { try { return JSON.parse(localStorage.getItem(WISH_KEY)||'[]'); } catch(e) { return []; } }
+function setWish(a) { localStorage.setItem(WISH_KEY, JSON.stringify(a)); }
+function isWished() { return getWish().map(String).includes(PLACE_ID); }
+
+function updateWishUI() {
+  const w = isWished();
+  const btn = document.getElementById('wishBtn');
+  const ico = document.getElementById('wishIco');
+  const lbl = document.getElementById('wishLbl');
+  if (btn) btn.classList.toggle('active', w);
+  if (ico) ico.setAttribute('fill', w ? 'currentColor' : 'none');
+  if (lbl) lbl.textContent = w ? 'V plánu' : 'Plán';
+}
+
+function toggleWishBtn() {
+  const w = isWished();
+  const list = getWish().map(String);
+  if (w) { setWish(list.filter(x => x !== PLACE_ID)); dbRemoveWish(PLACE_ID); }
+  else   { setWish([...list, PLACE_ID]); dbAddWish(PLACE_ID); }
+  updateWishUI();
+  if (window.lopNav) window.lopNav.refresh();
+}
+
+/* ── AUTOR HODNOCENÍ ── */
+(async function() {
+  const AUTOR_PLACES = ['H001','H101','H102','H201','H202','H301','H302','H203'];
+  const AUTOR_ROUTES = 3;
+  const MIN_VOTES = 5;
+
+  function starsHTML(score) {
+    const full = Math.round(score * 5);
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      html += `<svg width="11" height="11" viewBox="0 0 24 24" fill="${i <= full ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+    }
+    return html;
+  }
+
+  // Počty míst z places.json
+  try {
+    const res = await fetch('../places.json');
+    if (res.ok) {
+      const all = await res.json();
+      const count = all.filter(p => AUTOR_PLACES.includes(p.id)).length;
+      const el = document.getElementById('autorPlaces');
+      if (el) el.textContent = count + ' zastavení';
+    }
+  } catch(e) {}
+
+  // Trasy
+  const elR = document.getElementById('autorRoutes');
+  if (elR) elR.textContent = AUTOR_ROUTES + ' trasy';
+
+  // Hodnocení z Supabase
+  try {
+    const ids = AUTOR_PLACES.map(id => `place_id.eq.${id}`).join(',');
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/vote_counts?or=(${ids})&select=likes,dislikes`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      const likes    = data.reduce((s, r) => s + (parseInt(r.likes)    || 0), 0);
+      const dislikes = data.reduce((s, r) => s + (parseInt(r.dislikes) || 0), 0);
+      const total    = likes + dislikes;
+      const el       = document.getElementById('autorStars');
+      if (!el) return;
+      if (total < MIN_VOTES) {
+        el.textContent = 'čeká na hodnocení';
+      } else {
+        const score = likes / total;
+        el.innerHTML = starsHTML(score);
+        el.title = `${likes} lajků, ${dislikes} dislajků (${Math.round(score*100)}%)`;
+      }
+    }
+  } catch(e) {}
+})();
+
+
+/* ── MINI MAPA ── */
+(function() {
+  const LAT = 50.10543, LNG = 14.45595;
+  const PLACE_ID = 'H001';
+  const CAT_COLOR = { hist:'#4A4A48', arch:'#3B5F84', art:'#C0522A', fun:'#E0A020' };
+
+  const map = L.map('miniMap', {
+    center: [LAT, LNG], zoom: 15,
+    zoomControl: false, dragging: false,
+    scrollWheelZoom: false, doubleClickZoom: false,
+    touchZoom: false, keyboard: false,
+    attributionControl: false
+  });
+
+  // Naše CARTO dlaždice
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  // Šachovnicový praporek pro aktivní místo
+  const flagHtml = '<div style="'
+    + 'width:30px;height:30px;border-radius:50%;'
+    + 'border:2px solid #fff;box-shadow:0 2px 6px rgba(26,24,20,.35);'
+    + 'background-image:linear-gradient(45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(-45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(45deg,transparent 75%,#1a1a18 75%),'
+    + 'linear-gradient(-45deg,transparent 75%,#1a1a18 75%);'
+    + 'background-size:7px 7px;background-color:#fff;'
+    + 'background-position:0 0,0 3.5px,3.5px -3.5px,-3.5px 0;'
+    + '"></div>';
+
+  L.marker([LAT, LNG], {
+    icon: L.divIcon({ html: flagHtml, className: '', iconSize: [30,30], iconAnchor: [15,15] }),
+    zIndexOffset: 100
+  }).addTo(map).on('click', () => {
+    location.href = '../index.html#' + PLACE_ID;
+  });
+
+  // Okolní místa z places.json
+  fetch('../places.json').then(r => r.json()).then(places => {
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+    places.filter(p => p.id !== PLACE_ID && p.lat && p.lng && haversine(LAT, LNG, p.lat, p.lng) <= 1).forEach(p => {
+      const color = CAT_COLOR[p.cat] || '#999';
+      const letter = p.id ? p.id.replace(/[0-9]/g,'').charAt(0) : '?';
+      const pinHtml = `<div class="mini-pin" style="background:${color}">${letter}</div>`;
+      L.marker([p.lat, p.lng], {
+        icon: L.divIcon({ html: pinHtml, className: '', iconSize: [26,26], iconAnchor: [13,13] })
+      }).addTo(map).on('click', () => {
+        location.href = '../index.html#' + p.id;
+      });
+    });
+  }).catch(() => {});
+
+  // Klik na mapu → index.html
+  map.on('click', () => { location.href = '../index.html'; });
+})();
+
+/* ── SHARE ── */
+function share() {
+  if (navigator.share) {
+    navigator.share({ title: 'Holešovický přístav — LayersOfPrague', url: location.href });
+  } else {
+    navigator.clipboard?.writeText(location.href);
+    alert('Odkaz zkopírován do schránky');
+  }
+}
+
+/* ── INIT ── */
+updateWishUI();
+
+function positionStamp() {
+  const stamp = document.getElementById('heroStamp');
+  const hero  = document.getElementById('hero');
+  if (!stamp || !hero) return;
+  const size    = 88;
+  const overlap = Math.round(size / 5);  // ~18px
+  // Hero má padding 20px v hero-wrap — razítko přesahuje o overlap doprava i nahoru
+  // Pozicujeme absolutně v hero-wrap:
+  //   top = offsetTop(hero) - overlap
+  //   right = 20px (padding) - overlap  → záporné = přesah doprava
+  const heroTop = hero.offsetTop;
+  stamp.style.top   = (heroTop - overlap) + 'px';
+  stamp.style.right = (20 - overlap) + 'px';  // padding 20px - overlap = ~2px = 18px přes okraj
+}
+window.addEventListener('resize', positionStamp);
+window.addEventListener('load',   positionStamp);
+// Zavolej po načtení stamp obsahu
+const _origLoadStamp = loadVisitedStamp;
+loadVisitedStamp = async function() {
+  await _origLoadStamp();
+  positionStamp();
+};
+</script>
+<script src="../auth-modal.js"></script>
+<script>
+window.lopAuth.onLogin(() => {
+  if (typeof syncFromDB === 'function') syncFromDB().then(() => {
+    updateWishUI();
+    updateInsiderGate();
+    loadVisitedStamp();
+  });
+  else { updateWishUI(); updateInsiderGate(); }
+  if (window.lopHeader) window.lopHeader.refresh();
+});
+window.lopAuth.onLogout(() => {
+  localStorage.removeItem('lop_user_role');
+  updateWishUI();
+  updateInsiderGate();
+});
+</script>
+</body>
+</html>
