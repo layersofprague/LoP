@@ -59,10 +59,10 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;
   margin-bottom: 6px;
 }
-.kick { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 12px; font-weight: 500; }
+.kick { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 12px; font-weight: 500; }
 .page-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(24px, 6vw, 36px); line-height: 1; letter-spacing: -.03em; color: var(--ink); white-space: nowrap; }
 .page-title em { font-style: italic; font-weight: 300; color: #777772; }
-.page-intro { font-size: 13px; color: var(--ink-4); line-height: 1.6; text-wrap: pretty; margin-bottom: 14px; }
+.page-intro { font-size: 14px; color: var(--ink-4); line-height: 1.6; text-wrap: pretty; margin-bottom: 14px; }
 
 /* ── TOOLBAR (filtr + toggle) ── */
 /* ── CONTROLS BAR ── */
@@ -77,7 +77,7 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: center; gap: 5px;
   cursor: pointer; color: var(--ink-4);
   transition: background .15s, color .15s;
-  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
   white-space: nowrap; flex-shrink: 0;
 }
 .ctrl-btn:hover { background: var(--paper-2); color: var(--ink-2); }
@@ -95,8 +95,8 @@ a { color: inherit; text-decoration: none; }
 }
 .ctrl-btn-filter .filter-dots { display: flex; gap: 2px; align-items: center; }
 .ctrl-btn-filter .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
-.ctrl-btn-filter .filter-bottom { display: flex; align-items: center; gap: 4px; font-size: 10px; }
-.ctrl-btn-filter .filter-cnt { font-size: 9px; color: var(--ink-5); }
+.ctrl-btn-filter .filter-bottom { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.ctrl-btn-filter .filter-cnt { font-size: 10px; color: var(--ink-5); }
 .ctrl-btn-filter.has-filter .filter-cnt { color: var(--accent); font-weight: 600; }
 .ctrl-btn-view { width: 34px; padding: 6px 0; }
 .ctrl-btn-view + .ctrl-btn-view { border-left: 1px solid var(--rule); }
@@ -167,15 +167,15 @@ a { color: inherit; text-decoration: none; }
 .filter-row { padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .filter-row:first-child { padding-top: 4px; }
 .filter-row:last-of-type { border-bottom: none; }
-.filter-lbl { display: flex; justify-content: space-between; align-items: baseline; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px; }
-.filter-lbl-val { color: var(--ink); letter-spacing: .04em; font-size: 10px; }
+.filter-lbl { display: flex; justify-content: space-between; align-items: baseline; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px; }
+.filter-lbl-val { color: var(--ink); letter-spacing: .04em; font-size: 11px; }
 .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* ── CHIP ── */
 .chip {
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
   padding: 6px 12px; background: #fff; border: 1.5px solid var(--rule); border-radius: 6px;
-  font-size: 12px; font-weight: 500; color: var(--ink-2);
+  font-size: 13px; font-weight: 500; color: var(--ink-2);
   cursor: pointer; transition: all .15s; white-space: nowrap;
 }
 .chip:hover { border-color: var(--ink-4); }
@@ -200,7 +200,7 @@ a { color: inherit; text-decoration: none; }
 .chip.chip-locked { position: relative; }
 .chip.chip-locked::before {
   content: attr(data-tooltip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: var(--ink); color: #fff; font-size: 11px; line-height: 1.4; padding: 6px 10px; border-radius: 6px;
+  background: var(--ink); color: #fff; font-size: 12px; line-height: 1.4; padding: 6px 10px; border-radius: 6px;
   white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s; z-index: 1000;
   font-family: 'Inter', sans-serif; font-weight: 400; box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
@@ -212,7 +212,7 @@ a { color: inherit; text-decoration: none; }
 .chip.state-hide { background: var(--ink) !important; color: #fff !important; border-color: var(--ink) !important; }
 .chip.state-hide .chip-swatch { background: #fff !important; }
 .chip.state-hide:not(.chip-locked)::after { content: none; }
-.chip .chip-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-5); margin-left: 2px; }
+.chip .chip-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-5); margin-left: 2px; }
 .chip .chip-filter-icon {
   display: none; width: 9px; height: 9px; margin-left: 2px; flex-shrink: 0; background: currentColor;
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
@@ -234,15 +234,15 @@ a { color: inherit; text-decoration: none; }
 .filter-timeline .ft-h { position: absolute; top: 22px; transform: translate(-50%,-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: grab; z-index: 3; touch-action: none; }
 .filter-timeline .ft-h:active { cursor: grabbing; }
 .filter-timeline .ft-div { position: absolute; top: 14px; width: 1px; height: 16px; background: var(--rule-2); pointer-events: none; }
-.filter-timeline .ft-lbl { position: absolute; top: 36px; transform: translateX(-50%); font-size: 10px; font-weight: 500; color: var(--ink-2); white-space: nowrap; pointer-events: none; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+.filter-timeline .ft-lbl { position: absolute; top: 36px; transform: translateX(-50%); font-size: 11px; font-weight: 500; color: var(--ink-2); white-space: nowrap; pointer-events: none; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
 .filter-timeline .ft-lbl.off { color: var(--ink-5); opacity: .4; }
-.filter-timeline .ft-year { position: absolute; top: 54px; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-5); letter-spacing: .05em; pointer-events: none; }
+.filter-timeline .ft-year { position: absolute; top: 54px; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-5); letter-spacing: .05em; pointer-events: none; }
 .filter-timeline .ft-year-tick { position: absolute; top: 50px; width: 1px; height: 3px; background: var(--rule-2); transform: translateX(-50%); pointer-events: none; }
 .filter-range-input { appearance: none; -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--rule); outline: none; margin-top: 2px; }
 .filter-range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .filter-range-input::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); cursor: pointer; }
 .filter-footer { display: flex; justify-content: flex-end; padding-top: 10px; }
-.filter-reset { background: transparent; border: none; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); cursor: pointer; padding: 4px 0; }
+.filter-reset { background: transparent; border: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); cursor: pointer; padding: 4px 0; }
 .filter-reset:hover { color: var(--ink); }
 
 /* ── SECTION LABEL ── */
@@ -279,7 +279,7 @@ a { color: inherit; text-decoration: none; }
 .place-thumb {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 700;
+  font-family: 'Inter', sans-serif; font-size: 23px; font-weight: 700;
   letter-spacing: -.04em; color: rgba(0,0,0,.10);
   min-height: 62px; flex-shrink: 0;
   background: #EFEFED;
@@ -304,13 +304,13 @@ a { color: inherit; text-decoration: none; }
 }
 .place-kick .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 .place-name {
-  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;
   color: var(--ink); letter-spacing: -.01em; line-height: 1.2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   transition: color .15s;
 }
 .place-sub {
-  font-size: 11px; color: var(--ink-4); margin-top: 2px; line-height: 1.4;
+  font-size: 12px; color: var(--ink-4); margin-top: 2px; line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
@@ -329,7 +329,7 @@ a { color: inherit; text-decoration: none; }
   border-left: 1px solid var(--paper-2);
   width: 52px; flex-shrink: 0; flex-grow: 0;
 }
-.place-dist { font-size: 10px; color: var(--ink-5); font-family: 'Inter', sans-serif; text-align: center; white-space: nowrap; }
+.place-dist { font-size: 11px; color: var(--ink-5); font-family: 'Inter', sans-serif; text-align: center; white-space: nowrap; }
 .place-dist-link {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   text-decoration: none; color: var(--ink-5);
@@ -377,7 +377,7 @@ a { color: inherit; text-decoration: none; }
 }
 /* wish label — stejný font jako dist-hint */
 .place-wish-lbl {
-  font-size: 9px; font-family: 'Inter', sans-serif;
+  font-size: 10px; font-family: 'Inter', sans-serif;
   color: var(--ink-5); text-align: center;
   white-space: nowrap; letter-spacing: .01em;
   pointer-events: none;
@@ -407,7 +407,7 @@ a { color: inherit; text-decoration: none; }
 
 /* dist-hint: šedé, kurzíva, bez podtržení */
 .place-dist-hint {
-  font-size: 9px; font-family: 'Inter', sans-serif;
+  font-size: 10px; font-family: 'Inter', sans-serif;
   font-style: italic; color: var(--ink-4);
   cursor: pointer; text-align: center; line-height: 1.3;
   pointer-events: auto; text-decoration: none;
@@ -419,7 +419,7 @@ a { color: inherit; text-decoration: none; }
   flex-direction: row; align-items: center; gap: 4px;
 }
 #placesList.grid-mode .place-wish-lbl {
-  font-size: 9px; width: 44px; text-align: right; flex-shrink: 0;
+  font-size: 10px; width: 44px; text-align: right; flex-shrink: 0;
 }
 #placesList.grid-mode .place-wish-btn { flex-shrink: 0; }
 
@@ -441,7 +441,7 @@ a { color: inherit; text-decoration: none; }
 }
 #placesList.grid-mode .place-thumb {
   width: 100%; aspect-ratio: 3/2; min-height: unset;
-  font-size: 36px;
+  font-size: 37px;
 }
 #placesList.grid-mode .place-cat-pill {
   display: flex;
@@ -454,7 +454,7 @@ a { color: inherit; text-decoration: none; }
 #placesList.grid-mode .place-name { padding-right: 0; }
 #placesList.grid-mode .place-kick { display: none; }
 #placesList.grid-mode .place-sub {
-  font-size: 11px; -webkit-line-clamp: 2;
+  font-size: 12px; -webkit-line-clamp: 2;
 }
 /* grid meta: dist vlevo, votes absolutně na střed, wish vpravo */
 #placesList.grid-mode .place-meta {
@@ -504,16 +504,16 @@ a { color: inherit; text-decoration: none; }
 
 /* ── EMPTY & LOADING ── */
 .empty { text-align: center; padding: 60px 20px; color: var(--ink-4); }
-.empty h3 { font-size: 20px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
-.empty p { font-size: 13px; line-height: 1.5; }
-.loading { display: flex; align-items: center; justify-content: center; padding: 64px; color: var(--ink-5); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.empty h3 { font-size: 21px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.empty p { font-size: 14px; line-height: 1.5; }
+.loading { display: flex; align-items: center; justify-content: center; padding: 64px; color: var(--ink-5); font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 480px) {
   #placesList.grid-mode { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
-  .page-intro { font-size: 12px; line-height: 1.5; }
+  .page-intro { font-size: 13px; line-height: 1.5; }
   .hero-section { margin-bottom: 6px; }
   .hero-top { margin-bottom: 3px; }
   .section-label { margin-top: 10px; }
