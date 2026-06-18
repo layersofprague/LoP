@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#1a1a18"/>
+<meta name="theme-color" content="#111111"/>
 <title>Holešovický přístav — LayersOfPrague</title>
 <meta name="description" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════ TOKENS ═══════════════ */
 :root {
@@ -27,13 +27,13 @@
   --rule:     #E8E8E6;
   --rule-2:   #E0E0DE;
   --cat-hist: #4A4A48;
-  --cat-hist-soft: #c9c9c4;
+  --cat-hist-soft: #d8d8d4;
   --cat-arch: #3B5F84;
-  --cat-art:  #C0522A;
   --cat-fun:  #E0A020;
+  --cat-art:  #C0522A;
   --accent:   #B04020;
   --ok:       #3d7a4a;
-  --ease:     cubic-bezier(.22,.8,.36,1);
+  --ease: cubic-bezier(.22,.8,.36,1);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -82,24 +82,25 @@ a { color: inherit; text-decoration: none; }
 }
 .sl-kicker { align-self: flex-start; transform: translateY(1px); }
 .sl-lbl {
-  font-family: 'Inter', sans-serif; font-style: italic;
-  font-size: 15px; line-height: 1;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; line-height: 1;
+  letter-spacing: .02em;
   color: var(--ink-4);
-  font-weight: 300;
+  font-weight: 500;
   transition: color .2s, font-weight .2s;
 }
 .sl-lbl.active { color: var(--ink); font-weight: 500; }
 .sl-kicker {
-  font-family: 'Inter', sans-serif;
-  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-5); font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-4);
 }
 /* Handle — jediný ovládací prvek */
 .sl-handle {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   width: 26px; height: 26px; border-radius: 2px;
-  background: #eeefeb;
+  background: var(--paper);
   box-shadow: 0 4px 14px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.05);
   display: flex; align-items: center; justify-content: center;
   color: var(--ink);
@@ -131,7 +132,7 @@ a { color: inherit; text-decoration: none; }
   padding: 4px;
   background: transparent;
   border: none; cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 14px; letter-spacing: .04em;
   color: var(--paper); z-index: 5;
   line-height: 1;
@@ -161,16 +162,16 @@ a { color: inherit; text-decoration: none; }
   margin-top: 6px;
 }
 .copy-col-head {
-  font-family: 'Inter', sans-serif;
-  font-size: 8px; letter-spacing: .12em; text-transform: uppercase; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
   color: rgba(243,237,225,.4);
   margin-bottom: 3px; padding-bottom: 3px;
   border-bottom: 1px solid rgba(243,237,225,.1);
 }
 .copy-row { margin-bottom: 2px; }
 .copy-key {
-  font-family: 'Inter', sans-serif;
-  font-size: 8px; letter-spacing: .08em; text-transform: uppercase; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
   color: rgba(243,237,225,.4); margin-bottom: 1px;
 }
 .copy-val { font-size: 10.5px; color: rgba(243,237,225,.8); line-height: 1.3; }
@@ -267,18 +268,18 @@ a { color: inherit; text-decoration: none; }
 .ar-cta-ic svg { width: 16px; height: 16px; }
 .ar-cta-body { flex: 1; }
 .ar-cta-kick {
-  font-family: 'Inter', sans-serif;
-  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-  color: rgba(243,237,225,.5); font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(243,237,225,.5);
 }
 .ar-cta-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 15px; font-weight: 600; line-height: 1.2;
+  font-family: 'Fraunces', serif;
+  font-size: 15px; font-weight: 500; line-height: 1.2;
   margin-top: 1px;
 }
 .ar-cta-badge {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
   padding: 4px 8px; border-radius: 4px;
   background: rgba(243,237,225,.14);
 }
@@ -293,9 +294,9 @@ a { color: inherit; text-decoration: none; }
 /* kicker */
 .kicker {
   display: flex; align-items: center; gap: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-5); font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3);
   margin-bottom: 10px;
 }
 .k-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cat-hist); }
@@ -307,9 +308,9 @@ a { color: inherit; text-decoration: none; }
 .k-vote-btn {
   display: flex; align-items: center; gap: 4px;
   background: transparent; border: none; cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-size: 10px; color: var(--ink-5);
-  padding: 2px 5px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ink-3);
+  padding: 2px 4px; border-radius: 4px;
   transition: color .15s, background .15s;
 }
 .k-vote-btn:hover { background: var(--paper-2); color: var(--ink); }
@@ -321,26 +322,26 @@ a { color: inherit; text-decoration: none; }
 .place-title {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: clamp(22px, 5.5vw, 34px);
-  line-height: 1.05;
-  letter-spacing: -.025em;
+  font-size: clamp(26px, 7vw, 40px);
+  line-height: 1.0;
+  letter-spacing: -.03em;
   color: var(--ink);
   margin-bottom: 6px;
   text-wrap: pretty;
   white-space: normal;
 }
-.place-title em { font-style: italic; color: #777772; font-size: .75em; font-weight: 300; }
+.place-title em { font-style: italic; font-weight: 300; color: #777772; }
 
 /* sub */
 .place-sub {
-  font-size: 13px; color: var(--ink-4);
+  font-size: 13px; color: var(--ink-3);
   margin-bottom: 18px;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .place-sub .dot { color: var(--ink-4); }
 .place-sub .coords {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px; color: var(--ink-4);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--ink-3);
 }
 
 /* actions */
@@ -366,46 +367,55 @@ a { color: inherit; text-decoration: none; }
 /* lede */
 .lede {
   font-family: 'Inter', sans-serif;
-  font-size: 15px; line-height: 1.65;
+  font-size: 16px; line-height: 1.65;
+  font-weight: 400;
   color: var(--ink-2);
   letter-spacing: -.005em;
   margin-bottom: 22px;
   text-wrap: pretty;
 }
+.lede::first-letter {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.6em; font-weight: 700;
+  float: left; line-height: .82;
+  margin: 6px 10px 0 0;
+  color: var(--cat-hist);
+}
 
 /* section */
 .section { margin-bottom: 24px; }
 .sec-head {
-  display: flex; align-items: baseline; justify-content: space-between;
-  margin-bottom: 10px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
 }
 .sec-label {
   font-family: 'Inter', sans-serif;
-  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-5); font-weight: 500;
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-5); white-space: nowrap;
 }
+.sec-rule { flex: 1; height: 1px; background: var(--rule); }
 .sec-num {
   font-family: 'Inter', sans-serif;
-  font-size: 10px; color: var(--ink-5);
+  font-size: 10px; color: var(--ink-5); white-space: nowrap;
 }
 
 /* facts */
 .facts {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 1px; background: var(--rule);
-  border: 1.5px solid var(--rule); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--rule); border-radius: 10px; overflow: hidden;
 }
-.fact { background: #fff; padding: 11px 14px; }
+.fact { background: var(--paper); padding: 11px 14px; }
 .fact-k {
-  font-family: 'Inter', sans-serif;
-  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ink-5); margin-bottom: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 3px;
 }
 .fact-v {
   font-family: 'Inter', sans-serif;
   font-size: 15px; font-weight: 600;
-  color: var(--ink); line-height: 1.1;
+  letter-spacing: -.01em;
+  color: var(--ink); line-height: 1.15;
 }
 
 /* steps */
@@ -418,17 +428,18 @@ a { color: inherit; text-decoration: none; }
 .step:first-child { border-top: none; padding-top: 0; }
 .step-num {
   flex-shrink: 0;
-  font-family: 'Inter', sans-serif; font-style: italic;
-  font-size: 28px; line-height: 1; font-weight: 300;
+  font-family: 'Inter', sans-serif;
+  font-size: 26px; line-height: 1; font-weight: 300;
   color: var(--cat-hist); width: 38px; letter-spacing: -.03em;
 }
 .step-body h4 {
   font-family: 'Inter', sans-serif;
   font-size: 15px; font-weight: 600; line-height: 1.25;
+  letter-spacing: -.01em;
   margin-bottom: 4px; color: var(--ink);
 }
 .step-body p {
-  font-size: 13.5px; line-height: 1.6; color: var(--ink-3);
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
 }
 
 /* tip */
@@ -440,13 +451,13 @@ a { color: inherit; text-decoration: none; }
   border-radius: 0 10px 10px 0;
 }
 .tip-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--cat-fun); margin-bottom: 4px; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--cat-fun); margin-bottom: 4px;
 }
 .tip-text {
   font-family: 'Inter', sans-serif;
-  font-size: 13.5px; line-height: 1.55; font-style: italic; color: var(--ink-3);
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
 }
 
 /* nav button */
@@ -501,19 +512,19 @@ a { color: inherit; text-decoration: none; }
   width: 42px; height: 42px; border-radius: 50%;
   background: var(--cat-hist); color: var(--paper);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-size: 18px; font-style: italic; font-weight: 300;
+  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -.02em;
   flex-shrink: 0;
 }
 .autor-body { flex: 1; min-width: 0; }
 .autor-name {
   font-family: 'Inter', sans-serif;
-  font-size: 15px; font-weight: 600;
+  font-size: 15px; font-weight: 600; letter-spacing: -.01em;
   color: var(--ink); margin-bottom: 4px;
 }
 .autor-meta {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   font-size: 12px; color: var(--ink-3);
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   letter-spacing: .06em;
 }
 .autor-badge {
@@ -547,7 +558,7 @@ a { color: inherit; text-decoration: none; }
   width: 38px; height: 38px; border-radius: 50%;
   background: var(--cat-hist); color: var(--paper);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px; font-weight: 600; letter-spacing: .04em;
 }
 .lbm-body { flex: 1; min-width: 0; }
@@ -557,12 +568,12 @@ a { color: inherit; text-decoration: none; }
 }
 .lbm-name {
   font-family: 'Inter', sans-serif;
-  font-size: 15px; font-weight: 500; color: var(--ink);
+  font-size: 14px; font-weight: 600; letter-spacing: -.01em; color: var(--ink);
 }
 .lbm-sep { color: var(--ink-4); font-size: 12px; }
 .lbm-score {
   display: inline-flex; align-items: center; gap: 3px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px; letter-spacing: .06em;
   color: #E0A020;
 }
@@ -586,12 +597,12 @@ a { color: inherit; text-decoration: none; }
 .lb-row:first-child { border-top: none; }
 .lb-gold { background: linear-gradient(90deg, rgba(224,160,32,.08) 0%, transparent 100%); }
 .lb-rank {
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px; color: var(--ink-4); font-weight: 500;
   display: flex; align-items: center; justify-content: center;
 }
 .lb-name { font-size: 13.5px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lb-pts { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-2); text-align: right; }
+.lb-pts { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--ink-2); text-align: right; }
 .lb-bar-wrap { height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; }
 .lb-bar { height: 100%; background: #E0A020; border-radius: 2px; }
 .lb-gold .lb-pts { color: #b08010; }
@@ -608,11 +619,11 @@ a { color: inherit; text-decoration: none; }
 
 /* keyword tags */
 .kw-tag {
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px; letter-spacing: .06em;
-  padding: 4px 10px; border-radius: 20px;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
+  padding: 5px 11px; border-radius: 6px;
+  background: #fff;
+  border: 1.5px solid var(--rule);
   color: var(--ink-3);
 }
 
@@ -632,7 +643,7 @@ a { color: inherit; text-decoration: none; }
 }
 .gt-label {
   position: absolute; bottom: 6px; left: 6px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 9px; color: var(--ink-3);
 }
 
@@ -649,28 +660,71 @@ a { color: inherit; text-decoration: none; }
 .lb-my-stamp { width: 40px; height: 40px; flex-shrink: 0; }
 .lb-my-body { flex: 1; }
 .lb-my-label {
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--ink-4); margin-bottom: 2px;
 }
 .lb-my-val {
   font-family: 'Inter', sans-serif;
-  font-size: 18px; font-weight: 500; line-height: 1;
+  font-size: 18px; font-weight: 700; letter-spacing: -.02em; line-height: 1;
   color: var(--ink);
 }
 .lb-my-val span {
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px; font-weight: 400; color: var(--ink-4);
 }
 .lb-my-sub {
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px; color: var(--ink-4); margin-top: 2px;
 }
 .lb-my-date {
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px; color: var(--ink-4);
   text-align: right; flex-shrink: 0;
 }
+
+/* ── poloha / výřez mapy (placeholder) ── */
+.map-frame { position: relative; display: block; aspect-ratio: 16 / 9; border: 1.5px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--paper-2); text-decoration: none; }
+.map-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px); background-size: 30px 30px; opacity: .55; }
+.map-river { position: absolute; left: -12%; right: -12%; top: 52%; height: 30%; background: var(--paper-3); transform: rotate(-8deg); opacity: .85; }
+.map-pin { position: absolute; top: 43%; left: 50%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(176,64,32,.14); display: flex; align-items: center; justify-content: center; z-index: 2; transition: background .2s; }
+.map-pin-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.map-coords { position: absolute; left: 10px; bottom: 10px; z-index: 2; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .04em; color: var(--ink-3); background: rgba(248,248,246,.85); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--rule); }
+.map-note { position: absolute; right: 11px; top: 11px; z-index: 2; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); }
+.map-frame:hover .map-pin { background: rgba(176,64,32,.22); }
+
+/* ── žebříček: spotlight design sladěný s přehledem ── */
+.lh-card { background: #fff; border: 1.5px solid var(--rule); border-radius: 12px; overflow: hidden; }
+.lh-hero { display: flex; align-items: center; gap: 14px; padding: 18px 18px 0; }
+.lh-av { width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; background: var(--cat-hist); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; letter-spacing: .02em; position: relative; }
+.lh-badge { position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; background: var(--cat-fun); color: #fff; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+.lh-id { flex: 1; min-width: 0; }
+.lh-kick { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-4); }
+.lh-name { font-size: 21px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); line-height: 1.1; margin-top: 2px; }
+.lh-pts { text-align: right; flex-shrink: 0; }
+.lh-pts .n { font-size: 32px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); line-height: 1; }
+.lh-pts .u { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-4); margin-top: 4px; }
+.lh-quote-wrap { padding: 15px 18px 17px; }
+.lh-quote { position: relative; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+.lh-quote::before { content: ''; position: absolute; top: -8px; left: 36px; width: 14px; height: 14px; background: var(--paper-2); border-left: 1px solid var(--rule); border-top: 1px solid var(--rule); transform: rotate(45deg); }
+.lh-quote p { font-size: 15px; line-height: 1.6; color: var(--ink-3); font-style: italic; text-wrap: pretty; }
+.lh-quote .by { display: block; text-align: right; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .06em; color: var(--ink-4); }
+.lh-row { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 12px; padding: 14px 18px; border-top: 1px solid var(--rule); }
+.lh-row .rk { font-size: 14px; color: var(--ink-4); text-align: center; }
+.lh-row .nm { font-size: 15px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lh-row .pt { font-size: 15px; font-weight: 600; color: var(--ink-2); text-align: right; }
+.lh-skip { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 0; }
+.lh-skip span { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-5); }
+.lh-you { position: relative; overflow: hidden; display: none; grid-template-columns: auto 48px 1fr auto; align-items: center; gap: 14px; background: #fff; border: 1.5px solid var(--rule); border-radius: 12px; padding: 15px 18px 15px 20px; }
+.lh-you.visible { display: grid; }
+.lh-you::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent); }
+.lh-you .rk { font-size: 20px; font-weight: 700; color: var(--accent); }
+.lh-you .av { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+.lh-you .nm { font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.lh-you .sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-4); margin-top: 3px; letter-spacing: .02em; }
+.lh-you .pt-wrap { text-align: right; }
+.lh-you .pt { font-size: 24px; font-weight: 700; color: var(--accent); line-height: 1; }
+.lh-you .u { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-4); margin-top: 4px; }
 
 @media (max-width: 819px) and (orientation: landscape) {
   body { padding-right: 64px !important; padding-bottom: 0 !important; }
@@ -830,6 +884,7 @@ a { color: inherit; text-decoration: none; }
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Fakta</span>
+      <div class="sec-rule"></div>
       <span class="sec-num">4 položky</span>
     </div>
     <div class="facts">
@@ -840,10 +895,27 @@ a { color: inherit; text-decoration: none; }
     </div>
   </div>
 
+  <!-- poloha / mapa -->
+  <div class="section">
+    <div class="sec-head">
+      <span class="sec-label">Poloha</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num">výřez mapy</span>
+    </div>
+    <a class="map-frame" href="https://mapy.cz/zakladni?q=50.10543,14.45595&x=14.45595&y=50.10543&z=16" target="_blank" title="Otevřít v Mapy.cz">
+      <div class="map-grid"></div>
+      <div class="map-river"></div>
+      <div class="map-pin"><span class="map-pin-dot"></span></div>
+      <div class="map-coords">50.10543, 14.45595</div>
+      <div class="map-note">výřez mapy</div>
+    </a>
+  </div>
+
   <!-- na místě -->
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Na místě</span>
+      <div class="sec-rule"></div>
       <span class="sec-num">3 kroky</span>
     </div>
     <div class="steps">
@@ -890,6 +962,7 @@ a { color: inherit; text-decoration: none; }
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Galerie</span>
+      <div class="sec-rule"></div>
       <span class="sec-num">Brzy</span>
     </div>
     <div class="gallery">
@@ -907,54 +980,36 @@ a { color: inherit; text-decoration: none; }
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Žebříček</span>
+      <div class="sec-rule"></div>
       <span class="sec-num">Top 5</span>
     </div>
-    <div class="lbm-card">
-      <div class="lbm-avatar">JK</div>
-      <div class="lbm-body">
-        <div class="lbm-meta">
-          <span class="lbm-name">Jan K.</span>
-          <span class="lbm-sep">·</span>
-          <span class="lbm-score">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="#E0A020" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            342 bodů
-          </span>
+    <div class="lh-card">
+      <div class="lh-hero">
+        <div class="lh-av">JK<span class="lh-badge">1</span></div>
+        <div class="lh-id">
+          <div class="lh-kick">Nejlepší záběr</div>
+          <div class="lh-name">Jan K.</div>
         </div>
-        <p class="lbm-text">Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.</p>
+        <div class="lh-pts"><div class="n">342</div><div class="u">bodů</div></div>
       </div>
+      <div class="lh-quote-wrap">
+        <div class="lh-quote">
+          <p>„Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.“</p>
+          <span class="by">Jan K., 1. místo</span>
+        </div>
+      </div>
+      <div class="lh-row"><span class="rk">2</span><span class="nm">Tereza M.</span><span class="pt">298</span></div>
+      <div class="lh-row"><span class="rk">3</span><span class="nm">Pavel N.</span><span class="pt">261</span></div>
+      <div class="lh-row"><span class="rk">4</span><span class="nm">Lucie V.</span><span class="pt">244</span></div>
+      <div class="lh-row"><span class="rk">5</span><span class="nm">Martin H.</span><span class="pt">198</span></div>
     </div>
-    <div class="leaderboard">
-      <div class="lb-row lb-gold">
-        <div class="lb-rank"><svg width="12" height="12" viewBox="0 0 24 24" fill="#E0A020" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-        <div class="lb-name">Jan K.</div><div class="lb-pts">342</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:100%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">2</div><div class="lb-name">Tereza M.</div><div class="lb-pts">298</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:87%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">3</div><div class="lb-name">Pavel N.</div><div class="lb-pts">261</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:76%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">4</div><div class="lb-name">Lucie V.</div><div class="lb-pts">244</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:71%"></div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank">5</div><div class="lb-name">Martin H.</div><div class="lb-pts">198</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:58%"></div></div>
-      </div>
-    </div>
-    <!-- Tvůj výsledek -->
-    <div class="lb-my-row" id="lbMyRow">
-      <div class="lb-my-stamp" id="lbMyStamp"></div>
-      <div class="lb-my-body">
-        <div class="lb-my-label">Tvůj záběr</div>
-        <div class="lb-my-val"><span id="lbMyPts">—</span> <span>bodů</span></div>
-        <div class="lb-my-sub"><span id="lbMyScore">—</span> % shody</div>
-      </div>
-      <div class="lb-my-date" id="lbMyDate"></div>
+    <!-- Tvůj výsledek (mimo Top 5) -->
+    <div class="lh-skip" id="lbMySkip" style="display:none"><span></span><span></span><span></span></div>
+    <div class="lh-you" id="lbMyRow">
+      <span class="rk" id="lbMyRank">—</span>
+      <span class="av">VY</span>
+      <div><div class="nm">Tvůj výsledek</div><div class="sub"><span id="lbMyScore">—</span> % shody · <span id="lbMyDate"></span></div></div>
+      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u">bodů</div></div>
     </div>
 
     <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg">
@@ -973,6 +1028,7 @@ a { color: inherit; text-decoration: none; }
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Autor zastavení</span>
+      <div class="sec-rule"></div>
     </div>
     <div class="autor-card">
       <div class="autor-avatar">L</div>
@@ -998,6 +1054,7 @@ a { color: inherit; text-decoration: none; }
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Klíčová slova</span>
+      <div class="sec-rule"></div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;">
       <span class="kw-tag">přístav</span>
@@ -1438,6 +1495,9 @@ function renderMyLeaderboardRow() {
   if (!v) return;
   const row = document.getElementById('lbMyRow');
   if (row) row.classList.add('visible');
+  const skipEl = document.getElementById('lbMySkip');
+  if (skipEl) skipEl.style.display = 'flex';
+  loadMyRank(v.points);
   const ptsEl   = document.getElementById('lbMyPts');
   const scoreEl = document.getElementById('lbMyScore');
   const dateEl  = document.getElementById('lbMyDate');
@@ -1457,6 +1517,21 @@ function renderMyLeaderboardRow() {
       k: PLACE_ID + '-lb',
     });
   }
+}
+
+// Pořadí přihlášeného uživatele — počet záznamů s vyšším skóre pro toto místo + 1
+async function loadMyRank(myPoints) {
+  const el = document.getElementById('lbMyRank');
+  if (!el || myPoints == null) return;
+  try {
+    const r = await fetch(
+      SUPA_URL + '/rest/v1/visited?place_id=eq.' + PLACE_ID + '&points=gt.' + myPoints + '&select=place_id',
+      { headers: { ...authHeaders(), 'Prefer': 'count=exact', 'Range': '0-0' } }
+    );
+    const cr = r.headers.get('content-range');
+    const total = cr && cr.indexOf('/') >= 0 ? parseInt(cr.split('/')[1], 10) : null;
+    if (total != null && !isNaN(total)) el.textContent = total + 1;
+  } catch(e) {}
 }
 
 function arScoreToStampScore(arScore) {
