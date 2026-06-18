@@ -528,6 +528,7 @@ a { color: inherit; text-decoration: none; }
     padding: 8px 0 14px !important; padding-top: var(--header-h, 52px) !important;
     justify-content: flex-start !important; gap: 0 !important;
   }
+  body { padding-right: 0 !important; padding-bottom: 0 !important; }
   .page { padding-top: 16px; padding-left: 10px !important; padding-right: 74px !important; }
   .page-title { font-size: clamp(24px, 4vw, 30px); }
   .page-intro { font-size: 13px; line-height: 1.5; }
@@ -536,7 +537,7 @@ a { color: inherit; text-decoration: none; }
   .section-label { margin-top: 14px; }
   #placesList.grid-mode .section-label { margin-top: 14px; }
 }
-/* nav.js nastavuje body.style.paddingRight inline — přepíšeme přes JS níže */
+
 </style>
 </head>
 <body>
@@ -618,29 +619,6 @@ a { color: inherit; text-decoration: none; }
 
 <div id="lop-nav"></div>
 <script src="nav.js?v=2"></script>
-<script>
-// nav.js nastavuje body.style.paddingRight inline — v landscape na mobilu
-// chceme stejný okraj vpravo jako vlevo (10px od .page), ne nav šířku na body
-(function fixLandscapePadding() {
-  function apply() {
-    const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
-    if (isLandscapeMobile) {
-      document.body.style.paddingRight = '0';
-      document.body.style.paddingBottom = '';
-      const page = document.querySelector('.page');
-      if (page) { page.style.paddingRight = '74px'; page.style.paddingLeft = '10px'; }
-    } else if (window.innerWidth < 820) {
-      // portrait — nav je dole, body padding-bottom nastavuje nav.js, page okraje reset
-      const page = document.querySelector('.page');
-      if (page) { page.style.paddingRight = ''; page.style.paddingLeft = ''; }
-    }
-  }
-  // Spustit po nav.js (který běží v rAF)
-  requestAnimationFrame(() => requestAnimationFrame(apply));
-  window.addEventListener('resize', apply);
-  window.addEventListener('orientationchange', () => setTimeout(apply, 100));
-})();
-</script>
 
 <script>
 (function() {
