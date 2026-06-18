@@ -157,7 +157,7 @@ a { color: inherit; text-decoration: none; }
 .flat-section-header {
   display: flex; align-items: center; gap: 9px;
   font-family: 'Inter', sans-serif;
-  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-5); font-weight: 500;
   padding-bottom: 8px;
 }
@@ -312,6 +312,7 @@ a { color: inherit; text-decoration: none; }
     width: 2px !important; height: 20px !important;
     bottom: auto !important;
   }
+  body { padding-right: 0 !important; padding-bottom: 0 !important; }
   .page { padding-left: 10px !important; padding-right: 74px !important; }
 }
 </style>
@@ -327,24 +328,7 @@ a { color: inherit; text-decoration: none; }
 
 <div id="lop-nav"></div>
 <script src="nav.js?v=2"></script>
-<script>
-(function fixLandscapePadding() {
-  function apply() {
-    const isLandscapeMobile = window.innerWidth < 820 && window.innerWidth > window.innerHeight;
-    if (isLandscapeMobile) {
-      document.body.style.paddingRight = '0';
-      const page = document.querySelector('.page');
-      if (page) { page.style.paddingRight = '74px'; page.style.paddingLeft = '10px'; }
-    } else if (window.innerWidth < 820) {
-      const page = document.querySelector('.page');
-      if (page) { page.style.paddingRight = ''; page.style.paddingLeft = ''; }
-    }
-  }
-  requestAnimationFrame(() => requestAnimationFrame(apply));
-  window.addEventListener('resize', apply);
-  window.addEventListener('orientationchange', () => setTimeout(apply, 100));
-})();
-</script>
+
 
 <!-- Supabase + stamps -->
 <script src="castle-data.js"></script>
@@ -667,7 +651,7 @@ function renderSection(sec, idx) {
           return '<div class="badge-tip">' + iIcon + '<div>' + txt + '</div></div>';
         } else {
           const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
-          const descHtml = (tipData && tipData.desc) ? '<br><i style="color:var(--ink-4);font-size:10.5px;">' + tipData.desc + '</i>' : '';
+          const descHtml = (tipData && tipData.desc) ? '<br><i style="color:var(--ink-4);font-size:11px;">' + tipData.desc + '</i>' : '';
           let txt;
           if (isDistrict) {
             txt = 'Titul ' + title + ' je tvůj!' + descHtml;
