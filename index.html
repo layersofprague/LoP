@@ -1871,9 +1871,178 @@ a { color: inherit; text-decoration: none; }
   transition: opacity .15s;
 }
 .arch-tip-wiki:hover { opacity: .8; }
+
+/* ── Lang onboarding overlay ── */
+#lop-lang-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--paper, #F8F8F6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px 40px;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: opacity .35s, transform .35s;
+}
+#lop-lang-overlay.hiding {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(.98);
+}
+.llo-top {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: clamp(48px, 18vh, 120px);
+}
+.llo-logo {
+  width: clamp(200px, 55vw, 300px);
+  height: auto;
+  display: block;
+}
+.llo-vitejte {
+  margin-top: clamp(20px, 5vh, 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  line-height: 1.06;
+  text-align: center;
+}
+.llo-vitejte span { display: block; }
+.llo-bottom {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 360px;
+}
+.llo-flags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.llo-flag-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 28px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  transition: background .15s, opacity .15s;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.llo-flag-btn:hover { background: var(--paper-2, #F0F0EE); }
+.llo-flag-btn:active { opacity: .7; }
+.llo-flag-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink, #111111);
+}
+.llo-flag-divider {
+  width: 1px;
+  height: 62px;
+  background: var(--rule, #E8E8E6);
+  flex-shrink: 0;
+}
+.llo-select-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 10px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  #lop-lang-overlay {
+    flex-direction: row;
+    padding: 20px 40px;
+    gap: 40px;
+  }
+  .llo-top {
+    padding-top: 0;
+    flex: 1;
+    justify-content: center;
+  }
+  .llo-vitejte { margin-top: 16px; }
+  .llo-bottom {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* Flag SVG styles */
+.llo-flag { width: 72px; height: 48px; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 8px rgba(26,24,20,.16); display: block; flex-shrink: 0; }
 </style>
 </head>
 <body>
+
+
+<!-- ── Lang onboarding overlay ── -->
+<div id="lop-lang-overlay">
+  <div class="llo-top">
+    <img class="llo-logo" src="logo-transparent.png" alt="Layers of Prague"/>
+    <div class="llo-vitejte">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#D4D4CF;">Witamy</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:14px;color:#CFCFCA;">Welkom</span>
+      <span style="font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:#C9C9C4;">Üdvözöljük</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:17px;color:#C9C9C4;">Bienvenue</span>
+      <span style="font-family:'Fraunces',serif;font-weight:400;font-size:20px;color:#C2C2BD;">Willkommen</span>
+      <span style="font-family:'Fraunces',serif;font-weight:400;font-size:38px;letter-spacing:-.01em;color:#A4A49E;">Vítejte!</span>
+      <span style="font-family:'Fraunces',serif;font-style:italic;font-size:24px;color:#B6B6B1;">Welcome</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:18px;color:#C2C2BD;">Vitajte</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:16px;color:#C4C4BF;">Benvenuti</span>
+      <span style="font-family:'Noto Sans JP',sans-serif;font-weight:400;font-size:13px;color:#CECEC9;">ようこそ · 欢迎</span>
+    </div>
+  </div>
+  <div class="llo-bottom">
+    <div class="llo-flags">
+      <button class="llo-flag-btn" onclick="window.lopChooseLang('cs')">
+        <svg class="llo-flag" viewBox="0 0 72 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="72" height="24" fill="#ffffff"/>
+          <rect y="24" width="72" height="24" fill="#D7141A"/>
+          <polygon points="0,0 38,24 0,48" fill="#11457E"/>
+        </svg>
+        <span class="llo-flag-name">Čeština</span>
+      </button>
+      <div class="llo-flag-divider"></div>
+      <button class="llo-flag-btn" onclick="window.lopChooseLang('en')">
+        <svg class="llo-flag" viewBox="0 0 72 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="72" height="48" fill="#012169"/>
+          <line x1="0" y1="0" x2="72" y2="48" stroke="#fff" stroke-width="10"/>
+          <line x1="72" y1="0" x2="0" y2="48" stroke="#fff" stroke-width="10"/>
+          <line x1="0" y1="0" x2="72" y2="48" stroke="#C8102E" stroke-width="4"/>
+          <line x1="72" y1="0" x2="0" y2="48" stroke="#C8102E" stroke-width="4"/>
+          <rect x="29" width="14" height="48" fill="#fff"/>
+          <rect y="17" width="72" height="14" fill="#fff"/>
+          <rect x="31" width="10" height="48" fill="#C8102E"/>
+          <rect y="19" width="72" height="10" fill="#C8102E"/>
+        </svg>
+        <span class="llo-flag-name">English</span>
+      </button>
+    </div>
+    <div class="llo-select-hint">
+      <span style="font-family:'Inter',sans-serif;font-weight:500;font-size:13px;color:#9E9E99;">Vyberte jazyk</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:12px;color:#B6B6B1;">Select a language</span>
+      <span style="font-family:'Fraunces',serif;font-style:italic;font-size:12px;color:#B0B0AB;">Sprache wählen</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:11px;color:#BCBCB7;">Choisir une langue</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:11px;color:#BCBCB7;">Wybierz język</span>
+      <span style="font-family:'Noto Sans JP',sans-serif;font-weight:400;font-size:11px;color:#B6B6B1;">言語を選択 · 选择语言</span>
+    </div>
+  </div>
+</div>
 
 <div id="lop-header"></div>
 <script src="header.js?v=2"></script>
@@ -2510,6 +2679,106 @@ function locSteps(steps) {
     text:  (window.lopLang === 'en' && s.text_en)  ? s.text_en  : s.text,
   }));
 }
+
+/* ── Lang overlay ── */
+(function() {
+  const LANG_KEY = 'lop_lang';
+  const SEEN_KEY = 'lop_lang_chosen';
+
+  function _hide() {
+    const el = document.getElementById('lop-lang-overlay');
+    if (!el) return;
+    el.classList.add('hiding');
+    setTimeout(() => el.remove(), 400);
+  }
+
+  window.lopChooseLang = function(lang) {
+    // 1. Uložit do localStorage
+    localStorage.setItem(LANG_KEY, lang);
+    localStorage.setItem(SEEN_KEY, '1');
+
+    // 2. Pokud je přihlášen → sync do Supabase
+    _syncLangToSupabase(lang);
+
+    // 3. Reload s novým jazykem (i18n.js ho načte)
+    _hide();
+    setTimeout(() => location.reload(), 380);
+  };
+
+  async function _syncLangToSupabase(lang) {
+    try {
+      const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+      if (!s?.access_token || !s?.user?.id) return;
+      await fetch(
+        'https://lomtaoctzetpweuepesp.supabase.co/rest/v1/profiles?user_id=eq.' + s.user.id,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5',
+            'Authorization': 'Bearer ' + s.access_token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ lang }),
+        }
+      );
+    } catch(e) { /* tiché selhání — localStorage zůstává */ }
+  }
+
+  // Splash vždy, výběr jazyka jen při první návštěvě
+  function _init() {
+    const chosen = localStorage.getItem('lop_lang');
+    const el = document.getElementById('lop-lang-overlay');
+    if (!el) return;
+
+    if (chosen) {
+      // Opakovaná návštěva — schovat vlaječky a hint, zobrazit jen logo + vítejte
+      const bottom = el.querySelector('.llo-bottom');
+      if (bottom) bottom.style.display = 'none';
+
+      // Auto-hide po 1.6s
+      setTimeout(() => {
+        el.classList.add('hiding');
+        setTimeout(() => el.remove(), 400);
+      }, 1600);
+    }
+    // Jinak zůstane s výběrem jazyka
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+})();
+
+/* ── Sync lang ze Supabase po přihlášení ── */
+// Volat po úspěšném loginu (z auth-modal.js nebo kdekoli kde session vznikne)
+window.lopSyncLangFromProfile = async function() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lop_auth_session') || 'null');
+    if (!s?.access_token || !s?.user?.id) return;
+    const r = await fetch(
+      'https://lomtaoctzetpweuepesp.supabase.co/rest/v1/profiles?user_id=eq.' + s.user.id + '&select=lang',
+      {
+        headers: {
+          'apikey': 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5',
+          'Authorization': 'Bearer ' + s.access_token,
+        }
+      }
+    );
+    if (!r.ok) return;
+    const data = await r.json();
+    const lang = data?.[0]?.lang;
+    if (lang && ['cs', 'en'].includes(lang)) {
+      const current = localStorage.getItem('lop_lang');
+      if (current !== lang) {
+        localStorage.setItem('lop_lang', lang);
+        location.reload();
+      }
+    }
+  } catch(e) {}
+};
+
 async function loadData() {
   try {
     const [placesRes, routesRes] = await Promise.all([

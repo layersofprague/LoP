@@ -226,6 +226,7 @@ async function _doSignIn() {
     _close();
     if (window.lopHeader?.refresh) window.lopHeader.refresh();
     if (window.lopNav?.refresh)    window.lopNav.refresh();
+    if (window.lopSyncLangFromProfile) window.lopSyncLangFromProfile();
     _loginCbs.forEach(fn => { try { fn(data); } catch(e) {} });
   } catch(e) {
     _showErr('lamErrSignin', e.message);
