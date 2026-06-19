@@ -3404,8 +3404,11 @@ function toggleBaseLayer() {
 /* ═══════════════ HASH NAVIGACE ═══════════════ */
 function navigateToHash() {
   const hash = location.hash.replace('#', '');
+  console.log('[hash] hash:', hash, 'markers:', _markers.length, 'map:', !!window._map);
+  if (_markers.length > 0) console.log('[hash] first marker id:', _markers[0]?.loc?.id);
   if (!hash || !window._map || !_markers.length) return;
   const found = _markers.find(({ loc }) => loc.id === hash);
+  console.log('[hash] found:', found?.loc?.id, 'lat:', found?.loc?.lat);
   if (!found) return;
   const { loc, marker } = found;
 
