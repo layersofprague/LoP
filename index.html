@@ -558,6 +558,66 @@ a { color: inherit; text-decoration: none; }
   border-radius: 4px;
   overflow: hidden;
 }
+
+/* ── PODKLADOVÁ MAPA — přepínač vrstev ── */
+.base-layer-wrap {
+  position: fixed;
+  top: calc(var(--header-h, 52px) + 8px);
+  left: 14px;
+  z-index: 500;
+  pointer-events: auto;
+}
+.base-layer-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: #F8F8F6; border: 1.5px solid var(--rule);
+  border-radius: 10px; padding: 5px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 500; color: var(--ink-4);
+  cursor: pointer; white-space: nowrap;
+  box-shadow: 0 2px 16px rgba(0,0,0,.05);
+  transition: background .15s, color .15s;
+}
+.base-layer-btn:hover { background: #F0F0EE; color: var(--ink-2); }
+.base-layer-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+.base-layer-btn .bl-chevron { transition: transform .22s; }
+.base-layer-btn.open .bl-chevron { transform: rotate(180deg); }
+.base-layer-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: rgba(248,248,246,.97);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+  overflow: hidden;
+  min-width: 200px;
+}
+.base-layer-dropdown.open { display: block; }
+.bl-option {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; color: var(--ink-2);
+  cursor: pointer; transition: background .12s;
+  border-bottom: 1px solid var(--rule);
+}
+.bl-option:last-child { border-bottom: none; }
+.bl-option:hover { background: var(--paper-2); }
+.bl-option.active { color: var(--ink); font-weight: 600; }
+.bl-option .bl-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rule); flex-shrink: 0;
+}
+.bl-option.active .bl-dot { background: var(--accent); }
+.bl-option .bl-label { flex: 1; }
+.bl-option .bl-year {
+  font-size: 10px; color: var(--ink-5);
+}
+@media (max-width: 819px) and (orientation: landscape) {
+  .base-layer-wrap { left: 8px; top: calc(var(--header-h, 52px) + 8px); }
+}
 /* Filter puck — jedno tlačítko */
 .filter-puck-wrap {
   position: fixed;
@@ -1840,6 +1900,34 @@ a { color: inherit; text-decoration: none; }
     <section class="view active" id="mapView">
       <div id="map"></div>
 
+      <!-- Přepínač podkladových vrstev -->
+      <div class="base-layer-wrap" id="baseLayerWrap">
+        <button class="base-layer-btn" id="baseLayerBtn" onclick="toggleBaseLayer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span id="baseLayerLabel">Mapa</span>
+          <svg class="bl-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="base-layer-dropdown" id="baseLayerDropdown">
+          <div class="bl-option active" data-layer="carto" onclick="setBaseLayer('carto', this)">
+            <span class="bl-dot"></span>
+            <span class="bl-label">Mapa</span>
+          </div>
+          <div class="bl-option" data-layer="osm" onclick="setBaseLayer('osm', this)">
+            <span class="bl-dot"></span>
+            <span class="bl-label">OSM</span>
+          </div>
+          <div class="bl-option" data-layer="dark" onclick="setBaseLayer('dark', this)">
+            <span class="bl-dot"></span>
+            <span class="bl-label">Tmavá</span>
+          </div>
+          <div class="bl-option" data-layer="orto" onclick="setBaseLayer('orto', this)">
+            <span class="bl-dot"></span>
+            <span class="bl-label">Ortofoto</span>
+            <span class="bl-year">2025</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Filter puck -->
       <div class="filter-puck-wrap" id="filterPuckWrap">
         <button class="filter-puck" id="filterPuck" title="Filtr" onclick="toggleFilter()">
@@ -2776,6 +2864,8 @@ function rebuildMarkers() {
     const loc = marker._loc;
     marker.setIcon(makeIcon(loc));
   });
+  // Hash navigace — při prvním načtení
+  if (location.hash) navigateToHash();
 }
 
 function buildChips() {
@@ -3122,7 +3212,7 @@ function initMap() {
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   setTimeout(alignPuck, 100);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  BASE_LAYERS.carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap © CARTO',
     subdomains: 'abcd', maxZoom: 20
   }).addTo(map);
@@ -3203,7 +3293,148 @@ function rtToggleWish(id, el) {
   updateWishBadge();
 }
 
-/* ═══════════════ LOCATE ME — skutečná GPS ═══════════════ */
+/* ── PODKLADOVÉ VRSTVY ── */
+const BASE_LAYERS = {
+  carto: null, // inicializuje se v initMap
+  orto2025: null,
+  orto2020: null,
+  orto2010: null,
+  orto2000: null,
+  orto1990: null,
+  orto1975: null,
+  orto1938: null,
+};
+
+// Mapování layer→WMS layer číslo (z GetCapabilities IPR Praha)
+// Čísla vrstev: z GetCapabilities, vzor +8 každý rok (1=2025, 9=2024, 17=2023...)
+const IPR_LAYER_NUM = {
+  orto2025: '1',
+  orto2020: '41',
+  orto2015: '81',
+  orto2010: '121',
+  orto2005: '161',
+  orto2000: '201',
+  orto1990: '281',
+  orto1975: '401',
+  orto1938: '481',
+};
+
+const IPR_LABEL = {
+  carto:    'Mapa',
+  orto2025: 'Ortofoto 2025',
+  orto2020: 'Ortofoto 2020',
+  orto2010: 'Ortofoto 2010',
+  orto2000: 'Ortofoto 2000',
+  orto1990: 'Letecký 1990',
+  orto1975: 'Letecký 1975',
+  orto1938: 'Letecký 1938',
+};
+
+let _currentBaseLayer = 'carto';
+
+function _getOrCreateLayer(key) {
+  if (BASE_LAYERS[key]) return BASE_LAYERS[key];
+  if (key === 'osm') {
+    BASE_LAYERS.osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap',
+    });
+  } else if (key === 'dark') {
+    BASE_LAYERS.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, attribution: '© CARTO',
+    });
+  } else if (key === 'orto') {
+    BASE_LAYERS.orto = L.tileLayer.wms(
+      'https://gs-pub.praha.eu/arcgis/services/ort/ortofotomapa_archiv/MapServer/WmsServer', {
+      layers: '1', format: 'image/jpeg', transparent: false,
+      attribution: '© IPR Praha', maxZoom: 20,
+    });
+  }
+  return BASE_LAYERS[key] || null;
+}
+
+function setBaseLayer(key, el) {
+  if (!window._map) return;
+  const newLayer = _getOrCreateLayer(key);
+  if (!newLayer) return;
+
+  // Odstraň stávající
+  const oldLayer = _getOrCreateLayer(_currentBaseLayer);
+  if (oldLayer) window._map.removeLayer(oldLayer);
+
+  // Přidej novou jako spodní vrstvu
+  newLayer.addTo(window._map);
+  newLayer.bringToBack();
+  _currentBaseLayer = key;
+
+  // Aktualizuj UI
+  document.querySelectorAll('.bl-option').forEach(o => o.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const lbl = document.getElementById('baseLayerLabel');
+  if (lbl) lbl.textContent = LAYER_LABEL[key] || key;
+
+  // Zavři dropdown
+  document.getElementById('baseLayerDropdown')?.classList.remove('open');
+  document.getElementById('baseLayerBtn')?.classList.remove('open');
+  _baseLayerOpen = false;
+}
+
+let _baseLayerOpen = false;
+function toggleBaseLayer() {
+  _baseLayerOpen = !_baseLayerOpen;
+  document.getElementById('baseLayerDropdown')?.classList.toggle('open', _baseLayerOpen);
+  document.getElementById('baseLayerBtn')?.classList.toggle('open', _baseLayerOpen);
+  document.getElementById('baseLayerBtn')?.blur();
+  if (_baseLayerOpen) {
+    setTimeout(() => {
+      document.addEventListener('click', function _blOutside(e) {
+        const wrap = document.getElementById('baseLayerWrap');
+        if (wrap && !wrap.contains(e.target)) {
+          _baseLayerOpen = false;
+          document.getElementById('baseLayerDropdown')?.classList.remove('open');
+          document.getElementById('baseLayerBtn')?.classList.remove('open');
+        } else if (_baseLayerOpen) {
+          setTimeout(() => document.addEventListener('click', _blOutside, { capture: true, once: true }), 0);
+        }
+      }, { capture: true, once: true });
+    }, 0);
+  }
+}
+
+/* ═══════════════ HASH NAVIGACE ═══════════════ */
+function navigateToHash() {
+  const hash = location.hash.replace('#', '');
+  if (!hash || !window._map || !_markers.length) return;
+  const found = _markers.find(({ loc }) => loc.id === hash);
+  if (!found) return;
+  const { loc, marker } = found;
+
+  // Centruj mapu
+  window._map.setView([loc.lat, loc.lng], 16, { animate: false });
+
+  // Šachovnicový pin — nahraď normální icon
+  const flagHtml = '<div style="'
+    + 'width:30px;height:30px;border-radius:50%;'
+    + 'border:2px solid #fff;box-shadow:0 2px 6px rgba(26,24,20,.35);'
+    + 'background-image:linear-gradient(45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(-45deg,#1a1a18 25%,transparent 25%),'
+    + 'linear-gradient(45deg,transparent 75%,#1a1a18 75%),'
+    + 'linear-gradient(-45deg,transparent 75%,#1a1a18 75%);'
+    + 'background-size:7px 7px;background-color:#fff;'
+    + 'background-position:0 0,0 3.5px,3.5px -3.5px,-3.5px 0;'
+    + '"></div>';
+  marker.setIcon(L.divIcon({ html: flagHtml, className: '', iconSize: [30,30], iconAnchor: [15,15] }));
+
+  // Otevři tooltip
+  setTimeout(() => {
+    const rt = document.getElementById('rt');
+    if (rt) showTooltip(loc, marker, rt);
+  }, 300);
+
+  // Vrať normální pin při zavření tooltipu
+  marker.once('rt-close', () => marker.setIcon(makeIcon(loc)));
+}
+
+
 function locateMe() {
   if (!navigator.geolocation) {
     alert('Geolokace není podporována tímto prohlížečem.');
