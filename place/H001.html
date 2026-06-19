@@ -314,8 +314,8 @@ a { color: inherit; text-decoration: none; }
   transition: color .15s, background .15s;
 }
 .k-vote-btn:hover { background: var(--paper-2); color: var(--ink); }
-.k-vote-btn.active-like svg  { fill: var(--ink); stroke: var(--ink-5); }
-.k-vote-btn.active-dislike svg { fill: var(--ink); stroke: var(--ink-5); }
+.k-vote-btn.active-like  { color: var(--ok); }
+.k-vote-btn.active-dislike { color: var(--accent); }
 .k-vote-btn svg { width: 13px; height: 13px; }
 
 /* title */
@@ -745,6 +745,7 @@ a { color: inherit; text-decoration: none; }
 
 <!-- TOPBAR -->
 <div id="lop-header"></div>
+<script src="../i18n.js"></script>
 <script src="../header.js"></script>
 
 <!-- NAV -->
@@ -1105,7 +1106,7 @@ function renderExif(elId, data) {
   const artist   = data?.Artist || data?.XPAuthor || data?.Creator || data?.['dc:creator'] || null;
   const copy     = data?.Copyright || data?.Rights || data?.['dc:rights'] || null;
   if (!artist && !copy) {
-    el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">EXIF data nenalezena</div>';
+    el.innerHTML = `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_missing')}</div>`;
     return;
   }
   el.innerHTML = `
@@ -1127,7 +1128,7 @@ async function loadExif() {
   } catch(e) {
     ['copyHist','copyNow'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">Nepodařilo se načíst</div>';
+      if (el) el.innerHTML = `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_error')}</div>`;
     });
   }
 }
@@ -1168,11 +1169,11 @@ function updateInsiderGate() {
 
   if (gate && !insider) {
     if (!loggedIn) {
-      if (txt)  txt.textContent = 'Pro celý obsah se';
-      if (link) { link.textContent = 'přihlaste'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
+      if (txt)  txt.textContent = t('place.paywall_signin');
+      if (link) { link.textContent = t('place.paywall_link'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
     } else {
-      if (txt)  txt.textContent = 'Pro celý obsah';
-      if (link) { link.textContent = 'upgradujte na Insider'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
+      if (txt)  txt.textContent = t('place.paywall_insider');
+      if (link) { link.textContent = t('place.paywall_upgrade'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
     }
   }
 
@@ -1390,9 +1391,8 @@ function updateVoteUI(myVote, likes, dislikes) {
   const dislikeCount = document.getElementById('dislikeCount');
   likeBtn.classList.toggle('active-like',     myVote === 'like');
   dislikeBtn.classList.toggle('active-dislike', myVote === 'dislike');
-  dislikeBtn.querySelector('svg').setAttribute('stroke', myVote === 'dislike' ? 'var(--ink-5)' : 'currentColor');
-  likeBtn.querySelector('svg').setAttribute('fill',     myVote === 'like'    ? 'var(--ink)' : 'none');
-  dislikeBtn.querySelector('svg').setAttribute('fill',  myVote === 'dislike' ? 'var(--ink)' : 'none');
+  likeBtn.querySelector('svg').setAttribute('fill',     myVote === 'like'    ? 'currentColor' : 'none');
+  dislikeBtn.querySelector('svg').setAttribute('fill',  myVote === 'dislike' ? 'currentColor' : 'none');
   if (likes    !== null) likeCount.textContent    = likes;
   if (dislikes !== null) dislikeCount.textContent = dislikes;
 }
@@ -1559,7 +1559,7 @@ function updateWishUI() {
   const lbl = document.getElementById('wishLbl');
   if (btn) btn.classList.toggle('active', w);
   if (ico) ico.setAttribute('fill', w ? 'currentColor' : 'none');
-  if (lbl) lbl.textContent = w ? 'V plánu' : 'Plán';
+  if (lbl) lbl.textContent = w ? t('place.plan_in') : t('place.plan');
 }
 
 function toggleWishBtn() {
@@ -1588,18 +1588,18 @@ function toggleWishBtn() {
 
   // Počty míst z places.json
   try {
-    const res = await fetch('/LoP/places.json');
+    const res = await fetch('../places.json');
     if (res.ok) {
       const all = await res.json();
       const count = all.filter(p => AUTOR_PLACES.includes(p.id)).length;
       const el = document.getElementById('autorPlaces');
-      if (el) el.textContent = count + ' zastavení';
+      if (el) el.textContent = t('place.stops', { n: count });
     }
   } catch(e) {}
 
   // Trasy
   const elR = document.getElementById('autorRoutes');
-  if (elR) elR.textContent = AUTOR_ROUTES + ' trasy';
+  if (elR) elR.textContent = t('place.routes', { n: AUTOR_ROUTES });
 
   // Hodnocení z Supabase
   try {
@@ -1616,7 +1616,7 @@ function toggleWishBtn() {
       const el       = document.getElementById('autorStars');
       if (!el) return;
       if (total < MIN_VOTES) {
-        el.textContent = 'čeká na hodnocení';
+        el.textContent = t('place.waiting_rating');
       } else {
         const score = likes / total;
         el.innerHTML = starsHTML(score);
@@ -1661,13 +1661,12 @@ function toggleWishBtn() {
   L.marker([LAT, LNG], {
     icon: L.divIcon({ html: flagHtml, className: '', iconSize: [30,30], iconAnchor: [15,15] }),
     zIndexOffset: 100
-  }).addTo(map).on('click', (e) => {
-    L.DomEvent.stopPropagation(e);
-    sessionStorage.setItem('lop_goto', PLACE_ID); location.href = '/LoP/index.html';
+  }).addTo(map).on('click', () => {
+    location.href = '../index.html#' + PLACE_ID;
   });
 
   // Okolní místa z places.json
-  fetch('/LoP/places.json').then(r => r.json()).then(places => {
+  fetch('../places.json').then(r => r.json()).then(places => {
     function haversine(lat1, lng1, lat2, lng2) {
       const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
       const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
@@ -1679,15 +1678,14 @@ function toggleWishBtn() {
       const pinHtml = `<div class="mini-pin" style="background:${color}">${letter}</div>`;
       L.marker([p.lat, p.lng], {
         icon: L.divIcon({ html: pinHtml, className: '', iconSize: [26,26], iconAnchor: [13,13] })
-      }).addTo(map).on('click', (e) => {
-        L.DomEvent.stopPropagation(e);
-        sessionStorage.setItem('lop_goto', p.id); location.href = '/LoP/index.html';
+      }).addTo(map).on('click', () => {
+        location.href = '../index.html#' + p.id;
       });
     });
   }).catch(() => {});
 
-  // Klik na mapu (ne na pin) → index.html s centrováním na H001
-  map.on('click', () => { sessionStorage.setItem('lop_goto', PLACE_ID); location.href = '/LoP/index.html'; });
+  // Klik na mapu → index.html
+  map.on('click', () => { location.href = '../index.html'; });
 })();
 
 /* ── SHARE ── */
