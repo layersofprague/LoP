@@ -1882,11 +1882,11 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   inset: 0;
   z-index: 9000;
   background: var(--paper, #F8F8F6);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 30px 44px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: end;
+  justify-items: center;
+  padding: 0 30px 40px;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: opacity .35s, transform .35s;
@@ -1897,11 +1897,10 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   transform: scale(.98);
 }
 .llo-top {
-  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: clamp(48px, 14vh, 100px);
+  padding-bottom: 20px;
 }
 .llo-logo {
   width: clamp(260px, 82vw, 360px);
@@ -1909,7 +1908,7 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   display: block;
 }
 .llo-vitejte {
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1919,19 +1918,14 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
 }
 .llo-vitejte span { display: block; }
 .llo-bottom {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   width: 100%;
   max-width: 360px;
-  padding-bottom: 0;
 }
 .llo-flags {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .llo-flag-btn {
   display: flex;
