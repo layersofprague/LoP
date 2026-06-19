@@ -129,6 +129,10 @@ a { color: inherit; text-decoration: none; }
 
 /* ═══════════════ NAV ═══════════════ */
 #lop-header { background: #F8F8F6 !important; }
+/* Header a nav skryté během splash */
+body.lop-splash #lop-header,
+body.lop-splash #lop-nav,
+body.lop-splash #nav { opacity: 0; pointer-events: none; }
 #nav {
   flex: 0 0 auto;
   display: flex;
@@ -1991,6 +1995,7 @@ a { color: inherit; text-decoration: none; }
 
 
 <!-- ── Lang onboarding overlay ── -->
+<script>document.body.classList.add("lop-splash");</script>
 <div id="lop-lang-overlay">
   <div class="llo-top">
     <img class="llo-logo" src="logo-transparent.png" alt="Layers of Prague"/>
@@ -2689,6 +2694,7 @@ function locSteps(steps) {
     const el = document.getElementById('lop-lang-overlay');
     if (!el) return;
     el.classList.add('hiding');
+    document.body.classList.remove('lop-splash');
     setTimeout(() => el.remove(), 400);
   }
 
@@ -2738,6 +2744,7 @@ function locSteps(steps) {
       // Auto-hide po 1.6s
       setTimeout(() => {
         el.classList.add('hiding');
+        document.body.classList.remove('lop-splash');
         setTimeout(() => el.remove(), 400);
       }, 1600);
     }
