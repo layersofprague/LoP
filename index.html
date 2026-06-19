@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="i18n.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ═══════════════ TOKENS ═══════════════ */
@@ -1984,7 +1985,7 @@ a { color: inherit; text-decoration: none; }
             <div class="filter-row">
               <div class="filter-lbl">
                 <span>Vzdálenost od vás</span>
-                <span class="filter-lbl-val" id="distV">libovolná</span>
+                <span class="filter-lbl-val" id="distV">${t('overview.any_dist')}</span>
               </div>
               <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
             </div>
@@ -2173,7 +2174,7 @@ function showLoginSnackbar() {
   const el = document.getElementById('lop-snackbar');
   if (!el) return;
   const ret = encodeURIComponent(location.href);
-  el.innerHTML = 'Pro pokročilou správu míst se <a href="login.html?return=' + ret + '">přihlaste</a>';
+  el.innerHTML = `${t('place.paywall_signin')} <a href="login.html?return=${ret}">${t('place.paywall_link')}</a>`;
   el.classList.add('show');
   clearTimeout(_snackTimer);
   _snackTimer = setTimeout(() => el.classList.remove('show'), 4000);
@@ -2281,7 +2282,7 @@ async function syncFromDB(onDone) {
     _showSyncSpinner(false);
     _showSyncBar(true);
     const sb = document.getElementById('lop-sync-bar');
-    if (sb) { const t = sb.querySelector('.sb-text'); if (t) t.textContent = 'Chyba: ' + (e?.message || String(e)); }
+    if (sb) { const t = sb.querySelector('.sb-text'); if (t) t.textContent = t('overview.load_err') + ': ' + (e?.message || String(e)); }
     if (onDone) onDone();
     console.warn('Sync failed:', e?.message);
   }
@@ -2610,7 +2611,7 @@ function updateWishBadge() {
   if (badge) { badge.textContent = n; badge.style.display = loggedIn && n > 0 ? 'block' : 'none'; }
   if (lock)  { lock.style.display = loggedIn ? 'none' : 'block'; }
   const customCt = document.getElementById('customCt');
-  if (customCt) customCt.textContent = String(n).padStart(2, '0') + ' míst';
+  if (customCt) customCt.textContent = String(n).padStart(2, '0') + ' ' + (window.lopLang === 'en' ? 'places' : 'míst');
   updateChipCounts();
   if (window.lopNav && window.lopNav.refreshIndex) window.lopNav.refreshIndex();
 }
@@ -2688,7 +2689,7 @@ function showTooltip(loc, m, rt) {
   </div>`;
 
   // Wish
-  const wLbl = wBtn ? 'v plánu' : 'do plánu?';
+  const wLbl = wBtn ? t('place.plan_in') : t('place.plan_add');
   const wishFooterHtml = isLoggedIn()
     ? `<div class="rt-tip-wish-wrap" onclick="rtToggleWish('${loc.id}', this); event.stopPropagation();">
         <span class="rt-tip-wish-lbl${wBtn?' active':''}">${wLbl}</span>
@@ -2697,7 +2698,7 @@ function showTooltip(loc, m, rt) {
         </button>
       </div>`
     : `<div class="rt-tip-wish-wrap" onclick="event.stopPropagation();window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href);">
-        <span class="rt-tip-wish-lbl">do plánu?</span>
+        <span class="rt-tip-wish-lbl">${t('place.plan_add')}</span>
         <button class="rt-tip-wish-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         </button>
@@ -3063,7 +3064,7 @@ function initDistSlider() {
     const v = +slider.value;
     if (v >= 100) {
       DIST_STATE.max = null;
-      label.textContent = 'libovolná';
+      label.textContent = t('overview.any_dist');
     } else {
       const km = 0.2 + (v / 100) * 4.8;
       DIST_STATE.max = km;
@@ -3090,7 +3091,7 @@ function resetFilters() {
   DIST_STATE.max = null;
   document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force'));
   const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
-  const dv = document.getElementById('distV'); if (dv) dv.textContent = 'libovolná';
+  const dv = document.getElementById('distV'); if (dv) dv.textContent = t('overview.any_dist');
   renderEra();
   applyFilter();
   updateFilterPuck();
@@ -3298,7 +3299,7 @@ function rtToggleWish(id, el) {
     if (svg) svg.setAttribute('fill', now ? 'currentColor' : 'none');
   }
   if (lbl) {
-    lbl.textContent = now ? 'v plánu' : 'do plánu?';
+    lbl.textContent = now ? t('place.plan_in') : t('place.plan_add');
     lbl.classList.toggle('active', now);
   }
   rebuildMarkers();
@@ -3553,7 +3554,7 @@ function openSheet(id) {
     <div class="sheet-actions">
       <button class="act-btn ${wished?'active':''}" id="sheetWishBtn" onclick="sheetToggleWish('${loc.id}')">
         <svg viewBox="0 0 24 24" fill="${wished?'currentColor':'none'}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        <span class="act-lbl">${wished?'V plánu':'Plán'}</span>
+        <span class="act-lbl">${wished?t('place.plan_in'):t('place.plan')}</span>
       </button>
       <button class="act-btn" onclick="openArFor('${loc.id}')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -3633,7 +3634,7 @@ function sheetToggleWish(id) {
   btn.classList.toggle('active', now);
   btn.querySelector('svg').setAttribute('fill', now ? 'white' : '#b04020');
   btn.querySelector('svg').setAttribute('stroke', now ? 'white' : '#b04020');
-  btn.querySelector('.act-lbl').textContent = now ? 'V plánu' : 'Do plánu';
+  btn.querySelector('.act-lbl').textContent = now ? t('place.plan_in') : t('place.plan');
   rebuildMarkers();
   buildChips();
   updateWishBadge();
