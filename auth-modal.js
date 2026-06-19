@@ -83,63 +83,63 @@ const CSS = `
 `;
 
 const SVG_CLOSE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-const BTN_CLOSE = `<button class="lam-close" onclick="window.lopAuth.close()" aria-label="Zavřít">${SVG_CLOSE}</button>`;
+const BTN_CLOSE = `<button class="lam-close" onclick="window.lopAuth.close()" aria-label="${t('auth.close')}">${SVG_CLOSE}</button>`;
 
 const HTML = `
 <div id="lop-auth-backdrop">
-  <div id="lop-auth-modal" role="dialog" aria-modal="true" aria-label="Přihlášení">
+  <div id="lop-auth-modal" role="dialog" aria-modal="true" ${`aria-label="${t('auth.sign_in')}"`}>
     <div class="lam-handle"></div>
     <div id="lamViewSignin">
       <div class="lam-head">
-        <div><div class="lam-kick">Vítejte zpět</div><h2 class="lam-title">Přihlaste <em>se</em></h2><p class="lam-sub">Pro pokročilé funkce je nutné přihlášení.</p></div>
+        <div><div class="lam-kick">${t('auth.welcome_back')}</div><h2 class="lam-title">${t('auth.sign_in')}</h2><p class="lam-sub">${t('auth.sign_in_sub')}</p></div>
         ${BTN_CLOSE}
       </div>
       <div class="lam-body">
         <div class="lam-msg err" id="lamErrSignin"></div>
-        <div class="lam-field"><label>Email</label><input type="email" id="lamEmailSignin" placeholder="vas@email.cz" autocomplete="email"/></div>
-        <div class="lam-field"><label>Heslo</label><input type="password" id="lamPassSignin" placeholder="••••••••" autocomplete="current-password"/></div>
-        <button class="lam-submit" id="lamBtnSignin" onclick="window.lopAuth._doSignIn()">Přihlásit se</button>
-        <div class="lam-switch">Nemáte účet? <a onclick="window.lopAuth._show('register')">Registrovat se</a> &nbsp;·&nbsp; <a onclick="window.lopAuth._show('reset')">Zapomenuté heslo</a></div>
+        <div class="lam-field"><label>${t('auth.label_email')}</label><input type="email" id="lamEmailSignin" placeholder="${t('auth.placeholder_email')}" autocomplete="email"/></div>
+        <div class="lam-field"><label>${t('auth.label_password')}</label><input type="password" id="lamPassSignin" placeholder="••••••••" autocomplete="current-password"/></div>
+        <button class="lam-submit" id="lamBtnSignin" onclick="window.lopAuth._doSignIn()">${t('auth.btn_signin')}</button>
+        <div class="lam-switch">${t('auth.no_account')} <a onclick="window.lopAuth._show('register')">${t('auth.link_register')}</a> &nbsp;·&nbsp; <a onclick="window.lopAuth._show('reset')">${t('auth.link_forgot')}</a></div>
       </div>
     </div>
     <div id="lamViewRegister" style="display:none">
       <div class="lam-head">
-        <div><div class="lam-kick">Nový účet</div><h2 class="lam-title">Registrace</h2><p class="lam-sub">Bezplatný účet pro ukládání míst napříč zařízeními.</p></div>
+        <div><div class="lam-kick">${t('auth.new_account')}</div><h2 class="lam-title">${t('auth.register')}</h2><p class="lam-sub">${t('auth.register_sub')}</p></div>
         ${BTN_CLOSE}
       </div>
       <div class="lam-body">
         <div class="lam-msg err" id="lamErrRegister"></div>
         <div class="lam-msg ok"  id="lamOkRegister"></div>
-        <div class="lam-field"><label>Email</label><input type="email" id="lamEmailRegister" placeholder="vas@email.cz" autocomplete="email"/></div>
-        <div class="lam-field"><label>Heslo <span style="font-size:9px;opacity:.6">(min. 6 znaků)</span></label><input type="password" id="lamPassRegister" placeholder="••••••••" autocomplete="new-password"/></div>
-        <button class="lam-submit" id="lamBtnRegister" onclick="window.lopAuth._doRegister()">Vytvořit účet</button>
-        <div class="lam-switch">Máte účet? <a onclick="window.lopAuth._show('signin')">Přihlásit se</a></div>
+        <div class="lam-field"><label>${t('auth.label_email')}</label><input type="email" id="lamEmailRegister" placeholder="${t('auth.placeholder_email')}" autocomplete="email"/></div>
+        <div class="lam-field"><label>${t('auth.label_password')} <span style="font-size:9px;opacity:.6">(${t('auth.label_pass_hint')})</span></label><input type="password" id="lamPassRegister" placeholder="••••••••" autocomplete="new-password"/></div>
+        <button class="lam-submit" id="lamBtnRegister" onclick="window.lopAuth._doRegister()">${t('auth.btn_register')}</button>
+        <div class="lam-switch">${t('auth.have_account')} <a onclick="window.lopAuth._show('signin')">${t('auth.link_signin')}</a></div>
       </div>
     </div>
     <div id="lamViewReset" style="display:none">
       <div class="lam-head">
-        <div><div class="lam-kick">Obnova přístupu</div><h2 class="lam-title">Zapomenuté <em>heslo</em></h2><p class="lam-sub">Pošleme vám odkaz pro obnovu hesla.</p></div>
+        <div><div class="lam-kick">${t('auth.recovery')}</div><h2 class="lam-title">${t('auth.forgot')}</h2><p class="lam-sub">${t('auth.forgot_sub')}</p></div>
         ${BTN_CLOSE}
       </div>
       <div class="lam-body">
         <div class="lam-msg err" id="lamErrReset"></div>
         <div class="lam-msg ok"  id="lamOkReset"></div>
-        <div class="lam-field"><label>Email</label><input type="email" id="lamEmailReset" placeholder="vas@email.cz" autocomplete="email"/></div>
-        <button class="lam-submit" id="lamBtnReset" onclick="window.lopAuth._doReset()">Odeslat odkaz</button>
-        <div class="lam-switch"><a onclick="window.lopAuth._show('signin')">Zpět na přihlášení</a></div>
+        <div class="lam-field"><label>${t('auth.label_email')}</label><input type="email" id="lamEmailReset" placeholder="${t('auth.placeholder_email')}" autocomplete="email"/></div>
+        <button class="lam-submit" id="lamBtnReset" onclick="window.lopAuth._doReset()">${t('auth.btn_send_link')}</button>
+        <div class="lam-switch"><a onclick="window.lopAuth._show('signin')">${t('auth.link_back')}</a></div>
       </div>
     </div>
     <div id="lamViewLoggedIn" style="display:none">
       <div class="lam-head">
-        <div><div class="lam-kick">Účet</div><h2 class="lam-title">Jste <em>přihlášeni</em></h2></div>
+        <div><div class="lam-kick">${t('auth.account')}</div><h2 class="lam-title">${t('auth.logged_in')}</h2></div>
         ${BTN_CLOSE}
       </div>
       <div class="lam-body">
         <div class="lam-user">
           <div class="lam-avatar" id="lamAvatar"></div>
           <div class="lam-user-email" id="lamUserEmail"></div>
-          <button class="lam-submit" onclick="window.lopAuth.close()">Pokračovat</button>
-          <button class="lam-signout" onclick="window.lopAuth.signOut()">Odhlásit se</button>
+          <button class="lam-submit" onclick="window.lopAuth.close()">${t('auth.btn_continue')}</button>
+          <button class="lam-signout" onclick="window.lopAuth.signOut()">${t('auth.btn_signout')}</button>
         </div>
       </div>
     </div>
@@ -215,21 +215,21 @@ async function _doSignIn() {
   _clearMsg('lamErrSignin');
   const email = document.getElementById('lamEmailSignin')?.value.trim() || '';
   const pass  = document.getElementById('lamPassSignin')?.value || '';
-  if (!email) { _showErr('lamErrSignin', 'Zadejte emailovou adresu.'); return; }
-  if (!pass)  { _showErr('lamErrSignin', 'Zadejte heslo.'); return; }
-  _setLoading('lamBtnSignin', true, 'Přihlásit se');
+  if (!email) { _showErr('lamErrSignin', t('auth.err_email')); return; }
+  if (!pass)  { _showErr('lamErrSignin', t('auth.err_password')); return; }
+  _setLoading('lamBtnSignin', true, t('auth.btn_signin'));
   try {
     const data = await apiPost('/token?grant_type=password', { email, password: pass });
-    if (data.error) throw new Error(data.error.message || data.msg || 'Nesprávný email nebo heslo.');
+    if (data.error) throw new Error(data.error.message || data.msg || t('auth.err_wrong'));
     saveSession(data);
-    _setLoading('lamBtnSignin', false, 'Přihlásit se');
+    _setLoading('lamBtnSignin', false, t('auth.btn_signin'));
     _close();
     if (window.lopHeader?.refresh) window.lopHeader.refresh();
     if (window.lopNav?.refresh)    window.lopNav.refresh();
     _loginCbs.forEach(fn => { try { fn(data); } catch(e) {} });
   } catch(e) {
     _showErr('lamErrSignin', e.message);
-    _setLoading('lamBtnSignin', false, 'Přihlásit se');
+    _setLoading('lamBtnSignin', false, t('auth.btn_signin'));
   }
 }
 
@@ -237,33 +237,33 @@ async function _doRegister() {
   _clearMsg('lamErrRegister', 'lamOkRegister');
   const email = document.getElementById('lamEmailRegister')?.value.trim() || '';
   const pass  = document.getElementById('lamPassRegister')?.value || '';
-  if (!email) { _showErr('lamErrRegister', 'Zadejte emailovou adresu.'); return; }
-  if (!pass || pass.length < 6) { _showErr('lamErrRegister', 'Heslo musí mít alespoň 6 znaků.'); return; }
-  _setLoading('lamBtnRegister', true, 'Vytvořit účet');
+  if (!email) { _showErr('lamErrRegister', t('auth.err_email')); return; }
+  if (!pass || pass.length < 6) { _showErr('lamErrRegister', t('auth.err_short_pass')); return; }
+  _setLoading('lamBtnRegister', true, t('auth.btn_register'));
   try {
     const data = await apiPost('/signup', { email, password: pass });
-    if (data.error) throw new Error(data.error.message || data.msg || 'Chyba registrace.');
-    _showOk('lamOkRegister', 'Účet vytvořen! Zkontrolujte email pro potvrzení.');
-    _setLoading('lamBtnRegister', false, 'Vytvořit účet');
+    if (data.error) throw new Error(data.error.message || data.msg || t('auth.err_generic'));
+    _showOk('lamOkRegister', t('auth.ok_registered'));
+    _setLoading('lamBtnRegister', false, t('auth.btn_register'));
   } catch(e) {
     _showErr('lamErrRegister', e.message);
-    _setLoading('lamBtnRegister', false, 'Vytvořit účet');
+    _setLoading('lamBtnRegister', false, t('auth.btn_register'));
   }
 }
 
 async function _doReset() {
   _clearMsg('lamErrReset', 'lamOkReset');
   const email = document.getElementById('lamEmailReset')?.value.trim() || '';
-  if (!email) { _showErr('lamErrReset', 'Zadejte emailovou adresu.'); return; }
-  _setLoading('lamBtnReset', true, 'Odeslat odkaz');
+  if (!email) { _showErr('lamErrReset', t('auth.err_email')); return; }
+  _setLoading('lamBtnReset', true, t('auth.btn_send_link'));
   try {
     const data = await apiPost('/recover', { email });
-    if (data.error) throw new Error(data.error.message || 'Chyba.');
-    _showOk('lamOkReset', 'Odkaz byl odeslán na ' + email + '.');
-    _setLoading('lamBtnReset', false, 'Odeslat odkaz');
+    if (data.error) throw new Error(data.error.message || t('auth.err_generic'));
+    _showOk('lamOkReset', t('auth.ok_reset', { email: email }));
+    _setLoading('lamBtnReset', false, t('auth.btn_send_link'));
   } catch(e) {
     _showErr('lamErrReset', e.message);
-    _setLoading('lamBtnReset', false, 'Odeslat odkaz');
+    _setLoading('lamBtnReset', false, t('auth.btn_send_link'));
   }
 }
 

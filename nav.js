@@ -172,32 +172,32 @@ function _html() {
     {
       id: 'map',
       href: root + 'index.html',
-      label: 'Mapa',
+      label: t('nav.map'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>`
     },
     {
       id: 'prehled',
       href: root + 'prehled.html',
-      label: 'Přehled',
+      label: t('nav.overview'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`
     },
     {
       id: 'routes',
       href: root + 'trasy.html',
-      label: 'Trasy',
+      label: t('nav.routes'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>`
     },
     {
       id: 'sbirky',
       href: root + 'sbirky.html',
-      label: 'Sbírka',
+      label: t('nav.collection'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.5"/><circle cx="16" cy="8" r="3.5"/><circle cx="12" cy="16" r="3.5"/></svg>`
     },
     {
       id: 'wish',
       href: _isLoggedIn() ? root + 'prehled.html?filter=wished' : '#',
       onclick: _isLoggedIn() ? null : "if(window.lopAuth){event.preventDefault();window.lopAuth.open();}",
-      label: 'Plán',
+      label: t('nav.plan'),
       badge: _isLoggedIn() ? wc : null,
       locked: !_isLoggedIn(),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`
@@ -264,27 +264,27 @@ function _buildIndex() {
   const loggedIn = _isLoggedIn();
   const items = [
     {
-      id: 'map', label: 'Mapa', view: 'mapView',
+      id: 'map', label: t('nav.map'), view: 'mapView',
       onclick: "switchView('mapView')",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>'
     },
     {
-      id: 'prehled', label: 'Přehled',
+      id: 'prehled', label: t('nav.overview'),
       onclick: "location.href='prehled.html'",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
     },
     {
-      id: 'routes', label: 'Trasy',
+      id: 'routes', label: t('nav.routes'),
       onclick: "location.href='trasy.html'",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>'
     },
     {
-      id: 'sbirky', label: 'Sbírka',
+      id: 'sbirky', label: t('nav.collection'),
       onclick: "location.href='sbirky.html'",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.5"/><circle cx="16" cy="8" r="3.5"/><circle cx="12" cy="16" r="3.5"/></svg>'
     },
     {
-      id: 'wish', label: 'Plán', view: 'wishView',
+      id: 'wish', label: t('nav.plan'), view: 'wishView',
       onclick: loggedIn
         ? "location.href='prehled.html?filter=wished'"
         : "if(window.lopAuth){event.preventDefault();window.lopAuth.open();}else{location.href='login.html?return='+encodeURIComponent(location.href);}",

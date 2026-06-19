@@ -93,6 +93,9 @@ function _html() {
       <img class="lop-h-logo" src="${logoSrc}" alt="Layers of Prague"/>
     </a>
     <div class="lop-h-actions">
+      <button class="lop-h-btn" id="lopHLang" title="Language" onclick="window._lopToggleLang()" style="font-size:11px;font-weight:600;letter-spacing:.04em;font-family:'Inter',system-ui,sans-serif">
+        <span id="lopHLangLabel">${window.lopLang === 'en' ? 'CS' : 'EN'}</span>
+      </button>
       <button class="lop-h-btn" id="lopHSearch" title="Hledat" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </button>
@@ -180,6 +183,11 @@ if (document.readyState === 'loading') {
 /* ── Public API ── */
 window.lopHeader = {
   refresh: _updateAuth
+};
+
+window._lopToggleLang = function() {
+  const next = (window.lopLang === 'cs') ? 'en' : 'cs';
+  window.lopSetLang ? window.lopSetLang(next) : (localStorage.setItem('lop_lang', next), location.reload());
 };
 
 })();
