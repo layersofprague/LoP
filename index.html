@@ -2513,8 +2513,17 @@ async function loadData() {
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
-  // Hash navigace — spustit po buildu markerů
-  if (_hashIsPlace) setTimeout(navigateToHash, 600);
+  // Hash navigace — spustit po buildu markerů, retry pokud ještě nejsou ready
+  if (_hashIsPlace) {
+    function _tryNavigate(attempts) {
+      if (_markers.length > 0 && window._map) {
+        navigateToHash();
+      } else if (attempts > 0) {
+        setTimeout(() => _tryNavigate(attempts - 1), 300);
+      }
+    }
+    setTimeout(() => _tryNavigate(10), 300);
+  }
   syncFromDB(() => { updateWishBadge(); if(window._map) { _markers.forEach(({marker,loc})=>{marker.remove();marker.setIcon(makeIcon(loc));marker.addTo(window._map);}); applyFilter(); } });
 }
 
