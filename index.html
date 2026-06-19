@@ -2508,16 +2508,17 @@ async function loadData() {
   loadArchMap();
   // Automatická poloha při startu
   // Autocenter na polohu — přeskočit pokud hash odpovídá ID místa (navigace z detailu)
-  const _hashIsPlace = /^#[A-Z]\d{3}$/.test(location.hash);
-  if (!_hashIsPlace) setTimeout(() => locateMe(true), 800);
+  const _gotoPlace = sessionStorage.getItem('lop_goto');
+  if (_gotoPlace) sessionStorage.removeItem('lop_goto');
+  if (!_gotoPlace) setTimeout(() => locateMe(true), 800);
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
   // Hash navigace — spustit po buildu markerů, retry pokud ještě nejsou ready
-  if (_hashIsPlace) {
+  if (_gotoPlace) {
     function _tryNavigate(attempts) {
       if (_markers.length > 0 && window._map) {
-        navigateToHash();
+        navigateToPlace(_gotoPlace);
       } else if (attempts > 0) {
         setTimeout(() => _tryNavigate(attempts - 1), 300);
       }
@@ -3411,13 +3412,9 @@ function toggleBaseLayer() {
 }
 
 /* ═══════════════ HASH NAVIGACE ═══════════════ */
-function navigateToHash() {
-  const hash = location.hash.replace('#', '');
-  console.log('[hash] hash:', hash, 'markers:', _markers.length, 'map:', !!window._map);
-  if (_markers.length > 0) console.log('[hash] first marker id:', _markers[0]?.loc?.id);
-  if (!hash || !window._map || !_markers.length) return;
-  const found = _markers.find(({ loc }) => loc.id === hash);
-  console.log('[hash] found:', found?.loc?.id, 'lat:', found?.loc?.lat);
+function navigateToPlace(id) {
+  if (!id || !window._map || !_markers.length) return;
+  const found = _markers.find(({ loc }) => loc.id === id);
   if (!found) return;
   const { loc, marker } = found;
 
@@ -3474,8 +3471,8 @@ function locateMe(silent = false) {
       }).addTo(window._map);
 
       // Necentruj pokud hash navigace právě přesměrovala na místo
-      const hashIsPlace = /^#[A-Z]\d{3}$/.test(location.hash);
-      if (!hashIsPlace) {
+      const gotoActive = !!sessionStorage.getItem('lop_goto');
+      if (!gotoActive) {
         window._map.setView(loc, 16);
         setTimeout(() => window._map.invalidateSize(), 100);
       }
