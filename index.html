@@ -2509,7 +2509,7 @@ async function loadData() {
   // Automatická poloha při startu
   // Autocenter na polohu — přeskočit pokud hash odpovídá ID místa (navigace z detailu)
   const _hashIsPlace = /^#[A-Z]\d{3}$/.test(location.hash);
-  if (!_hashIsPlace) setTimeout(locateMe, 800);
+  if (!_hashIsPlace) setTimeout(() => locateMe(true), 800);
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
@@ -3436,9 +3436,9 @@ function navigateToHash() {
 }
 
 
-function locateMe() {
+function locateMe(silent = false) {
   if (!navigator.geolocation) {
-    alert('Geolokace není podporována tímto prohlížečem.');
+    if (!silent) alert('Geolokace není podporována tímto prohlížečem.');
     return;
   }
   const btn = document.getElementById('locateBtn');
@@ -3461,12 +3461,17 @@ function locateMe() {
         zIndexOffset: 1000
       }).addTo(window._map);
 
-      window._map.setView(loc, 16);
-      setTimeout(() => window._map.invalidateSize(), 100);
+      // Necentruj pokud hash navigace právě přesměrovala na místo
+      const hashIsPlace = /^#[A-Z]\d{3}$/.test(location.hash);
+      if (!hashIsPlace) {
+        window._map.setView(loc, 16);
+        setTimeout(() => window._map.invalidateSize(), 100);
+      }
       applyFilter();
     },
     (err) => {
       if (btn) btn.style.opacity = '1';
+      if (silent) return; // tiché selhání při auto-locate
       const msgs = {
         1: 'Přístup k poloze byl zamítnut. Zkontroluj oprávnění v prohlížeči.',
         2: 'Polohu se nepodařilo určit.',
