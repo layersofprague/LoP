@@ -1686,8 +1686,8 @@ function toggleWishBtn() {
     });
   }).catch(() => {});
 
-  // Klik na mapu (ne na pin) → index.html
-  map.on('click', () => { location.href = '/LoP/index.html'; });
+  // Klik na mapu (ne na pin) → index.html s centrováním na H001
+  map.on('click', () => { sessionStorage.setItem('lop_goto', PLACE_ID); location.href = '/LoP/index.html'; });
 })();
 
 /* ── SHARE ── */
