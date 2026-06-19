@@ -1910,7 +1910,7 @@ a { color: inherit; text-decoration: none; }
         <div class="base-layer-dropdown" id="baseLayerDropdown">
           <div class="bl-option active" data-layer="carto" onclick="setBaseLayer('carto', this)">
             <span class="bl-dot"></span>
-            <span class="bl-label">Mapa</span>
+            <span class="bl-label">Výchozí</span>
           </div>
           <div class="bl-option" data-layer="osm" onclick="setBaseLayer('osm', this)">
             <span class="bl-dot"></span>
@@ -1918,12 +1918,11 @@ a { color: inherit; text-decoration: none; }
           </div>
           <div class="bl-option" data-layer="dark" onclick="setBaseLayer('dark', this)">
             <span class="bl-dot"></span>
-            <span class="bl-label">Tmavá</span>
+            <span class="bl-label">Noční</span>
           </div>
           <div class="bl-option" data-layer="orto" onclick="setBaseLayer('orto', this)">
             <span class="bl-dot"></span>
             <span class="bl-label">Ortofoto</span>
-            <span class="bl-year">2025</span>
           </div>
         </div>
       </div>
@@ -2508,7 +2507,9 @@ async function loadData() {
   initMap();
   loadArchMap();
   // Automatická poloha při startu
-  setTimeout(locateMe, 800);
+  // Autocenter na polohu — přeskočit pokud hash odpovídá ID místa (navigace z detailu)
+  const _hashIsPlace = /^#[A-Z]\d{3}$/.test(location.hash);
+  if (!_hashIsPlace) setTimeout(locateMe, 800);
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
