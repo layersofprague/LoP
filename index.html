@@ -2517,6 +2517,7 @@ async function loadData() {
   // Hash navigace — spustit po buildu markerů, retry pokud ještě nejsou ready
   if (_gotoPlace) {
     function _tryNavigate(attempts) {
+      console.log('[nav] attempt', attempts, 'markers:', _markers.length, 'map:', !!window._map, 'goto:', _gotoPlace);
       if (_markers.length > 0 && window._map) {
         navigateToPlace(_gotoPlace);
       } else if (attempts > 0) {
