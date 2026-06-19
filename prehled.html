@@ -550,6 +550,7 @@ a { color: inherit; text-decoration: none; }
 <body>
 
 <div id="lop-header"></div>
+<script src="i18n.js"></script>
 <script src="header.js?v=2"></script>
 
 <div class="page">
@@ -588,7 +589,7 @@ a { color: inherit; text-decoration: none; }
   <div class="filter-modal-backdrop" id="filterBackdrop">
     <div class="filter-modal" id="filterModal">
       <div class="filter-modal-header">
-        <span class="filter-modal-title">Filtr</span>
+        <span class="filter-modal-title">${t('overview.filter')}</span>
         <button class="filter-modal-close" onclick="toggleFilter()" title="Zavřít">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -875,7 +876,7 @@ function initDistSlider() {
   const slider=document.getElementById('distSlider'), label=document.getElementById('distV'); if(!slider) return;
   slider.addEventListener('input',()=>{
     const v=+slider.value;
-    if(v>=100){ DIST_STATE.max=null; label.textContent='libovolná'; }
+    if(v>=100){ DIST_STATE.max=null; label.textContent=t('overview.any_dist'); }
     else{ DIST_STATE.max=0.2+(v/100)*4.8; label.textContent='< '+DIST_STATE.max.toFixed(1)+' km'; }
     applyFilter();
   });
@@ -892,7 +893,7 @@ function resetFilters() {
   ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
   document.querySelectorAll('.filter-chips .chip').forEach(c=>c.classList.remove('state-hide','state-dim','state-force'));
   const ds=document.getElementById('distSlider'); if(ds) ds.value=100;
-  const dv=document.getElementById('distV'); if(dv) dv.textContent='libovolná';
+  const dv=document.getElementById('distV'); if(dv) dv.textContent=t('overview.any_dist');
   renderEra(); applyFilter();
 }
 
@@ -918,7 +919,7 @@ async function loadPlaces() {
     const res=await fetch('places.json'); if(!res.ok) throw new Error('404');
     PLACES=await res.json();
   } catch(e) {
-    document.getElementById('placesList').innerHTML='<div class="empty"><h3>Nepodařilo se načíst místa</h3><p>Zkontrolujte připojení.</p></div>';
+    document.getElementById('placesList').innerHTML=`<div class="empty"><h3>${t('overview.load_err')}</h3><p>${t('overview.load_err_sub')}</p></div>`;
     return;
   }
   updateCounts();
@@ -961,7 +962,7 @@ function render() {
   });
 
   if(filtered.length===0){
-    document.getElementById('placesList').innerHTML='<div class="empty"><h3>Žádná místa</h3><p>Zkuste jiný filtr.</p></div>';
+    document.getElementById('placesList').innerHTML=`<div class="empty"><h3>${t('overview.empty')}</h3><p>${t('overview.empty_sub')}</p></div>`;
     return;
   }
 
@@ -1049,7 +1050,7 @@ function cardHTML(p, visited, wished) {
   const wishBtn = loggedIn
     ? `<div class="place-wish-wrap" onclick="toggleWish(event,'${p.id}')">
         ${wishLbl}
-        <button class="place-wish-btn ${wish?'wished':''}" title="${wish?'Odebrat z plánu':'Přidat do plánu'}">
+        <button class="place-wish-btn ${wish?'wished':''}" title="${wish?t('place.plan_in'):t('place.plan_add')}">
           <svg viewBox="0 0 24 24" fill="${wish?'currentColor':'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         </button>
       </div>`
@@ -1121,7 +1122,7 @@ function toggleWish(e, id) {
     if(svg) svg.setAttribute('fill', wished ? 'currentColor' : 'none');
   }
   if(lbl) {
-    lbl.textContent = wished ? 'v plánu' : 'do plánu?';
+    lbl.textContent = wished ? t('place.plan_in') : t('place.plan_add');
     lbl.classList.toggle('active', wished);
   }
   updateCounts();
@@ -1149,7 +1150,7 @@ async function syncFromDB(onDone) {
     document.head.appendChild(style);
     const spinner=document.createElement('div'); spinner.id='lop-sync-spinner'; document.body.appendChild(spinner);
     const bar=document.createElement('div'); bar.id='lop-sync-bar';
-    bar.innerHTML='<span class="sb-text">Nepodařilo se načíst data ze serveru.</span><button class="sb-retry" onclick="window._lopSyncRetry()">Zkusit znovu</button>';
+    bar.innerHTML=`<span class="sb-text">${t('overview.sync_err')}</span><button class="sb-retry" onclick="window._lopSyncRetry()">${t('overview.sync_retry')}</button>`;
     document.body.appendChild(bar);
   }
   function _showSyncSpinner(on){ const el=document.getElementById('lop-sync-spinner'); if(el) el.classList.toggle('show',on); }
@@ -1178,7 +1179,7 @@ async function syncFromDB(onDone) {
     _showSyncSpinner(false); _showSyncBar(false); if(onDone) onDone();
   } catch(e) {
     _showSyncSpinner(false); _showSyncBar(true);
-    const sb=document.getElementById('lop-sync-bar'); if(sb){const t=sb.querySelector('.sb-text');if(t) t.textContent='Chyba: '+(e?.message||String(e));}
+    const sb=document.getElementById('lop-sync-bar'); if(sb){const t=sb.querySelector('.sb-text');if(t) t.textContent=t('overview.load_err')+': '+(e?.message||String(e));}
     if(onDone) onDone();
   }
 }

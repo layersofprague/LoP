@@ -360,17 +360,17 @@ function updateCalBtn() {
   var disabled = localStorage.getItem('lop_cal_disabled') === '1';
   if (!cal) {
     // No calibration available
-    btn.textContent = 'kalibrovat kompas?';
+    btn.textContent = t('compass.calibrate_q');
     btn.style.background = '#b04020';
     btn.style.color = '#fff';
   } else if (calEnabled) {
     // Active
-    btn.textContent = '● kalibrace kompasu';
+    btn.textContent = t('compass.calibrating');
     btn.style.background = '#3d7a4a';
     btn.style.color = '#fff';
   } else {
     // Available but disabled
-    btn.textContent = '○ kalibrace kompasu';
+    btn.textContent = t('compass.calibrated');
     btn.style.background = 'rgba(26,24,20,.55)';
     btn.style.color = '#fff';
   }
@@ -484,7 +484,7 @@ function updateDist() {
   if (dist < 1000) dv.textContent = Math.round(dist) + ' m';
   else dv.textContent = (dist/1000).toFixed(1).replace('.', ',') + ' km';
   var steps = Math.round(dist / 0.75);
-  ds.textContent = steps < 9999 ? '≈ ' + steps.toLocaleString('cs') + ' kroků' : '';
+  ds.textContent = steps < 9999 ? t('compass.steps', { n: steps.toLocaleString(window.lopLang || 'cs') }) : '';
 }
 
 // ── SENSORS ──
@@ -548,7 +548,7 @@ navigator.geolocation && navigator.geolocation.watchPosition(
   },
   function(err) {
     var m = { 1: 'Poloha blokována', 2: 'Nelze určit', 3: 'Timeout' };
-    document.getElementById('dbg').textContent = 'GPS: ' + (m[err.code] || 'chyba');
+    document.getElementById('dbg').textContent = t('compass.gps_error') + ' ' + (err.code || '');
   },
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
@@ -719,6 +719,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 .arrival-visible { display: flex !important; }
 /* dbg styled inline */
 </style>
+<script src="i18n.js"></script>
 <script src="header.js"></script>
 <script src="nav.js"></script>
 </head>
@@ -1078,17 +1079,17 @@ function updateCalBtn() {
   var disabled = localStorage.getItem('lop_cal_disabled') === '1';
   if (!cal) {
     // No calibration available
-    btn.textContent = 'kalibrovat kompas?';
+    btn.textContent = t('compass.calibrate_q');
     btn.style.background = '#b04020';
     btn.style.color = '#fff';
   } else if (calEnabled) {
     // Active
-    btn.textContent = '● kalibrace kompasu';
+    btn.textContent = t('compass.calibrating');
     btn.style.background = '#3d7a4a';
     btn.style.color = '#fff';
   } else {
     // Available but disabled
-    btn.textContent = '○ kalibrace kompasu';
+    btn.textContent = t('compass.calibrated');
     btn.style.background = 'rgba(26,24,20,.55)';
     btn.style.color = '#fff';
   }
@@ -1198,7 +1199,7 @@ function updateDist() {
   if (dist < 1000) dv.textContent = Math.round(dist) + ' m';
   else dv.textContent = (dist/1000).toFixed(1).replace('.', ',') + ' km';
   var steps = Math.round(dist / 0.75);
-  ds.textContent = steps < 9999 ? '≈ ' + steps.toLocaleString('cs') + ' kroků' : '';
+  ds.textContent = steps < 9999 ? t('compass.steps', { n: steps.toLocaleString(window.lopLang || 'cs') }) : '';
 }
 
 // ── SENSORS ──
@@ -1262,7 +1263,7 @@ navigator.geolocation && navigator.geolocation.watchPosition(
   },
   function(err) {
     var m = { 1: 'Poloha blokována', 2: 'Nelze určit', 3: 'Timeout' };
-    document.getElementById('dbg').textContent = 'GPS: ' + (m[err.code] || 'chyba');
+    document.getElementById('dbg').textContent = t('compass.gps_error') + ' ' + (err.code || '');
   },
   { enableHighAccuracy: true, maximumAge: 1500 }
 );
