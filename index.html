@@ -1984,7 +1984,7 @@ a { color: inherit; text-decoration: none; }
             </div>
             <div class="filter-row">
               <div class="filter-lbl">
-                <span>Vzdálenost od vás</span>
+                <span>${t('overview.dist_from_you')}</span>
                 <span class="filter-lbl-val" id="distV">${t('overview.any_dist')}</span>
               </div>
               <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
@@ -2097,9 +2097,9 @@ a { color: inherit; text-decoration: none; }
     <!-- WISHLIST VIEW -->
     <section class="view" id="wishView">
       <div class="routes-hero">
-        <div class="routes-kick">Plán · Wishlist</div>
+        <div class="routes-kick">${t('wish.kick')}</div>
         <h1 class="routes-title">Tvoje <em>uložená<br/>místa</em></h1>
-        <p class="routes-intro">Srdíčka z mapy. Ulož si místa pro pozdější návštěvu — LoP ti z nich navrhne trasu.</p>
+        <p class="routes-intro">${t('wish.intro')}</p>
       </div>
       <div id="wishList"></div>
     </section>
@@ -2489,6 +2489,27 @@ function adaptPlace(p) {
 let LOCATIONS = [];
 let ROUTES    = [];
 
+
+/* ── i18n helpers pro data míst ── */
+function locStr(obj, field) {
+  // Vrátí přeložené pole pokud existuje a jazyk je EN
+  if (window.lopLang === 'en' && obj[field + '_en']) return obj[field + '_en'];
+  return obj[field] || '';
+}
+function locFacts(facts) {
+  if (!facts) return [];
+  return facts.map(f => ({
+    k: (window.lopLang === 'en' && f.k_en) ? f.k_en : f.k,
+    v: (window.lopLang === 'en' && f.v_en) ? f.v_en : f.v,
+  }));
+}
+function locSteps(steps) {
+  if (!steps) return [];
+  return steps.map(s => ({
+    title: (window.lopLang === 'en' && s.title_en) ? s.title_en : s.title,
+    text:  (window.lopLang === 'en' && s.text_en)  ? s.text_en  : s.text,
+  }));
+}
 async function loadData() {
   try {
     const [placesRes, routesRes] = await Promise.all([
@@ -2631,7 +2652,7 @@ function renderWishlist() {
     return `<div class="wl-item" onclick="openSheet('${loc.id}')">
       <div class="wl-num">${String(i+1).padStart(2,'0')}</div>
       <div class="wl-body">
-        <h4>${loc.name}</h4>
+        <h4>${locStr(loc,"name")}</h4>
         <div class="wl-meta">
           <span class="wl-dot" style="background: ${c.color}"></span>
           <span>${c.name}</span>
@@ -2642,7 +2663,7 @@ function renderWishlist() {
         </div>
       </div>
       <div class="wl-act">
-        <span>Zobrazit</span>
+        <span>${t('sheet.show')}</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
       </div>
     </div>`;
@@ -2676,7 +2697,7 @@ function showTooltip(loc, m, rt) {
     const distLabel = km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1).replace('.', ',') + ' km';
     distHtml = `<a class="rt-tip-dist" href="${compassUrl}" onclick="event.stopPropagation()" title="Navigovat">${compassIcon}<span>${distLabel}</span></a>`;
   } else {
-    distHtml = `<span class="rt-tip-dist-hint" onclick="locateMe();event.stopPropagation()">povolit polohu</span>`;
+    distHtml = `<span class="rt-tip-dist-hint" onclick="locateMe();event.stopPropagation()">${t('sheet.enable_location')}</span>`;
   }
 
   // Votes (placeholder)
@@ -2720,7 +2741,7 @@ function showTooltip(loc, m, rt) {
       </div>
     </a>
     <a href="place/${loc.id}.html" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
-      <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${loc.name}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${locStr(loc,"name")}</div>
       <div style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${loc.lede||''}</div>
     </a>
     <div class="rt-tip-footer">
@@ -2918,7 +2939,7 @@ function buildChips() {
       <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
       <button class="chip" id="chipVisited" data-filter="visited" style="width:130px" data-tooltip="Pro správu navštívených míst je nutné přihlášení">
         <span class="chip-swatch chip-icon chip-icon-check"></span>
-        Navštíveno <span id="ctVisitedWrap"></span>
+        ${t('overview.visited')} <span id="ctVisitedWrap"></span>
       </button>
     </div>
     <div class="chip-wrap">
@@ -3507,7 +3528,7 @@ function openSheet(id) {
     <div class="sl-base"><div style="position:absolute; inset:0; background:
       linear-gradient(180deg, #3a2f24 0%, #5a4834 40%, #8c7456 70%, #b8a284 100%);"></div></div>
     <div class="sl-top" id="slTop">${loc.photoThen
-      ? `<img src="${loc.photoThen}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;" alt="${loc.name}"/>`
+      ? `<img src="${loc.photoThen}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;" alt="${locStr(loc,"name")}"/>`
       : `<div style="position:absolute;inset:0;background:linear-gradient(180deg,#1a1814 0%,#3a342c 35%,#6b6558 70%,#9b9484 100%);filter:sepia(.5) contrast(1.1);"></div>`
     }</div>
     <div class="sl-divider" id="slDiv"></div>
@@ -3521,7 +3542,7 @@ function openSheet(id) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
       </div>
       <div class="arc-body">
-        <div class="arc-kick">Step into the past</div>
+        <div class="arc-kick">${t('sheet.ar_kick')}</div>
         <div class="arc-title">Promítni fotografii z ${loc.yearThen}</div>
       </div>
       <div class="arc-dist ${loc.distance.startsWith('2') || loc.distance.includes('350') ? 'ok' : ''}">${loc.distance}</div>
@@ -3542,13 +3563,13 @@ function openSheet(id) {
       <span class="k-sep">·</span>
       <span>${loc.area}</span>
     </div>
-    <h1 class="sheet-title serif">${loc.name}${loc.titleAlt ? `<br><em style="font-size:.7em;color:var(--ink-3)">— ${loc.titleAlt}</em>` : ''}</h1>
+    <h1 class="sheet-title serif">${locStr(loc,"name")}${loc.titleAlt ? `<br><em style="font-size:.7em;color:var(--ink-3)">— ${loc.titleAlt}</em>` : ''}</h1>
     <div class="sheet-sub">
-      <span>${loc.sub}</span>
+      <span>${locStr(loc,"sub")}</span>
       <span class="dot">·</span>
       <span class="coords">${loc.lat.toFixed(4)}° N · ${loc.lng.toFixed(4)}° E</span>
       <span class="dot">·</span>
-      <span>${loc.distance} od vás</span>
+      <span>${loc.distance} ${t('sheet.from_you')}</span>
     </div>
 
     <div class="sheet-actions">
@@ -3562,23 +3583,23 @@ function openSheet(id) {
       </button>
       <button class="act-btn" onclick="alert('Navigace přes Mapy.cz nebo Google Maps')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-        <span class="act-lbl">Navigovat</span>
+        <span class="act-lbl">${t('sheet.navigate')}</span>
       </button>
       <button class="act-btn" onclick="alert('Sdílet')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 11l8-5M8 13l8 5"/></svg>
-        <span class="act-lbl">Sdílet</span>
+        <span class="act-lbl">${t('sheet.share')}</span>
       </button>
     </div>
 
-    <p class="sheet-lede cat-${loc.cat}">${loc.lede}</p>
+    <p class="sheet-lede cat-${loc.cat}">${locStr(loc,"lede")}</p>
 
     <div class="sheet-section">
       <div class="sec-head">
-        <div class="sec-label">Fakta</div>
+        <div class="sec-label">${t('sheet.facts')}</div>
         <div class="sec-num">04</div>
       </div>
       <div class="facts">
-        ${(loc.facts||[]).slice(0,4).map(f => `
+        ${locFacts(loc.facts||[]).slice(0,4).map(f => `
           <div class="fact">
             <div class="fact-k">${f.k}</div>
             <div class="fact-v">${f.v}</div>
@@ -3588,11 +3609,11 @@ function openSheet(id) {
 
     <div class="sheet-section cat-${loc.cat}">
       <div class="sec-head">
-        <div class="sec-label">Na místě</div>
-        <div class="sec-num">${String(loc.steps.length).padStart(2,'0')} kroků</div>
+        <div class="sec-label">${t('sheet.on_site')}</div>
+        <div class="sec-num">${String(locSteps(loc.steps||[]).length).padStart(2,'0')} ${t('sheet.steps', {n:''}).trim()}</div>
       </div>
       <div class="steps">
-        ${loc.steps.map((s,i)=>`
+        ${locSteps(loc.steps).map((s,i)=>`
           <div class="step">
             <div class="step-num serif">${String(i+1).padStart(2,'0')}</div>
             <div class="step-body">
@@ -3602,14 +3623,14 @@ function openSheet(id) {
           </div>`).join('')}
       </div>
       ${loc.tip?`<div class="tip">
-        <div class="tip-label">Tip kurátora</div>
-        <div class="tip-text serif">${loc.tip}</div>
+        <div class="tip-label">${t('sheet.curators_tip')}</div>
+        <div class="tip-text serif">${locStr(loc,"tip")}</div>
       </div>`:''}
     </div>
 
     <div class="sheet-section">
       <div class="sec-head">
-        <div class="sec-label">Galerie</div>
+        <div class="sec-label">${t('sheet.gallery')}</div>
         <div class="sec-num">06</div>
       </div>
       <div class="gallery">${gallery}</div>
@@ -3617,7 +3638,7 @@ function openSheet(id) {
 
     <button class="nav-btn" onclick="openArFor('${loc.id}')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
-      Step into the past — otevři AR
+      ${t('sheet.ar_btn')}
     </button>
   `;
   applyTweaks();

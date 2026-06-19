@@ -608,7 +608,7 @@ a { color: inherit; text-decoration: none; }
         </div>
         <div class="filter-row">
           <div class="filter-lbl">
-            <span>Vzdálenost od vás</span>
+            <span>${t('overview.dist_from_you')}</span>
             <span class="filter-lbl-val" id="distV">libovolná</span>
           </div>
           <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
@@ -621,7 +621,7 @@ a { color: inherit; text-decoration: none; }
   </div>
 
   <div id="placesList">
-    <div class="loading">Načítám místa…</div>
+    <div class="loading">${t('overview.loading')}</div>
   </div>
 </div>
 
@@ -681,7 +681,7 @@ function makeStampSVG(p, arScore) {
   return window.stampSVG({
     ...STAMP_PROPS,
     code:      p.id,
-    name:      p.name,
+    name:      locStr(p,'name'),
     year:      p.yearBuilt || p.yearThen || '',
     cat:       p.cat,
     score:     arScoreToStampScore(arScore),
@@ -792,7 +792,7 @@ function buildChips() {
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
-      <button class="chip" id="chipVisited" data-filter="visited" style="width:130px" data-tooltip="Pro správu navštívených míst je nutné přihlášení"><span class="chip-swatch chip-icon chip-icon-check"></span>Navštíveno <span id="ctVisitedWrap"></span></button>
+      <button class="chip" id="chipVisited" data-filter="visited" style="width:130px" data-tooltip="${t('overview.login_tooltip')}"><span class="chip-swatch chip-icon chip-icon-check"></span>${t('overview.visited')} <span id="ctVisitedWrap"></span></button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-wished">výchozí</span>
@@ -992,7 +992,7 @@ function cardHTML(p, visited, wished) {
   const vis     = visited.includes(String(p.id));
   const wish    = wished && wished.includes(String(p.id));
   const thumb   = p.thumb || '';
-  const lede    = p.lede  || '';
+  const lede    = locStr(p,'lede');
   const detailUrl = 'place/' + p.id + '.html';
   const dist = userPos && p.lat && p.lng ? formatDist(haversineM(userPos[0],userPos[1],p.lat,p.lng)) : '';
   const loggedIn = isLoggedIn();
@@ -1005,7 +1005,7 @@ function cardHTML(p, visited, wished) {
 
   // Vzdálenost + odkaz na kompas
   const compassUrl = p.lat && p.lng
-    ? `compass.html?id=${p.id}&lat=${p.lat}&lng=${p.lng}&name=${encodeURIComponent(p.name)}${p.thumb?'&thumb='+encodeURIComponent(p.thumb):''}${p.arRadius?'&radius='+p.arRadius:''}`
+    ? `compass.html?id=${p.id}&lat=${p.lat}&lng=${p.lng}&name=${encodeURIComponent(locStr(p,'name'))}${p.thumb?'&thumb='+encodeURIComponent(p.thumb):''}${p.arRadius?'&radius='+p.arRadius:''}`
     : null;
 
   const compassIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`;
@@ -1046,7 +1046,7 @@ function cardHTML(p, visited, wished) {
   </div>`;
 
   // Wish — s labelem, obaleno v place-wish-wrap
-  const wishLbl = `<span class="place-wish-lbl${wish?' active':''}">${wish?'v plánu':'do plánu?'}</span>`;
+  const wishLbl = `<span class="place-wish-lbl${wish?' active':''}">${wish?t('place.plan_in'):t('place.plan_add')}</span>`;
   const wishBtn = loggedIn
     ? `<div class="place-wish-wrap" onclick="toggleWish(event,'${p.id}')">
         ${wishLbl}
@@ -1055,7 +1055,7 @@ function cardHTML(p, visited, wished) {
         </button>
       </div>`
     : `<div class="place-wish-wrap" onclick="event.stopPropagation();window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href);">
-        <span class="place-wish-lbl">do plánu?</span>
+        <span class="place-wish-lbl">${t('place.plan_add')}</span>
         <button class="place-wish-btn" title="Přihlášení nutné" style="position:relative">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           <span class="place-wish-lock"></span>
@@ -1064,7 +1064,7 @@ function cardHTML(p, visited, wished) {
 
   return `<div class="place-card" data-cat="${p.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${p.cat}">
-      ${thumb?`<img src="${thumb}" alt="${p.name}" onerror="this.style.display='none'"/>`:'' }
+      ${thumb?`<img src="${thumb}" alt="${locStr(p,'name')}" onerror="this.style.display='none'"/>`:'' }
       <div class="place-thumb-fallback">${letter}</div>
       <div class="place-cat-line" style="background:${color}"></div>
       <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
@@ -1075,7 +1075,7 @@ function cardHTML(p, visited, wished) {
         <span>${catName}</span>
         ${votesHtml}
       </div>
-      <div class="place-name">${p.name}</div>
+      <div class="place-name">${locStr(p,'name')}</div>
       <div class="place-sub">${lede}</div>
       ${stampHtml}
     </div>

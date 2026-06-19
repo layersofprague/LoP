@@ -1,85 +1,462 @@
 {
-  "nav.map":              { "cs": "Mapa",       "en": "Map" },
-  "nav.overview":         { "cs": "Přehled",    "en": "Overview" },
-  "nav.routes":           { "cs": "Trasy",      "en": "Routes" },
-  "nav.collection":       { "cs": "Sbírka",     "en": "Collection" },
-  "nav.plan":             { "cs": "Plán",       "en": "Plan" },
-
-  "auth.welcome_back":    { "cs": "Vítejte zpět",          "en": "Welcome back" },
-  "auth.sign_in":         { "cs": "Přihlaste se",           "en": "Sign in" },
-  "auth.sign_in_sub":     { "cs": "Pro pokročilé funkce je nutné přihlášení.", "en": "Sign in to access advanced features." },
-  "auth.new_account":     { "cs": "Nový účet",              "en": "New account" },
-  "auth.register":        { "cs": "Registrace",             "en": "Register" },
-  "auth.register_sub":    { "cs": "Bezplatný účet pro ukládání míst napříč zařízeními.", "en": "Free account to save places across devices." },
-  "auth.recovery":        { "cs": "Obnova přístupu",        "en": "Account recovery" },
-  "auth.forgot":          { "cs": "Zapomenuté heslo",       "en": "Forgotten password" },
-  "auth.forgot_sub":      { "cs": "Pošleme vám odkaz pro obnovu hesla.", "en": "We'll send you a password reset link." },
-  "auth.account":         { "cs": "Účet",                   "en": "Account" },
-  "auth.logged_in":       { "cs": "Jste přihlášeni",        "en": "You're signed in" },
-  "auth.btn_signin":      { "cs": "Přihlásit se",           "en": "Sign in" },
-  "auth.btn_register":    { "cs": "Vytvořit účet",          "en": "Create account" },
-  "auth.btn_send_link":   { "cs": "Odeslat odkaz",          "en": "Send link" },
-  "auth.btn_continue":    { "cs": "Pokračovat",             "en": "Continue" },
-  "auth.btn_signout":     { "cs": "Odhlásit se",            "en": "Sign out" },
-  "auth.no_account":      { "cs": "Nemáte účet?",           "en": "No account?" },
-  "auth.have_account":    { "cs": "Máte účet?",             "en": "Have an account?" },
-  "auth.link_register":   { "cs": "Registrovat se",         "en": "Register" },
-  "auth.link_signin":     { "cs": "Přihlásit se",           "en": "Sign in" },
-  "auth.link_forgot":     { "cs": "Zapomenuté heslo",       "en": "Forgot password?" },
-  "auth.link_back":       { "cs": "Zpět na přihlášení",     "en": "Back to sign in" },
-  "auth.close":           { "cs": "Zavřít",                 "en": "Close" },
-  "auth.err_email":       { "cs": "Zadejte emailovou adresu.", "en": "Please enter your email address." },
-  "auth.err_password":    { "cs": "Zadejte heslo.",            "en": "Please enter your password." },
-  "auth.err_short_pass":  { "cs": "Heslo musí mít alespoň 6 znaků.", "en": "Password must be at least 6 characters." },
-  "auth.err_wrong":       { "cs": "Nesprávný email nebo heslo.",     "en": "Incorrect email or password." },
-  "auth.err_generic":     { "cs": "Chyba registrace.",               "en": "Registration error." },
-  "auth.ok_registered":   { "cs": "Účet vytvořen! Zkontrolujte email pro potvrzení.", "en": "Account created! Check your email to confirm." },
-  "auth.ok_reset":        { "cs": "Odkaz byl odeslán na {email}.",   "en": "Link sent to {email}." },
-  "auth.label_email":     { "cs": "Email",  "en": "Email" },
-  "auth.label_password":  { "cs": "Heslo",  "en": "Password" },
-  "auth.label_pass_hint": { "cs": "min. 6 znaků", "en": "min. 6 characters" },
-  "auth.placeholder_email": { "cs": "vas@email.cz", "en": "your@email.com" },
-  "auth.placeholder_pass":  { "cs": "••••••••",     "en": "••••••••" },
-
-  "compass.calibrate_q":  { "cs": "kalibrovat kompas?",  "en": "calibrate compass?" },
-  "compass.calibrating":  { "cs": "● kalibrace kompasu", "en": "● calibrating compass" },
-  "compass.calibrated":   { "cs": "○ kalibrace kompasu", "en": "○ compass calibrated" },
-  "compass.steps":        { "cs": "≈ {n} kroků",         "en": "≈ {n} steps" },
-  "compass.gps_error":    { "cs": "GPS: chyba",          "en": "GPS: error" },
-
-  "collection.stamp_one":       { "cs": "razítko",  "en": "stamp" },
-  "collection.stamp_few":       { "cs": "razítka",  "en": "stamps" },
-  "collection.stamp_many":      { "cs": "razítek",  "en": "stamps" },
-  "collection.points":          { "cs": "bodů",     "en": "points" },
-  "collection.err_load":        { "cs": "Chyba načítání", "en": "Loading error" },
-  "collection.err_server":      { "cs": "Nepodařilo se spojit se serverem.", "en": "Could not connect to the server." },
-  "collection.btn_retry":       { "cs": "Zkusit znovu",   "en": "Try again" },
-  "collection.unearned":        { "cs": "Nezískáno",       "en": "Not earned" },
-  "collection.login_cta":       { "cs": "Přihlas se a razítka se ti budou ukládat do sbírky.", "en": "Sign in to save stamps to your collection." },
-
-  "place.plan_add":       { "cs": "do plánu?",  "en": "add to plan?" },
-  "place.plan_in":        { "cs": "v plánu",    "en": "in plan" },
-  "place.plan":           { "cs": "Plán",       "en": "Plan" },
-  "place.visited":        { "cs": "Navštíveno", "en": "Visited" },
-  "place.stops":          { "cs": "{n} zastavení", "en": "{n} stops" },
-  "place.routes":         { "cs": "{n} trasy",     "en": "{n} routes" },
-  "place.waiting_rating": { "cs": "čeká na hodnocení", "en": "awaiting rating" },
-  "place.paywall_signin": { "cs": "Pro celý obsah se",       "en": "To see full content," },
-  "place.paywall_link":   { "cs": "přihlaste",               "en": "sign in" },
-  "place.paywall_insider":{ "cs": "Pro celý obsah",          "en": "For full content," },
-  "place.paywall_upgrade":{ "cs": "upgradujte na Insider",   "en": "upgrade to Insider" },
-  "place.exif_missing":   { "cs": "EXIF data nenalezena",    "en": "EXIF data not found" },
-  "place.exif_error":     { "cs": "Nepodařilo se načíst",    "en": "Failed to load" },
-
-  "overview.filter":      { "cs": "Filtr",       "en": "Filter" },
-  "overview.any_dist":    { "cs": "libovolná",   "en": "any" },
-  "overview.empty":       { "cs": "Žádná místa", "en": "No places" },
-  "overview.empty_sub":   { "cs": "Zkuste jiný filtr.", "en": "Try a different filter." },
-  "overview.load_err":    { "cs": "Nepodařilo se načíst místa", "en": "Could not load places" },
-  "overview.load_err_sub":{ "cs": "Zkontrolujte připojení.",    "en": "Check your connection." },
-  "overview.sync_err":    { "cs": "Nepodařilo se načíst data ze serveru.", "en": "Could not load data from server." },
-  "overview.sync_retry":  { "cs": "Zkusit znovu", "en": "Try again" },
-
-  "lang.cs": { "cs": "Česky", "en": "Česky" },
-  "lang.en": { "cs": "English", "en": "English" }
+  "nav.map": {
+    "cs": "Mapa",
+    "en": "Map"
+  },
+  "nav.overview": {
+    "cs": "Přehled",
+    "en": "Overview"
+  },
+  "nav.routes": {
+    "cs": "Trasy",
+    "en": "Routes"
+  },
+  "nav.collection": {
+    "cs": "Sbírka",
+    "en": "Collection"
+  },
+  "nav.plan": {
+    "cs": "Plán",
+    "en": "Plan"
+  },
+  "auth.welcome_back": {
+    "cs": "Vítejte zpět",
+    "en": "Welcome back"
+  },
+  "auth.sign_in": {
+    "cs": "Přihlaste se",
+    "en": "Sign in"
+  },
+  "auth.sign_in_sub": {
+    "cs": "Pro pokročilé funkce je nutné přihlášení.",
+    "en": "Sign in to access advanced features."
+  },
+  "auth.new_account": {
+    "cs": "Nový účet",
+    "en": "New account"
+  },
+  "auth.register": {
+    "cs": "Registrace",
+    "en": "Register"
+  },
+  "auth.register_sub": {
+    "cs": "Bezplatný účet pro ukládání míst napříč zařízeními.",
+    "en": "Free account to save places across devices."
+  },
+  "auth.recovery": {
+    "cs": "Obnova přístupu",
+    "en": "Account recovery"
+  },
+  "auth.forgot": {
+    "cs": "Zapomenuté heslo",
+    "en": "Forgotten password"
+  },
+  "auth.forgot_sub": {
+    "cs": "Pošleme vám odkaz pro obnovu hesla.",
+    "en": "We'll send you a password reset link."
+  },
+  "auth.account": {
+    "cs": "Účet",
+    "en": "Account"
+  },
+  "auth.logged_in": {
+    "cs": "Jste přihlášeni",
+    "en": "You're signed in"
+  },
+  "auth.btn_signin": {
+    "cs": "Přihlásit se",
+    "en": "Sign in"
+  },
+  "auth.btn_register": {
+    "cs": "Vytvořit účet",
+    "en": "Create account"
+  },
+  "auth.btn_send_link": {
+    "cs": "Odeslat odkaz",
+    "en": "Send link"
+  },
+  "auth.btn_continue": {
+    "cs": "Pokračovat",
+    "en": "Continue"
+  },
+  "auth.btn_signout": {
+    "cs": "Odhlásit se",
+    "en": "Sign out"
+  },
+  "auth.no_account": {
+    "cs": "Nemáte účet?",
+    "en": "No account?"
+  },
+  "auth.have_account": {
+    "cs": "Máte účet?",
+    "en": "Have an account?"
+  },
+  "auth.link_register": {
+    "cs": "Registrovat se",
+    "en": "Register"
+  },
+  "auth.link_signin": {
+    "cs": "Přihlásit se",
+    "en": "Sign in"
+  },
+  "auth.link_forgot": {
+    "cs": "Zapomenuté heslo",
+    "en": "Forgot password?"
+  },
+  "auth.link_back": {
+    "cs": "Zpět na přihlášení",
+    "en": "Back to sign in"
+  },
+  "auth.close": {
+    "cs": "Zavřít",
+    "en": "Close"
+  },
+  "auth.err_email": {
+    "cs": "Zadejte emailovou adresu.",
+    "en": "Please enter your email address."
+  },
+  "auth.err_password": {
+    "cs": "Zadejte heslo.",
+    "en": "Please enter your password."
+  },
+  "auth.err_short_pass": {
+    "cs": "Heslo musí mít alespoň 6 znaků.",
+    "en": "Password must be at least 6 characters."
+  },
+  "auth.err_wrong": {
+    "cs": "Nesprávný email nebo heslo.",
+    "en": "Incorrect email or password."
+  },
+  "auth.err_generic": {
+    "cs": "Chyba registrace.",
+    "en": "Registration error."
+  },
+  "auth.ok_registered": {
+    "cs": "Účet vytvořen! Zkontrolujte email pro potvrzení.",
+    "en": "Account created! Check your email to confirm."
+  },
+  "auth.ok_reset": {
+    "cs": "Odkaz byl odeslán na {email}.",
+    "en": "Link sent to {email}."
+  },
+  "auth.label_email": {
+    "cs": "Email",
+    "en": "Email"
+  },
+  "auth.label_password": {
+    "cs": "Heslo",
+    "en": "Password"
+  },
+  "auth.label_pass_hint": {
+    "cs": "min. 6 znaků",
+    "en": "min. 6 characters"
+  },
+  "auth.placeholder_email": {
+    "cs": "vas@email.cz",
+    "en": "your@email.com"
+  },
+  "auth.placeholder_pass": {
+    "cs": "••••••••",
+    "en": "••••••••"
+  },
+  "compass.calibrate_q": {
+    "cs": "kalibrovat kompas?",
+    "en": "calibrate compass?"
+  },
+  "compass.calibrating": {
+    "cs": "● kalibrace kompasu",
+    "en": "● calibrating compass"
+  },
+  "compass.calibrated": {
+    "cs": "○ kalibrace kompasu",
+    "en": "○ compass calibrated"
+  },
+  "compass.steps": {
+    "cs": "≈ {n} kroků",
+    "en": "≈ {n} steps"
+  },
+  "compass.gps_error": {
+    "cs": "GPS: chyba",
+    "en": "GPS: error"
+  },
+  "collection.stamp_one": {
+    "cs": "razítko",
+    "en": "stamp"
+  },
+  "collection.stamp_few": {
+    "cs": "razítka",
+    "en": "stamps"
+  },
+  "collection.stamp_many": {
+    "cs": "razítek",
+    "en": "stamps"
+  },
+  "collection.points": {
+    "cs": "bodů",
+    "en": "points"
+  },
+  "collection.err_load": {
+    "cs": "Chyba načítání",
+    "en": "Loading error"
+  },
+  "collection.err_server": {
+    "cs": "Nepodařilo se spojit se serverem.",
+    "en": "Could not connect to the server."
+  },
+  "collection.btn_retry": {
+    "cs": "Zkusit znovu",
+    "en": "Try again"
+  },
+  "collection.unearned": {
+    "cs": "Nezískáno",
+    "en": "Not earned"
+  },
+  "collection.login_cta": {
+    "cs": "Přihlas se a razítka se ti budou ukládat do sbírky.",
+    "en": "Sign in to save stamps to your collection."
+  },
+  "place.plan_add": {
+    "cs": "do plánu?",
+    "en": "add to plan?"
+  },
+  "place.plan_in": {
+    "cs": "v plánu",
+    "en": "in plan"
+  },
+  "place.plan": {
+    "cs": "Plán",
+    "en": "Plan"
+  },
+  "place.visited": {
+    "cs": "Navštíveno",
+    "en": "Visited"
+  },
+  "place.stops": {
+    "cs": "{n} zastavení",
+    "en": "{n} stops"
+  },
+  "place.routes": {
+    "cs": "{n} trasy",
+    "en": "{n} routes"
+  },
+  "place.waiting_rating": {
+    "cs": "čeká na hodnocení",
+    "en": "awaiting rating"
+  },
+  "place.paywall_signin": {
+    "cs": "Pro celý obsah se",
+    "en": "To see full content,"
+  },
+  "place.paywall_link": {
+    "cs": "přihlaste",
+    "en": "sign in"
+  },
+  "place.paywall_insider": {
+    "cs": "Pro celý obsah",
+    "en": "For full content,"
+  },
+  "place.paywall_upgrade": {
+    "cs": "upgradujte na Insider",
+    "en": "upgrade to Insider"
+  },
+  "place.exif_missing": {
+    "cs": "EXIF data nenalezena",
+    "en": "EXIF data not found"
+  },
+  "place.exif_error": {
+    "cs": "Nepodařilo se načíst",
+    "en": "Failed to load"
+  },
+  "overview.filter": {
+    "cs": "Filtr",
+    "en": "Filter"
+  },
+  "overview.any_dist": {
+    "cs": "libovolná",
+    "en": "any"
+  },
+  "overview.empty": {
+    "cs": "Žádná místa",
+    "en": "No places"
+  },
+  "overview.empty_sub": {
+    "cs": "Zkuste jiný filtr.",
+    "en": "Try a different filter."
+  },
+  "overview.load_err": {
+    "cs": "Nepodařilo se načíst místa",
+    "en": "Could not load places"
+  },
+  "overview.load_err_sub": {
+    "cs": "Zkontrolujte připojení.",
+    "en": "Check your connection."
+  },
+  "overview.sync_err": {
+    "cs": "Nepodařilo se načíst data ze serveru.",
+    "en": "Could not load data from server."
+  },
+  "overview.sync_retry": {
+    "cs": "Zkusit znovu",
+    "en": "Try again"
+  },
+  "lang.cs": {
+    "cs": "Česky",
+    "en": "Česky"
+  },
+  "lang.en": {
+    "cs": "English",
+    "en": "English"
+  },
+  "sheet.facts": {
+    "cs": "Fakta",
+    "en": "Facts"
+  },
+  "sheet.on_site": {
+    "cs": "Na místě",
+    "en": "On site"
+  },
+  "sheet.steps": {
+    "cs": "{n} kroků",
+    "en": "{n} steps"
+  },
+  "sheet.curators_tip": {
+    "cs": "Tip kurátora",
+    "en": "Curator's tip"
+  },
+  "sheet.gallery": {
+    "cs": "Galerie",
+    "en": "Gallery"
+  },
+  "sheet.navigate": {
+    "cs": "Navigovat",
+    "en": "Navigate"
+  },
+  "sheet.share": {
+    "cs": "Sdílet",
+    "en": "Share"
+  },
+  "sheet.ar_btn": {
+    "cs": "Step into the past — otevři AR",
+    "en": "Step into the past — open AR"
+  },
+  "sheet.ar_kick": {
+    "cs": "Step into the past",
+    "en": "Step into the past"
+  },
+  "sheet.from_you": {
+    "cs": "od vás",
+    "en": "from you"
+  },
+  "sheet.enable_location": {
+    "cs": "povolit polohu",
+    "en": "enable location"
+  },
+  "sheet.show": {
+    "cs": "Zobrazit",
+    "en": "Show"
+  },
+  "overview.dist_from_you": {
+    "cs": "Vzdálenost od vás",
+    "en": "Distance from you"
+  },
+  "overview.visited": {
+    "cs": "Navštíveno",
+    "en": "Visited"
+  },
+  "overview.loading": {
+    "cs": "Načítám místa…",
+    "en": "Loading places…"
+  },
+  "overview.login_tooltip": {
+    "cs": "Pro správu navštívených míst je nutné přihlášení",
+    "en": "Sign in to manage visited places"
+  },
+  "place.plan_add_long": {
+    "cs": "Přidat do plánu",
+    "en": "Add to plan"
+  },
+  "place.plan_remove": {
+    "cs": "Odebrat z plánu",
+    "en": "Remove from plan"
+  },
+  "wish.title": {
+    "cs": "Tvoje uložená místa",
+    "en": "Your saved places"
+  },
+  "wish.kick": {
+    "cs": "Plán · Wishlist",
+    "en": "Plan · Wishlist"
+  },
+  "wish.intro": {
+    "cs": "Srdíčka z mapy. Ulož si místa pro pozdější návštěvu — LoP ti z nich navrhne trasu.",
+    "en": "Hearts from the map. Save places for later — LoP will suggest a route."
+  },
+  "fact.postaveno": {
+    "cs": "Postaveno",
+    "en": "Built"
+  },
+  "fact.dokonceno": {
+    "cs": "Dokončeno",
+    "en": "Completed"
+  },
+  "fact.sloh": {
+    "cs": "Sloh",
+    "en": "Style"
+  },
+  "fact.architekt": {
+    "cs": "Architekt",
+    "en": "Architect"
+  },
+  "fact.pamatka_od": {
+    "cs": "Památka od",
+    "en": "Listed since"
+  },
+  "fact.soucasne": {
+    "cs": "Současné využití",
+    "en": "Current use"
+  },
+  "fact.prvni_zminka": {
+    "cs": "První zmínka",
+    "en": "First mention"
+  },
+  "fact.otevreno": {
+    "cs": "Otevřeno",
+    "en": "Opened"
+  },
+  "fact.vybud": {
+    "cs": "Vybudováno",
+    "en": "Constructed"
+  },
+  "fact.vystavba": {
+    "cs": "Výstavba",
+    "en": "Construction"
+  },
+  "fact.delka": {
+    "cs": "Délka",
+    "en": "Length"
+  },
+  "fact.plocha": {
+    "cs": "Plocha",
+    "en": "Area"
+  },
+  "fact.rozloha": {
+    "cs": "Rozloha",
+    "en": "Area"
+  },
+  "fact.status": {
+    "cs": "Status",
+    "en": "Status"
+  },
+  "fact.socha_odstr": {
+    "cs": "Socha odstraněna",
+    "en": "Statue removed"
+  },
+  "fact.metronom_od": {
+    "cs": "Metronom od",
+    "en": "Metronome since"
+  },
+  "fact.orloj_od": {
+    "cs": "Orloj od",
+    "en": "Clock since"
+  }
 }
