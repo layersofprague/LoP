@@ -1663,7 +1663,7 @@ function toggleWishBtn() {
     zIndexOffset: 100
   }).addTo(map).on('click', (e) => {
     L.DomEvent.stopPropagation(e);
-    location.href = '/LoP/index.html#' + PLACE_ID;
+    sessionStorage.setItem('lop_goto', PLACE_ID); location.href = '/LoP/index.html';
   });
 
   // Okolní místa z places.json
@@ -1681,7 +1681,7 @@ function toggleWishBtn() {
         icon: L.divIcon({ html: pinHtml, className: '', iconSize: [26,26], iconAnchor: [13,13] })
       }).addTo(map).on('click', (e) => {
         L.DomEvent.stopPropagation(e);
-        location.href = '/LoP/index.html#' + p.id;
+        sessionStorage.setItem('lop_goto', p.id); location.href = '/LoP/index.html';
       });
     });
   }).catch(() => {});
