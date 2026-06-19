@@ -2513,6 +2513,8 @@ async function loadData() {
   renderRoutes();
   updateWishBadge();
   setTimeout(buildChips, 100);
+  // Hash navigace — spustit po buildu markerů
+  if (_hashIsPlace) setTimeout(navigateToHash, 600);
   syncFromDB(() => { updateWishBadge(); if(window._map) { _markers.forEach(({marker,loc})=>{marker.remove();marker.setIcon(makeIcon(loc));marker.addTo(window._map);}); applyFilter(); } });
 }
 
@@ -2865,8 +2867,6 @@ function rebuildMarkers() {
     const loc = marker._loc;
     marker.setIcon(makeIcon(loc));
   });
-  // Hash navigace — při prvním načtení
-  if (location.hash) navigateToHash();
 }
 
 function buildChips() {
