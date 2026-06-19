@@ -1897,12 +1897,11 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   transform: scale(.98);
 }
 .llo-top {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 8px;
+  padding-top: clamp(48px, 14vh, 100px);
 }
 .llo-logo {
   width: clamp(260px, 82vw, 360px);
@@ -1910,7 +1909,7 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   display: block;
 }
 .llo-vitejte {
-  margin-top: 10px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1920,10 +1919,13 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
 }
 .llo-vitejte span { display: block; }
 .llo-bottom {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   width: 100%;
   max-width: 360px;
-  padding-top: 14px;
+  padding-bottom: 0;
 }
 .llo-flags {
   display: flex;
