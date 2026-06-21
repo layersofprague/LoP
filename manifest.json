@@ -1,0 +1,19 @@
+{
+  "name": "Layers of Prague",
+  "short_name": "LayersOfPrague",
+  "description": "Historická Praha vrstvou po vrstvě",
+  "start_url": "/LoP/index.html",
+  "scope": "/LoP/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F8F8F6",
+  "theme_color": "#F8F8F6",
+  "icons": [
+    {
+      "src": "logo-transparent.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
