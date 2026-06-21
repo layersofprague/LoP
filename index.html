@@ -1884,8 +1884,8 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   z-index: 9000;
   background: var(--paper, #F8F8F6);
   display: grid;
-  grid-template-rows: 1fr auto;
-  align-items: end;
+  grid-template-rows: 1fr auto auto;
+  align-items: center;
   justify-items: center;
   padding: 0 30px 16px;
   font-family: 'Inter', system-ui, sans-serif;
@@ -1896,6 +1896,11 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   opacity: 0;
   pointer-events: none;
   transform: translateY(-8px) scale(.99);
+}
+.llo-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .llo-top {
   display: flex;
@@ -1974,7 +1979,18 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
     gap: 0;
     align-items: stretch;
     justify-content: stretch;
+    grid-template-rows: none;
   }
+  .llo-logo-wrap {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 28px;
+    grid-row: auto;
+  }
+  .llo-logo { width: clamp(180px, 38vw, 260px); }
   .llo-top {
     flex: 1 1 0;
     display: flex;
@@ -1984,7 +2000,6 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
     padding: 32px 28px;
     padding-bottom: 28px;
   }
-  .llo-logo { width: clamp(180px, 38vw, 260px); }
   .llo-vitejte {
     margin-top: 0;
     gap: 0px;
@@ -2013,8 +2028,10 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
 <!-- ── Lang onboarding overlay ── -->
 <script>document.body.classList.add("lop-splash");</script>
 <div id="lop-lang-overlay">
-  <div class="llo-top">
+  <div class="llo-logo-wrap">
     <img class="llo-logo" src="logo-transparent.png" alt="Layers of Prague"/>
+  </div>
+  <div class="llo-top">
     <div class="llo-vitejte">
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#D4D4CF;">Witamy</span>
       <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:13px;color:#CFCFCA;">Welkom</span>
@@ -2722,9 +2739,11 @@ function locSteps(steps) {
   function _hide() {
     const el = document.getElementById('lop-lang-overlay');
     if (!el) return;
+    // Okamžitě schovat obsah, jen fade background
+    el.querySelectorAll('.llo-logo-wrap,.llo-top,.llo-bottom').forEach(e => e.style.opacity = '0');
     el.classList.add('hiding');
     document.body.classList.remove('lop-splash');
-    setTimeout(() => el.remove(), 400);
+    setTimeout(() => el.remove(), 380);
   }
 
   window.lopChooseLang = function(lang) {
@@ -2735,9 +2754,8 @@ function locSteps(steps) {
     // 2. Pokud je přihlášen → sync do Supabase
     _syncLangToSupabase(lang);
 
-    // 3. Reload s novým jazykem (i18n.js ho načte)
+    // 3. Skrýt overlay, mapa je připravena
     _hide();
-    setTimeout(() => location.reload(), 380);
   };
 
   async function _syncLangToSupabase(lang) {
@@ -2766,18 +2784,12 @@ function locSteps(steps) {
     if (!el) return;
 
     if (chosen) {
-      // Opakovaná návštěva — schovat vlaječky a hint, zobrazit jen logo + vítejte
-      const bottom = el.querySelector('.llo-bottom');
-      if (bottom) bottom.style.display = 'none';
-
-      // Auto-hide po 1.6s
-      setTimeout(() => {
-        el.classList.add('hiding');
-        document.body.classList.remove('lop-splash');
-        setTimeout(() => el.remove(), 400);
-      }, 1600);
+      // Jazyk už zvolen — overlay okamžitě odstranit
+      el.remove();
+      document.body.classList.remove('lop-splash');
+      return;
     }
-    // Jinak zůstane s výběrem jazyka
+    // První návštěva — zobrazit výběr jazyka
   }
 
   if (document.readyState === 'loading') {
