@@ -1884,8 +1884,8 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   z-index: 9000;
   background: var(--paper, #F8F8F6);
   display: grid;
-  grid-template-rows: 1fr auto auto;
-  align-items: center;
+  grid-template-rows: 1fr auto;
+  align-items: end;
   justify-items: center;
   padding: 0 30px 16px;
   font-family: 'Inter', system-ui, sans-serif;
@@ -1896,11 +1896,6 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
   opacity: 0;
   pointer-events: none;
   transform: translateY(-8px) scale(.99);
-}
-.llo-logo-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .llo-top {
   display: flex;
@@ -2028,10 +2023,8 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
 <!-- ── Lang onboarding overlay ── -->
 <script>document.body.classList.add("lop-splash");</script>
 <div id="lop-lang-overlay">
-  <div class="llo-logo-wrap">
-    <img class="llo-logo" src="logo-transparent.png" alt="Layers of Prague"/>
-  </div>
   <div class="llo-top">
+    <img class="llo-logo" src="logo-transparent.png" alt="Layers of Prague"/>
     <div class="llo-vitejte">
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#D4D4CF;">Witamy</span>
       <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:13px;color:#CFCFCA;">Welkom</span>
