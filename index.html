@@ -2044,7 +2044,8 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 <script>
   // Splash jen při spuštění — TTL 10 sekund, přežije navigaci ale ne nové spuštění
   var _today = new Date().toDateString();
-  var _seenSplash = localStorage.getItem('lop_splash_ts') === _today;
+  var _nosplash = location.search.indexOf('nosplash') !== -1;
+  var _seenSplash = _nosplash || localStorage.getItem('lop_splash_ts') === _today;
   if (!_seenSplash) {
     document.body.classList.add("lop-splash");
     if (localStorage.getItem('lop_lang')) {

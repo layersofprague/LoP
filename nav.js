@@ -254,7 +254,7 @@ function _inject() {
 /* ── Navigace na mapu se zápisem splash timestamp ── */
 window._lopGoMap = function() {
   localStorage.setItem('lop_splash_ts', new Date().toDateString());
-  location.href = ROOT + 'index.html';
+  location.href = ROOT + 'index.html?nosplash=1';
 };
 
 /* ── Spuštění ── */
