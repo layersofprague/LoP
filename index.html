@@ -2042,9 +2042,14 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 
 <!-- ── Lang onboarding overlay ── -->
 <script>
-  document.body.classList.add("lop-splash");
-  if (localStorage.getItem('lop_lang')) {
-    document.body.classList.add("lop-return");
+  // Splash jen při prvním načtení session (spuštění aplikace), ne při navigaci
+  var _seenSplash = sessionStorage.getItem('lop_splash_shown');
+  if (!_seenSplash) {
+    document.body.classList.add("lop-splash");
+    if (localStorage.getItem('lop_lang')) {
+      document.body.classList.add("lop-return");
+    }
+    sessionStorage.setItem('lop_splash_shown', '1');
   }
 </script>
 <div id="lop-lang-overlay">
