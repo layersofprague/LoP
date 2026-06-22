@@ -134,6 +134,26 @@ body.lop-splash #lop-header,
 body.lop-splash #lop-nav,
 body.lop-splash #nav { opacity: 0; pointer-events: none; }
 #lop-header, #lop-nav, #nav { transition: opacity .4s ease; }
+body.lop-return .llo-bottom { display: none !important; }
+body.lop-return .llo-vitejte { display: none !important; }
+body.lop-return .llo-vitejte-zpet { display: flex !important; }
+.llo-vitejte-zpet {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  line-height: 1.06;
+  text-align: center;
+  margin-top: 28px;
+}
+.llo-vitejte-zpet span { display: block; }
+/* Stejná min-výška jako llo-bottom s vlajkami — aby logo bylo na stejném místě */
+.llo-bottom-placeholder {
+  display: none;
+  height: 140px;
+  width: 100%;
+}
+body.lop-return .llo-bottom-placeholder { display: block; }
 #nav {
   flex: 0 0 auto;
   display: flex;
@@ -2021,7 +2041,12 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
 
 
 <!-- ── Lang onboarding overlay ── -->
-<script>document.body.classList.add("lop-splash");</script>
+<script>
+  document.body.classList.add("lop-splash");
+  if (localStorage.getItem('lop_lang')) {
+    document.body.classList.add("lop-return");
+  }
+</script>
 <div id="lop-lang-overlay">
   <div class="llo-top">
     <img class="llo-logo" src="logo-transparent.png" alt="Layers of Prague"/>
@@ -2038,7 +2063,21 @@ body.lop-splash #nav { opacity: 0; pointer-events: none; }
       <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:15px;color:#C4C4BF;">Benvenuti</span>
       <span style="font-family:'Noto Sans JP',sans-serif;font-weight:400;font-size:13px;color:#CECEC9;">ようこそ · 欢迎</span>
     </div>
+    <div class="llo-vitejte-zpet">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#D4D4CF;">Witamy ponownie</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:13px;color:#CFCFCA;">Welkom terug</span>
+      <span style="font-family:'Fraunces',serif;font-style:italic;font-size:15px;color:#CCCCC7;">Üdv újra!</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:15px;color:#C9C9C4;">¡Bienvenido de nuevo!</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:16px;color:#C9C9C4;">Bon retour</span>
+      <span style="font-family:'Fraunces',serif;font-weight:400;font-size:19px;color:#C2C2BD;">Willkommen zurück</span>
+      <span style="font-family:'Fraunces',serif;font-weight:400;font-size:36px;letter-spacing:-.01em;color:#A4A49E;">Vítejte zpět!</span>
+      <span style="font-family:'Fraunces',serif;font-style:italic;font-size:22px;color:#B6B6B1;">Welcome back</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:17px;color:#C2C2BD;">Vitajte späť</span>
+      <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:15px;color:#C4C4BF;">Ben tornato</span>
+      <span style="font-family:'Noto Sans JP',sans-serif;font-weight:400;font-size:13px;color:#CECEC9;">おかえり · 欢迎回来</span>
+    </div>
   </div>
+  <div class="llo-bottom-placeholder"></div>
   <div class="llo-bottom">
     <div class="llo-flags">
       <button class="llo-flag-btn" onclick="window.lopChooseLang('cs')">
