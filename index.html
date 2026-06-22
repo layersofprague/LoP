@@ -2777,9 +2777,13 @@ function locSteps(steps) {
     if (!el) return;
 
     if (chosen) {
-      // Jazyk už zvolen — overlay okamžitě odstranit
-      el.remove();
-      document.body.classList.remove('lop-splash');
+      // Opakovaná návštěva — jen logo + vítejte, bez vlajek, auto-hide po 1.2s
+      el.querySelector('.llo-bottom').style.display = 'none';
+      setTimeout(() => {
+        el.classList.add('hiding');
+        document.body.classList.remove('lop-splash');
+        setTimeout(() => el.remove(), 380);
+      }, 1200);
       return;
     }
     // První návštěva — zobrazit výběr jazyka
