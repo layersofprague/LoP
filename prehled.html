@@ -936,6 +936,11 @@ function updateCounts() {
   if(wrapW) wrapW.innerHTML=loggedIn?'<span class="count">'+PLACES.filter(p=>wished.includes(String(p.id))).length+'</span>':lockSVG;
 }
 
+function locStr(obj, field) {
+  if (window.lopLang === 'en' && obj[field + '_en']) return obj[field + '_en'];
+  return obj[field] || '';
+}
+
 function render() {
   const visited=getVisited(), wished=getWished();
   const eraActive=ERA_STATE.from>ERA_START||ERA_STATE.to<ERA_END;
