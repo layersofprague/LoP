@@ -172,6 +172,7 @@ function _html() {
     {
       id: 'map',
       href: root + 'index.html',
+      onclick: "_lopGoMap()",
       label: t('nav.map'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>`
     },
@@ -249,6 +250,13 @@ function _inject() {
   window.addEventListener('resize', setCompensation);
 }
 
+
+/* ── Navigace na mapu se zápisem splash timestamp ── */
+window._lopGoMap = function() {
+  localStorage.setItem('lop_splash_ts', new Date().toDateString());
+  location.href = ROOT + 'index.html';
+};
+
 /* ── Spuštění ── */
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', _inject);
@@ -265,7 +273,7 @@ function _buildIndex() {
   const items = [
     {
       id: 'map', label: t('nav.map'), view: 'mapView',
-      onclick: "switchView('mapView')",
+      onclick: "location.pathname.includes('index') ? switchView('mapView') : window._lopGoMap()",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>'
     },
     {
