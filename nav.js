@@ -171,7 +171,7 @@ function _html() {
   const items = [
     {
       id: 'map',
-      href: root + 'index.html',
+      href: root + 'map.html',
       onclick: "event.preventDefault();window._lopGoMap()",
       label: t('nav.map'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>`
