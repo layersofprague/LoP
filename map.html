@@ -647,14 +647,13 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   pointer-events: auto;
 }
 .filter-puck {
-  display: flex; flex-direction: row; align-items: center; gap: 4px;
-  padding: 4px 8px;
+  display: flex; flex-direction: row; align-items: center; gap: 5px;
+  padding: 5px 10px;
   background: #F8F8F6; border: 1.5px solid var(--rule);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 2px 16px rgba(0,0,0,.05);
-  cursor: pointer; transition: background .15s; color: var(--ink-3);
+  cursor: pointer; transition: background .15s, color .15s; color: var(--ink-4);
   font-family: 'Inter', sans-serif;
-  min-height: 26px;
 }
 .filter-puck:hover { background: #F0F0EE; color: var(--ink-2); }
 .filter-puck.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
@@ -668,21 +667,21 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 .filter-puck-badge-dots { display: flex; gap: 2px; align-items: center; }
 .filter-puck-badge-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
-.filter-puck svg { width: 14px; height: 14px; flex-shrink: 0; }
+.filter-puck svg { width: 13px; height: 13px; flex-shrink: 0; }
 .filter-puck-dot { display: none; }
 /* label + count */
-.filter-puck-bottom { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.filter-puck-bottom { display: flex; align-items: center; gap: 4px; font-size: 10px; }
 .filter-puck-badge-label {
-  font-size: 11px; font-weight: 500;
+  font-size: 10px; font-weight: 500;
   font-family: 'Inter', sans-serif;
-  color: var(--ink-3); line-height: 1;
+  color: var(--ink-4); line-height: 1;
 }
 .filter-puck-badge-count {
   font-size: 10px; color: var(--ink-5); line-height: 1;
   font-family: 'Inter', sans-serif;
 }
 .filter-puck-badge-count .cnt-active {
-  font-size: 12px; font-weight: 500; color: var(--ink-4);
+  font-size: 10px; font-weight: 500; color: var(--ink-4);
 }
 /* Filter modal */
 .filter-modal-backdrop {
