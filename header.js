@@ -13,7 +13,7 @@
 const _depth = (location.pathname.match(/\//g) || []).length;
 // GitHub Pages: /LoP/ = hloubka 1, /LoP/place/ = hloubka 2
 const _isRoot = !location.pathname.split('/').filter(Boolean).slice(-1)[0]?.includes('.html')
-  || location.pathname.endsWith('index.html');
+  || location.pathname.endsWith('index.html') || location.pathname.endsWith('map.html');
 
 function _root() {
   // Vrátí relativní cestu ke kořeni projektu
@@ -147,7 +147,7 @@ function _html() {
   const logoSrc = ROOT + 'logo-tight.png';
   const loginHref = ROOT + 'login.html?return=' + encodeURIComponent(location.href);
   return `
-    <a class="lop-h-brand" href="${ROOT}index.html">
+    <a class="lop-h-brand" href="${ROOT}map.html">
       <img class="lop-h-logo" src="${logoSrc}" alt="Layers of Prague"/>
     </a>
     <div class="lop-h-actions">
