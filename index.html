@@ -2015,9 +2015,9 @@ body.lop-return .llo-bottom-placeholder { display: block; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 32px 28px;
-    padding-bottom: 28px;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 28px;
   }
   .llo-vitejte {
     margin-top: 0;
@@ -2029,8 +2029,9 @@ body.lop-return .llo-bottom-placeholder { display: block; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 32px 28px 24px;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 28px;
     border-left: 1px solid var(--rule, #E8E8E6);
   }
   .llo-flags { margin-bottom: 0; }
@@ -2774,6 +2775,11 @@ function locSteps(steps) {
     text:  (window.lopLang === 'en' && s.text_en)  ? s.text_en  : s.text,
   }));
 }
+
+/* ── Zabránit splash při rotaci displeje ── */
+window.addEventListener('orientationchange', function() {
+  localStorage.setItem('lop_splash_ts', new Date().toDateString());
+});
 
 /* ── Lang overlay ── */
 (function() {
