@@ -616,5 +616,95 @@
     "paywall": false,
     "rating": 4.6,
     "ratingCount": 0
+  },
+  {
+    "id": "H002",
+    "district": "Malá Strana",
+    "name": "Bašta sv. Máří Magdalény (XIX)",
+    "lat": 50.09305881760058,
+    "lng": 14.411785293307434,
+    "cat": "hist",
+    "thumb": "foto/h_002ove_thumb.jpg",
+    "sub": "Malá Strana / Letná, Praha 1",
+    "lede": "Jedna z mála dochovaných bašt pražského barokního opevnění na levém břehu Vltavy. Bašta XIX. nese jméno světice Máří Magdalény a do roku 1926 z ní každý den v poledne zazněl dělový výstřel — signál pro celou Prahu. Dnes na jejím místě stojí Kramářova vila, ale terén bašty je stále čitelný.",
+    "yearBuilt": 1653,
+    "yearPhoto": 1900,
+    "facts": [
+      {
+        "k": "Výstavba",
+        "v": "1653–1727"
+      },
+      {
+        "k": "Sloh",
+        "v": "Barokní pevnost"
+      },
+      {
+        "k": "Památka od",
+        "v": "1964"
+      },
+      {
+        "k": "Současné využití",
+        "v": "Dochovaná"
+      }
+    ],
+    "steps": [
+      {
+        "title": "Terén bašty",
+        "text": "Stůj na rohu ulic Na Baště sv. Tomáše a Gogolovy — zde začínala kurtina spojující baštu XVIII a XIX. Terén mírně stoupá přesně v linii původního opevnění."
+      },
+      {
+        "title": "Kramářova vila",
+        "text": "Budova stojí přesně na místě bašty. Pohleď na severní fasádu — sklon pozemku a mohutnost základů odpovídají rozměrům původního bastiónu: hloubka 102 m, šířka hrdla 145 m."
+      },
+      {
+        "title": "Výhled na město",
+        "text": "Zajdi na okraj Letenských sadů nad Čechovým mostem — odtud bašta kontrolovala severní přístup k Malé Straně přes Vltavu. Výhled je prakticky totožný s tím, co měli obránci v 18. století."
+      }
+    ],
+    "tip": "Nejlepší světlo na fotografii je odpoledne, kdy slunce osvětluje severní svah Letenských sadů a terén bašty je nejlépe čitelný.",
+    "tags": [
+      "bašta",
+      "opevnění",
+      "baroko",
+      "Malá Strana",
+      "Mariánské hradby",
+      "Kramářova vila",
+      "Letná",
+      "1653",
+      "poledne",
+      "hradby"
+    ],
+    "photos": [
+      {
+        "file": "foto/h_002s.jpg",
+        "type": "now",
+        "year": 2024,
+        "caption": "Pohled od Letenských sadů",
+        "credit": "LayersOfPrague",
+        "arAnchor": false
+      },
+      {
+        "file": "foto/h_002h.jpg",
+        "type": "hist",
+        "year": 1900,
+        "caption": "Bašta před zbouráním, pohled od severu",
+        "credit": "Archiv hl. m. Prahy",
+        "arAnchor": true,
+        "arHeading": 180
+      }
+    ],
+    "arHeading": 180,
+    "arRadius": 15,
+    "routes": [],
+    "points": 50,
+    "bonusAR": 25,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2025-06-23",
+    "published": true,
+    "paywall": false,
+    "rating": null,
+    "ratingCount": 0
   }
 ]
