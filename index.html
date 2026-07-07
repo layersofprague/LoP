@@ -217,9 +217,8 @@ body.lop-return .llo-bottom-placeholder { display: block; }
     _hide(function(){ location.replace('map.html'); });
   }
 
-  // Opakovaná návštěva — auto-hide po 1.2s pak mapa
-  var _seenToday = localStorage.getItem('lop_splash_ts') === TODAY;
-  if (_seenToday && localStorage.getItem('lop_lang')) {
+  // Opakovaná návštěva (jazyk zvolen) — zobrazit vítejte zpět, pak mapa
+  if (localStorage.getItem('lop_lang')) {
     setTimeout(_goMap, 1200);
   }
   // První návštěva — čeká na klik
