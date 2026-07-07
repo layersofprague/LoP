@@ -819,7 +819,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 
 .lop-pin {
-  width: 30px; height: 30px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   border: 2px solid var(--paper);
   box-shadow: 0 2px 6px rgba(26,24,20,.3);
   display: flex; align-items: center; justify-content: center;
@@ -2904,13 +2904,12 @@ function pinIconHTML(loc) {
   const wished  = isWished(loc.id)  ? 'wished'  : '';
   const style = TWEAKS.pinStyle;
   const catLetter = (CAT[loc.cat]?.letter || 'H');
-  const numDigits = String(loc.num).replace(/^[A-Z]+/, '');
-  const lbl = '<span style="display:flex;flex-direction:column;align-items:center;line-height:1;gap:1px"><span style="font-size:11px;font-weight:700">' + catLetter + '</span><span style="font-size:7px;font-weight:600;opacity:.85">' + numDigits + '</span></span>';
+  const lbl = '<span style="font-size:11px;font-weight:700;line-height:1">' + catLetter + '</span>';
   if (style === 'drop') {
-    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:32px; height:32px;"><span style="transform:rotate(45deg)">${lbl}</span></div>`;
+    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:24px; height:24px;"><span style="transform:rotate(45deg)">${lbl}</span></div>`;
   }
   if (style === 'tag') {
-    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:4px; width:34px; height:26px; font-size:11px;">${lbl}</div>`;
+    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:4px; width:28px; height:22px; font-size:11px;">${lbl}</div>`;
   }
   return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}">${lbl}</div>`;
 }
@@ -2919,8 +2918,8 @@ function makeIcon(loc) {
   return L.divIcon({
     html: pinIconHTML(loc),
     className: '',
-    iconSize: [46, 46],
-    iconAnchor: [23, 23]
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
   });
 }
 
