@@ -1112,12 +1112,12 @@ function renderExif(elId, data) {
   }
 
   const fields = [
-    { key: 'Author',        val: data?.Artist || data?.XPAuthor || data?.Creator || data?.['By-line'] || data?.['dc:creator'] },
-    { key: 'Credit',        val: data?.Credit },
-    { key: 'Specification', val: data?.SpecialInstructions || data?.['dc:description'] },
-    { key: 'Source',        val: data?.Source },
-    { key: 'Copyright',     val: data?.CopyrightNotice || data?.Copyright || data?.Rights || data?.['dc:rights'] },
-    { key: 'Date',          val: data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: 'Author',        val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
+    { key: 'Credit',        val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
+    { key: 'Specification', val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
+    { key: 'Source',        val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
+    { key: 'Copyright',     val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
+    { key: 'Date',          val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
@@ -1132,8 +1132,8 @@ async function loadExif() {
   _exifLoaded = true;
   try {
     const [histData, nowData] = await Promise.all([
-      exifr.parse(PHOTO_HIST, ['Artist', 'Credit', 'XPAuthor', 'Creator', 'By-line', 'CopyrightNotice', 'Copyright', 'Rights', 'SpecialInstructions', 'Source', 'DateCreated', 'CreateDate', 'dc:creator', 'dc:rights', 'dc:description']).catch(() => null),
-      exifr.parse(PHOTO_NOW,  ['Artist', 'Credit', 'XPAuthor', 'Creator', 'By-line', 'CopyrightNotice', 'Copyright', 'Rights', 'SpecialInstructions', 'Source', 'DateCreated', 'CreateDate', 'dc:creator', 'dc:rights', 'dc:description']).catch(() => null),
+      exifr.parse(PHOTO_HIST, true).catch(() => null),
+      exifr.parse(PHOTO_NOW,  true).catch(() => null),
     ]);
     renderExif('copyHist', histData);
     renderExif('copyNow',  nowData);
