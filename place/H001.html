@@ -842,8 +842,8 @@ a { color: inherit; text-decoration: none; }
     <div class="sl-top" id="slTopFs">
       <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
     </div>
-    <div class="sl-lbl sl-lbl-l" id="lblHistFs">~1930</div>
-    <div class="sl-lbl sl-lbl-r" id="lblNowFs">2026</div>
+    <div class="sl-lbl sl-lbl-l" id="lblNowFs">2026</div>
+    <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1930</div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
@@ -1274,8 +1274,8 @@ function updateInsiderGate() {
     }
     const lblL = document.getElementById('lblHistFs');
     const lblR = document.getElementById('lblNowFs');
-    if (lblL) lblL.classList.toggle('active', pct > 0.5);
-    if (lblR) lblR.classList.toggle('active', pct <= 0.5);
+    if (lblL) lblL.classList.toggle('active', pct <= 0.5);
+    if (lblR) lblR.classList.toggle('active', pct > 0.5);
   }
 
   function posFromX(x) {
