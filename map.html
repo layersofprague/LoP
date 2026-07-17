@@ -832,6 +832,19 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 /* Leaflet ořezává wrapper — povolíme přetékání pro fajfku a srdíčko */
 .leaflet-marker-icon { overflow: visible !important; }
+/* Wrapper divIconu — pin i kužel centrovány přes flex, žádný transform konflikt */
+.lop-pin-wrap {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Zorný kužel — směr pohledu fotografa, pozicován za pinem uprostřed */
+.lop-view-cone {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform-origin: center center;
+  pointer-events: none;
+  z-index: -1;
+}
 .lop-pin:hover { transform: scale(1.1); }
 .lop-pin.rt-active { transform: scale(1.2); }
 .lop-pin.cat-hist { background: var(--cat-hist); }
@@ -2899,27 +2912,48 @@ function pinLabel(num) {
   return s;
 }
 
+const CAT_HEX = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
+
+function viewConeHTML(loc) {
+  // Směr pohledu fotografa — z arHeading (0 = sever, po směru hodin)
+  const heading = loc.arHeading ?? loc.photos?.find(p => p.arAnchor)?.arHeading ?? null;
+  if (heading === null || heading === undefined) return '';
+  const color = CAT_HEX[loc.cat] || '#4A4A48';
+  // Kužel míří "nahoru" (=sever) v lokálním systému; natočíme celý wrapper
+  // Úzký kužel ~48°, poloměr 46px
+  return `<div class="lop-view-cone" style="transform:translate(-50%,-50%) rotate(${heading}deg)">
+    <svg width="96" height="96" viewBox="0 0 96 96" style="display:block">
+      <defs><radialGradient id="vc-${loc.id}" cx="50%" cy="100%" r="90%">
+        <stop offset="0%" stop-color="${color}" stop-opacity="0.42"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+      </radialGradient></defs>
+      <path d="M48,48 L28,6 A46,46 0 0,1 68,6 Z" fill="url(#vc-${loc.id})"/>
+    </svg>
+  </div>`;
+}
+
 function pinIconHTML(loc) {
   const visited = isVisited(loc.id) ? 'visited' : '';
   const wished  = isWished(loc.id)  ? 'wished'  : '';
   const style = TWEAKS.pinStyle;
   const catLetter = (CAT[loc.cat]?.letter || 'H');
   const lbl = '<span style="font-size:11px;font-weight:700;line-height:1">' + catLetter + '</span>';
+  const cone = viewConeHTML(loc);
   if (style === 'drop') {
-    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:24px; height:24px;"><span style="transform:rotate(45deg)">${lbl}</span></div>`;
+    return `${cone}<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); width:24px; height:24px;"><span style="transform:rotate(45deg)">${lbl}</span></div>`;
   }
   if (style === 'tag') {
-    return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:4px; width:28px; height:22px; font-size:11px;">${lbl}</div>`;
+    return `${cone}<div class="lop-pin cat-${loc.cat} ${visited} ${wished}" style="border-radius:4px; width:28px; height:22px; font-size:11px;">${lbl}</div>`;
   }
-  return `<div class="lop-pin cat-${loc.cat} ${visited} ${wished}">${lbl}</div>`;
+  return `${cone}<div class="lop-pin cat-${loc.cat} ${visited} ${wished}">${lbl}</div>`;
 }
 
 function makeIcon(loc) {
   return L.divIcon({
     html: pinIconHTML(loc),
-    className: '',
-    iconSize: [36, 36],
-    iconAnchor: [18, 18]
+    className: 'lop-pin-wrap',
+    iconSize: [96, 96],
+    iconAnchor: [48, 48]
   });
 }
 
