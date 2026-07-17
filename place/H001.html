@@ -183,9 +183,12 @@ a { color: inherit; text-decoration: none; }
 /* Fullscreen modal */
 .fs-modal {
   display: none;
-  position: fixed; inset: 0; z-index: 300;
-  background: rgba(0,0,0,.55);
+  position: fixed; inset: 0; z-index: 9100;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(18px) saturate(0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(0.8);
   align-items: center; justify-content: center;
+  overscroll-behavior: contain;
 }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
@@ -1103,16 +1106,25 @@ let _exifLoaded = false;
 function renderExif(elId, data) {
   const el = document.getElementById(elId);
   if (!el) return;
-  const artist   = data?.Artist || data?.XPAuthor || data?.Creator || data?.['dc:creator'] || null;
-  const copy     = data?.Copyright || data?.Rights || data?.['dc:rights'] || null;
-  if (!artist && !copy) {
+  if (!data) {
     el.innerHTML = `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_missing')}</div>`;
     return;
   }
-  el.innerHTML = `
-    ${artist ? `<div class="copy-row"><div class="copy-key">Autor</div><div class="copy-val">${artist}</div></div>` : ''}
-    ${copy   ? `<div class="copy-row"><div class="copy-key">Copyright</div><div class="copy-val">${copy}</div></div>`   : ''}
-  `;
+
+  const fields = [
+    { key: 'Author',        val: data?.Artist || data?.XPAuthor || data?.Creator || data?.['By-line'] || data?.['dc:creator'] },
+    { key: 'Credit',        val: data?.Credit },
+    { key: 'Specification', val: data?.SpecialInstructions || data?.['dc:description'] },
+    { key: 'Source',        val: data?.Source },
+    { key: 'Copyright',     val: data?.CopyrightNotice || data?.Copyright || data?.Rights || data?.['dc:rights'] },
+    { key: 'Date',          val: data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+  ];
+
+  const rows = fields.filter(f => f.val).map(f =>
+    `<div class="copy-row"><div class="copy-key">${f.key}</div><div class="copy-val">${f.val}</div></div>`
+  ).join('');
+
+  el.innerHTML = rows || `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_missing')}</div>`;
 }
 
 async function loadExif() {
@@ -1120,8 +1132,8 @@ async function loadExif() {
   _exifLoaded = true;
   try {
     const [histData, nowData] = await Promise.all([
-      exifr.parse(PHOTO_HIST, ['Artist', 'Copyright', 'XPAuthor', 'Creator', 'Rights', 'dc:creator', 'dc:rights']).catch(() => null),
-      exifr.parse(PHOTO_NOW,  ['Artist', 'Copyright', 'XPAuthor', 'Creator', 'Rights', 'dc:creator', 'dc:rights']).catch(() => null),
+      exifr.parse(PHOTO_HIST, ['Artist', 'Credit', 'XPAuthor', 'Creator', 'By-line', 'CopyrightNotice', 'Copyright', 'Rights', 'SpecialInstructions', 'Source', 'DateCreated', 'CreateDate', 'dc:creator', 'dc:rights', 'dc:description']).catch(() => null),
+      exifr.parse(PHOTO_NOW,  ['Artist', 'Credit', 'XPAuthor', 'Creator', 'By-line', 'CopyrightNotice', 'Copyright', 'Rights', 'SpecialInstructions', 'Source', 'DateCreated', 'CreateDate', 'dc:creator', 'dc:rights', 'dc:description']).catch(() => null),
     ]);
     renderExif('copyHist', histData);
     renderExif('copyNow',  nowData);
@@ -1293,6 +1305,8 @@ function toggleFullscreen() {
   const ico   = document.getElementById('slFsIco');
   _fsOpen = !_fsOpen;
   modal.classList.toggle('open', _fsOpen);
+  document.body.style.overflow   = _fsOpen ? 'hidden' : '';
+  document.body.style.touchAction = _fsOpen ? 'none'   : '';
   // Přepni ikonu: expand ↔ collapse
   if (ico) ico.innerHTML = _fsOpen
     ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
