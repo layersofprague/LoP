@@ -832,9 +832,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 /* Leaflet ořezává wrapper — povolíme přetékání pro fajfku a srdíčko */
 .leaflet-marker-icon { overflow: visible !important; }
-/* Wrapper divIconu — pin i kužel centrovány přes flex, žádný transform konflikt */
+/* Wrapper divIconu — pin i kužel centrovány přes flex.
+   POZOR: nesmí nastavovat position — Leaflet už má na tomto elementu
+   position:absolute pro zoom/pan, jeho přebití rozbije polohu pinů. */
 .lop-pin-wrap {
-  position: relative;
   display: flex; align-items: center; justify-content: center;
 }
 /* Zorný kužel — směr pohledu fotografa, pozicován za pinem uprostřed */
