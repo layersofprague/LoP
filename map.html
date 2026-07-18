@@ -845,7 +845,14 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   transform-origin: center center;
   pointer-events: none;
   z-index: -1;
+  transition: opacity .2s, transform .2s;
 }
+/* Odzoomováno (< 15) — kužely úplně skryté, jen piny */
+body.lop-zoom-far .lop-view-cone { opacity: 0; transform: translate(-50%,-50%) scale(0.4) !important; }
+/* Střední zoom (15–16) — kužely menší a slabší */
+body.lop-zoom-mid .lop-view-cone { opacity: .55; }
+body.lop-zoom-mid .lop-view-cone svg { transform: scale(0.62); transform-origin: 50% 100%; }
+/* Blízký zoom (≥ 17) — plná velikost, výchozí opacity z gradientu */
 .lop-pin:hover { transform: scale(1.1); }
 .lop-pin.rt-active { transform: scale(1.2); }
 .lop-pin.cat-hist { background: var(--cat-hist); }
@@ -3288,6 +3295,18 @@ function initMap() {
     zoomControl: false
   });
   window._map = map;
+
+  // Zorné kužely: viditelné jen při větším přiblížení, jinak nepřekáží
+  function _updateConeZoom() {
+    const z = map.getZoom();
+    document.body.classList.toggle('lop-zoom-far',  z < 15);
+    document.body.classList.toggle('lop-zoom-mid',   z >= 15 && z < 17);
+    document.body.classList.toggle('lop-zoom-near',  z >= 17);
+  }
+  map.on('zoomend', _updateConeZoom);
+  map.on('zoomstart', _updateConeZoom);
+  _updateConeZoom(); // počáteční stav podle výchozího zoomu (14)
+
   map.on('click', () => {
     const bar = document.getElementById('filterBar');
     if (bar && bar.classList.contains('open')) bar.classList.remove('open');
