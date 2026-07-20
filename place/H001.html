@@ -1368,8 +1368,7 @@ function _closeCopyOutside(e) {
   if (!e.target.closest('.copy-modal') && !e.target.closest('#slCopyBtn')) closeCopyright();
 }
 
-/* ── SYNC ── */
-syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); updateInsiderGate(); });
+/* ── SYNC ── (voláno níž, až jsou definované SUPA_URL/SUPA_KEY) */
 
 /* ── AUTH CHECK ── */
 function updateInsiderGate() {
@@ -1609,6 +1608,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
 /* ── SUPABASE VOTES ── */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+
+/* ── SYNC (spuštěno až tady, protože potřebuje SUPA_URL/SUPA_KEY výše) ── */
+syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); updateInsiderGate(); });
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
