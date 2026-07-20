@@ -228,6 +228,74 @@ a { color: inherit; text-decoration: none; }
 }
 .fs-close svg { width: 18px; height: 18px; pointer-events: none; }
 
+/* ── GALLERY LIGHTBOX ── */
+.gl-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 9200;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(18px) saturate(0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(0.8);
+  align-items: center; justify-content: center;
+  overscroll-behavior: contain;
+}
+.gl-modal.open { display: flex; }
+.gl-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 56px 16px;
+}
+.gl-img {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  -webkit-user-drag: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+.gl-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 5;
+}
+.gl-close svg { width: 18px; height: 18px; pointer-events: none; }
+.gl-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 5;
+}
+.gl-nav:hover { background: rgba(255,255,255,.25); }
+.gl-nav svg { width: 18px; height: 18px; pointer-events: none; }
+.gl-prev { left: 12px; }
+.gl-next { right: 12px; }
+.gl-caption {
+  position: absolute; left: 0; right: 0; bottom: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0 60px;
+  text-align: center;
+  pointer-events: none;
+}
+.gl-caption-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; letter-spacing: .04em;
+  color: rgba(238,239,235,.85);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.gl-caption-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .06em;
+  color: rgba(238,239,235,.5);
+}
+@media (max-width: 480px) {
+  .gl-nav { width: 34px; height: 34px; }
+  .gl-caption { padding: 0 48px; }
+}
+
 /* ── RAZÍTKO V ROHU ── */
 .hero-stamp {
   position: absolute;
@@ -941,6 +1009,28 @@ a { color: inherit; text-decoration: none; }
   </button>
 </div>
 
+<!-- GALLERY LIGHTBOX -->
+<div class="gl-modal" id="glModal">
+  <div class="gl-inner">
+    <img class="gl-img" id="glImg" src="" alt=""/>
+    <div class="gl-caption">
+      <div class="gl-caption-label" id="glLabel"></div>
+      <div class="gl-caption-count" id="glCount"></div>
+    </div>
+  </div>
+  <button class="gl-nav gl-prev" onclick="glPrev(event)" title="Předchozí">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="gl-nav gl-next" onclick="glNext(event)" title="Další">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <button class="gl-close" onclick="closeGallery()" title="Zavřít">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
+
 <!-- BODY -->
 <div class="body">
 
@@ -1027,38 +1117,38 @@ a { color: inherit; text-decoration: none; }
       <div class="sec-rule"></div>
       <span class="sec-num">7 fotografií</span>
     </div>
-    <div class="gallery">
-      <div class="gallery-thumb">
+    <div class="gallery" id="gallerySection">
+      <div class="gallery-thumb" onclick="openGallery(0)">
         <img src="https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
         <div class="gt-label">~1930</div>
       </div>
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(1)">
         <img src="https://layersofprague.github.io/LoP/foto/h_001Bh.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Stavba přístavního bazénu, dělníci při práci"/>
         <div class="gt-label">~1894</div>
       </div>
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(2)">
         <img src="https://layersofprague.github.io/LoP/foto/h_001Ch.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Drážní budova s věží (č.p. 1057)"/>
         <div class="gt-label">~1906</div>
       </div>
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(3)">
         <img src="https://layersofprague.github.io/LoP/foto/h_001Dh.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Seřaďovací nádraží a přístav, pohled z výšky"/>
         <div class="gt-label">~1895</div>
       </div>
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(4)">
         <img src="https://layersofprague.github.io/LoP/foto/h_001Gh.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Lodě v přístavním bazénu u překladiště"/>
         <div class="gt-label">~1895</div>
       </div>
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(5)">
         <img src="https://layersofprague.github.io/LoP/foto/h_001Hh.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Přístav v prvních letech provozu, jeřáby a lodě"/>
         <div class="gt-label">~1893</div>
       </div>
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(6)">
         <img src="https://layersofprague.github.io/LoP/foto/holesovicky_pristav_plan.jpg"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Plán přístavu 1894"/>
         <div class="gt-label">Plán 1894</div>
@@ -1432,6 +1522,89 @@ function toggleFullscreen() {
   if (_fsOpen && window._fsSetPos) window._fsSetPos(0.35);
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
+
+/* ── GALLERY LIGHTBOX ── */
+(function() {
+  const items = Array.from(document.querySelectorAll('#gallerySection .gallery-thumb')).map(thumb => {
+    const img   = thumb.querySelector('img');
+    const label = thumb.querySelector('.gt-label');
+    return {
+      src:   img ? img.getAttribute('src') : '',
+      alt:   img ? img.getAttribute('alt') : '',
+      label: label ? label.textContent : ''
+    };
+  });
+
+  let idx = 0;
+  let glOpenState = false;
+
+  function render() {
+    const img   = document.getElementById('glImg');
+    const label = document.getElementById('glLabel');
+    const count = document.getElementById('glCount');
+    if (!items[idx]) return;
+    img.src = items[idx].src;
+    img.alt = items[idx].alt;
+    label.textContent = items[idx].alt || items[idx].label;
+    count.textContent = (idx + 1) + ' / ' + items.length;
+  }
+
+  window.openGallery = function(i) {
+    idx = i;
+    render();
+    const modal = document.getElementById('glModal');
+    modal.classList.add('open');
+    glOpenState = true;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+  };
+
+  window.closeGallery = function() {
+    const modal = document.getElementById('glModal');
+    modal.classList.remove('open');
+    glOpenState = false;
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  };
+
+  window.glNext = function(e) {
+    if (e) e.stopPropagation();
+    idx = (idx + 1) % items.length;
+    render();
+  };
+  window.glPrev = function(e) {
+    if (e) e.stopPropagation();
+    idx = (idx - 1 + items.length) % items.length;
+    render();
+  };
+
+  const modal = document.getElementById('glModal');
+  if (modal) {
+    // Klik na pozadí (mimo obrázek/tlačítka) zavře lightbox
+    modal.addEventListener('click', e => {
+      if (e.target === modal || e.target.classList.contains('gl-inner')) closeGallery();
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!glOpenState) return;
+    if (e.key === 'Escape')      closeGallery();
+    else if (e.key === 'ArrowRight') glNext();
+    else if (e.key === 'ArrowLeft')  glPrev();
+  });
+
+  // Swipe pro mobil
+  let touchStartX = null;
+  if (modal) {
+    modal.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    modal.addEventListener('touchend', e => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) { dx > 0 ? glPrev() : glNext(); }
+      touchStartX = null;
+    }, { passive: true });
+  }
+})();
 
 /* ── SUPABASE VOTES ── */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
