@@ -1369,7 +1369,7 @@ function _closeCopyOutside(e) {
 }
 
 /* ── SYNC ── */
-syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); });
+syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); updateInsiderGate(); });
 
 /* ── AUTH CHECK ── */
 function updateInsiderGate() {
