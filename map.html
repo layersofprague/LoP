@@ -848,10 +848,11 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   transition: opacity .2s, transform .2s;
 }
 /* Odzoomováno (< 15) — kužely úplně skryté, jen piny */
-body.lop-zoom-far .lop-view-cone { opacity: 0; transform: translate(-50%,-50%) scale(0.4) !important; }
-/* Střední zoom (15–16) — kužely menší a slabší */
-body.lop-zoom-mid .lop-view-cone { opacity: .55; }
-body.lop-zoom-mid .lop-view-cone svg { transform: scale(0.62); transform-origin: 50% 100%; }
+body.lop-zoom-far .lop-view-cone { opacity: 0; }
+/* Střední zoom (15–16) — kužely jen slabší, beze změny tvaru
+   (transform-origin na <svg> se v prohlížečích počítá nekonzistentně,
+   proto se velikost NEMĚNÍ — jen průhlednost) */
+body.lop-zoom-mid .lop-view-cone { opacity: .5; }
 /* Blízký zoom (≥ 17) — plná velikost, výchozí opacity z gradientu */
 .lop-pin:hover { transform: scale(1.1); }
 .lop-pin.rt-active { transform: scale(1.2); }
@@ -1810,11 +1811,17 @@ body.lop-zoom-mid .lop-view-cone svg { transform: scale(0.62); transform-origin:
   box-shadow: 0 8px 32px rgba(26,24,20,.16);
   padding: 8px 6px;
   min-width: 210px;
-  max-height: 70vh;
+  max-height: min(70vh, calc(100vh - var(--header-h, 52px) - 130px - env(safe-area-inset-bottom, 0px)));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   display: none;
   flex-direction: column;
   gap: 2px;
+}
+@media (min-width: 820px), (orientation: landscape) {
+  /* na desktopu / landscape není spodní navbar v cestě */
+  .arch-panel-dropdown { max-height: min(70vh, calc(100vh - var(--header-h, 52px) - 40px)); }
 }
 .arch-panel-dropdown.open { display: flex; }
 .arch-style-row {
