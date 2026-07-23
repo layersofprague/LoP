@@ -1659,9 +1659,9 @@ function updateInsiderGate() {
 
     // Tažení pouze za handle
     handleEl.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
-    handleEl.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    handleEl.addEventListener('touchstart', e => { if (e.touches.length === 1) dragging = true; }, { passive: true });
     window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-    window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+    window.addEventListener('touchmove',  e => { if (e.touches.length === 2) { dragging = false; return; } if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
     window.addEventListener('mouseup',  () => dragging = false);
     window.addEventListener('touchend', () => dragging = false);
 
@@ -1720,12 +1720,18 @@ function updateInsiderGate() {
   const handleFs = document.getElementById('slHandleFs');
   if (handleFs) {
     handleFs.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
-    handleFs.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    handleFs.addEventListener('touchstart', e => { if (e.touches.length === 1) dragging = true; }, { passive: true });
   }
   window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-  window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+  window.addEventListener('touchmove',  e => { if (e.touches.length === 2) { dragging = false; return; } if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
   window.addEventListener('mouseup',  () => dragging = false);
   window.addEventListener('touchend', () => dragging = false);
+
+  // Pinch zoom na fs-modal-inner — init odložen až po definici _initSliderPinch
+  document.addEventListener('DOMContentLoaded', function() {
+    var fsInner = document.querySelector('.fs-modal-inner');
+    if (fsInner && typeof _initSliderPinch === 'function') _initSliderPinch(fsInner);
+  });
 
   // Klik na pozadí modalu (mimo inner) zavře
   modal.addEventListener('click', e => { if (e.target === modal) toggleFullscreen(); });
@@ -2435,12 +2441,19 @@ window.lopAuth.onLogout(() => {
       return x / rect.width;
     }
 
-    wrap.addEventListener('mousedown',  function(e) { dragging = true; setPos(getPct(e)); e.preventDefault(); });
+    // Desktop — drag jen z handle
+    handleEl.addEventListener('mousedown', function(e) { dragging = true; e.preventDefault(); });
     document.addEventListener('mousemove', function(e) { if (dragging) setPos(getPct(e)); });
     document.addEventListener('mouseup',   function()  { dragging = false; });
-    wrap.addEventListener('touchstart', function(e) { dragging = true; setPos(getPct(e)); }, { passive: true });
-    wrap.addEventListener('touchmove',  function(e) { if (dragging) { setPos(getPct(e)); e.preventDefault(); } }, { passive: false });
-    wrap.addEventListener('touchend',   function()  { dragging = false; });
+    // Touch — drag jen z handle, pinch zoom na celém wrap
+    handleEl.addEventListener('touchstart', function(e) { if (e.touches.length === 1) dragging = true; }, { passive: true });
+    wrap.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) { dragging = false; return; }
+      if (dragging) { setPos(getPct(e)); e.preventDefault(); }
+    }, { passive: false });
+    wrap.addEventListener('touchend', function() { dragging = false; });
+    // Pinch-to-zoom na wrap
+    _initSliderPinch(wrap);
 
     setPos(0.5);
   }
@@ -2448,6 +2461,11 @@ window.lopAuth.onLogout(() => {
   function _initAll() {
     initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', null, null);
     initRvSlider('rvFullscreen', 'rvFsTop',     'rvFsDiv',     'rvFsHandle',     null,     null);
+    // Pinch zoom na rvFullscreen — init odložen
+    document.addEventListener('DOMContentLoaded', function() {
+      var rvFsWrap = document.getElementById('rvFullscreen');
+      if (rvFsWrap && typeof _initSliderPinch === 'function') _initSliderPinch(rvFsWrap);
+    });
   }
 
   window._rvReinit = _initAll;
@@ -2747,6 +2765,94 @@ window._rvClosePlan = function() {
     _initAll();
   }
 })();
+</script>
+
+<script>
+/* ── PINCH-TO-ZOOM for comparison sliders ── */
+function _initSliderPinch(wrap) {
+  if (!wrap || wrap._pinchInited) return;
+  wrap._pinchInited = true;
+
+  var s = 1, tx = 0, ty = 0;
+  var s0, tx0, ty0, d0, fx0, fy0;
+  var lastTap = 0;
+
+  function dist(t) {
+    var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  function apply() {
+    wrap.style.transformOrigin = 'center center';
+    wrap.style.transform = s > 1.01 ? 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')' : '';
+    wrap.style.zIndex = s > 1.01 ? '10' : '';
+  }
+  function reset() { s = 1; tx = 0; ty = 0; apply(); }
+  function clamp() {
+    if (s <= 1.01) { tx = 0; ty = 0; return; }
+    var limX = wrap.offsetWidth  * (s-1) / 2;
+    var limY = wrap.offsetHeight * (s-1) / 2;
+    tx = Math.max(-limX, Math.min(limX, tx));
+    ty = Math.max(-limY, Math.min(limY, ty));
+  }
+
+  wrap.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      d0 = dist(e.touches); s0 = s; tx0 = tx; ty0 = ty;
+      fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    } else if (e.touches.length === 1 && s > 1.05) {
+      e.preventDefault();
+      wrap._panRefX = e.touches[0].clientX - tx;
+      wrap._panRefY = e.touches[0].clientY - ty;
+      wrap._panning = true;
+    }
+    // Double-tap reset
+    var now = Date.now();
+    if (e.touches.length === 1 && now - lastTap < 300) { reset(); lastTap = 0; return; }
+    if (e.touches.length === 1) lastTap = now;
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2 && d0) {
+      e.preventDefault();
+      var d = dist(e.touches);
+      var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
+      var natCx = wrap.offsetLeft + wrap.offsetWidth  / 2;
+      var natCy = wrap.offsetTop  + wrap.offsetHeight / 2;
+      var imgFx = (fx0 - natCx - tx0) / s0;
+      var imgFy = (fy0 - natCy - ty0) / s0;
+      tx = fx - natCx - imgFx * newS;
+      ty = fy - natCy - imgFy * newS;
+      s = newS; clamp(); apply();
+    } else if (e.touches.length === 1 && wrap._panning) {
+      e.preventDefault();
+      tx = e.touches[0].clientX - wrap._panRefX;
+      ty = e.touches[0].clientY - wrap._panRefY;
+      clamp(); apply();
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) d0 = 0;
+    if (e.touches.length === 0) wrap._panning = false;
+    if (s < 1.05) reset();
+  });
+
+  // Reset při zavření modalu
+  var modal = wrap.closest('.rv-fs-modal') || wrap.closest('.fs-modal');
+  if (modal) {
+    new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
+      });
+    }).observe(modal, { attributes: true });
+  }
+}
+
+// RV a FS slider pinch zoom inited via DOMContentLoaded above
 </script>
 </body>
 </html>
