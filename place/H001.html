@@ -83,13 +83,13 @@ a { color: inherit; text-decoration: none; }
 .sl-kicker { align-self: flex-start; transform: translateY(1px); }
 .sl-lbl {
   font-family: 'Inter', sans-serif;
-  font-size: 13px; line-height: 1;
-  letter-spacing: .02em;
+  font-size: 12px; line-height: 1;
+  letter-spacing: 0;
   color: var(--ink-4);
-  font-weight: 500;
-  transition: color .2s, font-weight .2s;
+  font-weight: 400;
+  transition: color .2s;
 }
-.sl-lbl.active { color: var(--ink); font-weight: 500; }
+.sl-lbl.active { color: var(--ink-4); font-weight: 400; }
 .sl-kicker {
   font-family: 'Inter', sans-serif;
   font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
@@ -1127,7 +1127,6 @@ a { color: inherit; text-decoration: none; }
 <div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
-  <div class="sl-kicker">Tehdy &amp; Dnes</div>
   <div class="sl-lbl active" id="lblHist">~1930</div>
 </div>
 
