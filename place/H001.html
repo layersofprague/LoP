@@ -1028,7 +1028,7 @@ a { color: inherit; text-decoration: none; }
 /* ── PINCH-TO-ZOOM na fullscreen obrázcích ── */
 .rv-fs-modal .rv-fs-img {
   touch-action: none;
-  transform-origin: 0 0;
+  transform-origin: center center;
   transition: none;
 }
 .rv-fs-modal .rv-fs-img.zoomed {
@@ -1244,7 +1244,7 @@ a { color: inherit; text-decoration: none; }
       <div class="tip-label">Zajímavosti</div>
       <div class="tip-text" id="insiderTeaser">Věděli jste, že Holešovický přístav nevznikl na řece?</div>
       <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Lanna vyhloubili celý 750m dlouhý a 100m široký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
+        <div class="tip-text" style="font-style:normal"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili celý 750m dlouhý, 100m široký a 2-4m hluboký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
         <div style="margin-top:14px">
           <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative">
             <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
@@ -2596,101 +2596,127 @@ window._rvClosePlan = function() {
 (function() {
   function initPinchZoom(img) {
     if (!img) return;
-    let scale = 1, startScale = 1;
-    let tx = 0, ty = 0, startTx = 0, startTy = 0;
-    let startDist = 0, startMid = {x:0,y:0};
-    let lastTap = 0;
-    let panStart = null;
 
-    function clampPan() {
-      if (scale <= 1) { tx = 0; ty = 0; return; }
-      var rect = img.getBoundingClientRect();
-      var parent = img.parentElement.getBoundingClientRect();
-      var maxTx = Math.max(0, (rect.width * scale / startScale - parent.width) / 2);
-      var maxTy = Math.max(0, (rect.height * scale / startScale - parent.height) / 2);
-      tx = Math.max(-maxTx, Math.min(maxTx, tx));
-      ty = Math.max(-maxTy, Math.min(maxTy, ty));
-    }
+    // Stav transformace
+    var s = 1, tx = 0, ty = 0;
+    // Uložený stav na začátku gesta
+    var s0, tx0, ty0, d0, fx0, fy0;
+    var panRefX, panRefY, panning = false;
+    var lastTap = 0;
 
     function apply() {
-      img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-      img.classList.toggle('zoomed', scale > 1.05);
+      // transform-origin: center center → střed obrázku
+      img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+      img.classList.toggle('zoomed', s > 1.05);
     }
 
     function reset() {
-      scale = 1; tx = 0; ty = 0;
+      s = 1; tx = 0; ty = 0;
       img.style.transform = '';
       img.classList.remove('zoomed');
+    }
+
+    function clamp() {
+      if (s <= 1.01) { tx = 0; ty = 0; return; }
+      // Přirozená (netransformovaná) velikost obrázku
+      var w = img.offsetWidth, h = img.offsetHeight;
+      var limX = w * (s - 1) / 2;
+      var limY = h * (s - 1) / 2;
+      tx = Math.max(-limX, Math.min(limX, tx));
+      ty = Math.max(-limY, Math.min(limY, ty));
     }
 
     function dist(t) {
       var dx = t[0].clientX - t[1].clientX;
       var dy = t[0].clientY - t[1].clientY;
-      return Math.sqrt(dx*dx + dy*dy);
-    }
-
-    function mid(t) {
-      return {
-        x: (t[0].clientX + t[1].clientX) / 2,
-        y: (t[0].clientY + t[1].clientY) / 2
-      };
+      return Math.sqrt(dx * dx + dy * dy);
     }
 
     img.addEventListener('touchstart', function(e) {
       if (e.touches.length === 2) {
         e.preventDefault();
-        startDist = dist(e.touches);
-        startScale = scale;
-        startMid = mid(e.touches);
-        startTx = tx; startTy = ty;
-        panStart = null;
-      } else if (e.touches.length === 1 && scale > 1.05) {
-        // Pan mode
-        e.preventDefault();
-        panStart = { x: e.touches[0].clientX - tx, y: e.touches[0].clientY - ty };
+        // Uložit stav gesta
+        d0  = dist(e.touches);
+        s0  = s; tx0 = tx; ty0 = ty;
+        // Ohnisko = střed prstů v souřadnicích okna
+        fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        panning = false;
       } else if (e.touches.length === 1) {
-        // Double tap detection
+        if (s > 1.05) {
+          e.preventDefault();
+          panRefX = e.touches[0].clientX - tx;
+          panRefY = e.touches[0].clientY - ty;
+          panning = true;
+        }
+        // Double-tap
         var now = Date.now();
         if (now - lastTap < 300) {
           e.preventDefault();
-          if (scale > 1.05) { reset(); } else {
-            // Zoom to 2.5x centered on tap
-            var rect = img.getBoundingClientRect();
-            scale = 2.5;
-            tx = (rect.width/2 - e.touches[0].clientX + rect.left) * 1.5;
-            ty = (rect.height/2 - e.touches[0].clientY + rect.top) * 1.5;
-            clampPan(); apply();
+          if (s > 1.05) {
+            reset();
+          } else {
+            // Střed obrázku v souřadnicích okna
+            var r = img.getBoundingClientRect();
+            var cx = r.left + r.width / 2;
+            var cy = r.top  + r.height / 2;
+            var tapX = e.touches[0].clientX;
+            var tapY = e.touches[0].clientY;
+            s = 2.5;
+            // Bod pod prstem musí zůstat pod prstem:
+            // newTx = tapX - cx - (tapX - cx) * s  →  -(tapX - cx)*(s-1)
+            tx = -(tapX - cx) * (s - 1);
+            ty = -(tapY - cy) * (s - 1);
+            clamp(); apply();
           }
+          lastTap = 0; return;
         }
         lastTap = now;
       }
     }, { passive: false });
 
     img.addEventListener('touchmove', function(e) {
-      if (e.touches.length === 2) {
+      if (e.touches.length === 2 && d0) {
         e.preventDefault();
-        var d = dist(e.touches);
-        var m = mid(e.touches);
-        scale = Math.max(1, Math.min(5, startScale * (d / startDist)));
-        tx = startTx + (m.x - startMid.x);
-        ty = startTy + (m.y - startMid.y);
-        clampPan(); apply();
-      } else if (e.touches.length === 1 && panStart) {
+        var d  = dist(e.touches);
+        var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
+
+        // Střed obrázku v souřadnicích okna při stavu s0/tx0/ty0:
+        // imgCenter_screen = naturalCenter_screen + tx0, ty0
+        // (transform-origin: center, natCenter = relativní střed v layoutu)
+        // Ohnisko v "obrázkovém" souřadnicovém systému (relativně ke středu, při s=s0):
+        //   imgPt = (fx0 - natCx - tx0) / s0   kde natCx = imgEl offsetLeft + w/2
+        var w  = img.offsetWidth,  h  = img.offsetHeight;
+        var el = img;
+        var natCx = el.offsetLeft + w / 2;
+        var natCy = el.offsetTop  + h / 2;
+        // Souřadnice ohniska ve "vnitřním" prostoru obrázku
+        var imgFx = (fx0 - natCx - tx0) / s0;
+        var imgFy = (fy0 - natCy - ty0) / s0;
+        // Nový translate: ohnisko v novém stavu musí ležet pod středem prstů (fx,fy)
+        //   fx = natCx + imgFx * newS + newTx + (fx - fx0)  ← posun středu prstů
+        tx = fx - natCx - imgFx * newS;
+        ty = fy - natCy - imgFy * newS;
+        s  = newS;
+        clamp(); apply();
+      } else if (e.touches.length === 1 && panning) {
         e.preventDefault();
-        tx = e.touches[0].clientX - panStart.x;
-        ty = e.touches[0].clientY - panStart.y;
-        clampPan(); apply();
+        tx = e.touches[0].clientX - panRefX;
+        ty = e.touches[0].clientY - panRefY;
+        clamp(); apply();
       }
     }, { passive: false });
 
     img.addEventListener('touchend', function(e) {
-      if (e.touches.length < 2) { startDist = 0; }
-      if (e.touches.length === 0) { panStart = null; }
-      if (scale < 1.05) reset();
+      if (e.touches.length < 2) d0 = 0;
+      if (e.touches.length === 0) panning = false;
+      if (s < 1.05) reset();
     });
 
-    // Reset on modal close
-    var modal = img.closest('.rv-fs-modal') || img.closest('.fs-modal');
+    // Reset při zavření modalu
+    var modal = img.closest('.rv-fs-modal');
     if (modal) {
       new MutationObserver(function(muts) {
         muts.forEach(function(m) {
