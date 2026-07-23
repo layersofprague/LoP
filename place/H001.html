@@ -2442,11 +2442,11 @@ window.lopAuth.onLogout(() => {
     }
 
     // Desktop — drag jen z handle
-    handleEl.addEventListener('mousedown', function(e) { dragging = true; e.preventDefault(); });
+    handle.addEventListener('mousedown', function(e) { dragging = true; e.preventDefault(); });
     document.addEventListener('mousemove', function(e) { if (dragging) setPos(getPct(e)); });
     document.addEventListener('mouseup',   function()  { dragging = false; });
     // Touch — drag jen z handle, pinch zoom na celém wrap
-    handleEl.addEventListener('touchstart', function(e) { if (e.touches.length === 1) dragging = true; }, { passive: true });
+    handle.addEventListener('touchstart', function(e) { if (e.touches.length === 1) dragging = true; }, { passive: true });
     wrap.addEventListener('touchmove', function(e) {
       if (e.touches.length === 2) { dragging = false; return; }
       if (dragging) { setPos(getPct(e)); e.preventDefault(); }
