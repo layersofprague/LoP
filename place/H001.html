@@ -900,6 +900,7 @@ a { color: inherit; text-decoration: none; }
   margin: 14px 0 4px;
 }
 .rv-wrap .sl-base, .rv-wrap .sl-top { position: absolute; inset: 0; }
+.rv-wrap .sl-top { clip-path: inset(0 50% 0 0); }
 .rv-wrap .sl-base img, .rv-wrap .sl-top img {
   width: 100%; height: 100%; object-fit: cover; pointer-events: none;
   -webkit-user-drag: none; display: block;
@@ -1523,6 +1524,8 @@ function updateInsiderGate() {
   const link   = document.getElementById('insiderGateLink');
 
   if (full)   full.classList.toggle('visible', insider);
+  // Reinicializovat river slider po zobrazení insider sekce
+  if (insider && window._rvReinit) window._rvReinit();
   if (gate)   gate.classList.toggle('hidden',  insider);
   if (teaser) teaser.style.display = insider ? 'none' : '';
 
@@ -2375,6 +2378,8 @@ window.lopAuth.onLogout(() => {
     initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', 'rvInlineLblL', 'rvInlineLblR');
     initRvSlider('rvFullscreen', 'rvFsTop',     'rvFsDiv',     'rvFsHandle',     'rvFsLblL',     'rvFsLblR');
   }
+
+  window._rvReinit = _initAll;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _initAll);
