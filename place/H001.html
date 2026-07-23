@@ -188,14 +188,15 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(18px) saturate(0.8);
   -webkit-backdrop-filter: blur(18px) saturate(0.8);
   align-items: center; justify-content: center;
+  flex-direction: column; gap: 0;
   overscroll-behavior: contain;
+  padding: 48px 12px 12px;
 }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
   position: relative;
-  width: min(100vw, calc(100dvh * 4 / 3));
-  height: min(100dvh, calc(100vw * 3 / 4));
-  max-width: 100vw; max-height: 100dvh;
+  width: 100%; max-width: 1200px; flex: 1;
+  max-height: 100%;
 }
 .fs-modal-inner .sl-base,
 .fs-modal-inner .sl-top {
@@ -207,14 +208,7 @@ a { color: inherit; text-decoration: none; }
   object-fit: contain;
   pointer-events: none; -webkit-user-drag: none;
 }
-.fs-modal-inner .sl-lbl {
-  position: absolute; bottom: 14px; z-index: 3;
-  color: rgba(238,239,235,.5);
-  text-shadow: 0 1px 4px rgba(0,0,0,.5);
-}
-.fs-modal-inner .sl-lbl.active { color: #ffffff; }
-.fs-modal-inner .sl-lbl-l { left: 14px; }
-.fs-modal-inner .sl-lbl-r { right: 14px; }
+
 .fs-modal-inner .sl-handle {
   position: absolute; top: 50%; cursor: ew-resize; z-index: 4; pointer-events: auto;
 }
@@ -955,10 +949,7 @@ a { color: inherit; text-decoration: none; }
 }
 .rv-fs-modal.open { display: flex; }
 .rv-fs-modal .rv-wrap { width: 100%; max-width: 1200px; flex: 1; aspect-ratio: auto; border-radius: 6px; margin: 0; }
-.rv-fs-modal .rv-margin { max-width: 1200px; width: 100%; }
-.rv-fs-modal .rv-margin .sl-lbl { color: rgba(255,255,255,.4); }
-.rv-fs-modal .rv-margin .sl-lbl.active { color: rgba(255,255,255,.4); }
-.rv-fs-modal .rv-margin .sl-kicker { color: rgba(255,255,255,.4); }
+
 .rv-fs-modal .sl-handle { background: rgba(255,255,255,.95); }
 .rv-fs-modal .sl-divider { background: rgba(255,255,255,.7); }
 .rv-fs-close {
@@ -981,6 +972,13 @@ a { color: inherit; text-decoration: none; }
   background: transparent; border: none; cursor: pointer;
   padding: 4px; display: flex; align-items: center; justify-content: center;
   color: var(--paper, #F8F8F6); z-index: 5;
+}
+
+.rv-fs-labels {
+  display: flex; justify-content: center; width: 100%; max-width: 1200px;
+  padding: 8px 4px 0;
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  color: rgba(255,255,255,.7);
 }
 
 /* ── INSIDER IMAGE COPYRIGHT ── */
@@ -1117,13 +1115,14 @@ a { color: inherit; text-decoration: none; }
     <div class="sl-top" id="slTopFs">
       <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
     </div>
-    <div class="sl-lbl sl-lbl-l" id="lblNowFs">2026</div>
-    <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1930</div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
       </svg>
     </div>
+  </div>
+  <div class="rv-fs-labels" id="fsModalLabels">
+    <span>Holešovický přístav — 2026 vs. ~1930</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1683,8 +1682,8 @@ function updateInsiderGate() {
       handle.style.left = (pct * 100) + '%';
       handle.style.transform = 'translate(-50%,-50%)';
     }
-    const lblL = document.getElementById('lblHistFs');
-    const lblR = document.getElementById('lblNowFs');
+    const lblL = null; // labels moved outside
+    const lblR = null;
     if (lblL) lblL.classList.toggle('active', pct <= 0.5);
     if (lblR) lblR.classList.toggle('active', pct > 0.5);
   }
@@ -2389,10 +2388,8 @@ window.lopAuth.onLogout(() => {
       </svg>
     </div>
   </div>
-  <div class="rv-margin">
-    <div class="sl-lbl active" id="rvFsLblL">1909–1914</div>
-    <div class="sl-kicker">Tehdy &amp; Dnes</div>
-    <div class="sl-lbl" id="rvFsLblR">Dnes</div>
+  <div class="rv-fs-labels" style="justify-content:center">
+    <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy 1909–1914 vs. současný letecký snímek</span>
   </div>
 </div>
 
@@ -2437,7 +2434,7 @@ window.lopAuth.onLogout(() => {
 
   function _initAll() {
     initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', 'rvInlineLblL', 'rvInlineLblR');
-    initRvSlider('rvFullscreen', 'rvFsTop',     'rvFsDiv',     'rvFsHandle',     'rvFsLblL',     'rvFsLblR');
+    initRvSlider('rvFullscreen', 'rvFsTop',     'rvFsDiv',     'rvFsHandle',     null,     null);
   }
 
   window._rvReinit = _initAll;
@@ -2470,7 +2467,7 @@ window.lopAuth.onLogout(() => {
   </button>
   <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938" style="max-width:calc(100% - 24px);max-height:calc(100% - 80px);object-fit:contain;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.45)"/>
   <div class="rv-fs-labels" style="justify-content:center">
-    <span>Orientační plán Prahy, 1938</span>
+    <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy, 1938</span>
   </div>
 </div>
 
