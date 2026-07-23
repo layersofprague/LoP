@@ -1146,9 +1146,10 @@ a { color: inherit; text-decoration: none; }
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
       </svg>
     </div>
+    <div class="sl-divider" id="slDividerFs"></div>
   </div>
   <div class="rv-fs-labels" id="fsModalLabels">
-    <span>Holešovický přístav — 2026 vs. ~1930</span>
+    <span>Holešovický přístav — současnost vs. ~1930</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1228,163 +1229,10 @@ a { color: inherit; text-decoration: none; }
     </div>
   </div>
 
-  <!-- na místě -->
+  <!-- stavby přístavu -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Na místě</span>
-      <div class="sec-rule"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px;font-family:'Inter',sans-serif;font-size:14px;line-height:1.65;color:var(--ink-2,#333331);">
-      <p><strong>Brána a vstupní budovy</strong> — vstup do přístavu hlídají dvě symetrické budovy u brány. Budova přístavního dozorství (č. p. 1060) je patrová stavba s asymetrickým štítem posunutým vpravo; v patře sdružená okna, v přízemí jednoduchá. Naproti stojí budova celní expozitury, kde se odbavovalo zboží. Obě spojuje typický Sanderův rukopis — kontrast červeného režného zdiva a bílé omítky posazený na soklu z hrubě opracovaného kamene.</p>
-      <p><strong>Budova celní expozitury</strong> — nejvýraznější stavba areálu (č. p. 1057). Do ulice se obrací třemi sdruženými okny se štítem, ale skutečnou dominantou je hranolová věž v zadní části, kterou bylo vidět z celé řeky. Právě zde se odbavovalo zboží mezi lodí, vlakem a městem.</p>
-      <p><strong>Celní skladiště</strong> — stojí opodál, přímo při nábřežní zdi (č. p. 1059). Střední trojosá část je patrová, po stranách z ní vybíhají přízemní křídla s arkádami pod mohutnou sedlovou střechou. Skladovalo se tu celně zajištěné zboží čekající na proclení.</p>
-    </div>
-    <div class="tip">
-      <div class="tip-label">Zajímavosti</div>
-      <div class="tip-text" id="insiderTeaser">Věděli jste, že Holešovický přístav nevznikl na řece?</div>
-      <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili celý 750m dlouhý, 100m široký a 2-4m hluboký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
-        <div>
-          <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative;margin-top:0">
-            <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
-            <div class="rv-copy-modal" id="rvCopyPlan">
-              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
-              <div style="margin-top:2px">
-                <div class="copy-col-head">Plán přístavu, 1894</div>
-                <div id="rvExifPlan1894"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-              </div>
-            </div>
-            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpenPlan()" title="Celá obrazovka">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-          </div>
-          <div class="rv-margin" style="justify-content:center">
-            <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Plán holešovického přístavu, 1894</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:0">
-        <div class="tip-text" style="font-style:normal"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
-        <div>
-          <div class="rv-wrap" id="rvInline">
-            <div class="sl-base"><img src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
-            <div class="sl-top" id="rvInlineTop"><img src="../foto/h001_orientacni_plan_Prahy_1909–1914.jpg" alt="Orientační plán Prahy 1909–1914"/></div>
-            <div class="sl-divider" id="rvInlineDiv"></div>
-            <div class="sl-handle" id="rvInlineHandle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
-              </svg>
-            </div>
-            <button class="sl-fs-btn" onclick="window._rvOpenFs()" title="Celá obrazovka">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
-            <div class="rv-copy-modal" id="rvCopyRiver">
-              <button class="copy-close" onclick="window._rvToggleCopy('rvCopyRiver')">✕</button>
-              <div class="copy-grid">
-                <div>
-                  <div class="copy-col-head">1909–1914</div>
-                  <div id="rvExifPlan1909"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-                </div>
-                <div>
-                  <div class="copy-col-head">Dnes (ortofoto)</div>
-                  <div id="rvExifOrtofoto"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);display:flex;justify-content:space-between;padding:4px 2px 0">
-            <span>1909–1914</span>
-            <span>Dnes</span>
-          </div>
-        </div>
-        </div>
-        <div>
-          <div class="tip-text" style="font-style:normal;margin-bottom:8px"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998. Představu o jejím rozsahu a členitosti si můžete udělat na orientačním plánu z roku 1938. Za pozornost stojí například několik úvratí pomocí kterých bylo možné dojet až na přístavní kosu. </div>
-          <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
-            <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
-            <div class="rv-copy-modal" id="rvCopy1938">
-              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
-              <div style="margin-top:2px">
-                <div class="copy-col-head">Orientační plán, 1938</div>
-                <div id="rvExif1938"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-              </div>
-            </div>
-            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpen1938()" title="Celá obrazovka">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-          </div>
-          <div class="rv-margin" style="justify-content:center">
-            <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Orientační plán Prahy, 1938</div>
-          </div>
-          <div class="tip-text" style="font-style:normal;margin-top:10px"><strong>Zlatá éra přístavu</strong> přišla mezi válkami. Od roku 1931 vyrážely z Holešovic motorové nákladní lodě až do Hamburku — po Vltavě a Labi přes Drážďany k moři a odtud do celého světa. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal se hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
-        </div>
-     
-      </div>
-      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
-        <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- galerie -->
-  <div class="section">
-    <div class="sec-head">
-      <span class="sec-label">Galerie</span>
-      <div class="sec-rule"></div>
-      <span class="sec-num">7 fotografií</span>
-    </div>
-    <div class="gallery" id="gallerySection">
-      <div class="gallery-thumb" onclick="openGallery(0)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
-        <div class="gt-label">~1930</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(1)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Bh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Stavba přístavního bazénu, dělníci při práci"/>
-        <div class="gt-label">~1894</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(2)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Ch.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Drážní budova s věží (č.p. 1057)"/>
-        <div class="gt-label">~1906</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(3)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Dh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Seřaďovací nádraží a přístav, pohled z výšky"/>
-        <div class="gt-label">~1895</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(4)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Gh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Lodě v přístavním bazénu u překladiště"/>
-        <div class="gt-label">~1895</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(5)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Hh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Přístav v prvních letech provozu, jeřáby a lodě"/>
-        <div class="gt-label">~1893</div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- relacioné (ručně definovana místa) -->
-  <div class="section" id="relatedSection">
-    <div class="sec-head">
-      <span class="sec-label">Související</span>
+      <span class="sec-label">Stavby přístavu</span>
       <div class="sec-rule"></div>
       <button id="relatedToggle" onclick="window._relToggle()" title="Přepnout zobrazení">
         <svg id="relatedToggleIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1396,7 +1244,7 @@ a { color: inherit; text-decoration: none; }
     <div id="relatedList"></div>
   </div>
 
-  <!-- poloha / mapa -->
+    <!-- poloha / mapa -->
   <div class="section">
     <div class="sec-head">
       <span class="sec-label">Poloha</span>
@@ -1706,6 +1554,8 @@ function updateInsiderGate() {
       handle.style.left = (pct * 100) + '%';
       handle.style.transform = 'translate(-50%,-50%)';
     }
+    const dividerFs = document.getElementById('slDividerFs');
+    if (dividerFs) dividerFs.style.left = (pct * 100) + '%';
     const lblL = null; // labels moved outside
     const lblR = null;
     if (lblL) lblL.classList.toggle('active', pct <= 0.5);
@@ -2282,51 +2132,39 @@ window.lopAuth.onLogout(() => {
   // Ručně definovaná ID nebo inline data pro místa která ještě nemají vlastní stránku
   const RELATED = [
     {
-      id: 'H001-doz',
-      cat: 'hist',
-      name: 'Budova přístavního dozorství',
-      lede: 'Vstupní budova areálu (č.p. 1060), symetricky umístěná u brány. Patrová stavba s asymetrickým štítem, kombinace červeného režného zdiva a bílé omítky na soklu kyklopského zdiva. Projekt František Sander, 1906.',
-      thumb: null,
-      url: null   // zatím nemá vlastní stránku
-    },
-    {
-      id: 'H001-celnice',
+      id: 'H001-expozitura',
       cat: 'hist',
       name: 'Budova celní expozitury',
-      lede: 'Secesní budova z roku 1906 při hlavním vstupu do přístavu. Bohatě členěná fasáda z režného červeného zdiva a bílé omítky, střecha s vikýři a věžičkami.',
-      thumb: null,
+      sub: 'č. p. 1057 · František Sander, 1906',
+      lede: 'Nejvýraznější stavba areálu s charakteristickou hranolovou věží. Postavena v duchu secese a rané moderny — kontrast hladkých světlých omítek a červeného režného zdiva. Věžová nástavba sloužila jako pozorovatelna s výhledem na celý přístavní bazén i seřaďovací nádraží.',
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001a_h.jpg',
       url: null
     },
     {
-      id: 'H001-sklad',
+      id: 'H001-dozorstvo',
       cat: 'hist',
-      name: 'Celní skladiště',
-      lede: 'Rozsáhlé přízemní skladiště pro celně zajištěné zboží. Součást Sanderova secesního souboru z roku 1906. Budova sloužila skladování po celou dobu své existence.',
-      thumb: null,
+      name: 'Budova přístavního dozorstva',
+      sub: 'č. p. 1060 · František Sander, 1906–1909',
+      lede: 'Přímý architektonický protějšek celní expozitury — spolu tvoří symbolickou vstupní bránu areálu. Vysoká sedlová střecha nesená ozdobně vyřezávanými krokvemi. V přízemí kanceláře dozorce, v patře služební byt přístavního kapitána.',
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001b_h.jpg',
       url: null
     },
     {
-      id: 'H001-prekl',
+      id: 'H001-skladiste',
       cat: 'hist',
-      name: 'Překladiště',
-      lede: 'Srdce obchodního provozu přístavu — zde se přesouvalo zboží mezi lodí, vlakem a nákladním autem. Vybaveno zdvihacími jeřáby, přímo napojeno na železniční vlečku.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/h_001Gh.jpg',
+      name: 'Budova celního skladiště',
+      sub: 'č. p. 1059 · František Sander, 1906',
+      lede: 'Rozsáhlá symetrická budova přímo při nábřežní zdi. Patrový střední trakt s valbovou střechou, po stranách přízemní skladištní haly. Logistické srdce přístavu — zboží přecházelo přímo z lodi přes jeřáby do skladů pod celním dohledem.',
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001c_h.jpg',
       url: null
     },
     {
-      id: 'H001-lodnice',
+      id: 'H001-vytah',
       cat: 'hist',
-      name: 'Loděnice a lodní výtah',
-      lede: 'Jediné zařízení v Praze pro vytahování labských lodí z vody k opravám a zimním prohlídkám. Kapacita přístavu byla 150–170 největších labských lodí najednou.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/h_001Bh.jpg',
-      url: null
-    },
-    {
-      id: 'H001-nadrazi',
-      cat: 'hist',
-      name: 'Seřaďovací nádraží a drážní budova',
-      lede: 'Zprovozněno roku 1906, vlečka na nádraží Bubny dokončena 1910. Drážní budova č.p. 1057 s charakteristickou hranolovou věží. Koleje odtud vedly i do Pergamentky, Ferony a dalších podniků.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/h_001Ch.jpg',
+      name: 'Lodní výtah a přístavní dílny',
+      sub: 'firma Lanna · konec přístavní kosy',
+      lede: 'Jediné zařízení v Praze pro vytahování lodí z vody. Svážnicový systém na kolejnicích dopravil i největší labská plavidla na suchou plošinu. Přilehlé dílny zajišťovaly opravy trupů, lodních šroubů i parních strojů — přístav byl zcela soběstačný.',
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001d_h.jpg',
       url: null
     },
   ];
@@ -2357,6 +2195,7 @@ window.lopAuth.onLogout(() => {
           <span>${catName}</span>
         </div>
         <div class="place-name">${p.name}</div>
+        ${p.sub ? `<div style="font-size:11px;color:var(--ink-5);margin-top:1px;font-family:'Inter',sans-serif">${p.sub}</div>` : ''}
         <div class="place-sub">${p.lede}</div>
       </div>
       <div class="place-meta" style="justify-content:center">
