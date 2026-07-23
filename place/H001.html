@@ -889,6 +889,81 @@ a { color: inherit; text-decoration: none; }
 }
 #relatedToggle:hover { background: var(--paper-2, #F0F0EE); color: var(--ink-2, #333331); }
 #relatedToggle svg { width: 15px; height: 15px; }
+
+/* ── RIVER BED COMPARISON SLIDER ── */
+.rv-compare {
+  position: relative; width: 100%; aspect-ratio: 16/10;
+  overflow: hidden; border-radius: 8px; cursor: col-resize;
+  margin: 14px 0 6px;
+  -webkit-user-select: none; user-select: none;
+  touch-action: pan-y pinch-zoom;
+}
+.rv-compare img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; pointer-events: none;
+  -webkit-user-drag: none;
+}
+.rv-compare .rv-top { clip-path: inset(0 0 0 0); }
+.rv-compare .rv-handle {
+  position: absolute; top: 0; bottom: 0; width: 3px;
+  background: #fff; cursor: col-resize; z-index: 3;
+  box-shadow: 0 0 6px rgba(0,0,0,.3);
+  left: 50%;
+}
+.rv-compare .rv-handle::after {
+  content: '\2039\203A'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; letter-spacing: 3px; color: var(--ink-3,#666);
+  padding-left: 2px;
+}
+.rv-compare .rv-lbl {
+  position: absolute; bottom: 8px; z-index: 2;
+  font-family: 'Inter',sans-serif; font-size: 11px; font-weight: 500;
+  color: rgba(255,255,255,.8); text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  transition: opacity .15s;
+}
+.rv-compare .rv-lbl-l { left: 10px; }
+.rv-compare .rv-lbl-r { right: 10px; }
+.rv-compare .rv-expand {
+  position: absolute; top: 8px; right: 8px; z-index: 4;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: rgba(0,0,0,.35); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; backdrop-filter: blur(4px);
+}
+.rv-compare .rv-expand svg { width: 14px; height: 14px; pointer-events: none; }
+
+/* Fullscreen modal for river comparison */
+.rv-fs-modal {
+  display: none; position: fixed; inset: 0; z-index: 9100;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(18px) saturate(0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(0.8);
+  align-items: center; justify-content: center;
+  overscroll-behavior: contain;
+  flex-direction: column; gap: 8px;
+  padding: 48px 12px 12px;
+}
+.rv-fs-modal.open { display: flex; }
+.rv-fs-modal .rv-compare { width: 100%; max-width: 1200px; flex: 1; aspect-ratio: auto; border-radius: 6px; }
+.rv-fs-modal .rv-compare img { border-radius: 4px; }
+.rv-fs-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.15); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 5;
+}
+.rv-fs-close svg { width: 18px; height: 18px; pointer-events: none; }
+.rv-fs-labels {
+  display: flex; justify-content: space-between; width: 100%; max-width: 1200px;
+  padding: 0 4px;
+  font-family: 'Inter',sans-serif; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.7);
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
@@ -1099,7 +1174,29 @@ a { color: inherit; text-decoration: none; }
         <div class="tip-text" style="font-style:normal">Přístav nevznikl na řece, ale vedle ní — dělníci firmy Lanna vyhloubili celý 750m dlouhý a 100m široký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce.</div>
         <div class="tip-text" style="font-style:normal">Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR) — obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
         <div class="tip-text" style="font-style:normal;margin-top:10px">V letech 1926–1928 inženýři přeložili koryto Vltavy blíž k přístavu a vytvořili tak úzkou kosu poloostrova. Na ní postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin.</div>
+        <div style="margin-top:16px">
+          <div class="tip-text" style="font-style:normal;margin-bottom:8px">Přeložení koryta Vltavy v letech 1926–1928 dramaticky změnilo tvar holešovického poloostrova. Posuňte posuvník a porovnejte orientační plán Prahy z let 1909–1914 se současným leteckým snímkem.</div>
+          <div class="rv-compare" id="rvInline">
+            <img class="rv-base" src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/>
+            <img class="rv-top" src="../foto/h001_orientacni_plan_Prahy_1909_1914.jpg" alt="Orientační plán Prahy 1909–1914"/>
+            <div class="rv-handle"></div>
+            <div class="rv-lbl rv-lbl-l">1909–1914</div>
+            <div class="rv-lbl rv-lbl-r">Dnes</div>
+            <button class="rv-expand" onclick="window._rvOpenFs()" title="Celá obrazovka">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+          </div>
+        </div>
         <div class="tip-text" style="font-style:normal;margin-top:10px">Zlatá éra přišla mezi válkami. Od roku 1931 vyrážely z Holešovic motorové nákladní lodě až do Hamburku — po Vltavě a Labi přes Drážďany k moři a odtud do celého světa. Po druhé světové válce přístav zaplnilo hlavně uhlí; stal se hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
+        <div style="margin-top:16px">
+          <div class="tip-text" style="font-style:normal;margin-bottom:8px">Na orientačním plánu z roku 1938 je dobře vidět přístavní železnice — vlečka vycházející z nádraží Bubny podél Jankovcovy ulice až k překladišti na břehu bazénu.</div>
+          <div style="position:relative;border-radius:8px;overflow:hidden;cursor:pointer;max-width:100%" onclick="window._rvOpen1938()">
+            <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice" style="width:100%;display:block;border-radius:8px"/>
+            <button class="rv-expand" style="position:absolute;top:8px;right:8px" onclick="event.stopPropagation();window._rvOpen1938()" title="Celá obrazovka">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+          </div>
+        </div>
      
       </div>
       <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
@@ -2169,5 +2266,120 @@ window.lopAuth.onLogout(() => {
 })();
 </script>
 
+
+<!-- River comparison fullscreen modal -->
+<div class="rv-fs-modal" id="rvFsModal">
+  <button class="rv-fs-close" onclick="window._rvCloseFs()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="rv-compare" id="rvFullscreen">
+    <img class="rv-base" src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/>
+    <img class="rv-top" src="../foto/h001_orientacni_plan_Prahy_1909_1914.jpg" alt="Orientační plán Prahy 1909–1914"/>
+    <div class="rv-handle"></div>
+  </div>
+  <div class="rv-fs-labels">
+    <span>1909–1914</span>
+    <span>Dnes</span>
+  </div>
+</div>
+
+<script>
+/* ── RIVER BED COMPARISON SLIDER ── */
+(function() {
+  function initRvSlider(container) {
+    if (!container) return;
+    const top = container.querySelector('.rv-top');
+    const handle = container.querySelector('.rv-handle');
+    if (!top || !handle) return;
+
+    let dragging = false;
+
+    function setPos(pct) {
+      pct = Math.max(0, Math.min(1, pct));
+      top.style.clipPath = 'inset(0 ' + ((1 - pct) * 100) + '% 0 0)';
+      handle.style.left = (pct * 100) + '%';
+      // Labels
+      const lblL = container.querySelector('.rv-lbl-l');
+      const lblR = container.querySelector('.rv-lbl-r');
+      if (lblL) lblL.style.opacity = pct > 0.15 ? 1 : 0;
+      if (lblR) lblR.style.opacity = pct < 0.85 ? 1 : 0;
+    }
+
+    function getPct(e) {
+      const rect = container.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      return x / rect.width;
+    }
+
+    container.addEventListener('mousedown', function(e) { dragging = true; setPos(getPct(e)); e.preventDefault(); });
+    document.addEventListener('mousemove', function(e) { if (dragging) setPos(getPct(e)); });
+    document.addEventListener('mouseup', function() { dragging = false; });
+    container.addEventListener('touchstart', function(e) { dragging = true; setPos(getPct(e)); }, { passive: true });
+    container.addEventListener('touchmove', function(e) { if (dragging) { setPos(getPct(e)); e.preventDefault(); } }, { passive: false });
+    container.addEventListener('touchend', function() { dragging = false; });
+
+    // Výchozí: půl na půl
+    setPos(0.5);
+  }
+
+  // Init inline slider
+  function _initAll() {
+    initRvSlider(document.getElementById('rvInline'));
+    initRvSlider(document.getElementById('rvFullscreen'));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initAll);
+  } else {
+    _initAll();
+  }
+
+  // Fullscreen open/close
+  window._rvOpenFs = function() {
+    const modal = document.getElementById('rvFsModal');
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+  };
+  window._rvCloseFs = function() {
+    const modal = document.getElementById('rvFsModal');
+    if (modal) modal.classList.remove('open');
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  };
+  // Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') window._rvCloseFs();
+  });
+})();
+</script>
+
+<!-- 1938 plan fullscreen -->
+<div class="rv-fs-modal" id="rv1938Modal">
+  <button class="rv-fs-close" onclick="window._rvClose1938()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938" style="max-width:calc(100% - 24px);max-height:calc(100% - 80px);object-fit:contain;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.45)"/>
+  <div class="rv-fs-labels" style="justify-content:center">
+    <span>Orientační plán Prahy, 1938</span>
+  </div>
+</div>
+
+<script>
+window._rvOpen1938 = function() {
+  var m = document.getElementById('rv1938Modal');
+  if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+};
+window._rvClose1938 = function() {
+  var m = document.getElementById('rv1938Modal');
+  if (m) m.classList.remove('open');
+  document.body.style.overflow=''; document.body.style.touchAction='';
+};
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('rv1938Modal')?.classList.contains('open')) window._rvClose1938();
+});
+</script>
 </body>
 </html>
