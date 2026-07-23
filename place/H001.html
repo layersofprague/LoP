@@ -1267,7 +1267,8 @@ a { color: inherit; text-decoration: none; }
             <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Plán holešovického přístavu, 1894</div>
           </div>
         </div>
-        <div class="tip-text" style="font-style:normal;margin-top:10px"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+        <div class="tip-text" style="font-style:normal"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
         <div>
           <div class="rv-wrap" id="rvInline">
             <div class="sl-base"><img src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
@@ -1299,9 +1300,13 @@ a { color: inherit; text-decoration: none; }
               </div>
             </div>
           </div>
-
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);display:flex;justify-content:space-between;padding:4px 2px 0">
+            <span>1909–1914</span>
+            <span>Dnes</span>
+          </div>
         </div>
-        <div style="margin-top:16px">
+        </div>
+        <div>
           <div class="tip-text" style="font-style:normal;margin-bottom:8px"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998. Představu o jejím rozsahu a členitosti si můžete udělat na orientačním plánu z roku 1938. Za pozornost stojí například několik úvratí pomocí kterých bylo možné dojet až na přístavní kosu. </div>
           <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
             <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
@@ -2453,7 +2458,7 @@ window.lopAuth.onLogout(() => {
   }
 
   function _initAll() {
-    initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', 'rvInlineLblL', 'rvInlineLblR');
+    initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', null, null);
     initRvSlider('rvFullscreen', 'rvFsTop',     'rvFsDiv',     'rvFsHandle',     null,     null);
   }
 
