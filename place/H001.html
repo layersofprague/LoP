@@ -927,15 +927,16 @@ a { color: inherit; text-decoration: none; }
   color: var(--paper, #F8F8F6); z-index: 5;
 }
 .rv-margin {
-  display: flex; align-items: flex-start; justify-content: space-between;
+  display: flex; align-items: baseline; justify-content: space-between;
   padding: 0 2px; margin-top: 2px;
 }
 .rv-margin .sl-lbl {
-  font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1;
-  letter-spacing: .02em; color: var(--ink-4, #999994); font-weight: 500;
+  font-family: 'Inter', sans-serif; font-size: 9px; line-height: 1;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-4, #999994); font-weight: 400;
   transition: color .2s;
 }
-.rv-margin .sl-lbl.active { color: var(--ink, #111); }
+.rv-margin .sl-lbl.active { color: var(--ink-4, #999994); font-weight: 400; }
 .rv-margin .sl-kicker {
   font-family: 'Inter', sans-serif; font-size: 9px; letter-spacing: .2em;
   text-transform: uppercase; color: var(--ink-4, #999994);
@@ -955,8 +956,8 @@ a { color: inherit; text-decoration: none; }
 .rv-fs-modal.open { display: flex; }
 .rv-fs-modal .rv-wrap { width: 100%; max-width: 1200px; flex: 1; aspect-ratio: auto; border-radius: 6px; margin: 0; }
 .rv-fs-modal .rv-margin { max-width: 1200px; width: 100%; }
-.rv-fs-modal .rv-margin .sl-lbl { color: rgba(255,255,255,.5); }
-.rv-fs-modal .rv-margin .sl-lbl.active { color: #fff; }
+.rv-fs-modal .rv-margin .sl-lbl { color: rgba(255,255,255,.4); }
+.rv-fs-modal .rv-margin .sl-lbl.active { color: rgba(255,255,255,.4); }
 .rv-fs-modal .rv-margin .sl-kicker { color: rgba(255,255,255,.4); }
 .rv-fs-modal .sl-handle { background: rgba(255,255,255,.95); }
 .rv-fs-modal .sl-divider { background: rgba(255,255,255,.7); }
@@ -1262,16 +1263,14 @@ a { color: inherit; text-decoration: none; }
             <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopyRiver">
               <button class="copy-close" onclick="window._rvToggleCopy('rvCopyRiver')">✕</button>
-              <div style="margin-top:2px">
-                <div class="copy-col-head">1909–1914</div>
-                <div id="rvExifPlan1909">
-                  <div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div>
+              <div class="copy-grid">
+                <div>
+                  <div class="copy-col-head">1909–1914</div>
+                  <div id="rvExifPlan1909"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
                 </div>
-              </div>
-              <div style="margin-top:6px">
-                <div class="copy-col-head">Dnes (ortofoto)</div>
-                <div id="rvExifOrtofoto">
-                  <div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div>
+                <div>
+                  <div class="copy-col-head">Dnes (ortofoto)</div>
+                  <div id="rvExifOrtofoto"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
                 </div>
               </div>
             </div>
