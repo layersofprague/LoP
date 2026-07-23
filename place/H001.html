@@ -981,6 +981,36 @@ a { color: inherit; text-decoration: none; }
   padding: 4px; display: flex; align-items: center; justify-content: center;
   color: var(--paper, #F8F8F6); z-index: 5;
 }
+
+/* ── INSIDER IMAGE COPYRIGHT ── */
+.rv-copy-btn {
+  position: absolute; bottom: 14px; left: 14px;
+  padding: 4px; background: transparent;
+  border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; letter-spacing: .04em;
+  color: var(--paper, #F8F8F6); z-index: 5;
+  line-height: 1; text-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+.rv-copy-modal {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  background: rgba(13,11,8,.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 7px 12px 8px;
+  transform: translateY(100%);
+  transition: transform .3s ease;
+  border-top: 1px solid rgba(243,237,225,.12);
+}
+.rv-copy-modal.open { transform: translateY(0); }
+.rv-copy-modal .copy-close {
+  position: absolute; top: 10px; right: 12px;
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(243,237,225,.5); font-size: 16px; line-height: 1;
+  padding: 2px 4px;
+}
+.rv-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
@@ -1191,8 +1221,16 @@ a { color: inherit; text-decoration: none; }
         <div class="tip-text" style="font-style:normal">Přístav nevznikl na řece, ale vedle ní — dělníci firmy Lanna vyhloubili celý 750m dlouhý a 100m široký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce.</div>
         <div class="tip-text" style="font-style:normal">Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR) — obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
         <div style="margin-top:14px">
-          <div class="rv-1938-thumb" onclick="window._rvOpenPlan()">
+          <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative">
             <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
+            <div class="rv-copy-modal" id="rvCopyPlan">
+              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
+              <div style="margin-top:2px">
+                <div class="copy-col-head">Plán přístavu, 1894</div>
+                <div id="rvExifPlan1894"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+              </div>
+            </div>
             <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpenPlan()" title="Celá obrazovka">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
@@ -1221,6 +1259,22 @@ a { color: inherit; text-decoration: none; }
                 <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
               </svg>
             </button>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
+            <div class="rv-copy-modal" id="rvCopyRiver">
+              <button class="copy-close" onclick="window._rvToggleCopy('rvCopyRiver')">✕</button>
+              <div style="margin-top:2px">
+                <div class="copy-col-head">1909–1914</div>
+                <div id="rvExifPlan1909">
+                  <div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div>
+                </div>
+              </div>
+              <div style="margin-top:6px">
+                <div class="copy-col-head">Dnes (ortofoto)</div>
+                <div id="rvExifOrtofoto">
+                  <div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="rv-margin">
             <div class="sl-lbl active" id="rvInlineLblL">1909–1914</div>
@@ -1232,8 +1286,16 @@ a { color: inherit; text-decoration: none; }
         <div class="tip-text" style="font-style:normal;margin-top:10px">Zlatá éra přišla mezi válkami. Od roku 1931 vyrážely z Holešovic motorové nákladní lodě až do Hamburku — po Vltavě a Labi přes Drážďany k moři a odtud do celého světa. Po druhé světové válce přístav zaplnilo hlavně uhlí; stal se hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
         <div style="margin-top:16px">
           <div class="tip-text" style="font-style:normal;margin-bottom:8px">Na orientačním plánu z roku 1938 je dobře vidět přístavní železnice — vlečka vycházející z nádraží Bubny podél Jankovcovy ulice až k překladišti na břehu bazénu.</div>
-          <div class="rv-1938-thumb" onclick="window._rvOpen1938()">
+          <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
             <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
+            <div class="rv-copy-modal" id="rvCopy1938">
+              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
+              <div style="margin-top:2px">
+                <div class="copy-col-head">Orientační plán, 1938</div>
+                <div id="rvExif1938"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+              </div>
+            </div>
             <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpen1938()" title="Celá obrazovka">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
@@ -2449,6 +2511,64 @@ window._rvClosePlan = function() {
   if (m) m.classList.remove('open');
   document.body.style.overflow=''; document.body.style.touchAction='';
 };
+</script>
+
+<script>
+/* ── INSIDER IMAGE COPYRIGHT + EXIF ── */
+(function() {
+  // Toggle copyright panel
+  window._rvToggleCopy = function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  };
+
+  // Reuse renderExif from main page
+  function _renderExifInsider(elId, data) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    if (!data) {
+      el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">EXIF data not found</div>';
+      return;
+    }
+    var fields = [
+      { key: 'Author',        val: data['dc:creator'] || data['XMP-dc:Creator'] || data.Artist || data.Creator },
+      { key: 'Zdroj',         val: data['photoshop:Credit'] || data['XMP-photoshop:Credit'] || data.Credit },
+      { key: 'Specification', val: data['dc:identifier'] || data['XMP-dc:Identifier'] || data.SpecialInstructions },
+      { key: 'Source',        val: data['dc:source'] || data['XMP-dc:Source'] || data.Source },
+      { key: 'Copyright',     val: data.Copyright || data.CopyrightNotice || data['dc:rights'] },
+      { key: 'Date',          val: data['dc:description'] || data['XMP-dc:Description'] || data.DateCreated || (data.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    ];
+    var rows = fields.filter(function(f){ return f.val; }).map(function(f){
+      return '<div class="copy-row"><div class="copy-key">' + f.key + '</div><div class="copy-val">' + f.val + '</div></div>';
+    }).join('');
+    el.innerHTML = rows || '<div class="copy-val" style="color:rgba(243,237,225,.35)">EXIF data not found</div>';
+  }
+
+  // Načíst EXIF pro insider obrázky
+  async function _loadInsiderExif() {
+    if (typeof exifr === 'undefined') return;
+    var images = [
+      { src: '../foto/h001_orientacni_plan_Prahy_1909–1914.jpg', elId: 'rvExifPlan1909' },
+      { src: '../foto/h001_ortofoto.jpg',                            elId: 'rvExifOrtofoto' },
+      { src: '../foto/holesovicky_pristav_plan.jpg',                 elId: 'rvExifPlan1894' },
+      { src: '../foto/h001_orientacni_plan_Prahy_1938.jpg',          elId: 'rvExif1938' },
+    ];
+    for (var i = 0; i < images.length; i++) {
+      try {
+        var data = await exifr.parse(images[i].src, true);
+        _renderExifInsider(images[i].elId, data);
+      } catch(e) {
+        _renderExifInsider(images[i].elId, null);
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _loadInsiderExif);
+  } else {
+    _loadInsiderExif();
+  }
+})();
 </script>
 </body>
 </html>
