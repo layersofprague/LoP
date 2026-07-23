@@ -190,14 +190,25 @@ a { color: inherit; text-decoration: none; }
   align-items: center; justify-content: center;
   flex-direction: column; gap: 0;
   overscroll-behavior: contain;
-  padding: 48px 12px 12px;
+  padding: 44px 0 8px;
 }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
   position: relative;
-  width: 100%; max-width: 1200px;
+  /* Šířka omezena, výška podle poměru stran */
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
   aspect-ratio: 4/3;
-  max-height: calc(100dvh - 100px);
+  overflow: hidden; /* divider nepřesahuje */
+  flex-shrink: 0;
+}
+/* Landscape — využít celou výšku */
+@media (orientation: landscape) {
+  .fs-modal { padding: 8px 0 4px; }
+  .fs-modal-inner {
+    width: auto;
+    height: calc(100dvh - 40px);
+    aspect-ratio: 4/3;
+  }
 }
 .fs-modal-inner .sl-base,
 .fs-modal-inner .sl-top {
@@ -206,10 +217,17 @@ a { color: inherit; text-decoration: none; }
 .fs-modal-inner .sl-base img,
 .fs-modal-inner .sl-top img {
   width: 100%; height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   pointer-events: none; -webkit-user-drag: none;
 }
 
+.fs-modal .rv-fs-labels {
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  padding: 6px 4px 0;
+}
+@media (orientation: landscape) {
+  .fs-modal .rv-fs-labels { width: auto; }
+}
 .fs-modal-inner .sl-handle {
   position: absolute; top: 50%; cursor: ew-resize; z-index: 4; pointer-events: auto;
 }
