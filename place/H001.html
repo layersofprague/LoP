@@ -945,7 +945,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center; justify-content: center;
   overscroll-behavior: contain;
   flex-direction: column; gap: 0;
-  padding: 48px 12px 12px;
+  padding: 40px 12px 12px;
 }
 .rv-fs-modal.open { display: flex; }
 .rv-fs-modal .rv-wrap { width: 100%; max-width: 1200px; flex: 1; aspect-ratio: auto; border-radius: 6px; margin: 0; }
@@ -981,8 +981,9 @@ a { color: inherit; text-decoration: none; }
   color: rgba(255,255,255,.7);
 }
 .rv-fs-img {
-  flex: 1; min-height: 0;
-  max-width: 100%; width: auto; height: auto;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 48px);
+  width: auto; height: auto;
   object-fit: contain; border-radius: 4px;
   box-shadow: 0 10px 40px rgba(0,0,0,.45);
 }
@@ -991,6 +992,7 @@ a { color: inherit; text-decoration: none; }
   .rv-fs-modal { padding: 8px 8px 4px; }
   .rv-fs-modal .rv-fs-close { top: 4px; right: 4px; width: 28px; height: 28px; }
   .rv-fs-labels { padding: 2px 4px 0; font-size: 11px; }
+  .rv-fs-img { max-height: calc(100% - 28px); }
 }
 
 /* ── INSIDER IMAGE COPYRIGHT ── */
@@ -1022,6 +1024,19 @@ a { color: inherit; text-decoration: none; }
   padding: 2px 4px;
 }
 .rv-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
+
+/* ── PINCH-TO-ZOOM na fullscreen obrázcích ── */
+.rv-fs-modal .rv-fs-img {
+  touch-action: none;
+  transform-origin: 0 0;
+  transition: none;
+}
+.rv-fs-modal .rv-fs-img.zoomed {
+  cursor: grab;
+}
+.rv-fs-modal .rv-fs-img.zoomed:active {
+  cursor: grabbing;
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
@@ -2575,6 +2590,127 @@ window._rvClosePlan = function() {
     document.addEventListener('DOMContentLoaded', _loadInsiderExif);
   } else {
     _loadInsiderExif();
+  }
+})();
+</script>
+
+<script>
+/* ── PINCH-TO-ZOOM for fullscreen modal images ── */
+(function() {
+  function initPinchZoom(img) {
+    if (!img) return;
+    let scale = 1, startScale = 1;
+    let tx = 0, ty = 0, startTx = 0, startTy = 0;
+    let startDist = 0, startMid = {x:0,y:0};
+    let lastTap = 0;
+    let panStart = null;
+
+    function clampPan() {
+      if (scale <= 1) { tx = 0; ty = 0; return; }
+      var rect = img.getBoundingClientRect();
+      var parent = img.parentElement.getBoundingClientRect();
+      var maxTx = Math.max(0, (rect.width * scale / startScale - parent.width) / 2);
+      var maxTy = Math.max(0, (rect.height * scale / startScale - parent.height) / 2);
+      tx = Math.max(-maxTx, Math.min(maxTx, tx));
+      ty = Math.max(-maxTy, Math.min(maxTy, ty));
+    }
+
+    function apply() {
+      img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+      img.classList.toggle('zoomed', scale > 1.05);
+    }
+
+    function reset() {
+      scale = 1; tx = 0; ty = 0;
+      img.style.transform = '';
+      img.classList.remove('zoomed');
+    }
+
+    function dist(t) {
+      var dx = t[0].clientX - t[1].clientX;
+      var dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    function mid(t) {
+      return {
+        x: (t[0].clientX + t[1].clientX) / 2,
+        y: (t[0].clientY + t[1].clientY) / 2
+      };
+    }
+
+    img.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        startDist = dist(e.touches);
+        startScale = scale;
+        startMid = mid(e.touches);
+        startTx = tx; startTy = ty;
+        panStart = null;
+      } else if (e.touches.length === 1 && scale > 1.05) {
+        // Pan mode
+        e.preventDefault();
+        panStart = { x: e.touches[0].clientX - tx, y: e.touches[0].clientY - ty };
+      } else if (e.touches.length === 1) {
+        // Double tap detection
+        var now = Date.now();
+        if (now - lastTap < 300) {
+          e.preventDefault();
+          if (scale > 1.05) { reset(); } else {
+            // Zoom to 2.5x centered on tap
+            var rect = img.getBoundingClientRect();
+            scale = 2.5;
+            tx = (rect.width/2 - e.touches[0].clientX + rect.left) * 1.5;
+            ty = (rect.height/2 - e.touches[0].clientY + rect.top) * 1.5;
+            clampPan(); apply();
+          }
+        }
+        lastTap = now;
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        var d = dist(e.touches);
+        var m = mid(e.touches);
+        scale = Math.max(1, Math.min(5, startScale * (d / startDist)));
+        tx = startTx + (m.x - startMid.x);
+        ty = startTy + (m.y - startMid.y);
+        clampPan(); apply();
+      } else if (e.touches.length === 1 && panStart) {
+        e.preventDefault();
+        tx = e.touches[0].clientX - panStart.x;
+        ty = e.touches[0].clientY - panStart.y;
+        clampPan(); apply();
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchend', function(e) {
+      if (e.touches.length < 2) { startDist = 0; }
+      if (e.touches.length === 0) { panStart = null; }
+      if (scale < 1.05) reset();
+    });
+
+    // Reset on modal close
+    var modal = img.closest('.rv-fs-modal') || img.closest('.fs-modal');
+    if (modal) {
+      new MutationObserver(function(muts) {
+        muts.forEach(function(m) {
+          if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
+        });
+      }).observe(modal, { attributes: true });
+    }
+  }
+
+  function _initAll() {
+    document.querySelectorAll('.rv-fs-modal .rv-fs-img').forEach(initPinchZoom);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initAll);
+  } else {
+    _initAll();
   }
 })();
 </script>
