@@ -1189,9 +1189,22 @@ a { color: inherit; text-decoration: none; }
       <div class="insider-full" id="insiderFull" style="margin-top:10px">
         <div class="tip-text" style="font-style:normal">Přístav nevznikl na řece, ale vedle ní — dělníci firmy Lanna vyhloubili celý 750m dlouhý a 100m široký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce.</div>
         <div class="tip-text" style="font-style:normal">Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR) — obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
+        <div style="margin-top:14px">
+          <div class="rv-1938-thumb" onclick="window._rvOpenPlan()">
+            <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
+            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpenPlan()" title="Celá obrazovka">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+          </div>
+          <div class="rv-margin" style="justify-content:center">
+            <div class="sl-kicker">Plán holešovického přístavu, 1894</div>
+          </div>
+        </div>
         <div class="tip-text" style="font-style:normal;margin-top:10px">V letech 1926–1928 inženýři přeložili koryto Vltavy blíž k přístavu a vytvořili tak úzkou kosu poloostrova. Na ní postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin.</div>
         <div style="margin-top:16px">
-          <div class="tip-text" style="font-style:normal;margin-bottom:8px">Přeložení koryta Vltavy v letech 1926–1928 dramaticky změnilo tvar holešovického poloostrova. Posuňte posuvník a porovnejte orientační plán Prahy z let 1909–1914 se současným leteckým snímkem.</div>
           <div class="rv-wrap" id="rvInline">
             <div class="sl-base"><img src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
             <div class="sl-top" id="rvInlineTop"><img src="../foto/h001_orientacni_plan_Prahy_1909_1914.jpg" alt="Orientační plán Prahy 1909–1914"/></div>
@@ -1213,6 +1226,7 @@ a { color: inherit; text-decoration: none; }
             <div class="sl-kicker">Tehdy &amp; Dnes</div>
             <div class="sl-lbl" id="rvInlineLblR">Dnes</div>
           </div>
+          <div class="tip-text" style="font-style:normal;margin-top:8px">Přeložení koryta Vltavy v letech 1926–1928 dramaticky změnilo tvar holešovického poloostrova. Porovnejte orientační plán Prahy z let 1909–1914 se současným leteckým snímkem.</div>
         </div>
         <div class="tip-text" style="font-style:normal;margin-top:10px">Zlatá éra přišla mezi válkami. Od roku 1931 vyrážely z Holešovic motorové nákladní lodě až do Hamburku — po Vltavě a Labi přes Drážďany k moři a odtud do celého světa. Po druhé světové válce přístav zaplnilo hlavně uhlí; stal se hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
         <div style="margin-top:16px">
@@ -1278,11 +1292,7 @@ a { color: inherit; text-decoration: none; }
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Přístav v prvních letech provozu, jeřáby a lodě"/>
         <div class="gt-label">~1893</div>
       </div>
-      <div class="gallery-thumb" onclick="openGallery(6)">
-        <img src="https://layersofprague.github.io/LoP/foto/holesovicky_pristav_plan.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Plán přístavu 1894"/>
-        <div class="gt-label">Plán 1894</div>
-      </div>
+
     </div>
   </div>
 
@@ -2382,7 +2392,7 @@ window.lopAuth.onLogout(() => {
     document.body.style.overflow=''; document.body.style.touchAction='';
   };
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { window._rvCloseFs(); window._rvClose1938(); }
+    if (e.key === 'Escape') { window._rvCloseFs(); window._rvClose1938(); window._rvClosePlan(); }
   });
 })();
 </script>
@@ -2411,6 +2421,29 @@ window._rvClose1938 = function() {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && document.getElementById('rv1938Modal')?.classList.contains('open')) window._rvClose1938();
 });
+</script>
+
+<!-- Plan 1894 fullscreen -->
+<div class="rv-fs-modal" id="rvPlanModal">
+  <button class="rv-fs-close" onclick="window._rvClosePlan()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894" style="max-width:calc(100% - 24px);max-height:calc(100% - 80px);object-fit:contain;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.45)"/>
+  <div class="rv-fs-labels" style="justify-content:center">
+    <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Plán holešovického přístavu, 1894</span>
+  </div>
+</div>
+
+<script>
+window._rvOpenPlan = function() {
+  var m = document.getElementById('rvPlanModal');
+  if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+};
+window._rvClosePlan = function() {
+  var m = document.getElementById('rvPlanModal');
+  if (m) m.classList.remove('open');
+  document.body.style.overflow=''; document.body.style.touchAction='';
+};
 </script>
 </body>
 </html>
