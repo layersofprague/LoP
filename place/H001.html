@@ -1310,6 +1310,8 @@ function renderPlaceI18n() {
   var capMap = {
     capPlan1894:    C.plan1894,
     capStavba:      C.stavba,
+    capStavba2:     C.stavba,
+    fsStavbaLabel:  C.stavba,
     capPlan1938:    C.plan1938,
     capMapa:        C.mapa,
     capRiverL:      C.plan1909,
@@ -1611,7 +1613,7 @@ window.addEventListener('load', renderPlaceI18n);
               </svg>
             </button>
           </div>
-          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Rozšíření přístavu ~1906–1908</div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capStavba2">Rozšíření přístavu ~1906–1908</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:0">
           <div class="tip-text" style="font-style:normal" id="insiderP2"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
@@ -2825,7 +2827,7 @@ document.addEventListener('keydown', function(e) {
   </button>
   <img src="../foto/H001h_h.jpg" alt="Hloubení přístavního bazénu" class="rv-fs-img"/>
   <div class="rv-fs-labels">
-    <span>Rozšíření přístavu ~1906–1908</span>
+    <span id="fsStavbaLabel">Rozšíření přístavu ~1906–1908</span>
   </div>
 </div>
 
