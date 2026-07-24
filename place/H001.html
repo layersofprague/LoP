@@ -1124,7 +1124,7 @@ const PLACE_DATA = {
     stavby:   { cs: 'Stavby přístavu', en: 'Harbour buildings' },
     poloha:   { cs: 'Poloha',          en: 'Location' },
     zebricek: { cs: 'Žebříček',        en: 'Ranking' },
-    autor:    { cs: 'Autor zastavení', en: 'Stop author' },
+    autor:    { cs: 'Autor zastavení', en: 'Author of the stop' },
     klicova:  { cs: 'Klíčová slova',   en: 'Keywords' },
   },
 
@@ -1331,6 +1331,29 @@ function renderPlaceI18n() {
   // FS modal label
   var fml = document.getElementById('fsModalLabel');
   if (fml) fml.textContent = loc(C.fsLabel);
+
+  // Ranking
+  var lhKick = document.getElementById('lhKick');
+  if (lhKick) lhKick.textContent = lang === 'en' ? 'Best shot' : 'Nejlepší záběr';
+  document.querySelectorAll('#lhUnit1, #lhUnit2').forEach(function(el) {
+    el.textContent = lang === 'en' ? 'pts' : 'bodů';
+  });
+  var lhBy = document.getElementById('lhBy');
+  if (lhBy) lhBy.textContent = 'Jan K., ' + (lang === 'en' ? '1st place' : '1. místo');
+
+  // AR CTA
+  var arKick = document.getElementById('arCtaKick');
+  if (arKick) arKick.textContent = lang === 'en' ? 'Peek into history' : 'Nahlédni do historie';
+  var arTitle = document.getElementById('arCtaTitle');
+  if (arTitle) arTitle.textContent = lang === 'en' ? 'Launch AR — Holešovice Harbour' : 'Spustit AR — Holešovický přístav';
+
+  // Autor badge + meta
+  var ab = document.getElementById('autorBadge');
+  if (ab) ab.textContent = lang === 'en' ? 'Curator' : 'Kurátor';
+  var ap = document.getElementById('autorPlaces');
+  if (ap) ap.textContent = lang === 'en' ? '12 stops' : '12 zastavení';
+  var ar = document.getElementById('autorStars');
+  if (ar && ar.textContent.match(/čeká|awaiting/)) ar.textContent = lang === 'en' ? 'awaiting rating' : 'čeká na hodnocení';
 }
 
 /* Spustit po načtení */
@@ -1677,15 +1700,15 @@ window.addEventListener('load', renderPlaceI18n);
       <div class="lh-hero">
         <div class="lh-av">JK<span class="lh-badge">1</span></div>
         <div class="lh-id">
-          <div class="lh-kick">Nejlepší záběr</div>
+          <div class="lh-kick" id="lhKick">Nejlepší záběr</div>
           <div class="lh-name">Jan K.</div>
         </div>
-        <div class="lh-pts"><div class="n">342</div><div class="u">bodů</div></div>
+        <div class="lh-pts"><div class="n">342</div><div class="u" id="lhUnit1">bodů</div></div>
       </div>
       <div class="lh-quote-wrap">
         <div class="lh-quote">
           <p>„Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.“</p>
-          <span class="by">Jan K., 1. místo</span>
+          <span class="by" id="lhBy">Jan K., 1. místo</span>
         </div>
       </div>
       <div class="lh-row"><span class="rk">2</span><span class="nm">Tereza M.</span><span class="pt">298</span></div>
@@ -1699,7 +1722,7 @@ window.addEventListener('load', renderPlaceI18n);
       <span class="rk" id="lbMyRank">—</span>
       <span class="av">VY</span>
       <div><div class="nm">Tvůj výsledek</div><div class="sub"><span id="lbMyScore">—</span> % shody · <span id="lbMyDate"></span></div></div>
-      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u">bodů</div></div>
+      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u" id="lhUnit2">bodů</div></div>
     </div>
 
     <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH001b_ove_thumb.jpg">
@@ -1707,8 +1730,8 @@ window.addEventListener('load', renderPlaceI18n);
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
       </div>
       <div class="ar-cta-body">
-        <div class="ar-cta-kick">Nahlédni do historie</div>
-        <div class="ar-cta-title">Spustit AR — Holešovický přístav</div>
+        <div class="ar-cta-kick" id="arCtaKick">Nahlédni do historie</div>
+        <div class="ar-cta-title" id="arCtaTitle">Spustit AR — Holešovický přístav</div>
       </div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5"><path d="m9 6 6 6-6 6"/></svg>
     </a>
@@ -1725,7 +1748,7 @@ window.addEventListener('load', renderPlaceI18n);
       <div class="autor-body">
         <div class="autor-name">LayersOfPrague</div>
         <div class="autor-meta">
-          <span class="autor-badge">Kurátor</span>
+          <span class="autor-badge" id="autorBadge">Kurátor</span>
           <span class="autor-sep">·</span>
           <span id="autorPlaces">12 zastavení</span>
           <span class="autor-sep">·</span>
@@ -1802,13 +1825,14 @@ function renderExif(elId, data) {
     return;
   }
 
+  const _en = window.lopLang === 'en';
   const fields = [
-    { key: 'Author',        val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
-    { key: 'Zdroj',        val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
-    { key: 'Specification', val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
-    { key: 'Source',        val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
-    { key: 'Copyright',     val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
-    { key: 'Date',          val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: _en ? 'Author'  : 'Autor',     val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
+    { key: _en ? 'Source'  : 'Zdroj',     val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
+    { key: _en ? 'Spec.'   : 'Spec.',     val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
+    { key: _en ? 'Ref.'    : 'Ref.',      val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
+    { key: 'Copyright',                   val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
+    { key: _en ? 'Date'    : 'Datum',     val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
@@ -2809,8 +2833,8 @@ window._rvClosePlan = function() {
       return;
     }
     var fields = [
-      { key: 'Author',        val: data['dc:creator'] || data['XMP-dc:Creator'] || data.Artist || data.Creator },
-      { key: 'Zdroj',         val: data['photoshop:Credit'] || data['XMP-photoshop:Credit'] || data.Credit },
+      { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: data['dc:creator'] || data['XMP-dc:Creator'] || data.Artist || data.Creator },
+      { key: window.lopLang === 'en' ? 'Source' : 'Zdroj', val: data['photoshop:Credit'] || data['XMP-photoshop:Credit'] || data.Credit },
       { key: 'Specification', val: data['dc:identifier'] || data['XMP-dc:Identifier'] || data.SpecialInstructions },
       { key: 'Source',        val: data['dc:source'] || data['XMP-dc:Source'] || data.Source },
       { key: 'Copyright',     val: data.Copyright || data.CopyrightNotice || data['dc:rights'] },
