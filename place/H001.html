@@ -1130,8 +1130,8 @@ const PLACE_DATA = {
 
   tipLabel:   { cs: 'Zajímavosti',    en: 'Did you know' },
   insiderTeaser: {
-    cs: 'Věděli jste, že Holešovický přístav nevznikl na řece?',
-    en: 'Did you know that Holešovice Port was not built on the river?'
+    cs: 'Věděli jste, že Holešovický přístav nevznikl na řece nebo jak zásadně se proměnila řeka v této oblasti? Zajímají Vás další detaily?',
+    en: 'Did you know that the Holešovice Port wasn’t built on a river or how drastically the river in this area has changed? Are you interested in more details?'
   },
   insiderGateText: {
     cs: 'Pro celý obsah se',
@@ -1272,6 +1272,8 @@ function renderPlaceI18n() {
   if (igt) igt.textContent = loc(P.insiderGateText);
   const igl = document.getElementById('insiderGateLink');
   if (igl) igl.textContent = loc(P.insiderGateLink);
+  const iwl = document.getElementById('insiderWhyLink');
+  if (iwl) iwl.textContent = lang === 'en' ? 'Why is some content hidden?' : 'Proč je část obsahu skryta?';
 
   // Keywords
   const kwContainer = document.getElementById('kwContainer');
@@ -1681,6 +1683,9 @@ window.addEventListener('load', renderPlaceI18n);
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
         <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+      </div>
+      <div style="margin-top:6px">
+        <a id="insiderWhyLink" href="../oprojektu.html" style="font-size:12px;color:var(--ink-4);text-decoration:underline;text-underline-offset:2px">Proč je část obsahu skryta?</a>
       </div>
     </div>
   </div>
