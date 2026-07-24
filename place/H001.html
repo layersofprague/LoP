@@ -1177,6 +1177,24 @@ const PLACE_DATA = {
     },
   ],
 
+  captions: {
+    plan1894:    { cs: 'Plán holešovického přístavu, 1894',                          en: 'Holešovice Harbour plan, 1894' },
+    stavba:      { cs: 'Rozšíření přístavu ~1906–1908',                              en: 'Harbour expansion ~1906–1908' },
+    plan1909:    { cs: '1909–1914',                                                   en: '1909–1914' },
+    today:       { cs: 'Dnes',                                                        en: 'Today' },
+    plan1938:    { cs: 'Orientační plán Prahy, 1938',                                 en: 'Prague orientation map, 1938' },
+    riverLabel:  { cs: 'Orientační plán Prahy 1909–1914 vs. současný letecký snímek', en: 'Prague orientation map 1909–1914 vs. current aerial photograph' },
+    fsLabel:     { cs: 'Holešovický přístav — současnost vs. ~1930',                  en: 'Holešovice Harbour — present day vs. ~1930' },
+    copyToday:   { cs: 'Dnes',                                                        en: 'Today' },
+    copyHist:    { cs: '~1930',                                                       en: '~1930' },
+    copyPlan:    { cs: 'Plán přístavu, 1894',                                         en: 'Harbour plan, 1894' },
+    copy1938:    { cs: 'Orientační plán, 1938',                                       en: 'Orientation map, 1938' },
+    copyRiverL:  { cs: '1909–1914',                                                   en: '1909–1914' },
+    copyRiverR:  { cs: 'Dnes (ortofoto)',                                             en: 'Today (aerial)' },
+    mapa:        { cs: 'výřez mapy',                                                  en: 'map detail' },
+    wishLbl:     { cs: 'Plán',                                                        en: 'Plan' },
+  },
+
   keywords: {
     cs: ['přístav','průmysl','secese','Holešovice','František Sander','lodní doprava','Praha 7','1892','Prague Marina','nábřeží','firma Lanna','železniční vlečka','Bubny','labské lodě','Hamburg','lodní výtah','František Bartoš','veřejná skladiště'],
     en: ['harbour','industry','art nouveau','Holešovice','František Sander','river transport','Prague 7','1892','Prague Marina','waterfront','Lanna company','railway siding','Bubny','Elbe barges','Hamburg','ship lift','František Bartoš','public warehouses']
@@ -1269,15 +1287,50 @@ function renderPlaceI18n() {
     if (el && P.insider && P.insider[k]) el.innerHTML = loc(P.insider[k]);
   });
 
+  // Kicker kategorie
+  var k1 = document.getElementById('kickerCat1');
+  var k2 = document.getElementById('kickerCat2');
+  if (k1) k1.textContent = lang === 'en' ? 'History'   : 'Historie';
+  if (k2) k2.textContent = lang === 'en' ? 'Industry'  : 'Průmysl';
+
+  // Action buttons
+  var actMap = {
+    actKompas: { cs: 'Kompas',  en: 'Compass' },
+    actSdilet: { cs: 'Sdílet',  en: 'Share'   },
+    wishLbl:   { cs: 'Plán',    en: 'Plan'     },
+    actAR:     { cs: 'AR',      en: 'AR'       },
+  };
+  Object.entries(actMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = loc(val);
+  });
+
+  // Popisky plánů a sliderů
+  var C = P.captions;
+  var capMap = {
+    capPlan1894:    C.plan1894,
+    capStavba:      C.stavba,
+    capPlan1938:    C.plan1938,
+    capMapa:        C.mapa,
+    capRiverL:      C.plan1909,
+    capRiverR:      C.today,
+    copyColNow:     C.copyToday,
+    copyColHist:    C.copyHist,
+    copyPlanHead:   C.copyPlan,
+    copy1938Head:   C.copy1938,
+    copyRiverRHead: C.copyRiverR,
+    fsPlan1894Label:C.plan1894,
+    fs1938Label:    C.plan1938,
+    fsModalLabel:   C.fsLabel,
+  };
+  Object.entries(capMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el && val) el.textContent = loc(val);
+  });
+
   // FS modal label
   var fml = document.getElementById('fsModalLabel');
-  if (fml) fml.textContent = lang === 'en'
-    ? 'Holešovice Harbour — present day vs. ~1930'
-    : 'Holešovický přístav — současnost vs. ~1930';
-
-  // Copyright modal hlavičky
-  var cnow = document.getElementById('copyColNow');
-  if (cnow) cnow.textContent = lang === 'en' ? 'Today' : 'Dnes';
+  if (fml) fml.textContent = loc(C.fsLabel);
 }
 
 /* Spustit po načtení */
@@ -1316,9 +1369,9 @@ window.addEventListener('load', renderPlaceI18n);
   <!-- kicker -->
   <div class="kicker">
     <div class="k-dot"></div>
-    <span>Historie</span>
+    <span id="kickerCat1">Historie</span>
     <span class="k-sep">·</span>
-    <span>Průmysl</span>
+    <span id="kickerCat2">Průmysl</span>
   </div>
 
 <div class="hero" id="hero">
@@ -1431,19 +1484,19 @@ window.addEventListener('load', renderPlaceI18n);
     </a>
     <a href="https://mapy.cz/zakladni?q=50.10543,14.45595&route-end=50.10543,14.45595&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Mapy.cz</span>
+      <span class="act-lbl" id="actMapy">Mapy.cz</span>
     </a>
     <a href="https://www.google.com/maps/dir/?api=1&destination=50.10543,14.45595&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Google</span>
+      <span class="act-lbl" id="actGoogle">Google</span>
     </a>
     <button class="act-btn" onclick="share()" title="Sdílet">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      <span class="act-lbl">Sdílet</span>
+      <span class="act-lbl" id="actSdilet">Sdílet</span>
     </button>
     <a href="../ar-intro.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH001b_ove_thumb.jpg" class="act-btn" title="AR">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
-      <span class="act-lbl">AR</span>
+      <span class="act-lbl" id="actAR">AR</span>
     </a>
     <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
       <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
@@ -1498,7 +1551,7 @@ window.addEventListener('load', renderPlaceI18n);
             <div class="rv-copy-modal" id="rvCopyPlan">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
               <div style="margin-top:2px">
-                <div class="copy-col-head">Plán přístavu, 1894</div>
+                <div class="copy-col-head" id="copyPlanHead">Plán přístavu, 1894</div>
                 <div id="rvExifPlan1894"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
               </div>
             </div>
@@ -1509,7 +1562,7 @@ window.addEventListener('load', renderPlaceI18n);
               </svg>
             </button>
           </div>
-          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Plán holešovického přístavu, 1894</div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capPlan1894">Plán holešovického přístavu, 1894</div>
         </div>
         <div>
           <div class="rv-1938-thumb" onclick="window._rvOpenStavba()" style="position:relative;margin-top:0">
@@ -1518,7 +1571,7 @@ window.addEventListener('load', renderPlaceI18n);
             <div class="rv-copy-modal" id="rvCopyStavba">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')">✕</button>
               <div style="margin-top:2px">
-                <div class="copy-col-head">Rozšíření přístavu ~1906–1908</div>
+                <div class="copy-col-head" id="capStavba">Rozšíření přístavu ~1906–1908</div>
                 <div id="rvExifStavba"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
               </div>
             </div>
@@ -1558,15 +1611,15 @@ window.addEventListener('load', renderPlaceI18n);
                     <div id="rvExifPlan1909"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
                   </div>
                   <div>
-                    <div class="copy-col-head">Dnes (ortofoto)</div>
+                    <div class="copy-col-head" id="copyRiverRHead">Dnes (ortofoto)</div>
                     <div id="rvExifOrtofoto"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
                   </div>
                 </div>
               </div>
             </div>
             <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);display:flex;justify-content:space-between;padding:4px 2px 0">
-              <span>1909–1914</span>
-              <span>Dnes</span>
+              <span id="capRiverL">1909–1914</span>
+              <span id="capRiverR">Dnes</span>
             </div>
           </div>
         </div>
@@ -1578,7 +1631,7 @@ window.addEventListener('load', renderPlaceI18n);
             <div class="rv-copy-modal" id="rvCopy1938">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
               <div style="margin-top:2px">
-                <div class="copy-col-head">Orientační plán, 1938</div>
+                <div class="copy-col-head" id="copy1938Head">Orientační plán, 1938</div>
                 <div id="rvExif1938"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
               </div>
             </div>
@@ -1589,7 +1642,7 @@ window.addEventListener('load', renderPlaceI18n);
               </svg>
             </button>
           </div>
-          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Orientační plán Prahy, 1938</div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capPlan1938">Orientační plán Prahy, 1938</div>
           <div class="tip-text" style="font-style:normal;margin-top:10px" id="insiderP4"><strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
         </div>
       </div>
@@ -1606,7 +1659,7 @@ window.addEventListener('load', renderPlaceI18n);
     <div class="sec-head">
       <span class="sec-label" id="secPoloha">Poloha</span>
       <div class="sec-rule"></div>
-      <span class="sec-num">výřez mapy</span>
+      <span class="sec-num" id="capMapa">výřez mapy</span>
     </div>
     <div class="map-frame" id="miniMapWrap">
       <div id="miniMap"></div>
@@ -2497,7 +2550,9 @@ window.lopAuth.onLogout(() => {
 
   const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
   const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
-  const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
+  const CAT_NAME   = window.lopLang === 'en'
+    ? { hist: 'History', arch: 'Architecture', art: 'Art', fun: 'Curiosities' }
+    : { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
 
   let _grid = true;
 
@@ -2528,7 +2583,7 @@ window.lopAuth.onLogout(() => {
         <div class="place-sub">${lede}</div>
       </div>
       <div class="place-meta" style="justify-content:center">
-        ${url ? '' : '<span style="font-size:9px;color:var(--ink-5);text-align:center;line-height:1.3;letter-spacing:.04em">Brzy</span>'}
+        ${url ? '' : '<span style="font-size:9px;color:var(--ink-5);text-align:center;line-height:1.3;letter-spacing:.04em">' + (window.lopLang === 'en' ? 'Soon' : 'Brzy') + '</span>'}
       </div>
     </div>`;
   }
@@ -2673,7 +2728,7 @@ window.lopAuth.onLogout(() => {
   </button>
   <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938" class="rv-fs-img"/>
   <div class="rv-fs-labels">
-    <span>Orientační plán Prahy, 1938</span>
+    <span id="fs1938Label">Orientační plán Prahy, 1938</span>
   </div>
 </div>
 
@@ -2720,7 +2775,7 @@ window._rvCloseStavba = function() {
   </button>
   <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img"/>
   <div class="rv-fs-labels">
-    <span>Plán holešovického přístavu, 1894</span>
+    <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
   </div>
 </div>
 
