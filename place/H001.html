@@ -1203,11 +1203,12 @@ const PLACE_DATA = {
 };
 
 /* ── Lokalizační helper ── */
-function loc(obj) {
+window.loc = function loc(obj) {
   if (!obj || typeof obj === 'string') return obj;
   const lang = window.lopLang || 'cs';
   return obj[lang] || obj.cs;
 }
+var loc = window.loc;
 
 /* ── Render překladatelných částí stránky ── */
 function renderPlaceI18n() {
@@ -1285,6 +1286,8 @@ if (document.readyState === 'loading') {
 } else {
   renderPlaceI18n();
 }
+/* Záloha — znovu po načtení celé stránky */
+window.addEventListener('load', renderPlaceI18n);
 </script>
 <script src="../header.js"></script>
 
