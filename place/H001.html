@@ -1950,7 +1950,11 @@ function updateInsiderGate() {
   if (full)   full.classList.toggle('visible', insider);
   // Reinicializovat river slider po zobrazení insider sekce
   if (insider && window._rvReinit) window._rvReinit();
-  if (gate)   gate.classList.toggle('hidden',  insider);
+  if (gate) {
+    gate.classList.toggle('hidden', insider);
+    if (!insider) gate.style.display = 'flex';
+    else gate.style.display = '';
+  }
   if (teaser) teaser.style.display = insider ? 'none' : '';
 
   if (gate && !insider) {
