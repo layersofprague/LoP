@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" id="htmlRoot">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#111111"/>
-<title>Holešovický přístav — LayersOfPrague</title>
-<meta name="description" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
+<title id="pageTitle">Holešovický přístav — LayersOfPrague</title>
+<meta name="description" id="metaDesc" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1082,6 +1082,210 @@ a { color: inherit; text-decoration: none; }
 <!-- TOPBAR -->
 <div id="lop-header"></div>
 <script src="../i18n.js"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   H001 — Holešovický přístav
+   Přeložitelná data stránky (CS + EN)
+   ══════════════════════════════════════════ */
+const PLACE_DATA = {
+  id: 'H001',
+  cat: 'hist',
+
+  title: {
+    cs: 'Holešovický <em>přístav</em>',
+    en: 'Holešovice <em>Harbour</em>'
+  },
+
+  pageTitle: {
+    cs: 'Holešovický přístav — LayersOfPrague',
+    en: 'Holešovice Harbour — LayersOfPrague'
+  },
+
+  metaDesc: {
+    cs: 'Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander.',
+    en: 'Prague's only harbour where river, rail and road transport converged. Built 1892–1894, the Art Nouveau buildings were designed by František Sander.'
+  },
+
+  lede: {
+    cs: 'Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.',
+    en: 'Prague's largest harbour and the only place in the city where ships, trains and lorries met at a single point. Its success lay in its location: three railway lines terminated in Holešovice — the Imperial State Railway, the Buštěhrad Railway and the Northwestern Railway — making it an ideal distribution hub. Branch lines ran not only to Praha-Bubny station but also to nearby factories: the Pergamentka paper mill, ironworks, mills and a power station. Most of them disappeared after 1989. The entire complex has been a listed cultural monument since 2002. Today, the Prague Marina residential complex stands on its banks.'
+  },
+
+  facts: [
+    { k: { cs: 'Vybudováno',     en: 'Built'          }, v: '1892–1910' },
+    { k: { cs: 'Délka bazénu',   en: 'Basin length'   }, v: '750 m' },
+    { k: { cs: 'Vytěženo',       en: 'Excavated'      }, v: '513 900 m³' },
+    { k: { cs: 'Architekt budov',en: 'Buildings arch.' }, v: 'F. Sander, 1906' },
+  ],
+
+  sections: {
+    fakta:    { cs: 'Fakta',           en: 'Facts' },
+    stavby:   { cs: 'Stavby přístavu', en: 'Harbour buildings' },
+    poloha:   { cs: 'Poloha',          en: 'Location' },
+    zebricek: { cs: 'Žebříček',        en: 'Ranking' },
+    autor:    { cs: 'Autor zastavení', en: 'Stop author' },
+    klicova:  { cs: 'Klíčová slova',   en: 'Keywords' },
+  },
+
+  tipLabel:   { cs: 'Zajímavosti',    en: 'Did you know' },
+  insiderTeaser: {
+    cs: 'Věděli jste, že Holešovický přístav nevznikl na řece?',
+    en: 'Did you know that Holešovice Harbour was not built on the river?'
+  },
+  insiderGateText: {
+    cs: 'Pro celý obsah se',
+    en: 'For the full content'
+  },
+  insiderGateLink: {
+    cs: 'přihlaste',
+    en: 'sign in'
+  },
+
+  related: [
+    {
+      id: 'H001-expozitura', cat: 'hist',
+      name: { cs: 'Budova celní expozitury',        en: 'Customs Office Building' },
+      sub:  { cs: 'č. p. 1057 · František Sander, 1906', en: 'No. 1057 · František Sander, 1906' },
+      lede: { cs: 'Nejvýraznější stavba areálu s charakteristickou hranolovou věží. Postavena v duchu secese a rané moderny — kontrast hladkých světlých omítek a červeného režného zdiva. Věžová nástavba sloužila jako pozorovatelna s výhledem na celý přístavní bazén i seřaďovací nádraží.',
+              en: 'The most distinctive building in the complex, with its characteristic prismatic tower. Built in the Art Nouveau and early modern style — a contrast of smooth light plaster and red face-brick. The tower served as an observation post overlooking the whole harbour basin and marshalling yard.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001a_h.jpg', url: null
+    },
+    {
+      id: 'H001-dozorstvo', cat: 'hist',
+      name: { cs: 'Budova přístavního dozorstva',     en: 'Harbour Supervisor's Building' },
+      sub:  { cs: 'č. p. 1060 · František Sander, 1906–1909', en: 'No. 1060 · František Sander, 1906–1909' },
+      lede: { cs: 'Přímý architektonický protějšek celní expozitury — spolu tvoří symbolickou vstupní bránu areálu. Vysoká sedlová střecha nesená ozdobně vyřezávanými krokvemi. V přízemí kanceláře dozorce, v patře služební byt přístavního kapitána.',
+              en: 'The direct architectural counterpart to the customs building — together they form the symbolic gateway to the complex. A tall saddle roof carried on ornately carved rafters. The ground floor housed the supervisor's offices; the upper floor served as the harbour master's flat.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001b_h.jpg', url: null
+    },
+    {
+      id: 'H001-skladiste', cat: 'hist',
+      name: { cs: 'Budova celního skladiště',         en: 'Customs Warehouse' },
+      sub:  { cs: 'č. p. 1059 · František Sander, 1906', en: 'No. 1059 · František Sander, 1906' },
+      lede: { cs: 'Rozsáhlá symetrická budova přímo při nábřežní zdi. Patrový střední trakt s valbovou střechou, po stranách přízemní skladištní haly. Logistické srdce přístavu — zboží přecházelo přímo z lodi přes jeřáby do skladů pod celním dohledem.',
+              en: 'A large symmetrical building directly against the quay wall. A two-storey central block with a hip roof, flanked by single-storey warehouse wings. The logistical heart of the harbour — goods moved directly from ship via cranes into bonded storage.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001c_h.jpg', url: null
+    },
+    {
+      id: 'H001-vytah', cat: 'hist',
+      name: { cs: 'Lodní výtah a přístavní dílny',    en: 'Ship Lift and Harbour Workshops' },
+      sub:  { cs: 'firma Lanna · konec přístavní kosy', en: 'Lanna company · tip of the harbour spit' },
+      lede: { cs: 'Jediné zařízení v Praze pro vytahování lodí z vody. Svážnicový systém na kolejnicích dopravil i největší labská plavidla na suchou plošinu. Přilehlé dílny zajišťovaly opravy trupů, lodních šroubů i parních strojů — přístav byl zcela soběstačný.',
+              en: 'The only facility in Prague for hauling vessels out of the water. A transverse slipway on rails could handle even the largest Elbe barges. Adjacent workshops provided hull repairs, propeller and steam-engine servicing — the harbour was entirely self-sufficient.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001d_h.jpg', url: null
+    },
+  ],
+
+  keywords: {
+    cs: ['přístav','průmysl','secese','Holešovice','František Sander','lodní doprava','Praha 7','1892','Prague Marina','nábřeží','firma Lanna','železniční vlečka','Bubny','labské lodě','Hamburg','lodní výtah','František Bartoš','veřejná skladiště'],
+    en: ['harbour','industry','art nouveau','Holešovice','František Sander','river transport','Prague 7','1892','Prague Marina','waterfront','Lanna company','railway siding','Bubny','Elbe barges','Hamburg','ship lift','František Bartoš','public warehouses']
+  },
+
+  insider: {
+    p1: {
+      cs: '<strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.',
+      en: '<strong>The harbour was not built on the river — it was built beside it.</strong> Workers from the Vojtěch Lanna company excavated the harbour basin from the Holešovice plain in two phases. Between 1892 and 1895 they created a protective winter harbour — 750 m long, 100 m wide and 2–4 m deep — where vessels could safely ride out floods and winter ice. Only after the completion of river-regulation works making the Vltava navigable downstream of Prague, and with the rapid growth of Prague\'s industry, did the urgent need for a large transhipment point arise. The existing Karlín harbour was no longer sufficient. Holešovice Harbour was therefore redesigned in this second phase as a commercial port. Around 1906–1908 the massive stone quay walls and the Art Nouveau complex of buildings were completed. The harbour could accommodate 150 to 170 large Elbe barges and, uniquely in Prague, had a ship lift — a device capable of hauling an entire vessel out of the water for repair or winter inspection. The total cost was 1,230,000 guilders (~CZK 2.7–2.8 billion / ~EUR 110 million). At the time this was an enormous sum, shared between the City of Prague and the Imperial Austrian Lieutenancy.'
+    },
+    p2: {
+      cs: '<strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.',
+      en: '<strong>The diversion of the Vltava</strong> dramatically changed the shape of the Holešovice peninsula. Between 1926 and 1928 engineers redirected the river channel closer to the harbour, creating a narrow spit on which architect František Bartoš built the Functionalist Public Warehouses with a reinforced-concrete frame, later supplemented by cold-storage and freezing facilities. The transformation is best seen by comparing the 1909–1914 orientation map of Prague with a present-day aerial photograph.'
+    },
+    p3: {
+      cs: '<strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.',
+      en: '<strong>It was the railway that turned the harbour into a true transport hub.</strong> The Holešovice Harbour Railway — the official name of this unique industrial siding — opened on 6 June 1910 with the aim of connecting the growing river harbour and surrounding factories to Praha-Bubny goods station. Its 2.6-kilometre route was a civil-engineering rarity: the tracks ran straight through the urban street grid — primarily along Jankovcova Street — and at several points crossed busy tramway lines on the level. The siding\'s main era ended with the decline of freight transport in the late twentieth century; it was formally closed in 1998.'
+    },
+    p4: {
+      cs: '<strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.',
+      en: '<strong>The harbour\'s golden age</strong> came between the wars. It supplied raw materials to the surrounding Holešovice factories and businesses — metals, metallurgical products, timber, chemicals and raw ingredients for the food industry. Sand, gravel, building stone and other construction materials for Prague\'s growing cityscape also passed through in large quantities. The introduction of motor cargo vessels from 1931 accelerated the movement of higher-value, piece and perishable goods between Prague and northern Germany. Motor freighters set out from Holešovice down the Vltava and Elbe via Dresden to Hamburg and thence to the world. Thanks to this direct link, colonial and consumer goods from overseas — coffee, tea, spices, citrus fruit, machinery and semi-finished products — also flowed into Prague. After the Second World War, coal became the dominant commodity; Holešovice Harbour was the main gateway through which fuel poured into industrial Prague.'
+    }
+  }
+};
+
+/* ── Lokalizační helper ── */
+function loc(obj) {
+  if (!obj || typeof obj === 'string') return obj;
+  const lang = window.lopLang || 'cs';
+  return obj[lang] || obj.cs;
+}
+
+/* ── Render překladatelných částí stránky ── */
+function renderPlaceI18n() {
+  const lang = window.lopLang || 'cs';
+  const P = PLACE_DATA;
+
+  // HTML lang atribut
+  const html = document.getElementById('htmlRoot');
+  if (html) html.lang = lang;
+
+  // Title a meta
+  const pt = document.getElementById('pageTitle');
+  if (pt) pt.textContent = loc(P.pageTitle);
+  const md = document.getElementById('metaDesc');
+  if (md) md.setAttribute('content', loc(P.metaDesc));
+
+  // H1
+  const title = document.getElementById('placeTitle');
+  if (title) title.innerHTML = loc(P.title);
+
+  // Lede
+  const lede = document.getElementById('placeLede');
+  if (lede) lede.textContent = loc(P.lede);
+
+  // Facts
+  P.facts.forEach(function(f, i) {
+    const el = document.getElementById('factK' + i);
+    if (el) el.textContent = loc(f.k);
+  });
+
+  // Section labels
+  Object.entries(P.sections).forEach(function([key, val]) {
+    const el = document.getElementById('sec' + key.charAt(0).toUpperCase() + key.slice(1));
+    if (el) el.textContent = loc(val);
+  });
+
+  // Tip
+  const tl = document.getElementById('tipLabel');
+  if (tl) tl.textContent = loc(P.tipLabel);
+  const it = document.getElementById('insiderTeaser');
+  if (it) it.textContent = loc(P.insiderTeaser);
+  const igt = document.getElementById('insiderGateText');
+  if (igt) igt.textContent = loc(P.insiderGateText);
+  const igl = document.getElementById('insiderGateLink');
+  if (igl) igl.textContent = loc(P.insiderGateLink);
+
+  // Keywords
+  const kwContainer = document.getElementById('kwContainer');
+  if (kwContainer) {
+    kwContainer.innerHTML = loc(P.keywords).map(function(kw) {
+      return '<span class="kw-tag">' + kw + '</span>';
+    }).join('');
+  }
+
+  // Insider odstavce
+  ['p1','p2','p3','p4'].forEach(function(k) {
+    var el = document.getElementById('insiderP' + k.slice(1));
+    if (el && P.insider && P.insider[k]) el.innerHTML = loc(P.insider[k]);
+  });
+
+  // FS modal label
+  var fml = document.getElementById('fsModalLabel');
+  if (fml) fml.textContent = lang === 'en'
+    ? 'Holešovice Harbour — present day vs. ~1930'
+    : 'Holešovický přístav — současnost vs. ~1930';
+
+  // Copyright modal hlavičky
+  var cnow = document.getElementById('copyColNow');
+  if (cnow) cnow.textContent = lang === 'en' ? 'Today' : 'Dnes';
+}
+
+/* Spustit po načtení */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderPlaceI18n);
+} else {
+  renderPlaceI18n();
+}
+</script>
 <script src="../header.js"></script>
 
 <!-- NAV -->
@@ -1093,7 +1297,7 @@ a { color: inherit; text-decoration: none; }
 
   <!-- title + votes -->
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-    <h1 class="place-title">Holešovický <em>přístav</em></h1>
+    <h1 class="place-title" id="placeTitle">Holešovický <em>přístav</em></h1>
     <div class="k-votes" style="flex-shrink:0;margin-top:6px">
       <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
@@ -1146,11 +1350,11 @@ a { color: inherit; text-decoration: none; }
     <button class="copy-close" onclick="closeCopyright()">✕</button>
     <div class="copy-grid" id="copyGrid">
       <div>
-        <div class="copy-col-head">Dnes</div>
+        <div class="copy-col-head" id="copyColNow">Dnes</div>
         <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
       <div>
-        <div class="copy-col-head">~1930</div>
+        <div class="copy-col-head" id="copyColHist">~1930</div>
         <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
     </div>
@@ -1182,7 +1386,7 @@ a { color: inherit; text-decoration: none; }
     <div class="sl-divider" id="slDividerFs"></div>
   </div>
   <div class="rv-fs-labels" id="fsModalLabels">
-    <span>Holešovický přístav — současnost vs. ~1930</span>
+    <span id="fsModalLabel">Holešovický přístav — současnost vs. ~1930</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1220,7 +1424,7 @@ a { color: inherit; text-decoration: none; }
   <div class="actions" style="grid-template-columns:repeat(6,1fr)">
     <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-      <span class="act-lbl">Kompas</span>
+      <span class="act-lbl" id="actKompas">Kompas</span>
     </a>
     <a href="https://mapy.cz/zakladni?q=50.10543,14.45595&route-end=50.10543,14.45595&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1245,27 +1449,27 @@ a { color: inherit; text-decoration: none; }
   </div>
 
   <!-- lede -->
-  <p class="lede">Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.</p>
+  <p class="lede" id="placeLede">Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.</p>
 
   <!-- fakta -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Fakta</span>
+      <span class="sec-label" id="secFakta">Fakta</span>
       <div class="sec-rule"></div>
       <span class="sec-num">4 položky</span>
     </div>
     <div class="facts">
-      <div class="fact"><div class="fact-k">Vybudováno</div><div class="fact-v">1892–1910</div></div>
-      <div class="fact"><div class="fact-k">Délka bazénu</div><div class="fact-v">750 m</div></div>
-      <div class="fact"><div class="fact-k">Vytěženo</div><div class="fact-v">513 900 m³</div></div>
-      <div class="fact"><div class="fact-k">Architekt budov</div><div class="fact-v">F. Sander, 1906</div></div>
+      <div class="fact"><div class="fact-k" id="factK0">Vybudováno</div><div class="fact-v">1892–1910</div></div>
+      <div class="fact"><div class="fact-k" id="factK1">Délka bazénu</div><div class="fact-v">750 m</div></div>
+      <div class="fact"><div class="fact-k" id="factK2">Vytěženo</div><div class="fact-v">513 900 m³</div></div>
+      <div class="fact"><div class="fact-k" id="factK3">Architekt budov</div><div class="fact-v">F. Sander, 1906</div></div>
     </div>
   </div>
 
   <!-- stavby přístavu -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Stavby přístavu</span>
+      <span class="sec-label" id="secStavby">Stavby přístavu</span>
       <div class="sec-rule"></div>
       <button id="relatedToggle" onclick="window._relToggle()" title="Přepnout zobrazení">
         <svg id="relatedToggleIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1280,10 +1484,10 @@ a { color: inherit; text-decoration: none; }
   <!-- zajímavosti / insider -->
   <div class="section">
     <div class="tip">
-      <div class="tip-label">Zajímavosti</div>
+      <div class="tip-label" id="tipLabel">Zajímavosti</div>
       <div class="tip-text" id="insiderTeaser">Věděli jste, že Holešovický přístav nevznikl na řece?</div>
       <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
+        <div class="tip-text" style="font-style:normal" id="insiderP1"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
         <div>
           <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative;margin-top:0">
             <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
@@ -1325,7 +1529,7 @@ a { color: inherit; text-decoration: none; }
           <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Rozšíření přístavu ~1906–1908</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:0">
-          <div class="tip-text" style="font-style:normal"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
+          <div class="tip-text" style="font-style:normal" id="insiderP2"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
           <div>
             <div class="rv-wrap" id="rvInline">
               <div class="sl-base"><img src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
@@ -1364,7 +1568,7 @@ a { color: inherit; text-decoration: none; }
           </div>
         </div>
         <div>
-          <div class="tip-text" style="font-style:normal;margin-bottom:8px"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.</div>
+          <div class="tip-text" style="font-style:normal;margin-bottom:8px" id="insiderP3"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.</div>
           <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
             <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
             <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
@@ -1383,7 +1587,7 @@ a { color: inherit; text-decoration: none; }
             </button>
           </div>
           <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0">Orientační plán Prahy, 1938</div>
-          <div class="tip-text" style="font-style:normal;margin-top:10px"><strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
+          <div class="tip-text" style="font-style:normal;margin-top:10px" id="insiderP4"><strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
         </div>
       </div>
       <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
@@ -1397,7 +1601,7 @@ a { color: inherit; text-decoration: none; }
     <!-- poloha / mapa -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Poloha</span>
+      <span class="sec-label" id="secPoloha">Poloha</span>
       <div class="sec-rule"></div>
       <span class="sec-num">výřez mapy</span>
     </div>
@@ -1409,7 +1613,7 @@ a { color: inherit; text-decoration: none; }
   <!-- gamifikace — žebříček -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Žebříček</span>
+      <span class="sec-label" id="secZebricek">Žebříček</span>
       <div class="sec-rule"></div>
       <span class="sec-num">Top 5</span>
     </div>
@@ -1457,7 +1661,7 @@ a { color: inherit; text-decoration: none; }
   <!-- autor zastavení -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Autor zastavení</span>
+      <span class="sec-label" id="secAutor">Autor zastavení</span>
       <div class="sec-rule"></div>
     </div>
     <div class="autor-card">
@@ -1483,7 +1687,7 @@ a { color: inherit; text-decoration: none; }
   <!-- klíčová slova -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Klíčová slova</span>
+      <span class="sec-label" id="secKlicova">Klíčová slova</span>
       <div class="sec-rule"></div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -2286,44 +2490,7 @@ window.lopAuth.onLogout(() => {
 /* ── RELATED PLACES ── */
 (function() {
   // Ručně definovaná ID nebo inline data pro místa která ještě nemají vlastní stránku
-  const RELATED = [
-    {
-      id: 'H001-expozitura',
-      cat: 'hist',
-      name: 'Budova celní expozitury',
-      sub: 'č. p. 1057 · František Sander, 1906',
-      lede: 'Nejvýraznější stavba areálu s charakteristickou hranolovou věží. Postavena v duchu secese a rané moderny — kontrast hladkých světlých omítek a červeného režného zdiva. Věžová nástavba sloužila jako pozorovatelna s výhledem na celý přístavní bazén i seřaďovací nádraží.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/H001a_h.jpg',
-      url: null
-    },
-    {
-      id: 'H001-dozorstvo',
-      cat: 'hist',
-      name: 'Budova přístavního dozorstva',
-      sub: 'č. p. 1060 · František Sander, 1906–1909',
-      lede: 'Přímý architektonický protějšek celní expozitury — spolu tvoří symbolickou vstupní bránu areálu. Vysoká sedlová střecha nesená ozdobně vyřezávanými krokvemi. V přízemí kanceláře dozorce, v patře služební byt přístavního kapitána.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/H001b_h.jpg',
-      url: null
-    },
-    {
-      id: 'H001-skladiste',
-      cat: 'hist',
-      name: 'Budova celního skladiště',
-      sub: 'č. p. 1059 · František Sander, 1906',
-      lede: 'Rozsáhlá symetrická budova přímo při nábřežní zdi. Patrový střední trakt s valbovou střechou, po stranách přízemní skladištní haly. Logistické srdce přístavu — zboží přecházelo přímo z lodi přes jeřáby do skladů pod celním dohledem.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/H001c_h.jpg',
-      url: null
-    },
-    {
-      id: 'H001-vytah',
-      cat: 'hist',
-      name: 'Lodní výtah a přístavní dílny',
-      sub: 'firma Lanna · konec přístavní kosy',
-      lede: 'Jediné zařízení v Praze pro vytahování lodí z vody. Svážnicový systém na kolejnicích dopravil i největší labská plavidla na suchou plošinu. Přilehlé dílny zajišťovaly opravy trupů, lodních šroubů i parních strojů — přístav byl zcela soběstačný.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/H001d_h.jpg',
-      url: null
-    },
-  ];
+  const RELATED = PLACE_DATA.related;
 
   const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
   const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
@@ -2337,10 +2504,13 @@ window.lopAuth.onLogout(() => {
     const catName = CAT_NAME[p.cat]   || '';
     const url     = p.url || null;
     const onclick = url ? `location.href='${url}'` : 'return false';
+    const name    = typeof p.name === 'object' ? loc(p.name) : p.name;
+    const sub     = p.sub  ? (typeof p.sub  === 'object' ? loc(p.sub)  : p.sub)  : null;
+    const lede    = typeof p.lede === 'object' ? loc(p.lede) : p.lede;
 
     return `<div class="place-card" data-cat="${p.cat}" onclick="${onclick}" style="${!url?'cursor:default':''}">
       <div class="place-thumb" data-cat="${p.cat}">
-        ${p.thumb ? `<img src="${p.thumb}" alt="${p.name}" onerror="this.style.display='none'"/>` : ''}
+        ${p.thumb ? `<img src="${p.thumb}" alt="${name}" onerror="this.style.display='none'"/>` : ''}
         <div class="place-thumb-fallback">${letter}</div>
         <div class="place-cat-line" style="background:${color}"></div>
         <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
@@ -2350,9 +2520,9 @@ window.lopAuth.onLogout(() => {
           <span class="dot" style="background:${color}"></span>
           <span>${catName}</span>
         </div>
-        <div class="place-name">${p.name}</div>
-        ${p.sub ? `<div style="font-size:11px;color:var(--ink-5);margin-top:1px;font-family:'Inter',sans-serif">${p.sub}</div>` : ''}
-        <div class="place-sub">${p.lede}</div>
+        <div class="place-name">${name}</div>
+        ${sub ? `<div style="font-size:11px;color:var(--ink-5);margin-top:1px;font-family:'Inter',sans-serif">${sub}</div>` : ''}
+        <div class="place-sub">${lede}</div>
       </div>
       <div class="place-meta" style="justify-content:center">
         ${url ? '' : '<span style="font-size:9px;color:var(--ink-5);text-align:center;line-height:1.3;letter-spacing:.04em">Brzy</span>'}
