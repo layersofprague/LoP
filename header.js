@@ -76,8 +76,8 @@ const CSS = `
 .lop-h-btn.logged-in { color: var(--ink, #111111); }
 #lop-settings-menu {
   position: fixed;
-  top: 0; right: 0;
-  z-index: 490;
+  top: var(--header-h, 52px); right: 0;
+  z-index: 510;
   min-width: 200px;
   background: var(--paper, #F8F8F6);
   border: 1px solid var(--rule, #E8E8E6);
@@ -252,7 +252,7 @@ function _injectSettingsMenu() {
       <div class="lop-sm-divider"></div>
       <a class="lop-sm-item" href="${ROOT}oprojektu.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        O projektu
+        ${window.lopLang === 'en' ? 'About the project' : 'O projektu'}
       </a>
     </div>
   `;
