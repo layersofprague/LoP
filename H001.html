@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" id="htmlRoot">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#111111"/>
-<title>Holešovický přístav — LayersOfPrague</title>
-<meta name="description" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
+<title id="pageTitle">Holešovický přístav — LayersOfPrague</title>
+<meta name="description" id="metaDesc" content="Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -83,13 +83,13 @@ a { color: inherit; text-decoration: none; }
 .sl-kicker { align-self: flex-start; transform: translateY(1px); }
 .sl-lbl {
   font-family: 'Inter', sans-serif;
-  font-size: 13px; line-height: 1;
-  letter-spacing: .02em;
+  font-size: 12px; line-height: 1;
+  letter-spacing: 0;
   color: var(--ink-4);
-  font-weight: 500;
-  transition: color .2s, font-weight .2s;
+  font-weight: 400;
+  transition: color .2s;
 }
-.sl-lbl.active { color: var(--ink); font-weight: 500; }
+.sl-lbl.active { color: var(--ink-4); font-weight: 400; }
 .sl-kicker {
   font-family: 'Inter', sans-serif;
   font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
@@ -188,14 +188,27 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(18px) saturate(0.8);
   -webkit-backdrop-filter: blur(18px) saturate(0.8);
   align-items: center; justify-content: center;
+  flex-direction: column; gap: 0;
   overscroll-behavior: contain;
+  padding: 44px 0 8px;
 }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
   position: relative;
-  width: min(100vw, calc(100dvh * 4 / 3));
-  height: min(100dvh, calc(100vw * 3 / 4));
-  max-width: 100vw; max-height: 100dvh;
+  /* Šířka omezena, výška podle poměru stran */
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  aspect-ratio: 4/3;
+  overflow: hidden; /* divider nepřesahuje */
+  flex-shrink: 0;
+}
+/* Landscape — využít celou výšku */
+@media (orientation: landscape) {
+  .fs-modal { padding: 8px 0 4px; }
+  .fs-modal-inner {
+    width: auto;
+    height: calc(100dvh - 40px);
+    aspect-ratio: 4/3;
+  }
 }
 .fs-modal-inner .sl-base,
 .fs-modal-inner .sl-top {
@@ -204,17 +217,17 @@ a { color: inherit; text-decoration: none; }
 .fs-modal-inner .sl-base img,
 .fs-modal-inner .sl-top img {
   width: 100%; height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   pointer-events: none; -webkit-user-drag: none;
 }
-.fs-modal-inner .sl-lbl {
-  position: absolute; bottom: 14px; z-index: 3;
-  color: rgba(238,239,235,.5);
-  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+
+.fs-modal .rv-fs-labels {
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  padding: 6px 4px 0;
 }
-.fs-modal-inner .sl-lbl.active { color: #ffffff; }
-.fs-modal-inner .sl-lbl-l { left: 14px; }
-.fs-modal-inner .sl-lbl-r { right: 14px; }
+@media (orientation: landscape) {
+  .fs-modal .rv-fs-labels { width: auto; }
+}
 .fs-modal-inner .sl-handle {
   position: absolute; top: 50%; cursor: ew-resize; z-index: 4; pointer-events: auto;
 }
@@ -951,10 +964,30 @@ a { color: inherit; text-decoration: none; }
   align-items: center; justify-content: center;
   overscroll-behavior: contain;
   flex-direction: column; gap: 0;
-  padding: 48px 12px 12px;
+  padding: 44px 0 8px;
 }
 .rv-fs-modal.open { display: flex; }
-.rv-fs-modal .rv-wrap { width: 100%; max-width: 1200px; flex: 1; aspect-ratio: auto; border-radius: 6px; margin: 0; }
+.rv-fs-modal .rv-wrap {
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  aspect-ratio: 4/3;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 0; margin: 0;
+}
+@media (orientation: landscape) {
+  .rv-fs-modal { padding: 8px 0 4px; }
+  .rv-fs-modal .rv-wrap {
+    width: auto;
+    height: calc(100dvh - 40px);
+    aspect-ratio: 4/3;
+  }
+}
+.rv-fs-modal .rv-fs-labels {
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+}
+@media (orientation: landscape) {
+  .rv-fs-modal .rv-fs-labels { width: auto; }
+}
 
 .rv-fs-modal .sl-handle { background: rgba(255,255,255,.95); }
 .rv-fs-modal .sl-divider { background: rgba(255,255,255,.7); }
@@ -970,7 +1003,7 @@ a { color: inherit; text-decoration: none; }
 /* 1938 thumbnail */
 .rv-1938-thumb {
   position: relative; border-radius: 8px; overflow: hidden; cursor: pointer;
-  margin: 14px 0 4px;
+  margin: 0 0 4px;
 }
 .rv-1938-thumb img { width: 100%; display: block; border-radius: 8px; }
 .rv-1938-thumb .sl-fs-btn {
@@ -986,6 +1019,14 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Inter', sans-serif; font-size: 12px;
   color: rgba(255,255,255,.7);
 }
+.rv-fs-img {
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 48px);
+  width: auto; height: auto;
+  object-fit: contain; border-radius: 4px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+/* Landscape mobile — handled above */
 
 /* ── INSIDER IMAGE COPYRIGHT ── */
 .rv-copy-btn {
@@ -1016,6 +1057,19 @@ a { color: inherit; text-decoration: none; }
   padding: 2px 4px;
 }
 .rv-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
+
+/* ── PINCH-TO-ZOOM na fullscreen obrázcích ── */
+.rv-fs-modal .rv-fs-img {
+  touch-action: none;
+  transform-origin: center center;
+  transition: none;
+}
+.rv-fs-modal .rv-fs-img.zoomed {
+  cursor: grab;
+}
+.rv-fs-modal .rv-fs-img.zoomed:active {
+  cursor: grabbing;
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
@@ -1028,6 +1082,299 @@ a { color: inherit; text-decoration: none; }
 <!-- TOPBAR -->
 <div id="lop-header"></div>
 <script src="../i18n.js"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   H001 — Holešovický přístav
+   Přeložitelná data stránky (CS + EN)
+   ══════════════════════════════════════════ */
+const PLACE_DATA = {
+  id: 'H001',
+  cat: 'hist',
+
+  title: {
+    cs: 'Holešovický <em>přístav</em>',
+    en: 'Holešovice <em>Port</em>'
+  },
+
+  pageTitle: {
+    cs: 'Holešovický přístav — LayersOfPrague',
+    en: 'Holešovice Port — LayersOfPrague'
+  },
+
+  metaDesc: {
+    cs: 'Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander.',
+    en: 'Prague\'s only port where river, rail and road transport converged. Built 1892–1894, the Art Nouveau buildings were designed by František Sander.'
+  },
+
+  lede: {
+    cs: 'Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.',
+    en: 'Prague\'s largest port and the only place in the city where ships, trains and lorries met at a single point. Its success lay in its location: three railway lines terminated in Holešovice — the Imperial State Railway, the Buštěhrad Railway and the Northwestern Railway — making it an ideal distribution hub. Branch lines ran not only to Praha-Bubny station but also to nearby factories: the Pergamentka paper mill, ironworks, mills and a power station. Most of them disappeared after 1989. The entire complex has been a listed cultural monument since 2002. Today, the Prague Marina residential complex stands on its banks.'
+  },
+
+  facts: [
+    { k: { cs: 'Vybudováno',     en: 'Built'          }, v: '1892–1910' },
+    { k: { cs: 'Délka bazénu',   en: 'Basin length'   }, v: '750 m' },
+    { k: { cs: 'Vytěženo',       en: 'Excavated'      }, v: '513 900 m³' },
+    { k: { cs: 'Architekt budov',en: 'Buildings arch.' }, v: 'F. Sander, 1906' },
+  ],
+
+  sections: {
+    fakta:    { cs: 'Fakta',           en: 'Facts' },
+    stavby:   { cs: 'Stavby přístavu', en: 'Port buildings' },
+    poloha:   { cs: 'Poloha',          en: 'Location' },
+    zebricek: { cs: 'Žebříček',        en: 'Ranking' },
+    autor:    { cs: 'Autor zastavení', en: 'Author of the stop' },
+    klicova:  { cs: 'Klíčová slova',   en: 'Keywords' },
+  },
+
+  tipLabel:   { cs: 'Zajímavosti',    en: 'Did you know' },
+  insiderTeaser: {
+    cs: 'Věděli jste, že Holešovický přístav nevznikl na řece nebo jak zásadně se proměnila řeka v této oblasti? Zajímají Vás další detaily?',
+    en: 'Did you know that the Holešovice Port wasn’t built on a river or how drastically the river in this area has changed? Are you interested in more details?'
+  },
+  insiderGateText: {
+    cs: 'Pro celý obsah se',
+    en: 'For the full content'
+  },
+  insiderGateLink: {
+    cs: 'přihlaste',
+    en: 'sign in'
+  },
+
+  related: [
+    {
+      id: 'H001-expozitura', cat: 'hist',
+      name: { cs: 'Budova celní expozitury',        en: 'Customs Office Building' },
+      sub:  { cs: 'č. p. 1057 · František Sander, 1906', en: 'No. 1057 · František Sander, 1906' },
+      lede: { cs: 'Nejvýraznější stavba areálu s charakteristickou hranolovou věží. Postavena v duchu secese a rané moderny — kontrast hladkých světlých omítek a červeného režného zdiva. Věžová nástavba sloužila jako pozorovatelna s výhledem na celý přístavní bazén i seřaďovací nádraží.',
+              en: 'The most distinctive building in the complex, with its characteristic prismatic tower. Built in the Art Nouveau and early modern style — a contrast of smooth light plaster and red face-brick. The tower served as an observation post overlooking the whole port basin and marshalling yard.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001a_h.jpg', url: null
+    },
+    {
+      id: 'H001-dozorstvo', cat: 'hist',
+      name: { cs: 'Budova přístavního dozorstva',     en: 'Port Supervisor\'s Building' },
+      sub:  { cs: 'č. p. 1060 · František Sander, 1906–1909', en: 'No. 1060 · František Sander, 1906–1909' },
+      lede: { cs: 'Přímý architektonický protějšek celní expozitury — spolu tvoří symbolickou vstupní bránu areálu. Vysoká sedlová střecha nesená ozdobně vyřezávanými krokvemi. V přízemí kanceláře dozorce, v patře služební byt přístavního kapitána.',
+              en: 'The direct architectural counterpart to the customs building — together they form the symbolic gateway to the complex. A tall saddle roof carried on ornately carved rafters. The ground floor housed the supervisor\'s offices; the upper floor served as the port master\'s flat.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001b_h.jpg', url: null
+    },
+    {
+      id: 'H001-skladiste', cat: 'hist',
+      name: { cs: 'Budova celního skladiště',         en: 'Customs Warehouse' },
+      sub:  { cs: 'č. p. 1059 · František Sander, 1906', en: 'No. 1059 · František Sander, 1906' },
+      lede: { cs: 'Rozsáhlá symetrická budova přímo při nábřežní zdi. Patrový střední trakt s valbovou střechou, po stranách přízemní skladištní haly. Logistické srdce přístavu — zboží přecházelo přímo z lodi přes jeřáby do skladů pod celním dohledem.',
+              en: 'A large symmetrical building directly against the quay wall. A two-storey central block with a hip roof, flanked by single-storey warehouse wings. The logistical heart of the port — goods moved directly from ship via cranes into bonded storage.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001c_h.jpg', url: null
+    },
+    {
+      id: 'H001-vytah', cat: 'hist',
+      name: { cs: 'Lodní výtah a přístavní dílny',    en: 'Ship Lift and Port Workshops' },
+      sub:  { cs: 'firma Lanna · konec přístavní kosy', en: 'Lanna company · tip of the port spit' },
+      lede: { cs: 'Jediné zařízení v Praze pro vytahování lodí z vody. Svážnicový systém na kolejnicích dopravil i největší labská plavidla na suchou plošinu. Přilehlé dílny zajišťovaly opravy trupů, lodních šroubů i parních strojů — přístav byl zcela soběstačný.',
+              en: 'The only facility in Prague for hauling vessels out of the water. A transverse slipway on rails could handle even the largest Elbe barges. Adjacent workshops provided hull repairs, propeller and steam-engine servicing — the port was entirely self-sufficient.' },
+      thumb: 'https://layersofprague.github.io/LoP/foto/H001d_h.jpg', url: null
+    },
+  ],
+
+  captions: {
+    plan1894:    { cs: 'Plán holešovického přístavu, 1894',                          en: 'Holešovice Port plan, 1894' },
+    stavba:      { cs: 'Rozšíření přístavu ~1906–1908',                              en: 'Port expansion ~1906–1908' },
+    plan1909:    { cs: '1909–1914',                                                   en: '1909–1914' },
+    today:       { cs: 'Dnes',                                                        en: 'Today' },
+    plan1938:    { cs: 'Orientační plán Prahy, 1938',                                 en: 'Prague orientation map, 1938' },
+    riverLabel:  { cs: 'Orientační plán Prahy 1909–1914 vs. současný letecký snímek', en: 'Prague orientation map 1909–1914 vs. current aerial photograph' },
+    fsLabel:     { cs: 'Holešovický přístav — současnost vs. ~1930',                  en: 'Holešovice Port — present day vs. ~1930' },
+    copyToday:   { cs: 'Dnes',                                                        en: 'Today' },
+    copyHist:    { cs: '~1930',                                                       en: '~1930' },
+    copyPlan:    { cs: 'Plán přístavu, 1894',                                         en: 'Port plan, 1894' },
+    copy1938:    { cs: 'Orientační plán, 1938',                                       en: 'Orientation map, 1938' },
+    copyRiverL:  { cs: '1909–1914',                                                   en: '1909–1914' },
+    copyRiverR:  { cs: 'Dnes (ortofoto)',                                             en: 'Today (aerial)' },
+    mapa:        { cs: 'výřez mapy',                                                  en: 'map detail' },
+    wishLbl:     { cs: 'Plán',                                                        en: 'Plan' },
+  },
+
+  keywords: {
+    cs: ['přístav','průmysl','secese','Holešovice','František Sander','lodní doprava','Praha 7','1892','Prague Marina','nábřeží','firma Lanna','železniční vlečka','Bubny','labské lodě','Hamburg','lodní výtah','František Bartoš','veřejná skladiště'],
+    en: ['port','industry','art nouveau','Holešovice','František Sander','river transport','Prague 7','1892','Prague Marina','waterfront','Lanna company','railway siding','Bubny','Elbe barges','Hamburg','ship lift','František Bartoš','public warehouses']
+  },
+
+  insider: {
+    p1: {
+      cs: '<strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.',
+      en: '<strong>The port was not built on the river — it was built beside it.</strong> Workers from the Vojtěch Lanna company excavated the port basin from the Holešovice plain in two phases. Between 1892 and 1895 they created a protective winter port — 750 m long, 100 m wide and 2–4 m deep — where vessels could safely ride out floods and winter ice. Only after the completion of river-regulation works making the Vltava navigable downstream of Prague, and with the rapid growth of Prague\'s industry, did the urgent need for a large transhipment point arise. The existing Karlín port was no longer sufficient. Holešovice Port was therefore redesigned in this second phase as a commercial port. Around 1906–1908 the massive stone quay walls and the Art Nouveau complex of buildings were completed. The port could accommodate 150 to 170 large Elbe barges and, uniquely in Prague, had a ship lift — a device capable of hauling an entire vessel out of the water for repair or winter inspection. The total cost was 1,230,000 guilders (~CZK 2.7–2.8 billion / ~EUR 110 million). At the time this was an enormous sum, shared between the City of Prague and the Imperial Austrian Lieutenancy.'
+    },
+    p2: {
+      cs: '<strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.',
+      en: '<strong>The diversion of the Vltava</strong> dramatically changed the shape of the Holešovice peninsula. Between 1926 and 1928 engineers redirected the river channel closer to the port, creating a narrow spit on which architect František Bartoš built the Functionalist Public Warehouses with a reinforced-concrete frame, later supplemented by cold-storage and freezing facilities. The transformation is best seen by comparing the 1909–1914 orientation map of Prague with a present-day aerial photograph.'
+    },
+    p3: {
+      cs: '<strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.',
+      en: '<strong>It was the railway that turned the port into a true transport hub.</strong> The Holešovice Port Railway — the official name of this unique industrial siding — opened on 6 June 1910 with the aim of connecting the growing river port and surrounding factories to Praha-Bubny goods station. Its 2.6-kilometre route was a civil-engineering rarity: the tracks ran straight through the urban street grid — primarily along Jankovcova Street — and at several points crossed busy tramway lines on the level. The siding\'s main era ended with the decline of freight transport in the late twentieth century; it was formally closed in 1998.'
+    },
+    p4: {
+      cs: '<strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.',
+      en: '<strong>The port\'s golden age</strong> came between the wars. It supplied raw materials to the surrounding Holešovice factories and businesses — metals, metallurgical products, timber, chemicals and raw ingredients for the food industry. Sand, gravel, building stone and other construction materials for Prague\'s growing cityscape also passed through in large quantities. The introduction of motor cargo vessels from 1931 accelerated the movement of higher-value, piece and perishable goods between Prague and northern Germany. Motor freighters set out from Holešovice down the Vltava and Elbe via Dresden to Hamburg and thence to the world. Thanks to this direct link, colonial and consumer goods from overseas — coffee, tea, spices, citrus fruit, machinery and semi-finished products — also flowed into Prague. After the Second World War, coal became the dominant commodity; Holešovice Port was the main gateway through which fuel poured into industrial Prague.'
+    }
+  }
+};
+
+/* ── Lokalizační helper ── */
+window.loc = function loc(obj) {
+  if (!obj || typeof obj === 'string') return obj;
+  const lang = window.lopLang || 'cs';
+  return obj[lang] || obj.cs;
+}
+var loc = window.loc;
+
+/* ── Render překladatelných částí stránky ── */
+function renderPlaceI18n() {
+  const lang = window.lopLang || 'cs';
+  const P = PLACE_DATA;
+
+  // HTML lang atribut
+  const html = document.getElementById('htmlRoot');
+  if (html) html.lang = lang;
+
+  // Title a meta
+  const pt = document.getElementById('pageTitle');
+  if (pt) pt.textContent = loc(P.pageTitle);
+  const md = document.getElementById('metaDesc');
+  if (md) md.setAttribute('content', loc(P.metaDesc));
+
+  // H1
+  const title = document.getElementById('placeTitle');
+  if (title) title.innerHTML = loc(P.title);
+
+  // Lede
+  const lede = document.getElementById('placeLede');
+  if (lede) lede.textContent = loc(P.lede);
+
+  // Facts
+  P.facts.forEach(function(f, i) {
+    const el = document.getElementById('factK' + i);
+    if (el) el.textContent = loc(f.k);
+  });
+
+  // Section labels
+  Object.entries(P.sections).forEach(function([key, val]) {
+    const el = document.getElementById('sec' + key.charAt(0).toUpperCase() + key.slice(1));
+    if (el) el.textContent = loc(val);
+  });
+
+  // Tip
+  const tl = document.getElementById('tipLabel');
+  if (tl) tl.textContent = loc(P.tipLabel);
+  const it = document.getElementById('insiderTeaser');
+  if (it) it.textContent = loc(P.insiderTeaser);
+  const igt = document.getElementById('insiderGateText');
+  if (igt) igt.textContent = loc(P.insiderGateText);
+  const igl = document.getElementById('insiderGateLink');
+  if (igl) igl.textContent = loc(P.insiderGateLink);
+  const iwl = document.getElementById('insiderWhyLink');
+  if (iwl) iwl.textContent = lang === 'en' ? 'Why is some content hidden?' : 'Proč je část obsahu skryta?';
+
+  // Keywords
+  const kwContainer = document.getElementById('kwContainer');
+  if (kwContainer) {
+    kwContainer.innerHTML = loc(P.keywords).map(function(kw) {
+      return '<span class="kw-tag">' + kw + '</span>';
+    }).join('');
+  }
+
+  // Insider odstavce
+  ['p1','p2','p3','p4'].forEach(function(k) {
+    var el = document.getElementById('insiderP' + k.slice(1));
+    if (el && P.insider && P.insider[k]) el.innerHTML = loc(P.insider[k]);
+  });
+
+  // Kicker kategorie
+  var k1 = document.getElementById('kickerCat1');
+  var k2 = document.getElementById('kickerCat2');
+  if (k1) k1.textContent = lang === 'en' ? 'History'   : 'Historie';
+  if (k2) k2.textContent = lang === 'en' ? 'Industry'  : 'Průmysl';
+
+  // Action buttons
+  var actMap = {
+    actKompas: { cs: 'Kompas',  en: 'Compass' },
+    actSdilet: { cs: 'Sdílet',  en: 'Share'   },
+    wishLbl:   { cs: 'Plán',    en: 'Plan'     },
+    actAR:     { cs: 'AR',      en: 'AR'       },
+  };
+  Object.entries(actMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = loc(val);
+  });
+
+  // Popisky plánů a sliderů
+  var C = P.captions;
+  var capMap = {
+    capPlan1894:    C.plan1894,
+    capStavba:      C.stavba,
+    capStavba2:     C.stavba,
+    fsStavbaLabel:  C.stavba,
+    capPlan1938:    C.plan1938,
+    capMapa:        C.mapa,
+    capRiverL:      C.plan1909,
+    capRiverR:      C.today,
+    copyColNow:     C.copyToday,
+    copyColHist:    C.copyHist,
+    copyPlanHead:   C.copyPlan,
+    copy1938Head:   C.copy1938,
+    copyRiverRHead: C.copyRiverR,
+    fsPlan1894Label:C.plan1894,
+    fs1938Label:    C.plan1938,
+    fsModalLabel:   C.fsLabel,
+  };
+  Object.entries(capMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el && val) el.textContent = loc(val);
+  });
+
+  // FS modal label
+  var fml = document.getElementById('fsModalLabel');
+  if (fml) fml.textContent = loc(C.fsLabel);
+
+  // Galerie
+  var sg = document.getElementById('secGalerie');
+  if (sg) sg.textContent = lang === 'en' ? 'Gallery' : 'Galerie';
+  var sgn = document.getElementById('secGalerieNum');
+  if (sgn) sgn.textContent = lang === 'en' ? '6 photos' : '6 fotografií';
+
+  // Ranking
+  var lhKick = document.getElementById('lhKick');
+  if (lhKick) lhKick.textContent = lang === 'en' ? 'Best shot' : 'Nejlepší záběr';
+  document.querySelectorAll('#lhUnit1, #lhUnit2').forEach(function(el) {
+    el.textContent = lang === 'en' ? 'pts' : 'bodů';
+  });
+  var lhBy = document.getElementById('lhBy');
+  if (lhBy) lhBy.textContent = 'Jan K., ' + (lang === 'en' ? '1st place' : '1. místo');
+
+  // AR CTA
+  var arKick = document.getElementById('arCtaKick');
+  if (arKick) arKick.textContent = lang === 'en' ? 'Peek into history' : 'Nahlédni do historie';
+  var arTitle = document.getElementById('arCtaTitle');
+  if (arTitle) arTitle.textContent = lang === 'en' ? 'Launch AR — Holešovice Port' : 'Spustit AR — Holešovický přístav';
+
+  // Autor badge + meta
+  var ab = document.getElementById('autorBadge');
+  if (ab) ab.textContent = lang === 'en' ? 'Curator' : 'Kurátor';
+  var ap = document.getElementById('autorPlaces');
+  if (ap) ap.textContent = lang === 'en' ? '12 stops' : '12 zastavení';
+  var ar = document.getElementById('autorStars');
+  if (ar && ar.textContent.match(/čeká|awaiting/)) ar.textContent = lang === 'en' ? 'awaiting rating' : 'čeká na hodnocení';
+}
+
+/* Spustit po načtení */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderPlaceI18n);
+} else {
+  renderPlaceI18n();
+}
+/* Záloha — znovu po načtení celé stránky */
+window.addEventListener('load', renderPlaceI18n);
+</script>
 <script src="../header.js"></script>
 
 <!-- NAV -->
@@ -1039,7 +1386,7 @@ a { color: inherit; text-decoration: none; }
 
   <!-- title + votes -->
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-    <h1 class="place-title">Holešovický <em>přístav</em></h1>
+    <h1 class="place-title" id="placeTitle">Holešovický <em>přístav</em></h1>
     <div class="k-votes" style="flex-shrink:0;margin-top:6px">
       <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
@@ -1055,19 +1402,19 @@ a { color: inherit; text-decoration: none; }
   <!-- kicker -->
   <div class="kicker">
     <div class="k-dot"></div>
-    <span>Historie</span>
+    <span id="kickerCat1">Historie</span>
     <span class="k-sep">·</span>
-    <span>Průmysl</span>
+    <span id="kickerCat2">Průmysl</span>
   </div>
 
 <div class="hero" id="hero">
   <!-- Základ: současná fotka -->
   <div class="sl-base">
-    <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+    <img src="../foto/H001b_s.jpg" alt="Holešovický přístav dnes"/>
   </div>
   <!-- Overlay: historická fotka, maskována zprava -->
   <div class="sl-top" id="slTop">
-    <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+    <img src="../foto/H001b_h.jpg" alt="Holešovický přístav ~1930"/>
   </div>
   <!-- Hairline divider -->
   <div class="sl-divider" id="slDivider"></div>
@@ -1092,11 +1439,11 @@ a { color: inherit; text-decoration: none; }
     <button class="copy-close" onclick="closeCopyright()">✕</button>
     <div class="copy-grid" id="copyGrid">
       <div>
-        <div class="copy-col-head">Dnes</div>
+        <div class="copy-col-head" id="copyColNow">Dnes</div>
         <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
       <div>
-        <div class="copy-col-head">~1930</div>
+        <div class="copy-col-head" id="copyColHist">~1930</div>
         <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
     </div>
@@ -1106,7 +1453,6 @@ a { color: inherit; text-decoration: none; }
 <div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
-  <div class="sl-kicker">Tehdy &amp; Dnes</div>
   <div class="sl-lbl active" id="lblHist">~1930</div>
 </div>
 
@@ -1116,18 +1462,20 @@ a { color: inherit; text-decoration: none; }
 <div class="fs-modal" id="fsModal">
   <div class="fs-modal-inner">
     <div class="sl-base">
-      <img src="../foto/h_001s.jpg" alt="Holešovický přístav dnes"/>
+      <img src="../foto/H001b_s.jpg" alt="Holešovický přístav dnes"/>
     </div>
     <div class="sl-top" id="slTopFs">
-      <img src="../foto/h_001h.jpg" alt="Holešovický přístav ~1930"/>
+      <img src="../foto/H001b_h.jpg" alt="Holešovický přístav ~1930"/>
     </div>
-    <div class="sl-lbl sl-lbl-l" id="lblNowFs">2026</div>
-    <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1930</div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
       </svg>
     </div>
+    <div class="sl-divider" id="slDividerFs"></div>
+  </div>
+  <div class="rv-fs-labels" id="fsModalLabels">
+    <span id="fsModalLabel">Holešovický přístav — současnost vs. ~1930</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1165,23 +1513,23 @@ a { color: inherit; text-decoration: none; }
   <div class="actions" style="grid-template-columns:repeat(6,1fr)">
     <a href="../compass.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-      <span class="act-lbl">Kompas</span>
+      <span class="act-lbl" id="actKompas">Kompas</span>
     </a>
     <a href="https://mapy.cz/zakladni?q=50.10543,14.45595&route-end=50.10543,14.45595&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Mapy.cz</span>
+      <span class="act-lbl" id="actMapy">Mapy.cz</span>
     </a>
     <a href="https://www.google.com/maps/dir/?api=1&destination=50.10543,14.45595&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Google</span>
+      <span class="act-lbl" id="actGoogle">Google</span>
     </a>
     <button class="act-btn" onclick="share()" title="Sdílet">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      <span class="act-lbl">Sdílet</span>
+      <span class="act-lbl" id="actSdilet">Sdílet</span>
     </button>
-    <a href="../ar-intro.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg" class="act-btn" title="AR">
+    <a href="../ar-intro.html?id=H001&lat=50.10543&lng=14.45595&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH001b_ove_thumb.jpg" class="act-btn" title="AR">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
-      <span class="act-lbl">AR</span>
+      <span class="act-lbl" id="actAR">AR</span>
     </a>
     <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
       <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
@@ -1190,182 +1538,27 @@ a { color: inherit; text-decoration: none; }
   </div>
 
   <!-- lede -->
-  <p class="lede">Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.</p>
+  <p class="lede" id="placeLede">Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.</p>
 
   <!-- fakta -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Fakta</span>
+      <span class="sec-label" id="secFakta">Fakta</span>
       <div class="sec-rule"></div>
       <span class="sec-num">4 položky</span>
     </div>
     <div class="facts">
-      <div class="fact"><div class="fact-k">Vybudováno</div><div class="fact-v">1892–1910</div></div>
-      <div class="fact"><div class="fact-k">Délka bazénu</div><div class="fact-v">750 m</div></div>
-      <div class="fact"><div class="fact-k">Vytěženo</div><div class="fact-v">513 900 m³</div></div>
-      <div class="fact"><div class="fact-k">Architekt budov</div><div class="fact-v">F. Sander, 1906</div></div>
+      <div class="fact"><div class="fact-k" id="factK0">Vybudováno</div><div class="fact-v">1892–1910</div></div>
+      <div class="fact"><div class="fact-k" id="factK1">Délka bazénu</div><div class="fact-v">750 m</div></div>
+      <div class="fact"><div class="fact-k" id="factK2">Vytěženo</div><div class="fact-v">513 900 m³</div></div>
+      <div class="fact"><div class="fact-k" id="factK3">Architekt budov</div><div class="fact-v">F. Sander, 1906</div></div>
     </div>
   </div>
 
-  <!-- na místě -->
+  <!-- stavby přístavu -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Na místě</span>
-      <div class="sec-rule"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px;font-family:'Inter',sans-serif;font-size:14px;line-height:1.65;color:var(--ink-2,#333331);">
-      <p><strong>Brána a vstupní budovy</strong> — vstup do přístavu hlídají dvě symetrické budovy u brány. Budova přístavního dozorství (č. p. 1060) je patrová stavba s asymetrickým štítem posunutým vpravo; v patře sdružená okna, v přízemí jednoduchá. Naproti stojí budova celní expozitury, kde se odbavovalo zboží. Obě spojuje typický Sanderův rukopis — kontrast červeného režného zdiva a bílé omítky posazený na soklu z hrubě opracovaného kamene.</p>
-      <p><strong>Budova celní expozitury</strong> — nejvýraznější stavba areálu (č. p. 1057). Do ulice se obrací třemi sdruženými okny se štítem, ale skutečnou dominantou je hranolová věž v zadní části, kterou bylo vidět z celé řeky. Právě zde se odbavovalo zboží mezi lodí, vlakem a městem.</p>
-      <p><strong>Celní skladiště</strong> — stojí opodál, přímo při nábřežní zdi (č. p. 1059). Střední trojosá část je patrová, po stranách z ní vybíhají přízemní křídla s arkádami pod mohutnou sedlovou střechou. Skladovalo se tu celně zajištěné zboží čekající na proclení.</p>
-      <p><strong>Železniční vlečka</strong> — teprve koleje udělaly z přístavu skutečný dopravní uzel. Vlečka zprovozněná roku 1910 vedla z nádraží Bubny Jankovcovou ulicí až k překladišti, kde jeřáby přendávaly náklad rovnou z lodi do vagonu. Odbočky se pak větvily do okolních továren. Vjezd u domu železničních zřízenců (č. p. 788) střežilo hradlo se závorou.</p>
-    </div>
-    <div class="tip">
-      <div class="tip-label">Zajímavosti</div>
-      <div class="tip-text" id="insiderTeaser">Věděli jste, že Holešovický přístav nevznikl na řece?</div>
-      <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal">Přístav nevznikl na řece, ale vedle ní — dělníci firmy Lanna vyhloubili celý 750m dlouhý a 100m široký přístavní bazén z holešovické planiny během pouhých dvou let. Stavba začala v roce 1892, v prosinci 1893 napustili dělníci bazén vodou a v listopadu 1894 přístav zahájil provoz. Lodě zde mohly bezpečně přezimovat, aniž by je ohrožoval led a proud řeky. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce.</div>
-        <div class="tip-text" style="font-style:normal">Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR) — obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
-        <div style="margin-top:14px">
-          <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative">
-            <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
-            <div class="rv-copy-modal" id="rvCopyPlan">
-              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
-              <div style="margin-top:2px">
-                <div class="copy-col-head">Plán přístavu, 1894</div>
-                <div id="rvExifPlan1894"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-              </div>
-            </div>
-            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpenPlan()" title="Celá obrazovka">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-          </div>
-          <div class="rv-margin" style="justify-content:center">
-            <div class="sl-kicker">Plán holešovického přístavu, 1894</div>
-          </div>
-        </div>
-        <div class="tip-text" style="font-style:normal;margin-top:10px">V letech 1926–1928 inženýři přeložili koryto Vltavy blíž k přístavu a vytvořili tak úzkou kosu poloostrova. Na ní postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin.</div>
-        <div style="margin-top:16px">
-          <div class="rv-wrap" id="rvInline">
-            <div class="sl-base"><img src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
-            <div class="sl-top" id="rvInlineTop"><img src="../foto/h001_orientacni_plan_Prahy_1909–1914.jpg" alt="Orientační plán Prahy 1909–1914"/></div>
-            <div class="sl-divider" id="rvInlineDiv"></div>
-            <div class="sl-handle" id="rvInlineHandle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
-              </svg>
-            </div>
-            <button class="sl-fs-btn" onclick="window._rvOpenFs()" title="Celá obrazovka">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
-            <div class="rv-copy-modal" id="rvCopyRiver">
-              <button class="copy-close" onclick="window._rvToggleCopy('rvCopyRiver')">✕</button>
-              <div class="copy-grid">
-                <div>
-                  <div class="copy-col-head">1909–1914</div>
-                  <div id="rvExifPlan1909"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-                </div>
-                <div>
-                  <div class="copy-col-head">Dnes (ortofoto)</div>
-                  <div id="rvExifOrtofoto"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="rv-margin">
-            <div class="sl-lbl active" id="rvInlineLblL">1909–1914</div>
-            <div class="sl-kicker">Tehdy &amp; Dnes</div>
-            <div class="sl-lbl" id="rvInlineLblR">Dnes</div>
-          </div>
-          <div class="tip-text" style="font-style:normal;margin-top:8px">Přeložení koryta Vltavy v letech 1926–1928 dramaticky změnilo tvar holešovického poloostrova. Porovnejte orientační plán Prahy z let 1909–1914 se současným leteckým snímkem.</div>
-        </div>
-        <div class="tip-text" style="font-style:normal;margin-top:10px">Zlatá éra přišla mezi válkami. Od roku 1931 vyrážely z Holešovic motorové nákladní lodě až do Hamburku — po Vltavě a Labi přes Drážďany k moři a odtud do celého světa. Po druhé světové válce přístav zaplnilo hlavně uhlí; stal se hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
-        <div style="margin-top:16px">
-          <div class="tip-text" style="font-style:normal;margin-bottom:8px">Na orientačním plánu z roku 1938 je dobře vidět přístavní železnice — vlečka vycházející z nádraží Bubny podél Jankovcovy ulice až k překladišti na břehu bazénu.</div>
-          <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
-            <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
-            <div class="rv-copy-modal" id="rvCopy1938">
-              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
-              <div style="margin-top:2px">
-                <div class="copy-col-head">Orientační plán, 1938</div>
-                <div id="rvExif1938"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-              </div>
-            </div>
-            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpen1938()" title="Celá obrazovka">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-          </div>
-          <div class="rv-margin" style="justify-content:center">
-            <div class="sl-kicker">Orientační plán Prahy, 1938</div>
-          </div>
-        </div>
-     
-      </div>
-      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
-        <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- galerie -->
-  <div class="section">
-    <div class="sec-head">
-      <span class="sec-label">Galerie</span>
-      <div class="sec-rule"></div>
-      <span class="sec-num">7 fotografií</span>
-    </div>
-    <div class="gallery" id="gallerySection">
-      <div class="gallery-thumb" onclick="openGallery(0)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
-        <div class="gt-label">~1930</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(1)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Bh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Stavba přístavního bazénu, dělníci při práci"/>
-        <div class="gt-label">~1894</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(2)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Ch.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Drážní budova s věží (č.p. 1057)"/>
-        <div class="gt-label">~1906</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(3)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Dh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Seřaďovací nádraží a přístav, pohled z výšky"/>
-        <div class="gt-label">~1895</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(4)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Gh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Lodě v přístavním bazénu u překladiště"/>
-        <div class="gt-label">~1895</div>
-      </div>
-      <div class="gallery-thumb" onclick="openGallery(5)">
-        <img src="https://layersofprague.github.io/LoP/foto/h_001Hh.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Přístav v prvních letech provozu, jeřáby a lodě"/>
-        <div class="gt-label">~1893</div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- relacioné (ručně definovana místa) -->
-  <div class="section" id="relatedSection">
-    <div class="sec-head">
-      <span class="sec-label">Související</span>
+      <span class="sec-label" id="secStavby">Stavby přístavu</span>
       <div class="sec-rule"></div>
       <button id="relatedToggle" onclick="window._relToggle()" title="Přepnout zobrazení">
         <svg id="relatedToggleIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1377,12 +1570,176 @@ a { color: inherit; text-decoration: none; }
     <div id="relatedList"></div>
   </div>
 
-  <!-- poloha / mapa -->
+  <!-- zajímavosti / insider -->
+  <div class="section">
+    <div class="tip">
+      <div class="tip-label" id="tipLabel">Zajímavosti</div>
+      <div class="tip-text" id="insiderTeaser">Věděli jste, že Holešovický přístav nevznikl na řece?</div>
+      <div class="insider-full" id="insiderFull" style="margin-top:10px">
+        <div class="tip-text" style="font-style:normal" id="insiderP1"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
+        <div>
+          <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative;margin-top:0">
+            <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
+            <div class="rv-copy-modal" id="rvCopyPlan">
+              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
+              <div style="margin-top:2px">
+                <div class="copy-col-head" id="copyPlanHead">Plán přístavu, 1894</div>
+                <div id="rvExifPlan1894"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+              </div>
+            </div>
+            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpenPlan()" title="Celá obrazovka">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capPlan1894">Plán holešovického přístavu, 1894</div>
+        </div>
+        <div>
+          <div class="rv-1938-thumb" onclick="window._rvOpenStavba()" style="position:relative;margin-top:0">
+            <img src="../foto/H001h_h.jpg" alt="Hloubení přístavního bazénu"/>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')" title="Autorská práva">©</button>
+            <div class="rv-copy-modal" id="rvCopyStavba">
+              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')">✕</button>
+              <div style="margin-top:2px">
+                <div class="copy-col-head" id="capStavba">Rozšíření přístavu ~1906–1908</div>
+                <div id="rvExifStavba"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+              </div>
+            </div>
+            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpenStavba()" title="Celá obrazovka">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capStavba2">Rozšíření přístavu ~1906–1908</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div class="tip-text" style="font-style:normal" id="insiderP2"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
+          <div>
+            <div class="rv-wrap" id="rvInline">
+              <div class="sl-base"><img src="../foto/H001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
+              <div class="sl-top" id="rvInlineTop"><img src="../foto/H001_orientacni_plan_Prahy_1909–1914.jpg" alt="Orientační plán Prahy 1909–1914"/></div>
+              <div class="sl-divider" id="rvInlineDiv"></div>
+              <div class="sl-handle" id="rvInlineHandle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
+                </svg>
+              </div>
+              <button class="sl-fs-btn" onclick="window._rvOpenFs()" title="Celá obrazovka">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                  <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
+              </button>
+              <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
+              <div class="rv-copy-modal" id="rvCopyRiver">
+                <button class="copy-close" onclick="window._rvToggleCopy('rvCopyRiver')">✕</button>
+                <div class="copy-grid">
+                  <div>
+                    <div class="copy-col-head">1909–1914</div>
+                    <div id="rvExifPlan1909"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+                  </div>
+                  <div>
+                    <div class="copy-col-head" id="copyRiverRHead">Dnes (ortofoto)</div>
+                    <div id="rvExifOrtofoto"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);display:flex;justify-content:space-between;padding:4px 2px 0">
+              <span id="capRiverL">1909–1914</span>
+              <span id="capRiverR">Dnes</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="tip-text" style="font-style:normal;margin-bottom:8px" id="insiderP3"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.</div>
+          <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
+            <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
+            <div class="rv-copy-modal" id="rvCopy1938">
+              <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
+              <div style="margin-top:2px">
+                <div class="copy-col-head" id="copy1938Head">Orientační plán, 1938</div>
+                <div id="rvExif1938"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+              </div>
+            </div>
+            <button class="sl-fs-btn" onclick="event.stopPropagation();window._rvOpen1938()" title="Celá obrazovka">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capPlan1938">Orientační plán Prahy, 1938</div>
+          <div class="tip-text" style="font-style:normal;margin-top:10px" id="insiderP4"><strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.</div>
+        </div>
+      </div>
+      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
+          <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-5);flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <a id="insiderWhyLink" href="../oprojektu.html" style="font-size:12px;color:var(--ink-5);text-decoration:underline;text-underline-offset:2px">Proč je část obsahu skryta?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- galerie -->
+  <div class="section" id="gallerySection">
+    <div class="sec-head">
+      <span class="sec-label" id="secGalerie">Galerie</span>
+      <div class="sec-rule"></div>
+      <span class="sec-num" id="secGalerieNum">6 fotografií</span>
+    </div>
+    <div class="gallery">
+      <div class="gallery-thumb" onclick="openGallery(0)">
+        <img src="https://layersofprague.github.io/LoP/foto/H001b_ove_thumb.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
+        <div class="gt-label">~1930</div>
+      </div>
+      <div class="gallery-thumb" onclick="openGallery(1)">
+        <img src="https://layersofprague.github.io/LoP/foto/H001j_h.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Stavba přístavního bazénu, dělníci při práci"/>
+        <div class="gt-label">~1894</div>
+      </div>
+      <div class="gallery-thumb" onclick="openGallery(2)">
+        <img src="https://layersofprague.github.io/LoP/foto/H001i_h.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Drážní budova s věží (č.p. 1057)"/>
+        <div class="gt-label">~1906</div>
+      </div>
+      <div class="gallery-thumb" onclick="openGallery(3)">
+        <img src="https://layersofprague.github.io/LoP/foto/H001e_h.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Seřaďovací nádraží a přístav, pohled z výšky"/>
+        <div class="gt-label">~1895</div>
+      </div>
+      <div class="gallery-thumb" onclick="openGallery(4)">
+        <img src="https://layersofprague.github.io/LoP/foto/H001f_h.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Lodě v přístavním bazénu u překladiště"/>
+        <div class="gt-label">~1895</div>
+      </div>
+      <div class="gallery-thumb" onclick="openGallery(5)">
+        <img src="https://layersofprague.github.io/LoP/foto/H001g_h.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Přístav v prvních letech provozu, jeřáby a lodě"/>
+        <div class="gt-label">~1893</div>
+      </div>
+    </div>
+  </div>
+
+    <!-- poloha / mapa -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Poloha</span>
+      <span class="sec-label" id="secPoloha">Poloha</span>
       <div class="sec-rule"></div>
-      <span class="sec-num">výřez mapy</span>
+      <span class="sec-num" id="capMapa">výřez mapy</span>
     </div>
     <div class="map-frame" id="miniMapWrap">
       <div id="miniMap"></div>
@@ -1392,7 +1749,7 @@ a { color: inherit; text-decoration: none; }
   <!-- gamifikace — žebříček -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Žebříček</span>
+      <span class="sec-label" id="secZebricek">Žebříček</span>
       <div class="sec-rule"></div>
       <span class="sec-num">Top 5</span>
     </div>
@@ -1400,15 +1757,15 @@ a { color: inherit; text-decoration: none; }
       <div class="lh-hero">
         <div class="lh-av">JK<span class="lh-badge">1</span></div>
         <div class="lh-id">
-          <div class="lh-kick">Nejlepší záběr</div>
+          <div class="lh-kick" id="lhKick">Nejlepší záběr</div>
           <div class="lh-name">Jan K.</div>
         </div>
-        <div class="lh-pts"><div class="n">342</div><div class="u">bodů</div></div>
+        <div class="lh-pts"><div class="n">342</div><div class="u" id="lhUnit1">bodů</div></div>
       </div>
       <div class="lh-quote-wrap">
         <div class="lh-quote">
           <p>„Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.“</p>
-          <span class="by">Jan K., 1. místo</span>
+          <span class="by" id="lhBy">Jan K., 1. místo</span>
         </div>
       </div>
       <div class="lh-row"><span class="rk">2</span><span class="nm">Tereza M.</span><span class="pt">298</span></div>
@@ -1422,16 +1779,16 @@ a { color: inherit; text-decoration: none; }
       <span class="rk" id="lbMyRank">—</span>
       <span class="av">VY</span>
       <div><div class="nm">Tvůj výsledek</div><div class="sub"><span id="lbMyScore">—</span> % shody · <span id="lbMyDate"></span></div></div>
-      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u">bodů</div></div>
+      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u" id="lhUnit2">bodů</div></div>
     </div>
 
-    <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2Fh_001ove_thumb.jpg">
+    <a class="ar-cta-light" href="../ar-intro.html?id=H001&lat=50.105147&lng=14.456289&name=Holešovický+přístav&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH001b_ove_thumb.jpg">
       <div class="ar-cta-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
       </div>
       <div class="ar-cta-body">
-        <div class="ar-cta-kick">Nahlédni do historie</div>
-        <div class="ar-cta-title">Spustit AR — Holešovický přístav</div>
+        <div class="ar-cta-kick" id="arCtaKick">Nahlédni do historie</div>
+        <div class="ar-cta-title" id="arCtaTitle">Spustit AR — Holešovický přístav</div>
       </div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5"><path d="m9 6 6 6-6 6"/></svg>
     </a>
@@ -1440,7 +1797,7 @@ a { color: inherit; text-decoration: none; }
   <!-- autor zastavení -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Autor zastavení</span>
+      <span class="sec-label" id="secAutor">Autor zastavení</span>
       <div class="sec-rule"></div>
     </div>
     <div class="autor-card">
@@ -1448,7 +1805,7 @@ a { color: inherit; text-decoration: none; }
       <div class="autor-body">
         <div class="autor-name">LayersOfPrague</div>
         <div class="autor-meta">
-          <span class="autor-badge">Kurátor</span>
+          <span class="autor-badge" id="autorBadge">Kurátor</span>
           <span class="autor-sep">·</span>
           <span id="autorPlaces">12 zastavení</span>
           <span class="autor-sep">·</span>
@@ -1466,7 +1823,7 @@ a { color: inherit; text-decoration: none; }
   <!-- klíčová slova -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Klíčová slova</span>
+      <span class="sec-label" id="secKlicova">Klíčová slova</span>
       <div class="sec-rule"></div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -1512,8 +1869,8 @@ const WISH_KEY   = 'lop_wishlist_v2';
 const VISIT_KEY  = 'lop_visited_v1';
 
 /* ── COPYRIGHT ── */
-const PHOTO_HIST = '../foto/h_001h.jpg';
-const PHOTO_NOW  = '../foto/h_001s.jpg';
+const PHOTO_HIST = '../foto/H001b_h.jpg';
+const PHOTO_NOW  = '../foto/H001b_s.jpg';
 
 let _exifLoaded = false;
 
@@ -1525,13 +1882,14 @@ function renderExif(elId, data) {
     return;
   }
 
+  const _en = window.lopLang === 'en';
   const fields = [
-    { key: 'Author',        val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
-    { key: 'Zdroj',        val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
-    { key: 'Specification', val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
-    { key: 'Source',        val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
-    { key: 'Copyright',     val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
-    { key: 'Date',          val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: _en ? 'Author'  : 'Autor',     val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
+    { key: _en ? 'Source'  : 'Zdroj',     val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
+    { key: _en ? 'Spec.'   : 'Spec.',     val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
+    { key: _en ? 'Ref.'    : 'Ref.',      val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
+    { key: 'Copyright',                   val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
+    { key: _en ? 'Date'    : 'Datum',     val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
@@ -1591,7 +1949,11 @@ function updateInsiderGate() {
   if (full)   full.classList.toggle('visible', insider);
   // Reinicializovat river slider po zobrazení insider sekce
   if (insider && window._rvReinit) window._rvReinit();
-  if (gate)   gate.classList.toggle('hidden',  insider);
+  if (gate) {
+    gate.classList.toggle('hidden', insider);
+    if (!insider) gate.style.display = 'flex';
+    else gate.style.display = '';
+  }
   if (teaser) teaser.style.display = insider ? 'none' : '';
 
   if (gate && !insider) {
@@ -1608,7 +1970,20 @@ function updateInsiderGate() {
   if (btn && loggedIn) btn.classList.add('logged-in');
 }
 
-(function() { updateInsiderGate(); })();
+(function() {
+  // Volat updateInsiderGate ihned (z cached localStorage) a pak znovu po syncFromDB
+  updateInsiderGate();
+  // syncFromDB je definováno níže — počkáme na DOMContentLoaded kdy už je definováno
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof syncFromDB === 'function') {
+      syncFromDB().then(() => {
+        updateWishUI();
+        loadVisitedStamp();
+        updateInsiderGate(); // překreslit po stažení aktuální role
+      });
+    }
+  });
+})();
 
 /* ── SLIDER ── */
 (function() {
@@ -1642,9 +2017,9 @@ function updateInsiderGate() {
 
     // Tažení pouze za handle
     handleEl.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
-    handleEl.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    handleEl.addEventListener('touchstart', e => { if (e.touches.length === 1) dragging = true; }, { passive: true });
     window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-    window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+    window.addEventListener('touchmove',  e => { if (e.touches.length === 2) { dragging = false; return; } if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
     window.addEventListener('mouseup',  () => dragging = false);
     window.addEventListener('touchend', () => dragging = false);
 
@@ -1687,8 +2062,10 @@ function updateInsiderGate() {
       handle.style.left = (pct * 100) + '%';
       handle.style.transform = 'translate(-50%,-50%)';
     }
-    const lblL = document.getElementById('lblHistFs');
-    const lblR = document.getElementById('lblNowFs');
+    const dividerFs = document.getElementById('slDividerFs');
+    if (dividerFs) dividerFs.style.left = (pct * 100) + '%';
+    const lblL = null; // labels moved outside
+    const lblR = null;
     if (lblL) lblL.classList.toggle('active', pct <= 0.5);
     if (lblR) lblR.classList.toggle('active', pct > 0.5);
   }
@@ -1701,12 +2078,18 @@ function updateInsiderGate() {
   const handleFs = document.getElementById('slHandleFs');
   if (handleFs) {
     handleFs.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
-    handleFs.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    handleFs.addEventListener('touchstart', e => { if (e.touches.length === 1) dragging = true; }, { passive: true });
   }
   window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-  window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+  window.addEventListener('touchmove',  e => { if (e.touches.length === 2) { dragging = false; return; } if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
   window.addEventListener('mouseup',  () => dragging = false);
   window.addEventListener('touchend', () => dragging = false);
+
+  // Pinch zoom na fs-modal-inner — init odložen až po definici _initSliderPinch
+  document.addEventListener('DOMContentLoaded', function() {
+    var fsInner = document.querySelector('.fs-modal-inner');
+    if (fsInner && typeof _initSliderPinch === 'function') _initSliderPinch(fsInner);
+  });
 
   // Klik na pozadí modalu (mimo inner) zavře
   modal.addEventListener('click', e => { if (e.target === modal) toggleFullscreen(); });
@@ -1817,8 +2200,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 
-/* ── SYNC (spuštěno až tady, protože potřebuje SUPA_URL/SUPA_KEY výše) ── */
-syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); updateInsiderGate(); });
+/* ── SYNC (přesunuto výše, do DOMContentLoaded po updateInsiderGate) ── */
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
@@ -2261,60 +2643,13 @@ window.lopAuth.onLogout(() => {
 /* ── RELATED PLACES ── */
 (function() {
   // Ručně definovaná ID nebo inline data pro místa která ještě nemají vlastní stránku
-  const RELATED = [
-    {
-      id: 'H001-doz',
-      cat: 'hist',
-      name: 'Budova přístavního dozorství',
-      lede: 'Vstupní budova areálu (č.p. 1060), symetricky umístěná u brány. Patrová stavba s asymetrickým štítem, kombinace červeného režného zdiva a bílé omítky na soklu kyklopského zdiva. Projekt František Sander, 1906.',
-      thumb: null,
-      url: null   // zatím nemá vlastní stránku
-    },
-    {
-      id: 'H001-celnice',
-      cat: 'hist',
-      name: 'Budova celní expozitury',
-      lede: 'Secesní budova z roku 1906 při hlavním vstupu do přístavu. Bohatě členěná fasáda z režného červeného zdiva a bílé omítky, střecha s vikýři a věžičkami.',
-      thumb: null,
-      url: null
-    },
-    {
-      id: 'H001-sklad',
-      cat: 'hist',
-      name: 'Celní skladiště',
-      lede: 'Rozsáhlé přízemní skladiště pro celně zajištěné zboží. Součást Sanderova secesního souboru z roku 1906. Budova sloužila skladování po celou dobu své existence.',
-      thumb: null,
-      url: null
-    },
-    {
-      id: 'H001-prekl',
-      cat: 'hist',
-      name: 'Překladiště',
-      lede: 'Srdce obchodního provozu přístavu — zde se přesouvalo zboží mezi lodí, vlakem a nákladním autem. Vybaveno zdvihacími jeřáby, přímo napojeno na železniční vlečku.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/h_001Gh.jpg',
-      url: null
-    },
-    {
-      id: 'H001-lodnice',
-      cat: 'hist',
-      name: 'Loděnice a lodní výtah',
-      lede: 'Jediné zařízení v Praze pro vytahování labských lodí z vody k opravám a zimním prohlídkám. Kapacita přístavu byla 150–170 největších labských lodí najednou.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/h_001Bh.jpg',
-      url: null
-    },
-    {
-      id: 'H001-nadrazi',
-      cat: 'hist',
-      name: 'Seřaďovací nádraží a drážní budova',
-      lede: 'Zprovozněno roku 1906, vlečka na nádraží Bubny dokončena 1910. Drážní budova č.p. 1057 s charakteristickou hranolovou věží. Koleje odtud vedly i do Pergamentky, Ferony a dalších podniků.',
-      thumb: 'https://layersofprague.github.io/LoP/foto/h_001Ch.jpg',
-      url: null
-    },
-  ];
+  const RELATED = PLACE_DATA.related;
 
   const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
   const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
-  const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
+  const CAT_NAME   = window.lopLang === 'en'
+    ? { hist: 'History', arch: 'Architecture', art: 'Art', fun: 'Curiosities' }
+    : { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
 
   let _grid = true;
 
@@ -2324,10 +2659,13 @@ window.lopAuth.onLogout(() => {
     const catName = CAT_NAME[p.cat]   || '';
     const url     = p.url || null;
     const onclick = url ? `location.href='${url}'` : 'return false';
+    const name    = typeof p.name === 'object' ? loc(p.name) : p.name;
+    const sub     = p.sub  ? (typeof p.sub  === 'object' ? loc(p.sub)  : p.sub)  : null;
+    const lede    = typeof p.lede === 'object' ? loc(p.lede) : p.lede;
 
     return `<div class="place-card" data-cat="${p.cat}" onclick="${onclick}" style="${!url?'cursor:default':''}">
       <div class="place-thumb" data-cat="${p.cat}">
-        ${p.thumb ? `<img src="${p.thumb}" alt="${p.name}" onerror="this.style.display='none'"/>` : ''}
+        ${p.thumb ? `<img src="${p.thumb}" alt="${name}" onerror="this.style.display='none'"/>` : ''}
         <div class="place-thumb-fallback">${letter}</div>
         <div class="place-cat-line" style="background:${color}"></div>
         <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
@@ -2337,11 +2675,12 @@ window.lopAuth.onLogout(() => {
           <span class="dot" style="background:${color}"></span>
           <span>${catName}</span>
         </div>
-        <div class="place-name">${p.name}</div>
-        <div class="place-sub">${p.lede}</div>
+        <div class="place-name">${name}</div>
+        ${sub ? `<div style="font-size:11px;color:var(--ink-5);margin-top:1px;font-family:'Inter',sans-serif">${sub}</div>` : ''}
+        <div class="place-sub">${lede}</div>
       </div>
       <div class="place-meta" style="justify-content:center">
-        ${url ? '' : '<span style="font-size:9px;color:var(--ink-5);text-align:center;line-height:1.3;letter-spacing:.04em">Brzy</span>'}
+        ${url ? '' : '<span style="font-size:9px;color:var(--ink-5);text-align:center;line-height:1.3;letter-spacing:.04em">' + (window.lopLang === 'en' ? 'Soon' : 'Brzy') + '</span>'}
       </div>
     </div>`;
   }
@@ -2384,8 +2723,8 @@ window.lopAuth.onLogout(() => {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <div class="rv-wrap" id="rvFullscreen">
-    <div class="sl-base"><img src="../foto/h001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
-    <div class="sl-top" id="rvFsTop"><img src="../foto/h001_orientacni_plan_Prahy_1909–1914.jpg" alt="Orientační plán Prahy 1909–1914"/></div>
+    <div class="sl-base"><img src="../foto/H001_ortofoto.jpg" alt="Současný letecký snímek"/></div>
+    <div class="sl-top" id="rvFsTop"><img src="../foto/H001_orientacni_plan_Prahy_1909–1914.jpg" alt="Orientační plán Prahy 1909–1914"/></div>
     <div class="sl-divider" id="rvFsDiv"></div>
     <div class="sl-handle" id="rvFsHandle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2427,19 +2766,33 @@ window.lopAuth.onLogout(() => {
       return x / rect.width;
     }
 
-    wrap.addEventListener('mousedown',  function(e) { dragging = true; setPos(getPct(e)); e.preventDefault(); });
+    // Desktop — drag jen z handle
+    handle.addEventListener('mousedown', function(e) { dragging = true; e.preventDefault(); });
     document.addEventListener('mousemove', function(e) { if (dragging) setPos(getPct(e)); });
     document.addEventListener('mouseup',   function()  { dragging = false; });
-    wrap.addEventListener('touchstart', function(e) { dragging = true; setPos(getPct(e)); }, { passive: true });
-    wrap.addEventListener('touchmove',  function(e) { if (dragging) { setPos(getPct(e)); e.preventDefault(); } }, { passive: false });
-    wrap.addEventListener('touchend',   function()  { dragging = false; });
+    // Touch — drag jen z handle, pinch zoom na celém wrap
+    handle.addEventListener('touchstart', function(e) { if (e.touches.length === 1) dragging = true; }, { passive: true });
+    wrap.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) { dragging = false; return; }
+      if (dragging) { setPos(getPct(e)); e.preventDefault(); }
+    }, { passive: false });
+    wrap.addEventListener('touchend', function() { dragging = false; });
+    // Pinch-to-zoom na wrap — odloženo aby byla funkce definovaná
+    setTimeout(function() {
+      if (typeof _initSliderPinch === 'function') _initSliderPinch(wrap);
+    }, 0);
 
     setPos(0.5);
   }
 
   function _initAll() {
-    initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', 'rvInlineLblL', 'rvInlineLblR');
+    initRvSlider('rvInline',     'rvInlineTop', 'rvInlineDiv', 'rvInlineHandle', null, null);
     initRvSlider('rvFullscreen', 'rvFsTop',     'rvFsDiv',     'rvFsHandle',     null,     null);
+    // Pinch zoom na rvFullscreen — init odložen
+    document.addEventListener('DOMContentLoaded', function() {
+      var rvFsWrap = document.getElementById('rvFullscreen');
+      if (rvFsWrap && typeof _initSliderPinch === 'function') _initSliderPinch(rvFsWrap);
+    });
   }
 
   window._rvReinit = _initAll;
@@ -2460,7 +2813,7 @@ window.lopAuth.onLogout(() => {
     document.body.style.overflow=''; document.body.style.touchAction='';
   };
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { window._rvCloseFs(); window._rvClose1938(); window._rvClosePlan(); }
+    if (e.key === 'Escape') { window._rvCloseFs(); window._rvClose1938(); window._rvClosePlan(); window._rvCloseStavba && window._rvCloseStavba(); }
   });
 })();
 </script>
@@ -2470,9 +2823,9 @@ window.lopAuth.onLogout(() => {
   <button class="rv-fs-close" onclick="window._rvClose1938()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/h001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938" style="max-width:calc(100% - 24px);max-height:calc(100% - 80px);object-fit:contain;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.45)"/>
-  <div class="rv-fs-labels" style="justify-content:center">
-    <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy, 1938</span>
+  <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938" class="rv-fs-img"/>
+  <div class="rv-fs-labels">
+    <span id="fs1938Label">Orientační plán Prahy, 1938</span>
   </div>
 </div>
 
@@ -2491,14 +2844,35 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-<!-- Plan 1894 fullscreen -->
+<!-- Stavba bazénu fullscreen -->
+<div class="rv-fs-modal" id="rvStavbaModal">
+  <button class="rv-fs-close" onclick="window._rvCloseStavba()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <img src="../foto/H001h_h.jpg" alt="Hloubení přístavního bazénu" class="rv-fs-img"/>
+  <div class="rv-fs-labels">
+    <span id="fsStavbaLabel">Rozšíření přístavu ~1906–1908</span>
+  </div>
+</div>
+
+<script>
+window._rvOpenStavba = function() {
+  var m = document.getElementById('rvStavbaModal');
+  if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+};
+window._rvCloseStavba = function() {
+  var m = document.getElementById('rvStavbaModal');
+  if (m) m.classList.remove('open');
+  document.body.style.overflow=''; document.body.style.touchAction='';
+};
+</script>
 <div class="rv-fs-modal" id="rvPlanModal">
   <button class="rv-fs-close" onclick="window._rvClosePlan()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/holesovicky_pristav_plan.jpg" alt="Plán holešovického přístavu, 1894" style="max-width:calc(100% - 24px);max-height:calc(100% - 80px);object-fit:contain;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.45)"/>
-  <div class="rv-fs-labels" style="justify-content:center">
-    <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Plán holešovického přístavu, 1894</span>
+  <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img"/>
+  <div class="rv-fs-labels">
+    <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
   </div>
 </div>
 
@@ -2532,8 +2906,8 @@ window._rvClosePlan = function() {
       return;
     }
     var fields = [
-      { key: 'Author',        val: data['dc:creator'] || data['XMP-dc:Creator'] || data.Artist || data.Creator },
-      { key: 'Zdroj',         val: data['photoshop:Credit'] || data['XMP-photoshop:Credit'] || data.Credit },
+      { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: data['dc:creator'] || data['XMP-dc:Creator'] || data.Artist || data.Creator },
+      { key: window.lopLang === 'en' ? 'Source' : 'Zdroj', val: data['photoshop:Credit'] || data['XMP-photoshop:Credit'] || data.Credit },
       { key: 'Specification', val: data['dc:identifier'] || data['XMP-dc:Identifier'] || data.SpecialInstructions },
       { key: 'Source',        val: data['dc:source'] || data['XMP-dc:Source'] || data.Source },
       { key: 'Copyright',     val: data.Copyright || data.CopyrightNotice || data['dc:rights'] },
@@ -2549,10 +2923,11 @@ window._rvClosePlan = function() {
   async function _loadInsiderExif() {
     if (typeof exifr === 'undefined') return;
     var images = [
-      { src: '../foto/h001_orientacni_plan_Prahy_1909–1914.jpg', elId: 'rvExifPlan1909' },
-      { src: '../foto/h001_ortofoto.jpg',                            elId: 'rvExifOrtofoto' },
-      { src: '../foto/holesovicky_pristav_plan.jpg',                 elId: 'rvExifPlan1894' },
-      { src: '../foto/h001_orientacni_plan_Prahy_1938.jpg',          elId: 'rvExif1938' },
+      { src: '../foto/H001_orientacni_plan_Prahy_1909–1914.jpg', elId: 'rvExifPlan1909' },
+      { src: '../foto/H001_ortofoto.jpg',                            elId: 'rvExifOrtofoto' },
+      { src: '../foto/H001_plan.jpg',                 elId: 'rvExifPlan1894' },
+      { src: '../foto/H001h_h.jpg',                              elId: 'rvExifStavba' },
+      { src: '../foto/H001_orientacni_plan_Prahy_1938.jpg',          elId: 'rvExif1938' },
     ];
     for (var i = 0; i < images.length; i++) {
       try {
@@ -2570,6 +2945,241 @@ window._rvClosePlan = function() {
     _loadInsiderExif();
   }
 })();
+</script>
+
+<script>
+/* ── PINCH-TO-ZOOM for fullscreen modal images ── */
+(function() {
+  function initPinchZoom(img) {
+    if (!img) return;
+
+    // Stav transformace
+    var s = 1, tx = 0, ty = 0;
+    // Uložený stav na začátku gesta
+    var s0, tx0, ty0, d0, fx0, fy0;
+    var panRefX, panRefY, panning = false;
+    var lastTap = 0;
+
+    function apply() {
+      // transform-origin: center center → střed obrázku
+      img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+      img.classList.toggle('zoomed', s > 1.05);
+    }
+
+    function reset() {
+      s = 1; tx = 0; ty = 0;
+      img.style.transform = '';
+      img.classList.remove('zoomed');
+    }
+
+    function clamp() {
+      if (s <= 1.01) { tx = 0; ty = 0; return; }
+      // Přirozená (netransformovaná) velikost obrázku
+      var w = img.offsetWidth, h = img.offsetHeight;
+      var limX = w * (s - 1) / 2;
+      var limY = h * (s - 1) / 2;
+      tx = Math.max(-limX, Math.min(limX, tx));
+      ty = Math.max(-limY, Math.min(limY, ty));
+    }
+
+    function dist(t) {
+      var dx = t[0].clientX - t[1].clientX;
+      var dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    img.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        // Uložit stav gesta
+        d0  = dist(e.touches);
+        s0  = s; tx0 = tx; ty0 = ty;
+        // Ohnisko = střed prstů v souřadnicích okna
+        fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        panning = false;
+      } else if (e.touches.length === 1) {
+        if (s > 1.05) {
+          e.preventDefault();
+          panRefX = e.touches[0].clientX - tx;
+          panRefY = e.touches[0].clientY - ty;
+          panning = true;
+        }
+        // Double-tap
+        var now = Date.now();
+        if (now - lastTap < 300) {
+          e.preventDefault();
+          if (s > 1.05) {
+            reset();
+          } else {
+            // Střed obrázku v souřadnicích okna
+            var r = img.getBoundingClientRect();
+            var cx = r.left + r.width / 2;
+            var cy = r.top  + r.height / 2;
+            var tapX = e.touches[0].clientX;
+            var tapY = e.touches[0].clientY;
+            s = 2.5;
+            // Bod pod prstem musí zůstat pod prstem:
+            // newTx = tapX - cx - (tapX - cx) * s  →  -(tapX - cx)*(s-1)
+            tx = -(tapX - cx) * (s - 1);
+            ty = -(tapY - cy) * (s - 1);
+            clamp(); apply();
+          }
+          lastTap = 0; return;
+        }
+        lastTap = now;
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && d0) {
+        e.preventDefault();
+        var d  = dist(e.touches);
+        var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
+
+        // Střed obrázku v souřadnicích okna při stavu s0/tx0/ty0:
+        // imgCenter_screen = naturalCenter_screen + tx0, ty0
+        // (transform-origin: center, natCenter = relativní střed v layoutu)
+        // Ohnisko v "obrázkovém" souřadnicovém systému (relativně ke středu, při s=s0):
+        //   imgPt = (fx0 - natCx - tx0) / s0   kde natCx = imgEl offsetLeft + w/2
+        var w  = img.offsetWidth,  h  = img.offsetHeight;
+        var el = img;
+        var natCx = el.offsetLeft + w / 2;
+        var natCy = el.offsetTop  + h / 2;
+        // Souřadnice ohniska ve "vnitřním" prostoru obrázku
+        var imgFx = (fx0 - natCx - tx0) / s0;
+        var imgFy = (fy0 - natCy - ty0) / s0;
+        // Nový translate: ohnisko v novém stavu musí ležet pod středem prstů (fx,fy)
+        //   fx = natCx + imgFx * newS + newTx + (fx - fx0)  ← posun středu prstů
+        tx = fx - natCx - imgFx * newS;
+        ty = fy - natCy - imgFy * newS;
+        s  = newS;
+        clamp(); apply();
+      } else if (e.touches.length === 1 && panning) {
+        e.preventDefault();
+        tx = e.touches[0].clientX - panRefX;
+        ty = e.touches[0].clientY - panRefY;
+        clamp(); apply();
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchend', function(e) {
+      if (e.touches.length < 2) d0 = 0;
+      if (e.touches.length === 0) panning = false;
+      if (s < 1.05) reset();
+    });
+
+    // Reset při zavření modalu
+    var modal = img.closest('.rv-fs-modal');
+    if (modal) {
+      new MutationObserver(function(muts) {
+        muts.forEach(function(m) {
+          if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
+        });
+      }).observe(modal, { attributes: true });
+    }
+  }
+
+  function _initAll() {
+    document.querySelectorAll('.rv-fs-modal .rv-fs-img').forEach(initPinchZoom);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initAll);
+  } else {
+    _initAll();
+  }
+})();
+</script>
+
+<script>
+/* ── PINCH-TO-ZOOM for comparison sliders ── */
+function _initSliderPinch(wrap) {
+  if (!wrap || wrap._pinchInited) return;
+  wrap._pinchInited = true;
+
+  var s = 1, tx = 0, ty = 0;
+  var s0, tx0, ty0, d0, fx0, fy0;
+  var lastTap = 0;
+
+  function dist(t) {
+    var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  function apply() {
+    wrap.style.transformOrigin = 'center center';
+    wrap.style.transform = s > 1.01 ? 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')' : '';
+    wrap.style.zIndex = s > 1.01 ? '10' : '';
+  }
+  function reset() { s = 1; tx = 0; ty = 0; apply(); }
+  function clamp() {
+    if (s <= 1.01) { tx = 0; ty = 0; return; }
+    var limX = wrap.offsetWidth  * (s-1) / 2;
+    var limY = wrap.offsetHeight * (s-1) / 2;
+    tx = Math.max(-limX, Math.min(limX, tx));
+    ty = Math.max(-limY, Math.min(limY, ty));
+  }
+
+  wrap.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      d0 = dist(e.touches); s0 = s; tx0 = tx; ty0 = ty;
+      fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    } else if (e.touches.length === 1 && s > 1.05) {
+      e.preventDefault();
+      wrap._panRefX = e.touches[0].clientX - tx;
+      wrap._panRefY = e.touches[0].clientY - ty;
+      wrap._panning = true;
+    }
+    // Double-tap reset
+    var now = Date.now();
+    if (e.touches.length === 1 && now - lastTap < 300) { reset(); lastTap = 0; return; }
+    if (e.touches.length === 1) lastTap = now;
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2 && d0) {
+      e.preventDefault();
+      var d = dist(e.touches);
+      var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
+      var natCx = wrap.offsetLeft + wrap.offsetWidth  / 2;
+      var natCy = wrap.offsetTop  + wrap.offsetHeight / 2;
+      var imgFx = (fx0 - natCx - tx0) / s0;
+      var imgFy = (fy0 - natCy - ty0) / s0;
+      tx = fx - natCx - imgFx * newS;
+      ty = fy - natCy - imgFy * newS;
+      s = newS; clamp(); apply();
+    } else if (e.touches.length === 1 && wrap._panning) {
+      e.preventDefault();
+      tx = e.touches[0].clientX - wrap._panRefX;
+      ty = e.touches[0].clientY - wrap._panRefY;
+      clamp(); apply();
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) d0 = 0;
+    if (e.touches.length === 0) wrap._panning = false;
+    if (s < 1.05) reset();
+  });
+
+  // Reset při zavření modalu
+  var modal = wrap.closest('.rv-fs-modal') || wrap.closest('.fs-modal');
+  if (modal) {
+    new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
+      });
+    }).observe(modal, { attributes: true });
+  }
+}
+
+// RV a FS slider pinch zoom inited via DOMContentLoaded above
 </script>
 </body>
 </html>
