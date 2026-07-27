@@ -196,7 +196,6 @@ a { color: inherit; text-decoration: none; }
           mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
   width: 11px; height: 11px;
 }
-.chip.state-dim { opacity: .5; }
 /* stav "vždy" — jen barevný rámeček a text, bez plné výplně */
 .chip.state-force { background: #fff !important; color: var(--accent) !important; border-color: var(--accent) !important; }
 .chip[data-filter="visited"].state-force { color: var(--ok) !important; border-color: var(--ok) !important; }
@@ -226,8 +225,6 @@ a { color: inherit; text-decoration: none; }
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'/></svg>") center/contain no-repeat;
 }
-.chip.state-dim .chip-count { display: none; }
-.chip.state-dim .chip-filter-icon { display: inline-block; }
 .chip.state-hide .chip-count { display: none; }
 .chip.state-hide .chip-filter-icon { display: inline-block; background: #fff; }
 .chip.all { background: var(--ink); color: #fff; border-color: var(--ink); }
@@ -563,6 +560,21 @@ a { color: inherit; text-decoration: none; }
   color: var(--paper); font-family: inherit; font-size: 12px; font-weight: 500;
   transition: box-shadow .15s, transform .15s;
 }
+.tax-banner .tb-ico {
+  width: 11px; height: 11px; flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center;  mask-position: center;
+  -webkit-mask-size: contain;     mask-size: contain;
+}
+.tax-banner .tb-ico-check {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+}
+.tax-banner .tb-ico-heart {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+}
 .tax-banner .tb-chip[data-tone="accent"] {
   background: #fff; border-color: var(--accent); color: var(--accent);
 }
@@ -821,12 +833,11 @@ function syncFilterUI() {
   setTxt('fmReset',    'overview.reset');
 
   const S_CAT  = { full:'filter.state_default', hide:'filter.state_hidden' };
-  const S_WISH = { full:'filter.state_default', dim:'filter.state_dimmed',
-                   hide:'filter.state_hidden',  force:'filter.state_always' };
+  const S_WISH = { full:'filter.state_default', hide:'filter.state_hidden', force:'filter.state_always' };
 
   document.querySelectorAll('.chip[data-cat]').forEach(btn => {
     const cat = btn.dataset.cat, st = FILTER[cat];
-    btn.classList.remove('state-dim','state-hide','state-force');
+    btn.classList.remove('state-hide','state-force');
     if (st === 'hide') btn.classList.add('state-hide');
     const lbl = document.getElementById('lbl-' + cat);
     if (lbl) lbl.textContent = t(S_CAT[st] || 'filter.state_default');
@@ -834,9 +845,8 @@ function syncFilterUI() {
 
   document.querySelectorAll('.chip[data-filter]').forEach(btn => {
     const f = btn.dataset.filter, st = FILTER[f];
-    btn.classList.remove('state-dim','state-hide','state-force');
-    if (st === 'dim')        btn.classList.add('state-dim');
-    else if (st === 'hide')  btn.classList.add('state-hide');
+    btn.classList.remove('state-hide','state-force');
+    if (st === 'hide')       btn.classList.add('state-hide');
     else if (st === 'force') btn.classList.add('state-force');
     const lbl = document.getElementById('lbl-' + f);
     if (lbl) lbl.textContent = t(S_WISH[st] || 'filter.state_default');
@@ -857,20 +867,23 @@ function activeFilters(undatedCount) {
 
   if (TAX) out.push({ label: taxLabel(), clear: clearTaxFilter });
 
+  /* Popisky se skládají ze STEJNÝCH klíčů jako stavy chipů v modálu,
+     jinak se obě místa dřív nebo později rozejdou. */
+  const STATE_KEY = { hide:'filter.state_hidden', force:'filter.state_always' };
+  const stateLabel = (st, name) => t(STATE_KEY[st]) + ': ' + name;
+
   ['hist','arch','art','fun'].forEach(cat => {
     if (FILTER[cat] === 'hide')
-      out.push({ label: t('filter.without', { x: t('cat.' + cat) }),
+      out.push({ label: stateLabel('hide', t('cat.' + cat)),
                  clear: () => { FILTER[cat] = 'full'; } });
   });
 
   [['wished','place.plan','accent'], ['visited','overview.visited','ok']].forEach(([f, key, tone]) => {
     const st = FILTER[f]; if (st === 'full') return;
-    const name = t(key);
-    const lbl = st === 'force' ? t('filter.always', { x:name })
-              : st === 'hide'  ? t('filter.without',{ x:name })
-              :                  t('filter.dimmed', { x:name });
+    const lbl = stateLabel(st, t(key));
     /* barevný obrys jen u "vždy" — u skrytí a útlumu by barva pletla */
     out.push({ label: lbl, tone: st === 'force' ? tone : null,
+               icon: f === 'wished' ? 'heart' : 'check',
                clear: () => { FILTER[f] = 'full'; } });
   });
 
@@ -910,6 +923,7 @@ function renderTaxBanner(count, undatedCount) {
   el.hidden = false;
   el.innerHTML = items.map((f, i) =>
     `<button class="tb-chip"${f.tone ? ` data-tone="${f.tone}"` : ''} onclick="clearOneFilter(${i}, ${undatedCount})">` +
+      (f.icon ? `<span class="tb-ico tb-ico-${f.icon}"></span>` : '') +
       `<span>${f.label}</span>` +
       `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
     `</button>`).join('');
@@ -927,10 +941,12 @@ function locateUser() {
 }
 
 const FILTER = { hist:'full', arch:'full', art:'full', fun:'full', visited:'full', wished:'full' };
-const FILTER_NEXT         = { full:'hide', dim:'full', hide:'full' };
-const FILTER_NEXT_WISHED  = { full:'hide', dim:'full', hide:'force', force:'full' };
-const FILTER_NEXT_VISITED = { full:'hide', dim:'full', hide:'force', force:'full' };
-const RANK = { full:0, dim:1, hide:2, force:0 };
+/* Cykly stavů. 'dim' se v přehledu nepoužívá — jen zobrazeno/skryto,
+   u plánu a navštívených navíc 'vždy'. */
+const FILTER_NEXT         = { full:'hide', hide:'full' };
+const FILTER_NEXT_WISHED  = { full:'hide', hide:'force', force:'full' };
+const FILTER_NEXT_VISITED = { full:'hide', hide:'force', force:'full' };
+const RANK = { full:0, hide:2, force:0 };
 const ERAS = [
   { id:'rom', name:'Románský',    from:1000, to:1230 },
   { id:'got', name:'Gotika',      from:1230, to:1500 },

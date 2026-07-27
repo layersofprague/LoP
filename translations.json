@@ -915,18 +915,6 @@
     "cs": "Zajímavosti",
     "en": "Curiosities"
   },
-  "filter.without": {
-    "cs": "bez: {x}",
-    "en": "without: {x}"
-  },
-  "filter.only": {
-    "cs": "jen: {x}",
-    "en": "only: {x}"
-  },
-  "filter.dimmed": {
-    "cs": "utlumeno: {x}",
-    "en": "dimmed: {x}"
-  },
   "filter.distance": {
     "cs": "do {x} km",
     "en": "within {x} km"
@@ -935,10 +923,6 @@
     "cs": "nedatovaná",
     "en": "undated"
   },
-  "filter.active": {
-    "cs": "Filtry",
-    "en": "Filters"
-  },
   "filter.state_default": {
     "cs": "výchozí",
     "en": "default"
@@ -946,10 +930,6 @@
   "filter.state_hidden": {
     "cs": "skryto",
     "en": "hidden"
-  },
-  "filter.state_dimmed": {
-    "cs": "utlumeno",
-    "en": "dimmed"
   },
   "filter.state_always": {
     "cs": "vždy",
@@ -966,9 +946,5 @@
   "overview.reset": {
     "cs": "Resetovat",
     "en": "Reset"
-  },
-  "filter.always": {
-    "cs": "vždy: {x}",
-    "en": "always: {x}"
   }
 }
