@@ -133,32 +133,14 @@ a { color: inherit; text-decoration: none; }
 .filter-modal-backdrop.open .filter-modal {
   opacity: 1; transform: none; pointer-events: auto;
 }
-.filter-modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px 0;
-}
-/* stejná sestava jako .ctrl-btn-filter pod hlavičkou stránky */
-.filter-modal-title {
-  display: flex; align-items: center; gap: 4px;
-  font-family: 'Inter', sans-serif;
-  font-size: 11px; font-weight: 500; color: var(--ink-4);
-}
-.filter-modal-title svg { width: 14px; height: 14px; flex-shrink: 0; }
-.filter-modal-title .filter-dots { display: flex; gap: 2px; align-items: center; }
-.filter-modal-title .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
-.filter-modal-title .filter-cnt { font-size: 10px; color: var(--ink-5); }
-.filter-modal-title #fmCntActive { font-size: 12px; font-weight: 500; color: var(--ink-5); }
-.filter-modal-title.has-filter .filter-cnt,
-.filter-modal-title.has-filter #fmCntActive { color: var(--accent); font-weight: 600; }
-.filter-modal-close {
-  appearance: none; background: transparent; border: none;
-  width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink-4); transition: background .15s, color .15s;
-}
-.filter-modal-close:hover { background: var(--paper-2); color: var(--ink); }
-.filter-modal-close svg { width: 14px; height: 14px; }
-.filter-modal-inner { padding: 14px 16px 20px; flex: 1; }
+.filter-modal-inner { padding: 16px 16px 20px; flex: 1; }
+/* ikona s tečkami a počtem — stejná sestava i barvy jako tlačítko pod hlavičkou */
+.fm-cnt-wrap { display: flex; align-items: center; gap: 4px; }
+.fm-cnt-wrap svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ink-4); }
+.fm-cnt-wrap .filter-dots { display: flex; gap: 2px; align-items: center; }
+.fm-cnt-wrap .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
+.fm-cnt-wrap .filter-cnt { font-size: 10px; color: var(--ink-5); }
+.fm-cnt-wrap #fmCntActive { font-size: 12px; font-weight: 500; color: var(--ink-5); }
 
 /* chip-wrap se stavovým popiskem — stejné jako index.html */
 .chip-wrap {
@@ -671,27 +653,23 @@ a { color: inherit; text-decoration: none; }
   <!-- Filter modal -->
   <div class="filter-modal-backdrop" id="filterBackdrop">
     <div class="filter-modal" id="filterModal">
-      <div class="filter-modal-header">
-        <span class="filter-modal-title">
-          <span class="filter-icon-wrap">
-            <span class="filter-dots">
-              <span style="background:var(--cat-hist)"></span>
-              <span style="background:var(--cat-arch)"></span>
-              <span style="background:var(--cat-art)"></span>
-              <span style="background:var(--cat-fun)"></span>
-            </span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          </span>
-          <span id="fmTitle">Filtr</span>
-          <span class="filter-cnt" id="fmCnt"><span id="fmCntActive">—</span><span id="fmCntTotal"></span></span>
-        </span>
-        <button class="filter-modal-close" onclick="toggleFilter()" id="btnCloseT" title="Zavřít">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
       <div class="filter-modal-inner">
         <div class="filter-row">
-          <div class="filter-lbl"><span id="fmCategory">Kategorie</span></div>
+          <div class="filter-lbl">
+            <span id="fmCategory">Kategorie</span>
+            <span class="fm-cnt-wrap">
+              <span class="filter-icon-wrap">
+                <span class="filter-dots">
+                  <span style="background:var(--cat-hist)"></span>
+                  <span style="background:var(--cat-arch)"></span>
+                  <span style="background:var(--cat-art)"></span>
+                  <span style="background:var(--cat-fun)"></span>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              </span>
+              <span class="filter-cnt"><span id="fmCntActive">—</span><span id="fmCntTotal"></span></span>
+            </span>
+          </div>
           <div class="filter-chips" id="mapChips"></div>
         </div>
         <div class="filter-row" id="styleRow" hidden>
@@ -882,6 +860,20 @@ function clearTaxFilter() {
 
 /* ── Jediné místo, které promítá stav filtrů do ovládacích prvků.
    Volá se z kliku na chip, z banneru i z resetu — nemá se jak rozejít. ── */
+/* Text potvrzovacího tlačítka nese počet výsledků — je z něj tak zřejmé,
+   co se po kliknutí objeví, aniž by tam muselo být "zavřít". */
+function updateApplyBtn(n) {
+  const ap = document.getElementById('fmApply');
+  if (!ap) return;
+  if (n == null) n = _lastCount;
+  if (n === 0) { ap.textContent = t('overview.apply_0'); return; }
+  const w = window.lopPlural
+    ? window.lopPlural(n, t('overview.place_1'), t('overview.place_2'), t('overview.place_5'))
+    : t('overview.place_5');
+  ap.textContent = t('overview.apply_n', { n: n, w: w });
+}
+let _lastCount = 0;
+
 function syncFilterUI() {
   /* statické popisky modálu — v HTML jsou jen jako fallback */
   const setTxt = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
@@ -892,15 +884,12 @@ function syncFilterUI() {
   setTxt('pageTitle',  'overview.page_title');
   const setTip = (id, key) => { const e = document.getElementById(id); if (e) e.title = t(key); };
   setTip('btnViewT',  'overview.toggle_view');
-  setTip('btnCloseT', 'overview.close');
-  setTxt('fmTitle',    'overview.filter');
   setTxt('fmCategory', 'overview.category');
   setTxt('fmStyle',    'overview.style');
   setTxt('fmEra',      'overview.era');
   setTxt('fmDist',     'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
-  const ap = document.getElementById('fmApply');
-  if (ap) ap.textContent = t('overview.apply');
+  updateApplyBtn();
 
   const S_CAT  = { full:'filter.state_default', hide:'filter.state_hidden' };
   const S_WISH = { full:'filter.state_default', hide:'filter.state_hidden', force:'filter.state_always' };
@@ -1274,6 +1263,7 @@ function render() {
   /* kolik míst prošlo jen díky tomu, že nemají dataci */
   const undatedCount = eraActive ? filtered.filter(p => locYear(p) == null).length : 0;
   renderTaxBanner(filtered.length, undatedCount);
+  _lastCount = filtered.length; updateApplyBtn(filtered.length);
 
   if(filtered.length===0){
     /* Které filtry to způsobily, ukazuje banner hned nad seznamem —
@@ -1303,8 +1293,7 @@ function render() {
   if(_fbtn) _fbtn.classList.toggle('has-filter', filtered.length < PLACES.length);
   const _mA=document.getElementById('fmCntActive'); if(_mA) _mA.textContent=filtered.length;
   const _mT=document.getElementById('fmCntTotal');  if(_mT) _mT.textContent='/'+PLACES.length;
-  const _mH=document.querySelector('.filter-modal-title');
-  if(_mH) _mH.classList.toggle('has-filter', filtered.length < PLACES.length);
+
   updateChipCounts();
 }
 

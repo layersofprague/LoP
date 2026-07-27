@@ -1014,5 +1014,25 @@
   "overview.apply": {
     "cs": "Zobrazit místa",
     "en": "Show places"
+  },
+  "overview.apply_n": {
+    "cs": "Zobrazit {n} {w}",
+    "en": "Show {n} {w}"
+  },
+  "overview.place_1": {
+    "cs": "místo",
+    "en": "place"
+  },
+  "overview.place_2": {
+    "cs": "místa",
+    "en": "places"
+  },
+  "overview.place_5": {
+    "cs": "míst",
+    "en": "places"
+  },
+  "overview.apply_0": {
+    "cs": "Žádná místa — zavřít",
+    "en": "No places — close"
   }
 }
