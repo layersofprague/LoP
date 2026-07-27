@@ -983,10 +983,6 @@
     "cs": "Zavřít",
     "en": "Close"
   },
-  "overview.geo_denied": {
-    "cs": "Přístup k poloze byl zamítnut.",
-    "en": "Location access was denied."
-  },
   "overview.plan_tooltip": {
     "cs": "Pro správu plánovaných míst je nutné přihlášení",
     "en": "Sign in to manage planned places"
@@ -1034,5 +1030,17 @@
   "overview.apply_0": {
     "cs": "Žádná místa — zavřít",
     "en": "No places — close"
+  },
+  "overview.geo_needed": {
+    "cs": "Filtrování podle vzdálenosti potřebuje vaši polohu.",
+    "en": "Distance filtering needs your location."
+  },
+  "overview.geo_enable": {
+    "cs": "Povolit polohu",
+    "en": "Enable location"
+  },
+  "overview.geo_blocked": {
+    "cs": "Poloha je pro tuto stránku zablokovaná. Povolíte ji ikonou vlevo v adresním řádku → Nastavení webu → Poloha.",
+    "en": "Location is blocked for this site. Allow it via the icon on the left of the address bar → Site settings → Location."
   }
 }

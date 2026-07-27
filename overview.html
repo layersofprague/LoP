@@ -135,6 +135,18 @@ a { color: inherit; text-decoration: none; }
 }
 .filter-modal-inner { padding: 16px 16px 20px; flex: 1; }
 /* ikona s tečkami a počtem — stejná sestava i barvy jako tlačítko pod hlavičkou */
+.dist-note {
+  font-family: 'Inter', sans-serif; font-size: 11px; color: var(--ink-4);
+  margin-top: 7px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.dist-note[hidden] { display: none; }
+.dist-note button {
+  background: transparent; border: 1.5px solid var(--rule); border-radius: 7px;
+  padding: 3px 10px; cursor: pointer; font-family: inherit; font-size: 11px;
+  color: var(--ink-2);
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.dist-note button:hover { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
 .fm-cnt-wrap { display: flex; align-items: center; gap: 4px; }
 .fm-cnt-wrap svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ink-4); }
 .fm-cnt-wrap .filter-dots { display: flex; gap: 2px; align-items: center; }
@@ -231,8 +243,8 @@ a { color: inherit; text-decoration: none; }
 .filter-chip { display: none; }
 
 /* ── ERA TIMELINE ── */
-.filter-timeline { position: relative; height: 46px; padding: 0 4px; }
-.filter-timeline .ft-track { position: absolute; left: 4px; right: 4px; top: 20px; height: 4px; background: var(--rule); border-radius: 2px; }
+.filter-timeline { position: relative; height: 46px; }
+.filter-timeline .ft-track { position: absolute; left: 0; right: 0; top: 20px; height: 4px; background: var(--rule); border-radius: 2px; }
 .filter-timeline .ft-fill { position: absolute; top: 20px; height: 4px; background: var(--ink); border-radius: 2px; }
 .filter-timeline .ft-h { position: absolute; top: 22px; transform: translate(-50%,-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: grab; z-index: 3; touch-action: none; }
 .filter-timeline .ft-h:active { cursor: grabbing; }
@@ -689,6 +701,7 @@ a { color: inherit; text-decoration: none; }
             <span class="filter-lbl-val" id="distV">libovolná</span>
           </div>
           <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+          <div class="dist-note" id="distNote" hidden></div>
         </div>
         <div class="filter-footer">
           <button class="filter-reset" id="fmReset" onclick="resetFilters()">Resetovat</button>
@@ -915,7 +928,20 @@ function syncFilterUI() {
     btn.classList.toggle('state-on', STYLE_FILTER.has(btn.dataset.style));
   });
 
+  const note = document.getElementById('distNote');
+  if (note) {
+    if (userPos || DIST_STATE.max == null) note.hidden = true;
+    else {
+      note.hidden = false;
+      note.innerHTML = GEO_PERM === 'denied'
+        ? `<span>${t('overview.geo_blocked')}</span>`
+        : `<span>${t('overview.geo_needed')}</span>` +
+          `<button type="button" onclick="requestLoc(event)">${t('overview.geo_enable')}</button>`;
+    }
+  }
+
   const ds = document.getElementById('distSlider');
+  if (ds) ds.style.opacity = (DIST_STATE.max != null && !userPos) ? '.45' : '1';
   const dv = document.getElementById('distV');
   if (ds) ds.value = DIST_STATE.max == null ? 100 : Math.round((DIST_STATE.max - 0.2) / 4.8 * 100);
   if (ds) ds.style.setProperty('--fill', (DIST_STATE.max == null ? 100 : Math.round((DIST_STATE.max - 0.2) / 4.8 * 100)) + '%');
@@ -1001,10 +1027,26 @@ function renderTaxBanner(count, undatedCount) {
     `</div>`).join('');
 }
 
+/* Stav oprávnění: 'prompt' | 'denied' | 'granted' | null (API nedostupné).
+   Po zamítnutí už prohlížeč výzvu znovu nezobrazí — je potřeba poradit jinak. */
+let GEO_PERM = null;
+if (navigator.permissions && navigator.permissions.query) {
+  navigator.permissions.query({ name: 'geolocation' }).then(st => {
+    GEO_PERM = st.state;
+    syncFilterUI();
+    /* Když si to uživatel přepne v nastavení prohlížeče, zachytíme to. */
+    st.onchange = () => {
+      GEO_PERM = st.state;
+      if (st.state === 'granted') locateUser();
+      syncFilterUI();
+    };
+  }).catch(() => {});
+}
+
 function requestLoc(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; render(); },
-    err => { if(err.code===1) alert(t('overview.geo_denied')); }, { enableHighAccuracy:true, timeout:8000 });
+    err => { if(err.code===1){ GEO_PERM='denied'; syncFilterUI(); } }, { enableHighAccuracy:true, timeout:8000 });
 }
 function locateUser() {
   if (!navigator.geolocation) return;
@@ -1029,7 +1071,7 @@ const UNDATED = { include:true };   // nedatovaná místa při aktivním filtru 
 const STYLE_FILTER = new Set();
 
 const eraPct    = y => ((y-ERA_START)/(ERA_END-ERA_START))*100;
-const pctToYear = p => Math.round(ERA_START+p*(ERA_END-ERA_START));
+const pctToYear = p => Math.round(ERA_START+Math.max(0,Math.min(1,p))*(ERA_END-ERA_START));
 
 function toggleFilter() {
   const backdrop = document.getElementById('filterBackdrop');
@@ -1133,13 +1175,15 @@ function buildEraTimeline() {
   const el=document.getElementById('eraTimeline'); if(!el) return;
   const years=[1000,1200,1400,1600,1800,1900,2000], html=[];
   html.push('<div class="ft-track"></div>','<div class="ft-fill" id="eraFill"></div>');
-  years.forEach(y=>{ html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`,`<span class="ft-year" style="left:${eraPct(y)}%">${y===2000?t('era.now'):y}</span>`); });
+  years.forEach(y=>{ html.push(`<span class="ft-year-tick" style="left:calc(8px + (100% - 16px) * ${eraPct(y)/100})"></span>`,`<span class="ft-year" style="left:calc(8px + (100% - 16px) * ${eraPct(y)/100})">${y===2000?t('era.now'):y}</span>`); });
   html.push('<div class="ft-h" id="eraHFrom" data-which="from"></div>','<div class="ft-h" id="eraHTo" data-which="to"></div>');
   el.innerHTML=html.join(''); renderEra();
   el.querySelectorAll('.ft-h').forEach(h=>{
     const onDown=ev=>{
       ev.preventDefault(); const which=h.dataset.which, rect=el.getBoundingClientRect();
-      const onMove=e=>{ const cx=e.touches?e.touches[0].clientX:e.clientX; const p=Math.max(0,Math.min(1,(cx-rect.left)/rect.width)), y=pctToYear(p); if(which==='from') ERA_STATE.from=Math.min(y,ERA_STATE.to-20); else ERA_STATE.to=Math.max(y,ERA_STATE.from+20); renderEra(); applyFilter(); };
+      const onMove=e=>{ const cx=e.touches?e.touches[0].clientX:e.clientX; /* táhlo jezdí od 8px do W−8px — mapovat kurzor na týž rozsah */
+        const usable=rect.width-16;
+        const p=Math.max(0,Math.min(1,(cx-rect.left-8)/usable)), y=pctToYear(p); if(which==='from') ERA_STATE.from=Math.min(y,ERA_STATE.to-20); else ERA_STATE.to=Math.max(y,ERA_STATE.from+20); renderEra(); applyFilter(); };
       const onUp=()=>{ window.removeEventListener('mousemove',onMove); window.removeEventListener('mouseup',onUp); window.removeEventListener('touchmove',onMove); window.removeEventListener('touchend',onUp); };
       window.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
       window.addEventListener('touchmove',onMove,{passive:false}); window.addEventListener('touchend',onUp);
@@ -1151,8 +1195,13 @@ function buildEraTimeline() {
 function renderEra() {
   const fromP=eraPct(ERA_STATE.from), toP=eraPct(ERA_STATE.to);
   const fromH=document.getElementById('eraHFrom'), toH=document.getElementById('eraHTo'), fill=document.getElementById('eraFill');
-  if(fromH) fromH.style.left=fromP+'%'; if(toH) toH.style.left=toP+'%';
-  if(fill){ fill.style.left=fromP+'%'; fill.style.width=(toP-fromP)+'%'; }
+  /* Nativní <input type=range> vede střed táhla od 8px do W−8px (půl šířky
+     táhla na každé straně). Osa to napodobuje, aby byly obě stopy stejně široké. */
+  const pos = pct => `calc(8px + (100% - 16px) * ${pct/100})`;
+  if(fromH) fromH.style.left = pos(fromP);
+  if(toH)   toH.style.left   = pos(toP);
+  if(fill){ fill.style.left  = pos(fromP);
+            fill.style.width = `calc((100% - 16px) * ${(toP-fromP)/100})`; }
   const fv=document.getElementById('eraFromV'), tv=document.getElementById('eraToV');
   if(fv) fv.textContent=ERA_STATE.from; if(tv) tv.textContent=ERA_STATE.to>=2025?'2000+':ERA_STATE.to;
 }
@@ -1162,6 +1211,9 @@ function initDistSlider() {
   slider.addEventListener('input',()=>{
     const v=+slider.value;
     slider.style.setProperty('--fill', v+'%');
+    /* Bez polohy nemá filtr podle čeho měřit — požádat právě teď,
+       kdy uživatel svůj záměr projevil posunutím táhla. */
+    if (v < 100 && !userPos && GEO_PERM !== 'denied') requestLoc();
     if(v>=100){ DIST_STATE.max=null; label.textContent=t('overview.any_dist'); }
     else{ DIST_STATE.max=0.2+(v/100)*4.8; label.textContent='< '+DIST_STATE.max.toFixed(1)+' km'; }
     applyFilter();
