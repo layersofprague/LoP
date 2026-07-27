@@ -699,13 +699,16 @@ a { color: inherit; text-decoration: none; }
 .kw-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
 .kw-link {
   text-decoration: none;
-  border-color: var(--ink-5);
-  color: var(--ink-2);
-  transition: background .15s, color .15s, border-color .15s;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  transition: box-shadow .15s, transform .15s;
 }
-.kw-link:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.kw-link[data-kind="style"]  { border-color: var(--cat-arch); color: var(--cat-arch); }
-.kw-link[data-kind="person"] { font-style: italic; }
+.kw-link:hover {
+  box-shadow: 0 3px 10px rgba(26,24,20,.28);
+  transform: translateY(-1px);
+}
+.kw-link:active { transform: translateY(0); box-shadow: none; }
 .kw-tag {
   font-family: 'Inter', sans-serif;
   font-size: 10px; letter-spacing: .06em;
@@ -1209,8 +1212,8 @@ const PLACE_DATA = {
   /* Popisná klíčová slova — NEklikatelná, needitovatelná filtrem.
      Filtrovatelné tagy žijí v places.json (tags / style / people / district). */
   extraKeywords: {
-    cs: ['lodní doprava','1892','Prague Marina','průmyslová Praha','přístavní dozorství','firma Lanna','železniční vlečka','Bubny','labské lodě','Hamburg','lodní výtah','František Bartoš','veřejná skladiště'],
-    en: ['river transport','1892','Prague Marina','industrial Prague','port supervision','Lanna company','railway siding','Bubny','Elbe barges','Hamburg','ship lift','František Bartoš','public warehouses']
+    cs: ['lodní doprava','železniční vlečka','Hamburg','lodní výtah','František Bartoš','Prague Marina'],
+    en: ['river transport','railway siding','Hamburg','ship lift','František Bartoš','Prague Marina']
   },
 
   insider: {
@@ -1392,6 +1395,7 @@ function renderKeywords() {
       `<a class="kw-tag kw-link" data-kind="${kind}" href="../overview.html?${kind}=${encodeURIComponent(slug)}">${label}</a>`
     );
     if (p.district) add(T.districtLabel(p.district), p.district, 'district');
+    if (p.prague)   add(T.pragueLabel(p.prague), p.prague, 'prague');
     (Array.isArray(p.style) ? p.style : p.style ? [p.style] : [])
       .forEach(s => add(T.styleLabel(s), s, 'style'));
     (p.tags || []).forEach(s => add(T.label(s), s, 'tag'));
