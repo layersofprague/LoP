@@ -878,5 +878,25 @@
   "prague.22": {
     "cs": "Praha 22",
     "en": "Prague 22"
+  },
+  "tag.shipyard": {
+    "cs": "loděnice",
+    "en": "shipyard"
+  },
+  "tag.lock": {
+    "cs": "plavební komora",
+    "en": "lock"
+  },
+  "tag.weir": {
+    "cs": "jez",
+    "en": "weir"
+  },
+  "tag.ferry": {
+    "cs": "přívoz",
+    "en": "ferry"
+  },
+  "tag.island": {
+    "cs": "ostrov",
+    "en": "island"
   }
 }

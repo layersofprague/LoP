@@ -58,6 +58,7 @@ const TAGS = {
   'cemetery':     { kind: 'space' },
   'courtyard':    { kind: 'space' },
   'waterfront':   { kind: 'space' },
+  'island':       { kind: 'space' },
 
   /* infrastruktura */
   'bridge':       { kind: 'infra' },
@@ -68,6 +69,10 @@ const TAGS = {
   'bastion':      { kind: 'infra' },
   'gate':         { kind: 'infra' },
   'waterworks':   { kind: 'infra' },
+  'shipyard':     { kind: 'infra' },
+  'lock':         { kind: 'infra' },
+  'weir':         { kind: 'infra' },
+  'ferry':        { kind: 'infra' },
 
   /* objekty */
   'monument':     { kind: 'object' },
