@@ -137,11 +137,19 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 16px 0;
 }
+/* stejná sestava jako .ctrl-btn-filter pod hlavičkou stránky */
 .filter-modal-title {
+  display: flex; align-items: center; gap: 4px;
   font-family: 'Inter', sans-serif;
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-4); font-weight: 500;
+  font-size: 11px; font-weight: 500; color: var(--ink-4);
 }
+.filter-modal-title svg { width: 14px; height: 14px; flex-shrink: 0; }
+.filter-modal-title .filter-dots { display: flex; gap: 2px; align-items: center; }
+.filter-modal-title .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
+.filter-modal-title .filter-cnt { font-size: 10px; color: var(--ink-5); }
+.filter-modal-title #fmCntActive { font-size: 12px; font-weight: 500; color: var(--ink-5); }
+.filter-modal-title.has-filter .filter-cnt,
+.filter-modal-title.has-filter #fmCntActive { color: var(--accent); font-weight: 600; }
 .filter-modal-close {
   appearance: none; background: transparent; border: none;
   width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
@@ -248,10 +256,27 @@ a { color: inherit; text-decoration: none; }
 .filter-timeline .ft-h:active { cursor: grabbing; }
 .filter-timeline .ft-year { position: absolute; top: 32px; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-5); letter-spacing: .05em; pointer-events: none; }
 .filter-timeline .ft-year-tick { position: absolute; top: 27px; width: 1px; height: 3px; background: var(--rule-2); transform: translateX(-50%); pointer-events: none; }
-.filter-range-input { appearance: none; -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--rule); outline: none; margin-top: 2px; }
+/* Výchozí stav = celý rozsah, tedy stopa černá jako u časové osy.
+   Šedne až část za táhlem — plní se z JS přes --fill. */
+.filter-range-input {
+  appearance: none; -webkit-appearance: none;
+  width: 100%; height: 4px; border-radius: 2px; outline: none; margin-top: 2px;
+  background: linear-gradient(to right,
+    var(--ink) 0%, var(--ink) var(--fill, 100%),
+    var(--rule) var(--fill, 100%), var(--rule) 100%);
+}
 .filter-range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .filter-range-input::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); cursor: pointer; }
-.filter-footer { display: flex; justify-content: flex-end; padding-top: 10px; }
+/* Reset vlevo, potvrzení vpravo — zavření křížkem nemusí být každému zřejmé. */
+.filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; }
+.filter-apply {
+  background: var(--ink); border: 1.5px solid var(--ink); border-radius: 7px;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--paper); cursor: pointer; padding: 6px 16px;
+  transition: box-shadow .15s, transform .15s;
+}
+.filter-apply:hover  { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
+.filter-apply:active { transform: translateY(0); box-shadow: none; }
 .filter-reset { background: transparent; border: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); cursor: pointer; padding: 4px 0; }
 .filter-reset:hover { color: var(--ink); }
 
@@ -647,7 +672,19 @@ a { color: inherit; text-decoration: none; }
   <div class="filter-modal-backdrop" id="filterBackdrop">
     <div class="filter-modal" id="filterModal">
       <div class="filter-modal-header">
-        <span class="filter-modal-title" id="fmTitle">Filtr</span>
+        <span class="filter-modal-title">
+          <span class="filter-icon-wrap">
+            <span class="filter-dots">
+              <span style="background:var(--cat-hist)"></span>
+              <span style="background:var(--cat-arch)"></span>
+              <span style="background:var(--cat-art)"></span>
+              <span style="background:var(--cat-fun)"></span>
+            </span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          </span>
+          <span id="fmTitle">Filtr</span>
+          <span class="filter-cnt" id="fmCnt"><span id="fmCntActive">—</span><span id="fmCntTotal"></span></span>
+        </span>
         <button class="filter-modal-close" onclick="toggleFilter()" id="btnCloseT" title="Zavřít">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -677,6 +714,7 @@ a { color: inherit; text-decoration: none; }
         </div>
         <div class="filter-footer">
           <button class="filter-reset" id="fmReset" onclick="resetFilters()">Resetovat</button>
+          <button class="filter-apply" id="fmApply" onclick="toggleFilter()">Zobrazit místa</button>
         </div>
       </div>
     </div>
@@ -861,6 +899,8 @@ function syncFilterUI() {
   setTxt('fmEra',      'overview.era');
   setTxt('fmDist',     'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
+  const ap = document.getElementById('fmApply');
+  if (ap) ap.textContent = t('overview.apply');
 
   const S_CAT  = { full:'filter.state_default', hide:'filter.state_hidden' };
   const S_WISH = { full:'filter.state_default', hide:'filter.state_hidden', force:'filter.state_always' };
@@ -889,6 +929,7 @@ function syncFilterUI() {
   const ds = document.getElementById('distSlider');
   const dv = document.getElementById('distV');
   if (ds) ds.value = DIST_STATE.max == null ? 100 : Math.round((DIST_STATE.max - 0.2) / 4.8 * 100);
+  if (ds) ds.style.setProperty('--fill', (DIST_STATE.max == null ? 100 : Math.round((DIST_STATE.max - 0.2) / 4.8 * 100)) + '%');
   if (dv) dv.textContent = DIST_STATE.max == null
       ? t('overview.any_dist') : '< ' + DIST_STATE.max.toFixed(1) + ' km';
 
@@ -1131,6 +1172,7 @@ function initDistSlider() {
   const slider=document.getElementById('distSlider'), label=document.getElementById('distV'); if(!slider) return;
   slider.addEventListener('input',()=>{
     const v=+slider.value;
+    slider.style.setProperty('--fill', v+'%');
     if(v>=100){ DIST_STATE.max=null; label.textContent=t('overview.any_dist'); }
     else{ DIST_STATE.max=0.2+(v/100)*4.8; label.textContent='< '+DIST_STATE.max.toFixed(1)+' km'; }
     applyFilter();
@@ -1259,6 +1301,10 @@ function render() {
   const _tot=document.getElementById('filterHeadTotal'); if(_tot) _tot.textContent='/'+PLACES.length;
   const _fbtn=document.getElementById('filterBtn');
   if(_fbtn) _fbtn.classList.toggle('has-filter', filtered.length < PLACES.length);
+  const _mA=document.getElementById('fmCntActive'); if(_mA) _mA.textContent=filtered.length;
+  const _mT=document.getElementById('fmCntTotal');  if(_mT) _mT.textContent='/'+PLACES.length;
+  const _mH=document.querySelector('.filter-modal-title');
+  if(_mH) _mH.classList.toggle('has-filter', filtered.length < PLACES.length);
   updateChipCounts();
 }
 

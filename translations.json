@@ -1010,5 +1010,9 @@
   "overview.intro": {
     "cs": "Vyhovuje Vám více forma seznamu než mapa? Všechna místa seřazená přehledně podle kategorií s možností filtrování. Stačí začít prozkoumávat.",
     "en": "Prefer a list to a map? All places sorted by category, with filtering. Just start exploring."
+  },
+  "overview.apply": {
+    "cs": "Zobrazit místa",
+    "en": "Show places"
   }
 }
