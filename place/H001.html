@@ -696,6 +696,16 @@ a { color: inherit; text-decoration: none; }
 .ar-cta-light .ar-cta-kick { color: rgba(238,239,235,.5); }
 
 /* keyword tags */
+.kw-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+.kw-link {
+  text-decoration: none;
+  border-color: var(--ink-5);
+  color: var(--ink-2);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.kw-link:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.kw-link[data-kind="style"]  { border-color: var(--cat-arch); color: var(--cat-arch); }
+.kw-link[data-kind="person"] { font-style: italic; }
 .kw-tag {
   font-family: 'Inter', sans-serif;
   font-size: 10px; letter-spacing: .06em;
@@ -1082,6 +1092,7 @@ a { color: inherit; text-decoration: none; }
 <!-- TOPBAR -->
 <div id="lop-header"></div>
 <script src="../i18n.js"></script>
+<script src="../tags.js"></script>
 
 <script>
 /* ══════════════════════════════════════════
@@ -1195,9 +1206,11 @@ const PLACE_DATA = {
     wishLbl:     { cs: 'Plán',                                                        en: 'Plan' },
   },
 
-  keywords: {
-    cs: ['přístav','průmysl','secese','Holešovice','František Sander','lodní doprava','Praha 7','1892','Prague Marina','nábřeží','firma Lanna','železniční vlečka','Bubny','labské lodě','Hamburg','lodní výtah','František Bartoš','veřejná skladiště'],
-    en: ['port','industry','art nouveau','Holešovice','František Sander','river transport','Prague 7','1892','Prague Marina','waterfront','Lanna company','railway siding','Bubny','Elbe barges','Hamburg','ship lift','František Bartoš','public warehouses']
+  /* Popisná klíčová slova — NEklikatelná, needitovatelná filtrem.
+     Filtrovatelné tagy žijí v places.json (tags / style / people / district). */
+  extraKeywords: {
+    cs: ['lodní doprava','1892','Prague Marina','průmyslová Praha','přístavní dozorství','firma Lanna','železniční vlečka','Bubny','labské lodě','Hamburg','lodní výtah','František Bartoš','veřejná skladiště'],
+    en: ['river transport','1892','Prague Marina','industrial Prague','port supervision','Lanna company','railway siding','Bubny','Elbe barges','Hamburg','ship lift','František Bartoš','public warehouses']
   },
 
   insider: {
@@ -1275,13 +1288,8 @@ function renderPlaceI18n() {
   const iwl = document.getElementById('insiderWhyLink');
   if (iwl) iwl.textContent = lang === 'en' ? 'Why is some content hidden?' : 'Proč je část obsahu skryta?';
 
-  // Keywords
-  const kwContainer = document.getElementById('kwContainer');
-  if (kwContainer) {
-    kwContainer.innerHTML = loc(P.keywords).map(function(kw) {
-      return '<span class="kw-tag">' + kw + '</span>';
-    }).join('');
-  }
+  // Klíčová slova — klikatelné ze slovníku (places.json) + popisné z extraKeywords
+  renderKeywords();
 
   // Insider odstavce
   ['p1','p2','p3','p4'].forEach(function(k) {
@@ -1365,6 +1373,45 @@ function renderPlaceI18n() {
   var ar = document.getElementById('autorStars');
   if (ar && ar.textContent.match(/čeká|awaiting/)) ar.textContent = lang === 'en' ? 'awaiting rating' : 'čeká na hodnocení';
 }
+
+
+/* ── KLÍČOVÁ SLOVA ──
+   Klikatelné chipy se berou z places.json (jediný zdroj pravdy pro filtrování),
+   popisná slova z PLACE_DATA.extraKeywords zůstávají jako prostý text. */
+let _placeRecord = null;
+
+function renderKeywords() {
+  const box = document.getElementById('kwContainer');
+  if (!box) return;
+  const T = window.LOP_TAGS;
+  const chips = [];
+
+  if (_placeRecord && T) {
+    const p = _placeRecord;
+    const add = (label, slug, kind) => chips.push(
+      `<a class="kw-tag kw-link" data-kind="${kind}" href="../overview.html?${kind}=${encodeURIComponent(slug)}">${label}</a>`
+    );
+    if (p.district) add(T.districtLabel(p.district), p.district, 'district');
+    (Array.isArray(p.style) ? p.style : p.style ? [p.style] : [])
+      .forEach(s => add(T.styleLabel(s), s, 'style'));
+    (p.tags || []).forEach(s => add(T.label(s), s, 'tag'));
+    (p.people || []).forEach(n => add(n, n, 'person'));
+  }
+
+  const extras = (PLACE_DATA.extraKeywords ? loc(PLACE_DATA.extraKeywords) : [])
+    .map(k => `<span class="kw-tag">${k}</span>`);
+
+  box.innerHTML = chips.join('') + extras.join('');
+}
+
+/* Načíst záznam místa a překreslit */
+fetch('../places.json')
+  .then(r => r.json())
+  .then(list => {
+    _placeRecord = list.find(x => x.id === PLACE_DATA.id) || null;
+    renderKeywords();
+  })
+  .catch(() => renderKeywords());
 
 /* Spustit po načtení */
 if (document.readyState === 'loading') {
@@ -1826,28 +1873,7 @@ window.addEventListener('load', renderPlaceI18n);
       <span class="sec-label" id="secKlicova">Klíčová slova</span>
       <div class="sec-rule"></div>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-      <span class="kw-tag">přístav</span>
-      <span class="kw-tag">průmysl</span>
-      <span class="kw-tag">secese</span>
-      <span class="kw-tag">Holešovice</span>
-      <span class="kw-tag">František Sander</span>
-      <span class="kw-tag">lodní doprava</span>
-      <span class="kw-tag">Praha 7</span>
-      <span class="kw-tag">1892</span>
-      <span class="kw-tag">Prague Marina</span>
-      <span class="kw-tag">nábřeží</span>
-      <span class="kw-tag">průmyslová Praha</span>
-      <span class="kw-tag">přístavní dozorství</span>
-      <span class="kw-tag">firma Lanna</span>
-      <span class="kw-tag">železniční vlečka</span>
-      <span class="kw-tag">Bubny</span>
-      <span class="kw-tag">labské lodě</span>
-      <span class="kw-tag">Hamburg</span>
-      <span class="kw-tag">lodní výtah</span>
-      <span class="kw-tag">František Bartoš</span>
-      <span class="kw-tag">veřejná skladiště</span>
-    </div>
+    <div class="kw-cloud" id="kwContainer"></div>
   </div>
 
 </div><!-- /body -->
