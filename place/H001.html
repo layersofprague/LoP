@@ -697,18 +697,20 @@ a { color: inherit; text-decoration: none; }
 
 /* keyword tags */
 .kw-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
-.kw-link {
+/* Klikatelné chipy — inverzní. Dvojitý selektor kvůli specificitě:
+   .kw-tag je v souboru níž a jinak by přebilo pozadí. */
+.kw-tag.kw-link {
   text-decoration: none;
   background: var(--ink);
   border-color: var(--ink);
   color: var(--paper);
   transition: box-shadow .15s, transform .15s;
 }
-.kw-link:hover {
+.kw-tag.kw-link:hover {
   box-shadow: 0 3px 10px rgba(26,24,20,.28);
   transform: translateY(-1px);
 }
-.kw-link:active { transform: translateY(0); box-shadow: none; }
+.kw-tag.kw-link:active { transform: translateY(0); box-shadow: none; }
 .kw-tag {
   font-family: 'Inter', sans-serif;
   font-size: 10px; letter-spacing: .06em;
@@ -1212,8 +1214,8 @@ const PLACE_DATA = {
   /* Popisná klíčová slova — NEklikatelná, needitovatelná filtrem.
      Filtrovatelné tagy žijí v places.json (tags / style / people / district). */
   extraKeywords: {
-    cs: ['lodní doprava','železniční vlečka','Hamburg','lodní výtah','František Bartoš','Prague Marina'],
-    en: ['river transport','railway siding','Hamburg','ship lift','František Bartoš','Prague Marina']
+    cs: ['lodní doprava','Holešovická přístavní dráha','František Bartoš','Prague Marina'],
+    en: ['river transport','Holešovice Port Railway','František Bartoš','Prague Marina']
   },
 
   insider: {
