@@ -1045,12 +1045,12 @@ if (navigator.permissions && navigator.permissions.query) {
 
 function requestLoc(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
-  navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; render(); },
-    err => { if(err.code===1){ GEO_PERM='denied'; syncFilterUI(); } }, { enableHighAccuracy:true, timeout:8000 });
+  navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; syncFilterUI(); render(); },
+    err => { if(err.code===1) GEO_PERM='denied'; syncFilterUI(); }, { enableHighAccuracy:true, timeout:8000 });
 }
 function locateUser() {
   if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; render(); },
+  navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; syncFilterUI(); render(); },
     ()=>{}, { enableHighAccuracy:true, timeout:8000 });
 }
 
@@ -1216,6 +1216,7 @@ function initDistSlider() {
     if (v < 100 && !userPos && GEO_PERM !== 'denied') requestLoc();
     if(v>=100){ DIST_STATE.max=null; label.textContent=t('overview.any_dist'); }
     else{ DIST_STATE.max=0.2+(v/100)*4.8; label.textContent='< '+DIST_STATE.max.toFixed(1)+' km'; }
+    syncFilterUI();   /* vykreslí poznámku o poloze a ztlumí táhlo, když chybí */
     applyFilter();
   });
 }
