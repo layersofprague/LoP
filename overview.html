@@ -563,6 +563,12 @@ a { color: inherit; text-decoration: none; }
   color: var(--paper); font-family: inherit; font-size: 12px; font-weight: 500;
   transition: box-shadow .15s, transform .15s;
 }
+.tax-banner .tb-chip[data-tone="accent"] {
+  background: #fff; border-color: var(--accent); color: var(--accent);
+}
+.tax-banner .tb-chip[data-tone="ok"] {
+  background: #fff; border-color: var(--ok); color: var(--ok);
+}
 .tax-banner .tb-chip:hover { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
 .tax-banner .tb-chip:active { transform: translateY(0); box-shadow: none; }
 .tax-banner .tb-chip svg { opacity: .65; flex-shrink: 0; }
@@ -857,13 +863,15 @@ function activeFilters(undatedCount) {
                  clear: () => { FILTER[cat] = 'full'; } });
   });
 
-  [['wished','place.plan'], ['visited','overview.visited']].forEach(([f, key]) => {
+  [['wished','place.plan','accent'], ['visited','overview.visited','ok']].forEach(([f, key, tone]) => {
     const st = FILTER[f]; if (st === 'full') return;
     const name = t(key);
     const lbl = st === 'force' ? t('filter.always', { x:name })
               : st === 'hide'  ? t('filter.without',{ x:name })
               :                  t('filter.dimmed', { x:name });
-    out.push({ label: lbl, clear: () => { FILTER[f] = 'full'; } });
+    /* barevný obrys jen u "vždy" — u skrytí a útlumu by barva pletla */
+    out.push({ label: lbl, tone: st === 'force' ? tone : null,
+               clear: () => { FILTER[f] = 'full'; } });
   });
 
   if (ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END) {
@@ -901,7 +909,7 @@ function renderTaxBanner(count, undatedCount) {
   if (!items.length) { el.hidden = true; return; }
   el.hidden = false;
   el.innerHTML = items.map((f, i) =>
-    `<button class="tb-chip" onclick="clearOneFilter(${i}, ${undatedCount})">` +
+    `<button class="tb-chip"${f.tone ? ` data-tone="${f.tone}"` : ''} onclick="clearOneFilter(${i}, ${undatedCount})">` +
       `<span>${f.label}</span>` +
       `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
     `</button>`).join('');
