@@ -898,5 +898,61 @@
   "tag.island": {
     "cs": "ostrov",
     "en": "island"
+  },
+  "cat.hist": {
+    "cs": "Historie",
+    "en": "History"
+  },
+  "cat.arch": {
+    "cs": "Architektura",
+    "en": "Architecture"
+  },
+  "cat.art": {
+    "cs": "Umění",
+    "en": "Art"
+  },
+  "cat.fun": {
+    "cs": "Zajímavosti",
+    "en": "Curiosities"
+  },
+  "filter.without": {
+    "cs": "bez: {x}",
+    "en": "without: {x}"
+  },
+  "filter.only": {
+    "cs": "jen: {x}",
+    "en": "only: {x}"
+  },
+  "filter.dimmed": {
+    "cs": "utlumeno: {x}",
+    "en": "dimmed: {x}"
+  },
+  "filter.distance": {
+    "cs": "do {x} km",
+    "en": "within {x} km"
+  },
+  "filter.undated": {
+    "cs": "nedatovaná",
+    "en": "undated"
+  },
+  "filter.active": {
+    "cs": "Filtry",
+    "en": "Filters"
+  },
+  "filter.state_default": {
+    "cs": "výchozí",
+    "en": "default"
+  },
+  "filter.state_hidden": {
+    "cs": "skryto",
+    "en": "hidden"
+  },
+  "filter.state_dimmed": {
+    "cs": "utlumeno",
+    "en": "dimmed"
+  },
+  "filter.state_always": {
+    "cs": "vždy",
+    "en": "always"
   }
 }

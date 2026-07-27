@@ -559,6 +559,18 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .12em; text-transform: uppercase; }
 .tax-banner .tb-value { font-weight: 600; color: var(--ink); font-size: 15px; }
 .tax-banner .tb-count { color: var(--ink-4); }
+.tax-banner .tb-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--ink); border: 1.5px solid var(--ink); border-radius: 7px;
+  padding: 4px 9px 4px 11px; cursor: pointer;
+  color: var(--paper); font-family: inherit; font-size: 12px; font-weight: 500;
+  transition: box-shadow .15s, transform .15s;
+}
+.tax-banner .tb-chip:hover { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
+.tax-banner .tb-chip:active { transform: translateY(0); box-shadow: none; }
+.tax-banner .tb-chip svg { opacity: .65; flex-shrink: 0; }
+.tax-banner .tb-chip:hover svg { opacity: 1; }
+.tax-banner .tb-count { margin-left: auto; }
 .tax-banner .tb-clear {
   margin-left: auto; display: flex; align-items: center; gap: 5px;
   background: transparent; border: 1px solid var(--rule); border-radius: 7px;
@@ -666,7 +678,7 @@ a { color: inherit; text-decoration: none; }
 
 const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
 const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
-const CAT_NAME   = { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
+const CAT_NAME   = new Proxy({}, { get: (_, k) => t('cat.' + String(k)) });
 const VISIT_KEY  = 'lop_visited_v1';
 const WISH_KEY   = 'lop_wishlist_v2';
 
@@ -802,18 +814,104 @@ function clearTaxFilter() {
   location.href = u.toString();
 }
 
-function renderTaxBanner(count) {
+
+/* ── Jediné místo, které promítá stav filtrů do ovládacích prvků.
+   Volá se z kliku na chip, z banneru i z resetu — nemá se jak rozejít. ── */
+function syncFilterUI() {
+  const S_CAT  = { full:'filter.state_default', hide:'filter.state_hidden' };
+  const S_WISH = { full:'filter.state_default', dim:'filter.state_dimmed',
+                   hide:'filter.state_hidden',  force:'filter.state_always' };
+
+  document.querySelectorAll('.chip[data-cat]').forEach(btn => {
+    const cat = btn.dataset.cat, st = FILTER[cat];
+    btn.classList.remove('state-dim','state-hide','state-force');
+    if (st === 'hide') btn.classList.add('state-hide');
+    const lbl = document.getElementById('lbl-' + cat);
+    if (lbl) lbl.textContent = t(S_CAT[st] || 'filter.state_default');
+  });
+
+  document.querySelectorAll('.chip[data-filter]').forEach(btn => {
+    const f = btn.dataset.filter, st = FILTER[f];
+    btn.classList.remove('state-dim','state-hide','state-force');
+    if (st === 'dim')        btn.classList.add('state-dim');
+    else if (st === 'hide')  btn.classList.add('state-hide');
+    else if (st === 'force') btn.classList.add('state-force');
+    const lbl = document.getElementById('lbl-' + f);
+    if (lbl) lbl.textContent = t(S_WISH[st] || 'filter.state_default');
+  });
+
+  const ds = document.getElementById('distSlider');
+  const dv = document.getElementById('distV');
+  if (ds) ds.value = DIST_STATE.max == null ? 100 : Math.round((DIST_STATE.max - 0.2) / 4.8 * 100);
+  if (dv) dv.textContent = DIST_STATE.max == null
+      ? t('overview.any_dist') : '< ' + DIST_STATE.max.toFixed(1) + ' km';
+
+  renderEra();
+}
+
+/* ── Seznam aktivních filtrů pro bannerové boxy ── */
+function activeFilters(undatedCount) {
+  const out = [];
+
+  if (TAX) out.push({ label: taxLabel(), clear: clearTaxFilter });
+
+  ['hist','arch','art','fun'].forEach(cat => {
+    if (FILTER[cat] === 'hide')
+      out.push({ label: t('filter.without', { x: t('cat.' + cat) }),
+                 clear: () => { FILTER[cat] = 'full'; } });
+  });
+
+  [['wished','place.plan'], ['visited','overview.visited']].forEach(([f, key]) => {
+    const st = FILTER[f]; if (st === 'full') return;
+    const name = t(key);
+    const lbl = st === 'force' ? t('filter.only',   { x:name })
+              : st === 'hide'  ? t('filter.without',{ x:name })
+              :                  t('filter.dimmed', { x:name });
+    out.push({ label: lbl, clear: () => { FILTER[f] = 'full'; } });
+  });
+
+  if (ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END) {
+    const to = ERA_STATE.to >= ERA_END ? '2000+' : ERA_STATE.to;
+    out.push({ label: ERA_STATE.from + '–' + to,
+               clear: () => { ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END; UNDATED.include = true; } });
+  }
+
+  if (DIST_STATE.max != null)
+    out.push({ label: t('filter.distance', { x: DIST_STATE.max.toFixed(1) }),
+               clear: () => { DIST_STATE.max = null; } });
+
+  /* Nedatovaná místa — jen když filtr období běží a nějaká by propadla.
+     Uživatel je vidí a může je odebrat; výchozí je ponechat. */
+  if (UNDATED.include && undatedCount > 0 &&
+      (ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END))
+    out.push({ label: t('filter.undated') + ' (' + undatedCount + ')',
+               clear: () => { UNDATED.include = false; } });
+
+  return out;
+}
+
+function clearOneFilter(i, undatedCount) {
+  const f = activeFilters(undatedCount)[i];
+  if (!f) return;
+  f.clear();
+  syncFilterUI();
+  applyFilter();
+}
+
+function renderTaxBanner(count, undatedCount) {
   const el = document.getElementById('taxBanner');
   if (!el) return;
-  if (!TAX) { el.hidden = true; return; }
+  const items = activeFilters(undatedCount);
+  if (!items.length) { el.hidden = true; return; }
   el.hidden = false;
   el.innerHTML =
-    `<span class="tb-label">${t('tag.filtered_by')}</span>` +
-    `<span class="tb-value">${taxLabel()}</span>` +
-    `<span class="tb-count">${count}</span>` +
-    `<button class="tb-clear" onclick="clearTaxFilter()">` +
-      `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
-      `${t('tag.clear_filter')}</button>`;
+    `<span class="tb-label">${t('filter.active')}</span>` +
+    items.map((f, i) =>
+      `<button class="tb-chip" onclick="clearOneFilter(${i}, ${undatedCount})">` +
+        `<span>${f.label}</span>` +
+        `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
+      `</button>`).join('') +
+    `<span class="tb-count">${count}</span>`;
 }
 
 function requestLoc(e) {
@@ -845,6 +943,7 @@ const ERAS = [
 const ERA_START=1000, ERA_END=2025;
 const ERA_STATE = { from:ERA_START, to:ERA_END };
 const DIST_STATE = { max:null };
+const UNDATED = { include:true };   // nedatovaná místa při aktivním filtru období
 
 const eraPct    = y => ((y-ERA_START)/(ERA_END-ERA_START))*100;
 const pctToYear = p => Math.round(ERA_START+p*(ERA_END-ERA_START));
@@ -887,17 +986,11 @@ function buildChips() {
       <button class="chip" id="chipWished" data-filter="wished" style="width:90px" data-tooltip="Pro správu plánovaných míst je nutné přihlášení"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>Plán <span id="ctWishedWrap"></span></button>
     </div>
   `;
-  const LABELS_CAT  = { full: 'výchozí', hide: 'skryto' };
-  const LABELS_WISH = { full: 'výchozí', dim: 'utlumeno', hide: 'skryto', force: 'vždy' };
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;
       FILTER[cat] = FILTER_NEXT[FILTER[cat]];
-      btn.classList.remove('state-dim','state-hide','state-force');
-      if (FILTER[cat]==='hide') btn.classList.add('state-hide');
-      const lbl = document.getElementById('lbl-'+cat);
-      if (lbl) lbl.textContent = LABELS_CAT[FILTER[cat]] || FILTER[cat];
-      applyFilter();
+      syncFilterUI(); applyFilter();
     });
   });
   el.querySelectorAll('.chip[data-filter]').forEach(btn => {
@@ -905,13 +998,7 @@ function buildChips() {
       if (!isLoggedIn()) { window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href); return; }
       const f = btn.dataset.filter;
       FILTER[f] = (f==='wished'?FILTER_NEXT_WISHED:f==='visited'?FILTER_NEXT_VISITED:FILTER_NEXT)[FILTER[f]];
-      btn.classList.remove('state-dim','state-hide','state-force');
-      if (FILTER[f]==='dim')   btn.classList.add('state-dim');
-      else if (FILTER[f]==='hide')  btn.classList.add('state-hide');
-      else if (FILTER[f]==='force') btn.classList.add('state-force');
-      const lbl = document.getElementById('lbl-'+f);
-      if (lbl) lbl.textContent = LABELS_WISH[FILTER[f]] || FILTER[f];
-      applyFilter();
+      syncFilterUI(); applyFilter();
     });
   });
   initDistSlider(); updateChipCounts();
@@ -977,12 +1064,11 @@ function haversineKm(a,b) {
 }
 
 function resetFilters() {
-  FILTER.hist=FILTER.arch=FILTER.fun='full'; FILTER.visited=FILTER.wished='full';
+  FILTER.hist=FILTER.arch=FILTER.art=FILTER.fun='full';
+  FILTER.visited=FILTER.wished='full';
   ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
-  document.querySelectorAll('.filter-chips .chip').forEach(c=>c.classList.remove('state-hide','state-dim','state-force'));
-  const ds=document.getElementById('distSlider'); if(ds) ds.value=100;
-  const dv=document.getElementById('distV'); if(dv) dv.textContent=t('overview.any_dist');
-  renderEra(); applyFilter();
+  UNDATED.include=true;
+  syncFilterUI(); applyFilter();
 }
 
 function locYear(p) {
@@ -1049,13 +1135,19 @@ function render() {
       s=votes.reduce((best,v)=>RANK[v]<=RANK[best]?v:best,'hide');
     }
     if(s==='hide') return false;
-    if(eraActive){ const y=locYear(p); if(y!=null&&(y<ERA_STATE.from||y>ERA_STATE.to)) return false; }
+    if(eraActive){
+      const y=locYear(p);
+      if(y==null){ if(!UNDATED.include) return false; }
+      else if(y<ERA_STATE.from||y>ERA_STATE.to) return false;
+    }
     if(distActive){ if(haversineKm([userPos[0],userPos[1]],[p.lat,p.lng])>DIST_STATE.max) return false; }
     if(!taxMatches(p)) return false;
     return true;
   });
 
-  renderTaxBanner(filtered.length);
+  /* kolik míst prošlo jen díky tomu, že nemají dataci */
+  const undatedCount = eraActive ? filtered.filter(p => locYear(p) == null).length : 0;
+  renderTaxBanner(filtered.length, undatedCount);
 
   if(filtered.length===0){
     const msg = TAX ? t('tag.no_results') : t('overview.empty');
@@ -1294,10 +1386,7 @@ loadPlaces().then(()=>{
       FILTER.hist=FILTER.arch=FILTER.art=FILTER.fun='full';
       FILTER.visited=FILTER.wished='full';
       ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
-      document.querySelectorAll('.filter-chips .chip').forEach(ch=>ch.classList.remove('state-hide','state-dim','state-force'));
-      const ds=document.getElementById('distSlider'); if(ds) ds.value=100;
-      const dv=document.getElementById('distV');      if(dv) dv.textContent=t('overview.any_dist');
-      renderEra();
+      syncFilterUI();
     }
     else if(_urlFilter==='wished'){
       FILTER.hist=FILTER.arch=FILTER.fun=FILTER.visited='hide'; FILTER.wished='force';
