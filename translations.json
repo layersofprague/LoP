@@ -946,5 +946,45 @@
   "overview.reset": {
     "cs": "Resetovat",
     "en": "Reset"
+  },
+  "era.rom": {
+    "cs": "Románský",
+    "en": "Romanesque"
+  },
+  "era.got": {
+    "cs": "Gotika",
+    "en": "Gothic"
+  },
+  "era.ren": {
+    "cs": "Renesance",
+    "en": "Renaissance"
+  },
+  "era.bar": {
+    "cs": "Baroko",
+    "en": "Baroque"
+  },
+  "era.emp": {
+    "cs": "Klasicismus",
+    "en": "Classicism"
+  },
+  "era.sec": {
+    "cs": "Secese",
+    "en": "Art Nouveau"
+  },
+  "era.mod": {
+    "cs": "Moderna",
+    "en": "Modernism"
+  },
+  "era.sou": {
+    "cs": "Současnost",
+    "en": "Contemporary"
+  },
+  "era.now": {
+    "cs": "souč.",
+    "en": "now"
+  },
+  "overview.style": {
+    "cs": "Sloh",
+    "en": "Style"
   }
 }

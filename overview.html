@@ -168,6 +168,8 @@ a { color: inherit; text-decoration: none; }
   .chip-wrap { flex-direction: row; align-items: center; gap: 8px; }
   .chip-state-lbl { padding-left: 0; width: 52px; text-align: left; }
 }
+.ft-lbl { cursor: pointer; transition: color .15s; }
+.ft-lbl:hover { color: var(--ink); }
 .filter-row { padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .filter-row:first-child { padding-top: 4px; }
 .filter-row:last-of-type { border-bottom: none; }
@@ -178,11 +180,19 @@ a { color: inherit; text-decoration: none; }
 /* ── CHIP ── */
 .chip {
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
-  padding: 6px 12px; background: #fff; border: 1.5px solid var(--rule); border-radius: 6px;
+  padding: 6px 12px; background: #fff; border: 1.5px solid var(--rule); border-radius: 7px;
   font-size: 13px; font-weight: 500; color: var(--ink-2);
-  cursor: pointer; transition: all .15s; white-space: nowrap;
+  cursor: pointer; white-space: nowrap;
+  transition: box-shadow .15s, transform .15s, background .15s, color .15s, border-color .15s;
 }
-.chip:hover { border-color: var(--ink-4); }
+.chip:hover  { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
+.chip:active { transform: translateY(0); box-shadow: none; }
+.chip.state-hide:hover  { box-shadow: 0 3px 10px rgba(26,24,20,.28); }
+/* sloh je pozitivní výběr — zvolený je plný, nezvolený neutrální */
+.chip.chip-style.state-on { background: var(--cat-arch); border-color: var(--cat-arch); color: #fff; }
+.chip.chip-style.state-on .chip-swatch { background: #fff !important; }
+.chip.chip-style.state-on .chip-count { color: rgba(255,255,255,.75); }
+.chip.state-force:hover { box-shadow: 0 3px 10px rgba(26,24,20,.16); }
 .chip .chip-swatch { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
 .chip .chip-icon { width: 12px; height: 12px; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
 .chip .chip-icon-check {
@@ -649,6 +659,10 @@ a { color: inherit; text-decoration: none; }
           <div class="filter-lbl"><span id="fmCategory">Kategorie</span></div>
           <div class="filter-chips" id="mapChips"></div>
         </div>
+        <div class="filter-row" id="styleRow" hidden>
+          <div class="filter-lbl"><span id="fmStyle">Sloh</span></div>
+          <div class="filter-chips" id="styleChips"></div>
+        </div>
         <div class="filter-row">
           <div class="filter-lbl">
             <span id="fmEra">Období</span>
@@ -781,9 +795,11 @@ let PLACES  = [];
 const _urlFilter = new URLSearchParams(location.search).get('filter');
 
 /* ── Filtr podle taxonomie ── */
+(new URLSearchParams(location.search).getAll('style')).forEach(s => STYLE_FILTER.add(s));
+
 const TAX = (() => {
   const q = new URLSearchParams(location.search);
-  for (const kind of ['tag', 'district', 'style', 'person', 'prague']) {
+  for (const kind of ['tag', 'district', 'person', 'prague']) {
     const raw = q.get(kind);
     if (raw) return { kind, value: raw };
   }
@@ -800,7 +816,6 @@ function taxMatches(p) {
       return (p.tags || []).includes(slug);
     }
     case 'district': return p.district === v;
-    case 'style':    return (Array.isArray(p.style) ? p.style : p.style ? [p.style] : []).includes(v);
     case 'person':   return (p.people || []).includes(v);
     case 'prague':   return String(p.prague) === String(v);
   }
@@ -815,7 +830,6 @@ function taxLabel() {
   switch (TAX.kind) {
     case 'tag':      return T.label(TAX.value);
     case 'district': return T.districtLabel(TAX.value);
-    case 'style':    return T.styleLabel(TAX.value);
     case 'person':   return TAX.value;
     case 'prague':   return T.pragueLabel(TAX.value);
   }
@@ -825,7 +839,7 @@ function taxLabel() {
 /** Zrušit filtr — odebere parametr a zůstane na stránce */
 function clearTaxFilter() {
   const u = new URL(location.href);
-  ['tag', 'district', 'style', 'person', 'prague'].forEach(k => u.searchParams.delete(k));
+  ['tag', 'district', 'person', 'prague'].forEach(k => u.searchParams.delete(k));
   location.href = u.toString();
 }
 
@@ -837,6 +851,7 @@ function syncFilterUI() {
   const setTxt = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
   setTxt('fmTitle',    'overview.filter');
   setTxt('fmCategory', 'overview.category');
+  setTxt('fmStyle',    'overview.style');
   setTxt('fmEra',      'overview.era');
   setTxt('fmDist',     'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
@@ -859,6 +874,10 @@ function syncFilterUI() {
     else if (st === 'force') btn.classList.add('state-force');
     const lbl = document.getElementById('lbl-' + f);
     if (lbl) lbl.textContent = t(S_WISH[st] || 'filter.state_default');
+  });
+
+  document.querySelectorAll('.chip-style').forEach(btn => {
+    btn.classList.toggle('state-on', STYLE_FILTER.has(btn.dataset.style));
   });
 
   const ds = document.getElementById('distSlider');
@@ -900,6 +919,11 @@ function activeFilters(undatedCount) {
     out.push({ label: ERA_STATE.from + '–' + to,
                clear: () => { ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END; UNDATED.include = true; } });
   }
+
+  STYLE_FILTER.forEach(code => {
+    out.push({ label: window.LOP_TAGS ? window.LOP_TAGS.styleLabel(code) : code,
+               clear: () => { STYLE_FILTER.delete(code); } });
+  });
 
   if (DIST_STATE.max != null && userPos)
     out.push({ label: t('filter.distance', { x: DIST_STATE.max.toFixed(1) }),
@@ -958,20 +982,27 @@ const FILTER_NEXT         = { full:'hide', hide:'full' };
 const FILTER_NEXT_WISHED  = { full:'hide', hide:'force', force:'full' };
 const FILTER_NEXT_VISITED = { full:'hide', hide:'force', force:'full' };
 const RANK = { full:0, hide:2, force:0 };
+/* Časová pásma jsou HRUBŠÍ než slohy ve slovníku (8 vs 17) a slouží
+   k orientaci na ose, ne k filtrování — 1850–1918 pokrývá historismus,
+   secesi i kubismus. Názvy jdou z překladů pod klíči era.<id>. */
 const ERAS = [
-  { id:'rom', name:'Románský',    from:1000, to:1230 },
-  { id:'got', name:'Gotika',      from:1230, to:1500 },
-  { id:'ren', name:'Renesance',   from:1500, to:1620 },
-  { id:'bar', name:'Baroko',      from:1620, to:1780 },
-  { id:'emp', name:'Klasicismus', from:1780, to:1850 },
-  { id:'sec', name:'Secese',      from:1850, to:1918 },
-  { id:'mod', name:'Moderna',     from:1918, to:2000 },
-  { id:'sou', name:'Současnost',  from:2000, to:2025 },
+  { id:'rom', from:1000, to:1230 },
+  { id:'got', from:1230, to:1500 },
+  { id:'ren', from:1500, to:1620 },
+  { id:'bar', from:1620, to:1780 },
+  { id:'emp', from:1780, to:1850 },
+  { id:'sec', from:1850, to:1918 },
+  { id:'mod', from:1918, to:2000 },
+  { id:'sou', from:2000, to:2025 },
 ];
 const ERA_START=1000, ERA_END=2025;
 const ERA_STATE = { from:ERA_START, to:ERA_END };
 const DIST_STATE = { max:null };
 const UNDATED = { include:true };   // nedatovaná místa při aktivním filtru období
+
+/* Slohy — POZITIVNÍ výběr: prázdná množina znamená "vše".
+   Liší se od kategorií záměrně; u 17 slohů chce člověk vybírat, ne odškrtávat. */
+const STYLE_FILTER = new Set();
 
 const eraPct    = y => ((y-ERA_START)/(ERA_END-ERA_START))*100;
 const pctToYear = p => Math.round(ERA_START+p*(ERA_END-ERA_START));
@@ -982,6 +1013,36 @@ function toggleFilter() {
   backdrop.classList.toggle('open');
   if (!wasOpen) buildEraTimeline();
   document.getElementById('filterBtn')?.blur();
+}
+
+/* Chipy slohů — jen ty, které se v datech vyskytují. Pořadí podle
+   slovníku, tedy zhruba chronologicky. */
+function buildStyleChips() {
+  const row = document.getElementById('styleRow');
+  const box = document.getElementById('styleChips');
+  if (!row || !box || !window.LOP_TAGS) return;
+
+  const counts = {};
+  PLACES.forEach(p => (Array.isArray(p.style) ? p.style : p.style ? [p.style] : [])
+    .forEach(s => counts[s] = (counts[s] || 0) + 1));
+
+  const codes = Object.keys(window.LOP_TAGS.styles).filter(s => counts[s]);
+  if (!codes.length) { row.hidden = true; return; }
+  row.hidden = false;
+
+  box.innerHTML = codes.map(code =>
+    `<button class="chip chip-style" data-style="${code}">` +
+      `<span class="chip-swatch" style="background:var(--cat-arch)"></span>` +
+      `${window.LOP_TAGS.styleLabel(code)} <span class="chip-count">${counts[code]}</span>` +
+    `</button>`).join('');
+
+  box.querySelectorAll('.chip-style').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.style;
+      STYLE_FILTER.has(s) ? STYLE_FILTER.delete(s) : STYLE_FILTER.add(s);
+      syncFilterUI(); applyFilter();
+    });
+  });
 }
 
 function buildChips() {
@@ -1049,10 +1110,19 @@ function buildEraTimeline() {
   const years=[1000,1400,1800,2000], html=[];
   html.push('<div class="ft-track"></div>','<div class="ft-fill" id="eraFill"></div>');
   ERAS.slice(1).forEach(e=>html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`));
-  ERAS.forEach(e=>{ const mid=(e.from+e.to)/2, w=eraPct(e.to)-eraPct(e.from); html.push(`<span class="ft-lbl" data-era="${e.id}" style="left:${eraPct(mid)}%;max-width:calc(${w}% - 4px)">${e.name}</span>`); });
-  years.forEach(y=>{ html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`,`<span class="ft-year" style="left:${eraPct(y)}%">${y===2000?'souč.':y}</span>`); });
+  ERAS.forEach(e=>{ const mid=(e.from+e.to)/2, w=eraPct(e.to)-eraPct(e.from); html.push(`<span class="ft-lbl" data-era="${e.id}" data-from="${e.from}" data-to="${e.to}" title="${e.from}–${e.to}" style="left:${eraPct(mid)}%;max-width:calc(${w}% - 4px)">${t('era.'+e.id)}</span>`); });
+  years.forEach(y=>{ html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`,`<span class="ft-year" style="left:${eraPct(y)}%">${y===2000?t('era.now'):y}</span>`); });
   html.push('<div class="ft-h" id="eraHFrom" data-which="from"></div>','<div class="ft-h" id="eraHTo" data-which="to"></div>');
   el.innerHTML=html.join(''); renderEra();
+  /* Klik na název pásma nastaví rozsah osy — název tak není jen popiska. */
+  el.querySelectorAll('.ft-lbl').forEach(lbl=>{
+    lbl.addEventListener('click', ev=>{
+      ev.stopPropagation();
+      ERA_STATE.from = +lbl.dataset.from;
+      ERA_STATE.to   = +lbl.dataset.to;
+      syncFilterUI(); applyFilter();
+    });
+  });
   el.querySelectorAll('.ft-h').forEach(h=>{
     const onDown=ev=>{
       ev.preventDefault(); const which=h.dataset.which, rect=el.getBoundingClientRect();
@@ -1095,7 +1165,7 @@ function resetFilters() {
   FILTER.hist=FILTER.arch=FILTER.art=FILTER.fun='full';
   FILTER.visited=FILTER.wished='full';
   ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
-  UNDATED.include=true;
+  UNDATED.include=true; STYLE_FILTER.clear();
   syncFilterUI(); applyFilter();
 }
 
@@ -1170,6 +1240,10 @@ function render() {
     }
     if(distActive){ if(haversineKm([userPos[0],userPos[1]],[p.lat,p.lng])>DIST_STATE.max) return false; }
     if(!taxMatches(p)) return false;
+    if(STYLE_FILTER.size){
+      const st = Array.isArray(p.style) ? p.style : p.style ? [p.style] : [];
+      if(!st.some(s => STYLE_FILTER.has(s))) return false;
+    }
     return true;
   });
 
@@ -1405,7 +1479,7 @@ async function syncFromDB(onDone) {
 setView(viewMode);
 
 loadPlaces().then(()=>{
-  buildChips();
+  buildChips(); buildStyleChips();
   syncFromDB(()=>{
     updateCounts(); updateChipCounts();
     if(TAX){
