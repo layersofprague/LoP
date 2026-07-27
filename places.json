@@ -1,13 +1,12 @@
 [
   {
     "id": "H101",
-    "district": "Nové Město",
+    "district": "nove-mesto",
     "name": "Šítkovská věž",
     "lat": 50.0784,
     "lng": 14.4133,
     "cat": "hist",
     "thumb": "photos/H101/thumb.webp",
-    "sub": "Nové Město, Praha 1",
     "lede": "Šítkovská věž — středověká vodní věž na pravém břehu Vltavy, postavená kolem roku 1495. Na historickém snímku vidíme zimní sběr ledu z řeky s koňskými potahy. Dnes na stejném místě stojí funkcionalistický Mánes z roku 1930 a u nábřeží kotví boat hotel Klotylda.",
     "yearBuilt": 1495,
     "yearPhoto": 1895,
@@ -45,11 +44,8 @@
     ],
     "tip": "Nejlepší světlo na fotografii je ráno kolem 8–9h, kdy slunce osvětluje věž zprava od vody.",
     "tags": [
-      "gotika",
-      "věž",
-      "Vltava",
-      "Nové Město",
-      "1400s"
+      "tower",
+      "river"
     ],
     "photos": [
       {
@@ -87,17 +83,20 @@
     "published": true,
     "paywall": false,
     "rating": 4.5,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "style": [
+      "Go"
+    ],
+    "prague": 1
   },
   {
     "id": "H102",
-    "district": "Nové Město",
+    "district": "nove-mesto",
     "name": "Václavské náměstí",
     "lat": 50.0815,
     "lng": 14.4278,
     "cat": "hist",
     "thumb": "photos/H102/thumb.webp",
-    "sub": "Nové Město, Praha 1",
     "lede": "Bývalý Koňský trh, dnes nervové centrum moderní Prahy. Místem prošly všechny zásadní momenty 20. století — od vzniku republiky po sametovou revoluci.",
     "yearBuilt": 1348,
     "yearPhoto": 1910,
@@ -123,11 +122,7 @@
     ],
     "tip": "Náměstí bylo původně Koňský trh — na dlažbě u Můstku jsou vyznačeny původní hranice tržiště.",
     "tags": [
-      "náměstí",
-      "Koňský trh",
-      "Nové Město",
-      "1968",
-      "1300s"
+      "square"
     ],
     "photos": [
       {
@@ -161,17 +156,17 @@
     "published": true,
     "paywall": false,
     "rating": 4.3,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "prague": 1
   },
   {
     "id": "H201",
-    "district": "Staré Město",
+    "district": "stare-mesto",
     "name": "Staroměstské náměstí",
     "lat": 50.0875,
     "lng": 14.4213,
     "cat": "arch",
     "thumb": "photos/H201/thumb.webp",
-    "sub": "Staré Město, Praha 1",
     "lede": "Srdce historické Prahy. Orloj, Týnský chrám, sgrafita — tři různé vrstvy času na jednom náměstí.",
     "yearBuilt": 1410,
     "yearPhoto": 1900,
@@ -197,11 +192,8 @@
     ],
     "tip": "Na dlažbě u radniční věže jsou kamenné kříže — pamětní místo 27 popravených z roku 1621.",
     "tags": [
-      "orloj",
-      "náměstí",
-      "Staré Město",
-      "gotika",
-      "1400s"
+      "clock",
+      "square"
     ],
     "photos": [
       {
@@ -235,17 +227,20 @@
     "published": true,
     "paywall": false,
     "rating": 4.8,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "style": [
+      "Go"
+    ],
+    "prague": 1
   },
   {
     "id": "H202",
-    "district": "Nové Město",
+    "district": "nove-mesto",
     "name": "Národní divadlo",
     "lat": 50.0808,
     "lng": 14.4133,
     "cat": "arch",
     "thumb": "photos/H202/thumb.webp",
-    "sub": "Nové Město, Praha 1",
     "lede": "Novorenesanční chrám národa. Z darů sbírky celého Československa, dvakrát postaven, dvakrát zachráněn.",
     "yearBuilt": 1881,
     "yearPhoto": 1895,
@@ -271,11 +266,8 @@
     ],
     "tip": "Nejpůsobivější pohled je z protějšího břehu za soumraku, kdy je divadlo nasvíceno.",
     "tags": [
-      "divadlo",
-      "novorenesance",
-      "Nové Město",
-      "Vltava",
-      "1800s"
+      "theatre",
+      "river"
     ],
     "photos": [
       {
@@ -309,17 +301,20 @@
     "published": true,
     "paywall": false,
     "rating": 4.7,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "style": [
+      "Hi"
+    ],
+    "prague": 1
   },
   {
     "id": "H301",
-    "district": "Hradčany",
+    "district": "hradcany",
     "name": "Pražský hrad",
     "lat": 50.0911,
     "lng": 14.4016,
     "cat": "fun",
     "thumb": "photos/H301/thumb.webp",
-    "sub": "Hradčany, Praha 1",
     "lede": "Největší souvislý hradní komplex na světě. Devět století evropských dějin v jedné siluetě nad Vltavou.",
     "yearBuilt": 870,
     "yearPhoto": 1905,
@@ -345,12 +340,9 @@
     ],
     "tip": "Střídání stráže probíhá každou hodinu, slavnostní verze každý den v poledne.",
     "tags": [
-      "hrad",
-      "Kafka",
-      "Zlatá ulička",
-      "Hradčany",
-      "katedrála",
-      "800s"
+      "castle",
+      "courtyard",
+      "cathedral"
     ],
     "photos": [
       {
@@ -384,17 +376,20 @@
     "published": true,
     "paywall": false,
     "rating": 4.9,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "people": [
+      "Kafka"
+    ],
+    "prague": 1
   },
   {
     "id": "H001",
-    "district": "Holešovice",
+    "district": "holesovice",
     "name": "Holešovický přístav",
     "lat": 50.105164,
     "lng": 14.456314,
     "cat": "hist",
     "thumb": "https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg",
-    "sub": "Holešovice, Praha 7",
     "lede": "Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl v letech 1892–1894 umělým vyhloubením bazénu 750 m dlouhého. Secesní budovy přístavního dozorství postavil roku 1906 architekt František Sander. V 90. letech lodní provoz ustal; dnes část areálu tvoří rezidence Prague Marina.",
     "yearBuilt": 1894,
     "yearPhoto": 1930,
@@ -432,12 +427,7 @@
     ],
     "tip": "Historická fotografie byla pořízena ze vzdálenosti cca 7 m. Nejlepší shoda snímku je při pohledu mírně dolů.",
     "tags": [
-      "přístav",
-      "průmysl",
-      "secese",
-      "Holešovice",
-      "Sander",
-      "1890s"
+      "port"
     ],
     "photos": [
       {
@@ -474,17 +464,24 @@
     "ratingCount": 0,
     "objLat": 50.105626,
     "objLng": 14.455984,
-    "photoFov": 66
+    "photoFov": 66,
+    "style": [
+      "Se",
+      "In"
+    ],
+    "people": [
+      "František Sander"
+    ],
+    "prague": 7
   },
   {
     "id": "H302",
-    "district": "Letná",
+    "district": "holesovice",
     "name": "Letenské sady",
     "lat": 50.0939,
     "lng": 14.4224,
     "cat": "fun",
     "thumb": "photos/H302/thumb.webp",
-    "sub": "Letná, Praha 7",
     "lede": "Největší socha Stalina na světě stála v letech 1955–1962 přesně tam, kde dnes kýve metronom Vratislava Nováka.",
     "yearBuilt": 1955,
     "yearPhoto": 1955,
@@ -506,12 +503,10 @@
     ],
     "tip": "Z platformy pod metronomen je jeden z nejlepších výhledů na historické centrum Prahy.",
     "tags": [
-      "Stalin",
-      "metronom",
-      "Letná",
-      "komunismus",
+      "monument",
+      "communism",
       "park",
-      "1900s"
+      "letna"
     ],
     "photos": [
       {
@@ -545,17 +540,20 @@
     "published": true,
     "paywall": false,
     "rating": 4.5,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "people": [
+      "Josif Stalin"
+    ],
+    "prague": 7
   },
   {
     "id": "H203",
-    "district": "Nové Město",
+    "district": "nove-mesto",
     "name": "Tančící dům",
     "lat": 50.0754,
     "lng": 14.4141,
     "cat": "arch",
     "thumb": "photos/H203/thumb.webp",
-    "sub": "Nové Město, Praha 1",
     "lede": "Na místě domu zbořeného při bombardování Prahy v roce 1945 postavili Frank Gehry a Vlado Milunić v roce 1996 svou tančící dvojici.",
     "yearBuilt": 1996,
     "yearPhoto": 1945,
@@ -577,11 +575,7 @@
     ],
     "tip": "Vyhlídková terasa v 7. patře nabízí 360° výhled na Prahu — vstup přes restauraci.",
     "tags": [
-      "architektura",
-      "Gehry",
-      "dekonstruktivismus",
-      "Nové Město",
-      "1990s"
+      "building"
     ],
     "photos": [
       {
@@ -615,17 +609,23 @@
     "published": true,
     "paywall": false,
     "rating": 4.6,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "style": [
+      "De"
+    ],
+    "people": [
+      "Frank Gehry"
+    ],
+    "prague": 1
   },
   {
     "id": "H002",
-    "district": "Malá Strana",
+    "district": "hradcany",
     "name": "Bašta sv. Máří Magdalény (XIX)",
     "lat": 50.09305881760058,
     "lng": 14.411785293307434,
     "cat": "hist",
     "thumb": "foto/h_002ove_thumb.jpg",
-    "sub": "Malá Strana / Letná, Praha 1",
     "lede": "Jedna z mála dochovaných bašt pražského barokního opevnění na levém břehu Vltavy. Bašta XIX. nese jméno světice Máří Magdalény a do roku 1926 z ní každý den v poledne zazněl dělový výstřel — signál pro celou Prahu. Dnes na jejím místě stojí Kramářova vila, ale terén bašty je stále čitelný.",
     "yearBuilt": 1653,
     "yearPhoto": 1900,
@@ -663,16 +663,9 @@
     ],
     "tip": "Nejlepší světlo na fotografii je odpoledne, kdy slunce osvětluje severní svah Letenských sadů a terén bašty je nejlépe čitelný.",
     "tags": [
-      "bašta",
-      "opevnění",
-      "baroko",
-      "Malá Strana",
-      "Mariánské hradby",
-      "Kramářova vila",
-      "Letná",
-      "1653",
-      "poledne",
-      "hradby"
+      "bastion",
+      "fortification",
+      "letna"
     ],
     "photos": [
       {
@@ -705,6 +698,10 @@
     "published": true,
     "paywall": false,
     "rating": null,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "style": [
+      "Ba"
+    ],
+    "prague": 1
   }
 ]

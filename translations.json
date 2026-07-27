@@ -458,5 +458,337 @@
   "fact.orloj_od": {
     "cs": "Orloj od",
     "en": "Clock since"
+  },
+  "style.romanesque": {
+    "cs": "Románský sloh",
+    "en": "Romanesque"
+  },
+  "style.gothic": {
+    "cs": "Gotika",
+    "en": "Gothic"
+  },
+  "style.fortification": {
+    "cs": "Opevnění & brány",
+    "en": "Fortifications & Gates"
+  },
+  "style.renaissance": {
+    "cs": "Renesance",
+    "en": "Renaissance"
+  },
+  "style.baroque": {
+    "cs": "Baroko & Rokoko",
+    "en": "Baroque & Rococo"
+  },
+  "style.classicism": {
+    "cs": "Klasicismus & Empír",
+    "en": "Classicism & Empire"
+  },
+  "style.historicism": {
+    "cs": "Historismus",
+    "en": "Historicism"
+  },
+  "style.artnouveau": {
+    "cs": "Secese",
+    "en": "Art Nouveau"
+  },
+  "style.cubism": {
+    "cs": "Kubismus & Rondokubismus",
+    "en": "Cubism & Rondocubism"
+  },
+  "style.modernism": {
+    "cs": "Moderna",
+    "en": "Modernism"
+  },
+  "style.functionalism": {
+    "cs": "Funkcionalismus",
+    "en": "Functionalism"
+  },
+  "style.sorela": {
+    "cs": "Sorela",
+    "en": "Socialist Realism"
+  },
+  "style.brutalism": {
+    "cs": "Brutalismus",
+    "en": "Brutalism"
+  },
+  "style.industrial": {
+    "cs": "Industrial",
+    "en": "Industrial"
+  },
+  "style.deconstructivism": {
+    "cs": "Dekonstruktivismus",
+    "en": "Deconstructivism"
+  },
+  "style.contemporary": {
+    "cs": "Současná architektura",
+    "en": "Contemporary"
+  },
+  "style.publicart": {
+    "cs": "Umění ve veřejném prostoru",
+    "en": "Public Art"
+  },
+  "tag.tower": {
+    "cs": "Věž",
+    "en": "Tower"
+  },
+  "tag.castle": {
+    "cs": "Hrad",
+    "en": "Castle"
+  },
+  "tag.cathedral": {
+    "cs": "Katedrála",
+    "en": "Cathedral"
+  },
+  "tag.church": {
+    "cs": "Kostel",
+    "en": "Church"
+  },
+  "tag.monastery": {
+    "cs": "Klášter",
+    "en": "Monastery"
+  },
+  "tag.synagogue": {
+    "cs": "Synagoga",
+    "en": "Synagogue"
+  },
+  "tag.palace": {
+    "cs": "Palác",
+    "en": "Palace"
+  },
+  "tag.villa": {
+    "cs": "Vila",
+    "en": "Villa"
+  },
+  "tag.theatre": {
+    "cs": "Divadlo",
+    "en": "Theatre"
+  },
+  "tag.museum": {
+    "cs": "Muzeum",
+    "en": "Museum"
+  },
+  "tag.factory": {
+    "cs": "Továrna",
+    "en": "Factory"
+  },
+  "tag.brewery": {
+    "cs": "Pivovar",
+    "en": "Brewery"
+  },
+  "tag.warehouse": {
+    "cs": "Skladiště",
+    "en": "Warehouse"
+  },
+  "tag.square": {
+    "cs": "Náměstí",
+    "en": "Square"
+  },
+  "tag.park": {
+    "cs": "Park",
+    "en": "Park"
+  },
+  "tag.garden": {
+    "cs": "Zahrada",
+    "en": "Garden"
+  },
+  "tag.cemetery": {
+    "cs": "Hřbitov",
+    "en": "Cemetery"
+  },
+  "tag.courtyard": {
+    "cs": "Dvůr",
+    "en": "Courtyard"
+  },
+  "tag.waterfront": {
+    "cs": "Nábřeží",
+    "en": "Waterfront"
+  },
+  "tag.bridge": {
+    "cs": "Most",
+    "en": "Bridge"
+  },
+  "tag.port": {
+    "cs": "Přístav",
+    "en": "Port"
+  },
+  "tag.railway": {
+    "cs": "Železnice",
+    "en": "Railway"
+  },
+  "tag.station": {
+    "cs": "Nádraží",
+    "en": "Station"
+  },
+  "tag.fortification": {
+    "cs": "Opevnění",
+    "en": "Fortification"
+  },
+  "tag.bastion": {
+    "cs": "Bašta",
+    "en": "Bastion"
+  },
+  "tag.gate": {
+    "cs": "Brána",
+    "en": "Gate"
+  },
+  "tag.waterworks": {
+    "cs": "Vodárna",
+    "en": "Waterworks"
+  },
+  "tag.monument": {
+    "cs": "Památník",
+    "en": "Monument"
+  },
+  "tag.statue": {
+    "cs": "Socha",
+    "en": "Statue"
+  },
+  "tag.fountain": {
+    "cs": "Kašna",
+    "en": "Fountain"
+  },
+  "tag.clock": {
+    "cs": "Orloj",
+    "en": "Astronomical Clock"
+  },
+  "tag.communism": {
+    "cs": "Komunismus",
+    "en": "Communism"
+  },
+  "tag.demolished": {
+    "cs": "Zaniklé",
+    "en": "Demolished"
+  },
+  "tag.unesco": {
+    "cs": "UNESCO",
+    "en": "UNESCO"
+  },
+  "tag.river": {
+    "cs": "Řeka",
+    "en": "River"
+  },
+  "tag.filtered_by": {
+    "cs": "Filtrováno podle",
+    "en": "Filtered by"
+  },
+  "tag.clear_filter": {
+    "cs": "Zrušit filtr",
+    "en": "Clear filter"
+  },
+  "tag.people": {
+    "cs": "Osobnosti",
+    "en": "People"
+  },
+  "tag.no_results": {
+    "cs": "Žádná místa s tímto tagem",
+    "en": "No places with this tag"
+  },
+  "district.stare-mesto": {
+    "cs": "Staré Město",
+    "en": "Old Town"
+  },
+  "district.nove-mesto": {
+    "cs": "Nové Město",
+    "en": "New Town"
+  },
+  "district.mala-strana": {
+    "cs": "Malá Strana",
+    "en": "Lesser Town"
+  },
+  "district.hradcany": {
+    "cs": "Hradčany",
+    "en": "Hradčany"
+  },
+  "district.josefov": {
+    "cs": "Josefov",
+    "en": "Josefov"
+  },
+  "district.vysehrad": {
+    "cs": "Vyšehrad",
+    "en": "Vyšehrad"
+  },
+  "district.vinohrady": {
+    "cs": "Vinohrady",
+    "en": "Vinohrady"
+  },
+  "district.zizkov": {
+    "cs": "Žižkov",
+    "en": "Žižkov"
+  },
+  "district.karlin": {
+    "cs": "Karlín",
+    "en": "Karlín"
+  },
+  "district.holesovice": {
+    "cs": "Holešovice",
+    "en": "Holešovice"
+  },
+  "district.bubenec": {
+    "cs": "Bubeneč",
+    "en": "Bubeneč"
+  },
+  "district.dejvice": {
+    "cs": "Dejvice",
+    "en": "Dejvice"
+  },
+  "district.brevnov": {
+    "cs": "Břevnov",
+    "en": "Břevnov"
+  },
+  "district.stresovice": {
+    "cs": "Střešovice",
+    "en": "Střešovice"
+  },
+  "district.smichov": {
+    "cs": "Smíchov",
+    "en": "Smíchov"
+  },
+  "district.nusle": {
+    "cs": "Nusle",
+    "en": "Nusle"
+  },
+  "district.podoli": {
+    "cs": "Podolí",
+    "en": "Podolí"
+  },
+  "district.vrsovice": {
+    "cs": "Vršovice",
+    "en": "Vršovice"
+  },
+  "district.liben": {
+    "cs": "Libeň",
+    "en": "Libeň"
+  },
+  "district.troja": {
+    "cs": "Troja",
+    "en": "Troja"
+  },
+  "tag.letna": {
+    "cs": "Letná",
+    "en": "Letná"
+  },
+  "tag.bubny": {
+    "cs": "Bubny",
+    "en": "Bubny"
+  },
+  "tag.kampa": {
+    "cs": "Kampa",
+    "en": "Kampa"
+  },
+  "tag.petrin": {
+    "cs": "Petřín",
+    "en": "Petřín"
+  },
+  "tag.naplavka": {
+    "cs": "Náplavka",
+    "en": "Náplavka"
+  },
+  "tag.stvanice": {
+    "cs": "Štvanice",
+    "en": "Štvanice"
+  },
+  "tag.building": {
+    "cs": "Budova",
+    "en": "Building"
   }
 }

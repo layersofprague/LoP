@@ -21,7 +21,7 @@ const ROOT = _root();
 /* ── Detekce aktivní sekce ── */
 function _activePage() {
   const path = location.pathname;
-  if (path.includes('prehled')) return 'prehled';
+  if (path.includes('overview')) return 'overview';
   if (path.includes('sbirky')) return 'sbirky';
   if (path.includes('trasy')) return 'routes';
   if (path.includes('login') || path.includes('profil')) return '';
@@ -177,8 +177,8 @@ function _html() {
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>`
     },
     {
-      id: 'prehled',
-      href: root + 'prehled.html',
+      id: 'overview',
+      href: root + 'overview.html',
       label: t('nav.overview'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`
     },
@@ -196,7 +196,7 @@ function _html() {
     },
     {
       id: 'wish',
-      href: _isLoggedIn() ? root + 'prehled.html?filter=wished' : '#',
+      href: _isLoggedIn() ? root + 'overview.html?filter=wished' : '#',
       onclick: _isLoggedIn() ? null : "if(window.lopAuth){event.preventDefault();window.lopAuth.open();}",
       label: t('nav.plan'),
       badge: _isLoggedIn() ? wc : null,
@@ -277,8 +277,8 @@ function _buildIndex() {
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 16V4"/></svg>'
     },
     {
-      id: 'prehled', label: t('nav.overview'),
-      onclick: "location.href='prehled.html'",
+      id: 'overview', label: t('nav.overview'),
+      onclick: "location.href='overview.html'",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
     },
     {
@@ -294,7 +294,7 @@ function _buildIndex() {
     {
       id: 'wish', label: t('nav.plan'), view: 'wishView',
       onclick: loggedIn
-        ? "location.href='prehled.html?filter=wished'"
+        ? "location.href='overview.html?filter=wished'"
         : "if(window.lopAuth){event.preventDefault();window.lopAuth.open();}else{location.href='login.html?return='+encodeURIComponent(location.href);}",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>'
     },
