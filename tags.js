@@ -87,7 +87,7 @@ const TAGS = {
   'communism':    { kind: 'theme' },
   'demolished':   { kind: 'theme' },
   'unesco':       { kind: 'theme' },
-  'river':        { kind: 'theme' },
+  'vltava':       { kind: 'locality' },
 };
 
 
@@ -161,6 +161,12 @@ window.LOP_TAGS = {
   districtLabel(slug) {
     if (!slug) return slug;
     return (window.t ? window.t('district.' + slug) : null) || slug;
+  },
+
+  /** Přeložený název městského obvodu: "Praha 7" */
+  pragueLabel(n) {
+    if (!n) return null;
+    return (window.t ? window.t('prague.' + n) : null) || ('Praha ' + n);
   },
 
   /** Zobrazovací lokalita: "Holešovice, Praha 7" */

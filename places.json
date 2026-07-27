@@ -45,7 +45,7 @@
     "tip": "Nejlepší světlo na fotografii je ráno kolem 8–9h, kdy slunce osvětluje věž zprava od vody.",
     "tags": [
       "tower",
-      "river"
+      "vltava"
     ],
     "photos": [
       {
@@ -267,7 +267,7 @@
     "tip": "Nejpůsobivější pohled je z protějšího břehu za soumraku, kdy je divadlo nasvíceno.",
     "tags": [
       "theatre",
-      "river"
+      "vltava"
     ],
     "photos": [
       {
@@ -427,7 +427,8 @@
     ],
     "tip": "Historická fotografie byla pořízena ze vzdálenosti cca 7 m. Nejlepší shoda snímku je při pohledu mírně dolů.",
     "tags": [
-      "port"
+      "port",
+      "vltava"
     ],
     "photos": [
       {
@@ -470,6 +471,7 @@
       "In"
     ],
     "people": [
+      "Vojtěch Lanna",
       "František Sander"
     ],
     "prague": 7

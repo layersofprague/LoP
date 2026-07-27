@@ -460,228 +460,224 @@
     "en": "Clock since"
   },
   "style.romanesque": {
-    "cs": "Románský sloh",
+    "cs": "románský sloh",
     "en": "Romanesque"
   },
   "style.gothic": {
-    "cs": "Gotika",
+    "cs": "gotika",
     "en": "Gothic"
   },
   "style.fortification": {
-    "cs": "Opevnění & brány",
+    "cs": "opevnění & brány",
     "en": "Fortifications & Gates"
   },
   "style.renaissance": {
-    "cs": "Renesance",
+    "cs": "renesance",
     "en": "Renaissance"
   },
   "style.baroque": {
-    "cs": "Baroko & Rokoko",
+    "cs": "baroko & rokoko",
     "en": "Baroque & Rococo"
   },
   "style.classicism": {
-    "cs": "Klasicismus & Empír",
+    "cs": "klasicismus & empír",
     "en": "Classicism & Empire"
   },
   "style.historicism": {
-    "cs": "Historismus",
+    "cs": "historismus",
     "en": "Historicism"
   },
   "style.artnouveau": {
-    "cs": "Secese",
+    "cs": "secese",
     "en": "Art Nouveau"
   },
   "style.cubism": {
-    "cs": "Kubismus & Rondokubismus",
+    "cs": "kubismus & rondokubismus",
     "en": "Cubism & Rondocubism"
   },
   "style.modernism": {
-    "cs": "Moderna",
+    "cs": "moderna",
     "en": "Modernism"
   },
   "style.functionalism": {
-    "cs": "Funkcionalismus",
+    "cs": "funkcionalismus",
     "en": "Functionalism"
   },
   "style.sorela": {
-    "cs": "Sorela",
+    "cs": "sorela",
     "en": "Socialist Realism"
   },
   "style.brutalism": {
-    "cs": "Brutalismus",
+    "cs": "brutalismus",
     "en": "Brutalism"
   },
   "style.industrial": {
-    "cs": "Industrial",
+    "cs": "průmysl",
     "en": "Industrial"
   },
   "style.deconstructivism": {
-    "cs": "Dekonstruktivismus",
+    "cs": "dekonstruktivismus",
     "en": "Deconstructivism"
   },
   "style.contemporary": {
-    "cs": "Současná architektura",
+    "cs": "současná architektura",
     "en": "Contemporary"
   },
   "style.publicart": {
-    "cs": "Umění ve veřejném prostoru",
+    "cs": "umění ve veřejném prostoru",
     "en": "Public Art"
   },
   "tag.tower": {
-    "cs": "Věž",
-    "en": "Tower"
+    "cs": "věž",
+    "en": "tower"
   },
   "tag.castle": {
-    "cs": "Hrad",
-    "en": "Castle"
+    "cs": "hrad",
+    "en": "castle"
   },
   "tag.cathedral": {
-    "cs": "Katedrála",
-    "en": "Cathedral"
+    "cs": "katedrála",
+    "en": "cathedral"
   },
   "tag.church": {
-    "cs": "Kostel",
-    "en": "Church"
+    "cs": "kostel",
+    "en": "church"
   },
   "tag.monastery": {
-    "cs": "Klášter",
-    "en": "Monastery"
+    "cs": "klášter",
+    "en": "monastery"
   },
   "tag.synagogue": {
-    "cs": "Synagoga",
-    "en": "Synagogue"
+    "cs": "synagoga",
+    "en": "synagogue"
   },
   "tag.palace": {
-    "cs": "Palác",
-    "en": "Palace"
+    "cs": "palác",
+    "en": "palace"
   },
   "tag.villa": {
-    "cs": "Vila",
-    "en": "Villa"
+    "cs": "vila",
+    "en": "villa"
   },
   "tag.theatre": {
-    "cs": "Divadlo",
-    "en": "Theatre"
+    "cs": "divadlo",
+    "en": "theatre"
   },
   "tag.museum": {
-    "cs": "Muzeum",
-    "en": "Museum"
+    "cs": "muzeum",
+    "en": "museum"
   },
   "tag.factory": {
-    "cs": "Továrna",
-    "en": "Factory"
+    "cs": "továrna",
+    "en": "factory"
   },
   "tag.brewery": {
-    "cs": "Pivovar",
-    "en": "Brewery"
+    "cs": "pivovar",
+    "en": "brewery"
   },
   "tag.warehouse": {
-    "cs": "Skladiště",
-    "en": "Warehouse"
+    "cs": "skladiště",
+    "en": "warehouse"
   },
   "tag.square": {
-    "cs": "Náměstí",
-    "en": "Square"
+    "cs": "náměstí",
+    "en": "square"
   },
   "tag.park": {
-    "cs": "Park",
-    "en": "Park"
+    "cs": "park",
+    "en": "park"
   },
   "tag.garden": {
-    "cs": "Zahrada",
-    "en": "Garden"
+    "cs": "zahrada",
+    "en": "garden"
   },
   "tag.cemetery": {
-    "cs": "Hřbitov",
-    "en": "Cemetery"
+    "cs": "hřbitov",
+    "en": "cemetery"
   },
   "tag.courtyard": {
-    "cs": "Dvůr",
-    "en": "Courtyard"
+    "cs": "dvůr",
+    "en": "courtyard"
   },
   "tag.waterfront": {
-    "cs": "Nábřeží",
-    "en": "Waterfront"
+    "cs": "nábřeží",
+    "en": "waterfront"
   },
   "tag.bridge": {
-    "cs": "Most",
-    "en": "Bridge"
+    "cs": "most",
+    "en": "bridge"
   },
   "tag.port": {
-    "cs": "Přístav",
-    "en": "Port"
+    "cs": "přístav",
+    "en": "port"
   },
   "tag.railway": {
-    "cs": "Železnice",
-    "en": "Railway"
+    "cs": "železnice",
+    "en": "railway"
   },
   "tag.station": {
-    "cs": "Nádraží",
-    "en": "Station"
+    "cs": "nádraží",
+    "en": "station"
   },
   "tag.fortification": {
-    "cs": "Opevnění",
-    "en": "Fortification"
+    "cs": "opevnění",
+    "en": "fortification"
   },
   "tag.bastion": {
-    "cs": "Bašta",
-    "en": "Bastion"
+    "cs": "bašta",
+    "en": "bastion"
   },
   "tag.gate": {
-    "cs": "Brána",
-    "en": "Gate"
+    "cs": "brána",
+    "en": "gate"
   },
   "tag.waterworks": {
-    "cs": "Vodárna",
-    "en": "Waterworks"
+    "cs": "vodárna",
+    "en": "waterworks"
   },
   "tag.monument": {
-    "cs": "Památník",
-    "en": "Monument"
+    "cs": "památník",
+    "en": "monument"
   },
   "tag.statue": {
-    "cs": "Socha",
-    "en": "Statue"
+    "cs": "socha",
+    "en": "statue"
   },
   "tag.fountain": {
-    "cs": "Kašna",
-    "en": "Fountain"
+    "cs": "kašna",
+    "en": "fountain"
   },
   "tag.clock": {
-    "cs": "Orloj",
-    "en": "Astronomical Clock"
+    "cs": "orloj",
+    "en": "astronomical Clock"
   },
   "tag.communism": {
-    "cs": "Komunismus",
-    "en": "Communism"
+    "cs": "komunismus",
+    "en": "communism"
   },
   "tag.demolished": {
-    "cs": "Zaniklé",
-    "en": "Demolished"
+    "cs": "zaniklé",
+    "en": "demolished"
   },
   "tag.unesco": {
     "cs": "UNESCO",
     "en": "UNESCO"
   },
-  "tag.river": {
-    "cs": "Řeka",
-    "en": "River"
-  },
   "tag.filtered_by": {
-    "cs": "Filtrováno podle",
-    "en": "Filtered by"
+    "cs": "filtrováno podle",
+    "en": "filtered by"
   },
   "tag.clear_filter": {
-    "cs": "Zrušit filtr",
-    "en": "Clear filter"
+    "cs": "zrušit filtr",
+    "en": "clear filter"
   },
   "tag.people": {
-    "cs": "Osobnosti",
-    "en": "People"
+    "cs": "osobnosti",
+    "en": "people"
   },
   "tag.no_results": {
-    "cs": "Žádná místa s tímto tagem",
-    "en": "No places with this tag"
+    "cs": "žádná místa s tímto tagem",
+    "en": "no places with this tag"
   },
   "district.stare-mesto": {
     "cs": "Staré Město",
@@ -788,7 +784,99 @@
     "en": "Štvanice"
   },
   "tag.building": {
-    "cs": "Budova",
-    "en": "Building"
+    "cs": "budova",
+    "en": "building"
+  },
+  "tag.vltava": {
+    "cs": "Vltava",
+    "en": "Vltava"
+  },
+  "prague.1": {
+    "cs": "Praha 1",
+    "en": "Prague 1"
+  },
+  "prague.2": {
+    "cs": "Praha 2",
+    "en": "Prague 2"
+  },
+  "prague.3": {
+    "cs": "Praha 3",
+    "en": "Prague 3"
+  },
+  "prague.4": {
+    "cs": "Praha 4",
+    "en": "Prague 4"
+  },
+  "prague.5": {
+    "cs": "Praha 5",
+    "en": "Prague 5"
+  },
+  "prague.6": {
+    "cs": "Praha 6",
+    "en": "Prague 6"
+  },
+  "prague.7": {
+    "cs": "Praha 7",
+    "en": "Prague 7"
+  },
+  "prague.8": {
+    "cs": "Praha 8",
+    "en": "Prague 8"
+  },
+  "prague.9": {
+    "cs": "Praha 9",
+    "en": "Prague 9"
+  },
+  "prague.10": {
+    "cs": "Praha 10",
+    "en": "Prague 10"
+  },
+  "prague.11": {
+    "cs": "Praha 11",
+    "en": "Prague 11"
+  },
+  "prague.12": {
+    "cs": "Praha 12",
+    "en": "Prague 12"
+  },
+  "prague.13": {
+    "cs": "Praha 13",
+    "en": "Prague 13"
+  },
+  "prague.14": {
+    "cs": "Praha 14",
+    "en": "Prague 14"
+  },
+  "prague.15": {
+    "cs": "Praha 15",
+    "en": "Prague 15"
+  },
+  "prague.16": {
+    "cs": "Praha 16",
+    "en": "Prague 16"
+  },
+  "prague.17": {
+    "cs": "Praha 17",
+    "en": "Prague 17"
+  },
+  "prague.18": {
+    "cs": "Praha 18",
+    "en": "Prague 18"
+  },
+  "prague.19": {
+    "cs": "Praha 19",
+    "en": "Prague 19"
+  },
+  "prague.20": {
+    "cs": "Praha 20",
+    "en": "Prague 20"
+  },
+  "prague.21": {
+    "cs": "Praha 21",
+    "en": "Prague 21"
+  },
+  "prague.22": {
+    "cs": "Praha 22",
+    "en": "Prague 22"
   }
 }
