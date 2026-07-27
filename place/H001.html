@@ -1300,11 +1300,9 @@ function renderPlaceI18n() {
     if (el && P.insider && P.insider[k]) el.innerHTML = loc(P.insider[k]);
   });
 
-  // Kicker kategorie
+  // Kicker — jen kategorie místa (cat), zbytek žije v klíčových slovech
   var k1 = document.getElementById('kickerCat1');
-  var k2 = document.getElementById('kickerCat2');
-  if (k1) k1.textContent = lang === 'en' ? 'History'   : 'Historie';
-  if (k2) k2.textContent = lang === 'en' ? 'Industry'  : 'Průmysl';
+  if (k1) k1.textContent = lang === 'en' ? 'History' : 'Historie';
 
   // Action buttons
   var actMap = {
@@ -1454,8 +1452,6 @@ window.addEventListener('load', renderPlaceI18n);
   <div class="kicker">
     <div class="k-dot"></div>
     <span id="kickerCat1">Historie</span>
-    <span class="k-sep">·</span>
-    <span id="kickerCat2">Průmysl</span>
   </div>
 
 <div class="hero" id="hero">
