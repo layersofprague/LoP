@@ -947,38 +947,6 @@
     "cs": "Resetovat",
     "en": "Reset"
   },
-  "era.rom": {
-    "cs": "Románský",
-    "en": "Romanesque"
-  },
-  "era.got": {
-    "cs": "Gotika",
-    "en": "Gothic"
-  },
-  "era.ren": {
-    "cs": "Renesance",
-    "en": "Renaissance"
-  },
-  "era.bar": {
-    "cs": "Baroko",
-    "en": "Baroque"
-  },
-  "era.emp": {
-    "cs": "Klasicismus",
-    "en": "Classicism"
-  },
-  "era.sec": {
-    "cs": "Secese",
-    "en": "Art Nouveau"
-  },
-  "era.mod": {
-    "cs": "Moderna",
-    "en": "Modernism"
-  },
-  "era.sou": {
-    "cs": "Současnost",
-    "en": "Contemporary"
-  },
   "era.now": {
     "cs": "souč.",
     "en": "now"
@@ -986,5 +954,61 @@
   "overview.style": {
     "cs": "Sloh",
     "en": "Style"
+  },
+  "overview.empty_filtered": {
+    "cs": "Žádná místa neodpovídají filtru",
+    "en": "No places match the filter"
+  },
+  "overview.empty_hint": {
+    "cs": "Zkuste zrušit některý z aktivních filtrů výše.",
+    "en": "Try clearing one of the active filters above."
+  },
+  "overview.page_title": {
+    "cs": "Přehled míst — LayersOfPrague",
+    "en": "Places overview — LayersOfPrague"
+  },
+  "overview.h1a": {
+    "cs": "Přehled",
+    "en": "Places"
+  },
+  "overview.h1b": {
+    "cs": "míst",
+    "en": "overview"
+  },
+  "overview.toggle_view": {
+    "cs": "Přepnout zobrazení",
+    "en": "Toggle view"
+  },
+  "overview.close": {
+    "cs": "Zavřít",
+    "en": "Close"
+  },
+  "overview.geo_denied": {
+    "cs": "Přístup k poloze byl zamítnut.",
+    "en": "Location access was denied."
+  },
+  "overview.plan_tooltip": {
+    "cs": "Pro správu plánovaných míst je nutné přihlášení",
+    "en": "Sign in to manage planned places"
+  },
+  "overview.navigate": {
+    "cs": "Navigovat na místo",
+    "en": "Navigate to place"
+  },
+  "overview.vote_up": {
+    "cs": "Líbí se",
+    "en": "Like"
+  },
+  "overview.vote_down": {
+    "cs": "Nelíbí se",
+    "en": "Dislike"
+  },
+  "overview.login_req": {
+    "cs": "Přihlášení nutné",
+    "en": "Sign in required"
+  },
+  "overview.intro": {
+    "cs": "Vyhovuje Vám více forma seznamu než mapa? Všechna místa seřazená přehledně podle kategorií s možností filtrování. Stačí začít prozkoumávat.",
+    "en": "Prefer a list to a map? All places sorted by category, with filtering. Just start exploring."
   }
 }

@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#111111"/>
-<title>Přehled míst — LayersOfPrague</title>
+<title id="pageTitle">Přehled míst — LayersOfPrague</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -168,8 +168,6 @@ a { color: inherit; text-decoration: none; }
   .chip-wrap { flex-direction: row; align-items: center; gap: 8px; }
   .chip-state-lbl { padding-left: 0; width: 52px; text-align: left; }
 }
-.ft-lbl { cursor: pointer; transition: color .15s; }
-.ft-lbl:hover { color: var(--ink); }
 .filter-row { padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .filter-row:first-child { padding-top: 4px; }
 .filter-row:last-of-type { border-bottom: none; }
@@ -243,16 +241,13 @@ a { color: inherit; text-decoration: none; }
 .filter-chip { display: none; }
 
 /* ── ERA TIMELINE ── */
-.filter-timeline { position: relative; height: 70px; padding: 0 4px; }
+.filter-timeline { position: relative; height: 46px; padding: 0 4px; }
 .filter-timeline .ft-track { position: absolute; left: 4px; right: 4px; top: 20px; height: 4px; background: var(--rule); border-radius: 2px; }
 .filter-timeline .ft-fill { position: absolute; top: 20px; height: 4px; background: var(--ink); border-radius: 2px; }
 .filter-timeline .ft-h { position: absolute; top: 22px; transform: translate(-50%,-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: grab; z-index: 3; touch-action: none; }
 .filter-timeline .ft-h:active { cursor: grabbing; }
-.filter-timeline .ft-div { position: absolute; top: 14px; width: 1px; height: 16px; background: var(--rule-2); pointer-events: none; }
-.filter-timeline .ft-lbl { position: absolute; top: 36px; transform: translateX(-50%); font-size: 11px; font-weight: 500; color: var(--ink-2); white-space: nowrap; pointer-events: none; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
-.filter-timeline .ft-lbl.off { color: var(--ink-5); opacity: .4; }
-.filter-timeline .ft-year { position: absolute; top: 54px; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-5); letter-spacing: .05em; pointer-events: none; }
-.filter-timeline .ft-year-tick { position: absolute; top: 50px; width: 1px; height: 3px; background: var(--rule-2); transform: translateX(-50%); pointer-events: none; }
+.filter-timeline .ft-year { position: absolute; top: 32px; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-5); letter-spacing: .05em; pointer-events: none; }
+.filter-timeline .ft-year-tick { position: absolute; top: 27px; width: 1px; height: 3px; background: var(--rule-2); transform: translateX(-50%); pointer-events: none; }
 .filter-range-input { appearance: none; -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--rule); outline: none; margin-top: 2px; }
 .filter-range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .filter-range-input::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); cursor: pointer; }
@@ -600,6 +595,9 @@ a { color: inherit; text-decoration: none; }
 .tax-banner .tb-chip[data-tone="ok"] {
   background: #fff; border-color: var(--ok); color: var(--ok);
 }
+.tax-banner .tb-chip[data-tone="arch"] {
+  background: #fff; border-color: var(--cat-arch); color: var(--cat-arch);
+}
 .tax-banner .tb-chip:hover { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
 .tax-banner .tb-chip:active { transform: translateY(0); box-shadow: none; }
 .tax-banner .tb-chip svg { opacity: .65; flex-shrink: 0; }
@@ -616,7 +614,7 @@ a { color: inherit; text-decoration: none; }
 <div class="page">
     <div class="hero-section">
     <div class="hero-top">
-      <h1 class="page-title">Přehled <em>míst</em></h1>
+      <h1 class="page-title"><span id="h1a">Přehled</span> <em id="h1b">míst</em></h1>
       <!-- Controls: Filtr + Seznam + Dlaždice -->
       <div class="controls-bar">
         <button class="ctrl-btn ctrl-btn-filter" id="filterBtn" onclick="toggleFilter()">
@@ -634,7 +632,7 @@ a { color: inherit; text-decoration: none; }
             <span class="filter-cnt" id="filterHeadCnt"><span id="filterHeadActive" style="color:var(--ink-5);font-size:12px;font-weight:500;">—</span><span id="filterHeadTotal" style="color:var(--ink-5);font-size:10px;"></span></span>
           </span>
         </button>
-        <button class="ctrl-btn ctrl-btn-view" id="btnView" onclick="toggleView()" title="Přepnout zobrazení">
+        <button class="ctrl-btn ctrl-btn-view" id="btnView" onclick="toggleView()" id="btnViewT" title="Přepnout zobrazení">
           <svg id="viewIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
             <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
@@ -642,7 +640,7 @@ a { color: inherit; text-decoration: none; }
         </button>
       </div>
     </div>
-    <p class="page-intro">Vyhovuje Vám více forma seznamu než mapa? Všechna místa seřazená přehledně podle kategorií s možností filtrování. Stačí začít prozkoumávat.</p>
+    <p class="page-intro" id="pageIntro">Vyhovuje Vám více forma seznamu než mapa? Všechna místa seřazená přehledně podle kategorií s možností filtrování. Stačí začít prozkoumávat.</p>
   </div>
 
   <!-- Filter modal -->
@@ -650,7 +648,7 @@ a { color: inherit; text-decoration: none; }
     <div class="filter-modal" id="filterModal">
       <div class="filter-modal-header">
         <span class="filter-modal-title" id="fmTitle">Filtr</span>
-        <button class="filter-modal-close" onclick="toggleFilter()" title="Zavřít">
+        <button class="filter-modal-close" onclick="toggleFilter()" id="btnCloseT" title="Zavřít">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -849,6 +847,14 @@ function clearTaxFilter() {
 function syncFilterUI() {
   /* statické popisky modálu — v HTML jsou jen jako fallback */
   const setTxt = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
+  setTxt('loadingMsg', 'overview.loading');
+  setTxt('h1a',        'overview.h1a');
+  setTxt('h1b',        'overview.h1b');
+  setTxt('pageIntro',  'overview.intro');
+  setTxt('pageTitle',  'overview.page_title');
+  const setTip = (id, key) => { const e = document.getElementById(id); if (e) e.title = t(key); };
+  setTip('btnViewT',  'overview.toggle_view');
+  setTip('btnCloseT', 'overview.close');
   setTxt('fmTitle',    'overview.filter');
   setTxt('fmCategory', 'overview.category');
   setTxt('fmStyle',    'overview.style');
@@ -922,6 +928,7 @@ function activeFilters(undatedCount) {
 
   STYLE_FILTER.forEach(code => {
     out.push({ label: window.LOP_TAGS ? window.LOP_TAGS.styleLabel(code) : code,
+               tone: 'arch',
                clear: () => { STYLE_FILTER.delete(code); } });
   });
 
@@ -967,7 +974,7 @@ function renderTaxBanner(count, undatedCount) {
 function requestLoc(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; render(); },
-    err => { if(err.code===1) alert('Přístup k poloze byl zamítnut.'); }, { enableHighAccuracy:true, timeout:8000 });
+    err => { if(err.code===1) alert(t('overview.geo_denied')); }, { enableHighAccuracy:true, timeout:8000 });
 }
 function locateUser() {
   if (!navigator.geolocation) return;
@@ -982,19 +989,6 @@ const FILTER_NEXT         = { full:'hide', hide:'full' };
 const FILTER_NEXT_WISHED  = { full:'hide', hide:'force', force:'full' };
 const FILTER_NEXT_VISITED = { full:'hide', hide:'force', force:'full' };
 const RANK = { full:0, hide:2, force:0 };
-/* Časová pásma jsou HRUBŠÍ než slohy ve slovníku (8 vs 17) a slouží
-   k orientaci na ose, ne k filtrování — 1850–1918 pokrývá historismus,
-   secesi i kubismus. Názvy jdou z překladů pod klíči era.<id>. */
-const ERAS = [
-  { id:'rom', from:1000, to:1230 },
-  { id:'got', from:1230, to:1500 },
-  { id:'ren', from:1500, to:1620 },
-  { id:'bar', from:1620, to:1780 },
-  { id:'emp', from:1780, to:1850 },
-  { id:'sec', from:1850, to:1918 },
-  { id:'mod', from:1918, to:2000 },
-  { id:'sou', from:2000, to:2025 },
-];
 const ERA_START=1000, ERA_END=2025;
 const ERA_STATE = { from:ERA_START, to:ERA_END };
 const DIST_STATE = { max:null };
@@ -1060,11 +1054,11 @@ function buildChips() {
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-art">výchozí</span>
-      <button class="chip" data-cat="art"><span class="chip-swatch" style="background:var(--cat-art)"></span>Umění <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span></button>
+      <button class="chip" data-cat="art"><span class="chip-swatch" style="background:var(--cat-art)"></span>${t('cat.art')} <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
-      <button class="chip" data-cat="fun"><span class="chip-swatch" style="background:var(--cat-fun)"></span>Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span></button>
+      <button class="chip" data-cat="fun"><span class="chip-swatch" style="background:var(--cat-fun)"></span>${t('cat.fun')} <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
@@ -1072,7 +1066,7 @@ function buildChips() {
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-wished">výchozí</span>
-      <button class="chip" id="chipWished" data-filter="wished" data-tooltip="Pro správu plánovaných míst je nutné přihlášení"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>Plán <span id="ctWishedWrap"></span></button>
+      <button class="chip" id="chipWished" data-filter="wished" data-tooltip="${t('overview.plan_tooltip')}"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>${t('place.plan')} <span id="ctWishedWrap"></span></button>
     </div>
   `;
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
@@ -1107,22 +1101,11 @@ function updateChipCounts() {
 
 function buildEraTimeline() {
   const el=document.getElementById('eraTimeline'); if(!el) return;
-  const years=[1000,1400,1800,2000], html=[];
+  const years=[1000,1200,1400,1600,1800,1900,2000], html=[];
   html.push('<div class="ft-track"></div>','<div class="ft-fill" id="eraFill"></div>');
-  ERAS.slice(1).forEach(e=>html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`));
-  ERAS.forEach(e=>{ const mid=(e.from+e.to)/2, w=eraPct(e.to)-eraPct(e.from); html.push(`<span class="ft-lbl" data-era="${e.id}" data-from="${e.from}" data-to="${e.to}" title="${e.from}–${e.to}" style="left:${eraPct(mid)}%;max-width:calc(${w}% - 4px)">${t('era.'+e.id)}</span>`); });
   years.forEach(y=>{ html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`,`<span class="ft-year" style="left:${eraPct(y)}%">${y===2000?t('era.now'):y}</span>`); });
   html.push('<div class="ft-h" id="eraHFrom" data-which="from"></div>','<div class="ft-h" id="eraHTo" data-which="to"></div>');
   el.innerHTML=html.join(''); renderEra();
-  /* Klik na název pásma nastaví rozsah osy — název tak není jen popiska. */
-  el.querySelectorAll('.ft-lbl').forEach(lbl=>{
-    lbl.addEventListener('click', ev=>{
-      ev.stopPropagation();
-      ERA_STATE.from = +lbl.dataset.from;
-      ERA_STATE.to   = +lbl.dataset.to;
-      syncFilterUI(); applyFilter();
-    });
-  });
   el.querySelectorAll('.ft-h').forEach(h=>{
     const onDown=ev=>{
       ev.preventDefault(); const which=h.dataset.which, rect=el.getBoundingClientRect();
@@ -1142,7 +1125,6 @@ function renderEra() {
   if(fill){ fill.style.left=fromP+'%'; fill.style.width=(toP-fromP)+'%'; }
   const fv=document.getElementById('eraFromV'), tv=document.getElementById('eraToV');
   if(fv) fv.textContent=ERA_STATE.from; if(tv) tv.textContent=ERA_STATE.to>=2025?'2000+':ERA_STATE.to;
-  document.querySelectorAll('.ft-lbl').forEach(lbl=>{ const era=ERAS.find(e=>e.id===lbl.dataset.era); if(era) lbl.classList.toggle('off',!(era.to>ERA_STATE.from&&era.from<ERA_STATE.to)); });
 }
 
 function initDistSlider() {
@@ -1252,8 +1234,12 @@ function render() {
   renderTaxBanner(filtered.length, undatedCount);
 
   if(filtered.length===0){
-    const msg = TAX ? t('tag.no_results') : t('overview.empty');
-    document.getElementById('placesList').innerHTML=`<div class="empty"><h3>${msg}</h3><p>${TAX ? '' : t('overview.empty_sub')}</p></div>`;
+    /* Které filtry to způsobily, ukazuje banner hned nad seznamem —
+       nemá smysl je vypisovat podruhé. Stačí na něj odkázat. */
+    const anyFilter = activeFilters(undatedCount).length > 0;
+    const msg = anyFilter ? t('overview.empty_filtered') : t('overview.empty');
+    const sub = anyFilter ? t('overview.empty_hint')     : t('overview.empty_sub');
+    document.getElementById('placesList').innerHTML=`<div class="empty"><h3>${msg}</h3><p>${sub}</p></div>`;
     return;
   }
 
@@ -1303,7 +1289,7 @@ function cardHTML(p, visited, wished) {
 
   // Seznam: ikona nad číslem (flex-column)
   const distListHtml = dist
-    ? `<a class="place-dist place-dist-link" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="Navigovat na místo">
+    ? `<a class="place-dist place-dist-link" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="${t('overview.navigate')}">
         <span class="place-dist-icon list">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
@@ -1311,7 +1297,7 @@ function cardHTML(p, visited, wished) {
 
   // Dlaždice: ikona před číslem (flex-row)
   const distGridHtml = dist
-    ? `<a class="place-dist place-dist-link place-dist-grid" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="Navigovat na místo">
+    ? `<a class="place-dist place-dist-link place-dist-grid" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="${t('overview.navigate')}">
         <span class="place-dist-icon grid">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
@@ -1328,10 +1314,10 @@ function cardHTML(p, visited, wished) {
   const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
 
   const votesHtml = `<div class="place-votes">
-    <button class="place-vote-btn up${votedUp?' voted':''}" onclick="votePlace(event,'${p.id}','up')" title="Líbí se">
+    <button class="place-vote-btn up${votedUp?' voted':''}" onclick="votePlace(event,'${p.id}','up')" title="${t('overview.vote_up')}">
       ${arrowUp}<span class="place-vote-count">${voteUp}</span>
     </button>
-    <button class="place-vote-btn down${votedDown?' voted':''}" onclick="votePlace(event,'${p.id}','down')" title="Nelíbí se">
+    <button class="place-vote-btn down${votedDown?' voted':''}" onclick="votePlace(event,'${p.id}','down')" title="${t('overview.vote_down')}">
       ${arrowDown}<span class="place-vote-count">${voteDown}</span>
     </button>
   </div>`;
@@ -1347,7 +1333,7 @@ function cardHTML(p, visited, wished) {
       </div>`
     : `<div class="place-wish-wrap" onclick="event.stopPropagation();window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href);">
         <span class="place-wish-lbl">${t('place.plan_add')}</span>
-        <button class="place-wish-btn" title="Přihlášení nutné" style="position:relative">
+        <button class="place-wish-btn" title="${t('overview.login_req')}" style="position:relative">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           <span class="place-wish-lock"></span>
         </button>
