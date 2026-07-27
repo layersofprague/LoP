@@ -549,8 +549,17 @@ a { color: inherit; text-decoration: none; }
 
 /* ── AKTIVNÍ FILTRY — volně ložené chipy, bez rámečku ── */
 .tax-banner {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;
   margin: 0 0 14px;
+}
+.tax-banner .tb-wrap {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+}
+.tax-banner .tb-state {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; letter-spacing: .01em;
+  color: var(--ink-4); line-height: 1;
+  padding-left: 11px;
 }
 .tax-banner[hidden] { display: none; }
 .tax-banner .tb-chip {
@@ -572,8 +581,8 @@ a { color: inherit; text-decoration: none; }
           mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
 }
 .tax-banner .tb-ico-heart {
-  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
-          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' stroke='black' stroke-width='2' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' stroke='black' stroke-width='2' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
 }
 .tax-banner .tb-chip[data-tone="accent"] {
   background: #fff; border-color: var(--accent); color: var(--accent);
@@ -870,19 +879,18 @@ function activeFilters(undatedCount) {
   /* Popisky se skládají ze STEJNÝCH klíčů jako stavy chipů v modálu,
      jinak se obě místa dřív nebo později rozejdou. */
   const STATE_KEY = { hide:'filter.state_hidden', force:'filter.state_always' };
-  const stateLabel = (st, name) => t(STATE_KEY[st]) + ': ' + name;
 
   ['hist','arch','art','fun'].forEach(cat => {
     if (FILTER[cat] === 'hide')
-      out.push({ label: stateLabel('hide', t('cat.' + cat)),
+      out.push({ label: t('cat.' + cat), state: t(STATE_KEY.hide),
                  clear: () => { FILTER[cat] = 'full'; } });
   });
 
   [['wished','place.plan','accent'], ['visited','overview.visited','ok']].forEach(([f, key, tone]) => {
     const st = FILTER[f]; if (st === 'full') return;
-    const lbl = stateLabel(st, t(key));
-    /* barevný obrys jen u "vždy" — u skrytí a útlumu by barva pletla */
-    out.push({ label: lbl, tone: st === 'force' ? tone : null,
+    /* barevný obrys jen u "vždy" — u skrytí by barva pletla */
+    out.push({ label: t(key), state: t(STATE_KEY[st]),
+               tone: st === 'force' ? tone : null,
                icon: f === 'wished' ? 'heart' : 'check',
                clear: () => { FILTER[f] = 'full'; } });
   });
@@ -922,11 +930,14 @@ function renderTaxBanner(count, undatedCount) {
   if (!items.length) { el.hidden = true; return; }
   el.hidden = false;
   el.innerHTML = items.map((f, i) =>
-    `<button class="tb-chip"${f.tone ? ` data-tone="${f.tone}"` : ''} onclick="clearOneFilter(${i}, ${undatedCount})">` +
-      (f.icon ? `<span class="tb-ico tb-ico-${f.icon}"></span>` : '') +
-      `<span>${f.label}</span>` +
-      `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
-    `</button>`).join('');
+    `<div class="tb-wrap">` +
+      `<span class="tb-state">${f.state || '&nbsp;'}</span>` +
+      `<button class="tb-chip"${f.tone ? ` data-tone="${f.tone}"` : ''} onclick="clearOneFilter(${i}, ${undatedCount})">` +
+        (f.icon ? `<span class="tb-ico tb-ico-${f.icon}"></span>` : '') +
+        `<span>${f.label}</span>` +
+        `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
+      `</button>` +
+    `</div>`).join('');
 }
 
 function requestLoc(e) {
