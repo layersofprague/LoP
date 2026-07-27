@@ -197,10 +197,14 @@ a { color: inherit; text-decoration: none; }
   width: 11px; height: 11px;
 }
 .chip.state-dim { opacity: .5; }
-.chip.state-force { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
-.chip[data-filter="visited"].state-force { background: var(--ok) !important; border-color: var(--ok) !important; }
-.chip.state-force .chip-swatch, .chip.state-force .chip-icon-check, .chip.state-force .chip-icon-heart { background: #fff !important; }
-.chip.state-force svg { color: #fff !important; fill: #fff !important; stroke: #fff !important; }
+/* stav "vždy" — jen barevný rámeček a text, bez plné výplně */
+.chip.state-force { background: #fff !important; color: var(--accent) !important; border-color: var(--accent) !important; }
+.chip[data-filter="visited"].state-force { color: var(--ok) !important; border-color: var(--ok) !important; }
+.chip.state-force .chip-swatch, .chip.state-force .chip-icon-heart { background: var(--accent) !important; }
+.chip[data-filter="visited"].state-force .chip-swatch,
+.chip[data-filter="visited"].state-force .chip-icon-check { background: var(--ok) !important; }
+.chip.state-force svg { color: var(--accent) !important; fill: var(--accent) !important; stroke: var(--accent) !important; }
+.chip[data-filter="visited"].state-force svg { color: var(--ok) !important; fill: var(--ok) !important; stroke: var(--ok) !important; }
 .chip.chip-locked { position: relative; }
 .chip.chip-locked::before {
   content: attr(data-tooltip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
@@ -546,19 +550,12 @@ a { color: inherit; text-decoration: none; }
 }
 
 
-/* ── FILTR PODLE TAXONOMIE (?tag= / ?district= / ?style= / ?person=) ── */
+/* ── AKTIVNÍ FILTRY — volně ložené chipy, bez rámečku ── */
 .tax-banner {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin: 0 0 14px; padding: 10px 14px;
-  background: var(--paper-2); border: 1px solid var(--rule);
-  border-radius: 10px;
-  font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink-3);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 0 0 14px;
 }
 .tax-banner[hidden] { display: none; }
-.tax-banner .tb-label { color: var(--ink-4); font-size: 11px;
-  letter-spacing: .12em; text-transform: uppercase; }
-.tax-banner .tb-value { font-weight: 600; color: var(--ink); font-size: 15px; }
-.tax-banner .tb-count { color: var(--ink-4); }
 .tax-banner .tb-chip {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--ink); border: 1.5px solid var(--ink); border-radius: 7px;
@@ -570,15 +567,6 @@ a { color: inherit; text-decoration: none; }
 .tax-banner .tb-chip:active { transform: translateY(0); box-shadow: none; }
 .tax-banner .tb-chip svg { opacity: .65; flex-shrink: 0; }
 .tax-banner .tb-chip:hover svg { opacity: 1; }
-.tax-banner .tb-count { margin-left: auto; }
-.tax-banner .tb-clear {
-  margin-left: auto; display: flex; align-items: center; gap: 5px;
-  background: transparent; border: 1px solid var(--rule); border-radius: 7px;
-  padding: 4px 10px; cursor: pointer; color: var(--ink-3);
-  font-family: inherit; font-size: 12px;
-  transition: background .15s, color .15s, border-color .15s;
-}
-.tax-banner .tb-clear:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 </style>
 </head>
 <body>
@@ -912,14 +900,11 @@ function renderTaxBanner(count, undatedCount) {
   const items = activeFilters(undatedCount);
   if (!items.length) { el.hidden = true; return; }
   el.hidden = false;
-  el.innerHTML =
-    `<span class="tb-label">${t('filter.active')}</span>` +
-    items.map((f, i) =>
-      `<button class="tb-chip" onclick="clearOneFilter(${i}, ${undatedCount})">` +
-        `<span>${f.label}</span>` +
-        `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
-      `</button>`).join('') +
-    `<span class="tb-count">${count}</span>`;
+  el.innerHTML = items.map((f, i) =>
+    `<button class="tb-chip" onclick="clearOneFilter(${i}, ${undatedCount})">` +
+      `<span>${f.label}</span>` +
+      `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
+    `</button>`).join('');
 }
 
 function requestLoc(e) {
