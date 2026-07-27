@@ -954,5 +954,21 @@
   "filter.state_always": {
     "cs": "vždy",
     "en": "always"
+  },
+  "overview.category": {
+    "cs": "Kategorie",
+    "en": "Category"
+  },
+  "overview.era": {
+    "cs": "Období",
+    "en": "Period"
+  },
+  "overview.reset": {
+    "cs": "Resetovat",
+    "en": "Reset"
+  },
+  "filter.always": {
+    "cs": "vždy: {x}",
+    "en": "always: {x}"
   }
 }

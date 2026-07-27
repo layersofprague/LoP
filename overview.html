@@ -624,32 +624,32 @@ a { color: inherit; text-decoration: none; }
   <div class="filter-modal-backdrop" id="filterBackdrop">
     <div class="filter-modal" id="filterModal">
       <div class="filter-modal-header">
-        <span class="filter-modal-title">${t('overview.filter')}</span>
+        <span class="filter-modal-title" id="fmTitle">Filtr</span>
         <button class="filter-modal-close" onclick="toggleFilter()" title="Zavřít">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="filter-modal-inner">
         <div class="filter-row">
-          <div class="filter-lbl"><span>Kategorie</span></div>
+          <div class="filter-lbl"><span id="fmCategory">Kategorie</span></div>
           <div class="filter-chips" id="mapChips"></div>
         </div>
         <div class="filter-row">
           <div class="filter-lbl">
-            <span>Období</span>
+            <span id="fmEra">Období</span>
             <span class="filter-lbl-val"><span id="eraFromV">1000</span> — <span id="eraToV">2000</span></span>
           </div>
           <div class="filter-timeline" id="eraTimeline"></div>
         </div>
         <div class="filter-row">
           <div class="filter-lbl">
-            <span>${t('overview.dist_from_you')}</span>
+            <span id="fmDist">Vzdálenost od vás</span>
             <span class="filter-lbl-val" id="distV">libovolná</span>
           </div>
           <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
         </div>
         <div class="filter-footer">
-          <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
+          <button class="filter-reset" id="fmReset" onclick="resetFilters()">Resetovat</button>
         </div>
       </div>
     </div>
@@ -818,6 +818,14 @@ function clearTaxFilter() {
 /* ── Jediné místo, které promítá stav filtrů do ovládacích prvků.
    Volá se z kliku na chip, z banneru i z resetu — nemá se jak rozejít. ── */
 function syncFilterUI() {
+  /* statické popisky modálu — v HTML jsou jen jako fallback */
+  const setTxt = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
+  setTxt('fmTitle',    'overview.filter');
+  setTxt('fmCategory', 'overview.category');
+  setTxt('fmEra',      'overview.era');
+  setTxt('fmDist',     'overview.dist_from_you');
+  setTxt('fmReset',    'overview.reset');
+
   const S_CAT  = { full:'filter.state_default', hide:'filter.state_hidden' };
   const S_WISH = { full:'filter.state_default', dim:'filter.state_dimmed',
                    hide:'filter.state_hidden',  force:'filter.state_always' };
@@ -864,7 +872,7 @@ function activeFilters(undatedCount) {
   [['wished','place.plan'], ['visited','overview.visited']].forEach(([f, key]) => {
     const st = FILTER[f]; if (st === 'full') return;
     const name = t(key);
-    const lbl = st === 'force' ? t('filter.only',   { x:name })
+    const lbl = st === 'force' ? t('filter.always', { x:name })
               : st === 'hide'  ? t('filter.without',{ x:name })
               :                  t('filter.dimmed', { x:name });
     out.push({ label: lbl, clear: () => { FILTER[f] = 'full'; } });
@@ -876,7 +884,7 @@ function activeFilters(undatedCount) {
                clear: () => { ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END; UNDATED.include = true; } });
   }
 
-  if (DIST_STATE.max != null)
+  if (DIST_STATE.max != null && userPos)
     out.push({ label: t('filter.distance', { x: DIST_STATE.max.toFixed(1) }),
                clear: () => { DIST_STATE.max = null; } });
 
