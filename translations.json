@@ -1094,5 +1094,9 @@
   "place.gallery_count": {
     "cs": "{n} fotografií",
     "en": "{n} photos"
+  },
+  "place.geo_blocked": {
+    "cs": "poloha blokována",
+    "en": "location blocked"
   }
 }
