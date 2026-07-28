@@ -186,10 +186,7 @@ function _updateAuth() {
       btn.title = s.user.email || 'Profil';
       const initial = (s.user.email || '?')[0].toUpperCase();
       btn.innerHTML = `<span class="lop-h-profile-avatar">${initial}</span>`;
-      btn.onclick = () => {
-        if (window.lopAuth) window.lopAuth.open('loggedIn');
-        else location.href = ROOT + 'profile.html';
-      };
+      btn.onclick = () => { location.href = ROOT + 'profile.html'; };
     } else {
       btn.classList.remove('logged-in');
       btn.title = 'Přihlásit se';
