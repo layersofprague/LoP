@@ -10,8 +10,8 @@
       "en": "Šítkov Water Tower"
     },
     "teaser": {
-      "cs": "Středověká vodní věž na pravém břehu Vltavy z roku 1495.",
-      "en": "A medieval water tower on the right bank of the Vltava, built around 1495."
+      "cs": "Středověká vodní věž na pravém břehu Vltavy z roku 1495 — jedna z mála, které se ve městě dochovaly.",
+      "en": "A medieval water tower on the Vltava's right bank, built around 1495 — one of the few to survive in the city."
     },
     "district": "nove-mesto",
     "prague": 1,
@@ -54,8 +54,8 @@
       "en": "Wenceslas Square"
     },
     "teaser": {
-      "cs": "Bývalý Koňský trh, dnes nervové centrum moderní Prahy.",
-      "en": "The former Horse Market, today the nerve centre of modern Prague."
+      "cs": "Bývalý Koňský trh z roku 1348, dnes nervové centrum moderní Prahy — od Národního muzea až k Můstku.",
+      "en": "Founded in 1348 as the Horse Market, today it's the nerve centre of modern Prague, stretching from the National Museum to Můstek."
     },
     "district": "nove-mesto",
     "prague": 1,
@@ -90,8 +90,8 @@
       "en": "Old Town Square"
     },
     "teaser": {
-      "cs": "Srdce historické Prahy — orloj, Týnský chrám, tři vrstvy času na jednom náměstí.",
-      "en": "The heart of historic Prague — the astronomical clock, Týn Church, three layers of time in one square."
+      "cs": "Srdce historické Prahy — orloj, Týnský chrám, tři vrstvy času na jednom náměstí. Jedno z nejnavštěvovanějších míst v zemi.",
+      "en": "The heart of historic Prague — the astronomical clock, Týn Church, three layers of time in one square, among the country's most visited spots."
     },
     "district": "stare-mesto",
     "prague": 1,
@@ -130,8 +130,8 @@
       "en": "National Theatre"
     },
     "teaser": {
-      "cs": "Novorenesanční chrám národa. Dvakrát postaven, dvakrát zachráněn.",
-      "en": "The neo-Renaissance temple of the nation. Built twice, saved twice."
+      "cs": "Novorenesanční chrám národa, který v roce 1881 hned po otevření vyhořel — a Praha ho za dva roky postavila znovu.",
+      "en": "The neo-Renaissance temple of the nation, gutted by fire in 1881 weeks after opening — and rebuilt by Prague within two years."
     },
     "district": "nove-mesto",
     "prague": 1,
@@ -170,8 +170,8 @@
       "en": "Prague Castle"
     },
     "teaser": {
-      "cs": "Největší souvislý hradní komplex na světě. Devět století dějin nad Vltavou.",
-      "en": "The largest contiguous castle complex in the world. Nine centuries of history above the Vltava."
+      "cs": "Největší souvislý hradní komplex na světě. Devět století dějin nad Vltavou, od knížat Přemyslovců až po prezidenty.",
+      "en": "The largest contiguous castle complex in the world — nine centuries of history above the Vltava, from Přemyslid princes to modern presidents."
     },
     "district": "hradcany",
     "prague": 1,
@@ -211,8 +211,8 @@
       "en": "Holešovice Port"
     },
     "teaser": {
-      "cs": "Jediné místo v Praze, kde se v jednom bodě potkávaly loď, vlak i nákladní vůz.",
-      "en": "The only place in Prague where ship, train and lorry met at a single point."
+      "cs": "Jediné místo v Praze, kde se v jednom bodě potkávaly loď, vlak i nákladní vůz — dnes secesní areál s bydlením Prague Marina.",
+      "en": "The only place in Prague where ship, train and lorry once met at a single point — today an Art Nouveau complex turned Prague Marina residences."
     },
     "district": "holesovice",
     "prague": 7,
@@ -257,8 +257,8 @@
       "en": "Letná Park"
     },
     "teaser": {
-      "cs": "Kde stála největší socha Stalina na světě, dnes kýve Novákův metronom.",
-      "en": "Where the world’s largest statue of Stalin once stood, Novák’s metronome now swings."
+      "cs": "Kde stála největší socha Stalina na světě, dnes kýve Novákův metronom — a výhled na celou Prahu zdarma.",
+      "en": "Where the world's largest statue of Stalin once stood, now Novák's metronome swings — with a free view over all of Prague."
     },
     "district": "holesovice",
     "prague": 7,
@@ -299,8 +299,8 @@
       "en": "Dancing House"
     },
     "teaser": {
-      "cs": "Tančící dům Franka Gehryho a Vlada Miluniće z roku 1996.",
-      "en": "The Dancing House by Frank Gehry and Vlado Milunić, 1996."
+      "cs": "Tančící dům Franka Gehryho a Vlada Miluniće z roku 1996, postavený na místě domu zbořeného při bombardování Prahy 1945.",
+      "en": "The Dancing House by Frank Gehry and Vlado Milunić, built in 1996 on a plot cleared by the 1945 bombing of Prague."
     },
     "district": "nove-mesto",
     "prague": 1,
@@ -341,8 +341,8 @@
       "en": "St Mary Magdalene Bastion (XIX)"
     },
     "teaser": {
-      "cs": "Jedna z mála dochovaných bašt pražského barokního opevnění.",
-      "en": "One of the few surviving bastions of Prague’s Baroque fortifications."
+      "cs": "Jedna z mála dochovaných bašt barokního opevnění Prahy, postavená roku 1653 na Hradčanech.",
+      "en": "One of the few surviving bastions of Prague's Baroque fortifications, built in 1653 in Hradčany."
     },
     "district": "hradcany",
     "prague": 1,
