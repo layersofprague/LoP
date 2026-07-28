@@ -188,11 +188,26 @@ a { color: inherit; text-decoration: none; }
 .chip:hover  { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
 .chip:active { transform: translateY(0); box-shadow: none; }
 .chip.state-hide:hover  { box-shadow: 0 3px 10px rgba(26,24,20,.28); }
-/* sloh je pozitivní výběr — zvolený má barevný obrys, shodně se stavem "vždy" */
+/* Kategorie i sloh jsou pozitivní výběr: zvolený má barevný obrys.
+   Plná černá je vyhrazená pro skrytí (navštíveno / plán). */
+.chip[data-cat].state-on { background: #fff; }
+.chip[data-cat="hist"].state-on { border-color: var(--cat-hist); color: var(--cat-hist); }
+.chip[data-cat="arch"].state-on { border-color: var(--cat-arch); color: var(--cat-arch); }
+.chip[data-cat="art"].state-on  { border-color: var(--cat-art);  color: var(--cat-art);  }
+.chip[data-cat="fun"].state-on  { border-color: var(--cat-fun);  color: var(--cat-fun);  }
+.chip[data-cat].state-on .chip-count { opacity: .7; }
+/* "jen tyto" u navštíveno a plánu — barevný obrys jako u kategorií */
+.chip[data-filter="wished"].state-on  { background:#fff; border-color: var(--accent); color: var(--accent); }
+.chip[data-filter="visited"].state-on { background:#fff; border-color: var(--ok);     color: var(--ok);     }
+.chip[data-filter="wished"].state-on .chip-icon-heart  { background: var(--accent) !important; }
+.chip[data-filter="visited"].state-on .chip-icon-check { background: var(--ok) !important; }
+.chip[data-filter].state-on svg { color: currentColor !important; fill: currentColor !important; stroke: currentColor !important; }
+
+/* sloh je pozitivní výběr — zvolený má barevný obrys, shodně s kategoriemi */
 .chip.chip-style.state-on { background: #fff; border-color: var(--cat-arch); color: var(--cat-arch); }
 .chip.chip-style.state-on .chip-swatch { background: var(--cat-arch) !important; }
 .chip.chip-style.state-on .chip-count  { color: var(--cat-arch); opacity: .7; }
-.chip.state-force:hover { box-shadow: 0 3px 10px rgba(26,24,20,.16); }
+.chip.state-on:hover { box-shadow: 0 3px 10px rgba(26,24,20,.16); }
 .chip .chip-swatch { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
 .chip .chip-icon { width: 12px; height: 12px; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
 .chip .chip-icon-check {
@@ -206,14 +221,6 @@ a { color: inherit; text-decoration: none; }
           mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>");
   width: 11px; height: 11px;
 }
-/* stav "vždy" — jen barevný rámeček a text, bez plné výplně */
-.chip.state-force { background: #fff !important; color: var(--accent) !important; border-color: var(--accent) !important; }
-.chip[data-filter="visited"].state-force { color: var(--ok) !important; border-color: var(--ok) !important; }
-.chip.state-force .chip-swatch, .chip.state-force .chip-icon-heart { background: var(--accent) !important; }
-.chip[data-filter="visited"].state-force .chip-swatch,
-.chip[data-filter="visited"].state-force .chip-icon-check { background: var(--ok) !important; }
-.chip.state-force svg { color: var(--accent) !important; fill: var(--accent) !important; stroke: var(--accent) !important; }
-.chip[data-filter="visited"].state-force svg { color: var(--ok) !important; fill: var(--ok) !important; stroke: var(--ok) !important; }
 .chip.chip-locked { position: relative; }
 .chip.chip-locked::before {
   content: attr(data-tooltip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
@@ -617,6 +624,10 @@ a { color: inherit; text-decoration: none; }
 .tax-banner .tb-chip[data-tone="arch"] {
   background: #fff; border-color: var(--cat-arch); color: var(--cat-arch);
 }
+.tax-banner .tb-chip[data-tone="cat-hist"] { background:#fff; border-color: var(--cat-hist); color: var(--cat-hist); }
+.tax-banner .tb-chip[data-tone="cat-arch"] { background:#fff; border-color: var(--cat-arch); color: var(--cat-arch); }
+.tax-banner .tb-chip[data-tone="cat-art"]  { background:#fff; border-color: var(--cat-art);  color: var(--cat-art);  }
+.tax-banner .tb-chip[data-tone="cat-fun"]  { background:#fff; border-color: var(--cat-fun);  color: var(--cat-fun);  }
 .tax-banner .tb-chip:hover { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
 .tax-banner .tb-chip:active { transform: translateY(0); box-shadow: none; }
 .tax-banner .tb-chip svg { opacity: .65; flex-shrink: 0; }
@@ -904,22 +915,18 @@ function syncFilterUI() {
   setTxt('fmReset',    'overview.reset');
   updateApplyBtn();
 
-  const S_CAT  = { full:'filter.state_default', hide:'filter.state_hidden' };
-  const S_WISH = { full:'filter.state_default', hide:'filter.state_hidden', force:'filter.state_always' };
+  const S_WISH = { full:'filter.state_default', only:'filter.state_only', hide:'filter.state_hidden' };
 
+  /* Kategorie: vybráno / nevybráno. Stav je vidět z chipu, popisek netřeba. */
   document.querySelectorAll('.chip[data-cat]').forEach(btn => {
-    const cat = btn.dataset.cat, st = FILTER[cat];
-    btn.classList.remove('state-hide','state-force');
-    if (st === 'hide') btn.classList.add('state-hide');
-    const lbl = document.getElementById('lbl-' + cat);
-    if (lbl) lbl.textContent = t(S_CAT[st] || 'filter.state_default');
+    btn.classList.toggle('state-on', CAT_FILTER.has(btn.dataset.cat));
   });
 
   document.querySelectorAll('.chip[data-filter]').forEach(btn => {
     const f = btn.dataset.filter, st = FILTER[f];
-    btn.classList.remove('state-hide','state-force');
-    if (st === 'hide')       btn.classList.add('state-hide');
-    else if (st === 'force') btn.classList.add('state-force');
+    btn.classList.remove('state-hide','state-on');
+    if (st === 'hide')      btn.classList.add('state-hide');
+    else if (st === 'only') btn.classList.add('state-on');
     const lbl = document.getElementById('lbl-' + f);
     if (lbl) lbl.textContent = t(S_WISH[st] || 'filter.state_default');
   });
@@ -959,7 +966,7 @@ function activeFilters(undatedCount) {
 
   /* Popisky se skládají ze STEJNÝCH klíčů jako stavy chipů v modálu,
      jinak se obě místa dřív nebo později rozejdou. */
-  const STATE_KEY = { hide:'filter.state_hidden', force:'filter.state_always' };
+  const STATE_KEY = { hide:'filter.state_hidden', only:'filter.state_only' };
 
   ['hist','arch','art','fun'].forEach(cat => {
     if (FILTER[cat] === 'hide')
@@ -971,7 +978,7 @@ function activeFilters(undatedCount) {
     const st = FILTER[f]; if (st === 'full') return;
     /* barevný obrys jen u "vždy" — u skrytí by barva pletla */
     out.push({ label: t(key), state: t(STATE_KEY[st]),
-               tone: st === 'force' ? tone : null,
+               tone: st === 'only' ? tone : null,
                icon: f === 'wished' ? 'heart' : 'check',
                clear: () => { FILTER[f] = 'full'; } });
   });
@@ -1054,13 +1061,14 @@ function locateUser() {
     ()=>{}, { enableHighAccuracy:true, timeout:8000 });
 }
 
-const FILTER = { hist:'full', arch:'full', art:'full', fun:'full', visited:'full', wished:'full' };
+/* Kategorie i slohy = POZITIVNÍ výběr (prázdná množina znamená vše).
+   Navštíveno a plán mají tři stavy, protože u nich dává smysl i skrytí. */
+const CAT_FILTER = new Set();
+const FILTER = { visited:'full', wished:'full' };
 /* Cykly stavů. 'dim' se v přehledu nepoužívá — jen zobrazeno/skryto,
    u plánu a navštívených navíc 'vždy'. */
-const FILTER_NEXT         = { full:'hide', hide:'full' };
-const FILTER_NEXT_WISHED  = { full:'hide', hide:'force', force:'full' };
-const FILTER_NEXT_VISITED = { full:'hide', hide:'force', force:'full' };
-const RANK = { full:0, hide:2, force:0 };
+/* výchozí → jen tyto → skryté → výchozí */
+const FILTER_NEXT = { full:'only', only:'hide', hide:'full' };
 const ERA_START=1000, ERA_END=2025;
 const ERA_STATE = { from:ERA_START, to:ERA_END };
 const DIST_STATE = { max:null };
@@ -1117,19 +1125,15 @@ function buildChips() {
   PLACES.forEach(l => { if(counts[l.cat] !== undefined) counts[l.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
-      <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
       <button class="chip" data-cat="hist"><span class="chip-swatch" style="background:var(--cat-hist)"></span>Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
-      <span class="chip-state-lbl" id="lbl-arch">výchozí</span>
       <button class="chip" data-cat="arch"><span class="chip-swatch" style="background:var(--cat-arch)"></span>Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
-      <span class="chip-state-lbl" id="lbl-art">výchozí</span>
       <button class="chip" data-cat="art"><span class="chip-swatch" style="background:var(--cat-art)"></span>${t('cat.art')} <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
-      <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
       <button class="chip" data-cat="fun"><span class="chip-swatch" style="background:var(--cat-fun)"></span>${t('cat.fun')} <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
@@ -1144,7 +1148,7 @@ function buildChips() {
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;
-      FILTER[cat] = FILTER_NEXT[FILTER[cat]];
+      CAT_FILTER.has(cat) ? CAT_FILTER.delete(cat) : CAT_FILTER.add(cat);
       syncFilterUI(); applyFilter();
     });
   });
@@ -1152,7 +1156,7 @@ function buildChips() {
     btn.addEventListener('click', () => {
       if (!isLoggedIn()) { window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href); return; }
       const f = btn.dataset.filter;
-      FILTER[f] = (f==='wished'?FILTER_NEXT_WISHED:f==='visited'?FILTER_NEXT_VISITED:FILTER_NEXT)[FILTER[f]];
+      FILTER[f] = FILTER_NEXT[FILTER[f]];
       syncFilterUI(); applyFilter();
     });
   });
@@ -1228,10 +1232,10 @@ function haversineKm(a,b) {
 }
 
 function resetFilters() {
-  FILTER.hist=FILTER.arch=FILTER.art=FILTER.fun='full';
+  CAT_FILTER.clear(); STYLE_FILTER.clear();
   FILTER.visited=FILTER.wished='full';
   ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
-  UNDATED.include=true; STYLE_FILTER.clear();
+  UNDATED.include=true;
   syncFilterUI(); applyFilter();
 }
 
@@ -1286,19 +1290,13 @@ function render() {
 
   const filtered=PLACES.filter(p=>{
     const wish=wished.includes(String(p.id)), vis=visited.includes(String(p.id));
-    const catState=FILTER[p.cat], wishState=FILTER.wished, visState=FILTER.visited;
-    let s='full';
-    if      (wishState==='force'&&wish) s='full';
-    else if (visState==='force'&&vis)   s='full';
-    else if (catState==='hide')          s='hide';
-    else if (wishState==='hide'&&wish)   s='hide';
-    else if (visState==='hide'&&vis)     s='hide';
-    else {
-      const votes=[catState];
-      if(wish) votes.push(wishState); if(vis) votes.push(visState);
-      s=votes.reduce((best,v)=>RANK[v]<=RANK[best]?v:best,'hide');
-    }
-    if(s==='hide') return false;
+    /* Každá podmínka stojí sama o sobě a všechny musí projít.
+       Prázdná množina kategorií = bez omezení. */
+    if(CAT_FILTER.size && !CAT_FILTER.has(p.cat)) return false;
+    if(FILTER.visited==='only' && !vis)  return false;
+    if(FILTER.visited==='hide' &&  vis)  return false;
+    if(FILTER.wished ==='only' && !wish) return false;
+    if(FILTER.wished ==='hide' &&  wish) return false;
     if(eraActive){
       const y=locYear(p);
       if(y==null){ if(!UNDATED.include) return false; }
@@ -1559,15 +1557,14 @@ loadPlaces().then(()=>{
     if(TAX){
       /* Příchod s taxonomickým filtrem = čistý štít. Uživatel chce vidět
          všechna místa daného tagu; doufiltrovat si může sám. */
-      FILTER.hist=FILTER.arch=FILTER.art=FILTER.fun='full';
+      CAT_FILTER.clear();
       FILTER.visited=FILTER.wished='full';
       ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
       syncFilterUI();
     }
     else if(_urlFilter==='wished'){
-      FILTER.hist=FILTER.arch=FILTER.fun=FILTER.visited='hide'; FILTER.wished='force';
-      document.querySelectorAll('[data-cat="hist"],[data-cat="arch"],[data-cat="fun"],[data-filter="visited"]').forEach(b=>b.classList.add('state-hide'));
-      const chipW=document.getElementById('chipWished'); if(chipW) chipW.classList.add('state-force');
+      FILTER.wished='only';   /* "jen plánovaná" — kategorie zůstávají volné */
+      syncFilterUI();
     }
     render();
   });

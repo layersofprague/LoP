@@ -931,10 +931,6 @@
     "cs": "skryto",
     "en": "hidden"
   },
-  "filter.state_always": {
-    "cs": "vždy",
-    "en": "always"
-  },
   "overview.category": {
     "cs": "Kategorie",
     "en": "Category"
@@ -1042,5 +1038,9 @@
   "overview.geo_blocked": {
     "cs": "Poloha je pro tuto stránku zablokovaná. Povolíte ji ikonou vlevo v adresním řádku → Nastavení webu → Poloha.",
     "en": "Location is blocked for this site. Allow it via the icon on the left of the address bar → Site settings → Location."
+  },
+  "filter.state_only": {
+    "cs": "jen tyto",
+    "en": "only these"
   }
 }
