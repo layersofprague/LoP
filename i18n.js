@@ -46,6 +46,38 @@ let _T = {};
   } catch (e) {
     console.warn('[i18n] Chyba načtení:', e);
   }
+/* ── Kontrola nevyhodnocených šablon ──
+   `${t('klíč')}` funguje jen uvnitř template literalu. Ve statickém HTML
+   se nevyhodnotí a vypíše se doslova. Chyba je tichá — text vypadá jako
+   text — proto ji hlásíme do konzole s odkazem na konkrétní prvek. */
+function _lopCheckTemplates() {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const found = [];
+  let n;
+  while ((n = walker.nextNode())) {
+    if (n.nodeValue.includes('${t(') || n.nodeValue.includes('${ t(')) {
+      found.push({ text: n.nodeValue.trim().slice(0, 70), el: n.parentElement });
+    }
+  }
+  document.querySelectorAll('[title],[data-tooltip],[alt],[placeholder]').forEach(el => {
+    ['title', 'data-tooltip', 'alt', 'placeholder'].forEach(a => {
+      const v = el.getAttribute(a);
+      if (v && v.includes('${t(')) found.push({ text: a + '="' + v.slice(0, 60) + '"', el: el });
+    });
+  });
+  if (found.length) {
+    console.warn('[i18n] ' + found.length + '× nevyhodnocená šablona ve statickém HTML '
+      + '— patří do template literalu v JS, nebo dát prvku id a nastavit textContent:');
+    found.forEach(f => console.warn('   ', f.text, f.el));
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _lopCheckTemplates);
+} else {
+  _lopCheckTemplates();
+}
+
 })();
 
 /* ── t('key') — překlad s volitelnou interpolací ── */

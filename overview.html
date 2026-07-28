@@ -901,6 +901,14 @@ function updateApplyBtn(n) {
 }
 let _lastCount = 0;
 
+/* Jediná povolená cesta ke změně stavu filtru. Mutace je argument, takže
+   překreslení ani přefiltrování nelze vynechat — právě to byla opakovaná chyba. */
+function updateFilter(mutate) {
+  mutate();
+  syncFilterUI();
+  applyFilter();
+}
+
 function syncFilterUI() {
   /* statické popisky modálu — v HTML jsou jen jako fallback */
   const setTxt = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
@@ -1014,9 +1022,7 @@ function activeFilters(undatedCount) {
 function clearOneFilter(i, undatedCount) {
   const f = activeFilters(undatedCount)[i];
   if (!f) return;
-  f.clear();
-  syncFilterUI();
-  applyFilter();
+  updateFilter(f.clear);
 }
 
 function renderTaxBanner(count, undatedCount) {
@@ -1115,8 +1121,7 @@ function buildStyleChips() {
   box.querySelectorAll('.chip-style').forEach(btn => {
     btn.addEventListener('click', () => {
       const s = btn.dataset.style;
-      STYLE_FILTER.has(s) ? STYLE_FILTER.delete(s) : STYLE_FILTER.add(s);
-      syncFilterUI(); applyFilter();
+      updateFilter(() => STYLE_FILTER.has(s) ? STYLE_FILTER.delete(s) : STYLE_FILTER.add(s));
     });
   });
 }
@@ -1150,16 +1155,14 @@ function buildChips() {
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;
-      CAT_FILTER.has(cat) ? CAT_FILTER.delete(cat) : CAT_FILTER.add(cat);
-      syncFilterUI(); applyFilter();
+      updateFilter(() => CAT_FILTER.has(cat) ? CAT_FILTER.delete(cat) : CAT_FILTER.add(cat));
     });
   });
   el.querySelectorAll('.chip[data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!isLoggedIn()) { window.lopAuth?window.lopAuth.open():location.href='login.html?return='+encodeURIComponent(location.href); return; }
       const f = btn.dataset.filter;
-      FILTER[f] = FILTER_NEXT[FILTER[f]];
-      syncFilterUI(); applyFilter();
+      updateFilter(() => { FILTER[f] = FILTER_NEXT[FILTER[f]]; });
     });
   });
   initDistSlider(); updateChipCounts();
@@ -1220,10 +1223,10 @@ function initDistSlider() {
     /* Bez polohy nemá filtr podle čeho měřit — požádat právě teď,
        kdy uživatel svůj záměr projevil posunutím táhla. */
     if (v < 100 && !userPos && GEO_PERM !== 'denied') requestLoc();
-    if(v>=100){ DIST_STATE.max=null; label.textContent=t('overview.any_dist'); }
-    else{ DIST_STATE.max=0.2+(v/100)*4.8; label.textContent='< '+DIST_STATE.max.toFixed(1)+' km'; }
-    syncFilterUI();   /* vykreslí poznámku o poloze a ztlumí táhlo, když chybí */
-    applyFilter();
+    updateFilter(() => {
+      if(v>=100) DIST_STATE.max=null;
+      else       DIST_STATE.max=0.2+(v/100)*4.8;
+    });
   });
 }
 
@@ -1234,11 +1237,12 @@ function haversineKm(a,b) {
 }
 
 function resetFilters() {
-  CAT_FILTER.clear(); STYLE_FILTER.clear();
-  FILTER.visited=FILTER.wished='full';
-  ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
-  UNDATED.include=true;
-  syncFilterUI(); applyFilter();
+  updateFilter(() => {
+    CAT_FILTER.clear(); STYLE_FILTER.clear();
+    FILTER.visited=FILTER.wished='full';
+    ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
+    UNDATED.include=true;
+  });
 }
 
 function locYear(p) {
@@ -1572,16 +1576,17 @@ loadPlaces().then(()=>{
     if(TAX){
       /* Příchod s taxonomickým filtrem = čistý štít. Uživatel chce vidět
          všechna místa daného tagu; doufiltrovat si může sám. */
-      CAT_FILTER.clear();
-      FILTER.visited=FILTER.wished='full';
-      ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
-      syncFilterUI();
+      updateFilter(() => {
+        CAT_FILTER.clear();
+        FILTER.visited=FILTER.wished='full';
+        ERA_STATE.from=ERA_START; ERA_STATE.to=ERA_END; DIST_STATE.max=null;
+      });
     }
     else if(_urlFilter==='wished'){
-      FILTER.wished='add';   /* nic jiného vybráno → výsledkem jsou jen plánovaná */
-      syncFilterUI();
+      /* nic jiného vybráno → výsledkem jsou jen plánovaná */
+      updateFilter(() => { FILTER.wished='add'; });
     }
-    render();
+    else render();
   });
 });
 locateUser();

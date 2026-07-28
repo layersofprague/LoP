@@ -833,10 +833,11 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 /* Leaflet ořezává wrapper — povolíme přetékání pro fajfku a srdíčko */
 .leaflet-marker-icon { overflow: visible !important; }
-/* Wrapper divIconu — pin i kužel centrovány přes flex.
-   POZOR: nesmí nastavovat position — Leaflet už má na tomto elementu
-   position:absolute pro zoom/pan, jeho přebití rozbije polohu pinů. */
-.lop-pin-wrap {
+/* Vnitřní obal pinu. Vlastní `position` tu je bezpečná, protože Leafletův
+   element (rodič) si drží svoje position:absolute pro zoom a pan. */
+.lop-pin-inner {
+  position: relative;
+  width: 96px; height: 96px;
   display: flex; align-items: center; justify-content: center;
 }
 /* Zorný kužel — směr pohledu fotografa, pozicován za pinem uprostřed */
@@ -2962,8 +2963,10 @@ function pinIconHTML(loc) {
 
 function makeIcon(loc) {
   return L.divIcon({
-    html: pinIconHTML(loc),
-    className: 'lop-pin-wrap',
+    /* Obsah je ve VNITŘNÍM divu. Leafletův element (className) zůstává bez
+       vlastních stylů — nastavit mu `position` by rozbilo zoom a pan. */
+    html: '<div class="lop-pin-inner">' + pinIconHTML(loc) + '</div>',
+    className: '',
     iconSize: [96, 96],
     iconAnchor: [48, 48]
   });
