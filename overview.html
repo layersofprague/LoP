@@ -918,8 +918,7 @@ function syncFilterUI() {
   setTxt('fmReset',    'overview.reset');
   updateApplyBtn();
 
-  const S_WISH = { full:'filter.state_default', always:'filter.state_always',
-                   only:'filter.state_only', hide:'filter.state_hidden' };
+  const S_WISH = { full:'filter.state_default', add:'filter.state_selected', hide:'filter.state_hidden' };
 
   /* Kategorie: vybráno / nevybráno. Stav je vidět z chipu, popisek netřeba. */
   document.querySelectorAll('.chip[data-cat]').forEach(btn => {
@@ -930,7 +929,7 @@ function syncFilterUI() {
     const f = btn.dataset.filter, st = FILTER[f];
     btn.classList.remove('state-hide','state-on');
     if (st === 'hide') btn.classList.add('state-hide');
-    else if (st === 'always' || st === 'only') btn.classList.add('state-on');
+    else if (st === 'add') btn.classList.add('state-on');
     const lbl = document.getElementById('lbl-' + f);
     if (lbl) lbl.textContent = t(S_WISH[st] || 'filter.state_default');
   });
@@ -970,7 +969,7 @@ function activeFilters(undatedCount) {
 
   /* Popisky se skládají ze STEJNÝCH klíčů jako stavy chipů v modálu,
      jinak se obě místa dřív nebo později rozejdou. */
-  const STATE_KEY = { hide:'filter.state_hidden', always:'filter.state_always', only:'filter.state_only' };
+  const STATE_KEY = { hide:'filter.state_hidden', add:'filter.state_selected' };
 
   CAT_FILTER.forEach(cat => {
     out.push({ label: t('cat.' + cat), tone: 'cat-' + cat,
@@ -981,7 +980,7 @@ function activeFilters(undatedCount) {
     const st = FILTER[f]; if (st === 'full') return;
     /* barevný obrys jen u "vždy" — u skrytí by barva pletla */
     out.push({ label: t(key), state: t(STATE_KEY[st]),
-               tone: (st === 'always' || st === 'only') ? tone : null,
+               tone: st === 'add' ? tone : null,
                icon: f === 'wished' ? 'heart' : 'check',
                clear: () => { FILTER[f] = 'full'; } });
   });
@@ -1070,10 +1069,8 @@ const CAT_FILTER = new Set();
 const FILTER = { visited:'full', wished:'full' };
 /* Cykly stavů. 'dim' se v přehledu nepoužívá — jen zobrazeno/skryto,
    u plánu a navštívených navíc 'vždy'. */
-/* výchozí → vždy zobrazit → skrýt → výchozí.
-   Stav 'only' ("jen tyto") nastavuje pouze odkaz Plán v navigaci
-   přes ?filter=wished; klik ho vrátí na výchozí. */
-const FILTER_NEXT = { full:'always', always:'hide', hide:'full', only:'full' };
+/* výchozí → vybráno → skryto → výchozí */
+const FILTER_NEXT = { full:'add', add:'hide', hide:'full' };
 const ERA_START=1000, ERA_END=2025;
 const ERA_STATE = { from:ERA_START, to:ERA_END };
 const DIST_STATE = { max:null };
@@ -1300,16 +1297,16 @@ function render() {
     if(FILTER.visited==='hide' && vis)  return false;
     if(FILTER.wished ==='hide' && wish) return false;
 
-    /* 2. "jen tyto" — pouze z ?filter=wished, omezuje výběr. */
-    if(FILTER.visited==='only' && !vis)  return false;
-    if(FILTER.wished ==='only' && !wish) return false;
-
-    /* 3. VŽDY ZOBRAZIT — místo projde bez ohledu na ostatní filtry.
-       Proto sjednocení, ne průnik: "historie a k tomu můj plán". */
-    if((FILTER.visited==='always' && vis) || (FILTER.wished==='always' && wish)) return true;
-
-    /* 4. Běžné filtry. Prázdná množina kategorií = bez omezení. */
-    if(CAT_FILTER.size && !CAT_FILTER.has(p.cat)) return false;
+    /* 2. Výběr: kategorie, plán a navštíveno jsou rovnocenné položky
+       jedné množiny. Nic nevybráno = bez omezení, jinak SJEDNOCENÍ —
+       "jen plán" i "historie a k tomu plán" vyjdou z téhož pravidla. */
+    const selecting = CAT_FILTER.size || FILTER.wished==='add' || FILTER.visited==='add';
+    if(selecting){
+      const inSel = CAT_FILTER.has(p.cat)
+                 || (FILTER.wished ==='add' && wish)
+                 || (FILTER.visited==='add' && vis);
+      if(!inSel) return false;
+    }
     if(eraActive){
       const y=locYear(p);
       if(y==null){ if(!UNDATED.include) return false; }
@@ -1576,7 +1573,7 @@ loadPlaces().then(()=>{
       syncFilterUI();
     }
     else if(_urlFilter==='wished'){
-      FILTER.wished='only';   /* "jen plánovaná" — kategorie zůstávají volné */
+      FILTER.wished='add';   /* nic jiného vybráno → výsledkem jsou jen plánovaná */
       syncFilterUI();
     }
     render();
