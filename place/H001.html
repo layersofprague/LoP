@@ -695,19 +695,11 @@ a { color: inherit; text-decoration: none; }
 .ar-cta-light .ar-cta-ic { background: rgba(238,239,235,.12); }
 .ar-cta-light .ar-cta-kick { color: rgba(238,239,235,.5); }
 
-/* keyword tags */
-.kw-cloud { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+/* keyword tags — jen klikatelné, vedou na overview.html?<kind>=<slug> */
+.kw-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
 .kw-tag {
   font-family: 'Inter', sans-serif;
-  font-size: 10px; letter-spacing: .04em;
-  font-style: italic;
-  padding: 4px 2px;
-  color: var(--ink-4);
-}
-/* Klikatelné chipy — světlý box, ne inverzní. Musí stát ZA .kw-tag, jinak by
-   prohrály na pořadí při shodné specificitě (element nese obě třídy). */
-.kw-link {
-  font-style: normal;
+  font-size: 10px; letter-spacing: .06em;
   text-decoration: none;
   padding: 5px 11px; border-radius: 6px;
   background: #fff;
@@ -715,8 +707,8 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-3);
   transition: box-shadow .15s, transform .15s, border-color .15s;
 }
-.kw-link:hover  { border-color: var(--ink-5); box-shadow: 0 3px 10px rgba(26,24,20,.12); transform: translateY(-1px); }
-.kw-link:active { transform: translateY(0); box-shadow: none; }
+.kw-tag:hover  { border-color: var(--ink-5); box-shadow: 0 3px 10px rgba(26,24,20,.12); transform: translateY(-1px); }
+.kw-tag:active { transform: translateY(0); box-shadow: none; }
 
 /* placeholder gallery */
 .gallery {
@@ -1269,8 +1261,7 @@ function renderPlaceI18n() {
 
 
 /* ── KLÍČOVÁ SLOVA ──
-   Klikatelné chipy se berou z places-index.json (jediný zdroj pravdy pro filtrování),
-   popisná slova z PLACE.extraKeywords zůstávají jako prostý text. */
+   Klikatelné chipy se berou z places-index.json (jediný zdroj pravdy pro filtrování). */
 let _placeRecord = null;
 
 function updateCategoryKicker() {
@@ -1287,7 +1278,7 @@ function renderKeywords() {
   if (_placeRecord && T) {
     const p = _placeRecord;
     const add = (label, slug, kind) => chips.push(
-      `<a class="kw-tag kw-link" data-kind="${kind}" href="../overview.html?${kind}=${encodeURIComponent(slug)}">${label}</a>`
+      `<a class="kw-tag" data-kind="${kind}" href="../overview.html?${kind}=${encodeURIComponent(slug)}">${label}</a>`
     );
     if (p.district) add(T.districtLabel(p.district), p.district, 'district');
     if (p.prague)   add(T.pragueLabel(p.prague), p.prague, 'prague');
@@ -1297,10 +1288,7 @@ function renderKeywords() {
     (p.people || []).forEach(n => add(n, n, 'person'));
   }
 
-  const extras = (PLACE && PLACE.extraKeywords ? loc(PLACE.extraKeywords) : [])
-    .map(k => `<span class="kw-tag">${k}</span>`);
-
-  box.innerHTML = chips.join('') + extras.join('');
+  box.innerHTML = chips.join('');
 }
 
 /* Načíst záznam místa z places-index.json (kategorie, tagy, styl, district...) */
