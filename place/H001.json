@@ -1,0 +1,238 @@
+{
+  "id": "H001",
+  "title": {
+    "cs": "Holešovický <em>přístav</em>",
+    "en": "Holešovice <em>Port</em>"
+  },
+  "pageTitle": {
+    "cs": "Holešovický přístav — LayersOfPrague",
+    "en": "Holešovice Port — LayersOfPrague"
+  },
+  "metaDesc": {
+    "cs": "Jediný pražský přístav, kde se setkávala lodní, železniční a silniční doprava. Vznikl 1892–1894, secesní budovy navrhl František Sander.",
+    "en": "Prague's only port where river, rail and road transport converged. Built 1892–1894, the Art Nouveau buildings were designed by František Sander."
+  },
+  "lede": {
+    "cs": "Největší pražský přístav a jediné místo ve městě, kde se v jednom bodě potkávaly lodě, vlaky a nákladní vozy. Klíčem k úspěchu přístavu byla jeho poloha. V Holešovicích končily hned tři železniční dráhy (Rakousko-uherská státní, Buštěhradská a Severozápadní) a přístav se tak stal ideálním místem k distribuci zboží. Odsud vedly vlečky nejen na nádraží Bubny, ale i do okolních podniků — papírny Pergamentka, železáren, mlýnů i elektrárny. Většina z nich zanikla až po roce 1989. Celý přístav je od roku 2002 chráněnou kulturní památkou. Dnes na jeho březích stojí rezidence Prague Marina.",
+    "en": "Prague's largest port and the only place in the city where ships, trains and lorries met at a single point. Its success lay in its location: three railway lines terminated in Holešovice — the Imperial State Railway, the Buštěhrad Railway and the Northwestern Railway — making it an ideal distribution hub. Branch lines ran not only to Praha-Bubny station but also to nearby factories: the Pergamentka paper mill, ironworks, mills and a power station. Most of them disappeared after 1989. The entire complex has been a listed cultural monument since 2002. Today, the Prague Marina residential complex stands on its banks."
+  },
+  "facts": [
+    {
+      "k": {
+        "cs": "Vybudováno",
+        "en": "Built"
+      },
+      "v": "1892–1910"
+    },
+    {
+      "k": {
+        "cs": "Délka bazénu",
+        "en": "Basin length"
+      },
+      "v": "750 m"
+    },
+    {
+      "k": {
+        "cs": "Vytěženo",
+        "en": "Excavated"
+      },
+      "v": "513 900 m³"
+    },
+    {
+      "k": {
+        "cs": "Architekt budov",
+        "en": "Buildings arch."
+      },
+      "v": "F. Sander, 1906"
+    }
+  ],
+  "sectionStavby": {
+    "cs": "Stavby přístavu",
+    "en": "Port buildings"
+  },
+  "insiderTeaser": {
+    "cs": "Věděli jste, že Holešovický přístav nevznikl na řece nebo jak zásadně se proměnila řeka v této oblasti? Zajímají Vás další detaily?",
+    "en": "Did you know that the Holešovice Port wasn’t built on a river or how drastically the river in this area has changed? Are you interested in more details?"
+  },
+  "arCtaTitle": {
+    "cs": "Spustit AR — Holešovický přístav",
+    "en": "Launch AR — Holešovice Port"
+  },
+  "ranking": {
+    "author": "Jan K.",
+    "rankLabel": {
+      "cs": "1. místo",
+      "en": "1st place"
+    }
+  },
+  "curatorStops": 12,
+  "galleryCount": 6,
+  "related": [
+    {
+      "id": "H001-expozitura",
+      "cat": "hist",
+      "name": {
+        "cs": "Budova celní expozitury",
+        "en": "Customs Office Building"
+      },
+      "sub": {
+        "cs": "č. p. 1057 · František Sander, 1906",
+        "en": "No. 1057 · František Sander, 1906"
+      },
+      "lede": {
+        "cs": "Nejvýraznější stavba areálu s charakteristickou hranolovou věží. Postavena v duchu secese a rané moderny — kontrast hladkých světlých omítek a červeného režného zdiva. Věžová nástavba sloužila jako pozorovatelna s výhledem na celý přístavní bazén i seřaďovací nádraží.",
+        "en": "The most distinctive building in the complex, with its characteristic prismatic tower. Built in the Art Nouveau and early modern style — a contrast of smooth light plaster and red face-brick. The tower served as an observation post overlooking the whole port basin and marshalling yard."
+      },
+      "thumb": "https://layersofprague.github.io/LoP/foto/H001a_h.jpg",
+      "url": null
+    },
+    {
+      "id": "H001-dozorstvo",
+      "cat": "hist",
+      "name": {
+        "cs": "Budova přístavního dozorstva",
+        "en": "Port Supervisor's Building"
+      },
+      "sub": {
+        "cs": "č. p. 1060 · František Sander, 1906–1909",
+        "en": "No. 1060 · František Sander, 1906–1909"
+      },
+      "lede": {
+        "cs": "Přímý architektonický protějšek celní expozitury — spolu tvoří symbolickou vstupní bránu areálu. Vysoká sedlová střecha nesená ozdobně vyřezávanými krokvemi. V přízemí kanceláře dozorce, v patře služební byt přístavního kapitána.",
+        "en": "The direct architectural counterpart to the customs building — together they form the symbolic gateway to the complex. A tall saddle roof carried on ornately carved rafters. The ground floor housed the supervisor's offices; the upper floor served as the port master's flat."
+      },
+      "thumb": "https://layersofprague.github.io/LoP/foto/H001b_h.jpg",
+      "url": null
+    },
+    {
+      "id": "H001-skladiste",
+      "cat": "hist",
+      "name": {
+        "cs": "Budova celního skladiště",
+        "en": "Customs Warehouse"
+      },
+      "sub": {
+        "cs": "č. p. 1059 · František Sander, 1906",
+        "en": "No. 1059 · František Sander, 1906"
+      },
+      "lede": {
+        "cs": "Rozsáhlá symetrická budova přímo při nábřežní zdi. Patrový střední trakt s valbovou střechou, po stranách přízemní skladištní haly. Logistické srdce přístavu — zboží přecházelo přímo z lodi přes jeřáby do skladů pod celním dohledem.",
+        "en": "A large symmetrical building directly against the quay wall. A two-storey central block with a hip roof, flanked by single-storey warehouse wings. The logistical heart of the port — goods moved directly from ship via cranes into bonded storage."
+      },
+      "thumb": "https://layersofprague.github.io/LoP/foto/H001c_h.jpg",
+      "url": null
+    },
+    {
+      "id": "H001-vytah",
+      "cat": "hist",
+      "name": {
+        "cs": "Lodní výtah a přístavní dílny",
+        "en": "Ship Lift and Port Workshops"
+      },
+      "sub": {
+        "cs": "firma Lanna · konec přístavní kosy",
+        "en": "Lanna company · tip of the port spit"
+      },
+      "lede": {
+        "cs": "Jediné zařízení v Praze pro vytahování lodí z vody. Svážnicový systém na kolejnicích dopravil i největší labská plavidla na suchou plošinu. Přilehlé dílny zajišťovaly opravy trupů, lodních šroubů i parních strojů — přístav byl zcela soběstačný.",
+        "en": "The only facility in Prague for hauling vessels out of the water. A transverse slipway on rails could handle even the largest Elbe barges. Adjacent workshops provided hull repairs, propeller and steam-engine servicing — the port was entirely self-sufficient."
+      },
+      "thumb": "https://layersofprague.github.io/LoP/foto/H001d_h.jpg",
+      "url": null
+    }
+  ],
+  "captions": {
+    "plan1894": {
+      "cs": "Plán holešovického přístavu, 1894",
+      "en": "Holešovice Port plan, 1894"
+    },
+    "stavba": {
+      "cs": "Rozšíření přístavu ~1906–1908",
+      "en": "Port expansion ~1906–1908"
+    },
+    "plan1909": {
+      "cs": "1909–1914",
+      "en": "1909–1914"
+    },
+    "today": {
+      "cs": "Dnes",
+      "en": "Today"
+    },
+    "plan1938": {
+      "cs": "Orientační plán Prahy, 1938",
+      "en": "Prague orientation map, 1938"
+    },
+    "riverLabel": {
+      "cs": "Orientační plán Prahy 1909–1914 vs. současný letecký snímek",
+      "en": "Prague orientation map 1909–1914 vs. current aerial photograph"
+    },
+    "fsLabel": {
+      "cs": "Holešovický přístav — současnost vs. ~1930",
+      "en": "Holešovice Port — present day vs. ~1930"
+    },
+    "copyToday": {
+      "cs": "Dnes",
+      "en": "Today"
+    },
+    "copyHist": {
+      "cs": "~1930",
+      "en": "~1930"
+    },
+    "copyPlan": {
+      "cs": "Plán přístavu, 1894",
+      "en": "Port plan, 1894"
+    },
+    "copy1938": {
+      "cs": "Orientační plán, 1938",
+      "en": "Orientation map, 1938"
+    },
+    "copyRiverL": {
+      "cs": "1909–1914",
+      "en": "1909–1914"
+    },
+    "copyRiverR": {
+      "cs": "Dnes (ortofoto)",
+      "en": "Today (aerial)"
+    },
+    "mapa": {
+      "cs": "výřez mapy",
+      "en": "map detail"
+    },
+    "wishLbl": {
+      "cs": "Plán",
+      "en": "Plan"
+    }
+  },
+  "extraKeywords": {
+    "cs": [
+      "lodní doprava",
+      "Holešovická přístavní dráha",
+      "František Bartoš",
+      "Prague Marina"
+    ],
+    "en": [
+      "river transport",
+      "Holešovice Port Railway",
+      "František Bartoš",
+      "Prague Marina"
+    ]
+  },
+  "insider": {
+    "p1": {
+      "cs": "<strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.",
+      "en": "<strong>The port was not built on the river — it was built beside it.</strong> Workers from the Vojtěch Lanna company excavated the port basin from the Holešovice plain in two phases. Between 1892 and 1895 they created a protective winter port — 750 m long, 100 m wide and 2–4 m deep — where vessels could safely ride out floods and winter ice. Only after the completion of river-regulation works making the Vltava navigable downstream of Prague, and with the rapid growth of Prague's industry, did the urgent need for a large transhipment point arise. The existing Karlín port was no longer sufficient. Holešovice Port was therefore redesigned in this second phase as a commercial port. Around 1906–1908 the massive stone quay walls and the Art Nouveau complex of buildings were completed. The port could accommodate 150 to 170 large Elbe barges and, uniquely in Prague, had a ship lift — a device capable of hauling an entire vessel out of the water for repair or winter inspection. The total cost was 1,230,000 guilders (~CZK 2.7–2.8 billion / ~EUR 110 million). At the time this was an enormous sum, shared between the City of Prague and the Imperial Austrian Lieutenancy."
+    },
+    "p2": {
+      "cs": "<strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.",
+      "en": "<strong>The diversion of the Vltava</strong> dramatically changed the shape of the Holešovice peninsula. Between 1926 and 1928 engineers redirected the river channel closer to the port, creating a narrow spit on which architect František Bartoš built the Functionalist Public Warehouses with a reinforced-concrete frame, later supplemented by cold-storage and freezing facilities. The transformation is best seen by comparing the 1909–1914 orientation map of Prague with a present-day aerial photograph."
+    },
+    "p3": {
+      "cs": "<strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.",
+      "en": "<strong>It was the railway that turned the port into a true transport hub.</strong> The Holešovice Port Railway — the official name of this unique industrial siding — opened on 6 June 1910 with the aim of connecting the growing river port and surrounding factories to Praha-Bubny goods station. Its 2.6-kilometre route was a civil-engineering rarity: the tracks ran straight through the urban street grid — primarily along Jankovcova Street — and at several points crossed busy tramway lines on the level. The siding's main era ended with the decline of freight transport in the late twentieth century; it was formally closed in 1998."
+    },
+    "p4": {
+      "cs": "<strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.",
+      "en": "<strong>The port's golden age</strong> came between the wars. It supplied raw materials to the surrounding Holešovice factories and businesses — metals, metallurgical products, timber, chemicals and raw ingredients for the food industry. Sand, gravel, building stone and other construction materials for Prague's growing cityscape also passed through in large quantities. The introduction of motor cargo vessels from 1931 accelerated the movement of higher-value, piece and perishable goods between Prague and northern Germany. Motor freighters set out from Holešovice down the Vltava and Elbe via Dresden to Hamburg and thence to the world. Thanks to this direct link, colonial and consumer goods from overseas — coffee, tea, spices, citrus fruit, machinery and semi-finished products — also flowed into Prague. After the Second World War, coal became the dominant commodity; Holešovice Port was the main gateway through which fuel poured into industrial Prague."
+    }
+  }
+}
