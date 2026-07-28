@@ -2485,7 +2485,7 @@ function adaptPlace(p) {
     wished:    p.wished   ?? false,
 
     // ── Texty ──
-    lede:      getText(p.teaser) || getText(p.lede),   // plné lede je v places/HXXX.json
+    lede:      getText(p.teaser) || getText(p.lede),   // plné lede je v place/HXXX.json
     body:      getText(p.body) || '',
     tip:       getText(p.tip)  || '',
 
@@ -3610,12 +3610,12 @@ function locateMe(silent = false) {
 /* ═══════════════ SHEET ═══════════════ */
 const sheet = document.getElementById('sheet');
 
-/* Detailní obsah (plné lede, facts, steps, tip) leží v places/HXXX.json
+/* Detailní obsah (plné lede, facts, steps, tip) leží v place/HXXX.json
    a stahuje se teprve při otevření panelu. Jednou načtený se drží. */
 const _detailCache = {};
 function loadDetail(id) {
   if (_detailCache[id]) return Promise.resolve(_detailCache[id]);
-  return fetch('places/' + id + '.json?v=' + (window.lopDataVer||''))
+  return fetch('place/' + id + '.json?v=' + (window.lopDataVer||''))
     .then(r => r.ok ? r.json() : null)
     .then(d => { _detailCache[id] = d || {}; return _detailCache[id]; })
     .catch(() => (_detailCache[id] = {}));

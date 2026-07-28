@@ -1042,5 +1042,57 @@
   "filter.state_selected": {
     "cs": "vybráno",
     "en": "selected"
+  },
+  "place.sec_location": {
+    "cs": "Poloha",
+    "en": "Location"
+  },
+  "place.sec_ranking": {
+    "cs": "Žebříček",
+    "en": "Ranking"
+  },
+  "place.sec_author": {
+    "cs": "Autor zastavení",
+    "en": "Author of the stop"
+  },
+  "place.sec_keywords": {
+    "cs": "Klíčová slova",
+    "en": "Keywords"
+  },
+  "place.tip_label": {
+    "cs": "Zajímavosti",
+    "en": "Did you know"
+  },
+  "place.paywall_why": {
+    "cs": "Proč je část obsahu skryta?",
+    "en": "Why is some content hidden?"
+  },
+  "place.act_compass": {
+    "cs": "Kompas",
+    "en": "Compass"
+  },
+  "place.act_ar": {
+    "cs": "AR",
+    "en": "AR"
+  },
+  "place.best_shot": {
+    "cs": "Nejlepší záběr",
+    "en": "Best shot"
+  },
+  "place.pts": {
+    "cs": "bodů",
+    "en": "pts"
+  },
+  "place.author_badge": {
+    "cs": "Kurátor",
+    "en": "Curator"
+  },
+  "place.ar_cta_kick": {
+    "cs": "Nahlédni do historie",
+    "en": "Peek into history"
+  },
+  "place.gallery_count": {
+    "cs": "{n} fotografií",
+    "en": "{n} photos"
   }
 }
