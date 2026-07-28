@@ -188,7 +188,7 @@ function _updateAuth() {
       btn.innerHTML = `<span class="lop-h-profile-avatar">${initial}</span>`;
       btn.onclick = () => {
         if (window.lopAuth) window.lopAuth.open('loggedIn');
-        else location.href = ROOT + 'profil.html';
+        else location.href = ROOT + 'profile.html';
       };
     } else {
       btn.classList.remove('logged-in');
