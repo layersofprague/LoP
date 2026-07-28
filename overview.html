@@ -837,9 +837,6 @@ let userPos = null;
 let PLACES  = [];
 const _urlFilter = new URLSearchParams(location.search).get('filter');
 
-/* ── Filtr podle taxonomie ── */
-(new URLSearchParams(location.search).getAll('style')).forEach(s => STYLE_FILTER.add(s));
-
 const TAX = (() => {
   const q = new URLSearchParams(location.search);
   for (const kind of ['tag', 'district', 'person', 'prague']) {
@@ -1087,6 +1084,7 @@ const UNDATED = { include:true };   // nedatovaná místa při aktivním filtru 
 /* Slohy — POZITIVNÍ výběr: prázdná množina znamená "vše".
    Liší se od kategorií záměrně; u 17 slohů chce člověk vybírat, ne odškrtávat. */
 const STYLE_FILTER = new Set();
+(new URLSearchParams(location.search).getAll('style')).forEach(s => STYLE_FILTER.add(s));
 
 const eraPct    = y => ((y-ERA_START)/(ERA_END-ERA_START))*100;
 const pctToYear = p => Math.round(ERA_START+Math.max(0,Math.min(1,p))*(ERA_END-ERA_START));
