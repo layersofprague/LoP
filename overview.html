@@ -155,8 +155,11 @@ a { color: inherit; text-decoration: none; }
 .fm-cnt-wrap #fmCntActive { font-size: 12px; font-weight: 500; color: var(--ink-5); }
 
 /* chip-wrap se stavovým popiskem — stejné jako index.html */
+/* Kategorie popisek nemají, navštíveno a plán ano — zarovnat chipy dolů,
+   ať stojí na společné lince bez ohledu na to, co je nad nimi. */
 .chip-wrap {
   display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  justify-content: flex-end;
 }
 .chip-state-lbl {
   font-family: 'Inter', sans-serif;
@@ -175,7 +178,7 @@ a { color: inherit; text-decoration: none; }
 .filter-row:last-of-type { border-bottom: none; }
 .filter-lbl { display: flex; justify-content: space-between; align-items: baseline; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px; }
 .filter-lbl-val { color: var(--ink); letter-spacing: .04em; font-size: 11px; }
-.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end; }
 
 /* ── CHIP ── */
 .chip {
@@ -915,7 +918,8 @@ function syncFilterUI() {
   setTxt('fmReset',    'overview.reset');
   updateApplyBtn();
 
-  const S_WISH = { full:'filter.state_default', only:'filter.state_only', hide:'filter.state_hidden' };
+  const S_WISH = { full:'filter.state_default', always:'filter.state_always',
+                   only:'filter.state_only', hide:'filter.state_hidden' };
 
   /* Kategorie: vybráno / nevybráno. Stav je vidět z chipu, popisek netřeba. */
   document.querySelectorAll('.chip[data-cat]').forEach(btn => {
@@ -925,8 +929,8 @@ function syncFilterUI() {
   document.querySelectorAll('.chip[data-filter]').forEach(btn => {
     const f = btn.dataset.filter, st = FILTER[f];
     btn.classList.remove('state-hide','state-on');
-    if (st === 'hide')      btn.classList.add('state-hide');
-    else if (st === 'only') btn.classList.add('state-on');
+    if (st === 'hide') btn.classList.add('state-hide');
+    else if (st === 'always' || st === 'only') btn.classList.add('state-on');
     const lbl = document.getElementById('lbl-' + f);
     if (lbl) lbl.textContent = t(S_WISH[st] || 'filter.state_default');
   });
@@ -966,19 +970,18 @@ function activeFilters(undatedCount) {
 
   /* Popisky se skládají ze STEJNÝCH klíčů jako stavy chipů v modálu,
      jinak se obě místa dřív nebo později rozejdou. */
-  const STATE_KEY = { hide:'filter.state_hidden', only:'filter.state_only' };
+  const STATE_KEY = { hide:'filter.state_hidden', always:'filter.state_always', only:'filter.state_only' };
 
-  ['hist','arch','art','fun'].forEach(cat => {
-    if (FILTER[cat] === 'hide')
-      out.push({ label: t('cat.' + cat), state: t(STATE_KEY.hide),
-                 clear: () => { FILTER[cat] = 'full'; } });
+  CAT_FILTER.forEach(cat => {
+    out.push({ label: t('cat.' + cat), tone: 'cat-' + cat,
+               clear: () => { CAT_FILTER.delete(cat); } });
   });
 
   [['wished','place.plan','accent'], ['visited','overview.visited','ok']].forEach(([f, key, tone]) => {
     const st = FILTER[f]; if (st === 'full') return;
     /* barevný obrys jen u "vždy" — u skrytí by barva pletla */
     out.push({ label: t(key), state: t(STATE_KEY[st]),
-               tone: st === 'only' ? tone : null,
+               tone: (st === 'always' || st === 'only') ? tone : null,
                icon: f === 'wished' ? 'heart' : 'check',
                clear: () => { FILTER[f] = 'full'; } });
   });
@@ -1067,8 +1070,10 @@ const CAT_FILTER = new Set();
 const FILTER = { visited:'full', wished:'full' };
 /* Cykly stavů. 'dim' se v přehledu nepoužívá — jen zobrazeno/skryto,
    u plánu a navštívených navíc 'vždy'. */
-/* výchozí → jen tyto → skryté → výchozí */
-const FILTER_NEXT = { full:'only', only:'hide', hide:'full' };
+/* výchozí → vždy zobrazit → skrýt → výchozí.
+   Stav 'only' ("jen tyto") nastavuje pouze odkaz Plán v navigaci
+   přes ?filter=wished; klik ho vrátí na výchozí. */
+const FILTER_NEXT = { full:'always', always:'hide', hide:'full', only:'full' };
 const ERA_START=1000, ERA_END=2025;
 const ERA_STATE = { from:ERA_START, to:ERA_END };
 const DIST_STATE = { max:null };
@@ -1290,13 +1295,21 @@ function render() {
 
   const filtered=PLACES.filter(p=>{
     const wish=wished.includes(String(p.id)), vis=visited.includes(String(p.id));
-    /* Každá podmínka stojí sama o sobě a všechny musí projít.
-       Prázdná množina kategorií = bez omezení. */
-    if(CAT_FILTER.size && !CAT_FILTER.has(p.cat)) return false;
+
+    /* 1. SKRÝT má přednost před vším ostatním. */
+    if(FILTER.visited==='hide' && vis)  return false;
+    if(FILTER.wished ==='hide' && wish) return false;
+
+    /* 2. "jen tyto" — pouze z ?filter=wished, omezuje výběr. */
     if(FILTER.visited==='only' && !vis)  return false;
-    if(FILTER.visited==='hide' &&  vis)  return false;
     if(FILTER.wished ==='only' && !wish) return false;
-    if(FILTER.wished ==='hide' &&  wish) return false;
+
+    /* 3. VŽDY ZOBRAZIT — místo projde bez ohledu na ostatní filtry.
+       Proto sjednocení, ne průnik: "historie a k tomu můj plán". */
+    if((FILTER.visited==='always' && vis) || (FILTER.wished==='always' && wish)) return true;
+
+    /* 4. Běžné filtry. Prázdná množina kategorií = bez omezení. */
+    if(CAT_FILTER.size && !CAT_FILTER.has(p.cat)) return false;
     if(eraActive){
       const y=locYear(p);
       if(y==null){ if(!UNDATED.include) return false; }

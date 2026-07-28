@@ -1042,5 +1042,9 @@
   "filter.state_only": {
     "cs": "jen tyto",
     "en": "only these"
+  },
+  "filter.state_always": {
+    "cs": "vždy",
+    "en": "always"
   }
 }
