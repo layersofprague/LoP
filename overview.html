@@ -379,6 +379,8 @@ a { color: inherit; text-decoration: none; }
 .place-dist-icon svg { width: 12px; height: 12px; display: block; }
 .place-dist-hint { font-size: 9px; color: var(--ink-5); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; text-align: center; }
 .place-dist-hint:hover { color: var(--ink-4); }
+.place-dist-hint.geo-blocked { cursor: default; text-decoration: none; }
+.place-dist-hint.geo-blocked:hover { color: var(--ink-5); }
 
 /* meta-dist-grid: skrytý v listu, viditelný v gridu */
 .meta-dist-grid { display: none; }
@@ -454,13 +456,16 @@ a { color: inherit; text-decoration: none; }
   pointer-events: auto; text-decoration: none;
 }
 .place-dist-hint:hover { color: var(--ink-3); }
+.place-dist-hint.geo-blocked { cursor: default; }
+.place-dist-hint.geo-blocked:hover { color: var(--ink-4); }
 
 /* grid: wish-wrap vodorovně, label PEVNÁ šířka aby liky neskákaly */
 #placesList.grid-mode .place-wish-wrap {
   flex-direction: row; align-items: center; gap: 4px;
 }
 #placesList.grid-mode .place-wish-lbl {
-  font-size: 10px; width: 44px; text-align: right; flex-shrink: 0;
+  font-size: 10px; width: 56px; text-align: right; flex-shrink: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 #placesList.grid-mode .place-wish-btn { flex-shrink: 0; }
 
@@ -499,6 +504,7 @@ a { color: inherit; text-decoration: none; }
 #placesList.grid-mode .place-kick { display: none; }
 #placesList.grid-mode .place-sub {
   font-size: 12px; -webkit-line-clamp: 2;
+  min-height: 2.8em; /* 2 řádky i pro kratší teaser — lišta dole musí sedět mezi kartami */
 }
 /* grid meta: dist vlevo, votes absolutně na střed, wish vpravo */
 #placesList.grid-mode .place-meta {
@@ -1048,11 +1054,13 @@ if (navigator.permissions && navigator.permissions.query) {
   navigator.permissions.query({ name: 'geolocation' }).then(st => {
     GEO_PERM = st.state;
     syncFilterUI();
+    if (PLACES.length) render();
     /* Když si to uživatel přepne v nastavení prohlížeče, zachytíme to. */
     st.onchange = () => {
       GEO_PERM = st.state;
       if (st.state === 'granted') locateUser();
       syncFilterUI();
+      if (PLACES.length) render();
     };
   }).catch(() => {});
 }
@@ -1060,7 +1068,7 @@ if (navigator.permissions && navigator.permissions.query) {
 function requestLoc(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; syncFilterUI(); render(); },
-    err => { if(err.code===1) GEO_PERM='denied'; syncFilterUI(); }, { enableHighAccuracy:true, timeout:8000 });
+    err => { if(err.code===1) GEO_PERM='denied'; syncFilterUI(); render(); }, { enableHighAccuracy:true, timeout:8000 });
 }
 function locateUser() {
   if (!navigator.geolocation) return;
@@ -1393,12 +1401,18 @@ function cardHTML(p, visited, wished) {
   const compassIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`;
 
   // Seznam: ikona nad číslem (flex-column)
+  const geoBlocked = GEO_PERM === 'denied';
+  const geoHintAttrs = geoBlocked
+    ? `title="${t('overview.geo_blocked')}"`
+    : `onclick="requestLoc(event)"`;
+  const geoHintTxt = geoBlocked ? t('place.geo_blocked') : t('sheet.enable_location');
+
   const distListHtml = dist
     ? `<a class="place-dist place-dist-link" href="${compassUrl||'#'}" onclick="event.stopPropagation()" title="${t('overview.navigate')}">
         <span class="place-dist-icon list">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
-    : `<span class="place-dist-hint place-dist-hint-list" onclick="requestLoc(event)">${t('sheet.enable_location').replace(' ','<br>')}</span>`;
+    : `<span class="place-dist-hint place-dist-hint-list${geoBlocked?' geo-blocked':''}" ${geoHintAttrs}>${geoHintTxt.replace(' ','<br>')}</span>`;
 
   // Dlaždice: ikona před číslem (flex-row)
   const distGridHtml = dist
@@ -1406,7 +1420,7 @@ function cardHTML(p, visited, wished) {
         <span class="place-dist-icon grid">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
-    : `<span class="place-dist-hint" onclick="requestLoc(event)">${t('sheet.enable_location')}</span>`;
+    : `<span class="place-dist-hint${geoBlocked?' geo-blocked':''}" ${geoHintAttrs}>${geoHintTxt}</span>`;
 
   // Like/dislike — čisté šipky, s počty (TODO: Supabase)
   const voteUp   = p._voteUp   ?? Math.floor(Math.random()*40+2);  // placeholder
