@@ -1,0 +1,373 @@
+[
+  {
+    "id": "H101",
+    "lat": 50.0784,
+    "lng": 14.4133,
+    "cat": "hist",
+    "thumb": "photos/H101/thumb.webp",
+    "name": {
+      "cs": "Šítkovská věž",
+      "en": "Šítkov Water Tower"
+    },
+    "teaser": {
+      "cs": "Středověká vodní věž na pravém břehu Vltavy z roku 1495.",
+      "en": "A medieval water tower on the right bank of the Vltava, built around 1495."
+    },
+    "district": "nove-mesto",
+    "prague": 1,
+    "tags": [
+      "tower",
+      "vltava"
+    ],
+    "style": [
+      "Go"
+    ],
+    "yearBuilt": 1495,
+    "yearPhoto": 1895,
+    "arHeading": 180,
+    "arRadius": 15,
+    "routes": [
+      "vrstvy-vltavy"
+    ],
+    "routeOrder": {
+      "vrstvy-vltavy": 1
+    },
+    "points": 50,
+    "bonusAR": 25,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.5,
+    "ratingCount": 0
+  },
+  {
+    "id": "H102",
+    "lat": 50.0815,
+    "lng": 14.4278,
+    "cat": "hist",
+    "thumb": "photos/H102/thumb.webp",
+    "name": {
+      "cs": "Václavské náměstí",
+      "en": "Wenceslas Square"
+    },
+    "teaser": {
+      "cs": "Bývalý Koňský trh, dnes nervové centrum moderní Prahy.",
+      "en": "The former Horse Market, today the nerve centre of modern Prague."
+    },
+    "district": "nove-mesto",
+    "prague": 1,
+    "tags": [
+      "square"
+    ],
+    "yearBuilt": 1348,
+    "yearPhoto": 1910,
+    "arHeading": 200,
+    "arRadius": 30,
+    "routes": [],
+    "routeOrder": {},
+    "points": 40,
+    "bonusAR": 20,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.3,
+    "ratingCount": 0
+  },
+  {
+    "id": "H201",
+    "lat": 50.0875,
+    "lng": 14.4213,
+    "cat": "arch",
+    "thumb": "photos/H201/thumb.webp",
+    "name": {
+      "cs": "Staroměstské náměstí",
+      "en": "Old Town Square"
+    },
+    "teaser": {
+      "cs": "Srdce historické Prahy — orloj, Týnský chrám, tři vrstvy času na jednom náměstí.",
+      "en": "The heart of historic Prague — the astronomical clock, Týn Church, three layers of time in one square."
+    },
+    "district": "stare-mesto",
+    "prague": 1,
+    "tags": [
+      "clock",
+      "square"
+    ],
+    "style": [
+      "Go"
+    ],
+    "yearBuilt": 1410,
+    "yearPhoto": 1900,
+    "arHeading": 270,
+    "arRadius": 25,
+    "routes": [],
+    "routeOrder": {},
+    "points": 60,
+    "bonusAR": 30,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.8,
+    "ratingCount": 0
+  },
+  {
+    "id": "H202",
+    "lat": 50.0808,
+    "lng": 14.4133,
+    "cat": "arch",
+    "thumb": "photos/H202/thumb.webp",
+    "name": {
+      "cs": "Národní divadlo",
+      "en": "National Theatre"
+    },
+    "teaser": {
+      "cs": "Novorenesanční chrám národa. Dvakrát postaven, dvakrát zachráněn.",
+      "en": "The neo-Renaissance temple of the nation. Built twice, saved twice."
+    },
+    "district": "nove-mesto",
+    "prague": 1,
+    "tags": [
+      "theatre",
+      "vltava"
+    ],
+    "style": [
+      "Hi"
+    ],
+    "yearBuilt": 1881,
+    "yearPhoto": 1895,
+    "arHeading": 90,
+    "arRadius": 20,
+    "routes": [],
+    "routeOrder": {},
+    "points": 55,
+    "bonusAR": 25,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.7,
+    "ratingCount": 0
+  },
+  {
+    "id": "H301",
+    "lat": 50.0911,
+    "lng": 14.4016,
+    "cat": "fun",
+    "thumb": "photos/H301/thumb.webp",
+    "name": {
+      "cs": "Pražský hrad",
+      "en": "Prague Castle"
+    },
+    "teaser": {
+      "cs": "Největší souvislý hradní komplex na světě. Devět století dějin nad Vltavou.",
+      "en": "The largest contiguous castle complex in the world. Nine centuries of history above the Vltava."
+    },
+    "district": "hradcany",
+    "prague": 1,
+    "tags": [
+      "castle",
+      "courtyard",
+      "cathedral"
+    ],
+    "people": [
+      "Kafka"
+    ],
+    "yearBuilt": 870,
+    "yearPhoto": 1905,
+    "arHeading": 340,
+    "arRadius": 40,
+    "routes": [],
+    "routeOrder": {},
+    "points": 80,
+    "bonusAR": 40,
+    "badge": "castle-keeper",
+    "difficulty": "medium",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.9,
+    "ratingCount": 0
+  },
+  {
+    "id": "H001",
+    "lat": 50.105164,
+    "lng": 14.456314,
+    "cat": "hist",
+    "thumb": "https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg",
+    "name": {
+      "cs": "Holešovický přístav",
+      "en": "Holešovice Port"
+    },
+    "teaser": {
+      "cs": "Jediné místo v Praze, kde se v jednom bodě potkávaly loď, vlak i nákladní vůz.",
+      "en": "The only place in Prague where ship, train and lorry met at a single point."
+    },
+    "district": "holesovice",
+    "prague": 7,
+    "tags": [
+      "port",
+      "vltava",
+      "railway"
+    ],
+    "style": [
+      "Se",
+      "In"
+    ],
+    "people": [
+      "Vojtěch Lanna",
+      "František Sander"
+    ],
+    "yearBuilt": 1894,
+    "yearPhoto": 1930,
+    "arHeading": 136,
+    "arRadius": 12,
+    "routes": [],
+    "routeOrder": {},
+    "points": 70,
+    "bonusAR": 40,
+    "badge": "river-pilot",
+    "difficulty": "medium",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.6,
+    "ratingCount": 0
+  },
+  {
+    "id": "H302",
+    "lat": 50.0939,
+    "lng": 14.4224,
+    "cat": "fun",
+    "thumb": "photos/H302/thumb.webp",
+    "name": {
+      "cs": "Letenské sady",
+      "en": "Letná Park"
+    },
+    "teaser": {
+      "cs": "Kde stála největší socha Stalina na světě, dnes kýve Novákův metronom.",
+      "en": "Where the world’s largest statue of Stalin once stood, Novák’s metronome now swings."
+    },
+    "district": "holesovice",
+    "prague": 7,
+    "tags": [
+      "monument",
+      "communism",
+      "park",
+      "letna"
+    ],
+    "people": [
+      "Josif Stalin"
+    ],
+    "yearBuilt": 1955,
+    "yearPhoto": 1955,
+    "arHeading": 160,
+    "arRadius": 20,
+    "routes": [],
+    "routeOrder": {},
+    "points": 65,
+    "bonusAR": 35,
+    "badge": "time-traveler",
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.5,
+    "ratingCount": 0
+  },
+  {
+    "id": "H203",
+    "lat": 50.0754,
+    "lng": 14.4141,
+    "cat": "arch",
+    "thumb": "photos/H203/thumb.webp",
+    "name": {
+      "cs": "Tančící dům",
+      "en": "Dancing House"
+    },
+    "teaser": {
+      "cs": "Tančící dům Franka Gehryho a Vlada Miluniće z roku 1996.",
+      "en": "The Dancing House by Frank Gehry and Vlado Milunić, 1996."
+    },
+    "district": "nove-mesto",
+    "prague": 1,
+    "tags": [
+      "building"
+    ],
+    "style": [
+      "De"
+    ],
+    "people": [
+      "Frank Gehry"
+    ],
+    "yearBuilt": 1996,
+    "yearPhoto": 1945,
+    "arHeading": 45,
+    "arRadius": 15,
+    "routes": [],
+    "routeOrder": {},
+    "points": 50,
+    "bonusAR": 25,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2024-10-01",
+    "published": true,
+    "paywall": false,
+    "rating": 4.6,
+    "ratingCount": 0
+  },
+  {
+    "id": "H002",
+    "lat": 50.09305881760058,
+    "lng": 14.411785293307434,
+    "cat": "hist",
+    "thumb": "foto/h_002ove_thumb.jpg",
+    "name": {
+      "cs": "Bašta sv. Máří Magdalény (XIX)",
+      "en": "St Mary Magdalene Bastion (XIX)"
+    },
+    "teaser": {
+      "cs": "Jedna z mála dochovaných bašt pražského barokního opevnění.",
+      "en": "One of the few surviving bastions of Prague’s Baroque fortifications."
+    },
+    "district": "hradcany",
+    "prague": 1,
+    "tags": [
+      "bastion",
+      "fortification",
+      "letna"
+    ],
+    "style": [
+      "Ba"
+    ],
+    "yearBuilt": 1653,
+    "yearPhoto": 1900,
+    "arHeading": 180,
+    "arRadius": 15,
+    "routes": [],
+    "points": 50,
+    "bonusAR": 25,
+    "badge": null,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2025-06-23",
+    "published": true,
+    "paywall": false,
+    "rating": null,
+    "ratingCount": 0
+  }
+]

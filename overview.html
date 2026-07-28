@@ -772,7 +772,7 @@ function toggleView() {
   document.getElementById('btnView')?.blur();
 }
 
-/* ── Stamp — napojení na stamp.js (stejné jako sbirky.html) ── */
+/* ── Stamp — napojení na stamp.js (stejné jako collections.html) ── */
 const STAMP_PROPS = { orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true };
 
 function arScoreToStampScore(arScore) {
@@ -1244,7 +1244,7 @@ function resetFilters() {
 function locYear(p) {
   if(p.yearBuilt) return p.yearBuilt;
   const parse=s=>{ const v=String(s), y=v.match(/\d{3,4}/); if(y) return parseInt(y[0]); const cc=v.match(/(\d{1,2})\.\s*stol/i); if(cc) return (parseInt(cc[1])-1)*100+50; return null; };
-  if(p.facts){ for(const f of p.facts){ if(/postaveno|otevřeno|dokončeno|vybudováno/i.test(f.k)){ const y=parse(f.v); if(y) return y; } } for(const f of p.facts){ const y=parse(f.v); if(y) return y; } }
+  /* facts se přesunuly do places/HXXX.json — v indexu je yearBuilt */
   if(p.yearThen){ const y=parse(p.yearThen); if(y) return y; }
   return null;
 }
@@ -1260,7 +1260,7 @@ document.addEventListener('click', e=>{
 
 async function loadPlaces() {
   try {
-    const res=await fetch('places.json'); if(!res.ok) throw new Error('404');
+    const res=await fetch('places-index.json'); if(!res.ok) throw new Error('404');
     PLACES=await res.json();
   } catch(e) {
     document.getElementById('placesList').innerHTML=`<div class="empty"><h3>${t('overview.load_err')}</h3><p>${t('overview.load_err_sub')}</p></div>`;
@@ -1280,9 +1280,14 @@ function updateCounts() {
   if(wrapW) wrapW.innerHTML=loggedIn?'<span class="count">'+PLACES.filter(p=>wished.includes(String(p.id))).length+'</span>':lockSVG;
 }
 
+/* Pole v places-index.json jsou lokalizované objekty { cs, en, … }.
+   Chybí-li aktivní jazyk, spadne se na češtinu. */
 function locStr(obj, field) {
-  if (window.lopLang === 'en' && obj[field + '_en']) return obj[field + '_en'];
-  return obj[field] || '';
+  const v = obj[field];
+  if (v && typeof v === 'object' && !Array.isArray(v))
+    return v[window.lopLang] || v.cs || '';
+  if (window.lopLang === 'en' && obj[field + '_en']) return obj[field + '_en'];   // starý zápis
+  return v || '';
 }
 
 function render() {
@@ -1365,7 +1370,7 @@ function cardHTML(p, visited, wished) {
   const vis     = visited.includes(String(p.id));
   const wish    = wished && wished.includes(String(p.id));
   const thumb   = p.thumb || '';
-  const lede    = locStr(p,'lede');
+  const lede    = locStr(p,'teaser') || locStr(p,'lede');
   const detailUrl = 'place/' + p.id + '.html';
   const dist = userPos && p.lat && p.lng ? formatDist(haversineM(userPos[0],userPos[1],p.lat,p.lng)) : '';
   const loggedIn = isLoggedIn();

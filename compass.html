@@ -246,7 +246,7 @@ document.getElementById('clip').addEventListener('click', function(e) {
 });
 
 
-// ── OTHER LOCATIONS (dimmed) — načteno z places.json ──
+// ── OTHER LOCATIONS (dimmed) — načteno z places-index.json ──
 var CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
 
 function addDimmedMarkers(locations) {
@@ -268,7 +268,7 @@ function addDimmedMarkers(locations) {
   });
 }
 
-fetch('places.json')
+fetch('places-index.json')
   .then(function(r) { return r.ok ? r.json() : []; })
   .then(function(data) {
     var locs = data
@@ -720,6 +720,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #e8e4dc; }
 /* dbg styled inline */
 </style>
 <script src="i18n.js"></script>
+<script src="tags.js"></script>
 <script src="header.js"></script>
 <script src="nav.js"></script>
 </head>
@@ -965,7 +966,7 @@ document.getElementById('clip').addEventListener('click', function(e) {
 });
 
 
-// ── OTHER LOCATIONS (dimmed) — načteno z places.json ──
+// ── OTHER LOCATIONS (dimmed) — načteno z places-index.json ──
 var CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', fun: '#E0A020' };
 
 function addDimmedMarkers(locations) {
@@ -987,7 +988,7 @@ function addDimmedMarkers(locations) {
   });
 }
 
-fetch('places.json')
+fetch('places-index.json')
   .then(function(r) { return r.ok ? r.json() : []; })
   .then(function(data) {
     var locs = data

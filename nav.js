@@ -22,7 +22,7 @@ const ROOT = _root();
 function _activePage() {
   const path = location.pathname;
   if (path.includes('overview')) return 'overview';
-  if (path.includes('sbirky')) return 'sbirky';
+  if (path.includes('collections')) return 'collections';
   if (path.includes('trasy')) return 'routes';
   if (path.includes('login') || path.includes('profil')) return '';
   if (path.includes('place/') || path.includes('ar-intro') || path.includes('compass')) return '';
@@ -189,8 +189,8 @@ function _html() {
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>`
     },
     {
-      id: 'sbirky',
-      href: root + 'sbirky.html',
+      id: 'collections',
+      href: root + 'collections.html',
       label: t('nav.collection'),
       svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.5"/><circle cx="16" cy="8" r="3.5"/><circle cx="12" cy="16" r="3.5"/></svg>`
     },
@@ -287,8 +287,8 @@ function _buildIndex() {
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></svg>'
     },
     {
-      id: 'sbirky', label: t('nav.collection'),
-      onclick: "location.href='sbirky.html'",
+      id: 'collections', label: t('nav.collection'),
+      onclick: "location.href='collections.html'",
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.5"/><circle cx="16" cy="8" r="3.5"/><circle cx="12" cy="16" r="3.5"/></svg>'
     },
     {

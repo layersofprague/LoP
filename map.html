@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="i18n.js"></script>
+<script src="tags.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ═══════════════ TOKENS ═══════════════ */
@@ -2441,11 +2442,11 @@ document.getElementById('tweakPin').value = TWEAKS.pinStyle;
 /* ═══════════════ i18n helper ═══════════════ */
 // Varianta C: pole může být string nebo {cs, en, …}
 // Rozšíření na více jazyků: stačí přidat klíč do objektu v places.json
-const LANG = 'cs';
 function getText(val) {
   if (!val) return '';
   if (typeof val === 'string') return val;
-  return val[LANG] ?? val.cs ?? Object.values(val)[0] ?? '';
+  const lang = window.lopLang || 'cs';
+  return val[lang] ?? val.cs ?? Object.values(val)[0] ?? '';
 }
 
 /* ═══════════════ DATA ═══════════════ */
@@ -2471,8 +2472,9 @@ function adaptPlace(p) {
     id:        p.id,
     num:       p.num ?? p.id,   // p.num pro fallback data, p.id pro nové H-formát
     name:      getText(p.name),
-    sub:       getText(p.sub),
-    area:      getText(p.sub),  // zpětná kompatibilita
+    /* sub už v datech není — skládá se z katastru a obvodu */
+    sub:       (window.LOP_TAGS ? window.LOP_TAGS.placeLocation(p) : ''),
+    area:      (window.LOP_TAGS ? window.LOP_TAGS.placeLocation(p) : ''),
     lat:       p.lat,
     lng:       p.lng,
     cat:       p.cat,
@@ -2482,7 +2484,7 @@ function adaptPlace(p) {
     wished:    p.wished   ?? false,
 
     // ── Texty ──
-    lede:      getText(p.lede),
+    lede:      getText(p.teaser) || getText(p.lede),   // plné lede je v places/HXXX.json
     body:      getText(p.body) || '',
     tip:       getText(p.tip)  || '',
 
@@ -2542,9 +2544,10 @@ let ROUTES    = [];
 
 /* ── i18n helpers pro data míst ── */
 function locStr(obj, field) {
-  // Vrátí přeložené pole pokud existuje a jazyk je EN
-  if (window.lopLang === 'en' && obj[field + '_en']) return obj[field + '_en'];
-  return obj[field] || '';
+  const v = obj[field];
+  if (v && typeof v === 'object' && !Array.isArray(v)) return v[window.lopLang] || v.cs || '';
+  if (window.lopLang === 'en' && obj[field + '_en']) return obj[field + '_en'];   // starý zápis
+  return v || '';
 }
 function locFacts(facts) {
   if (!facts) return [];
@@ -2564,7 +2567,7 @@ function locSteps(steps) {
 async function loadData() {
   try {
     const [placesRes, routesRes] = await Promise.all([
-      fetch('places.json'),
+      fetch('places-index.json'),
       fetch('routes.json').catch(() => ({ ok: false }))
     ]);
     if (placesRes.ok) {
@@ -3604,8 +3607,31 @@ function locateMe(silent = false) {
 /* ═══════════════ SHEET ═══════════════ */
 const sheet = document.getElementById('sheet');
 
+/* Detailní obsah (plné lede, facts, steps, tip) leží v places/HXXX.json
+   a stahuje se teprve při otevření panelu. Jednou načtený se drží. */
+const _detailCache = {};
+function loadDetail(id) {
+  if (_detailCache[id]) return Promise.resolve(_detailCache[id]);
+  return fetch('places/' + id + '.json')
+    .then(r => r.ok ? r.json() : null)
+    .then(d => { _detailCache[id] = d || {}; return _detailCache[id]; })
+    .catch(() => (_detailCache[id] = {}));
+}
+
 function openSheet(id) {
   const loc = LOCATIONS.find(l => l.id === id); if (!loc) return;
+  /* Doplnit detail a panel překreslit — teaser se zobrazí okamžitě. */
+  if (!loc._detailed) {
+    loadDetail(id).then(d => {
+      if (d && d.lede)  loc.lede  = getText(d.lede);
+      if (d && d.facts) loc.facts = d.facts;
+      if (d && d.steps) loc.steps = d.steps;
+      if (d && d.tip)   loc.tip   = getText(d.tip);
+      if (d && d.photos) loc.photos = d.photos;
+      loc._detailed = true;
+      openSheet(id);
+    });
+  }
   const c = CAT[loc.cat];
   const wished = isWished(id);
 

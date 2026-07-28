@@ -178,7 +178,7 @@ window.LOP_TAGS = {
   placeLocation(place) {
     const d = this.districtLabel(place.district);
     const n = place.prague || (DISTRICTS[place.district] || {}).pr;
-    return n ? d + ', Praha ' + n : d;
+    return n ? d + ', ' + this.pragueLabel(n) : d;
   },
 
   /** Seznam slugů daného druhu */
