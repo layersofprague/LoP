@@ -1101,7 +1101,7 @@ a { color: inherit; text-decoration: none; }
    H001 — Holešovický přístav
    Přeložitelná data stránky (CS + EN)
    ══════════════════════════════════════════ */
-const PLACE_ID = 'H001';
+const PLACE_JSON_ID = 'H001';
 let PLACE = null;
 
 /* Place-specific obsah (lede, facts, related, captions, insider odstavce...)
@@ -1109,7 +1109,7 @@ let PLACE = null;
    dělá map.html přes loadDetail(). Obecné UI popisky (Fakta, Kompas, Sdílet...)
    jdou přes t() z translations.json — nekopírují se pro každé místo znovu. */
 function loadPlaceData() {
-  return fetch(PLACE_ID + '.json?v=' + (window.lopDataVer || ''))
+  return fetch(PLACE_JSON_ID + '.json?v=' + (window.lopDataVer || ''))
     .then(function(r) { return r.json(); })
     .then(function(d) { PLACE = d; })
     .catch(function() { PLACE = {}; });
@@ -1306,7 +1306,7 @@ function renderKeywords() {
 fetch('../places-index.json?v=' + (window.lopDataVer||''))
   .then(r => r.json())
   .then(list => {
-    _placeRecord = list.find(x => x.id === PLACE_ID) || null;
+    _placeRecord = list.find(x => x.id === PLACE_JSON_ID) || null;
     updateCategoryKicker();
     renderKeywords();
   })
