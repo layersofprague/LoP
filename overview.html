@@ -1266,7 +1266,7 @@ document.addEventListener('click', e=>{
 
 async function loadPlaces() {
   try {
-    const res=await fetch('places-index.json'); if(!res.ok) throw new Error('404');
+    const res=await fetch('places-index.json?v=' + (window.lopDataVer||'')); if(!res.ok) throw new Error('404');
     PLACES=await res.json();
   } catch(e) {
     document.getElementById('placesList').innerHTML=`<div class="empty"><h3>${t('overview.load_err')}</h3><p>${t('overview.load_err_sub')}</p></div>`;

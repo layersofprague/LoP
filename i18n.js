@@ -36,10 +36,15 @@ window.lopLang = LANG;
 /* ── Načtení synchronně (před renderem) ── */
 let _T = {};
 
+/* Verze v dotazu — bez ní podává GitHub Pages starou translations.json
+   z cache a chybějící klíče se vypisují doslova ("overview.geo_short"). */
+const LOP_DATA_VER = '20260728';
+
 (function _load() {
   try {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', _root() + 'translations.json', false);
+    xhr.open('GET', _root() + 'translations.json?v=' + LOP_DATA_VER, false);
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
     xhr.send();
     if (xhr.status === 200) _T = JSON.parse(xhr.responseText);
     else console.warn('[i18n] translations.json nenalezen, status:', xhr.status);
@@ -104,6 +109,8 @@ window.lopSetLang = function (lang) {
 /* ── Plurál ── */
 // cs: lopPlural(3, 'razítko', 'razítka', 'razítek') → 'razítka'
 // en: lopPlural(3, 'stamp', null, 'stamps') → 'stamps'
+window.lopDataVer = LOP_DATA_VER;
+
 window.lopPlural = function (n, one, few, many) {
   if (LANG === 'cs') {
     if (n === 1) return one;

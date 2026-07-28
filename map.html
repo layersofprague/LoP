@@ -2568,7 +2568,7 @@ function locSteps(steps) {
 async function loadData() {
   try {
     const [placesRes, routesRes] = await Promise.all([
-      fetch('places-index.json'),
+      fetch('places-index.json?v=' + (window.lopDataVer||'')),
       fetch('routes.json').catch(() => ({ ok: false }))
     ]);
     if (placesRes.ok) {
@@ -3615,7 +3615,7 @@ const sheet = document.getElementById('sheet');
 const _detailCache = {};
 function loadDetail(id) {
   if (_detailCache[id]) return Promise.resolve(_detailCache[id]);
-  return fetch('places/' + id + '.json')
+  return fetch('places/' + id + '.json?v=' + (window.lopDataVer||''))
     .then(r => r.ok ? r.json() : null)
     .then(d => { _detailCache[id] = d || {}; return _detailCache[id]; })
     .catch(() => (_detailCache[id] = {}));

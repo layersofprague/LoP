@@ -268,7 +268,7 @@ function addDimmedMarkers(locations) {
   });
 }
 
-fetch('places-index.json')
+fetch('places-index.json?v=' + (window.lopDataVer||''))
   .then(function(r) { return r.ok ? r.json() : []; })
   .then(function(data) {
     var locs = data
@@ -988,7 +988,7 @@ function addDimmedMarkers(locations) {
   });
 }
 
-fetch('places-index.json')
+fetch('places-index.json?v=' + (window.lopDataVer||''))
   .then(function(r) { return r.ok ? r.json() : []; })
   .then(function(data) {
     var locs = data

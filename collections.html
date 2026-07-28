@@ -423,7 +423,7 @@ function getVisited() {
 let PLACES = [];
 async function loadPlaces() {
   try {
-    const r = await fetch('places-index.json');
+    const r = await fetch('places-index.json?v=' + (window.lopDataVer||''));
     PLACES = await r.json();
   } catch(e) { PLACES = []; }
 }
@@ -499,7 +499,7 @@ function buildSectionData(places, visited, scores) {
       const sc = scores[id];
       return {
         code: id,
-        name: isVis ? (typeof p.name==='object' ? (p.name[window.lopLang]||p.name.cs) : p.name) : null,
+        name: isVis ? locName(p.name) : null,
         year: p.yearBuilt || p.year,
         cat: cat,
         score: sc ? sc.score : (isVis ? 100 : undefined),
@@ -528,7 +528,7 @@ function buildSectionData(places, visited, scores) {
       const sc = scores[id];
       return {
         code: id,
-        name: isVis ? (typeof p.name==='object' ? (p.name[window.lopLang]||p.name.cs) : p.name) : null,
+        name: isVis ? locName(p.name) : null,
         year: p.yearBuilt || p.year,
         cat: p.cat,
         score: sc ? sc.score : (isVis ? 100 : undefined),
@@ -598,9 +598,17 @@ function renderStamp(item) {
   }) : '';
 }
 
+/* Lokalizované jméno. Pozor: `name` je u nenavštívených záznamů záměrně null
+   a `typeof null === 'object'`, proto se nejdřív testuje pravdivost. */
+function locName(v) {
+  if (!v) return v;                       // null / '' projde beze změny
+  if (typeof v === 'object') return v[window.lopLang] || v.cs || '';
+  return v;
+}
+
 function renderSection(sec, idx) {
-  const got = sec.items.filter(p => (typeof p.name==='object' ? (p.name[window.lopLang]||p.name.cs) : p.name));
-  const empties = sec.items.filter(p => !(typeof p.name==='object' ? (p.name[window.lopLang]||p.name.cs) : p.name) || p.empty);
+  const got = sec.items.filter(p => locName(p.name));
+  const empties = sec.items.filter(p => !locName(p.name) || p.empty);
   const total = sec.items.length;
   const pct = total > 0 ? Math.round(got.length / total * 100) : 0;
   const isOpen = !!openState[sec.name];
