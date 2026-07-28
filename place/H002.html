@@ -1599,9 +1599,9 @@ function toggleWishBtn() {
     return html;
   }
 
-  // Počty míst z places.json
+  // Počty míst z places-index.json
   try {
-    const res = await fetch('../places.json');
+    const res = await fetch('../places-index.json');
     if (res.ok) {
       const all = await res.json();
       const count = all.filter(p => AUTOR_PLACES.includes(p.id)).length;
@@ -1678,8 +1678,8 @@ function toggleWishBtn() {
     location.href = '../map.html#' + PLACE_ID;
   });
 
-  // Okolní místa z places.json
-  fetch('../places.json').then(r => r.json()).then(places => {
+  // Okolní místa z places-index.json
+  fetch('../places-index.json').then(r => r.json()).then(places => {
     function haversine(lat1, lng1, lat2, lng2) {
       const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
       const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
