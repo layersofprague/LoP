@@ -108,7 +108,8 @@ a { color: inherit; text-decoration: none; }
 /* ── FILTER MODAL ── */
 .filter-modal-backdrop {
   position: fixed;
-  top: var(--header-h, 52px); left: 0; right: 0; bottom: 0;
+  top: var(--header-h, 52px); left: 0;
+  right: var(--nav-inset-right, 0px); bottom: var(--nav-inset-bottom, 0px);
   z-index: 80; /* pod #lop-nav (z-index 90 v nav.js) — navbar musí zůstat viditelný i s otevřeným filtrem */
   display: none; pointer-events: none;
   background: transparent; transition: background .22s;
@@ -1138,10 +1139,24 @@ const pctToYear = p => Math.round(ERA_START+Math.max(0,Math.min(1,p))*(ERA_END-E
 function toggleFilter() {
   const backdrop = document.getElementById('filterBackdrop');
   const wasOpen = backdrop.classList.contains('open');
+  if (!wasOpen) syncNavInset();
   backdrop.classList.toggle('open');
   if (!wasOpen) buildEraTimeline();
   document.getElementById('filterBtn')?.blur();
 }
+
+/* Backdrop filtru nesmí zasahovat pod navbar — nav.js si sám počítá svůj
+   footprint (bottom bar / boční lišta podle orientace) a promítá ho jako
+   padding na <body>. Tady tu stejnou hodnotu jen přečteme, ať se konvence
+   nezdvojuje na dvou místech. */
+function syncNavInset() {
+  const cs = getComputedStyle(document.body);
+  document.documentElement.style.setProperty('--nav-inset-right', cs.paddingRight || '0px');
+  document.documentElement.style.setProperty('--nav-inset-bottom', cs.paddingBottom || '0px');
+}
+requestAnimationFrame(syncNavInset);
+window.addEventListener('resize', syncNavInset);
+window.addEventListener('orientationchange', () => setTimeout(syncNavInset, 200));
 
 /* Chipy slohů — jen ty, které se v datech vyskytují. Pořadí podle
    slovníku, tedy zhruba chronologicky. */
