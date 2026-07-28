@@ -4,7 +4,7 @@
     "lat": 50.0784,
     "lng": 14.4133,
     "cat": "hist",
-    "thumb": "photos/H101/thumb.webp",
+    "thumb": "foto/H101_ove_thumb.jpg",
     "name": {
       "cs": "Šítkovská věž",
       "en": "Šítkov Water Tower"
@@ -48,7 +48,7 @@
     "lat": 50.0815,
     "lng": 14.4278,
     "cat": "hist",
-    "thumb": "photos/H102/thumb.webp",
+    "thumb": "foto/H102_ove_thumb.jpg",
     "name": {
       "cs": "Václavské náměstí",
       "en": "Wenceslas Square"
@@ -84,7 +84,7 @@
     "lat": 50.0875,
     "lng": 14.4213,
     "cat": "arch",
-    "thumb": "photos/H201/thumb.webp",
+    "thumb": "foto/H201_ove_thumb.jpg",
     "name": {
       "cs": "Staroměstské náměstí",
       "en": "Old Town Square"
@@ -124,7 +124,7 @@
     "lat": 50.0808,
     "lng": 14.4133,
     "cat": "arch",
-    "thumb": "photos/H202/thumb.webp",
+    "thumb": "foto/H202_ove_thumb.jpg",
     "name": {
       "cs": "Národní divadlo",
       "en": "National Theatre"
@@ -164,7 +164,7 @@
     "lat": 50.0911,
     "lng": 14.4016,
     "cat": "fun",
-    "thumb": "photos/H301/thumb.webp",
+    "thumb": "foto/H301_ove_thumb.jpg",
     "name": {
       "cs": "Pražský hrad",
       "en": "Prague Castle"
@@ -205,7 +205,7 @@
     "lat": 50.105164,
     "lng": 14.456314,
     "cat": "hist",
-    "thumb": "https://layersofprague.github.io/LoP/foto/h_001ove_thumb.jpg",
+    "thumb": "foto/H001b_ove_thumb.jpg",
     "name": {
       "cs": "Holešovický přístav",
       "en": "Holešovice Port"
@@ -251,7 +251,7 @@
     "lat": 50.0939,
     "lng": 14.4224,
     "cat": "fun",
-    "thumb": "photos/H302/thumb.webp",
+    "thumb": "foto/H302_ove_thumb.jpg",
     "name": {
       "cs": "Letenské sady",
       "en": "Letná Park"
@@ -293,7 +293,7 @@
     "lat": 50.0754,
     "lng": 14.4141,
     "cat": "arch",
-    "thumb": "photos/H203/thumb.webp",
+    "thumb": "foto/H203_ove_thumb.jpg",
     "name": {
       "cs": "Tančící dům",
       "en": "Dancing House"
@@ -335,7 +335,7 @@
     "lat": 50.09305881760058,
     "lng": 14.411785293307434,
     "cat": "hist",
-    "thumb": "foto/h_002ove_thumb.jpg",
+    "thumb": "foto/H002_ove_thumb.jpg",
     "name": {
       "cs": "Bašta sv. Máří Magdalény (XIX)",
       "en": "St Mary Magdalene Bastion (XIX)"
