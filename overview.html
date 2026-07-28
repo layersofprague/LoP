@@ -1398,7 +1398,7 @@ function cardHTML(p, visited, wished) {
         <span class="place-dist-icon list">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
-    : `<span class="place-dist-hint place-dist-hint-list" onclick="requestLoc(event)">${t('overview.geo_short').replace(' ','<br>')}</span>`;
+    : `<span class="place-dist-hint place-dist-hint-list" onclick="requestLoc(event)">${t('sheet.enable_location').replace(' ','<br>')}</span>`;
 
   // Dlaždice: ikona před číslem (flex-row)
   const distGridHtml = dist
@@ -1406,7 +1406,7 @@ function cardHTML(p, visited, wished) {
         <span class="place-dist-icon grid">${compassIcon}</span>
         <span>${dist}</span>
        </a>`
-    : `<span class="place-dist-hint" onclick="requestLoc(event)">${t('overview.geo_short')}</span>`;
+    : `<span class="place-dist-hint" onclick="requestLoc(event)">${t('sheet.enable_location')}</span>`;
 
   // Like/dislike — čisté šipky, s počty (TODO: Supabase)
   const voteUp   = p._voteUp   ?? Math.floor(Math.random()*40+2);  // placeholder
