@@ -1145,18 +1145,34 @@ function toggleFilter() {
   document.getElementById('filterBtn')?.blur();
 }
 
-/* Backdrop filtru nesmí zasahovat pod navbar — nav.js si sám počítá svůj
-   footprint (bottom bar / boční lišta podle orientace) a promítá ho jako
-   padding na <body>. Tady tu stejnou hodnotu jen přečteme, ať se konvence
-   nezdvojuje na dvou místech. */
+/* Backdrop filtru nesmí zasahovat pod navbar. Čtení body paddingu (které si
+   nastavuje nav.js) bylo závislé na pořadí dvou nezávislých requestAnimationFrame
+   volání — v landscape se to spolehlivě netrefilo. Měříme přímo skutečnou
+   pozici #lop-nav v DOMu, to je vždy aktuální bez ohledu na timing. */
 function syncNavInset() {
-  const cs = getComputedStyle(document.body);
-  document.documentElement.style.setProperty('--nav-inset-right', cs.paddingRight || '0px');
-  document.documentElement.style.setProperty('--nav-inset-bottom', cs.paddingBottom || '0px');
+  const nav = document.getElementById('lop-nav');
+  let right = 0, bottom = 0;
+  if (nav) {
+    const r = nav.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    // boční lišta (landscape mobil / desktop) — sahá k pravému okraji přes celou výšku
+    if (r.width > 0 && r.right >= vw - 2 && r.height >= vh - 2) right = vw - r.left;
+    // spodní lišta (portrait mobil) — sahá k dolnímu okraji přes celou šířku
+    if (r.height > 0 && r.bottom >= vh - 2 && r.width >= vw - 2) bottom = vh - r.top;
+  }
+  document.documentElement.style.setProperty('--nav-inset-right', right + 'px');
+  document.documentElement.style.setProperty('--nav-inset-bottom', bottom + 'px');
 }
-requestAnimationFrame(syncNavInset);
+syncNavInset();
+if (document.readyState === 'loading') {
+  // nav.js čeká na DOMContentLoaded a teprve v něm plánuje svůj vlastní rAF;
+  // stejným pořadím zajistíme, že náš sync doběhne AŽ PO tom, ne dřív.
+  document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(syncNavInset));
+} else {
+  requestAnimationFrame(syncNavInset);
+}
 window.addEventListener('resize', syncNavInset);
-window.addEventListener('orientationchange', () => setTimeout(syncNavInset, 200));
+window.addEventListener('orientationchange', () => setTimeout(syncNavInset, 250));
 
 /* Chipy slohů — jen ty, které se v datech vyskytují. Pořadí podle
    slovníku, tedy zhruba chronologicky. */
