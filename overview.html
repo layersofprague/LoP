@@ -382,6 +382,20 @@ a { color: inherit; text-decoration: none; }
 .place-dist-hint.geo-blocked { cursor: default; text-decoration: none; }
 .place-dist-hint.geo-blocked:hover { color: var(--ink-5); }
 
+/* tooltip po kliku na zablokovanou polohu — druhé okno prohlížeč nezobrazí,
+   takže tohle je jediná viditelná odpověď na klik */
+.geo-tip {
+  position: fixed; z-index: 2000; max-width: 240px;
+  background: var(--ink); color: var(--paper);
+  font-family: 'Inter', sans-serif; font-size: 11px; line-height: 1.4;
+  padding: 8px 11px; border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .15s, transform .15s;
+  pointer-events: none;
+}
+.geo-tip.visible { opacity: 1; transform: translateY(0); }
+
 /* meta-dist-grid: skrytý v listu, viditelný v gridu */
 .meta-dist-grid { display: none; }
 
@@ -1070,6 +1084,30 @@ function requestLoc(e) {
   navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; syncFilterUI(); render(); },
     err => { if(err.code===1) GEO_PERM='denied'; syncFilterUI(); render(); }, { enableHighAccuracy:true, timeout:8000 });
 }
+
+/* Poloha je natvrdo zablokovaná v prohlížeči — druhé okno se nezobrazí,
+   takže klik musí dát viditelnou odpověď rovnou na stránce, ne jen v title. */
+let _geoTip = null;
+function showGeoBlockedHint(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  if (_geoTip) { _geoTip.remove(); _geoTip = null; }
+  const target = e.currentTarget;
+  const rect = target.getBoundingClientRect();
+  const tip = document.createElement('div');
+  tip.className = 'geo-tip';
+  tip.textContent = t('overview.geo_blocked');
+  document.body.appendChild(tip);
+  const tipRect = tip.getBoundingClientRect();
+  let left = rect.left + rect.width / 2 - tipRect.width / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tipRect.width - 8));
+  tip.style.left = left + 'px';
+  tip.style.top = (rect.top - tipRect.height - 8 + window.scrollY) + 'px';
+  requestAnimationFrame(() => tip.classList.add('visible'));
+  _geoTip = tip;
+  const remove = () => { if (_geoTip === tip) { tip.remove(); _geoTip = null; } };
+  setTimeout(remove, 5000);
+  document.addEventListener('click', remove, { once: true, capture: true });
+}
 function locateUser() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => { userPos=[pos.coords.latitude,pos.coords.longitude]; syncFilterUI(); render(); },
@@ -1403,7 +1441,7 @@ function cardHTML(p, visited, wished) {
   // Seznam: ikona nad číslem (flex-column)
   const geoBlocked = GEO_PERM === 'denied';
   const geoHintAttrs = geoBlocked
-    ? `title="${t('overview.geo_blocked')}"`
+    ? `onclick="showGeoBlockedHint(event)"`
     : `onclick="requestLoc(event)"`;
   const geoHintTxt = geoBlocked ? t('place.geo_blocked') : t('sheet.enable_location');
 
