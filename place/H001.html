@@ -995,7 +995,7 @@ a { color: inherit; text-decoration: none; }
   }
 }
 .rv-fs-modal .rv-fs-labels {
-  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  width: min(100vw, calc((100dvh - 80px) * var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3)));
 }
 @media (orientation: landscape) {
   .rv-fs-modal .rv-fs-labels { width: auto; }
@@ -1063,6 +1063,15 @@ a { color: inherit; text-decoration: none; }
 }
 .rv-fs-imgwrap .rv-fs-labels {
   flex-shrink: 0;
+}
+.rv-fs-imgwrap .rv-fs-img {
+  /* Popisek má pevnou výšku (flex-shrink:0), fotka dostane zbytek — žádné
+     odhadované "− 48px", které se u vyššího popisku nemuselo vejít. */
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  max-height: 100%;
+  max-width: calc(100% - 24px);
 }
 .rv-fs-img {
   max-width: calc(100% - 24px);
