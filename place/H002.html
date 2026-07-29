@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#111111"/>
 <title id="pageTitle">Bašta sv. Máří Magdalény — LayersOfPrague</title>
-<meta name="description" id="metaDesc" content="Jeden z posledních dochovaných bastionů barokního opevnění Prahy z let 1653–1730. Do roku 1926 se odtud dělem ohlašovalo pražské poledne."/>
+<meta name="description" id="metaDesc" content="Jeden z posledních dochovaných bašt barokního opevnění Prahy z let 1653–1730. Do roku 1926 se odtud dělem ohlašovalo pražské poledne."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -939,7 +939,7 @@ function renderPlaceI18n() {
   const cl = document.getElementById('curiosityLabel');
   if (cl) cl.textContent = t('place.tip_label');
   const ct = document.getElementById('curiosityText');
-  if (ct && P.curiosity) ct.textContent = loc(P.curiosity);
+  if (ct && P.curiosity) ct.innerHTML = loc(P.curiosity);
 
   // Tip (insider)
   const tl = document.getElementById('tipLabel');
@@ -1253,7 +1253,7 @@ window.addEventListener('load', renderPlaceI18n);
   </div>
 
   <!-- lede -->
-  <p class="lede" id="placeLede">Bašta XIX. je jedním z posledních dochovaných bastionů barokního pásu, který mezi lety 1653 a 1730 obepnul celou Prahu na příkaz vojevůdce Innocentia Contiho. Nese jméno sv. Máří Magdalény — stejně jako ostatní bastiony podél celého pásu dostala jméno po jednom z patronů, kterým se dobově zasvěcovaly jednotlivé úseky opevnění. Na levém břehu Vltavy stavbu vedl italský stavitel Carlo Lurago. Bastion měl zdvojenou střeleckou linii (tzv. fausse-braye) a je zapsán v Ústředním seznamu kulturních památek ČR jako součást městského opevnění Malé Strany a Hradčan. Dnes stojí bašta na pozemku Kramářovy vily, oficiální rezidence předsedy vlády ČR, a je běžně nepřístupná veřejnosti.</p>
+  <p class="lede" id="placeLede">Bašta XIX. je jedním z posledních dochovaných bašt barokního pásu, který mezi lety 1653 a 1730 obepnul celou Prahu na příkaz vojevůdce Innocentia Contiho. Nese jméno sv. Máří Magdalény — stejně jako ostatní bašty podél celého pásu dostala jméno po jednom z patronů, kterým se dobově zasvěcovaly jednotlivé úseky opevnění. Na levém břehu Vltavy stavbu vedl italský stavitel Carlo Lurago. Bašta měla zdvojenou střeleckou linii (tzv. fausse-braye) a je zapsána v Ústředním seznamu kulturních památek ČR jako součást městského opevnění Malé Strany a Hradčan. Dnes stojí bašta na pozemku Kramářovy vily, oficiální rezidence předsedy vlády ČR, a je běžně nepřístupná veřejnosti.</p>
 
   <!-- fakta -->
   <div class="section">
@@ -1278,7 +1278,7 @@ window.addEventListener('load', renderPlaceI18n);
       <div class="tip-label" id="tipLabel">Tip</div>
       <div class="tip-text" id="insiderTeaser">Věděli jste, že se sem dá jednou za čas dostat úplně zdarma?</div>
       <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal" id="insiderP1">Bašta stojí na pozemku Kramářovy vily, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti.</div>
+        <div class="tip-text" style="font-style:normal" id="insiderP1">Úřad vlády několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti.</div>
         <a class="tip-link-btn" id="insiderLinkBtn" href="https://vlada.gov.cz/scripts/detail.php?pgid=1483" target="_blank" rel="noopener">Termíny na webu Úřadu vlády ČR →</a>
       </div>
       <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
