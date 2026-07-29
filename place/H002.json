@@ -48,10 +48,10 @@
   ],
   "access": {
     "exterior": "restricted",
-    "interior": "restricted",
+    "interior": "none",
     "note": {
-      "cs": "Součást střeženého areálu Kramářovy vily, oficiální rezidence předsedy vlády ČR. Běžně nepřístupné.",
-      "en": "Part of the guarded grounds of Kramář's Villa, the official residence of the Czech Prime Minister. Normally inaccessible."
+      "cs": "Součást střeženého areálu Kramářovy vily, oficiální rezidence předsedy vlády ČR. Bašta jako fortifikační stavba nemá interiér — přístupná je jen příležitostně, v rámci Dnů otevřených dveří.",
+      "en": "Part of the guarded grounds of Kramář's Villa, the official residence of the Czech Prime Minister. As a fortification structure the bastion has no interior — it's accessible only occasionally, during Open House Days."
     }
   },
   "arCtaTitle": {
@@ -87,8 +87,19 @@
   },
   "insider": {
     "p1": {
-      "cs": "<strong>Bašta stojí na pozemku Kramářovy vily</strong>, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti. Přesné termíny vyhlašuje <a href=\"https://vlada.gov.cz/scripts/detail.php?pgid=1483\" target=\"_blank\" rel=\"noopener\">web Úřadu vlády ČR</a>.",
-      "en": "<strong>The bastion stands on the grounds of Kramář's Villa</strong>, the official residence of the Czech Prime Minister, and is normally off-limits — it's a guarded area. Several times a year, though, the Government Office holds <strong>Open House Days</strong> for its historic buildings (typically spring through autumn and on state holidays), when the villa and its gardens, bastion included, open free to the public. Exact dates are announced on the <a href=\"https://vlada.gov.cz/scripts/detail.php?pgid=1483\" target=\"_blank\" rel=\"noopener\">Government Office website</a>."
+      "cs": "<strong>Bašta stojí na pozemku Kramářovy vily</strong>, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti.",
+      "en": "<strong>The bastion stands on the grounds of Kramář's Villa</strong>, the official residence of the Czech Prime Minister, and is normally off-limits — it's a guarded area. Several times a year, though, the Government Office holds <strong>Open House Days</strong> for its historic buildings (typically spring through autumn and on state holidays), when the villa and its gardens, bastion included, open free to the public."
+    }
+  },
+  "curiosity": {
+    "cs": "Až do roku 1926 se z bašty výstřelem z děla ohlašovalo pražské poledne — signál ke spuštění dostávala od praporkového signálu z věže Klementina.",
+    "en": "Until 1926, a cannon fired from the bastion announced Prague's noon — the signal to fire came via a flag cue from the Klementinum tower."
+  },
+  "insiderLink": {
+    "url": "https://vlada.gov.cz/scripts/detail.php?pgid=1483",
+    "label": {
+      "cs": "Termíny na webu Úřadu vlády ČR",
+      "en": "Dates on the Government Office website"
     }
   }
 }

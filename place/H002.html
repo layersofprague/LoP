@@ -537,6 +537,16 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Inter', sans-serif;
   font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
 }
+.tip-link-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px; padding: 7px 13px;
+  background: #fff; border: 1.5px solid var(--cat-fun);
+  border-radius: 7px;
+  font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+  color: var(--ink-2); text-decoration: none;
+  transition: background .15s, box-shadow .15s;
+}
+.tip-link-btn:hover { background: var(--paper); box-shadow: 0 3px 10px rgba(26,24,20,.1); }
 
 /* nav button */
 .nav-btn {
@@ -925,11 +935,19 @@ function renderPlaceI18n() {
     if (el) el.textContent = val;
   });
 
-  // Tip
+  // Zajímavosti — veřejné, nezávislé na insider gatingu (updateInsiderGate() se jich netýká)
+  const cl = document.getElementById('curiosityLabel');
+  if (cl) cl.textContent = t('place.tip_label');
+  const ct = document.getElementById('curiosityText');
+  if (ct && P.curiosity) ct.textContent = loc(P.curiosity);
+
+  // Tip (insider)
   const tl = document.getElementById('tipLabel');
-  if (tl) tl.textContent = t('place.tip_label');
+  if (tl) tl.textContent = t('place.insider_tip_label');
   const it = document.getElementById('insiderTeaser');
   if (it) it.textContent = loc(P.insiderTeaser);
+  const ilb = document.getElementById('insiderLinkBtn');
+  if (ilb && P.insiderLink) { ilb.href = P.insiderLink.url; ilb.textContent = loc(P.insiderLink.label) + ' →'; }
   const iwl = document.getElementById('insiderWhyLink');
   if (iwl) iwl.textContent = t('place.paywall_why');
   // insiderGateText/insiderGateLink se nastavují dynamicky v updateInsiderGate()
@@ -1249,18 +1267,27 @@ window.addEventListener('load', renderPlaceI18n);
       <div class="fact"><div class="fact-k" id="factK1">Šířka hrdla</div><div class="fact-v">145 m</div></div>
       <div class="fact"><div class="fact-k" id="factK2">Hloubka</div><div class="fact-v">102 m</div></div>
       <div class="fact"><div class="fact-k" id="factK3">Ohlašovalo poledne do</div><div class="fact-v">1926</div></div>
-      <div class="fact"><div class="fact-k" id="factAccExtK">Exteriér</div><div class="fact-v" id="factAccExtV">omezený přístup</div></div>
-      <div class="fact"><div class="fact-k" id="factAccIntK">Interiér</div><div class="fact-v" id="factAccIntV">příležitostně přístupné</div></div>
+      <div class="fact"><div class="fact-k" id="factAccExtK">Exteriér</div><div class="fact-v" id="factAccExtV">příležitostně přístupné</div></div>
+      <div class="fact"><div class="fact-k" id="factAccIntK">Interiér</div><div class="fact-v" id="factAccIntV">–</div></div>
     </div>
   </div>
 
-  <!-- zajímavosti / insider -->
+  <!-- zajímavosti — veřejné, bez vazby na insider gating -->
   <div class="section">
     <div class="tip">
-      <div class="tip-label" id="tipLabel">Zajímavosti</div>
+      <div class="tip-label" id="curiosityLabel">Zajímavosti</div>
+      <div class="tip-text" style="font-style:normal" id="curiosityText">Až do roku 1926 se z bašty výstřelem z děla ohlašovalo pražské poledne — signál ke spuštění dostávala od praporkového signálu z věže Klementina.</div>
+    </div>
+  </div>
+
+  <!-- tip (insider) -->
+  <div class="section">
+    <div class="tip">
+      <div class="tip-label" id="tipLabel">Tip</div>
       <div class="tip-text" id="insiderTeaser">Věděli jste, že se sem dá jednou za čas dostat úplně zdarma?</div>
       <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal" id="insiderP1"><strong>Bašta stojí na pozemku Kramářovy vily</strong>, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti. Přesné termíny vyhlašuje <a href="https://vlada.gov.cz/scripts/detail.php?pgid=1483" target="_blank" rel="noopener">web Úřadu vlády ČR</a>.</div>
+        <div class="tip-text" style="font-style:normal" id="insiderP1"><strong>Bašta stojí na pozemku Kramářovy vily</strong>, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti.</div>
+        <a class="tip-link-btn" id="insiderLinkBtn" href="https://vlada.gov.cz/scripts/detail.php?pgid=1483" target="_blank" rel="noopener">Termíny na webu Úřadu vlády ČR →</a>
       </div>
       <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
         <div style="display:flex;align-items:center;gap:5px">
@@ -1275,6 +1302,7 @@ window.addEventListener('load', renderPlaceI18n);
       </div>
     </div>
   </div>
+
 
   <!-- galerie -->
   <div class="section" id="gallerySection">
