@@ -2956,6 +2956,7 @@ window.lopAuth.onLogout(() => {
 window._rvOpen1938 = function() {
   var m = document.getElementById('rv1938Modal');
   if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+  _alignFsLabelsToImg('rv1938Modal');
 };
 window._rvClose1938 = function() {
   var m = document.getElementById('rv1938Modal');
@@ -2990,6 +2991,7 @@ document.addEventListener('keydown', function(e) {
 window._rvOpenStavba = function() {
   var m = document.getElementById('rvStavbaModal');
   if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+  _alignFsLabelsToImg('rvStavbaModal');
 };
 window._rvCloseStavba = function() {
   var m = document.getElementById('rvStavbaModal');
@@ -3016,9 +3018,26 @@ window._rvCloseStavba = function() {
 </div>
 
 <script>
+// object-fit:contain může fotku vykreslit užší než celý modal (na výšku
+// omezená fotka na výšku obrazovky v portrait) — popisek pod ní má mít
+// stejnou šířku jako fotka, jinak "začátek řádku" vyjde na levý okraj
+// obrazovky místo levého okraje fotky.
+function _alignFsLabelsToImg(modalId) {
+  requestAnimationFrame(function() {
+    var modal = document.getElementById(modalId);
+    var img = modal ? modal.querySelector('.rv-fs-imgwrap img') : null;
+    var labels = modal ? modal.querySelector('.rv-fs-labels') : null;
+    if (img && labels) {
+      var w = img.getBoundingClientRect().width;
+      if (w > 0) labels.style.width = w + 'px';
+    }
+  });
+}
+
 window._rvOpenPlan = function() {
   var m = document.getElementById('rvPlanModal');
   if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+  _alignFsLabelsToImg('rvPlanModal');
 };
 window._rvClosePlan = function() {
   var m = document.getElementById('rvPlanModal');
