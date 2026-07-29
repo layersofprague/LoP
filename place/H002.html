@@ -1807,6 +1807,9 @@ function toggleFullscreen() {
     : '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
   if (_fsOpen && window._fsSetPos) window._fsSetPos(0.35);
   if (_fsOpen) loadExif();
+  // Copyright panel by si jinak "pamatoval" otevřený stav i po zavření fullscreen —
+  // příště by se objevil rovnou rozbalený, ne čerstvě zavřený.
+  if (!_fsOpen) { const cm = document.getElementById('copyModalFs'); if (cm) cm.classList.remove('open'); }
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
 
