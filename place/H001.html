@@ -1611,7 +1611,7 @@ window.addEventListener('load', renderPlaceI18n);
         <div>
           <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative;margin-top:0">
             <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" id="imgPlan1894"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('plan1894');window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopyPlan">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
               <div style="margin-top:2px">
@@ -1631,7 +1631,7 @@ window.addEventListener('load', renderPlaceI18n);
         <div>
           <div class="rv-1938-thumb" onclick="window._rvOpenStavba()" style="position:relative;margin-top:0">
             <img src="../foto/H001h_h.jpg" alt="Rozšíření přístavu v letech 1906–1908" id="imgStavba"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')" title="Autorská práva">©</button>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('stavba');window._rvToggleCopy('rvCopyStavba')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopyStavba">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')">✕</button>
               <div style="margin-top:2px">
@@ -1666,7 +1666,7 @@ window.addEventListener('load', renderPlaceI18n);
                   <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
                 </svg>
               </button>
-              <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
+              <button class="rv-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('river');window._rvToggleCopy('rvCopyRiver')" title="Autorská práva">©</button>
               <div class="rv-copy-modal" id="rvCopyRiver">
                 <button class="copy-close" onclick="window._rvToggleCopy('rvCopyRiver')">✕</button>
                 <div class="copy-grid">
@@ -1691,7 +1691,7 @@ window.addEventListener('load', renderPlaceI18n);
           <div class="tip-text" style="font-style:normal;margin-bottom:8px" id="insiderP3"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.</div>
           <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
             <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy, 1938" id="imgPlan1938"/>
-            <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
+            <button class="rv-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('y1938');window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopy1938">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
               <div style="margin-top:2px">
@@ -2207,17 +2207,11 @@ function toggleFullscreen() {
     ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
     : '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
   if (_fsOpen && window._fsSetPos) window._fsSetPos(0.35);
-  if (_fsOpen) loadExif();
   // Copyright panel by si jinak "pamatoval" otevřený stav i po zavření fullscreen —
   // příště by se objevil rovnou rozbalený, ne čerstvě zavřený.
   if (!_fsOpen) { const cm = document.getElementById('copyModalFs'); if (cm) cm.classList.remove('open'); }
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
-
-// Rok pod sliderem (lblHist/lblNow) je vidět vždy, i bez otevření čehokoliv —
-// proto se EXIF načítá rovnou při načtení stránky, ne až líně při kliku
-// (jinak by tam chvíli svítil špatný zálohový rok, než se opraví).
-loadExif();
 
 /* ── GALLERY LIGHTBOX ── */
 (function() {
@@ -2853,7 +2847,7 @@ window.lopAuth.onLogout(() => {
     </div>
   </div>
   <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyRiverFs')" title="Autorská práva">©</button>
+    <button class="fs-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('river');toggleFsCopy('rvCopyRiverFs')" title="Autorská práva">©</button>
     <span id="rvFsRiverLabel" style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy 1909–1914 vs. ortofotomapa z roku 2025</span>
   </div>
 </div>
@@ -2953,7 +2947,7 @@ window.lopAuth.onLogout(() => {
     </div>
   </div>
   <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopy1938Fs')" title="Autorská práva">©</button>
+    <button class="fs-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('y1938');toggleFsCopy('rvCopy1938Fs')" title="Autorská práva">©</button>
     <span id="fs1938Label">Orientační plán Prahy, 1938</span>
   </div>
 </div>
@@ -2987,7 +2981,7 @@ document.addEventListener('keydown', function(e) {
     </div>
   </div>
   <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyStavbaFs')" title="Autorská práva">©</button>
+    <button class="fs-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('stavba');toggleFsCopy('rvCopyStavbaFs')" title="Autorská práva">©</button>
     <span id="fsStavbaLabel">Rozšíření přístavu v letech 1906–1908</span>
   </div>
 </div>
@@ -3016,7 +3010,7 @@ window._rvCloseStavba = function() {
     </div>
   </div>
   <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyPlanFs')" title="Autorská práva">©</button>
+    <button class="fs-copy-btn" onclick="event.stopPropagation();window._loadInsiderExifGroup('plan1894');toggleFsCopy('rvCopyPlanFs')" title="Autorská práva">©</button>
     <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
   </div>
 </div>
@@ -3082,16 +3076,23 @@ window._rvClosePlan = function() {
     el.innerHTML = rows || '<div class="copy-val" style="color:rgba(243,237,225,.35)">EXIF data not found</div>';
   }
 
-  // Načíst EXIF pro insider obrázky
-  async function _loadInsiderExif() {
-    if (typeof exifr === 'undefined') return;
-    var images = [
+  // EXIF pro insider obrázky se načítá líně, jen pro obrázek, na jehož ©
+  // uživatel klikl — ne automaticky pro všech 5 při načtení stránky.
+  var IMG_GROUPS = {
+    plan1894: [{ src: '../foto/H001_plan.jpg', elId: 'rvExifPlan1894', elIdFs: 'rvExifPlan1894Fs' }],
+    stavba:   [{ src: '../foto/H001h_h.jpg', elId: 'rvExifStavba', elIdFs: 'rvExifStavbaFs' }],
+    y1938:    [{ src: '../foto/H001_orientacni_plan_Prahy_1938.jpg', elId: 'rvExif1938', elIdFs: 'rvExif1938Fs' }],
+    river: [
       { src: '../foto/H001_orientacni_plan_Prahy_1909–1914.jpg', elId: 'rvExifPlan1909', elIdFs: 'rvExifPlan1909Fs' },
-      { src: '../foto/H001_ortofoto.jpg',                            elId: 'rvExifOrtofoto', elIdFs: 'rvExifOrtofotoFs' },
-      { src: '../foto/H001_plan.jpg',                 elId: 'rvExifPlan1894', elIdFs: 'rvExifPlan1894Fs' },
-      { src: '../foto/H001h_h.jpg',                              elId: 'rvExifStavba', elIdFs: 'rvExifStavbaFs' },
-      { src: '../foto/H001_orientacni_plan_Prahy_1938.jpg',          elId: 'rvExif1938', elIdFs: 'rvExif1938Fs' },
-    ];
+      { src: '../foto/H001_ortofoto.jpg', elId: 'rvExifOrtofoto', elIdFs: 'rvExifOrtofotoFs' },
+    ],
+  };
+  var _loadedGroups = {};
+  async function _loadInsiderExifGroup(key) {
+    if (_loadedGroups[key]) return;
+    _loadedGroups[key] = true;
+    if (typeof exifr === 'undefined') return;
+    var images = IMG_GROUPS[key] || [];
     for (var i = 0; i < images.length; i++) {
       try {
         var data = await exifr.parse(images[i].src, true);
@@ -3103,12 +3104,7 @@ window._rvClosePlan = function() {
       }
     }
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', _loadInsiderExif);
-  } else {
-    _loadInsiderExif();
-  }
+  window._loadInsiderExifGroup = _loadInsiderExifGroup;
 })();
 </script>
 
