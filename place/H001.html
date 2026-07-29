@@ -2810,7 +2810,7 @@ window.lopAuth.onLogout(() => {
 
 
 <!-- River comparison fullscreen modal -->
-<div class="rv-fs-modal" id="rvFsModal">
+<div class="rv-fs-modal" id="rvFsModal" onclick="if(event.target===this)window._rvCloseFs()">
   <button class="rv-fs-close" onclick="window._rvCloseFs()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
@@ -2925,7 +2925,7 @@ window.lopAuth.onLogout(() => {
 </script>
 
 <!-- 1938 plan fullscreen -->
-<div class="rv-fs-modal" id="rv1938Modal">
+<div class="rv-fs-modal" id="rv1938Modal" onclick="if(event.target===this)window._rvClose1938()">
   <button class="rv-fs-close" onclick="window._rvClose1938()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
@@ -2958,7 +2958,7 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <!-- Stavba bazénu fullscreen -->
-<div class="rv-fs-modal" id="rvStavbaModal">
+<div class="rv-fs-modal" id="rvStavbaModal" onclick="if(event.target===this)window._rvCloseStavba()">
   <button class="rv-fs-close" onclick="window._rvCloseStavba()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
@@ -2986,7 +2986,7 @@ window._rvCloseStavba = function() {
   document.body.style.overflow=''; document.body.style.touchAction='';
 };
 </script>
-<div class="rv-fs-modal" id="rvPlanModal">
+<div class="rv-fs-modal" id="rvPlanModal" onclick="if(event.target===this)window._rvClosePlan()">
   <button class="rv-fs-close" onclick="window._rvClosePlan()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
