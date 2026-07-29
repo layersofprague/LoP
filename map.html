@@ -2241,9 +2241,9 @@ function isLoggedIn() {
 function getUserRole() {
   return localStorage.getItem('lop_user_role') || 'member';
 }
-function isInsider() { const r = getUserRole(); return ['insider','author','admin'].includes(r); }
-function isAuthor()  { const r = getUserRole(); return ['author','admin'].includes(r); }
-function isAdmin()   { return getUserRole() === 'admin'; }
+function isInsider() { return isLoggedIn() && ['insider','author','admin'].includes(getUserRole()); }
+function isAuthor()  { return isLoggedIn() && ['author','admin'].includes(getUserRole()); }
+function isAdmin()   { return isLoggedIn() && getUserRole() === 'admin'; }
 
 /* ═══════════════ SUPABASE SYNC ═══════════════ */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';

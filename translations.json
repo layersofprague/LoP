@@ -1098,5 +1098,45 @@
   "place.geo_blocked": {
     "cs": "poloha blokována",
     "en": "location blocked"
+  },
+  "place.access_exterior": {
+    "cs": "Exteriér",
+    "en": "Exterior"
+  },
+  "place.access_interior": {
+    "cs": "Interiér",
+    "en": "Interior"
+  },
+  "access.exterior.public": {
+    "cs": "volně přístupné",
+    "en": "open to the public"
+  },
+  "access.exterior.restricted": {
+    "cs": "omezený přístup",
+    "en": "restricted access"
+  },
+  "access.exterior.none": {
+    "cs": "nepřístupné",
+    "en": "not accessible"
+  },
+  "access.interior.public": {
+    "cs": "volně přístupné",
+    "en": "open to the public"
+  },
+  "access.interior.ticketed": {
+    "cs": "za vstupné",
+    "en": "ticketed"
+  },
+  "access.interior.private": {
+    "cs": "soukromé",
+    "en": "private"
+  },
+  "access.interior.restricted": {
+    "cs": "příležitostně přístupné",
+    "en": "occasional access"
+  },
+  "access.interior.none": {
+    "cs": "bez interiéru",
+    "en": "no interior"
   }
 }
