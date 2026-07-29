@@ -147,8 +147,8 @@
       "en": "Holešovice Port plan, 1894"
     },
     "stavba": {
-      "cs": "Rozšíření přístavu ~1906–1908",
-      "en": "Port expansion ~1906–1908"
+      "cs": "Rozšíření přístavu v letech 1906–1908",
+      "en": "Port expansion, 1906–1908"
     },
     "plan1909": {
       "cs": "1909–1914",
@@ -177,14 +177,6 @@
     "copyHist": {
       "cs": "~1930",
       "en": "~1930"
-    },
-    "copyPlan": {
-      "cs": "Plán přístavu, 1894",
-      "en": "Port plan, 1894"
-    },
-    "copy1938": {
-      "cs": "Orientační plán, 1938",
-      "en": "Orientation map, 1938"
     },
     "copyRiverL": {
       "cs": "1909–1914",

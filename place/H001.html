@@ -163,7 +163,7 @@ a { color: inherit; text-decoration: none; }
 }
 .copy-col-head {
   font-family: 'Inter', sans-serif;
-  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
+  font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
   color: rgba(243,237,225,.8);
   margin-bottom: 3px; padding-bottom: 3px;
   border-bottom: 1px solid rgba(243,237,225,.1);
@@ -1224,8 +1224,8 @@ function renderPlaceI18n() {
     capRiverR:      C.today,
     copyColNow:     C.copyToday,
     copyColHist:    C.copyHist,
-    copyPlanHead:   C.copyPlan,
-    copy1938Head:   C.copy1938,
+    copyPlanHead:   C.plan1894,
+    copy1938Head:   C.plan1938,
     copyRiverRHead: C.copyRiverR,
     fsPlan1894Label:C.plan1894,
     fs1938Label:    C.plan1938,
@@ -1234,6 +1234,18 @@ function renderPlaceI18n() {
   Object.entries(capMap).forEach(function([id, val]) {
     var el = document.getElementById(id);
     if (el && val) el.textContent = loc(val);
+  });
+
+  // alt atributy historických obrázků — stejný jediný zdroj jako popisky/hlavičky výše,
+  // ne ruční text zvlášť pro každý výskyt (hlavní + fullscreen verze).
+  var altMap = {
+    imgPlan1894: C.plan1894, imgPlan1894Fs: C.plan1894,
+    imgStavba:   C.stavba,   imgStavbaFs:   C.stavba,
+    imgPlan1938: C.plan1938, imgPlan1938Fs: C.plan1938,
+  };
+  Object.entries(altMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el && val) el.alt = loc(val);
   });
 
   // FS modal label
@@ -1531,12 +1543,12 @@ window.addEventListener('load', renderPlaceI18n);
         <div class="tip-text" style="font-style:normal" id="insiderP1"><strong>Přístav nevznikl na řece, ale vedle ní.</strong> Dělníci firmy Vojtěcha Lanny vyhloubili přístavní bazén z holešovické planiny ve dvou etapách. V letech 1892–1895 vznikl ochranný zimní přístav — 750m dlouhý, 100m široký, 2–4m hluboký — ve kterém lodě mohly bezpečně přečkat povodně a zimní zámrazy. Teprve po dokončení regulačních prací na splavnění Vltavy směrem pod Prahu a s prudkým rozvojem pražského průmyslu vyvstala naléhavá potřeba velkého překladiště. Dosavadní karlínský přístav kapacitně nestačil. Holešovický přístav byl proto v této druhé fázi přeprojektován a upraven na přístav obchodní. Kolem let 1906–1908 byly dobudovány masivní kamenné nábřežní zdi a secesní budovy areálu. Přístav pojal 150 až 170 velkých labských lodí a jako jediný v Praze měl lodní výtah — zařízení, které dokázalo vyzdvihnout celou loď z vody na souš k opravě nebo zimní prohlídce. Celá stavba stála 1 230 000 zlatých (~2,7–2,8 mld. Kč / ~110 mil. EUR). Na tehdejší dobu se jednalo o obrovskou sumu, kterou složilo město Praha spolu s rakouským místodržitelstvím.</div>
         <div>
           <div class="rv-1938-thumb" onclick="window._rvOpenPlan()" style="position:relative;margin-top:0">
-            <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894"/>
+            <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" id="imgPlan1894"/>
             <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopyPlan">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyPlan')">✕</button>
               <div style="margin-top:2px">
-                <div class="copy-col-head" id="copyPlanHead">Plán přístavu, 1894</div>
+                <div class="copy-col-head" id="copyPlanHead">Plán holešovického přístavu, 1894</div>
                 <div id="rvExifPlan1894"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
               </div>
             </div>
@@ -1551,12 +1563,12 @@ window.addEventListener('load', renderPlaceI18n);
         </div>
         <div>
           <div class="rv-1938-thumb" onclick="window._rvOpenStavba()" style="position:relative;margin-top:0">
-            <img src="../foto/H001h_h.jpg" alt="Hloubení přístavního bazénu"/>
+            <img src="../foto/H001h_h.jpg" alt="Rozšíření přístavu v letech 1906–1908" id="imgStavba"/>
             <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopyStavba">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopyStavba')">✕</button>
               <div style="margin-top:2px">
-                <div class="copy-col-head" id="capStavba">Rozšíření přístavu ~1906–1908</div>
+                <div class="copy-col-head" id="capStavba">Rozšíření přístavu v letech 1906–1908</div>
                 <div id="rvExifStavba"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
               </div>
             </div>
@@ -1567,7 +1579,7 @@ window.addEventListener('load', renderPlaceI18n);
               </svg>
             </button>
           </div>
-          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capStavba2">Rozšíření přístavu ~1906–1908</div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);text-align:center;padding:4px 2px 0" id="capStavba2">Rozšíření přístavu v letech 1906–1908</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:0">
           <div class="tip-text" style="font-style:normal" id="insiderP2"><strong>Přeložení koryta Vltavy</strong> dramaticky změnilo tvar holešovického poloostrova. V letech 1926–1928 inženýři přeložili koryto Vltavy blíže k přístavu a vytvořili tak úzkou kosu na které postavil architekt František Bartoš funkcionalistická Veřejná skladiště se železobetonovým skeletem, později doplněná i o chladírnu a mrazírnu potravin. Nejlépe patrné je to při porovnání orientačního plánu Prahy z let 1909–1914 se současným leteckým snímkem.</div>
@@ -1611,12 +1623,12 @@ window.addEventListener('load', renderPlaceI18n);
         <div>
           <div class="tip-text" style="font-style:normal;margin-bottom:8px" id="insiderP3"><strong>Teprve koleje udělaly z přístavu skutečný dopravní uzel.</strong> Holešovická přístavní dráha, jak se tato unikátní železniční vlečka oficiálně jmenovala, byla uvedena do provozu 6. června 1910 s cílem propojit rozvíjející se holešovický říční přístav a okolní továrny s nákladovým nádražím Praha-Bubny. Její trasa dlouhá 2,6 kilometru byla stavební raritou. Koleje vedly přímo středem městské uliční zástavby – zejména Jankovcovou ulicí – a vlaky zde hned na několika místech úrovňově křížily frekventované tramvajové tratě. Hlavní éra vlečky skončila s útlumem nákladní dopravy na sklonku 20. století a k jejímu oficiálnímu zrušení došlo v roce 1998.</div>
           <div class="rv-1938-thumb" onclick="window._rvOpen1938()" style="position:relative">
-            <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938 — přístavní železnice"/>
+            <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy, 1938" id="imgPlan1938"/>
             <button class="rv-copy-btn" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')" title="Autorská práva">©</button>
             <div class="rv-copy-modal" id="rvCopy1938">
               <button class="copy-close" onclick="event.stopPropagation();window._rvToggleCopy('rvCopy1938')">✕</button>
               <div style="margin-top:2px">
-                <div class="copy-col-head" id="copy1938Head">Orientační plán, 1938</div>
+                <div class="copy-col-head" id="copy1938Head">Orientační plán Prahy, 1938</div>
                 <div id="rvExif1938"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
               </div>
             </div>
@@ -1851,7 +1863,7 @@ function renderExif(elId, data) {
   const zdrojLines = [];
   if (credit) zdrojLines.push(credit);
   if (source) zdrojLines.push(`<em>${source}</em>`);
-  if (spec)   zdrojLines.push(`<em>${spec}</em>`);
+  if (spec)   zdrojLines.push(`<em style="font-size:8.5px;opacity:.65">${spec}</em>`);
   const zdroj = zdrojLines.length ? zdrojLines.join('<br>') : null;
 
   const fields = [
@@ -2809,7 +2821,7 @@ window.lopAuth.onLogout(() => {
   <button class="rv-fs-close" onclick="window._rvClose1938()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy 1938" class="rv-fs-img"/>
+  <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy, 1938" class="rv-fs-img" id="imgPlan1938Fs"/>
   <div class="rv-fs-labels">
     <span id="fs1938Label">Orientační plán Prahy, 1938</span>
   </div>
@@ -2835,9 +2847,9 @@ document.addEventListener('keydown', function(e) {
   <button class="rv-fs-close" onclick="window._rvCloseStavba()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/H001h_h.jpg" alt="Hloubení přístavního bazénu" class="rv-fs-img"/>
+  <img src="../foto/H001h_h.jpg" alt="Rozšíření přístavu v letech 1906–1908" class="rv-fs-img" id="imgStavbaFs"/>
   <div class="rv-fs-labels">
-    <span id="fsStavbaLabel">Rozšíření přístavu ~1906–1908</span>
+    <span id="fsStavbaLabel">Rozšíření přístavu v letech 1906–1908</span>
   </div>
 </div>
 
@@ -2856,7 +2868,7 @@ window._rvCloseStavba = function() {
   <button class="rv-fs-close" onclick="window._rvClosePlan()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img"/>
+  <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img" id="imgPlan1894Fs"/>
   <div class="rv-fs-labels">
     <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
   </div>
@@ -2909,7 +2921,7 @@ window._rvClosePlan = function() {
     var zdrojLines = [];
     if (credit) zdrojLines.push(credit);
     if (source) zdrojLines.push('<em>' + source + '</em>');
-    if (spec)   zdrojLines.push('<em>' + spec + '</em>');
+    if (spec)   zdrojLines.push('<em style="font-size:8.5px;opacity:.65">' + spec + '</em>');
     var zdroj = zdrojLines.length ? zdrojLines.join('<br>') : null;
     var fields = [
       { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: hz(xv(data.creator) ?? data.Artist) },
