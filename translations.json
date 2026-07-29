@@ -1142,5 +1142,9 @@
   "place.insider_tip_label": {
     "cs": "Tip",
     "en": "Tip"
+  },
+  "access.interior.mixed": {
+    "cs": "–",
+    "en": "–"
   }
 }
