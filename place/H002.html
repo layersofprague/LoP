@@ -1480,16 +1480,21 @@ function renderExif(elId, data) {
     return;
   }
 
-  // Kredit (publikace/tisk, odkud fotka pochází) a Zdroj (instituce/web) popisují
-  // podobnou věc — sloučeno do jednoho řádku "Zdroj", zdroj odlišen kurzívou.
+  // Kredit (publikace/tisk), Zdroj (instituce/web) a Specifikace popisují podobnou
+  // věc — sloučeno do jednoho řádku "Zdroj": kredit prostým textem, zdroj i
+  // specifikace pod ním kurzívou, bez vlastních popisků.
   const _en = window.lopLang === 'en';
   const credit = humanizeVal(xv(data?.Credit) ?? xv(data?.credit), _en);
   const source = humanizeVal(xv(data?.source) ?? xv(data?.Source), _en);
-  const zdroj  = credit && source ? `${credit}<br><em>${source}</em>` : (credit ?? source);
+  const spec   = humanizeVal(xv(data?.identifier) ?? data?.SpecialInstructions, _en);
+  const zdrojLines = [];
+  if (credit) zdrojLines.push(credit);
+  if (source) zdrojLines.push(`<em>${source}</em>`);
+  if (spec)   zdrojLines.push(`<em>${spec}</em>`);
+  const zdroj = zdrojLines.length ? zdrojLines.join('<br>') : null;
 
   const fields = [
     { key: _en ? 'Author'  : 'Autor',     val: humanizeVal(xv(data?.creator) ?? data?.Artist, _en) },
-    { key: _en ? 'Spec.'   : 'Spec.',     val: humanizeVal(xv(data?.identifier) ?? data?.SpecialInstructions, _en) },
     { key: _en ? 'Source'  : 'Zdroj',     val: zdroj },
     { key: 'Copyright',                   val: humanizeVal(xv(data?.rights) ?? data?.Copyright ?? data?.CopyrightNotice, _en) },
   ];
