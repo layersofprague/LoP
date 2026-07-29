@@ -1429,7 +1429,7 @@ window.addEventListener('load', renderPlaceI18n);
   </div>
   <!-- Overlay: historická fotka, maskována zprava -->
   <div class="sl-top" id="slTop">
-    <img src="../foto/H001b_h.jpg" alt="Holešovický přístav ~1930"/>
+    <img src="../foto/H001b_h.jpg" alt="Holešovický přístav 1909"/>
   </div>
   <!-- Hairline divider -->
   <div class="sl-divider" id="slDivider"></div>
@@ -1458,7 +1458,7 @@ window.addEventListener('load', renderPlaceI18n);
         <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
       <div>
-        <div class="copy-col-head" id="copyColHist">~1930</div>
+        <div class="copy-col-head" id="copyColHist">1909</div>
         <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
     </div>
@@ -1468,7 +1468,7 @@ window.addEventListener('load', renderPlaceI18n);
 <div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
-  <div class="sl-lbl active" id="lblHist">~1930</div>
+  <div class="sl-lbl active" id="lblHist">1909</div>
 </div>
 
 </div><!-- /hero-wrap -->
@@ -1480,7 +1480,7 @@ window.addEventListener('load', renderPlaceI18n);
       <img src="../foto/H001b_s.jpg" alt="Holešovický přístav dnes"/>
     </div>
     <div class="sl-top" id="slTopFs">
-      <img src="../foto/H001b_h.jpg" alt="Holešovický přístav ~1930"/>
+      <img src="../foto/H001b_h.jpg" alt="Holešovický přístav 1909"/>
     </div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1496,7 +1496,7 @@ window.addEventListener('load', renderPlaceI18n);
           <div id="copyNowFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
         </div>
         <div>
-          <div class="copy-col-head" id="copyColHistFs">~1930</div>
+          <div class="copy-col-head" id="copyColHistFs">1909</div>
           <div id="copyHistFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
         </div>
       </div>
@@ -1504,7 +1504,7 @@ window.addEventListener('load', renderPlaceI18n);
   </div>
   <div class="rv-fs-labels" id="fsModalLabels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();loadExif();toggleFsCopy('copyModalFs')" title="Autorská práva">©</button>
-    <span id="fsModalLabel">Holešovický přístav — současnost vs. ~1930</span>
+    <span id="fsModalLabel">Holešovický přístav — současnost vs. 1909</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1734,8 +1734,8 @@ window.addEventListener('load', renderPlaceI18n);
     <div class="gallery">
       <div class="gallery-thumb" onclick="openGallery(0)">
         <img src="https://layersofprague.github.io/LoP/foto/H001b_ove_thumb.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1930"/>
-        <div class="gt-label">~1930</div>
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="1909"/>
+        <div class="gt-label">1909</div>
       </div>
       <div class="gallery-thumb" onclick="openGallery(1)">
         <img src="https://layersofprague.github.io/LoP/foto/H001j_h.jpg"
@@ -1955,7 +1955,7 @@ function updateYearLabels(histData, nowData) {
     const lh = document.getElementById('lblHist');    if (lh) lh.textContent = histYear;
     const ch = document.getElementById('copyColHist'); if (ch) ch.textContent = histYear;
     const chf = document.getElementById('copyColHistFs'); if (chf) chf.textContent = histYear;
-    // fsModalLabel je celá věta ("... vs. ~1930") — nahradit jen rok v ní, ne přepsat celý text
+    // fsModalLabel je celá věta ("... vs. 1909") — nahradit jen rok v ní, ne přepsat celý text
     const fml = document.getElementById('fsModalLabel');
     if (fml && /~?\d{4}/.test(fml.textContent)) fml.textContent = fml.textContent.replace(/~?\d{4}/, histYear);
   }
@@ -2102,7 +2102,7 @@ function updateInsiderGate() {
       const divider = heroEl.querySelector('.sl-divider');
       if (divider) divider.style.left = (pct * 100) + '%';
       // Aktivní strana (větší plocha) = bělejší letopočet
-      // Levý letopočet (1930 / hist) je aktivní když je vidět víc historické fotky (pct > 0.5)
+      // Levý letopočet (historická fotka) je aktivní když je vidět víc historické fotky (pct > 0.5)
       if (lblLeftEl)  lblLeftEl.classList.toggle('active', pct > 0.5);
       if (lblRightEl) lblRightEl.classList.toggle('active', pct <= 0.5);
     }

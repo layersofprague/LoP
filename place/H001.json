@@ -167,16 +167,16 @@
       "en": "Prague orientation map 1909–1914 vs. 2025 orthophoto map"
     },
     "fsLabel": {
-      "cs": "Holešovický přístav — současnost vs. ~1930",
-      "en": "Holešovice Port — present day vs. ~1930"
+      "cs": "Holešovický přístav — současnost vs. 1909",
+      "en": "Holešovice Port — present day vs. 1909"
     },
     "copyToday": {
       "cs": "Dnes",
       "en": "Today"
     },
     "copyHist": {
-      "cs": "~1930",
-      "en": "~1930"
+      "cs": "1909",
+      "en": "1909"
     },
     "copyRiverL": {
       "cs": "1909–1914",
