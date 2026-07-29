@@ -1816,6 +1816,11 @@ function toggleFullscreen() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
 
+// Rok pod sliderem (lblHist/lblNow) je vidět vždy, i bez otevření čehokoliv —
+// proto se EXIF načítá rovnou při načtení stránky, ne až líně při kliku
+// (jinak by tam chvíli svítil špatný zálohový rok, než se opraví).
+loadExif();
+
 /* ── GALLERY LIGHTBOX ── */
 (function() {
   const items = Array.from(document.querySelectorAll('#gallerySection .gallery-thumb')).map(thumb => {
