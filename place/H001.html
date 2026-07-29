@@ -1052,6 +1052,7 @@ a { color: inherit; text-decoration: none; }
   width: min(100vw, calc((100dvh - 80px) * 4 / 3));
   aspect-ratio: 4/3;
   flex-shrink: 0;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
 }
 @media (orientation: landscape) {
@@ -1975,7 +1976,19 @@ async function loadExif() {
    a _loadInsiderExif() dál v souboru), tady se jen ukazuje/skrývá. */
 function toggleFsCopy(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.toggle('open');
+  if (!el) return;
+  const opening = !el.classList.contains('open');
+  el.classList.toggle('open');
+  if (opening) {
+    const wrap = el.closest('.rv-fs-imgwrap, .fs-modal-inner, .rv-wrap');
+    const img  = wrap ? wrap.querySelector('img') : null;
+    if (wrap && img) {
+      const wr = wrap.getBoundingClientRect();
+      const ir = img.getBoundingClientRect();
+      el.style.left  = Math.max(0, ir.left  - wr.left)  + 'px';
+      el.style.right = Math.max(0, wr.right - ir.right) + 'px';
+    }
+  }
 }
 
 function openCopyright() {
