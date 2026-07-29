@@ -1455,11 +1455,11 @@ function renderExif(elId, data) {
   const _en = window.lopLang === 'en';
   const fields = [
     { key: _en ? 'Author'  : 'Autor',     val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
-    { key: _en ? 'Source'  : 'Zdroj',     val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
+    { key: _en ? 'Credit'  : 'Kredit',    val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
     { key: _en ? 'Spec.'   : 'Spec.',     val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
-    { key: _en ? 'Ref.'    : 'Ref.',      val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
+    { key: _en ? 'Source'  : 'Zdroj',     val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
     { key: 'Copyright',                   val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
-    { key: _en ? 'Date'    : 'Datum',     val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: _en ? 'Date'    : 'Datum',     val: data?.['photoshop:DateCreated'] || data?.['XMP-photoshop:DateCreated'] || data?.DateCreated || data?.['dc:date'] || data?.['XMP-dc:Date'] || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
