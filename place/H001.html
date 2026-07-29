@@ -1044,11 +1044,15 @@ a { color: inherit; text-decoration: none; }
   background: rgba(13,11,8,.8);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0));
-  transform: translateY(100%);
+  /* --copy-gap = mezera mezi spodkem kontejneru a skutečnou spodní hranou
+     fotky (object-fit:contain ji může vykreslit menší). Zavřený i otevřený
+     stav s ní počítají stejně, takže není potřeba nic resetovat při zavření —
+     dřív tu zůstal viset zbytek panelu přesně o --copy-gap pixelů. */
+  transform: translateY(calc(100% + var(--copy-gap, 0px)));
   transition: transform .3s var(--ease);
   border-top: 1px solid rgba(243,237,225,.12);
 }
-.fs-copy-modal.open { transform: translateY(0); }
+.fs-copy-modal.open { transform: translateY(calc(-1 * var(--copy-gap, 0px))); }
 .fs-copy-modal .copy-close {
   position: absolute; top: 10px; right: 14px;
   background: none; border: none; color: rgba(243,237,225,.5); cursor: pointer; font-size: 15px;
@@ -1994,21 +1998,23 @@ function toggleFsCopy(id) {
   const el = document.getElementById(id);
   if (!el) return;
   const opening = !el.classList.contains('open');
-  el.classList.toggle('open');
   if (opening) {
     const wrap = el.closest('.rv-fs-imgwrap, .fs-modal-inner, .rv-wrap');
     const img  = wrap ? wrap.querySelector('img') : null;
     if (wrap && img) {
       const wr = wrap.getBoundingClientRect();
       const ir = img.getBoundingClientRect();
-      el.style.left   = Math.max(0, ir.left   - wr.left)   + 'px';
-      el.style.right  = Math.max(0, wr.right  - ir.right)  + 'px';
+      el.style.left = Math.max(0, ir.left - wr.left) + 'px';
+      el.style.right = Math.max(0, wr.right - ir.right) + 'px';
       // object-fit:contain může fotku vykreslit menší, než je celý kontejner
       // (širokoúhlý plán v užším boxu) — panel má vyjíždět od spodní hrany
       // fotky samotné, ne od spodku kontejneru, přesně jako u sliderů.
-      el.style.bottom = Math.max(0, wr.bottom - ir.bottom) + 'px';
+      // --copy-gap řeší otevřený i zavřený stav stejně (viz CSS), takže se
+      // nemusí nic zvlášť resetovat při zavírání.
+      el.style.setProperty('--copy-gap', Math.max(0, wr.bottom - ir.bottom) + 'px');
     }
   }
+  el.classList.toggle('open');
 }
 
 function openCopyright() {
