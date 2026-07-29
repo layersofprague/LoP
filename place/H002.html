@@ -34,6 +34,12 @@
   --accent:   #B04020;
   --ok:       #3d7a4a;
   --ease: cubic-bezier(.22,.8,.36,1);
+
+  /* Poměr stran hero fotek (dnes/historická) — u tohoto místa 4:3. Jiné místo
+     s jinak tvarovanými fotkami tady stačí přepsat na skutečný poměr, ne
+     přepisovat aspect-ratio na několika místech zvlášť (.hero, .fs-modal-inner). */
+  --fs-ratio-w: 4;
+  --fs-ratio-h: 3;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -57,7 +63,7 @@ a { color: inherit; text-decoration: none; }
 .hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   background: #0d0b08;
   overflow: hidden;
   cursor: default;
@@ -163,7 +169,7 @@ a { color: inherit; text-decoration: none; }
 }
 .copy-col-head {
   font-family: 'Inter', sans-serif;
-  font-size: 8px; letter-spacing: .16em; text-transform: uppercase;
+  font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
   color: rgba(243,237,225,.8);
   margin-bottom: 3px; padding-bottom: 3px;
   border-bottom: 1px solid rgba(243,237,225,.1);
@@ -195,9 +201,9 @@ a { color: inherit; text-decoration: none; }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
   position: relative;
-  /* Šířka omezena, výška podle poměru stran */
-  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
-  aspect-ratio: 4/3;
+  /* Poměr stran je nastavitelný přes --fs-ratio-w/--fs-ratio-h (fallback 4:3). */
+  width: min(100vw, calc((100dvh - 80px) * var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3)));
+  aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   overflow: hidden; /* divider nepřesahuje */
   flex-shrink: 0;
 }
@@ -207,7 +213,7 @@ a { color: inherit; text-decoration: none; }
   .fs-modal-inner {
     width: auto;
     height: calc(100dvh - 40px);
-    aspect-ratio: 4/3;
+    aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   }
 }
 .fs-modal-inner .sl-base,
@@ -1490,7 +1496,7 @@ function renderExif(elId, data) {
   const zdrojLines = [];
   if (credit) zdrojLines.push(credit);
   if (source) zdrojLines.push(`<em>${source}</em>`);
-  if (spec)   zdrojLines.push(`<em>${spec}</em>`);
+  if (spec)   zdrojLines.push(`<em style="font-size:8.5px;opacity:.65">${spec}</em>`);
   const zdroj = zdrojLines.length ? zdrojLines.join('<br>') : null;
 
   const fields = [

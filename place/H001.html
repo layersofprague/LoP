@@ -34,6 +34,12 @@
   --accent:   #B04020;
   --ok:       #3d7a4a;
   --ease: cubic-bezier(.22,.8,.36,1);
+
+  /* Poměr stran hero fotek (dnes/historická) — u tohoto místa 4:3. Jiné místo
+     s jinak tvarovanými fotkami tady stačí přepsat na skutečný poměr, ne
+     přepisovat aspect-ratio na několika místech zvlášť (.hero, .fs-modal-inner). */
+  --fs-ratio-w: 4;
+  --fs-ratio-h: 3;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -57,7 +63,7 @@ a { color: inherit; text-decoration: none; }
 .hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   background: #0d0b08;
   overflow: hidden;
   cursor: default;
@@ -195,9 +201,10 @@ a { color: inherit; text-decoration: none; }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
   position: relative;
-  /* Šířka omezena, výška podle poměru stran */
-  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
-  aspect-ratio: 4/3;
+  /* Poměr stran je nastavitelný přes --fs-ratio-w/--fs-ratio-h (fallback 4:3) —
+     různá místa budou mít různě tvarované fotky, nemá být natvrdo 4:3 pro všechny. */
+  width: min(100vw, calc((100dvh - 80px) * var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3)));
+  aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   overflow: hidden; /* divider nepřesahuje */
   flex-shrink: 0;
 }
@@ -207,7 +214,7 @@ a { color: inherit; text-decoration: none; }
   .fs-modal-inner {
     width: auto;
     height: calc(100dvh - 40px);
-    aspect-ratio: 4/3;
+    aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   }
 }
 .fs-modal-inner .sl-base,
@@ -973,8 +980,8 @@ a { color: inherit; text-decoration: none; }
 }
 .rv-fs-modal.open { display: flex; }
 .rv-fs-modal .rv-wrap {
-  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
-  aspect-ratio: 4/3;
+  width: min(100vw, calc((100dvh - 80px) * var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3)));
+  aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 0; margin: 0;
@@ -984,7 +991,7 @@ a { color: inherit; text-decoration: none; }
   .rv-fs-modal .rv-wrap {
     width: auto;
     height: calc(100dvh - 40px);
-    aspect-ratio: 4/3;
+    aspect-ratio: var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3);
   }
 }
 .rv-fs-modal .rv-fs-labels {
@@ -1049,14 +1056,10 @@ a { color: inherit; text-decoration: none; }
 .fs-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
 .rv-fs-imgwrap {
   position: relative;
-  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
-  aspect-ratio: 4/3;
-  flex-shrink: 0;
+  width: 100%; max-width: 100vw;
+  flex: 1 1 auto; min-height: 0;
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-}
-@media (orientation: landscape) {
-  .rv-fs-imgwrap { width: auto; height: calc(100dvh - 40px); aspect-ratio: 4/3; }
 }
 .rv-fs-img {
   max-width: calc(100% - 24px);
