@@ -1805,6 +1805,25 @@ const PHOTO_NOW  = '../foto/H001b_s.jpg';
 
 let _exifLoaded = false;
 
+// exifr vrací XMP vlastnosti bez namespace prefixu (creator, source, description...),
+// ne jako 'dc:creator' apod. Lang-alt pole (description, rights) navíc přichází
+// jako objekt {lang, value}, ne prostý string — proto xv() rozbaluje .value.
+function xv(v) {
+  if (v == null) return null;
+  if (Array.isArray(v)) return v.length ? xv(v[0]) : null;
+  if (typeof v === 'object' && 'value' in v) return v.value;
+  return v;
+}
+
+// Rok z EXIF data pro popisek pod sliderem / hlavičku modalu — jen 4 číslice,
+// ne celý fallback řetězec (CreateDate apod. by mohl vrátit celé ISO datum).
+function xifYear(data) {
+  const raw = xv(data?.description) ?? data?.DateCreated ?? (data?.CreateDate ? String(data.CreateDate) : null);
+  if (raw == null) return null;
+  const m = String(raw).match(/\d{4}/);
+  return m ? m[0] : String(raw);
+}
+
 function renderExif(elId, data) {
   const el = document.getElementById(elId);
   if (!el) return;
@@ -1813,22 +1832,17 @@ function renderExif(elId, data) {
     return;
   }
 
-  // exifr vrací XMP vlastnosti bez namespace prefixu (creator, source, description...),
-  // ne jako 'dc:creator' apod. Lang-alt pole (description, rights) navíc přichází
-  // jako objekt {lang, value}, ne prostý string — proto xv() rozbaluje .value.
-  function xv(v) {
-    if (v == null) return null;
-    if (Array.isArray(v)) return v.length ? xv(v[0]) : null;
-    if (typeof v === 'object' && 'value' in v) return v.value;
-    return v;
-  }
+  // Kredit (publikace/tisk, odkud fotka pochází) a Zdroj (instituce/web) popisují
+  // podobnou věc — sloučeno do jednoho řádku "Zdroj", zdroj odlišen kurzívou.
+  const credit = xv(data?.Credit) ?? xv(data?.credit);
+  const source = xv(data?.source) ?? xv(data?.Source);
+  const zdroj  = credit && source ? `${credit} — <em>${source}</em>` : (credit ?? source);
 
   const _en = window.lopLang === 'en';
   const fields = [
     { key: _en ? 'Author'  : 'Autor',     val: xv(data?.creator)    ?? data?.Artist },
-    { key: _en ? 'Credit'  : 'Kredit',    val: xv(data?.Credit)     ?? xv(data?.credit) },
     { key: _en ? 'Spec.'   : 'Spec.',     val: xv(data?.identifier) ?? data?.SpecialInstructions },
-    { key: _en ? 'Source'  : 'Zdroj',     val: xv(data?.source)     ?? xv(data?.Source) },
+    { key: _en ? 'Source'  : 'Zdroj',     val: zdroj },
     { key: 'Copyright',                   val: xv(data?.rights)     ?? data?.Copyright ?? data?.CopyrightNotice },
     { key: _en ? 'Date'    : 'Datum',     val: xv(data?.description) ?? data?.DateCreated ?? (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
@@ -1838,6 +1852,21 @@ function renderExif(elId, data) {
   ).join('');
 
   el.innerHTML = rows || `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_missing')}</div>`;
+}
+
+/* Popisek roku pod sliderem a hlavička sloupce v info modalu musí ukazovat
+   totéž, co reálně říká EXIF — ne odhad z captions.json. Přepíše se, jakmile
+   EXIF dorazí; do té doby zůstává fallback text z HTML/captions. */
+function updateYearLabels(histData, nowData) {
+  const histYear = xifYear(histData);
+  if (histYear) {
+    const lh = document.getElementById('lblHist');    if (lh) lh.textContent = histYear;
+    const ch = document.getElementById('copyColHist'); if (ch) ch.textContent = histYear;
+  }
+  const nowYear = xifYear(nowData);
+  if (nowYear) {
+    const ln = document.getElementById('lblNow'); if (ln) ln.textContent = nowYear;
+  }
 }
 
 async function loadExif() {
@@ -1850,6 +1879,7 @@ async function loadExif() {
     ]);
     renderExif('copyHist', histData);
     renderExif('copyNow',  nowData);
+    updateYearLabels(histData, nowData);
   } catch(e) {
     ['copyHist','copyNow'].forEach(id => {
       const el = document.getElementById(id);
@@ -2853,11 +2883,13 @@ window._rvClosePlan = function() {
       if (typeof v === 'object' && 'value' in v) return v.value;
       return v;
     }
+    var credit = xv(data.Credit) ?? xv(data.credit);
+    var source = xv(data.source) ?? xv(data.Source);
+    var zdroj  = credit && source ? credit + ' — <em>' + source + '</em>' : (credit ?? source);
     var fields = [
       { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: xv(data.creator) ?? data.Artist },
-      { key: window.lopLang === 'en' ? 'Credit' : 'Kredit', val: xv(data.Credit) ?? xv(data.credit) },
       { key: window.lopLang === 'en' ? 'Spec.' : 'Spec.', val: xv(data.identifier) ?? data.SpecialInstructions },
-      { key: window.lopLang === 'en' ? 'Source' : 'Zdroj', val: xv(data.source) ?? xv(data.Source) },
+      { key: window.lopLang === 'en' ? 'Source' : 'Zdroj', val: zdroj },
       { key: 'Copyright',     val: xv(data.rights) ?? data.Copyright ?? data.CopyrightNotice },
       { key: window.lopLang === 'en' ? 'Date' : 'Datum', val: xv(data.description) ?? data.DateCreated ?? (data.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
     ];
