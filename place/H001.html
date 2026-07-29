@@ -1836,7 +1836,7 @@ function renderExif(elId, data) {
   // podobnou věc — sloučeno do jednoho řádku "Zdroj", zdroj odlišen kurzívou.
   const credit = xv(data?.Credit) ?? xv(data?.credit);
   const source = xv(data?.source) ?? xv(data?.Source);
-  const zdroj  = credit && source ? `${credit} — <em>${source}</em>` : (credit ?? source);
+  const zdroj  = credit && source ? `${credit}<br><em>${source}</em>` : (credit ?? source);
 
   const _en = window.lopLang === 'en';
   const fields = [
@@ -2885,7 +2885,7 @@ window._rvClosePlan = function() {
     }
     var credit = xv(data.Credit) ?? xv(data.credit);
     var source = xv(data.source) ?? xv(data.Source);
-    var zdroj  = credit && source ? credit + ' — <em>' + source + '</em>' : (credit ?? source);
+    var zdroj  = credit && source ? credit + '<br><em>' + source + '</em>' : (credit ?? source);
     var fields = [
       { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: xv(data.creator) ?? data.Artist },
       { key: window.lopLang === 'en' ? 'Spec.' : 'Spec.', val: xv(data.identifier) ?? data.SpecialInstructions },
