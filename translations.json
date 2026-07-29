@@ -1112,8 +1112,8 @@
     "en": "open to the public"
   },
   "access.exterior.restricted": {
-    "cs": "omezený přístup",
-    "en": "restricted access"
+    "cs": "příležitostně přístupné",
+    "en": "occasional access"
   },
   "access.exterior.none": {
     "cs": "nepřístupné",
@@ -1136,7 +1136,11 @@
     "en": "occasional access"
   },
   "access.interior.none": {
-    "cs": "bez interiéru",
-    "en": "no interior"
+    "cs": "–",
+    "en": "–"
+  },
+  "place.insider_tip_label": {
+    "cs": "Tip",
+    "en": "Tip"
   }
 }
