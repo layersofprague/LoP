@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#111111"/>
 <title id="pageTitle">Bašta sv. Máří Magdalény — LayersOfPrague</title>
-<meta name="description" id="metaDesc" content="Jeden z posledních dochovaných bašt barokního opevnění Prahy z let 1653–1730. Do roku 1926 se odtud dělem ohlašovalo pražské poledne."/>
+<meta name="description" id="metaDesc" content="Jeden z posledních dochovaných bašt barokního opevnění Prahy z let 1653–1730. V letech 1891–1911 se odtud dělem ohlašovalo pražské poledne."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -973,6 +973,8 @@ function renderPlaceI18n() {
   // Zajímavosti — veřejné, nezávislé na insider gatingu (updateInsiderGate() se jich netýká)
   const cl = document.getElementById('curiosityLabel');
   if (cl) cl.textContent = t('place.tip_label');
+  const clt = document.getElementById('curiosityTeaser');
+  if (clt && P.curiosityTeaser) clt.textContent = loc(P.curiosityTeaser);
   const ct = document.getElementById('curiosityText');
   if (ct && P.curiosity) ct.innerHTML = loc(P.curiosity);
 
@@ -1348,7 +1350,8 @@ window.addEventListener('load', renderPlaceI18n);
   <div class="section">
     <div class="tip">
       <div class="tip-label" id="curiosityLabel">Zajímavosti</div>
-      <div class="tip-text" style="font-style:normal" id="curiosityText">Až do roku 1926 se z bašty výstřelem z děla ohlašovalo <strong>pražské poledne</strong>. Signál ke spuštění byl dáván praporkem z věže Klementina, vzdáleného přibližně 700 metrů.</div>
+      <div class="tip-text" id="curiosityTeaser">Slyšeli jste někdy o pražském poledni?</div>
+      <div class="tip-text" style="font-style:normal;margin-top:6px" id="curiosityText">V letech 1891 až 1911 se z bašty výstřelem z děla ohlašovalo <strong>pražské poledne</strong>. Signál ke spuštění byl dáván praporkem z věže Klementina, vzdáleného přibližně 700 metrů. Podle tohoto akustického signálu si lidé v celém městě přesně seřizovali své hodinky. Tradice střílení poledne z této bašty skončila v roce 1911, kdy bylo oznamování přesného času přesunuto na jiné místo — na Opyš u Pražského hradu.</div>
     </div>
   </div>
 
@@ -1608,8 +1611,12 @@ function toggleFsCopy(id) {
     if (wrap && img) {
       const wr = wrap.getBoundingClientRect();
       const ir = img.getBoundingClientRect();
-      el.style.left  = Math.max(0, ir.left  - wr.left)  + 'px';
-      el.style.right = Math.max(0, wr.right - ir.right) + 'px';
+      el.style.left   = Math.max(0, ir.left   - wr.left)   + 'px';
+      el.style.right  = Math.max(0, wr.right  - ir.right)  + 'px';
+      // object-fit:contain může fotku vykreslit menší, než je celý kontejner
+      // — panel má vyjíždět od spodní hrany fotky samotné, ne od spodku
+      // kontejneru, přesně jako u sliderů.
+      el.style.bottom = Math.max(0, wr.bottom - ir.bottom) + 'px';
     }
   }
 }

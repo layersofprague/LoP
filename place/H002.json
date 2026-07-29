@@ -9,8 +9,8 @@
     "en": "St Mary Magdalene Bastion — LayersOfPrague"
   },
   "metaDesc": {
-    "cs": "Jeden z posledních dochovaných bašt barokního opevnění Prahy z let 1653–1730. Do roku 1926 se odtud dělem ohlašovalo pražské poledne.",
-    "en": "One of the last surviving bastions of Prague's Baroque fortifications, built 1653–1730. Until 1926, a cannon shot from here announced Prague's noon."
+    "cs": "Jeden z posledních dochovaných bašt barokního opevnění Prahy z let 1653–1730. V letech 1891–1911 se odtud dělem ohlašovalo pražské poledne.",
+    "en": "One of the last surviving bastions of Prague's Baroque fortifications, built 1653–1730. Between 1891 and 1911, a cannon shot from here announced Prague's noon."
   },
   "lede": {
     "cs": "Bašta XIX. je jedním z posledních dochovaných bašt barokního pásu, který mezi lety 1653 a 1730 obepnul celou Prahu na příkaz vojevůdce Innocentia Contiho. Nese jméno sv. Máří Magdalény — stejně jako ostatní bašty podél celého pásu dostala jméno po jednom z patronů, kterým se dobově zasvěcovaly jednotlivé úseky opevnění. Na levém břehu Vltavy stavbu vedl italský stavitel Carlo Lurago. Bašta měla zdvojenou střeleckou linii (tzv. fausse-braye) a je zapsána v Ústředním seznamu kulturních památek ČR jako součást městského opevnění Malé Strany a Hradčan. Dnes stojí bašta na pozemku Kramářovy vily, oficiální rezidence předsedy vlády ČR, a je běžně nepřístupná veřejnosti.",
@@ -92,8 +92,8 @@
     }
   },
   "curiosity": {
-    "cs": "Až do roku 1926 se z bašty výstřelem z děla ohlašovalo <strong>pražské poledne</strong>. Signál ke spuštění byl dáván praporkem z věže Klementina, vzdáleného přibližně 700 metrů.",
-    "en": "Until 1926, a cannon fired from the bastion announced <strong>Prague's noon</strong>. The signal to fire came via a flag cue from the Klementinum tower, about 700 metres away."
+    "cs": "V letech 1891 až 1911 se z bašty výstřelem z děla ohlašovalo <strong>pražské poledne</strong>. Signál ke spuštění byl dáván praporkem z věže Klementina, vzdáleného přibližně 700 metrů. Podle tohoto akustického signálu si lidé v celém městě přesně seřizovali své hodinky. Tradice střílení poledne z této bašty skončila v roce 1911, kdy bylo oznamování přesného času přesunuto na jiné místo — na Opyš u Pražského hradu.",
+    "en": "Between 1891 and 1911, a cannon fired from the bastion announced <strong>Prague's noon</strong>. The signal to fire came via a flag cue from the Klementinum tower, about 700 metres away. People across the city set their watches precisely by this acoustic signal. The tradition of firing the noon shot from this bastion ended in 1911, when the time signal moved elsewhere — to Opyš, by Prague Castle."
   },
   "insiderLink": {
     "url": "https://vlada.gov.cz/scripts/detail.php?pgid=1483",
@@ -101,5 +101,9 @@
       "cs": "Termíny na webu Úřadu vlády ČR",
       "en": "Dates on the Government Office website"
     }
+  },
+  "curiosityTeaser": {
+    "cs": "Slyšeli jste někdy o pražském poledni?",
+    "en": "Have you ever heard of Prague's noon?"
   }
 }

@@ -2001,8 +2001,12 @@ function toggleFsCopy(id) {
     if (wrap && img) {
       const wr = wrap.getBoundingClientRect();
       const ir = img.getBoundingClientRect();
-      el.style.left  = Math.max(0, ir.left  - wr.left)  + 'px';
-      el.style.right = Math.max(0, wr.right - ir.right) + 'px';
+      el.style.left   = Math.max(0, ir.left   - wr.left)   + 'px';
+      el.style.right  = Math.max(0, wr.right  - ir.right)  + 'px';
+      // object-fit:contain může fotku vykreslit menší, než je celý kontejner
+      // (širokoúhlý plán v užším boxu) — panel má vyjíždět od spodní hrany
+      // fotky samotné, ne od spodku kontejneru, přesně jako u sliderů.
+      el.style.bottom = Math.max(0, wr.bottom - ir.bottom) + 'px';
     }
   }
 }
