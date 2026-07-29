@@ -1033,7 +1033,7 @@ a { color: inherit; text-decoration: none; }
 }
 .fs-copy-btn:hover { color: #fff; }
 .fs-copy-modal {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9200;
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
   background: rgba(13,11,8,.8);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0));
@@ -1047,6 +1047,16 @@ a { color: inherit; text-decoration: none; }
   background: none; border: none; color: rgba(243,237,225,.5); cursor: pointer; font-size: 15px;
 }
 .fs-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
+.rv-fs-imgwrap {
+  position: relative;
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  aspect-ratio: 4/3;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+@media (orientation: landscape) {
+  .rv-fs-imgwrap { width: auto; height: calc(100dvh - 40px); aspect-ratio: 4/3; }
+}
 .rv-fs-img {
   max-width: calc(100% - 24px);
   max-height: calc(100% - 48px);
@@ -1459,23 +1469,23 @@ window.addEventListener('load', renderPlaceI18n);
       </svg>
     </div>
     <div class="sl-divider" id="slDividerFs"></div>
+    <div class="fs-copy-modal" id="copyModalFs">
+      <button class="copy-close" onclick="toggleFsCopy('copyModalFs')">✕</button>
+      <div class="copy-grid">
+        <div>
+          <div class="copy-col-head" id="copyColNowFs">Dnes</div>
+          <div id="copyNowFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+        </div>
+        <div>
+          <div class="copy-col-head" id="copyColHistFs">~1930</div>
+          <div id="copyHistFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="rv-fs-labels" id="fsModalLabels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();loadExif();toggleFsCopy('copyModalFs')" title="Autorská práva">©</button>
     <span id="fsModalLabel">Holešovický přístav — současnost vs. ~1930</span>
-  </div>
-  <div class="fs-copy-modal" id="copyModalFs">
-    <button class="copy-close" onclick="toggleFsCopy('copyModalFs')">✕</button>
-    <div class="copy-grid">
-      <div>
-        <div class="copy-col-head" id="copyColNowFs">Dnes</div>
-        <div id="copyNowFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-      </div>
-      <div>
-        <div class="copy-col-head" id="copyColHistFs">~1930</div>
-        <div id="copyHistFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-      </div>
-    </div>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1926,6 +1936,9 @@ function updateYearLabels(histData, nowData) {
     const lh = document.getElementById('lblHist');    if (lh) lh.textContent = histYear;
     const ch = document.getElementById('copyColHist'); if (ch) ch.textContent = histYear;
     const chf = document.getElementById('copyColHistFs'); if (chf) chf.textContent = histYear;
+    // fsModalLabel je celá věta ("... vs. ~1930") — nahradit jen rok v ní, ne přepsat celý text
+    const fml = document.getElementById('fsModalLabel');
+    if (fml && /~?\d{4}/.test(fml.textContent)) fml.textContent = fml.textContent.replace(/~?\d{4}/, histYear);
   }
   const nowYear = xifYear(nowData);
   if (nowYear) {
@@ -2158,6 +2171,7 @@ function toggleFullscreen() {
     ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
     : '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
   if (_fsOpen && window._fsSetPos) window._fsSetPos(0.35);
+  if (_fsOpen) loadExif();
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
 
@@ -2780,23 +2794,23 @@ window.lopAuth.onLogout(() => {
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
       </svg>
     </div>
+    <div class="fs-copy-modal" id="rvCopyRiverFs">
+      <button class="copy-close" onclick="toggleFsCopy('rvCopyRiverFs')">✕</button>
+      <div class="copy-grid">
+        <div>
+          <div class="copy-col-head">1909–1914</div>
+          <div id="rvExifPlan1909Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+        </div>
+        <div>
+          <div class="copy-col-head" id="copyRiverRHeadFs">Dnes (ortofoto)</div>
+          <div id="rvExifOrtofotoFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="rv-fs-labels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyRiverFs')" title="Autorská práva">©</button>
     <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy 1909–1914 vs. současný letecký snímek</span>
-  </div>
-  <div class="fs-copy-modal" id="rvCopyRiverFs">
-    <button class="copy-close" onclick="toggleFsCopy('rvCopyRiverFs')">✕</button>
-    <div class="copy-grid">
-      <div>
-        <div class="copy-col-head">1909–1914</div>
-        <div id="rvExifPlan1909Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-      </div>
-      <div>
-        <div class="copy-col-head" id="copyRiverRHeadFs">Dnes (ortofoto)</div>
-        <div id="rvExifOrtofotoFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -2886,14 +2900,16 @@ window.lopAuth.onLogout(() => {
   <button class="rv-fs-close" onclick="window._rvClose1938()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy, 1938" class="rv-fs-img" id="imgPlan1938Fs"/>
+  <div class="rv-fs-imgwrap">
+    <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy, 1938" class="rv-fs-img" id="imgPlan1938Fs"/>
+    <div class="fs-copy-modal" id="rvCopy1938Fs">
+      <button class="copy-close" onclick="toggleFsCopy('rvCopy1938Fs')">✕</button>
+      <div id="rvExif1938Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+    </div>
+  </div>
   <div class="rv-fs-labels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopy1938Fs')" title="Autorská práva">©</button>
     <span id="fs1938Label">Orientační plán Prahy, 1938</span>
-  </div>
-  <div class="fs-copy-modal" id="rvCopy1938Fs">
-    <button class="copy-close" onclick="toggleFsCopy('rvCopy1938Fs')">✕</button>
-    <div id="rvExif1938Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
   </div>
 </div>
 
@@ -2917,14 +2933,16 @@ document.addEventListener('keydown', function(e) {
   <button class="rv-fs-close" onclick="window._rvCloseStavba()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/H001h_h.jpg" alt="Rozšíření přístavu v letech 1906–1908" class="rv-fs-img" id="imgStavbaFs"/>
+  <div class="rv-fs-imgwrap">
+    <img src="../foto/H001h_h.jpg" alt="Rozšíření přístavu v letech 1906–1908" class="rv-fs-img" id="imgStavbaFs"/>
+    <div class="fs-copy-modal" id="rvCopyStavbaFs">
+      <button class="copy-close" onclick="toggleFsCopy('rvCopyStavbaFs')">✕</button>
+      <div id="rvExifStavbaFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+    </div>
+  </div>
   <div class="rv-fs-labels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyStavbaFs')" title="Autorská práva">©</button>
     <span id="fsStavbaLabel">Rozšíření přístavu v letech 1906–1908</span>
-  </div>
-  <div class="fs-copy-modal" id="rvCopyStavbaFs">
-    <button class="copy-close" onclick="toggleFsCopy('rvCopyStavbaFs')">✕</button>
-    <div id="rvExifStavbaFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
   </div>
 </div>
 
@@ -2943,14 +2961,16 @@ window._rvCloseStavba = function() {
   <button class="rv-fs-close" onclick="window._rvClosePlan()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
-  <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img" id="imgPlan1894Fs"/>
+  <div class="rv-fs-imgwrap">
+    <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img" id="imgPlan1894Fs"/>
+    <div class="fs-copy-modal" id="rvCopyPlanFs">
+      <button class="copy-close" onclick="toggleFsCopy('rvCopyPlanFs')">✕</button>
+      <div id="rvExifPlan1894Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+    </div>
+  </div>
   <div class="rv-fs-labels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyPlanFs')" title="Autorská práva">©</button>
     <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
-  </div>
-  <div class="fs-copy-modal" id="rvCopyPlanFs">
-    <button class="copy-close" onclick="toggleFsCopy('rvCopyPlanFs')">✕</button>
-    <div id="rvExifPlan1894Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
   </div>
 </div>
 
