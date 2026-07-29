@@ -1019,11 +1019,34 @@ a { color: inherit; text-decoration: none; }
 }
 
 .rv-fs-labels {
-  display: flex; justify-content: center; width: 100%; max-width: 1200px;
+  display: flex; justify-content: flex-start; align-items: center; gap: 9px;
+  width: 100%; max-width: 1200px;
   padding: 8px 4px 0;
   font-family: 'Inter', sans-serif; font-size: 12px;
   color: rgba(255,255,255,.7);
 }
+.fs-copy-btn {
+  flex-shrink: 0; background: transparent; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 14px; letter-spacing: .04em;
+  color: rgba(255,255,255,.55); padding: 2px 0; line-height: 1;
+  transition: color .15s;
+}
+.fs-copy-btn:hover { color: #fff; }
+.fs-copy-modal {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9200;
+  background: rgba(13,11,8,.8);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0));
+  transform: translateY(100%);
+  transition: transform .3s var(--ease);
+  border-top: 1px solid rgba(243,237,225,.12);
+}
+.fs-copy-modal.open { transform: translateY(0); }
+.fs-copy-modal .copy-close {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none; color: rgba(243,237,225,.5); cursor: pointer; font-size: 15px;
+}
+.fs-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
 .rv-fs-img {
   max-width: calc(100% - 24px);
   max-height: calc(100% - 48px);
@@ -1227,6 +1250,7 @@ function renderPlaceI18n() {
     copyPlanHead:   C.plan1894,
     copy1938Head:   C.plan1938,
     copyRiverRHead: C.copyRiverR,
+    copyRiverRHeadFs: C.copyRiverR,
     fsPlan1894Label:C.plan1894,
     fs1938Label:    C.plan1938,
     fsModalLabel:   C.fsLabel,
@@ -1437,7 +1461,21 @@ window.addEventListener('load', renderPlaceI18n);
     <div class="sl-divider" id="slDividerFs"></div>
   </div>
   <div class="rv-fs-labels" id="fsModalLabels">
+    <button class="fs-copy-btn" onclick="event.stopPropagation();loadExif();toggleFsCopy('copyModalFs')" title="Autorská práva">©</button>
     <span id="fsModalLabel">Holešovický přístav — současnost vs. ~1930</span>
+  </div>
+  <div class="fs-copy-modal" id="copyModalFs">
+    <button class="copy-close" onclick="toggleFsCopy('copyModalFs')">✕</button>
+    <div class="copy-grid">
+      <div>
+        <div class="copy-col-head" id="copyColNowFs">Dnes</div>
+        <div id="copyNowFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+      <div>
+        <div class="copy-col-head" id="copyColHistFs">~1930</div>
+        <div id="copyHistFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+    </div>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1887,11 +1925,13 @@ function updateYearLabels(histData, nowData) {
   if (histYear) {
     const lh = document.getElementById('lblHist');    if (lh) lh.textContent = histYear;
     const ch = document.getElementById('copyColHist'); if (ch) ch.textContent = histYear;
+    const chf = document.getElementById('copyColHistFs'); if (chf) chf.textContent = histYear;
   }
   const nowYear = xifYear(nowData);
   if (nowYear) {
     const ln = document.getElementById('lblNow');    if (ln) ln.textContent = nowYear;
     const cn = document.getElementById('copyColNow'); if (cn) cn.textContent = nowYear;
+    const cnf = document.getElementById('copyColNowFs'); if (cnf) cnf.textContent = nowYear;
   }
 }
 
@@ -1905,13 +1945,24 @@ async function loadExif() {
     ]);
     renderExif('copyHist', histData);
     renderExif('copyNow',  nowData);
+    renderExif('copyHistFs', histData);
+    renderExif('copyNowFs',  nowData);
     updateYearLabels(histData, nowData);
   } catch(e) {
-    ['copyHist','copyNow'].forEach(id => {
+    ['copyHist','copyNow','copyHistFs','copyNowFs'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_error')}</div>`;
     });
   }
+}
+
+/* Fullscreen copyright panel — jeden generický přepínač pro všechny fullscreen
+   modaly (hero, plán 1894, stavba, 1938, ortofoto), místo zvlášť psané funkce
+   pro každý. Data do panelů se plní z už načteného EXIF (viz loadExif() níže
+   a _loadInsiderExif() dál v souboru), tady se jen ukazuje/skrývá. */
+function toggleFsCopy(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
 }
 
 function openCopyright() {
@@ -2730,8 +2781,22 @@ window.lopAuth.onLogout(() => {
       </svg>
     </div>
   </div>
-  <div class="rv-fs-labels" style="justify-content:center">
+  <div class="rv-fs-labels">
+    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyRiverFs')" title="Autorská práva">©</button>
     <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy 1909–1914 vs. současný letecký snímek</span>
+  </div>
+  <div class="fs-copy-modal" id="rvCopyRiverFs">
+    <button class="copy-close" onclick="toggleFsCopy('rvCopyRiverFs')">✕</button>
+    <div class="copy-grid">
+      <div>
+        <div class="copy-col-head">1909–1914</div>
+        <div id="rvExifPlan1909Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+      <div>
+        <div class="copy-col-head" id="copyRiverRHeadFs">Dnes (ortofoto)</div>
+        <div id="rvExifOrtofotoFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2823,7 +2888,12 @@ window.lopAuth.onLogout(() => {
   </button>
   <img src="../foto/H001_orientacni_plan_Prahy_1938.jpg" alt="Orientační plán Prahy, 1938" class="rv-fs-img" id="imgPlan1938Fs"/>
   <div class="rv-fs-labels">
+    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopy1938Fs')" title="Autorská práva">©</button>
     <span id="fs1938Label">Orientační plán Prahy, 1938</span>
+  </div>
+  <div class="fs-copy-modal" id="rvCopy1938Fs">
+    <button class="copy-close" onclick="toggleFsCopy('rvCopy1938Fs')">✕</button>
+    <div id="rvExif1938Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
   </div>
 </div>
 
@@ -2849,7 +2919,12 @@ document.addEventListener('keydown', function(e) {
   </button>
   <img src="../foto/H001h_h.jpg" alt="Rozšíření přístavu v letech 1906–1908" class="rv-fs-img" id="imgStavbaFs"/>
   <div class="rv-fs-labels">
+    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyStavbaFs')" title="Autorská práva">©</button>
     <span id="fsStavbaLabel">Rozšíření přístavu v letech 1906–1908</span>
+  </div>
+  <div class="fs-copy-modal" id="rvCopyStavbaFs">
+    <button class="copy-close" onclick="toggleFsCopy('rvCopyStavbaFs')">✕</button>
+    <div id="rvExifStavbaFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
   </div>
 </div>
 
@@ -2870,7 +2945,12 @@ window._rvCloseStavba = function() {
   </button>
   <img src="../foto/H001_plan.jpg" alt="Plán holešovického přístavu, 1894" class="rv-fs-img" id="imgPlan1894Fs"/>
   <div class="rv-fs-labels">
+    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyPlanFs')" title="Autorská práva">©</button>
     <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
+  </div>
+  <div class="fs-copy-modal" id="rvCopyPlanFs">
+    <button class="copy-close" onclick="toggleFsCopy('rvCopyPlanFs')">✕</button>
+    <div id="rvExifPlan1894Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
   </div>
 </div>
 
@@ -2938,18 +3018,20 @@ window._rvClosePlan = function() {
   async function _loadInsiderExif() {
     if (typeof exifr === 'undefined') return;
     var images = [
-      { src: '../foto/H001_orientacni_plan_Prahy_1909–1914.jpg', elId: 'rvExifPlan1909' },
-      { src: '../foto/H001_ortofoto.jpg',                            elId: 'rvExifOrtofoto' },
-      { src: '../foto/H001_plan.jpg',                 elId: 'rvExifPlan1894' },
-      { src: '../foto/H001h_h.jpg',                              elId: 'rvExifStavba' },
-      { src: '../foto/H001_orientacni_plan_Prahy_1938.jpg',          elId: 'rvExif1938' },
+      { src: '../foto/H001_orientacni_plan_Prahy_1909–1914.jpg', elId: 'rvExifPlan1909', elIdFs: 'rvExifPlan1909Fs' },
+      { src: '../foto/H001_ortofoto.jpg',                            elId: 'rvExifOrtofoto', elIdFs: 'rvExifOrtofotoFs' },
+      { src: '../foto/H001_plan.jpg',                 elId: 'rvExifPlan1894', elIdFs: 'rvExifPlan1894Fs' },
+      { src: '../foto/H001h_h.jpg',                              elId: 'rvExifStavba', elIdFs: 'rvExifStavbaFs' },
+      { src: '../foto/H001_orientacni_plan_Prahy_1938.jpg',          elId: 'rvExif1938', elIdFs: 'rvExif1938Fs' },
     ];
     for (var i = 0; i < images.length; i++) {
       try {
         var data = await exifr.parse(images[i].src, true);
         _renderExifInsider(images[i].elId, data);
+        _renderExifInsider(images[i].elIdFs, data);
       } catch(e) {
         _renderExifInsider(images[i].elId, null);
+        _renderExifInsider(images[i].elIdFs, null);
       }
     }
   }
