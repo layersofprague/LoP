@@ -1452,14 +1452,24 @@ function renderExif(elId, data) {
     return;
   }
 
+  // exifr vrací XMP vlastnosti bez namespace prefixu (creator, source, description...),
+  // ne jako 'dc:creator' apod. Lang-alt pole (description, rights) navíc přichází
+  // jako objekt {lang, value}, ne prostý string — proto xv() rozbaluje .value.
+  function xv(v) {
+    if (v == null) return null;
+    if (Array.isArray(v)) return v.length ? xv(v[0]) : null;
+    if (typeof v === 'object' && 'value' in v) return v.value;
+    return v;
+  }
+
   const _en = window.lopLang === 'en';
   const fields = [
-    { key: _en ? 'Author'  : 'Autor',     val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
-    { key: _en ? 'Credit'  : 'Kredit',    val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
-    { key: _en ? 'Spec.'   : 'Spec.',     val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
-    { key: _en ? 'Source'  : 'Zdroj',     val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
-    { key: 'Copyright',                   val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
-    { key: _en ? 'Date'    : 'Datum',     val: data?.['photoshop:DateCreated'] || data?.['XMP-photoshop:DateCreated'] || data?.DateCreated || data?.['dc:date'] || data?.['XMP-dc:Date'] || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: _en ? 'Author'  : 'Autor',     val: xv(data?.creator)    ?? data?.Artist },
+    { key: _en ? 'Credit'  : 'Kredit',    val: xv(data?.Credit)     ?? xv(data?.credit) },
+    { key: _en ? 'Spec.'   : 'Spec.',     val: xv(data?.identifier) ?? data?.SpecialInstructions },
+    { key: _en ? 'Source'  : 'Zdroj',     val: xv(data?.source)     ?? xv(data?.Source) },
+    { key: 'Copyright',                   val: xv(data?.rights)     ?? data?.Copyright ?? data?.CopyrightNotice },
+    { key: _en ? 'Date'    : 'Datum',     val: xv(data?.description) ?? data?.DateCreated ?? (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
