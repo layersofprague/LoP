@@ -3021,17 +3021,24 @@ window._rvCloseStavba = function() {
 // object-fit:contain může fotku vykreslit užší než celý modal (na výšku
 // omezená fotka na výšku obrazovky v portrait) — popisek pod ní má mít
 // stejnou šířku jako fotka, jinak "začátek řádku" vyjde na levý okraj
-// obrazovky místo levého okraje fotky.
+// obrazovky místo levého okraje fotky. Měření musí počkat na skutečné
+// načtení fotky — bez ní neznáme její poměr stran a šířka by vyšla špatně.
 function _alignFsLabelsToImg(modalId) {
-  requestAnimationFrame(function() {
-    var modal = document.getElementById(modalId);
-    var img = modal ? modal.querySelector('.rv-fs-imgwrap img') : null;
-    var labels = modal ? modal.querySelector('.rv-fs-labels') : null;
-    if (img && labels) {
+  var modal = document.getElementById(modalId);
+  var img = modal ? modal.querySelector('.rv-fs-imgwrap img') : null;
+  var labels = modal ? modal.querySelector('.rv-fs-labels') : null;
+  if (!img || !labels) return;
+  function apply() {
+    requestAnimationFrame(function() {
       var w = img.getBoundingClientRect().width;
       if (w > 0) labels.style.width = w + 'px';
-    }
-  });
+    });
+  }
+  if (img.complete && img.naturalWidth > 0) {
+    apply();
+  } else {
+    img.addEventListener('load', apply, { once: true });
+  }
 }
 
 window._rvOpenPlan = function() {
