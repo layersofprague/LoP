@@ -1503,7 +1503,7 @@ window.addEventListener('load', renderPlaceI18n);
       <div class="fact"><div class="fact-k" id="factK2">Vytěženo</div><div class="fact-v">513 900 m³</div></div>
       <div class="fact"><div class="fact-k" id="factK3">Architekt budov</div><div class="fact-v">F. Sander, 1906</div></div>
       <div class="fact"><div class="fact-k" id="factAccExtK">Exteriér</div><div class="fact-v" id="factAccExtV">volně přístupné</div></div>
-      <div class="fact"><div class="fact-k" id="factAccIntK">Interiér</div><div class="fact-v" id="factAccIntV">soukromé byty</div></div>
+      <div class="fact"><div class="fact-k" id="factAccIntK">Interiér</div><div class="fact-v" id="factAccIntV">–</div></div>
     </div>
   </div>
 
@@ -1824,6 +1824,15 @@ function xifYear(data) {
   return m ? m[0] : String(raw);
 }
 
+// exifr někdy vrátí doslovný anglický string 'unknown' (typicky u autora) —
+// v češtině to chceme přeložit, ne nechat anglicky napůl cesty.
+function humanizeVal(v, isEn) {
+  if (typeof v === 'string' && v.trim().toLowerCase() === 'unknown') {
+    return isEn ? 'Unknown' : 'neznámý';
+  }
+  return v;
+}
+
 function renderExif(elId, data) {
   const el = document.getElementById(elId);
   if (!el) return;
@@ -1834,17 +1843,16 @@ function renderExif(elId, data) {
 
   // Kredit (publikace/tisk, odkud fotka pochází) a Zdroj (instituce/web) popisují
   // podobnou věc — sloučeno do jednoho řádku "Zdroj", zdroj odlišen kurzívou.
-  const credit = xv(data?.Credit) ?? xv(data?.credit);
-  const source = xv(data?.source) ?? xv(data?.Source);
+  const _en = window.lopLang === 'en';
+  const credit = humanizeVal(xv(data?.Credit) ?? xv(data?.credit), _en);
+  const source = humanizeVal(xv(data?.source) ?? xv(data?.Source), _en);
   const zdroj  = credit && source ? `${credit}<br><em>${source}</em>` : (credit ?? source);
 
-  const _en = window.lopLang === 'en';
   const fields = [
-    { key: _en ? 'Author'  : 'Autor',     val: xv(data?.creator)    ?? data?.Artist },
-    { key: _en ? 'Spec.'   : 'Spec.',     val: xv(data?.identifier) ?? data?.SpecialInstructions },
+    { key: _en ? 'Author'  : 'Autor',     val: humanizeVal(xv(data?.creator) ?? data?.Artist, _en) },
+    { key: _en ? 'Spec.'   : 'Spec.',     val: humanizeVal(xv(data?.identifier) ?? data?.SpecialInstructions, _en) },
     { key: _en ? 'Source'  : 'Zdroj',     val: zdroj },
-    { key: 'Copyright',                   val: xv(data?.rights)     ?? data?.Copyright ?? data?.CopyrightNotice },
-    { key: _en ? 'Date'    : 'Datum',     val: xv(data?.description) ?? data?.DateCreated ?? (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: 'Copyright',                   val: humanizeVal(xv(data?.rights) ?? data?.Copyright ?? data?.CopyrightNotice, _en) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
@@ -1865,7 +1873,8 @@ function updateYearLabels(histData, nowData) {
   }
   const nowYear = xifYear(nowData);
   if (nowYear) {
-    const ln = document.getElementById('lblNow'); if (ln) ln.textContent = nowYear;
+    const ln = document.getElementById('lblNow');    if (ln) ln.textContent = nowYear;
+    const cn = document.getElementById('copyColNow'); if (cn) cn.textContent = nowYear;
   }
 }
 
@@ -2883,15 +2892,20 @@ window._rvClosePlan = function() {
       if (typeof v === 'object' && 'value' in v) return v.value;
       return v;
     }
-    var credit = xv(data.Credit) ?? xv(data.credit);
-    var source = xv(data.source) ?? xv(data.Source);
+    function hz(v) {
+      if (typeof v === 'string' && v.trim().toLowerCase() === 'unknown') {
+        return window.lopLang === 'en' ? 'Unknown' : 'neznámý';
+      }
+      return v;
+    }
+    var credit = hz(xv(data.Credit) ?? xv(data.credit));
+    var source = hz(xv(data.source) ?? xv(data.Source));
     var zdroj  = credit && source ? credit + '<br><em>' + source + '</em>' : (credit ?? source);
     var fields = [
-      { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: xv(data.creator) ?? data.Artist },
-      { key: window.lopLang === 'en' ? 'Spec.' : 'Spec.', val: xv(data.identifier) ?? data.SpecialInstructions },
+      { key: window.lopLang === 'en' ? 'Author' : 'Autor', val: hz(xv(data.creator) ?? data.Artist) },
+      { key: window.lopLang === 'en' ? 'Spec.' : 'Spec.', val: hz(xv(data.identifier) ?? data.SpecialInstructions) },
       { key: window.lopLang === 'en' ? 'Source' : 'Zdroj', val: zdroj },
-      { key: 'Copyright',     val: xv(data.rights) ?? data.Copyright ?? data.CopyrightNotice },
-      { key: window.lopLang === 'en' ? 'Date' : 'Datum', val: xv(data.description) ?? data.DateCreated ?? (data.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+      { key: 'Copyright',     val: hz(xv(data.rights) ?? data.Copyright ?? data.CopyrightNotice) },
     ];
     var rows = fields.filter(function(f){ return f.val; }).map(function(f){
       return '<div class="copy-row"><div class="copy-key">' + f.key + '</div><div class="copy-val">' + f.val + '</div></div>';
