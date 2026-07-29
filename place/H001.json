@@ -223,10 +223,10 @@
   },
   "access": {
     "exterior": "public",
-    "interior": "private",
+    "interior": "mixed",
     "note": {
-      "cs": "Nábřeží a areál jsou veřejně průchozí, budovy jsou dnes soukromé bytové jednotky (Prague Marina).",
-      "en": "The embankment and grounds are open to walk through; the buildings themselves are now private residences (Prague Marina)."
+      "cs": "Nábřeží a areál jsou veřejně průchozí. Přístupnost jednotlivých budov se liší — dnes je řada z nich soukromými bytovými jednotkami (Prague Marina), podrobněji u jednotlivých staveb.",
+      "en": "The embankment and grounds are open to walk through. Access varies by building — many are now private residences (Prague Marina); see individual buildings for details."
     }
   }
 }
