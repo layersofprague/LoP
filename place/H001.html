@@ -1059,7 +1059,10 @@ a { color: inherit; text-decoration: none; }
   width: 100%; max-width: 100vw;
   flex: 1 1 auto; min-height: 0;
   overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.rv-fs-imgwrap .rv-fs-labels {
+  flex-shrink: 0;
 }
 .rv-fs-img {
   max-width: calc(100% - 24px);
@@ -1258,6 +1261,7 @@ function renderPlaceI18n() {
     capPlan1938:    C.plan1938,
     capMapa:        C.mapa,
     capRiverL:      C.plan1909,
+    rvFsRiverLabel: C.riverLabel,
     capRiverR:      C.today,
     copyColNow:     C.copyToday,
     copyColHist:    C.copyHist,
@@ -1668,7 +1672,7 @@ window.addEventListener('load', renderPlaceI18n);
             </div>
             <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-4);display:flex;justify-content:space-between;padding:4px 2px 0">
               <span id="capRiverL">1909–1914</span>
-              <span id="capRiverR">Dnes</span>
+              <span id="capRiverR">2025</span>
             </div>
           </div>
         </div>
@@ -2826,7 +2830,7 @@ window.lopAuth.onLogout(() => {
   </div>
   <div class="rv-fs-labels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyRiverFs')" title="Autorská práva">©</button>
-    <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy 1909–1914 vs. současný letecký snímek</span>
+    <span id="rvFsRiverLabel" style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.7)">Orientační plán Prahy 1909–1914 vs. ortofotomapa z roku 2025</span>
   </div>
 </div>
 
@@ -2922,10 +2926,10 @@ window.lopAuth.onLogout(() => {
       <button class="copy-close" onclick="toggleFsCopy('rvCopy1938Fs')">✕</button>
       <div id="rvExif1938Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
     </div>
-  </div>
-  <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopy1938Fs')" title="Autorská práva">©</button>
-    <span id="fs1938Label">Orientační plán Prahy, 1938</span>
+    <div class="rv-fs-labels">
+      <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopy1938Fs')" title="Autorská práva">©</button>
+      <span id="fs1938Label">Orientační plán Prahy, 1938</span>
+    </div>
   </div>
 </div>
 
@@ -2955,10 +2959,10 @@ document.addEventListener('keydown', function(e) {
       <button class="copy-close" onclick="toggleFsCopy('rvCopyStavbaFs')">✕</button>
       <div id="rvExifStavbaFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
     </div>
-  </div>
-  <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyStavbaFs')" title="Autorská práva">©</button>
-    <span id="fsStavbaLabel">Rozšíření přístavu v letech 1906–1908</span>
+    <div class="rv-fs-labels">
+      <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyStavbaFs')" title="Autorská práva">©</button>
+      <span id="fsStavbaLabel">Rozšíření přístavu v letech 1906–1908</span>
+    </div>
   </div>
 </div>
 
@@ -2983,10 +2987,10 @@ window._rvCloseStavba = function() {
       <button class="copy-close" onclick="toggleFsCopy('rvCopyPlanFs')">✕</button>
       <div id="rvExifPlan1894Fs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
     </div>
-  </div>
-  <div class="rv-fs-labels">
-    <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyPlanFs')" title="Autorská práva">©</button>
-    <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
+    <div class="rv-fs-labels">
+      <button class="fs-copy-btn" onclick="event.stopPropagation();toggleFsCopy('rvCopyPlanFs')" title="Autorská práva">©</button>
+      <span id="fsPlan1894Label">Plán holešovického přístavu, 1894</span>
+    </div>
   </div>
 </div>
 
