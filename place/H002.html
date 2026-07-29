@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" id="htmlRoot">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#111111"/>
-<title>Bašta sv. Máří Magdalény (XIX) — LayersOfPrague</title>
-<meta name="description" content="Jedna z mála dochovaných bašt pražského barokního opevnění. Od roku 1653 střežila severní přístup k Malé Straně — a každý den v poledne ohlašovala čas výstřelem z děla."/>
+<title id="pageTitle">Bašta sv. Máří Magdalény — LayersOfPrague</title>
+<meta name="description" id="metaDesc" content="Jeden z posledních dochovaných bastionů barokního opevnění Prahy z let 1653–1730. Do roku 1926 se odtud dělem ohlašovalo pražské poledne."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -83,13 +83,13 @@ a { color: inherit; text-decoration: none; }
 .sl-kicker { align-self: flex-start; transform: translateY(1px); }
 .sl-lbl {
   font-family: 'Inter', sans-serif;
-  font-size: 13px; line-height: 1;
-  letter-spacing: .02em;
+  font-size: 12px; line-height: 1;
+  letter-spacing: 0;
   color: var(--ink-4);
-  font-weight: 500;
-  transition: color .2s, font-weight .2s;
+  font-weight: 400;
+  transition: color .2s;
 }
-.sl-lbl.active { color: var(--ink); font-weight: 500; }
+.sl-lbl.active { color: var(--ink-4); font-weight: 400; }
 .sl-kicker {
   font-family: 'Inter', sans-serif;
   font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
@@ -188,14 +188,27 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(18px) saturate(0.8);
   -webkit-backdrop-filter: blur(18px) saturate(0.8);
   align-items: center; justify-content: center;
+  flex-direction: column; gap: 0;
   overscroll-behavior: contain;
+  padding: 44px 0 8px;
 }
 .fs-modal.open { display: flex; }
 .fs-modal-inner {
   position: relative;
-  width: min(100vw, calc(100dvh * 4 / 3));
-  height: min(100dvh, calc(100vw * 3 / 4));
-  max-width: 100vw; max-height: 100dvh;
+  /* Šířka omezena, výška podle poměru stran */
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  aspect-ratio: 4/3;
+  overflow: hidden; /* divider nepřesahuje */
+  flex-shrink: 0;
+}
+/* Landscape — využít celou výšku */
+@media (orientation: landscape) {
+  .fs-modal { padding: 8px 0 4px; }
+  .fs-modal-inner {
+    width: auto;
+    height: calc(100dvh - 40px);
+    aspect-ratio: 4/3;
+  }
 }
 .fs-modal-inner .sl-base,
 .fs-modal-inner .sl-top {
@@ -204,17 +217,17 @@ a { color: inherit; text-decoration: none; }
 .fs-modal-inner .sl-base img,
 .fs-modal-inner .sl-top img {
   width: 100%; height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   pointer-events: none; -webkit-user-drag: none;
 }
-.fs-modal-inner .sl-lbl {
-  position: absolute; bottom: 14px; z-index: 3;
-  color: rgba(238,239,235,.5);
-  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+
+.fs-modal .rv-fs-labels {
+  width: min(100vw, calc((100dvh - 80px) * 4 / 3));
+  padding: 6px 4px 0;
 }
-.fs-modal-inner .sl-lbl.active { color: #ffffff; }
-.fs-modal-inner .sl-lbl-l { left: 14px; }
-.fs-modal-inner .sl-lbl-r { right: 14px; }
+@media (orientation: landscape) {
+  .fs-modal .rv-fs-labels { width: auto; }
+}
 .fs-modal-inner .sl-handle {
   position: absolute; top: 50%; cursor: ew-resize; z-index: 4; pointer-events: auto;
 }
@@ -227,6 +240,74 @@ a { color: inherit; text-decoration: none; }
   color: #fff; z-index: 5;
 }
 .fs-close svg { width: 18px; height: 18px; pointer-events: none; }
+
+/* ── GALLERY LIGHTBOX ── */
+.gl-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 9200;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(18px) saturate(0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(0.8);
+  align-items: center; justify-content: center;
+  overscroll-behavior: contain;
+}
+.gl-modal.open { display: flex; }
+.gl-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 56px 16px;
+}
+.gl-img {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  -webkit-user-drag: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+.gl-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 5;
+}
+.gl-close svg { width: 18px; height: 18px; pointer-events: none; }
+.gl-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; z-index: 5;
+}
+.gl-nav:hover { background: rgba(255,255,255,.25); }
+.gl-nav svg { width: 18px; height: 18px; pointer-events: none; }
+.gl-prev { left: 12px; }
+.gl-next { right: 12px; }
+.gl-caption {
+  position: absolute; left: 0; right: 0; bottom: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0 60px;
+  text-align: center;
+  pointer-events: none;
+}
+.gl-caption-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; letter-spacing: .04em;
+  color: rgba(238,239,235,.85);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.gl-caption-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .06em;
+  color: rgba(238,239,235,.5);
+}
+@media (max-width: 480px) {
+  .gl-nav { width: 34px; height: 34px; }
+  .gl-caption { padding: 0 48px; }
+}
 
 /* ── RAZÍTKO V ROHU ── */
 .hero-stamp {
@@ -614,15 +695,20 @@ a { color: inherit; text-decoration: none; }
 .ar-cta-light .ar-cta-ic { background: rgba(238,239,235,.12); }
 .ar-cta-light .ar-cta-kick { color: rgba(238,239,235,.5); }
 
-/* keyword tags */
+/* keyword tags — jen klikatelné, vedou na overview.html?<kind>=<slug> */
+.kw-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
 .kw-tag {
   font-family: 'Inter', sans-serif;
   font-size: 10px; letter-spacing: .06em;
+  text-decoration: none;
   padding: 5px 11px; border-radius: 6px;
   background: #fff;
   border: 1.5px solid var(--rule);
   color: var(--ink-3);
+  transition: box-shadow .15s, transform .15s, border-color .15s;
 }
+.kw-tag:hover  { border-color: var(--ink-5); box-shadow: 0 3px 10px rgba(26,24,20,.12); transform: translateY(-1px); }
+.kw-tag:active { transform: translateY(0); box-shadow: none; }
 
 /* placeholder gallery */
 .gallery {
@@ -737,6 +823,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 819px) and (orientation: landscape) {
   body { padding-right: 64px !important; padding-bottom: 0 !important; }
 }
+
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
@@ -748,6 +835,245 @@ a { color: inherit; text-decoration: none; }
 
 <!-- TOPBAR -->
 <div id="lop-header"></div>
+<script src="../i18n.js"></script>
+<script src="../tags.js"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   H002 — Bašta sv. Máří Magdalény
+   Přeložitelná data stránky (CS + EN)
+   ══════════════════════════════════════════ */
+const PLACE_JSON_ID = 'H002';
+let PLACE = null;
+
+/* Place-specific obsah (lede, facts, captions, insider odstavec...)
+   žije v place/H002.json — sem se natahuje na vyžádání, stejně jako to
+   dělá map.html přes loadDetail(). Obecné UI popisky (Fakta, Kompas, Sdílet...)
+   jdou přes t() z translations.json — nekopírují se pro každé místo znovu. */
+function loadPlaceData() {
+  return fetch(PLACE_JSON_ID + '.json?v=' + (window.lopDataVer || ''))
+    .then(function(r) { return r.json(); })
+    .then(function(d) { PLACE = d; })
+    .catch(function() { PLACE = {}; });
+}
+
+/* ── Lokalizační helper ── */
+window.loc = function loc(obj) {
+  if (!obj || typeof obj === 'string') return obj;
+  const lang = window.lopLang || 'cs';
+  return obj[lang] || obj.cs;
+}
+var loc = window.loc;
+
+/* ── Render překladatelných částí stránky ──
+   Obecné UI popisky (Fakta, Kompas, Sdílet, Plán, AR, kategorie...) jdou
+   přes t() z translations.json. Place-specific obsah (lede, facts, related,
+   captions, insider odstavce, ranking...) čte PLACE, naplněné loadPlaceData(). */
+function renderPlaceI18n() {
+  if (!PLACE) return; // data ještě nedorazila — zůstává český fallback z HTML
+  const lang = window.lopLang || 'cs';
+  const P = PLACE;
+
+  // HTML lang atribut
+  const html = document.getElementById('htmlRoot');
+  if (html) html.lang = lang;
+
+  // Title a meta
+  const pt = document.getElementById('pageTitle');
+  if (pt) pt.textContent = loc(P.pageTitle);
+  const md = document.getElementById('metaDesc');
+  if (md) md.setAttribute('content', loc(P.metaDesc));
+
+  // H1
+  const title = document.getElementById('placeTitle');
+  if (title) title.innerHTML = loc(P.title);
+
+  // Lede
+  const lede = document.getElementById('placeLede');
+  if (lede) lede.textContent = loc(P.lede);
+
+  // Facts
+  P.facts.forEach(function(f, i) {
+    const el = document.getElementById('factK' + i);
+    if (el) el.textContent = loc(f.k);
+  });
+
+  // Přístupnost — label i hodnota jdou přes obecné klíče, jen slug (public/restricted/...) je place-specific
+  if (P.access) {
+    const extK = document.getElementById('factAccExtK'), extV = document.getElementById('factAccExtV');
+    const intK = document.getElementById('factAccIntK'), intV = document.getElementById('factAccIntV');
+    if (extK) extK.textContent = t('place.access_exterior');
+    if (extV) extV.textContent = t('access.exterior.' + P.access.exterior);
+    if (intK) intK.textContent = t('place.access_interior');
+    if (intV) intV.textContent = t('access.interior.' + P.access.interior);
+    if (P.access.note) {
+      const noteTxt = loc(P.access.note);
+      [extV, intV].forEach(el => { if (el) el.title = noteTxt; });
+    }
+  }
+
+  // Section labels — obecné z translations.json, "Stavby přístavu" je place-specific
+  var secMap = {
+    secFakta:    t('sheet.facts'),
+    secPoloha:   t('place.sec_location'),
+    secZebricek: t('place.sec_ranking'),
+    secAutor:    t('place.sec_author'),
+    secKlicova:  t('place.sec_keywords'),
+  };
+  Object.entries(secMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  });
+
+  // Tip
+  const tl = document.getElementById('tipLabel');
+  if (tl) tl.textContent = t('place.tip_label');
+  const it = document.getElementById('insiderTeaser');
+  if (it) it.textContent = loc(P.insiderTeaser);
+  const iwl = document.getElementById('insiderWhyLink');
+  if (iwl) iwl.textContent = t('place.paywall_why');
+  // insiderGateText/insiderGateLink se nastavují dynamicky v updateInsiderGate()
+  // podle stavu přihlášení (viz níže) — nemá smysl je nastavovat i tady.
+
+  // Klíčová slova — klikatelné ze slovníku (places-index.json) + popisné z extraKeywords
+  renderKeywords();
+
+  // Insider odstavce
+  ['p1','p2','p3','p4'].forEach(function(k) {
+    var el = document.getElementById('insiderP' + k.slice(1));
+    if (el && P.insider && P.insider[k]) el.innerHTML = loc(P.insider[k]);
+  });
+
+  // Kicker — kategorie místa podle places-index.json (cat.hist/arch/art/fun), ne natvrdo
+  updateCategoryKicker();
+
+  // Action buttons — obecné popisky z translations.json
+  var actMap = {
+    actKompas: t('place.act_compass'),
+    actSdilet: t('sheet.share'),
+    wishLbl:   t('place.plan'),
+    actAR:     t('place.act_ar'),
+  };
+  Object.entries(actMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  });
+
+  // Popisky plánů a sliderů — place-specific
+  var C = P.captions;
+  var capMap = {
+    capPlan1894:    C.plan1894,
+    capStavba:      C.stavba,
+    capStavba2:     C.stavba,
+    fsStavbaLabel:  C.stavba,
+    capPlan1938:    C.plan1938,
+    capMapa:        C.mapa,
+    capRiverL:      C.plan1909,
+    capRiverR:      C.today,
+    copyColNow:     C.copyToday,
+    copyColHist:    C.copyHist,
+    copyPlanHead:   C.copyPlan,
+    copy1938Head:   C.copy1938,
+    copyRiverRHead: C.copyRiverR,
+    fsPlan1894Label:C.plan1894,
+    fs1938Label:    C.plan1938,
+    fsModalLabel:   C.fsLabel,
+  };
+  Object.entries(capMap).forEach(function([id, val]) {
+    var el = document.getElementById(id);
+    if (el && val) el.textContent = loc(val);
+  });
+
+  // FS modal label
+  var fml = document.getElementById('fsModalLabel');
+  if (fml) fml.textContent = loc(C.fsLabel);
+
+  // Galerie
+  var sg = document.getElementById('secGalerie');
+  if (sg) sg.textContent = t('sheet.gallery');
+  var sgn = document.getElementById('secGalerieNum');
+  if (sgn) sgn.textContent = t('place.gallery_count', { n: P.galleryCount });
+
+  // Ranking
+  var lhKick = document.getElementById('lhKick');
+  if (lhKick) lhKick.textContent = t('place.best_shot');
+  document.querySelectorAll('#lhUnit1, #lhUnit2').forEach(function(el) {
+    el.textContent = t('place.pts');
+  });
+  var lhBy = document.getElementById('lhBy');
+  if (lhBy) lhBy.textContent = P.ranking.author + ', ' + loc(P.ranking.rankLabel);
+
+  // AR CTA
+  var arKick = document.getElementById('arCtaKick');
+  if (arKick) arKick.textContent = t('place.ar_cta_kick');
+  var arTitle = document.getElementById('arCtaTitle');
+  if (arTitle) arTitle.textContent = loc(P.arCtaTitle);
+
+  // Autor badge + meta
+  var ab = document.getElementById('autorBadge');
+  if (ab) ab.textContent = t('place.author_badge');
+  var ap = document.getElementById('autorPlaces');
+  if (ap) ap.textContent = t('place.stops', { n: P.curatorStops });
+  var ar = document.getElementById('autorStars');
+  if (ar && ar.textContent.match(/čeká|awaiting/)) ar.textContent = t('place.waiting_rating');
+
+  // Podřazené stavby areálu (related) — teď, když už jsou data k dispozici
+}
+
+
+/* ── KLÍČOVÁ SLOVA ──
+   Klikatelné chipy se berou z places-index.json (jediný zdroj pravdy pro filtrování). */
+let _placeRecord = null;
+
+function updateCategoryKicker() {
+  var k1 = document.getElementById('kickerCat1');
+  if (k1 && _placeRecord && _placeRecord.cat) k1.textContent = t('cat.' + _placeRecord.cat);
+}
+
+function renderKeywords() {
+  const box = document.getElementById('kwContainer');
+  if (!box) return;
+  const T = window.LOP_TAGS;
+  const chips = [];
+
+  if (_placeRecord && T) {
+    const p = _placeRecord;
+    const add = (label, slug, kind) => chips.push(
+      `<a class="kw-tag" data-kind="${kind}" href="../overview.html?${kind}=${encodeURIComponent(slug)}">${label}</a>`
+    );
+    if (p.district) add(T.districtLabel(p.district), p.district, 'district');
+    if (p.prague)   add(T.pragueLabel(p.prague), p.prague, 'prague');
+    (Array.isArray(p.style) ? p.style : p.style ? [p.style] : [])
+      .forEach(s => add(T.styleLabel(s), s, 'style'));
+    (p.tags || []).forEach(s => add(T.label(s), s, 'tag'));
+    (p.people || []).forEach(n => add(n, n, 'person'));
+  }
+
+  box.innerHTML = chips.join('');
+}
+
+/* Načíst záznam místa z places-index.json (kategorie, tagy, styl, district...) */
+fetch('../places-index.json?v=' + (window.lopDataVer||''))
+  .then(r => r.json())
+  .then(list => {
+    _placeRecord = list.find(x => x.id === PLACE_JSON_ID) || null;
+    updateCategoryKicker();
+    renderKeywords();
+  })
+  .catch(() => renderKeywords());
+
+/* Spustit render, až jsou k dispozici obě věci: DOM i place/H002.json */
+const _domReady = new Promise(function(resolve) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', resolve);
+  } else {
+    resolve();
+  }
+});
+Promise.all([loadPlaceData(), _domReady]).then(renderPlaceI18n);
+/* Záloha — znovu po plném načtení stránky (obrázky, fonty...) */
+window.addEventListener('load', renderPlaceI18n);
+</script>
 <script src="../header.js"></script>
 
 <!-- NAV -->
@@ -759,7 +1085,7 @@ a { color: inherit; text-decoration: none; }
 
   <!-- title + votes -->
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-    <h1 class="place-title">Bašta sv. <em>Máří Magdalény</em></h1>
+    <h1 class="place-title" id="placeTitle"><em>Bašta</em> sv. Máří Magdalény</h1>
     <div class="k-votes" style="flex-shrink:0;margin-top:6px">
       <button class="k-vote-btn" id="dislikeBtn" onclick="vote('dislike')" title="Nelíbí se">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
@@ -775,9 +1101,7 @@ a { color: inherit; text-decoration: none; }
   <!-- kicker -->
   <div class="kicker">
     <div class="k-dot"></div>
-    <span>Historie</span>
-    <span class="k-sep">·</span>
-    <span>Opevnění</span>
+    <span id="kickerCat1">Historie</span>
   </div>
 
 <div class="hero" id="hero">
@@ -812,11 +1136,11 @@ a { color: inherit; text-decoration: none; }
     <button class="copy-close" onclick="closeCopyright()">✕</button>
     <div class="copy-grid" id="copyGrid">
       <div>
-        <div class="copy-col-head">Dnes</div>
+        <div class="copy-col-head" id="copyColNow">Dnes</div>
         <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
       <div>
-        <div class="copy-col-head">~1900</div>
+        <div class="copy-col-head" id="copyColHist">~1900</div>
         <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
     </div>
@@ -826,7 +1150,6 @@ a { color: inherit; text-decoration: none; }
 <div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
-  <div class="sl-kicker">Tehdy &amp; Dnes</div>
   <div class="sl-lbl active" id="lblHist">~1900</div>
 </div>
 
@@ -841,15 +1164,39 @@ a { color: inherit; text-decoration: none; }
     <div class="sl-top" id="slTopFs">
       <img src="../foto/H002_h.jpg" alt="Bašta sv. Máří Magdalény ~1900"/>
     </div>
-    <div class="sl-lbl sl-lbl-l" id="lblNowFs">2026</div>
-    <div class="sl-lbl sl-lbl-r" id="lblHistFs">~1900</div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/>
       </svg>
     </div>
+    <div class="sl-divider" id="slDividerFs"></div>
+  </div>
+  <div class="rv-fs-labels" id="fsModalLabels">
+    <span id="fsModalLabel">Bašta sv. Máří Magdalény — současnost vs. ~1900</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
+
+<!-- GALLERY LIGHTBOX -->
+<div class="gl-modal" id="glModal">
+  <div class="gl-inner">
+    <img class="gl-img" id="glImg" src="" alt=""/>
+    <div class="gl-caption">
+      <div class="gl-caption-label" id="glLabel"></div>
+      <div class="gl-caption-count" id="glCount"></div>
+    </div>
+  </div>
+  <button class="gl-nav gl-prev" onclick="glPrev(event)" title="Předchozí">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="gl-nav gl-next" onclick="glNext(event)" title="Další">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <button class="gl-close" onclick="closeGallery()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
@@ -861,25 +1208,25 @@ a { color: inherit; text-decoration: none; }
 
   <!-- actions -->
   <div class="actions" style="grid-template-columns:repeat(6,1fr)">
-    <a href="../compass.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény+(XIX)" class="act-btn" title="Kompas">
+    <a href="../compass.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-      <span class="act-lbl">Kompas</span>
+      <span class="act-lbl" id="actKompas">Kompas</span>
     </a>
     <a href="https://mapy.cz/zakladni?q=50.09305881760058,14.411785293307434&route-end=50.09305881760058,14.411785293307434&transport=public" class="act-btn" target="_blank" title="Mapy.cz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Mapy.cz</span>
+      <span class="act-lbl" id="actMapy">Mapy.cz</span>
     </a>
     <a href="https://www.google.com/maps/dir/?api=1&destination=50.09305881760058,14.411785293307434&travelmode=transit" class="act-btn" target="_blank" title="Google Maps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span class="act-lbl">Google</span>
+      <span class="act-lbl" id="actGoogle">Google</span>
     </a>
     <button class="act-btn" onclick="share()" title="Sdílet">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      <span class="act-lbl">Sdílet</span>
+      <span class="act-lbl" id="actSdilet">Sdílet</span>
     </button>
-    <a href="../ar-intro.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény+(XIX)&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH002_ove_thumb.jpg" class="act-btn" title="AR">
+    <a href="../ar-intro.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH002_ove_thumb.jpg" class="act-btn" title="AR">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
-      <span class="act-lbl">AR</span>
+      <span class="act-lbl" id="actAR">AR</span>
     </a>
     <button class="act-btn" id="wishBtn" onclick="toggleWishBtn()" title="Přidat do plánu">
       <svg id="wishIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
@@ -888,94 +1235,74 @@ a { color: inherit; text-decoration: none; }
   </div>
 
   <!-- lede -->
-  <p class="lede">Jedna z mála dochovaných bašt pražského barokního opevnění na levém břehu Vltavy. Bašta XIX. nese jméno světice Máří Magdalény a do roku 1926 z ní každý den v poledne zazněl dělový výstřel — signál pro celou Prahu. Dnes na jejím místě stojí Kramářova vila, ale terén bašty je stále čitelný.</p>
+  <p class="lede" id="placeLede">Bašta XIX. nese jméno kostela sv. Máří Magdalény a je jedním z posledních dochovaných bastionů barokního pásu, který mezi lety 1653 a 1730 obepnul celou Prahu na příkaz vojevůdce Innocentia Contiho. Na levém břehu Vltavy stavbu vedl italský stavitel Carlo Lurago. Bastion měl zdvojenou střeleckou linii (tzv. fausse-braye) a je zapsán v Ústředním seznamu kulturních památek ČR jako součást městského opevnění Malé Strany a Hradčan. Až do roku 1926 se odtud výstřelem z děla ohlašovalo pražské poledne — signál dostával povel praporkem z věže Klementina. Dnes stojí bašta na pozemku Kramářovy vily, oficiální rezidence předsedy vlády ČR, a je běžně nepřístupná veřejnosti.</p>
 
   <!-- fakta -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Fakta</span>
+      <span class="sec-label" id="secFakta">Fakta</span>
       <div class="sec-rule"></div>
-      <span class="sec-num">4 položky</span>
+      <span class="sec-num">6 položek</span>
     </div>
     <div class="facts">
-      <div class="fact"><div class="fact-k">Výstavba</div><div class="fact-v">1653–1727</div></div>
-      <div class="fact"><div class="fact-k">Sloh</div><div class="fact-v">Barokní pevnost</div></div>
-      <div class="fact"><div class="fact-k">Památka od</div><div class="fact-v">1964</div></div>
-      <div class="fact"><div class="fact-k">Současný stav</div><div class="fact-v">Dochovaná</div></div>
+      <div class="fact"><div class="fact-k" id="factK0">Vybudováno</div><div class="fact-v">1653–1730</div></div>
+      <div class="fact"><div class="fact-k" id="factK1">Šířka hrdla</div><div class="fact-v">145 m</div></div>
+      <div class="fact"><div class="fact-k" id="factK2">Hloubka</div><div class="fact-v">102 m</div></div>
+      <div class="fact"><div class="fact-k" id="factK3">Ohlašovalo poledne do</div><div class="fact-v">1926</div></div>
+      <div class="fact"><div class="fact-k" id="factAccExtK">Exteriér</div><div class="fact-v" id="factAccExtV">omezený přístup</div></div>
+      <div class="fact"><div class="fact-k" id="factAccIntK">Interiér</div><div class="fact-v" id="factAccIntV">příležitostně přístupné</div></div>
     </div>
   </div>
 
-  <!-- na místě -->
+  <!-- zajímavosti / insider -->
   <div class="section">
-    <div class="sec-head">
-      <span class="sec-label">Na místě</span>
-      <div class="sec-rule"></div>
-      <span class="sec-num">3 kroky</span>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <h4>Terén bašty</h4>
-          <p>Stůj na rohu ulic Na Baště sv. Tomáše a Gogolovy — zde začínala kurtina spojující baštu XVIII a XIX. Terén mírně stoupá přesně v linii původního opevnění.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <h4>Kramářova vila</h4>
-          <p>Budova stojí přesně na místě bašty. Pohleď na severní fasádu — sklon pozemku a mohutnost základů odpovídají rozměrům původního bastiónu: hloubka 102 m, šířka hrdla 145 m.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <h4>Výhled na město</h4>
-          <p>Zajdi na okraj Letenských sadů nad Čechovým mostem — odtud bašta kontrolovala severní přístup k Malé Straně přes Vltavu. Výhled je prakticky totožný s tím, co měli obránci v 18. století.</p>
-        </div>
-      </div>
-    </div>
     <div class="tip">
-      <div class="tip-label">Zajímavosti</div>
-      <div class="tip-text" id="insiderTeaser">Věděli jste, že z této bašty se každý den střílelo pražské poledne…</div>
+      <div class="tip-label" id="tipLabel">Zajímavosti</div>
+      <div class="tip-text" id="insiderTeaser">Věděli jste, že se sem dá jednou za čas dostat úplně zdarma?</div>
       <div class="insider-full" id="insiderFull" style="margin-top:10px">
-        <div class="tip-text" style="font-style:normal">Do roku 1926 se z bašty XIX každý den ve 12:00 ozval dělový výstřel — signál pro celou Prahu, aby si lidé seřídili hodiny. Signál přicházel opticky z věže Klementina, kde astronom zdvihl prapor, a dělostřelec na baště vystřelil. Tradice sahá do 18. století.</div>
-        <div class="tip-text" style="font-style:normal;margin-top:10px">Bašta má zdvojenou střeleckou linii — tzv. fausse-braye, nízký vnější val před hlavní zdí. To ji řadí mezi sofistikovanější prvky pražského barokního opevnění. Rozměry jsou úctyhodné: levý líc 88 m, pravý líc 104 m, hloubka 102 m.</div>
-        <div class="tip-text" style="font-style:normal;margin-top:10px">Celý systém Mariánských hradeb postavil na levém břehu italský stavitel Santino de Bossi, zatímco pravý břeh řídil Carlo Lurago. Hradby odolaly obléhání Fridricha Pruského v roce 1757 — bašta XIX stála v té době na přímé linii případného útoku ze severu.</div>
-        <div class="tip-text" style="font-style:normal;margin-top:10px">S bouráním hradeb začali v roce 1874. Bašta XIX zanikla kolem roku 1901 — na jejím místě nechal první československý premiér Karel Kramář postavit honosnou vilu. Ta stojí dodnes a je chráněnou kulturní památkou.</div>
+        <div class="tip-text" style="font-style:normal" id="insiderP1"><strong>Bašta stojí na pozemku Kramářovy vily</strong>, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti. Přesné termíny vyhlašuje <a href="https://vlada.gov.cz/scripts/detail.php?pgid=1483" target="_blank" rel="noopener">web Úřadu vlády ČR</a>.</div>
       </div>
-      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
-        <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+      <div class="insider-gate" id="insiderGate" style="margin-top:10px;background:transparent;border:none;padding:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span id="insiderGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
+          <a id="insiderGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-5);flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <a id="insiderWhyLink" href="../oprojektu.html" style="font-size:12px;color:var(--ink-5);text-decoration:underline;text-underline-offset:2px">Proč je část obsahu skryta?</a>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- galerie (placeholder) -->
-  <div class="section">
+  <!-- galerie -->
+  <div class="section" id="gallerySection">
     <div class="sec-head">
-      <span class="sec-label">Galerie</span>
+      <span class="sec-label" id="secGalerie">Galerie</span>
       <div class="sec-rule"></div>
-      <span class="sec-num">Brzy</span>
+      <span class="sec-num" id="secGalerieNum">2 fotografie</span>
     </div>
     <div class="gallery">
-      <div class="gallery-thumb">
+      <div class="gallery-thumb" onclick="openGallery(0)">
         <img src="https://layersofprague.github.io/LoP/foto/H002_ove_thumb.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="~1900"/>
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Bašta sv. Máří Magdalény dnes"/>
+        <div class="gt-label">Dnes</div>
+      </div>
+      <div class="gallery-thumb" onclick="openGallery(1)">
+        <img src="https://layersofprague.github.io/LoP/foto/H002_h.jpg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Bašta sv. Máří Magdalény ~1900"/>
         <div class="gt-label">~1900</div>
       </div>
-      <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
-      <div class="gallery-thumb"><div class="gt-label">Brzy</div></div>
     </div>
   </div>
 
-  <!-- poloha / mapa -->
+    <!-- poloha / mapa -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Poloha</span>
+      <span class="sec-label" id="secPoloha">Poloha</span>
       <div class="sec-rule"></div>
-      <span class="sec-num">výřez mapy</span>
+      <span class="sec-num" id="capMapa">výřez mapy</span>
     </div>
     <div class="map-frame" id="miniMapWrap">
       <div id="miniMap"></div>
@@ -985,27 +1312,27 @@ a { color: inherit; text-decoration: none; }
   <!-- gamifikace — žebříček -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Žebříček</span>
+      <span class="sec-label" id="secZebricek">Žebříček</span>
       <div class="sec-rule"></div>
       <span class="sec-num">Top 5</span>
     </div>
     <div class="lh-card">
       <div class="lh-hero">
-        <div class="lh-av">JK<span class="lh-badge">1</span></div>
+        <div class="lh-av">PN<span class="lh-badge">1</span></div>
         <div class="lh-id">
-          <div class="lh-kick">Nejlepší záběr</div>
-          <div class="lh-name">Jan K.</div>
+          <div class="lh-kick" id="lhKick">Nejlepší záběr</div>
+          <div class="lh-name">Petra N.</div>
         </div>
-        <div class="lh-pts"><div class="n">342</div><div class="u">bodů</div></div>
+        <div class="lh-pts"><div class="n">198</div><div class="u" id="lhUnit1">bodů</div></div>
       </div>
       <div class="lh-quote-wrap">
         <div class="lh-quote">
-          <p>„Přišel jsem za rozbřesku, mlha ležela na vodě — AR zarovnání bylo dokonalé. Nejlepší zastavení v Holešovicích.“</p>
-          <span class="by">Jan K., 1. místo</span>
+          <p>„Zahradou se šlo jen jednou v roce, ale ta bašta ve večerním světle stála za tu frontu. AR ukázalo, jak vysoko sahaly hradby původně.“</p>
+          <span class="by" id="lhBy">Petra N., 1. místo</span>
         </div>
       </div>
-      <div class="lh-row"><span class="rk">2</span><span class="nm">Tereza M.</span><span class="pt">298</span></div>
-      <div class="lh-row"><span class="rk">3</span><span class="nm">Pavel N.</span><span class="pt">261</span></div>
+      <div class="lh-row"><span class="rk">2</span><span class="nm">Tomáš H.</span><span class="pt">156</span></div>
+      <div class="lh-row"><span class="rk">3</span><span class="nm">Lucie V.</span><span class="pt">121</span></div>
       <div class="lh-row"><span class="rk">4</span><span class="nm">Lucie V.</span><span class="pt">244</span></div>
       <div class="lh-row"><span class="rk">5</span><span class="nm">Martin H.</span><span class="pt">198</span></div>
     </div>
@@ -1015,16 +1342,16 @@ a { color: inherit; text-decoration: none; }
       <span class="rk" id="lbMyRank">—</span>
       <span class="av">VY</span>
       <div><div class="nm">Tvůj výsledek</div><div class="sub"><span id="lbMyScore">—</span> % shody · <span id="lbMyDate"></span></div></div>
-      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u">bodů</div></div>
+      <div class="pt-wrap"><div class="pt" id="lbMyPts">—</div><div class="u" id="lhUnit2">bodů</div></div>
     </div>
 
-    <a class="ar-cta-light" href="../ar-intro.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény+(XIX)&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH002_ove_thumb.jpg">
+    <a class="ar-cta-light" href="../ar-intro.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény&thumb=https%3A%2F%2Flayersofprague.github.io%2FLoP%2Ffoto%2FH002_ove_thumb.jpg">
       <div class="ar-cta-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-2h8l2 2h3v13H3z"/><circle cx="12" cy="13" r="3"/></svg>
       </div>
       <div class="ar-cta-body">
-        <div class="ar-cta-kick">Nahlédni do historie</div>
-        <div class="ar-cta-title">Spustit AR — Bašta sv. Máří Magdalény (XIX)</div>
+        <div class="ar-cta-kick" id="arCtaKick">Nahlédni do historie</div>
+        <div class="ar-cta-title" id="arCtaTitle">Spustit AR — Bašta sv. Máří Magdalény</div>
       </div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5"><path d="m9 6 6 6-6 6"/></svg>
     </a>
@@ -1033,7 +1360,7 @@ a { color: inherit; text-decoration: none; }
   <!-- autor zastavení -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Autor zastavení</span>
+      <span class="sec-label" id="secAutor">Autor zastavení</span>
       <div class="sec-rule"></div>
     </div>
     <div class="autor-card">
@@ -1041,9 +1368,9 @@ a { color: inherit; text-decoration: none; }
       <div class="autor-body">
         <div class="autor-name">LayersOfPrague</div>
         <div class="autor-meta">
-          <span class="autor-badge">Kurátor</span>
+          <span class="autor-badge" id="autorBadge">Kurátor</span>
           <span class="autor-sep">·</span>
-          <span id="autorPlaces">12 zastavení</span>
+          <span id="autorPlaces">8 zastavení</span>
           <span class="autor-sep">·</span>
           <span id="autorRoutes">3 trasy</span>
           <span class="autor-sep">·</span>
@@ -1059,23 +1386,10 @@ a { color: inherit; text-decoration: none; }
   <!-- klíčová slova -->
   <div class="section">
     <div class="sec-head">
-      <span class="sec-label">Klíčová slova</span>
+      <span class="sec-label" id="secKlicova">Klíčová slova</span>
       <div class="sec-rule"></div>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-      <span class="kw-tag">bašta</span>
-      <span class="kw-tag">opevnění</span>
-      <span class="kw-tag">baroko</span>
-      <span class="kw-tag">Malá Strana</span>
-      <span class="kw-tag">Mariánské hradby</span>
-      <span class="kw-tag">Kramářova vila</span>
-      <span class="kw-tag">Letná</span>
-      <span class="kw-tag">1653</span>
-      <span class="kw-tag">poledne</span>
-      <span class="kw-tag">střelba</span>
-      <span class="kw-tag">Santino de Bossi</span>
-      <span class="kw-tag">hradby</span>
-    </div>
+    <div class="kw-cloud" id="kwContainer"></div>
   </div>
 
 </div><!-- /body -->
@@ -1110,13 +1424,14 @@ function renderExif(elId, data) {
     return;
   }
 
+  const _en = window.lopLang === 'en';
   const fields = [
-    { key: 'Author',        val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
-    { key: 'Credit',        val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
-    { key: 'Specification', val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
-    { key: 'Source',        val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
-    { key: 'Copyright',     val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
-    { key: 'Date',          val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
+    { key: _en ? 'Author'  : 'Autor',     val: data?.['dc:creator']    || data?.['XMP-dc:Creator']         || data?.Artist     || data?.Creator },
+    { key: _en ? 'Source'  : 'Zdroj',     val: data?.['photoshop:Credit'] || data?.['XMP-photoshop:Credit'] || data?.Credit },
+    { key: _en ? 'Spec.'   : 'Spec.',     val: data?.['dc:identifier'] || data?.['XMP-dc:Identifier']      || data?.SpecialInstructions },
+    { key: _en ? 'Ref.'    : 'Ref.',      val: data?.['dc:source']     || data?.['XMP-dc:Source']           || data?.Source },
+    { key: 'Copyright',                   val: data?.Copyright         || data?.CopyrightNotice             || data?.['dc:rights'] },
+    { key: _en ? 'Date'    : 'Datum',     val: data?.['dc:description'] || data?.['XMP-dc:Description']    || data?.DateCreated || (data?.CreateDate ? String(data.CreateDate).slice(0,10) : null) },
   ];
 
   const rows = fields.filter(f => f.val).map(f =>
@@ -1139,7 +1454,7 @@ async function loadExif() {
   } catch(e) {
     ['copyHist','copyNow'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.innerHTML = '<div class="copy-val" style="color:rgba(243,237,225,.35)">Nepodařilo se načíst</div>';
+      if (el) el.innerHTML = `<div class="copy-val" style="color:rgba(243,237,225,.35)">${t('place.exif_error')}</div>`;
     });
   }
 }
@@ -1159,14 +1474,13 @@ function _closeCopyOutside(e) {
   if (!e.target.closest('.copy-modal') && !e.target.closest('#slCopyBtn')) closeCopyright();
 }
 
-/* ── SYNC ── */
-syncFromDB().then(() => { updateWishUI(); loadVisitedStamp(); });
+/* ── SYNC ── (voláno níž, až jsou definované SUPA_URL/SUPA_KEY) */
 
 /* ── AUTH CHECK ── */
 function updateInsiderGate() {
   const loggedIn = !!(()=>{ try { const s = JSON.parse(localStorage.getItem('lop_auth_session')||'null'); return s&&s.access_token&&s.user; } catch(e){} })();
   const role     = localStorage.getItem('lop_user_role') || 'member';
-  const insider  = ['insider','author','admin'].includes(role);
+  const insider  = loggedIn && ['insider','author','admin'].includes(role);
 
   const full   = document.getElementById('insiderFull');
   const gate   = document.getElementById('insiderGate');
@@ -1175,16 +1489,21 @@ function updateInsiderGate() {
   const link   = document.getElementById('insiderGateLink');
 
   if (full)   full.classList.toggle('visible', insider);
-  if (gate)   gate.classList.toggle('hidden',  insider);
+  // Reinicializovat river slider po zobrazení insider sekce
+  if (gate) {
+    gate.classList.toggle('hidden', insider);
+    if (!insider) gate.style.display = 'flex';
+    else gate.style.display = '';
+  }
   if (teaser) teaser.style.display = insider ? 'none' : '';
 
   if (gate && !insider) {
     if (!loggedIn) {
-      if (txt)  txt.textContent = 'Pro celý obsah se';
-      if (link) { link.textContent = 'přihlaste'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
+      if (txt)  txt.textContent = t('place.paywall_signin');
+      if (link) { link.textContent = t('place.paywall_link'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
     } else {
-      if (txt)  txt.textContent = 'Pro celý obsah';
-      if (link) { link.textContent = 'upgradujte na Insider'; link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
+      if (txt)  txt.textContent = t('place.paywall_insider');
+      if (link) { link.textContent = t('place.paywall_upgrade'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
     }
   }
 
@@ -1192,7 +1511,20 @@ function updateInsiderGate() {
   if (btn && loggedIn) btn.classList.add('logged-in');
 }
 
-(function() { updateInsiderGate(); })();
+(function() {
+  // Volat updateInsiderGate ihned (z cached localStorage) a pak znovu po syncFromDB
+  updateInsiderGate();
+  // syncFromDB je definováno níže — počkáme na DOMContentLoaded kdy už je definováno
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof syncFromDB === 'function') {
+      syncFromDB().then(() => {
+        updateWishUI();
+        loadVisitedStamp();
+        updateInsiderGate(); // překreslit po stažení aktuální role
+      });
+    }
+  });
+})();
 
 /* ── SLIDER ── */
 (function() {
@@ -1226,9 +1558,9 @@ function updateInsiderGate() {
 
     // Tažení pouze za handle
     handleEl.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
-    handleEl.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    handleEl.addEventListener('touchstart', e => { if (e.touches.length === 1) dragging = true; }, { passive: true });
     window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-    window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+    window.addEventListener('touchmove',  e => { if (e.touches.length === 2) { dragging = false; return; } if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
     window.addEventListener('mouseup',  () => dragging = false);
     window.addEventListener('touchend', () => dragging = false);
 
@@ -1271,8 +1603,10 @@ function updateInsiderGate() {
       handle.style.left = (pct * 100) + '%';
       handle.style.transform = 'translate(-50%,-50%)';
     }
-    const lblL = document.getElementById('lblHistFs');
-    const lblR = document.getElementById('lblNowFs');
+    const dividerFs = document.getElementById('slDividerFs');
+    if (dividerFs) dividerFs.style.left = (pct * 100) + '%';
+    const lblL = null; // labels moved outside
+    const lblR = null;
     if (lblL) lblL.classList.toggle('active', pct <= 0.5);
     if (lblR) lblR.classList.toggle('active', pct > 0.5);
   }
@@ -1285,12 +1619,18 @@ function updateInsiderGate() {
   const handleFs = document.getElementById('slHandleFs');
   if (handleFs) {
     handleFs.addEventListener('mousedown',  e => { dragging = true; e.preventDefault(); });
-    handleFs.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+    handleFs.addEventListener('touchstart', e => { if (e.touches.length === 1) dragging = true; }, { passive: true });
   }
   window.addEventListener('mousemove',  e => { if (dragging) setPos(posFromX(e.clientX)); });
-  window.addEventListener('touchmove',  e => { if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
+  window.addEventListener('touchmove',  e => { if (e.touches.length === 2) { dragging = false; return; } if (dragging) setPos(posFromX(e.touches[0].clientX)); }, { passive: true });
   window.addEventListener('mouseup',  () => dragging = false);
   window.addEventListener('touchend', () => dragging = false);
+
+  // Pinch zoom na fs-modal-inner — init odložen až po definici _initSliderPinch
+  document.addEventListener('DOMContentLoaded', function() {
+    var fsInner = document.querySelector('.fs-modal-inner');
+    if (fsInner && typeof _initSliderPinch === 'function') _initSliderPinch(fsInner);
+  });
 
   // Klik na pozadí modalu (mimo inner) zavře
   modal.addEventListener('click', e => { if (e.target === modal) toggleFullscreen(); });
@@ -1314,9 +1654,94 @@ function toggleFullscreen() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) toggleFullscreen(); });
 
+/* ── GALLERY LIGHTBOX ── */
+(function() {
+  const items = Array.from(document.querySelectorAll('#gallerySection .gallery-thumb')).map(thumb => {
+    const img   = thumb.querySelector('img');
+    const label = thumb.querySelector('.gt-label');
+    return {
+      src:   img ? img.getAttribute('src') : '',
+      alt:   img ? img.getAttribute('alt') : '',
+      label: label ? label.textContent : ''
+    };
+  });
+
+  let idx = 0;
+  let glOpenState = false;
+
+  function render() {
+    const img   = document.getElementById('glImg');
+    const label = document.getElementById('glLabel');
+    const count = document.getElementById('glCount');
+    if (!items[idx]) return;
+    img.src = items[idx].src;
+    img.alt = items[idx].alt;
+    label.textContent = items[idx].alt || items[idx].label;
+    count.textContent = (idx + 1) + ' / ' + items.length;
+  }
+
+  window.openGallery = function(i) {
+    idx = i;
+    render();
+    const modal = document.getElementById('glModal');
+    modal.classList.add('open');
+    glOpenState = true;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+  };
+
+  window.closeGallery = function() {
+    const modal = document.getElementById('glModal');
+    modal.classList.remove('open');
+    glOpenState = false;
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  };
+
+  window.glNext = function(e) {
+    if (e) e.stopPropagation();
+    idx = (idx + 1) % items.length;
+    render();
+  };
+  window.glPrev = function(e) {
+    if (e) e.stopPropagation();
+    idx = (idx - 1 + items.length) % items.length;
+    render();
+  };
+
+  const modal = document.getElementById('glModal');
+  if (modal) {
+    // Klik na pozadí (mimo obrázek/tlačítka) zavře lightbox
+    modal.addEventListener('click', e => {
+      if (e.target === modal || e.target.classList.contains('gl-inner')) closeGallery();
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!glOpenState) return;
+    if (e.key === 'Escape')      closeGallery();
+    else if (e.key === 'ArrowRight') glNext();
+    else if (e.key === 'ArrowLeft')  glPrev();
+  });
+
+  // Swipe pro mobil
+  let touchStartX = null;
+  if (modal) {
+    modal.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    modal.addEventListener('touchend', e => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) { dx > 0 ? glPrev() : glNext(); }
+      touchStartX = null;
+    }, { passive: true });
+  }
+})();
+
 /* ── SUPABASE VOTES ── */
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
+
+/* ── SYNC (přesunuto výše, do DOMContentLoaded po updateInsiderGate) ── */
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
@@ -1489,8 +1914,8 @@ async function loadVisitedStamp() {
         stampEl.innerHTML = window.stampSVG({
           orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
           code: PLACE_ID,
-          name: 'Bašta sv. Máří Magdalény (XIX)',
-          year: 1653,
+          name: 'Bašta sv. Máří Magdalény',
+          year: 1894,
           cat: 'hist',
           score: stampScore,
           dateLabel: visitedAt ? visitedAt.getDate() + '. ' + (visitedAt.getMonth()+1) + '. ' + visitedAt.getFullYear() : '',
@@ -1528,7 +1953,7 @@ function renderMyLeaderboardRow() {
   if (stampEl && window.stampSVG) {
     stampEl.innerHTML = window.stampSVG({
       orientation: 'sealF', style: 'rough', castle: 'ink', eccentric: true,
-      code: PLACE_ID, name: 'Bašta sv. Máří Magdalény (XIX)', year: 1653, cat: 'hist',
+      code: PLACE_ID, name: 'Bašta sv. Máří Magdalény', year: 1894, cat: 'hist',
       score: arScoreToStampScore(v.score),
       dateLabel: v.visitedAt ? v.visitedAt.getDate() + '. ' + (v.visitedAt.getMonth()+1) + '. ' + v.visitedAt.getFullYear() : '',
       k: PLACE_ID + '-lb',
@@ -1572,7 +1997,7 @@ function updateWishUI() {
   const lbl = document.getElementById('wishLbl');
   if (btn) btn.classList.toggle('active', w);
   if (ico) ico.setAttribute('fill', w ? 'currentColor' : 'none');
-  if (lbl) lbl.textContent = w ? 'V plánu' : 'Plán';
+  if (lbl) lbl.textContent = w ? t('place.plan_in') : t('place.plan');
 }
 
 function toggleWishBtn() {
@@ -1586,7 +2011,7 @@ function toggleWishBtn() {
 
 /* ── AUTOR HODNOCENÍ ── */
 (async function() {
-  const AUTOR_PLACES = ['H001','H101','H102','H201','H202','H301','H302','H203'];
+  const AUTOR_PLACES = ['H002','H101','H102','H201','H202','H301','H302','H203'];
   const AUTOR_ROUTES = 3;
   const MIN_VOTES = 5;
 
@@ -1606,13 +2031,13 @@ function toggleWishBtn() {
       const all = await res.json();
       const count = all.filter(p => AUTOR_PLACES.includes(p.id)).length;
       const el = document.getElementById('autorPlaces');
-      if (el) el.textContent = count + ' zastavení';
+      if (el) el.textContent = t('place.stops', { n: count });
     }
   } catch(e) {}
 
   // Trasy
   const elR = document.getElementById('autorRoutes');
-  if (elR) elR.textContent = AUTOR_ROUTES + ' trasy';
+  if (elR) elR.textContent = t('place.routes', { n: AUTOR_ROUTES });
 
   // Hodnocení z Supabase
   try {
@@ -1629,7 +2054,7 @@ function toggleWishBtn() {
       const el       = document.getElementById('autorStars');
       if (!el) return;
       if (total < MIN_VOTES) {
-        el.textContent = 'čeká na hodnocení';
+        el.textContent = t('place.waiting_rating');
       } else {
         const score = likes / total;
         el.innerHTML = starsHTML(score);
@@ -1643,7 +2068,7 @@ function toggleWishBtn() {
 /* ── MINI MAPA ── */
 (function() {
   const LAT = 50.09305881760058, LNG = 14.411785293307434;
-  const PLACE_ID = 'H001';
+  const PLACE_ID = 'H002';
   const CAT_COLOR = { hist:'#4A4A48', arch:'#3B5F84', art:'#C0522A', fun:'#E0A020' };
 
   const map = L.map('miniMap', {
@@ -1692,19 +2117,19 @@ function toggleWishBtn() {
       L.marker([p.lat, p.lng], {
         icon: L.divIcon({ html: pinHtml, className: '', iconSize: [26,26], iconAnchor: [13,13] })
       }).addTo(map).on('click', () => {
-        location.href = '../index.html#' + p.id;
+        location.href = '../map.html#' + p.id;
       });
     });
   }).catch(() => {});
 
-  // Klik na mapu → index.html
-  map.on('click', () => { location.href = '../index.html'; });
+  // Klik na mapu → map.html
+  map.on('click', () => { location.href = '../map.html'; });
 })();
 
 /* ── SHARE ── */
 function share() {
   if (navigator.share) {
-    navigator.share({ title: 'Holešovický přístav — LayersOfPrague', url: location.href });
+    navigator.share({ title: 'Bašta sv. Máří Magdalény — LayersOfPrague', url: location.href });
   } else {
     navigator.clipboard?.writeText(location.href);
     alert('Odkaz zkopírován do schránky');
@@ -1753,6 +2178,242 @@ window.lopAuth.onLogout(() => {
   updateWishUI();
   updateInsiderGate();
 });
+</script>
+
+
+<script>
+/* ── PINCH-TO-ZOOM for fullscreen modal images ── */
+(function() {
+  function initPinchZoom(img) {
+    if (!img) return;
+
+    // Stav transformace
+    var s = 1, tx = 0, ty = 0;
+    // Uložený stav na začátku gesta
+    var s0, tx0, ty0, d0, fx0, fy0;
+    var panRefX, panRefY, panning = false;
+    var lastTap = 0;
+
+    function apply() {
+      // transform-origin: center center → střed obrázku
+      img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+      img.classList.toggle('zoomed', s > 1.05);
+    }
+
+    function reset() {
+      s = 1; tx = 0; ty = 0;
+      img.style.transform = '';
+      img.classList.remove('zoomed');
+    }
+
+    function clamp() {
+      if (s <= 1.01) { tx = 0; ty = 0; return; }
+      // Přirozená (netransformovaná) velikost obrázku
+      var w = img.offsetWidth, h = img.offsetHeight;
+      var limX = w * (s - 1) / 2;
+      var limY = h * (s - 1) / 2;
+      tx = Math.max(-limX, Math.min(limX, tx));
+      ty = Math.max(-limY, Math.min(limY, ty));
+    }
+
+    function dist(t) {
+      var dx = t[0].clientX - t[1].clientX;
+      var dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    img.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        // Uložit stav gesta
+        d0  = dist(e.touches);
+        s0  = s; tx0 = tx; ty0 = ty;
+        // Ohnisko = střed prstů v souřadnicích okna
+        fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        panning = false;
+      } else if (e.touches.length === 1) {
+        if (s > 1.05) {
+          e.preventDefault();
+          panRefX = e.touches[0].clientX - tx;
+          panRefY = e.touches[0].clientY - ty;
+          panning = true;
+        }
+        // Double-tap
+        var now = Date.now();
+        if (now - lastTap < 300) {
+          e.preventDefault();
+          if (s > 1.05) {
+            reset();
+          } else {
+            // Střed obrázku v souřadnicích okna
+            var r = img.getBoundingClientRect();
+            var cx = r.left + r.width / 2;
+            var cy = r.top  + r.height / 2;
+            var tapX = e.touches[0].clientX;
+            var tapY = e.touches[0].clientY;
+            s = 2.5;
+            // Bod pod prstem musí zůstat pod prstem:
+            // newTx = tapX - cx - (tapX - cx) * s  →  -(tapX - cx)*(s-1)
+            tx = -(tapX - cx) * (s - 1);
+            ty = -(tapY - cy) * (s - 1);
+            clamp(); apply();
+          }
+          lastTap = 0; return;
+        }
+        lastTap = now;
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && d0) {
+        e.preventDefault();
+        var d  = dist(e.touches);
+        var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
+
+        // Střed obrázku v souřadnicích okna při stavu s0/tx0/ty0:
+        // imgCenter_screen = naturalCenter_screen + tx0, ty0
+        // (transform-origin: center, natCenter = relativní střed v layoutu)
+        // Ohnisko v "obrázkovém" souřadnicovém systému (relativně ke středu, při s=s0):
+        //   imgPt = (fx0 - natCx - tx0) / s0   kde natCx = imgEl offsetLeft + w/2
+        var w  = img.offsetWidth,  h  = img.offsetHeight;
+        var el = img;
+        var natCx = el.offsetLeft + w / 2;
+        var natCy = el.offsetTop  + h / 2;
+        // Souřadnice ohniska ve "vnitřním" prostoru obrázku
+        var imgFx = (fx0 - natCx - tx0) / s0;
+        var imgFy = (fy0 - natCy - ty0) / s0;
+        // Nový translate: ohnisko v novém stavu musí ležet pod středem prstů (fx,fy)
+        //   fx = natCx + imgFx * newS + newTx + (fx - fx0)  ← posun středu prstů
+        tx = fx - natCx - imgFx * newS;
+        ty = fy - natCy - imgFy * newS;
+        s  = newS;
+        clamp(); apply();
+      } else if (e.touches.length === 1 && panning) {
+        e.preventDefault();
+        tx = e.touches[0].clientX - panRefX;
+        ty = e.touches[0].clientY - panRefY;
+        clamp(); apply();
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchend', function(e) {
+      if (e.touches.length < 2) d0 = 0;
+      if (e.touches.length === 0) panning = false;
+      if (s < 1.05) reset();
+    });
+
+    // Reset při zavření modalu
+    var modal = img.closest('.rv-fs-modal');
+    if (modal) {
+      new MutationObserver(function(muts) {
+        muts.forEach(function(m) {
+          if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
+        });
+      }).observe(modal, { attributes: true });
+    }
+  }
+
+  function _initAll() {
+    document.querySelectorAll('.rv-fs-modal .rv-fs-img').forEach(initPinchZoom);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initAll);
+  } else {
+    _initAll();
+  }
+})();
+</script>
+
+<script>
+/* ── PINCH-TO-ZOOM for comparison sliders ── */
+function _initSliderPinch(wrap) {
+  if (!wrap || wrap._pinchInited) return;
+  wrap._pinchInited = true;
+
+  var s = 1, tx = 0, ty = 0;
+  var s0, tx0, ty0, d0, fx0, fy0;
+  var lastTap = 0;
+
+  function dist(t) {
+    var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  function apply() {
+    wrap.style.transformOrigin = 'center center';
+    wrap.style.transform = s > 1.01 ? 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')' : '';
+    wrap.style.zIndex = s > 1.01 ? '10' : '';
+  }
+  function reset() { s = 1; tx = 0; ty = 0; apply(); }
+  function clamp() {
+    if (s <= 1.01) { tx = 0; ty = 0; return; }
+    var limX = wrap.offsetWidth  * (s-1) / 2;
+    var limY = wrap.offsetHeight * (s-1) / 2;
+    tx = Math.max(-limX, Math.min(limX, tx));
+    ty = Math.max(-limY, Math.min(limY, ty));
+  }
+
+  wrap.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      d0 = dist(e.touches); s0 = s; tx0 = tx; ty0 = ty;
+      fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    } else if (e.touches.length === 1 && s > 1.05) {
+      e.preventDefault();
+      wrap._panRefX = e.touches[0].clientX - tx;
+      wrap._panRefY = e.touches[0].clientY - ty;
+      wrap._panning = true;
+    }
+    // Double-tap reset
+    var now = Date.now();
+    if (e.touches.length === 1 && now - lastTap < 300) { reset(); lastTap = 0; return; }
+    if (e.touches.length === 1) lastTap = now;
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2 && d0) {
+      e.preventDefault();
+      var d = dist(e.touches);
+      var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
+      var natCx = wrap.offsetLeft + wrap.offsetWidth  / 2;
+      var natCy = wrap.offsetTop  + wrap.offsetHeight / 2;
+      var imgFx = (fx0 - natCx - tx0) / s0;
+      var imgFy = (fy0 - natCy - ty0) / s0;
+      tx = fx - natCx - imgFx * newS;
+      ty = fy - natCy - imgFy * newS;
+      s = newS; clamp(); apply();
+    } else if (e.touches.length === 1 && wrap._panning) {
+      e.preventDefault();
+      tx = e.touches[0].clientX - wrap._panRefX;
+      ty = e.touches[0].clientY - wrap._panRefY;
+      clamp(); apply();
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) d0 = 0;
+    if (e.touches.length === 0) wrap._panning = false;
+    if (s < 1.05) reset();
+  });
+
+  // Reset při zavření modalu
+  var modal = wrap.closest('.rv-fs-modal') || wrap.closest('.fs-modal');
+  if (modal) {
+    new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
+      });
+    }).observe(modal, { attributes: true });
+  }
+}
+
+// RV a FS slider pinch zoom inited via DOMContentLoaded above
 </script>
 </body>
 </html>

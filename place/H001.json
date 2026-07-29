@@ -220,5 +220,13 @@
       "cs": "<strong>Zlatá éra přístavu</strong> přišla mezi válkami. Přístav zásoboval surovinami okolní holešovické továrny a podniky. Vozily se tudíž kovy, hutní výrobky, dřevo, chemikálie nebo suroviny pro potravinářský průmysl. Přes přístav se ve velkém rovněž přepravoval písek, štěrk, stavební kámen a další materiály určené pro rozvíjející se pražskou výstavbu. Zavedením motorových nákladních lodí od roku 1931 se zrychlil transport cennějšího, kusového a rychlozkazitelného zboží mezi Prahou a severním Německem. Z Holešovic vyrážely motorové nákladní lodě po Vltavě a Labi přes Drážďany až do Hamburku k moři a odtud do celého světa. Díky tomuto přímému spojení proudilo do Prahy také koloniální a spotřební zboží ze zámoří. Jednalo se například o kávu, čaj, koření, jižní ovoce nebo různé stroje a polotovary. Po druhé světové válce bylo hlavní komoditou uhlí. Holešovický přístav se stal hlavní bránou, kterou proudilo topivo do průmyslové Prahy.",
       "en": "<strong>The port's golden age</strong> came between the wars. It supplied raw materials to the surrounding Holešovice factories and businesses — metals, metallurgical products, timber, chemicals and raw ingredients for the food industry. Sand, gravel, building stone and other construction materials for Prague's growing cityscape also passed through in large quantities. The introduction of motor cargo vessels from 1931 accelerated the movement of higher-value, piece and perishable goods between Prague and northern Germany. Motor freighters set out from Holešovice down the Vltava and Elbe via Dresden to Hamburg and thence to the world. Thanks to this direct link, colonial and consumer goods from overseas — coffee, tea, spices, citrus fruit, machinery and semi-finished products — also flowed into Prague. After the Second World War, coal became the dominant commodity; Holešovice Port was the main gateway through which fuel poured into industrial Prague."
     }
+  },
+  "access": {
+    "exterior": "public",
+    "interior": "private",
+    "note": {
+      "cs": "Nábřeží a areál jsou veřejně průchozí, budovy jsou dnes soukromé bytové jednotky (Prague Marina).",
+      "en": "The embankment and grounds are open to walk through; the buildings themselves are now private residences (Prague Marina)."
+    }
   }
 }

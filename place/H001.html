@@ -1149,6 +1149,20 @@ function renderPlaceI18n() {
     if (el) el.textContent = loc(f.k);
   });
 
+  // Přístupnost — label i hodnota jdou přes obecné klíče, jen slug (public/restricted/...) je place-specific
+  if (P.access) {
+    const extK = document.getElementById('factAccExtK'), extV = document.getElementById('factAccExtV');
+    const intK = document.getElementById('factAccIntK'), intV = document.getElementById('factAccIntV');
+    if (extK) extK.textContent = t('place.access_exterior');
+    if (extV) extV.textContent = t('access.exterior.' + P.access.exterior);
+    if (intK) intK.textContent = t('place.access_interior');
+    if (intV) intV.textContent = t('access.interior.' + P.access.interior);
+    if (P.access.note) {
+      const noteTxt = loc(P.access.note);
+      [extV, intV].forEach(el => { if (el) el.title = noteTxt; });
+    }
+  }
+
   // Section labels — obecné z translations.json, "Stavby přístavu" je place-specific
   var secMap = {
     secFakta:    t('sheet.facts'),
@@ -1481,13 +1495,15 @@ window.addEventListener('load', renderPlaceI18n);
     <div class="sec-head">
       <span class="sec-label" id="secFakta">Fakta</span>
       <div class="sec-rule"></div>
-      <span class="sec-num">4 položky</span>
+      <span class="sec-num">6 položek</span>
     </div>
     <div class="facts">
       <div class="fact"><div class="fact-k" id="factK0">Vybudováno</div><div class="fact-v">1892–1910</div></div>
       <div class="fact"><div class="fact-k" id="factK1">Délka bazénu</div><div class="fact-v">750 m</div></div>
       <div class="fact"><div class="fact-k" id="factK2">Vytěženo</div><div class="fact-v">513 900 m³</div></div>
       <div class="fact"><div class="fact-k" id="factK3">Architekt budov</div><div class="fact-v">F. Sander, 1906</div></div>
+      <div class="fact"><div class="fact-k" id="factAccExtK">Exteriér</div><div class="fact-v" id="factAccExtV">volně přístupné</div></div>
+      <div class="fact"><div class="fact-k" id="factAccIntK">Interiér</div><div class="fact-v" id="factAccIntV">soukromé byty</div></div>
     </div>
   </div>
 
@@ -1853,7 +1869,7 @@ function _closeCopyOutside(e) {
 function updateInsiderGate() {
   const loggedIn = !!(()=>{ try { const s = JSON.parse(localStorage.getItem('lop_auth_session')||'null'); return s&&s.access_token&&s.user; } catch(e){} })();
   const role     = localStorage.getItem('lop_user_role') || 'member';
-  const insider  = ['insider','author','admin'].includes(role);
+  const insider  = loggedIn && ['insider','author','admin'].includes(role);
 
   const full   = document.getElementById('insiderFull');
   const gate   = document.getElementById('insiderGate');

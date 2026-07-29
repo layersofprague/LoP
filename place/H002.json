@@ -1,0 +1,94 @@
+{
+  "id": "H002",
+  "title": {
+    "cs": "<em>Bašta</em> sv. Máří Magdalény",
+    "en": "St Mary Magdalene <em>Bastion</em>"
+  },
+  "pageTitle": {
+    "cs": "Bašta sv. Máří Magdalény — LayersOfPrague",
+    "en": "St Mary Magdalene Bastion — LayersOfPrague"
+  },
+  "metaDesc": {
+    "cs": "Jeden z posledních dochovaných bastionů barokního opevnění Prahy z let 1653–1730. Do roku 1926 se odtud dělem ohlašovalo pražské poledne.",
+    "en": "One of the last surviving bastions of Prague's Baroque fortifications, built 1653–1730. Until 1926, a cannon shot from here announced Prague's noon."
+  },
+  "lede": {
+    "cs": "Bašta XIX. nese jméno kostela sv. Máří Magdalény a je jedním z posledních dochovaných bastionů barokního pásu, který mezi lety 1653 a 1730 obepnul celou Prahu na příkaz vojevůdce Innocentia Contiho. Na levém břehu Vltavy stavbu vedl italský stavitel Carlo Lurago. Bastion měl zdvojenou střeleckou linii (tzv. fausse-braye) a je zapsán v Ústředním seznamu kulturních památek ČR jako součást městského opevnění Malé Strany a Hradčan. Až do roku 1926 se odtud výstřelem z děla ohlašovalo pražské poledne — signál dostával povel praporkem z věže Klementina. Dnes stojí bašta na pozemku Kramářovy vily, oficiální rezidence předsedy vlády ČR, a je běžně nepřístupná veřejnosti.",
+    "en": "Bastion XIX takes its name from the nearby Church of St Mary Magdalene and is one of the last surviving bastions of the Baroque fortification ring built around Prague between 1653 and 1730 under general Innocentio Conti. On the left bank, construction was led by the Italian builder Carlo Lurago. The bastion had a doubled firing line (a fausse-braye) and is listed in the Czech Republic's Central List of Cultural Monuments as part of the fortifications of Malá Strana and Hradčany. Until 1926, a cannon fired from here announced Prague's noon, cued by a flag signal from the Klementinum tower. Today the bastion stands on the grounds of Kramář's Villa, the official residence of the Czech Prime Minister, and is normally closed to the public."
+  },
+  "facts": [
+    {
+      "k": {
+        "cs": "Vybudováno",
+        "en": "Built"
+      },
+      "v": "1653–1730"
+    },
+    {
+      "k": {
+        "cs": "Šířka hrdla",
+        "en": "Gorge width"
+      },
+      "v": "145 m"
+    },
+    {
+      "k": {
+        "cs": "Hloubka",
+        "en": "Depth"
+      },
+      "v": "102 m"
+    },
+    {
+      "k": {
+        "cs": "Ohlašovalo poledne do",
+        "en": "Announced noon until"
+      },
+      "v": "1926"
+    }
+  ],
+  "access": {
+    "exterior": "restricted",
+    "interior": "restricted",
+    "note": {
+      "cs": "Součást střeženého areálu Kramářovy vily, oficiální rezidence předsedy vlády ČR. Běžně nepřístupné.",
+      "en": "Part of the guarded grounds of Kramář's Villa, the official residence of the Czech Prime Minister. Normally inaccessible."
+    }
+  },
+  "arCtaTitle": {
+    "cs": "Spustit AR — Bašta sv. Máří Magdalény",
+    "en": "Launch AR — St Mary Magdalene Bastion"
+  },
+  "ranking": {
+    "author": "Petra N.",
+    "rankLabel": {
+      "cs": "1. místo",
+      "en": "1st place"
+    }
+  },
+  "curatorStops": 8,
+  "galleryCount": 2,
+  "captions": {
+    "fsLabel": {
+      "cs": "Bašta sv. Máří Magdalény — současnost vs. cca 1900",
+      "en": "St Mary Magdalene Bastion — now vs. c. 1900"
+    },
+    "copyToday": {
+      "cs": "Autor fotografie (současnost)",
+      "en": "Photo credit (present day)"
+    },
+    "copyHist": {
+      "cs": "Autor fotografie (historická)",
+      "en": "Photo credit (historical)"
+    }
+  },
+  "insiderTeaser": {
+    "cs": "Věděli jste, že se sem dá jednou za čas dostat úplně zdarma?",
+    "en": "Did you know you can actually get in here for free, a few times a year?"
+  },
+  "insider": {
+    "p1": {
+      "cs": "<strong>Bašta stojí na pozemku Kramářovy vily</strong>, oficiální rezidence předsedy vlády ČR, a je tak běžně mimo dosah veřejnosti — jde o střežený areál. Úřad vlády ale několikrát ročně pořádá <strong>Dny otevřených dveří</strong> historických objektů (obvykle jaro až podzim a o státních svátcích), kdy je vila i přilehlé zahrady s baštou zdarma přístupná veřejnosti. Přesné termíny vyhlašuje <a href=\"https://vlada.gov.cz/scripts/detail.php?pgid=1483\" target=\"_blank\" rel=\"noopener\">web Úřadu vlády ČR</a>.",
+      "en": "<strong>The bastion stands on the grounds of Kramář's Villa</strong>, the official residence of the Czech Prime Minister, and is normally off-limits — it's a guarded area. Several times a year, though, the Government Office holds <strong>Open House Days</strong> for its historic buildings (typically spring through autumn and on state holidays), when the villa and its gardens, bastion included, open free to the public. Exact dates are announced on the <a href=\"https://vlada.gov.cz/scripts/detail.php?pgid=1483\" target=\"_blank\" rel=\"noopener\">Government Office website</a>."
+    }
+  }
+}
