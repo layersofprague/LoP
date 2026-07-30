@@ -262,16 +262,34 @@ a { color: inherit; text-decoration: none; }
 .gl-inner {
   position: relative;
   width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  padding: 56px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 4px 4px;
+}
+/* Kontejner obaluje přesně fotku — stejný princip jako .rv-fs-imgwrap:
+   spodek kontejneru = spodek fotky (copyright panel vyjíždí od její hrany)
+   a transformace při pinch-zoomu se aplikuje na kontejner, takže zvětšená
+   fotka může přetéct přes celý displej. */
+.gl-imgwrap {
+  position: relative;
+  flex: 0 0 auto;
+  max-width: 100vw;
+  overflow: hidden;
+  display: flex;
+  line-height: 0;
 }
 .gl-img {
-  max-width: 100%; max-height: 100%;
-  object-fit: contain;
+  display: block;
+  max-width: calc(100vw - 8px);
+  max-height: calc(100dvh - var(--gl-chrome, 46px));
+  width: auto; height: auto;
   border-radius: 4px;
   -webkit-user-drag: none;
   box-shadow: 0 10px 40px rgba(0,0,0,.45);
 }
+@media (orientation: landscape) {
+  .gl-imgwrap { --gl-chrome: 42px; }
+}
+.gl-inner .rv-fs-labels { width: auto; max-width: 100vw; }
 .gl-close {
   position: absolute; top: 16px; right: 16px;
   width: 36px; height: 36px; border-radius: 8px;
@@ -293,13 +311,6 @@ a { color: inherit; text-decoration: none; }
 .gl-nav svg { width: 18px; height: 18px; pointer-events: none; }
 .gl-prev { left: 12px; }
 .gl-next { right: 12px; }
-.gl-caption {
-  position: absolute; left: 0; right: 0; bottom: 14px;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 0 60px;
-  text-align: center;
-  pointer-events: none;
-}
 .gl-caption-label {
   font-family: 'Inter', sans-serif;
   font-size: 11px; letter-spacing: .04em;
@@ -313,7 +324,6 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 480px) {
   .gl-nav { width: 34px; height: 34px; }
-  .gl-caption { padding: 0 48px; }
 }
 
 /* ── RAZÍTKO V ROHU ── */
@@ -995,10 +1005,8 @@ a { color: inherit; text-decoration: none; }
   }
 }
 .rv-fs-modal .rv-fs-labels {
-  /* Šířka podle obsahu + vycentrování — skupina "© popisek" pak sedí
-     doprostřed pod fotkou, ne u levého okraje obrazovky. */
+  /* Šířka podle obsahu, ne přes celou obrazovku (centrování řeší základní pravidlo). */
   width: auto; max-width: 100vw;
-  justify-content: center;
 }
 
 .rv-fs-modal .sl-handle { background: rgba(255,255,255,.95); }
@@ -1026,7 +1034,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .rv-fs-labels {
-  display: flex; justify-content: flex-start; align-items: center; gap: 9px;
+  /* justify-content: center — skupina "© popisek" sedí doprostřed pod fotkou.
+     Platí pro fullscreen slidery i samostatné obrázky. */
+  display: flex; justify-content: center; align-items: center; gap: 9px;
   width: 100%; max-width: 1200px;
   padding: 4px 4px 0;
   font-family: 'Inter', sans-serif; font-size: 12px;
@@ -1518,10 +1528,17 @@ window.addEventListener('load', renderPlaceI18n);
 <!-- GALLERY LIGHTBOX -->
 <div class="gl-modal" id="glModal">
   <div class="gl-inner">
-    <img class="gl-img" id="glImg" src="" alt=""/>
-    <div class="gl-caption">
-      <div class="gl-caption-label" id="glLabel"></div>
-      <div class="gl-caption-count" id="glCount"></div>
+    <div class="gl-imgwrap" id="glImgWrap">
+      <img class="gl-img" id="glImg" src="" alt=""/>
+      <div class="fs-copy-modal" id="glCopyModal">
+        <button class="copy-close" onclick="event.stopPropagation();toggleFsCopy('glCopyModal')">✕</button>
+        <div id="glExif"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
+      </div>
+    </div>
+    <div class="rv-fs-labels">
+      <button class="fs-copy-btn" onclick="event.stopPropagation();glLoadExif();toggleFsCopy('glCopyModal')" title="Autorská práva">©</button>
+      <span class="gl-caption-label" id="glLabel"></span>
+      <span class="gl-caption-count" id="glCount"></span>
     </div>
   </div>
   <button class="gl-nav gl-prev" onclick="glPrev(event)" title="Předchozí">
@@ -2228,6 +2245,30 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
 
   let idx = 0;
   let glOpenState = false;
+  const _glExifCache = {};
+
+  // EXIF se načítá líně, až po kliknutí na © u konkrétní fotky (stejně jako
+  // u ostatních copyright panelů), a cachuje se podle URL.
+  window.glLoadExif = function() {
+    const item = items[idx];
+    if (!item) return;
+    const src = item.src;
+    if (_glExifCache[src] !== undefined) {
+      renderExif('glExif', _glExifCache[src]);
+      return;
+    }
+    if (typeof exifr === 'undefined') return;
+    exifr.parse(src, true)
+      .then(function(d) { _glExifCache[src] = d || null; renderExif('glExif', _glExifCache[src]); })
+      .catch(function() { _glExifCache[src] = null; renderExif('glExif', null); });
+  };
+
+  function _glResetOverlays() {
+    const cm = document.getElementById('glCopyModal');
+    if (cm) cm.classList.remove('open');
+    const wrap = document.getElementById('glImgWrap');
+    if (wrap && wrap._pinchReset) wrap._pinchReset();
+  }
 
   function render() {
     const img   = document.getElementById('glImg');
@@ -2238,6 +2279,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
     img.alt = items[idx].alt;
     label.textContent = items[idx].alt || items[idx].label;
     count.textContent = (idx + 1) + ' / ' + items.length;
+    // Při přepnutí fotky zavřít copyright panel a zrušit přiblížení —
+    // jinak by zůstal viset EXIF předchozí fotky a cizí úroveň zoomu.
+    _glResetOverlays();
   }
 
   window.openGallery = function(i) {
@@ -2248,6 +2292,11 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
     glOpenState = true;
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
+    // Pinch-zoom stejný jako u fullscreen fotek — transformuje kontejner,
+    // takže zvětšená fotka může přetéct přes celý displej. Init je odložený
+    // až sem, protože _initSliderPinch je definovaný v pozdějším bloku.
+    const wrap = document.getElementById('glImgWrap');
+    if (wrap && typeof _initSliderPinch === 'function') _initSliderPinch(wrap);
   };
 
   window.closeGallery = function() {
@@ -2256,6 +2305,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
     glOpenState = false;
     document.body.style.overflow = '';
     document.body.style.touchAction = '';
+    _glResetOverlays();
   };
 
   window.glNext = function(e) {
@@ -2287,9 +2337,19 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _fsOpen) t
   // Swipe pro mobil
   let touchStartX = null;
   if (modal) {
-    modal.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    // Při přiblížení slouží tažení jedním prstem k posunu fotky (řeší pinch
+    // handler), ne k přepínání na další — jinak by se fotka měnila při každém
+    // posunu zoomované fotky.
+    function _glZoomed() {
+      const w = document.getElementById('glImgWrap');
+      return !!(w && w._isZoomed && w._isZoomed());
+    }
+    modal.addEventListener('touchstart', e => {
+      touchStartX = (e.touches.length === 1 && !_glZoomed()) ? e.touches[0].clientX : null;
+    }, { passive: true });
     modal.addEventListener('touchend', e => {
       if (touchStartX === null) return;
+      if (_glZoomed()) { touchStartX = null; return; }
       const dx = e.changedTouches[0].clientX - touchStartX;
       if (Math.abs(dx) > 40) { dx > 0 ? glPrev() : glNext(); }
       touchStartX = null;
@@ -3151,6 +3211,8 @@ function _initSliderPinch(wrap) {
     wrap.style.zIndex = s > 1.01 ? '10' : '';
   }
   function reset() { s = 1; tx = 0; ty = 0; apply(); }
+  wrap._pinchReset = reset;
+  wrap._isZoomed = function() { return s > 1.05; };
   function clamp() {
     if (s <= 1.01) { tx = 0; ty = 0; return; }
     var limX = wrap.offsetWidth  * (s-1) / 2;
@@ -3206,7 +3268,7 @@ function _initSliderPinch(wrap) {
   });
 
   // Reset při zavření modalu
-  var modal = wrap.closest('.rv-fs-modal') || wrap.closest('.fs-modal');
+  var modal = wrap.closest('.rv-fs-modal') || wrap.closest('.fs-modal') || wrap.closest('.gl-modal');
   if (modal) {
     new MutationObserver(function(muts) {
       muts.forEach(function(m) {
