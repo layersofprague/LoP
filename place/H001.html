@@ -976,7 +976,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center; justify-content: center;
   overscroll-behavior: contain;
   flex-direction: column; gap: 0;
-  padding: 44px 0 8px;
+  padding: 8px 0 4px;
 }
 .rv-fs-modal.open { display: flex; }
 .rv-fs-modal .rv-wrap {
@@ -1028,7 +1028,7 @@ a { color: inherit; text-decoration: none; }
 .rv-fs-labels {
   display: flex; justify-content: flex-start; align-items: center; gap: 9px;
   width: 100%; max-width: 1200px;
-  padding: 8px 4px 0;
+  padding: 4px 4px 0;
   font-family: 'Inter', sans-serif; font-size: 12px;
   color: rgba(255,255,255,.7);
 }
@@ -1070,12 +1070,12 @@ a { color: inherit; text-decoration: none; }
 }
 .rv-fs-imgwrap .rv-fs-img {
   display: block;
-  max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - var(--fs-chrome, 108px));
+  max-width: calc(100vw - 8px);
+  max-height: calc(100dvh - var(--fs-chrome, 46px));
   width: auto; height: auto;
 }
 @media (orientation: landscape) {
-  .rv-fs-imgwrap { --fs-chrome: 64px; }
+  .rv-fs-imgwrap { --fs-chrome: 42px; }
 }
 .rv-fs-img {
   max-width: calc(100% - 24px);
@@ -3112,140 +3112,15 @@ window._rvClosePlan = function() {
 <script>
 /* ── PINCH-TO-ZOOM for fullscreen modal images ── */
 (function() {
-  function initPinchZoom(img) {
-    if (!img) return;
-
-    // Stav transformace
-    var s = 1, tx = 0, ty = 0;
-    // Uložený stav na začátku gesta
-    var s0, tx0, ty0, d0, fx0, fy0;
-    var panRefX, panRefY, panning = false;
-    var lastTap = 0;
-
-    function apply() {
-      // transform-origin: center center → střed obrázku
-      img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
-      img.classList.toggle('zoomed', s > 1.05);
-    }
-
-    function reset() {
-      s = 1; tx = 0; ty = 0;
-      img.style.transform = '';
-      img.classList.remove('zoomed');
-    }
-
-    function clamp() {
-      if (s <= 1.01) { tx = 0; ty = 0; return; }
-      // Přirozená (netransformovaná) velikost obrázku
-      var w = img.offsetWidth, h = img.offsetHeight;
-      var limX = w * (s - 1) / 2;
-      var limY = h * (s - 1) / 2;
-      tx = Math.max(-limX, Math.min(limX, tx));
-      ty = Math.max(-limY, Math.min(limY, ty));
-    }
-
-    function dist(t) {
-      var dx = t[0].clientX - t[1].clientX;
-      var dy = t[0].clientY - t[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    img.addEventListener('touchstart', function(e) {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        // Uložit stav gesta
-        d0  = dist(e.touches);
-        s0  = s; tx0 = tx; ty0 = ty;
-        // Ohnisko = střed prstů v souřadnicích okna
-        fx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        fy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        panning = false;
-      } else if (e.touches.length === 1) {
-        if (s > 1.05) {
-          e.preventDefault();
-          panRefX = e.touches[0].clientX - tx;
-          panRefY = e.touches[0].clientY - ty;
-          panning = true;
-        }
-        // Double-tap
-        var now = Date.now();
-        if (now - lastTap < 300) {
-          e.preventDefault();
-          if (s > 1.05) {
-            reset();
-          } else {
-            // Střed obrázku v souřadnicích okna
-            var r = img.getBoundingClientRect();
-            var cx = r.left + r.width / 2;
-            var cy = r.top  + r.height / 2;
-            var tapX = e.touches[0].clientX;
-            var tapY = e.touches[0].clientY;
-            s = 2.5;
-            // Bod pod prstem musí zůstat pod prstem:
-            // newTx = tapX - cx - (tapX - cx) * s  →  -(tapX - cx)*(s-1)
-            tx = -(tapX - cx) * (s - 1);
-            ty = -(tapY - cy) * (s - 1);
-            clamp(); apply();
-          }
-          lastTap = 0; return;
-        }
-        lastTap = now;
-      }
-    }, { passive: false });
-
-    img.addEventListener('touchmove', function(e) {
-      if (e.touches.length === 2 && d0) {
-        e.preventDefault();
-        var d  = dist(e.touches);
-        var fx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        var fy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        var newS = Math.max(1, Math.min(5, s0 * (d / d0)));
-
-        // Střed obrázku v souřadnicích okna při stavu s0/tx0/ty0:
-        // imgCenter_screen = naturalCenter_screen + tx0, ty0
-        // (transform-origin: center, natCenter = relativní střed v layoutu)
-        // Ohnisko v "obrázkovém" souřadnicovém systému (relativně ke středu, při s=s0):
-        //   imgPt = (fx0 - natCx - tx0) / s0   kde natCx = imgEl offsetLeft + w/2
-        var w  = img.offsetWidth,  h  = img.offsetHeight;
-        var el = img;
-        var natCx = el.offsetLeft + w / 2;
-        var natCy = el.offsetTop  + h / 2;
-        // Souřadnice ohniska ve "vnitřním" prostoru obrázku
-        var imgFx = (fx0 - natCx - tx0) / s0;
-        var imgFy = (fy0 - natCy - ty0) / s0;
-        // Nový translate: ohnisko v novém stavu musí ležet pod středem prstů (fx,fy)
-        //   fx = natCx + imgFx * newS + newTx + (fx - fx0)  ← posun středu prstů
-        tx = fx - natCx - imgFx * newS;
-        ty = fy - natCy - imgFy * newS;
-        s  = newS;
-        clamp(); apply();
-      } else if (e.touches.length === 1 && panning) {
-        e.preventDefault();
-        tx = e.touches[0].clientX - panRefX;
-        ty = e.touches[0].clientY - panRefY;
-        clamp(); apply();
-      }
-    }, { passive: false });
-
-    img.addEventListener('touchend', function(e) {
-      if (e.touches.length < 2) d0 = 0;
-      if (e.touches.length === 0) panning = false;
-      if (s < 1.05) reset();
-    });
-
-    // Reset při zavření modalu
-    var modal = img.closest('.rv-fs-modal');
-    if (modal) {
-      new MutationObserver(function(muts) {
-        muts.forEach(function(m) {
-          if (m.attributeName === 'class' && !modal.classList.contains('open')) reset();
-        });
-      }).observe(modal, { attributes: true });
-    }
-  }
-
   function _initAll() {
-    document.querySelectorAll('.rv-fs-modal .rv-fs-img').forEach(initPinchZoom);
+    // Stejný mechanismus jako u sliderů: transformace se aplikuje na celý
+    // kontejner (i s jeho klipovací hranicí), ne na obrázek uvnitř — díky tomu
+    // se zvětšená fotka může rozlézt přes celý displej, ne se ořezat na
+    // rámečku. Dřív se tady volal initPinchZoom(img), který škáloval obrázek
+    // uvnitř kontejneru s overflow:hidden, a proto zoom končil na jeho hraně.
+    document.querySelectorAll('.rv-fs-modal .rv-fs-imgwrap').forEach(function(wrap) {
+      if (typeof _initSliderPinch === 'function') _initSliderPinch(wrap);
+    });
   }
 
   if (document.readyState === 'loading') {
