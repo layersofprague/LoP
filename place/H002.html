@@ -998,6 +998,8 @@ function renderPlaceI18n() {
   if (ilb && P.insiderLink) { ilb.href = P.insiderLink.url; ilb.textContent = loc(P.insiderLink.label) + ' →'; }
   const iwl = document.getElementById('insiderWhyLink');
   if (iwl) iwl.textContent = t('place.paywall_why');
+  const cwl = document.getElementById('curiosityWhyLink');
+  if (cwl) cwl.textContent = t('place.paywall_why');
   // insiderGateText/insiderGateLink se nastavují dynamicky v updateInsiderGate()
   // podle stavu přihlášení (viz níže) — nemá smysl je nastavovat i tady.
 
@@ -1177,7 +1179,7 @@ window.addEventListener('load', renderPlaceI18n);
   </div>
   <!-- Overlay: historická fotka, maskována zprava -->
   <div class="sl-top" id="slTop">
-    <img src="../foto/H002_h.jpg" alt="Bašta sv. Máří Magdalény ~1900"/>
+    <img src="../foto/H002_h.jpg" alt="Bašta sv. Máří Magdalény 1870"/>
   </div>
   <!-- Hairline divider -->
   <div class="sl-divider" id="slDivider"></div>
@@ -1206,7 +1208,7 @@ window.addEventListener('load', renderPlaceI18n);
         <div id="copyNow"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
       <div>
-        <div class="copy-col-head" id="copyColHist">~1900</div>
+        <div class="copy-col-head" id="copyColHist">1870</div>
         <div id="copyHist"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
       </div>
     </div>
@@ -1216,7 +1218,7 @@ window.addEventListener('load', renderPlaceI18n);
 <div id="heroStamp" style="display:none;position:absolute;top:var(--stamp-top,82px);right:2px;width:88px;height:88px;z-index:20;filter:drop-shadow(0 2px 8px rgba(0,0,0,.18));pointer-events:none"></div>
 <div class="sl-margin">
   <div class="sl-lbl" id="lblNow">2026</div>
-  <div class="sl-lbl active" id="lblHist">~1900</div>
+  <div class="sl-lbl active" id="lblHist">1870</div>
 </div>
 
 </div><!-- /hero-wrap -->
@@ -1228,7 +1230,7 @@ window.addEventListener('load', renderPlaceI18n);
       <img src="../foto/H002_s.jpg" alt="Bašta sv. Máří Magdalény dnes"/>
     </div>
     <div class="sl-top" id="slTopFs">
-      <img src="../foto/H002_h.jpg" alt="Bašta sv. Máří Magdalény ~1900"/>
+      <img src="../foto/H002_h.jpg" alt="Bašta sv. Máří Magdalény 1870"/>
     </div>
     <div class="sl-handle" id="slHandleFs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1244,7 +1246,7 @@ window.addEventListener('load', renderPlaceI18n);
           <div id="copyNowFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
         </div>
         <div>
-          <div class="copy-col-head" id="copyColHistFs">~1900</div>
+          <div class="copy-col-head" id="copyColHistFs">1870</div>
           <div id="copyHistFs"><div class="copy-val" style="color:rgba(243,237,225,.4)">Načítám…</div></div>
         </div>
       </div>
@@ -1252,7 +1254,7 @@ window.addEventListener('load', renderPlaceI18n);
   </div>
   <div class="rv-fs-labels" id="fsModalLabels">
     <button class="fs-copy-btn" onclick="event.stopPropagation();loadExif();toggleFsCopy('copyModalFs')" title="Autorská práva">©</button>
-    <span id="fsModalLabel">Bašta sv. Máří Magdalény — současnost vs. ~1900</span>
+    <span id="fsModalLabel">Bašta sv. Máří Magdalény — současnost vs. 1870</span>
   </div>
   <button class="fs-close" onclick="toggleFullscreen()" title="Zavřít">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1364,12 +1366,25 @@ window.addEventListener('load', renderPlaceI18n);
     </div>
   </div>
 
-  <!-- zajímavosti — veřejné, bez vazby na insider gating -->
+  <!-- zajímavosti (insider, vlastní brána nezávislá na sekci Tip) -->
   <div class="section">
     <div class="tip">
       <div class="tip-label" id="curiosityLabel">Zajímavosti</div>
       <div class="tip-text" id="curiosityTeaser">Slyšeli jste někdy o pražském poledni?</div>
-      <div class="tip-text" style="font-style:normal;margin-top:6px" id="curiosityText">V letech 1891 až 1911 se z bašty výstřelem z děla ohlašovalo <strong>pražské poledne</strong>. Signál ke spuštění byl dáván praporkem z věže Klementina, vzdáleného přibližně 700 metrů. Podle tohoto akustického signálu si lidé v celém městě přesně seřizovali své hodinky. Tradice střílení poledne z této bašty skončila v roce 1911, kdy bylo oznamování přesného času přesunuto na jiné místo — na Opyš u Pražského hradu.</div>
+      <div class="insider-full" id="curiosityFull" style="margin-top:10px">
+        <div class="tip-text" style="font-style:normal" id="curiosityText">V letech 1891 až 1911 se z bašty výstřelem z děla ohlašovalo <strong>pražské poledne</strong>. Signál ke spuštění byl dáván praporkem z věže Klementina, vzdáleného přibližně 700 metrů. Podle tohoto akustického signálu si lidé v celém městě přesně seřizovali své hodinky. Tradice střílení poledne z této bašty skončila v roce 1911, kdy bylo oznamování přesného času přesunuto na jiné místo — na Opyš u Pražského hradu.</div>
+      </div>
+      <div class="insider-gate" id="curiosityGate" style="margin-top:10px;background:transparent;border:none;padding:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span id="curiosityGateText" style="font-size:13px;color:var(--ink-3)">Pro celý obsah se</span>
+          <a id="curiosityGateLink" style="font-size:13px" onclick="window.lopAuth ? window.lopAuth.open() : location.href='../login.html?return='+encodeURIComponent(location.href)">přihlaste</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-5);flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <a id="curiosityWhyLink" href="../oprojektu.html" style="font-size:12px;color:var(--ink-5);text-decoration:underline;text-underline-offset:2px">Proč je část obsahu skryta?</a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1389,8 +1404,8 @@ window.addEventListener('load', renderPlaceI18n);
       </div>
       <div class="gallery-thumb" onclick="openGallery(1)">
         <img src="https://layersofprague.github.io/LoP/foto/H002_h.jpg"
-             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Bašta sv. Máří Magdalény ~1900"/>
-        <div class="gt-label">~1900</div>
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" alt="Bašta sv. Máří Magdalény 1870"/>
+        <div class="gt-label">1870</div>
       </div>
     </div>
   </div>
@@ -1579,18 +1594,19 @@ function renderExif(elId, data) {
 /* Popisek roku pod sliderem a hlavička sloupce v info modalu musí ukazovat
    totéž, co reálně říká EXIF — ne odhad z captions.json. Přepíše se, jakmile
    EXIF dorazí; do té doby zůstává fallback text z HTML/captions. */
+/* Aktualizuje POUZE hlavičky uvnitř copyright panelu — tam je rok součástí
+   EXIF výpisu (samostatný řádek "Datum" jsme z výpisu odebrali).
+   Popisky pod sliderem (lblHist/lblNow) a titulek fullscreenu zůstávají
+   natvrdo v HTML a EXIF je nepřepisuje — jinak by po kliknutí na © viditelně
+   přeskočily na jinou hodnotu. */
 function updateYearLabels(histData, nowData) {
   const histYear = xifYear(histData);
   if (histYear) {
-    const lh = document.getElementById('lblHist');    if (lh) lh.textContent = histYear;
     const ch = document.getElementById('copyColHist'); if (ch) ch.textContent = histYear;
     const chf = document.getElementById('copyColHistFs'); if (chf) chf.textContent = histYear;
-    const fml = document.getElementById('fsModalLabel');
-    if (fml && /~?\d{4}/.test(fml.textContent)) fml.textContent = fml.textContent.replace(/~?\d{4}/, histYear);
   }
   const nowYear = xifYear(nowData);
   if (nowYear) {
-    const ln = document.getElementById('lblNow');    if (ln) ln.textContent = nowYear;
     const cn = document.getElementById('copyColNow'); if (cn) cn.textContent = nowYear;
     const cnf = document.getElementById('copyColNowFs'); if (cnf) cnf.textContent = nowYear;
   }
@@ -1658,30 +1674,39 @@ function updateInsiderGate() {
   const role     = localStorage.getItem('lop_user_role') || 'member';
   const insider  = loggedIn && ['insider','author','admin'].includes(role);
 
-  const full   = document.getElementById('insiderFull');
-  const gate   = document.getElementById('insiderGate');
-  const teaser = document.getElementById('insiderTeaser');
-  const txt    = document.getElementById('insiderGateText');
-  const link   = document.getElementById('insiderGateLink');
+  // Gatované sekce — každá má vlastní teaser/obsah/bránu, ale stejné pravidlo:
+  // nepřihlášený (resp. ne-insider) vidí jen teaser + bránu, insider jen obsah.
+  const GATED = [
+    { full: 'insiderFull',   gate: 'insiderGate',   teaser: 'insiderTeaser',
+      txt: 'insiderGateText',   link: 'insiderGateLink' },
+    { full: 'curiosityFull', gate: 'curiosityGate', teaser: 'curiosityTeaser',
+      txt: 'curiosityGateText', link: 'curiosityGateLink' },
+  ];
 
-  if (full)   full.classList.toggle('visible', insider);
-  // Reinicializovat river slider po zobrazení insider sekce
-  if (gate) {
-    gate.classList.toggle('hidden', insider);
-    if (!insider) gate.style.display = 'flex';
-    else gate.style.display = '';
-  }
-  if (teaser) teaser.style.display = insider ? 'none' : '';
+  GATED.forEach(function(sec) {
+    const full   = document.getElementById(sec.full);
+    const gate   = document.getElementById(sec.gate);
+    const teaser = document.getElementById(sec.teaser);
+    const txt    = document.getElementById(sec.txt);
+    const link   = document.getElementById(sec.link);
 
-  if (gate && !insider) {
-    if (!loggedIn) {
-      if (txt)  txt.textContent = t('place.paywall_signin');
-      if (link) { link.textContent = t('place.paywall_link'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
-    } else {
-      if (txt)  txt.textContent = t('place.paywall_insider');
-      if (link) { link.textContent = t('place.paywall_upgrade'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
+    if (full) full.classList.toggle('visible', insider);
+    if (gate) {
+      gate.classList.toggle('hidden', insider);
+      gate.style.display = insider ? '' : 'flex';
     }
-  }
+    if (teaser) teaser.style.display = insider ? 'none' : '';
+
+    if (gate && !insider) {
+      if (!loggedIn) {
+        if (txt)  txt.textContent = t('place.paywall_signin');
+        if (link) { link.textContent = t('place.paywall_link'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : location.href = '../login.html?return=' + encodeURIComponent(location.href); }
+      } else {
+        if (txt)  txt.textContent = t('place.paywall_insider');
+        if (link) { link.textContent = t('place.paywall_upgrade'); link.onclick = () => window.lopAuth ? window.lopAuth.open() : null; }
+      }
+    }
+  });
 
   const btn = document.getElementById('lopHProfile');
   if (btn && loggedIn) btn.classList.add('logged-in');

@@ -69,16 +69,16 @@
   "galleryCount": 2,
   "captions": {
     "fsLabel": {
-      "cs": "Bašta sv. Máří Magdalény — současnost vs. cca 1900",
-      "en": "St Mary Magdalene Bastion — now vs. c. 1900"
+      "cs": "Bašta sv. Máří Magdalény — současnost vs. 1870",
+      "en": "St Mary Magdalene Bastion — present day vs. 1870"
     },
     "copyToday": {
-      "cs": "Autor fotografie (současnost)",
-      "en": "Photo credit (present day)"
+      "cs": "2026",
+      "en": "2026"
     },
     "copyHist": {
-      "cs": "Autor fotografie (historická)",
-      "en": "Photo credit (historical)"
+      "cs": "1870",
+      "en": "1870"
     }
   },
   "insiderTeaser": {

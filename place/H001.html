@@ -1968,19 +1968,19 @@ function renderExif(elId, data) {
 /* Popisek roku pod sliderem a hlavička sloupce v info modalu musí ukazovat
    totéž, co reálně říká EXIF — ne odhad z captions.json. Přepíše se, jakmile
    EXIF dorazí; do té doby zůstává fallback text z HTML/captions. */
+/* Aktualizuje POUZE hlavičky uvnitř copyright panelu — tam je rok součástí
+   EXIF výpisu (samostatný řádek "Datum" jsme z výpisu odebrali).
+   Popisky pod sliderem (lblHist/lblNow) a titulek fullscreenu zůstávají
+   natvrdo v HTML a EXIF je nepřepisuje — jinak by po kliknutí na © viditelně
+   přeskočily na jinou hodnotu. */
 function updateYearLabels(histData, nowData) {
   const histYear = xifYear(histData);
   if (histYear) {
-    const lh = document.getElementById('lblHist');    if (lh) lh.textContent = histYear;
     const ch = document.getElementById('copyColHist'); if (ch) ch.textContent = histYear;
     const chf = document.getElementById('copyColHistFs'); if (chf) chf.textContent = histYear;
-    // fsModalLabel je celá věta ("... vs. 1909") — nahradit jen rok v ní, ne přepsat celý text
-    const fml = document.getElementById('fsModalLabel');
-    if (fml && /~?\d{4}/.test(fml.textContent)) fml.textContent = fml.textContent.replace(/~?\d{4}/, histYear);
   }
   const nowYear = xifYear(nowData);
   if (nowYear) {
-    const ln = document.getElementById('lblNow');    if (ln) ln.textContent = nowYear;
     const cn = document.getElementById('copyColNow'); if (cn) cn.textContent = nowYear;
     const cnf = document.getElementById('copyColNowFs'); if (cnf) cnf.textContent = nowYear;
   }
