@@ -345,46 +345,40 @@ a { color: inherit; text-decoration: none; }
    collections.html — Sbírka razítek (layout 4b ploché sekce)
    ═══════════════════════════════════════════════════════ */
 
+/* Titulek a hláška o načítání — v HTML zůstává český text jako záloha
+   (konvence #9), tady se přepíše podle zvoleného jazyka. */
+document.title = t('collection.page_title');
+(function () {
+  const el = document.getElementById('loadingEl');
+  if (el) el.textContent = t('collection.loading');
+})();
+
 const SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
 const SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 // VISIT_KEY a WISH_KEY — data jdou přímo ze Supabase (_dbVisited, _dbWished)
 
 const CAT_COLOR = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
-const CAT_NAME  = { hist: 'Historie', arch: 'Architektura', art: 'Umění', fun: 'Zajímavosti' };
-const CAT_BADGE = { hist: 'Historik', arch: 'Stavitel', art: 'Galerista', fun: 'Objevitel' };
+/* Popisky jdou z translations.json (konvence: struktura v kódu, texty v překladech),
+   proto se čtou funkcemi, ne z natvrdo zapsaných objektů — jinak by stránka
+   zůstala česky i v anglické verzi. */
+const catName  = cat => t('cat.' + cat);
+const catBadge = cat => t('badge.' + cat);
+const catTip   = cat => ({
+  title:    t('tip.' + cat + '.title'),
+  progress: t('tip.' + cat + '.progress'),
+  complete: t('tip.' + cat + '.complete'),
+});
+
 const CAT_PREFIX = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
 
-const CAT_TIP = {
-  hist: { title: 'Archeolog a Historik', progress: 'Ještě {x} a bude z tebe Archeolog a Historik.', complete: 'Blahopřejeme! Všechna razítka sbírky HISTORIE jsou tvá! Nyní Ti právem náleží titul Archeolog a Historik.' },
-  arch: { title: 'Stavitel a Architekt', progress: 'Ještě {x} a bude z tebe Stavitel a Architekt.', complete: 'Blahopřejeme! Všechna razítka sbírky ARCHITEKTURA jsou tvá! Nyní Ti právem náleží titul Stavitel a Architekt.' },
-  art:  { title: 'Umělec a Galerista',  progress: 'Ještě {x} a bude z tebe Umělec a Galerista.',  complete: 'Blahopřejeme! Všechna razítka sbírky UMĚNÍ jsou tvá! Nyní Ti právem náleží titul Umělec a Galerista.' },
-  fun:  { title: 'Zvědavec a Objevitel', progress: 'Ještě {x} a bude z tebe Zvědavec a Objevitel.', complete: 'Blahopřejeme! Všechna razítka sbírky ZAJÍMAVOSTI jsou tvá! Nyní Ti právem náleží titul Zvědavec a Objevitel.' },
-};
-
-const DISTRICT_DATA = {
-  'Staré Město': { title: 'Měšťák a Hausknecht', desc: 'Měšťákům a Hausnknechtům se říkalo bohatým obchodníkům, ale také rázovitým rváčům a kočím z přístavních krčem.' },
-  'Nové Město':  { title: 'Rachunbář a Františkán', desc: 'Rachunbářům a Františkánům se říkalo chudším dělníkům, kteří pili v hospodách na dluh, a mnichům z místních klášterů.' },
-  'Malá Strana': { title: 'Malostranský Špunt a Lokaj', desc: 'Malostranským Špuntům a Lokajům se říkalo klukům z bojovných part na zamrzlé Vltavě a služebnictvu ze šlechtických paláců.' },
-  'Hradčany':    { title: 'Kastelán a Kapucín', desc: 'Kastelánům a Kapucínům se říkalo chudině a řemeslníkům navázaným na Pražský hrad a klášterní život v okolí Lorety.' },
-  'Josefov':     { title: 'Meiselovec', desc: 'Meiselovecem se říkalo obyvateli židovského ghetta, pojmenovaným po nejslavnějším historickém starostovi Mordechaji Maiselovi.' },
-  'Žižkov':      { title: 'Žižkovský Pepík', desc: 'Žižkovskými Pepíky se říkalo slavným pouličním frajerkům, dělníkům a bohémům s typickým stylem oblékání a vlastním slangem.' },
-  'Smíchov':     { title: 'Smíchovský Baraba', desc: 'Smíchovskými Barabami se říkalo drsným, hlučným a tvrdě pracujícím dělníkům z místních obřích továren a pivovaru.' },
-  'Holešovice':  { title: 'Holešovický Šupák', desc: 'Holešovickými Šupáky se říkalo přístavním dělníkům, kteří šupovali – tedy posouvali a vykládali sudy a bedny z lodí.' },
-  'Karlín':      { title: 'Karlínský kluk', desc: 'Karlínskými kluky se říkalo drsnějším dělnickým partám z první pravé průmyslové čtvrti Prahy.' },
-  'Košíře':      { title: 'Košířský rváč', desc: 'Košířskými rváči se říkalo divokým partám z tehdejší periferie, které neustále bojovaly se sousedním Smíchovem.' },
-  'Podskalí':    { title: 'Podskalák a Plavec', desc: 'Podskalákům a Plavcům se říkalo hrdé a uzavřené komunitě vorařů, ledařů a rybářů z oblasti dnešní Výtoně.' },
-  'Kampa':       { title: 'Kampán', desc: 'Kampány se říkalo obyvatelům polovenkovské izolované komunity pradlen, mlynářů a rybářů z vltavského ostrova.' },
-  'Braník':      { title: 'Branský ledař', desc: 'Branskými ledaři se říkalo dělníkům, kteří v zimě sekali na zamrzlé Vltavě led a sváželi ho do branických ledáren.' },
-  'Podolí':      { title: 'Podolský cementárník', desc: 'Podolskými cementárníky se říkalo dělníkům z bývalé slavné podolské cementárny, kteří tvořili jádro tamní říční komunity.' },
-  'Nusle':       { title: 'Nuselský Kafemlejnek', desc: 'Nuselskými Kafemlejnky se říkalo chudšímu pavlačovému obyvatelstvu, jehož sousedky neustále melely pantem a ráno mlely meltu.' },
-  'Libeň':       { title: 'Libeňský Balonář', desc: 'Libeňskými Balonáři se říkalo klukům, kteří fascinovaně sledovali vypouštění prvních pražských balonů v Libeni.' },
-  'Vyšehrad':    { title: 'Vyšehradský Kanovník a Peckář', desc: 'Vyšehradskými Kanovníky a Peckáři se říkalo kněžím z kapituly a pěstitelům třešní a švestek, které prodávali po celé Praze.' },
-  'Vršovice':    { title: 'Vršovický Koloběžkář', desc: 'Vršovickými Koloběžkáři se ironicky říkalo obyvatelům venkovského předměstí bez pořádné dopravy, kde se lidé museli neustále přesouvat.' },
-  'Vinohrady':   { title: 'Vinohradský paňáca', desc: 'Vinohradskými paňácy se posměšně říkalo bohatším a elegantním měšťanům – a to zejména v ústech jejich žižkovských sousedů.' },
-  'Břevnov':     { title: 'Břevnovský zelinář a Benediktin', desc: 'Břevnovskými zelináři a Benediktiny se říkalo pěstitelům a mnichům spjatým se zahradami, které historicky patřily Břevnovskému klášteru.' },
-  'Troja':       { title: 'Trojský vinař', desc: 'Trojskými vinaři se říkalo obyvatelům svahů nad Vltavou, kteří po staletí udržovali tradici pěstování vinné révy.' },
-  'Letná':       { title: 'Sparťan', desc: 'Sparťany se říkalo obyvatelům Letné – podle zdejšího fotbalového klubu AC Sparta Praha.' },
-};
+/* Kurátorské tituly čtvrtí. Klíčem je SLUG (`holesovice`), ne český název —
+   `district` v datech je slug, takže vyhledávání podle názvu vždycky selhalo
+   a místo titulu se zobrazoval surový slug. */
+function districtCurator(slug) {
+  const titleKey = 'curator.' + slug + '.title';
+  if (!window.lopHasKey || !window.lopHasKey(titleKey)) return null;
+  return { title: t(titleKey), desc: t('curator.' + slug + '.desc') };
+}
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem('lop_auth_session') || 'null'); } catch(e) { return null; }
@@ -510,10 +504,11 @@ function buildSectionData(places, visited, scores) {
     });
     sections.push({
       kind: 'cat',
-      name: CAT_NAME[cat],
+      key: cat,                 // stabilní klíč (nezávislý na jazyce) pro openState
+      name: catName(cat),
       color: CAT_COLOR[cat],
       cat: cat,
-      badge: CAT_BADGE[cat],
+      badge: catBadge(cat),
       items: items,
     });
   });
@@ -537,12 +532,16 @@ function buildSectionData(places, visited, scores) {
         empty: !isVis,
       };
     });
+    const cur = districtCurator(district);
+    const distLabel = (window.LOP_TAGS && LOP_TAGS.districtLabel)
+      ? LOP_TAGS.districtLabel(district) : district;
     sections.push({
       kind: 'district',
-      name: district,
+      key: district,            // slug — stabilní klíč pro openState
+      name: distLabel,
       color: '#b04020',
       cat: 'hist',
-      badge: (DISTRICT_DATA[district] ? DISTRICT_DATA[district].title : 'Kurátor ' + district),
+      badge: cur ? cur.title : t('collection.curator_generic', { d: distLabel }),
       items: items,
     });
   });
@@ -611,7 +610,7 @@ function renderSection(sec, idx) {
   const empties = sec.items.filter(p => !locName(p.name) || p.empty);
   const total = sec.items.length;
   const pct = total > 0 ? Math.round(got.length / total * 100) : 0;
-  const isOpen = !!openState[sec.name];
+  const isOpen = !!openState[sec.key || sec.name];
   const isDistrict = sec.kind === 'district';
 
   let gridHTML = '';
@@ -627,7 +626,7 @@ function renderSection(sec, idx) {
   const badgeInitial = sec.badge ? sec.badge[0].toUpperCase() : '?';
 
   return `<div class="flat-section" id="sec-${idx}">
-    <button class="flat-section-btn" onclick="toggleSection(${idx}, '${sec.name.replace(/'/g, "\\'")}')">
+    <button class="flat-section-btn" onclick="toggleSection(${idx}, '${String(sec.key || sec.name).replace(/'/g, "\\'")}')">
       <div class="flat-section-header">
         <span class="flat-section-dot${isDistrict ? ' district' : ''}" style="background:${sec.color}"></span>
         <span class="flat-section-name">${sec.name}</span>
@@ -644,35 +643,27 @@ function renderSection(sec, idx) {
       <div class="stamps-grid">${gridHTML}</div>
       <div style="height:10px"></div>
       ${(function(){
-        const tipData = isDistrict ? DISTRICT_DATA[sec.name] : (CAT_TIP[sec.cat] || null);
-        if (!tipData && !isDistrict) return '';
-        const iIcon = '<div class="badge-tip-icon">i</div>';
-        const okIcon = '<div class="badge-tip-icon">i</div>';
+        /* Pozor: dřív se tady psalo `const t = CAT_TIP[...]`, což zastínilo
+           globální překladovou funkci t() — proto se proměnná jmenuje `ct`. */
+        const ct = isDistrict ? districtCurator(sec.key) : catTip(sec.cat);
+        if (!ct) return '';
+        const icon = '<div class="badge-tip-icon">i</div>';
+        const titleTxt = ct.title || sec.badge;
+        const title = '<b>' + titleTxt + '</b>';
+        let txt;
         if (empties.length > 0) {
           const x = '<b>' + empties.length + ' ' + plural(empties.length) + '</b>';
-          const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
-          let txt;
-          if (isDistrict) {
-            txt = 'Ještě ' + x + ' a bude z tebe ' + title + '.';
-          } else {
-            const t = CAT_TIP[sec.cat];
-            txt = t.progress
-              .replace('{x}', x)
-              .replace(t.title || sec.badge, '<b>' + (t.title || sec.badge) + '</b>');
-          }
-          return '<div class="badge-tip">' + iIcon + '<div>' + txt + '</div></div>';
+          txt = isDistrict
+            ? t('collection.progress_district', { x: x, title: title })
+            : ct.progress.replace('{x}', x).replace(titleTxt, title);
         } else {
-          const title = '<b>' + (tipData ? tipData.title : sec.badge) + '</b>';
-          const descHtml = (tipData && tipData.desc) ? '<br><i style="color:var(--ink-4);font-size:11px;">' + tipData.desc + '</i>' : '';
-          let txt;
-          if (isDistrict) {
-            txt = 'Titul ' + title + ' je tvůj!' + descHtml;
-          } else {
-            const t = CAT_TIP[sec.cat];
-            txt = t.complete.replace(t.title || sec.badge, '<b>' + (t.title || sec.badge) + '</b>');
-          }
-          return '<div class="badge-tip">' + okIcon + '<div>' + txt + '</div></div>';
+          const descHtml = ct.desc
+            ? '<br><i style="color:var(--ink-4);font-size:11px;">' + ct.desc + '</i>' : '';
+          txt = isDistrict
+            ? t('collection.complete_district', { title: title }) + descHtml
+            : ct.complete.replace(titleTxt, title);
         }
+        return '<div class="badge-tip">' + icon + '<div>' + txt + '</div></div>';
       })()} 
     </div>
   </div>`;

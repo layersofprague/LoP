@@ -38,7 +38,7 @@ let _T = {};
 
 /* Verze v dotazu — bez ní podává GitHub Pages starou translations.json
    z cache a chybějící klíče se vypisují doslova ("overview.geo_short"). */
-const LOP_DATA_VER = '20260817';
+const LOP_DATA_VER = '20260819';
 
 (function _load() {
   try {
@@ -97,6 +97,13 @@ window.t = function (key, vars) {
     });
   }
   return str;
+};
+
+/* ── Existuje klíč? ──
+   Pro nepovinné texty (např. kurátorský titul čtvrti, který nemají všechny),
+   kde by t() zbytečně hlásil chybějící klíč do konzole. */
+window.lopHasKey = function (key) {
+  return Object.prototype.hasOwnProperty.call(_T, key);
 };
 
 /* ── Přepnutí jazyka ── */

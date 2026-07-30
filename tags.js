@@ -121,6 +121,13 @@ const DISTRICTS = {
   'vrsovice':     { pr: 10 },
   'liben':        { pr: 8, split: true },   // též Praha 7, 9
   'troja':        { pr: 7 },
+  /* Zažité lokality, nikoli samostatné katastry — vedeny zde, protože
+     `district` v datech i URL s nimi pracuje stejně jako s katastrem. */
+  'kampa':        { pr: 1 },                // součást Malé Strany
+  'podskali':     { pr: 2 },                // součást Nového Města
+  'letna':        { pr: 7 },                // na hranici Holešovic a Bubenče
+  'kosire':       { pr: 5 },
+  'branik':       { pr: 4 },
 };
 
 /* ── ALIASY ──
