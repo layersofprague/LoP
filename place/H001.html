@@ -995,10 +995,10 @@ a { color: inherit; text-decoration: none; }
   }
 }
 .rv-fs-modal .rv-fs-labels {
-  width: min(100vw, calc((100dvh - 80px) * var(--fs-ratio-w, 4) / var(--fs-ratio-h, 3)));
-}
-@media (orientation: landscape) {
-  .rv-fs-modal .rv-fs-labels { width: auto; }
+  /* Šířka podle obsahu + vycentrování — skupina "© popisek" pak sedí
+     doprostřed pod fotkou, ne u levého okraje obrazovky. */
+  width: auto; max-width: 100vw;
+  justify-content: center;
 }
 
 .rv-fs-modal .sl-handle { background: rgba(255,255,255,.95); }
@@ -1056,24 +1056,26 @@ a { color: inherit; text-decoration: none; }
 .fs-copy-modal .copy-close:hover { color: var(--paper, #F8F8F6); }
 .rv-fs-imgwrap {
   position: relative;
-  width: 100%; max-width: 100vw;
-  /* flex-basis MUSÍ být 0, ne auto — s "auto" si kontejner bere výšku z obsahu,
-     ale obsah (fotka s max-height:100%) si ji bere z kontejneru → kruhová
-     závislost, kterou prohlížeč vyřeší kolapsem na pár pixelů. S basis 0 se
-     výška určí z volného místa ve modalu, tedy jednoznačně — stejně spolehlivě,
-     jako to u sliderů řeší aspect-ratio. */
-  flex: 1 1 0; min-height: 0;
+  /* Kontejner obaluje přesně fotku (shrink-wrap), nevyplňuje celý modal.
+     Fotka je omezená viewport jednotkami, ne procenty z kontejneru — tím
+     padá kruhová závislost (kontejner→obsah→kontejner), kvůli které box
+     dřív kolaboval. Spodek kontejneru = spodek fotky, takže copyright panel
+     vyjíždí přesně od hrany fotky. Modal si pak celou skupinu
+     (fotka + popisek) vycentruje sám. */
+  flex: 0 0 auto;
+  max-width: 100vw;
   overflow: hidden;
-  /* justify-content: flex-end — fotka se lepí k dolnímu okraji kontejneru,
-     přebytečný prostor jde nahoru. Spodek fotky = spodek kontejneru, takže
-     copyright panel vyjíždí přesně od hrany fotky a nepřejíždí přes popisek. */
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  display: flex;
+  line-height: 0;
 }
 .rv-fs-imgwrap .rv-fs-img {
-  flex: 0 1 auto;
-  min-height: 0; min-width: 0;
-  max-height: 100%;
-  max-width: calc(100% - 24px);
+  display: block;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - var(--fs-chrome, 108px));
+  width: auto; height: auto;
+}
+@media (orientation: landscape) {
+  .rv-fs-imgwrap { --fs-chrome: 64px; }
 }
 .rv-fs-img {
   max-width: calc(100% - 24px);
@@ -1998,11 +2000,10 @@ function toggleFsCopy(id) {
   const opening = !el.classList.contains('open');
   el.classList.toggle('open');
   if (opening) {
-    // object-fit:contain může fotku vykreslit užší, než je celý kontejner
-    // (širokoúhlý plán) — panel má sedět na šířku fotky, ne kontejneru.
-    // Výškově se řešit nemusí — fotka je zarovnaná k dolnímu okraji
-    // kontejneru (justify-content:flex-end), takže spodek fotky = spodek
-    // kontejneru vždycky, stejně jako u sliderů.
+    // U samostatných obrázků obaluje kontejner fotku přesně, takže offsety
+    // vyjdou nulové. U sliderů (.fs-modal-inner/.rv-wrap) fotka vyplňuje
+    // celý kontejner, taky nula. Dopočet zůstává jako pojistka pro případ,
+    // že by se poměr stran někdy rozešel s kontejnerem.
     const wrap = el.closest('.rv-fs-imgwrap, .fs-modal-inner, .rv-wrap');
     const img  = wrap ? wrap.querySelector('img') : null;
     if (wrap && img) {
@@ -2956,7 +2957,6 @@ window.lopAuth.onLogout(() => {
 window._rvOpen1938 = function() {
   var m = document.getElementById('rv1938Modal');
   if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
-  _alignFsLabelsToImg('rv1938Modal');
 };
 window._rvClose1938 = function() {
   var m = document.getElementById('rv1938Modal');
@@ -2991,7 +2991,6 @@ document.addEventListener('keydown', function(e) {
 window._rvOpenStavba = function() {
   var m = document.getElementById('rvStavbaModal');
   if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
-  _alignFsLabelsToImg('rvStavbaModal');
 };
 window._rvCloseStavba = function() {
   var m = document.getElementById('rvStavbaModal');
@@ -3018,33 +3017,9 @@ window._rvCloseStavba = function() {
 </div>
 
 <script>
-// object-fit:contain může fotku vykreslit užší než celý modal (na výšku
-// omezená fotka na výšku obrazovky v portrait) — popisek pod ní má mít
-// stejnou šířku jako fotka, jinak "začátek řádku" vyjde na levý okraj
-// obrazovky místo levého okraje fotky. Měření musí počkat na skutečné
-// načtení fotky — bez ní neznáme její poměr stran a šířka by vyšla špatně.
-function _alignFsLabelsToImg(modalId) {
-  var modal = document.getElementById(modalId);
-  var img = modal ? modal.querySelector('.rv-fs-imgwrap img') : null;
-  var labels = modal ? modal.querySelector('.rv-fs-labels') : null;
-  if (!img || !labels) return;
-  function apply() {
-    requestAnimationFrame(function() {
-      var w = img.getBoundingClientRect().width;
-      if (w > 0) labels.style.width = w + 'px';
-    });
-  }
-  if (img.complete && img.naturalWidth > 0) {
-    apply();
-  } else {
-    img.addEventListener('load', apply, { once: true });
-  }
-}
-
 window._rvOpenPlan = function() {
   var m = document.getElementById('rvPlanModal');
   if (m) { m.classList.add('open'); document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
-  _alignFsLabelsToImg('rvPlanModal');
 };
 window._rvClosePlan = function() {
   var m = document.getElementById('rvPlanModal');
