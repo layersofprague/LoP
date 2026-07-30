@@ -715,11 +715,11 @@ function renderAll() {
   let html = `
   <div class="hero-section">
     <div class="hero-top">
-      <h1 class="page-title">Sbírka <em>razítek</em></h1>
+      <h1 class="page-title">${t('collection.h1')}</h1>
       <table class="hero-meta" style="align-self:flex-end;margin-top:0;margin-bottom:2px">
         <tr>
           <td><span id="statCount">—</span><span class="hero-slash">/</span><span class="hero-total" id="statTotal">—</span></td>
-          <td>razítek</td>
+          <td>${t('collection.stamps_label')}</td>
         </tr>
         <tr>
           <td id="statPoints">—</td>
@@ -727,23 +727,23 @@ function renderAll() {
         </tr>
       </table>
     </div>
-    <p class="page-intro">Sleduj jak se plní tvoje sbírky v jednotlivých kategoriích. Každé místo, které navštívíš, zanechá razítko. Každé prolnutí přítomnosti s minulostí nebo zodpovězení otázky ti ho vylepší a přidá další body.</p>
+    <p class="page-intro">${t('collection.intro')}</p>
   </div>
 
   <div id="sections-wrap">
-    <div class="section-kicker">Kategorie</div>
+    <div class="section-kicker">${t('collection.kicker_cats')}</div>
     ${catSections.map((s, i) => renderSection(s, i)).join('')}
-    ${distSections.length ? `<div class="section-kicker" style="margin-top:22px">Čtvrti</div>
+    ${distSections.length ? `<div class="section-kicker" style="margin-top:22px">${t('collection.kicker_districts')}</div>
     ${distSections.map((s, i) => renderSection(s, catSections.length + i)).join('')}` : ''}
   </div>
 
   ${!isLoggedIn() ? `<div class="auth-cta">
-    <div class="auth-cta-title">Sleduj svůj postup</div>
+    <div class="auth-cta-title">${t('collection.cta_title')}</div>
     <p class="auth-cta-sub">${t('collection.login_cta')}</p>
-    <button class="auth-cta-btn" onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html'">Přihlásit se</button>
+    <button class="auth-cta-btn" onclick="window.lopAuth ? window.lopAuth.open() : location.href='login.html'">${t('collection.cta_btn')}</button>
   </div>` : `<div style="text-align:center;padding:18px 10px 28px;">
-    <p style="font-size:12px;color:var(--ink-4);line-height:1.5;">Není důležité vyhrát, ale <b style="font-size:15px;color:var(--ink);font-weight:700;">pobavit se!</b></p>
-    <p style="font-size:11px;color:var(--ink-5);font-style:italic;margin-top:6px;">... a třeba se i něco dozvědět =)</p>
+    <p style="font-size:12px;color:var(--ink-4);line-height:1.5;">${t('collection.footer_a')} <b style="font-size:15px;color:var(--ink);font-weight:700;">${t('collection.footer_b')}</b></p>
+    <p style="font-size:11px;color:var(--ink-5);font-style:italic;margin-top:6px;">${t('collection.footer_sub')}</p>
   </div>`}`;
 
   const page = document.getElementById('page');
@@ -758,7 +758,9 @@ function renderAll() {
   const elPoints = document.getElementById('statPoints');
   if (elCount)  elCount.textContent  = visitedCount;
   if (elTotal)  elTotal.textContent  = totalPlaces;
-  if (elPoints) elPoints.textContent = totalPoints.toFixed(1);
+  // Body jsou v praxi celá čísla — ".0" na konci vypadalo jako chyba.
+  if (elPoints) elPoints.textContent = Number.isInteger(totalPoints)
+    ? String(totalPoints) : totalPoints.toFixed(1);
   // Připoj _sections na všechny sec-N prvky
   sections.forEach((s, i) => {
     const el = document.getElementById('sec-' + i);
