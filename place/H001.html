@@ -1057,21 +1057,21 @@ a { color: inherit; text-decoration: none; }
 .rv-fs-imgwrap {
   position: relative;
   width: 100%; max-width: 100vw;
-  flex: 1 1 auto; min-height: 0;
+  /* flex-basis MUSÍ být 0, ne auto — s "auto" si kontejner bere výšku z obsahu,
+     ale obsah (fotka s max-height:100%) si ji bere z kontejneru → kruhová
+     závislost, kterou prohlížeč vyřeší kolapsem na pár pixelů. S basis 0 se
+     výška určí z volného místa ve modalu, tedy jednoznačně — stejně spolehlivě,
+     jako to u sliderů řeší aspect-ratio. */
+  flex: 1 1 0; min-height: 0;
   overflow: hidden;
   /* justify-content: flex-end — fotka se lepí k dolnímu okraji kontejneru,
-     přebytečný prostor (širokoúhlá fotka v příliš vysokém boxu) jde nahoru.
-     Díky tomu spodek fotky = spodek kontejneru vždycky, popisek může zůstat
-     mimo tenhle kontejner (jako u sliderů) a copyright panel přes něj
-     při vyjíždění nepřejíždí. */
+     přebytečný prostor jde nahoru. Spodek fotky = spodek kontejneru, takže
+     copyright panel vyjíždí přesně od hrany fotky a nepřejíždí přes popisek. */
   display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
 }
 .rv-fs-imgwrap .rv-fs-img {
-  /* Popisek má pevnou výšku (flex-shrink:0), fotka dostane zbytek — žádné
-     odhadované "− 48px", které se u vyššího popisku nemuselo vejít. */
-  flex: 1 1 auto;
-  min-height: 0;
-  min-width: 0;
+  flex: 0 1 auto;
+  min-height: 0; min-width: 0;
   max-height: 100%;
   max-width: calc(100% - 24px);
 }
