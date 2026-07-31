@@ -1372,16 +1372,16 @@
     "cs": "Sparťany se říkalo obyvatelům Letné – podle zdejšího fotbalového klubu AC Sparta Praha."
   },
   "report.link": {
-    "cs": "Nahlásit nesrovnalost",
-    "en": "Report an inaccuracy"
+    "cs": "Nahlásit nesrovnalost na této stránce",
+    "en": "Report an inaccuracy on this page"
   },
   "report.title": {
     "cs": "Nahlásit nesrovnalost",
     "en": "Report an inaccuracy"
   },
   "report.intro": {
-    "cs": "Všechna fakta i autorská práva několikrát ověřujeme z důvěryhodných primárních zdrojů, analýzy kontextu i křížového porovnávání dat. Našli jste i přesto nesrovnalost nebo snad chybu? Napište nám! Rádi prověříme a případně opravíme.",
-    "en": "We verify every fact and every copyright several times over — from trustworthy primary sources, by analysing context and by cross-checking data. Found an inaccuracy or an outright mistake anyway? Write to us! We’ll gladly look into it and correct it if needed."
+    "cs": "Všechna fakta i autorská práva několikrát ověřujeme z důvěryhodných primárních zdrojů, analýzy kontextu i křížového porovnávání dat. Stejně tak všechny funkce neustále testujeme. Našli jste i přesto nesrovnalost nebo snad chybu? Napište nám! Rádi prověříme a případně opravíme.",
+    "en": "We verify every fact and every copyright several times over — from trustworthy primary sources, by analysing context and by cross-checking data. We also test every feature continuously. Found an inaccuracy or an outright mistake anyway? Write to us! We’ll gladly look into it and correct it if needed."
   },
   "report.email": {
     "cs": "Váš e-mail",
@@ -1462,5 +1462,9 @@
   "report.err_fast": {
     "cs": "Formulář byl odeslán příliš rychle. Zkuste to prosím znovu.",
     "en": "The form was submitted too quickly. Please try again."
+  },
+  "report.kind_feature": {
+    "cs": "Funkce",
+    "en": "Feature"
   }
 }

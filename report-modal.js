@@ -19,7 +19,7 @@
   var SUPA_URL = 'https://lomtaoctzetpweuepesp.supabase.co';
   var SUPA_KEY = 'sb_publishable_uAQBxCOYWpc_PrEc78fFzw_kbeH4xj5';
 
-  var KINDS = ['facts', 'copyright', 'translation', 'other'];
+  var KINDS = ['facts', 'copyright', 'translation', 'feature', 'other'];
   var THROTTLE_KEY = 'lop_report_last';
   var THROTTLE_MS = 60 * 1000;   // nejvýš 1 report za minutu z jednoho prohlížeče
   var MIN_FILL_MS = 2000;        // formulář vyplněný do 2 s = skoro jistě bot

@@ -7,7 +7,7 @@ create table if not exists public.reports (
   id          bigserial primary key,
   created_at  timestamptz not null default now(),
   email       text not null,
-  kind        text not null check (kind in ('facts','copyright','translation','other')),
+  kind        text not null check (kind in ('facts','copyright','translation','feature','other')),
   message     text not null,
   place_id    text,
   page_title  text,
@@ -50,3 +50,14 @@ create policy reports_insert_anon
 -- → Edge Function, která odešle mail přes Resend/Mailgun.
 -- Klíč zůstane na serveru, frontend se nemění.
 -- ══════════════════════════════════════════════════════════
+
+
+-- ══════════════════════════════════════════════════════════
+-- MIGRACE — spustit POUZE pokud už tabulka existuje z dřívějška
+-- (přidání kategorie 'feature' do povolených hodnot).
+-- Bez tohoto by hlášení typu „Funkce“ skončilo chybou.
+-- ══════════════════════════════════════════════════════════
+-- alter table public.reports drop constraint if exists reports_kind_check;
+-- alter table public.reports
+--   add constraint reports_kind_check
+--   check (kind in ('facts','copyright','translation','feature','other'));
