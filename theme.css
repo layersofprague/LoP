@@ -13,6 +13,25 @@
    odstíny a zesvětlené akcenty, aby na tmavém pozadí držely kontrast.
    ══════════════════════════════════════════════════════════ */
 
+/* ── Deklarace barevného schématu ──
+   Statická, nezávislá na JS. `theme.js` ji sice nastavuje i inline, ale
+   Samsung Internet a Chrome „Auto Dark Theme“ se rozhodují dřív, než JS
+   stihne proběhnout — proto to musí být i tady v CSS. */
+:root { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }
+
+/* ── Signál „tento web tmavý režim umí sám“ ──
+   Prohlížeče s vynuceným tmavým režimem ustoupí, jen když web podporu
+   tmavého režimu deklaruje. Samotné `color-scheme: light` na Samsung
+   Internetu nestačí — testuje se i přítomnost tohoto media query.
+
+   Blok je záměrně účinný jen tehdy, když si uživatel tmavý režim skutečně
+   zvolil (`data-theme="dark"`). Systémové nastavení se neřídí samo:
+   výchozí je světlý režim, tmavý je vědomá volba v nastavení. */
+@media (prefers-color-scheme: dark) {
+  html[data-theme="dark"] { color-scheme: dark; }
+}
+
 html[data-theme="dark"] {
   --paper:    #171614;   /* pozadí stránky */
   --paper-2:  #1F1E1B;   /* karty, sekundární plochy */

@@ -34,6 +34,9 @@
     root.setAttribute('data-theme', theme);
     // Vlastní vykreslování prvků prohlížeče (scrollbary, formuláře)
     root.style.colorScheme = theme;
+    // Meta deklarace musí odpovídat, jinak si prohlížeč může vzít tu původní
+    var cs = document.querySelector('meta[name="color-scheme"]');
+    if (cs) cs.setAttribute('content', theme);
   }
 
   var _current = _stored() || 'light';
