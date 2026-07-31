@@ -1466,5 +1466,53 @@
   "report.kind_feature": {
     "cs": "Funkce",
     "en": "Feature"
+  },
+  "updates.menu": {
+    "cs": "Aktualizace",
+    "en": "Updates"
+  },
+  "updates.page_title": {
+    "cs": "Aktualizace — LayersOfPrague",
+    "en": "Updates — LayersOfPrague"
+  },
+  "updates.kick": {
+    "cs": "Changelog",
+    "en": "Changelog"
+  },
+  "updates.title": {
+    "cs": "Aktualizace",
+    "en": "Updates"
+  },
+  "updates.intro": {
+    "cs": "Co se v aplikaci změnilo — nová místa, opravy a úpravy.",
+    "en": "What’s changed in the app — new places, fixes and tweaks."
+  },
+  "updates.loading": {
+    "cs": "Načítám…",
+    "en": "Loading…"
+  },
+  "updates.empty": {
+    "cs": "Zatím tu nic není.",
+    "en": "Nothing here yet."
+  },
+  "updates.err": {
+    "cs": "Aktualizace se nepodařilo načíst.",
+    "en": "Could not load the updates."
+  },
+  "updates.kind_new": {
+    "cs": "Nové",
+    "en": "New"
+  },
+  "updates.kind_fix": {
+    "cs": "Oprava",
+    "en": "Fix"
+  },
+  "updates.kind_change": {
+    "cs": "Úprava",
+    "en": "Change"
+  },
+  "updates.fresh": {
+    "cs": "nové od vaší poslední návštěvy",
+    "en": "new since your last visit"
   }
 }

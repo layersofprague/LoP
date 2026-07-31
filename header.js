@@ -247,6 +247,10 @@ function _injectSettingsMenu() {
         <button class="lop-sm-lang-btn${lang === 'en' ? ' active' : ''}" onclick="window.lopSetLang('en')">EN</button>
       </div>
       <div class="lop-sm-divider"></div>
+      <a class="lop-sm-item" href="${ROOT}updates.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+        ${window.lopLang === 'en' ? 'Updates' : 'Aktualizace'}
+      </a>
       <a class="lop-sm-item" href="${ROOT}oprojektu.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         ${window.lopLang === 'en' ? 'About the project' : 'O projektu'}

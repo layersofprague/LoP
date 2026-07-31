@@ -1,0 +1,62 @@
+[
+  {
+    "date": "2026-07-31",
+    "page": "H001, H002",
+    "url": "place/H001.html",
+    "kind": "new",
+    "text": {
+      "cs": "Přidán odkaz „Nahlásit nesrovnalost na této stránce“ — hlášení faktických chyb, autorských práv, překladu i funkcí.",
+      "en": "Added a “Report an inaccuracy on this page” link — for reporting factual errors, copyright, translation and feature issues."
+    }
+  },
+  {
+    "date": "2026-07-31",
+    "page": "collections.html",
+    "url": "collections.html",
+    "kind": "fix",
+    "text": {
+      "cs": "Opraveny chybějící překlady sbírky a kurátorské tituly čtvrtí, které se zobrazovaly jako neúplný odkaz.",
+      "en": "Fixed missing translations in the collection and district curator titles that showed as an incomplete reference."
+    }
+  },
+  {
+    "date": "2026-07-30",
+    "page": "H001, H002",
+    "url": "place/H001.html",
+    "kind": "change",
+    "text": {
+      "cs": "Fotografie v galerii se nyní ovládají stejně jako ve fullscreenu — přiblížení dvěma prsty a informace o autorství.",
+      "en": "Gallery photos now behave like the fullscreen view — pinch to zoom and photo credit details."
+    }
+  },
+  {
+    "date": "2026-07-30",
+    "page": "H002",
+    "url": "place/H002.html",
+    "kind": "new",
+    "text": {
+      "cs": "Nové zastavení: Bašta sv. Máří Magdalény — včetně zajímavosti o pražském poledni a tipu na návštěvu.",
+      "en": "New stop: St Mary Magdalene Bastion — including the story of Prague’s noon and a visitor tip."
+    }
+  },
+  {
+    "date": "2026-07-29",
+    "page": "overview.html",
+    "url": "overview.html",
+    "kind": "change",
+    "text": {
+      "cs": "Časová osa filtru je progresivní — novější období má na táhle víc místa, protože je v něm víc míst.",
+      "en": "The era filter is now progressive — recent periods get more room on the slider, since more places fall into them."
+    }
+  },
+  {
+    "date": "2026-07-29",
+    "page": "routes.html, profile.html",
+    "url": "routes.html",
+    "kind": "fix",
+    "text": {
+      "cs": "Opravena chybějící navigace na stránkách Trasy a Profil.",
+      "en": "Fixed the missing navigation bar on the Routes and Profile pages."
+    }
+  }
+]

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs" id="htmlRoot">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#1a1a18"/>
+<title>Aktualizace — LayersOfPrague</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #F8F8F6;
+  --paper-2:  #F0F0EE;
+  --paper-3:  #E8E8E6;
+  --ink:      #111111;
+  --ink-2:    #333331;
+  --ink-3:    #666662;
+  --ink-4:    #999994;
+  --ink-5:    #BABAB6;
+  --rule:     #E8E8E6;
+  --rule-2:   #E0E0DE;
+  --accent:   #B04020;
+  --ok:       #3d7a4a;
+  --cat-hist: #4A4A48;
+  --cat-arch: #3B5F84;
+  --cat-art:  #C0522A;
+  --cat-fun:  #E0A020;
+  --ease:     cubic-bezier(.22,.8,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper); color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+
+.page { max-width: 820px; margin: 0 auto; padding: 28px 10px 100px; }
+@media (min-width: 820px) { .page { padding: 28px clamp(24px, 5vw, 64px) 40px; } }
+
+/* ── HERO ── */
+.up-kick {
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-5); margin-bottom: 12px; font-weight: 500;
+}
+.up-title {
+  font-weight: 700; font-size: clamp(24px, 6vw, 36px);
+  line-height: 1; letter-spacing: -.03em; color: var(--ink);
+}
+.up-title em { font-style: italic; font-weight: 300; color: #777772; }
+.up-intro {
+  font-size: 14px; color: var(--ink-4); margin-top: 12px;
+  line-height: 1.6; max-width: 38em; text-wrap: pretty;
+}
+.up-hero { margin-bottom: 24px; }
+
+/* ── SKUPINA PODLE DATA ── */
+.up-daygroup { margin-bottom: 4px; }
+.up-date {
+  display: flex; align-items: baseline; gap: 10px;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-5); font-weight: 500;
+  padding: 18px 0 8px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 2px;
+}
+.up-date .up-date-rule { flex: 1; }
+
+/* ── ŘÁDEK ── */
+.up-row {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 4px 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--rule);
+  align-items: start;
+}
+.up-row:first-of-type { border-top: none; }
+.up-daygroup .up-row:first-child { border-top: none; }
+
+.up-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  white-space: nowrap;
+}
+.up-badge.new    { background: var(--ok);        color: #fff; }
+.up-badge.fix    { background: var(--accent);    color: #fff; }
+.up-badge.change { background: var(--paper-3);   color: var(--ink-3); }
+
+.up-body { min-width: 0; }
+.up-page {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px; color: var(--ink-4);
+  margin-bottom: 3px;
+}
+a.up-page { text-decoration: underline; text-underline-offset: 2px; }
+a.up-page:hover { color: var(--ink-2); }
+.up-text { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+
+/* Zvýraznění záznamů od poslední návštěvy */
+.up-row.unseen { position: relative; }
+.up-row.unseen::before {
+  content: '';
+  position: absolute; left: -10px; top: 16px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent);
+}
+.up-fresh {
+  font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-left: 6px;
+}
+
+.up-empty, .up-loading {
+  padding: 40px 6px; text-align: center;
+  font-size: 13px; color: var(--ink-4);
+}
+
+/* ── Landscape mobil — navbar vpravo ── */
+@media (max-width: 819px) and (orientation: landscape) {
+  #lop-nav {
+    position: fixed !important;
+    top: 0 !important; bottom: 0 !important;
+    right: 0 !important; left: auto !important;
+    width: 64px !important; height: auto !important;
+    flex-direction: column !important;
+    border-top: none !important;
+    border-left: 1px solid var(--rule) !important;
+    padding: 8px 0 14px !important;
+    padding-top: var(--header-h, 52px) !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+  }
+  #lop-nav .nav-item { flex: 0 0 auto !important; padding: 10px 4px !important; }
+  #lop-nav .nav-item .nav-lbl { font-size: 9px !important; }
+  #lop-nav .nav-item.active::before {
+    top: 50% !important; left: -1px !important;
+    transform: translateY(-50%) !important;
+    width: 2px !important; height: 20px !important;
+    bottom: auto !important;
+  }
+  .page { padding-right: 78px !important; }
+}
+@media (max-width: 420px) {
+  .up-row { grid-template-columns: 1fr; }
+  .up-badge { justify-self: start; }
+}
+</style>
+</head>
+<body>
+
+<div id="lop-header"></div>
+<script src="i18n.js"></script>
+<script src="tags.js"></script>
+<script src="header.js?v=2"></script>
+
+<div class="page">
+  <div class="up-hero">
+    <div class="up-kick" id="upKick">Changelog</div>
+    <h1 class="up-title" id="upTitle">Aktualizace</h1>
+    <p class="up-intro" id="upIntro">Co se v aplikaci změnilo — nová místa, opravy a úpravy.</p>
+  </div>
+
+  <div id="upList">
+    <div class="up-loading" id="upLoading">Načítám…</div>
+  </div>
+</div>
+
+<div id="lop-nav"></div>
+<script src="nav.js?v=2"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   updates.html — přehled aktualizací
+
+   Záznamy jdou z updates.json, ne z HTML — přidání nové položky
+   je tedy jen řádek v datech. Popisky jsou {cs,en} jako všude jinde.
+   ══════════════════════════════════════════ */
+
+const SEEN_KEY = 'lop_updates_seen';
+
+/* Poslední návštěva se přečte PŘED zápisem nové, aby se dalo označit,
+   co je od té doby nového. */
+const _lastSeen = localStorage.getItem(SEEN_KEY) || '';
+
+document.title = t('updates.page_title');
+(function () {
+  const set = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+  set('upKick',  'updates.kick');
+  set('upTitle', 'updates.title');
+  set('upIntro', 'updates.intro');
+  set('upLoading', 'updates.loading');
+})();
+
+function loc(v) {
+  if (!v) return '';
+  if (typeof v === 'string') return v;
+  return v[window.lopLang || 'cs'] || v.cs || '';
+}
+
+/* Datum ve tvaru, jaký je v daném jazyce zvykem. */
+function fmtDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  if (isNaN(d)) return iso;
+  const lang = (window.lopLang === 'en') ? 'en-GB' : 'cs-CZ';
+  return d.toLocaleDateString(lang, { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function render(items) {
+  const list = document.getElementById('upList');
+  if (!items.length) {
+    list.innerHTML = `<div class="up-empty">${t('updates.empty')}</div>`;
+    return;
+  }
+
+  // Nejnovější nahoře; v rámci dne pořadí ze souboru
+  items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  const groups = [];
+  items.forEach(it => {
+    const g = groups[groups.length - 1];
+    if (g && g.date === it.date) g.items.push(it);
+    else groups.push({ date: it.date, items: [it] });
+  });
+
+  list.innerHTML = groups.map(g => {
+    const unseenDay = _lastSeen && String(g.date) > _lastSeen;
+    const rows = g.items.map(it => {
+      const kind = ['new', 'fix', 'change'].includes(it.kind) ? it.kind : 'change';
+      const pageTxt = it.page ? String(it.page) : '';
+      const page = pageTxt
+        ? (it.url
+            ? `<a class="up-page" href="${it.url}">${pageTxt}</a>`
+            : `<span class="up-page">${pageTxt}</span>`)
+        : '';
+      return `
+        <div class="up-row${unseenDay ? ' unseen' : ''}">
+          <span class="up-badge ${kind}">${t('updates.kind_' + kind)}</span>
+          <div class="up-body">
+            ${page}
+            <div class="up-text">${loc(it.text)}</div>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="up-daygroup">
+        <div class="up-date">
+          <span>${fmtDate(g.date)}</span>
+          ${unseenDay ? `<span class="up-fresh">${t('updates.fresh')}</span>` : ''}
+          <span class="up-date-rule"></span>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  // Návštěva zaznamenána až po vykreslení — jinak by se „nové“ nikdy neukázalo
+  const newest = items[0] && items[0].date;
+  if (newest) localStorage.setItem(SEEN_KEY, String(newest));
+}
+
+fetch('updates.json?v=' + (window.lopDataVer || ''))
+  .then(r => r.json())
+  .then(render)
+  .catch(err => {
+    console.error('[updates] načtení selhalo:', err);
+    document.getElementById('upList').innerHTML =
+      `<div class="up-empty">${t('updates.err')}</div>`;
+  });
+</script>
+<script src="auth-modal.js"></script>
+</body>
+</html>
