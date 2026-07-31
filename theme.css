@@ -1,0 +1,123 @@
+/* ══════════════════════════════════════════════════════════
+   theme.css — tmavý režim
+
+   Přepisuje pouze hodnoty CSS proměnných, ne jednotlivé komponenty —
+   to je možné jen díky tomu, že celý web jede na tokenech
+   (--paper, --ink, --rule …). Selektor `html[data-theme="dark"]`
+   má vyšší specificitu než `:root`, takže na pořadí načtení nezáleží.
+
+   Druhá část souboru dorovnává komponenty, které mají barvu zapsanou
+   natvrdo (#fff) a proměnnou tedy nerespektují.
+
+   Není to inverze světlé palety — tmavý režim má vlastní, teplejší
+   odstíny a zesvětlené akcenty, aby na tmavém pozadí držely kontrast.
+   ══════════════════════════════════════════════════════════ */
+
+html[data-theme="dark"] {
+  --paper:    #171614;   /* pozadí stránky */
+  --paper-2:  #1F1E1B;   /* karty, sekundární plochy */
+  --paper-3:  #292824;   /* terciární plochy */
+  --ink:      #F2F1ED;   /* hlavní text */
+  --ink-2:    #DBD9D3;
+  --ink-3:    #B2AFA7;
+  --ink-4:    #8A877F;
+  --ink-5:    #605D57;
+  --rule:     #2D2C28;
+  --rule-2:   #37352F;
+
+  /* Akcenty zesvětlené — původní odstíny jsou na tmavém pozadí příliš tmavé */
+  --accent:   #D9603C;
+  --ok:       #5BA36B;
+  --cat-hist: #9C9C97;
+  --cat-hist-soft: #3A3A36;
+  --cat-arch: #6E95BE;
+  --cat-art:  #E07A4E;
+  --cat-fun:  #E8B84B;
+}
+
+html[data-theme="dark"] body { background: var(--paper); color: var(--ink); }
+
+/* ── Komponenty s natvrdo zapsaným #fff ──
+   Proměnnou nerespektují, proto se dorovnávají zvlášť. */
+html[data-theme="dark"] .chip,
+html[data-theme="dark"] .place-card,
+html[data-theme="dark"] .place-cat-pill,
+html[data-theme="dark"] .kw-tag,
+html[data-theme="dark"] .fact,
+html[data-theme="dark"] .lh-card,
+html[data-theme="dark"] .lh-you,
+html[data-theme="dark"] .tip-link-btn,
+html[data-theme="dark"] .flat-section,
+html[data-theme="dark"] .flat-section-body.open,
+html[data-theme="dark"] .filter-bar,
+html[data-theme="dark"] .rt-tip,
+html[data-theme="dark"] .rt-tip-pill,
+html[data-theme="dark"] .arch-style-code,
+html[data-theme="dark"] .rep-input,
+html[data-theme="dark"] .rep-select,
+html[data-theme="dark"] .rep-area {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .rep-static { background: var(--paper-3); }
+
+/* Piny v mapě zůstávají světlé záměrně — musí být čitelné proti mapě,
+   která se v tmavém režimu nemění. */
+
+/* Vybraný stav filtračních čipů: plná černá by na tmavém pozadí zmizela */
+html[data-theme="dark"] .chip[data-cat].state-on,
+html[data-theme="dark"] .chip.chip-style.state-on,
+html[data-theme="dark"] .chip[data-filter="visited"].state-on,
+html[data-theme="dark"] .chip[data-filter="wished"].state-on {
+  background: var(--paper-3);
+}
+html[data-theme="dark"] .chip.state-hide {
+  background: #000;
+  border-color: var(--ink-4);
+  color: var(--paper);
+}
+
+/* Fotografie a mapa se nepřebarvují — jen se jim ubere svítivost,
+   aby na tmavém pozadí nepálily do očí. */
+html[data-theme="dark"] .place-thumb img,
+html[data-theme="dark"] .gallery-thumb img,
+html[data-theme="dark"] .sl-base img,
+html[data-theme="dark"] .sl-top img,
+html[data-theme="dark"] .rv-fs-img,
+html[data-theme="dark"] .gl-img,
+html[data-theme="dark"] #miniMap {
+  filter: brightness(.88);
+}
+/* Ve fullscreenu naopak plná svítivost — tam je fotka hlavní obsah */
+html[data-theme="dark"] .fs-modal .sl-base img,
+html[data-theme="dark"] .fs-modal .sl-top img,
+html[data-theme="dark"] .rv-fs-modal .rv-fs-img,
+html[data-theme="dark"] .gl-modal .gl-img {
+  filter: none;
+}
+
+/* Modaly: světlé pozadí by v tmavém režimu svítilo */
+html[data-theme="dark"] .rep-box,
+html[data-theme="dark"] .filter-modal {
+  background: var(--paper);
+}
+html[data-theme="dark"] .filter-modal-backdrop.open {
+  background: rgba(0, 0, 0, .45);
+}
+
+/* Přepínač režimu v nastavení */
+.lop-sm-theme-row { display: flex; gap: 6px; padding: 4px 10px 8px; }
+.lop-sm-theme-btn {
+  flex: 1; padding: 6px 8px; cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: .04em;
+  background: transparent; color: var(--ink-3, #666662);
+  border: 1.5px solid var(--rule, #E8E8E6); border-radius: 6px;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.lop-sm-theme-btn:hover { color: var(--ink, #111); }
+.lop-sm-theme-btn.active {
+  border-color: var(--ink, #111); color: var(--ink, #111);
+  background: var(--paper-2, #F0F0EE);
+}

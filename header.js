@@ -247,6 +247,12 @@ function _injectSettingsMenu() {
         <button class="lop-sm-lang-btn${lang === 'en' ? ' active' : ''}" onclick="window.lopSetLang('en')">EN</button>
       </div>
       <div class="lop-sm-divider"></div>
+      <div class="lop-sm-label" id="lopSmThemeLabel">${window.lopLang === 'en' ? 'Appearance' : 'Vzhled'}</div>
+      <div class="lop-sm-theme-row">
+        <button class="lop-sm-theme-btn" data-theme-btn="light" onclick="window.lopSetTheme('light');window.lopSyncThemeBtns()">${window.lopLang === 'en' ? 'Light' : 'Světlý'}</button>
+        <button class="lop-sm-theme-btn" data-theme-btn="dark" onclick="window.lopSetTheme('dark');window.lopSyncThemeBtns()">${window.lopLang === 'en' ? 'Dark' : 'Tmavý'}</button>
+      </div>
+      <div class="lop-sm-divider"></div>
       <a class="lop-sm-item" href="${ROOT}updates.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
         ${window.lopLang === 'en' ? 'Updates' : 'Aktualizace'}
@@ -258,6 +264,16 @@ function _injectSettingsMenu() {
     </div>
   `;
   document.body.appendChild(div.firstElementChild);
+
+  /* Zvýraznit aktivní režim. Voláno i po kliknutí, protože menu se
+     nepřekresluje — přepnutí režimu stránku nereloaduje. */
+  window.lopSyncThemeBtns = function () {
+    var cur = window.lopTheme || 'light';
+    document.querySelectorAll('.lop-sm-theme-btn').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.themeBtn === cur);
+    });
+  };
+  window.lopSyncThemeBtns();
 
   // Close on outside click
   document.addEventListener('click', e => {
