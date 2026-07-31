@@ -250,7 +250,18 @@ function _injectSettingsMenu() {
       <div class="lop-sm-label" id="lopSmThemeLabel">${window.lopLang === 'en' ? 'Appearance' : 'Vzhled'}</div>
       <div class="lop-sm-theme-row">
         <button class="lop-sm-theme-btn" data-theme-btn="light" onclick="window.lopSetTheme('light');window.lopSyncThemeBtns()">${window.lopLang === 'en' ? 'Light' : 'Světlý'}</button>
+        <button class="lop-sm-theme-btn" data-theme-btn="auto" onclick="window.lopSetTheme('auto');window.lopSyncThemeBtns()">${window.lopLang === 'en' ? 'Auto' : 'Auto'}</button>
         <button class="lop-sm-theme-btn" data-theme-btn="dark" onclick="window.lopSetTheme('dark');window.lopSyncThemeBtns()">${window.lopLang === 'en' ? 'Dark' : 'Tmavý'}</button>
+      </div>
+      <div class="lop-sm-auto-note" id="lopThemeAutoNote" hidden></div>
+      <button class="lop-sm-hint" id="lopThemeHintBtn" onclick="window.lopToggleThemeHint()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span>${window.lopLang === 'en' ? 'Not working?' : 'Nefunguje?'}</span>
+      </button>
+      <div class="lop-sm-tip" id="lopThemeHint" hidden>
+        ${window.lopLang === 'en'
+          ? 'The browser is recolouring the site on its own and overrides this setting. Turn its forced dark mode off:<br><b>Menu (☰) → Settings → Dark mode → Off</b><br>In Samsung Internet the option is called <i>Dark mode</i> or <i>Forced dark mode for web content</i>.'
+          : 'Barvy přebarvuje sám prohlížeč a přebíjí tím tohle nastavení. Vypněte v něm nucený tmavý režim:<br><b>Menu (☰) → Nastavení → Tmavý režim → Vypnuto</b><br>V Samsung Internetu se volba jmenuje <i>Tmavý režim</i> nebo <i>Nucený tmavý režim pro webový obsah</i>.'}
       </div>
       <div class="lop-sm-divider"></div>
       <a class="lop-sm-item" href="${ROOT}updates.html">
@@ -268,12 +279,37 @@ function _injectSettingsMenu() {
   /* Zvýraznit aktivní režim. Voláno i po kliknutí, protože menu se
      nepřekresluje — přepnutí režimu stránku nereloaduje. */
   window.lopSyncThemeBtns = function () {
-    var cur = window.lopTheme || 'light';
+    var cur = window.lopThemeMode || 'light';
     document.querySelectorAll('.lop-sm-theme-btn').forEach(function (b) {
       b.classList.toggle('active', b.dataset.themeBtn === cur);
     });
+
+    // V automatickém režimu ukázat, podle čeho se to řídí
+    var note = document.getElementById('lopThemeAutoNote');
+    if (!note) return;
+    if (cur !== 'auto' || !window.lopSunTimes) { note.hidden = true; return; }
+    var t = window.lopSunTimes();
+    if (!t) { note.hidden = true; return; }
+    var f = function (d) {
+      return d.toLocaleTimeString(window.lopLang === 'en' ? 'en-GB' : 'cs-CZ',
+        { hour: '2-digit', minute: '2-digit' });
+    };
+    note.hidden = false;
+    note.textContent = window.lopLang === 'en'
+      ? 'Follows daylight in Prague — sunrise ' + f(t.rise) + ', sunset ' + f(t.set) + '.'
+      : 'Podle denního světla v Praze — východ ' + f(t.rise) + ', západ ' + f(t.set) + '.';
   };
   window.lopSyncThemeBtns();
+
+  /* Nápověda pro případ, že prohlížeč přebarvuje web sám a přepínač
+     tím pádem nemá viditelný účinek (Samsung Internet, Chrome auto-dark). */
+  window.lopToggleThemeHint = function () {
+    var tip = document.getElementById('lopThemeHint');
+    var btn = document.getElementById('lopThemeHintBtn');
+    if (!tip) return;
+    tip.hidden = !tip.hidden;
+    if (btn) btn.classList.toggle('open', !tip.hidden);
+  };
 
   // Close on outside click
   document.addEventListener('click', e => {

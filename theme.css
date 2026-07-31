@@ -128,15 +128,40 @@ html[data-theme="dark"] .filter-modal-backdrop.open {
 /* Přepínač režimu v nastavení */
 .lop-sm-theme-row { display: flex; gap: 6px; padding: 4px 10px 8px; }
 .lop-sm-theme-btn {
-  flex: 1; padding: 6px 8px; cursor: pointer;
+  flex: 1; padding: 6px 6px; cursor: pointer;
   font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 600;
-  letter-spacing: .04em;
+  letter-spacing: .02em; white-space: nowrap;
   background: transparent; color: var(--ink-3, #666662);
   border: 1.5px solid var(--rule, #E8E8E6); border-radius: 6px;
   transition: border-color .15s, color .15s, background .15s;
+}
+.lop-sm-auto-note {
+  padding: 0 10px 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px; line-height: 1.45; color: var(--ink-5, #BABAB6);
 }
 .lop-sm-theme-btn:hover { color: var(--ink, #111); }
 .lop-sm-theme-btn.active {
   border-color: var(--ink, #111); color: var(--ink, #111);
   background: var(--paper-2, #F0F0EE);
 }
+
+/* Nápověda „Nefunguje?“ pod přepínačem */
+.lop-sm-hint {
+  display: flex; align-items: center; gap: 5px;
+  width: 100%; padding: 0 10px 8px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px;
+  color: var(--ink-5, #BABAB6);
+  transition: color .15s;
+}
+.lop-sm-hint span { text-decoration: underline; text-underline-offset: 2px; }
+.lop-sm-hint:hover, .lop-sm-hint.open { color: var(--ink-3, #666662); }
+.lop-sm-hint svg { width: 12px; height: 12px; flex-shrink: 0; }
+.lop-sm-tip {
+  margin: 0 10px 10px; padding: 9px 11px;
+  background: var(--paper-2, #F0F0EE); border-radius: 7px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px; line-height: 1.55; color: var(--ink-3, #666662);
+}
+.lop-sm-tip b { color: var(--ink-2, #333331); font-weight: 600; }
