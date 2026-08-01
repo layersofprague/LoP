@@ -2379,8 +2379,17 @@ function persistTweak(key, value) {
   window.parent.postMessage({type: '__edit_mode_set_keys', edits: {[key]: value}}, '*');
 }
 
+/* Proměnné, které tenhle panel nastavuje jako INLINE styl na <html>.
+   Inline styl přebije jakékoli pravidlo ze stylopisu, tedy i theme.css —
+   proto se v tmavém režimu musí odstranit, jinak by paleta zůstala světlá. */
+const TWEAK_PALETTE_VARS = ['--accent','--paper','--paper-2','--paper-3',
+  '--rule','--rule-2','--ink','--ink-2','--ink-3','--ink-4'];
+
 function applyTweaks() {
   const r = document.documentElement;
+  if (window.lopTheme === 'dark') {
+    TWEAK_PALETTE_VARS.forEach(function (v) { r.style.removeProperty(v); });
+  } else {
   r.style.setProperty('--accent', TWEAKS.accentColor);
   if (TWEAKS.paperMode === 'cool') {
     r.style.setProperty('--paper', '#eeefeb');
@@ -2412,6 +2421,7 @@ function applyTweaks() {
     r.style.setProperty('--ink-2', '#3a342c');
     r.style.setProperty('--ink-3', '#6b6558');
     r.style.setProperty('--ink-4', '#9b9484');
+  }
   }
   document.querySelectorAll('.serif, .brand-mark, .sheet-title, .routes-title, .rc-title, .wl-body h4, .sheet-lede, .fact-v:not(.mono), .step-num, .step-body h4, .tip-text, .sheet-ar-cta .arc-title, .ar-place-name, .pc-title, .pc-num, .wl-num, .rc-num, .map-hint-title, .mh-letter').forEach(el => {
     el.style.fontFamily = TWEAKS.displayFont;
@@ -4043,6 +4053,8 @@ async function loadArchMap() {
 
 /* ═══════════════ INIT ═══════════════ */
 applyTweaks();
+/* Po přepnutí režimu je potřeba paletu buď odstranit, nebo zase nastavit. */
+document.addEventListener('lop:themechange', applyTweaks);
 
 // Auth stav profil tlačítka
 (function() {
