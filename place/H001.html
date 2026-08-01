@@ -2971,10 +2971,9 @@ window.lopAuth.onLogout(() => {
       if (dragging) { setPos(getPct(e)); e.preventDefault(); }
     }, { passive: false });
     wrap.addEventListener('touchend', function() { dragging = false; });
-    // Pinch-to-zoom na wrap — odloženo aby byla funkce definovaná
-    setTimeout(function() {
-      if (typeof _initSliderPinch === 'function') _initSliderPinch(wrap);
-    }, 0);
+    /* Pinch-to-zoom se tady záměrně NEzapíná — tahle funkce obsluhuje
+       i slider vložený přímo na stránce, kde by zvětšování dvěma prsty
+       jen překáželo rolování. Modal si pinch zapíná sám (viz _initAll). */
 
     setPos(0.5);
   }
