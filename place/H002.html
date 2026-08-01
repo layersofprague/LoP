@@ -478,23 +478,37 @@ a { color: inherit; text-decoration: none; }
 
 /* actions */
 .actions {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  /* minmax(0,1fr) místo pouhého 1fr: bez toho má sloupec minimální šířku
+     podle obsahu a při zvětšeném měřítku stránky se řádek rozlije mimo
+     obrazovku. Takhle se sloupce poslušně zmenší. */
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px; padding: 12px 8px;
   margin: -4px -4px 20px;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
 }
+/* Úzký prostor (malý displej nebo měřítko 110–125 %) — drobnější popisky,
+   ať se vejde všech šest tlačítek vedle sebe a text se nezalomí přes ikonu. */
+@media (max-width: 380px) {
+  .actions { gap: 4px; padding: 12px 4px; }
+  .act-lbl { font-size: 9px; letter-spacing: 0; }
+}
 .act-btn {
   appearance: none; background: transparent; border: none;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
-  padding: 6px 4px; border-radius: 8px;
+  padding: 6px 2px; border-radius: 8px;
   cursor: pointer; color: var(--ink-2);
   transition: background .15s; text-decoration: none;
+  min-width: 0;            /* smí se zmenšit pod šířku popisku */
 }
 .act-btn:hover { background: var(--paper-2); }
 .act-btn.active { color: var(--accent); }
 .act-btn svg { width: 18px; height: 18px; }
-.act-lbl { font-size: 10px; font-weight: 500; letter-spacing: .01em; }
+.act-lbl {
+  font-size: 10px; font-weight: 500; letter-spacing: .01em;
+  /* Raději oříznout třemi tečkami než zalomit popisek přes ikonu. */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
 
 /* lede */
 .lede {
@@ -1309,7 +1323,7 @@ window.addEventListener('load', renderPlaceI18n);
 <div class="body">
 
   <!-- actions -->
-  <div class="actions" style="grid-template-columns:repeat(6,1fr)">
+  <div class="actions">
     <a href="../compass.html?id=H002&lat=50.09305881760058&lng=14.411785293307434&name=Bašta+sv.+Máří+Magdalény" class="act-btn" title="Kompas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span class="act-lbl" id="actKompas">Kompas</span>
