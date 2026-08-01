@@ -50,21 +50,27 @@ const CSS = `
 }
 .lop-h-logo {
   /* max-height místo height, aby se logo mohlo proporčně zmenšit;
-     samotné height + max-width by ho zploštilo. */
-  max-height: 36px; max-width: 100%;
+     samotné height + max-width by ho zploštilo. Je to jen pojistka proti
+     přetečení — místo se přednostně šetří na tlačítkách (viz níže). */
+  max-height: 46px; max-width: 100%;
   width: auto; height: auto;
   display: block; object-fit: contain;
-  margin-top: -4px;
+  margin-top: -8px;
 }
-@media (min-width: 400px) {
-  .lop-h-logo { max-height: 46px; margin-top: -8px; }
+/* Úzký prostor (malý displej nebo měřítko 110–125 %): ubrat na mezerách
+   a velikosti tlačítek, ne na logu. Fyzická velikost tlačítek přitom
+   neklesne — při 125 % je 32 CSS px na displeji 40 px, tedy víc než
+   dnešních 38 px při 100 %. */
+@media (max-width: 400px) {
+  #lop-header { padding-left: 8px; padding-right: 8px; }
+  .lop-h-actions { gap: 0; }
+  .lop-h-btn { width: 32px; height: 34px; }
+  .lop-h-btn svg { width: 18px; height: 18px; }
+  .lop-h-btn .lop-h-dot { top: 6px; right: 5px; }
 }
 .lop-h-actions {
   display: flex; align-items: center; gap: 2px;
-  flex: 0 0 auto;   /* tlačítka se nikdy nezmenšují ani nezalamují */
-}
-@media (max-width: 360px) {
-  #lop-header { padding-left: 10px; padding-right: 10px; }
+  flex: 0 0 auto;   /* tlačítka se nikdy nezalamují */
 }
 .lop-h-btn {
   appearance: none; background: transparent; border: none;
