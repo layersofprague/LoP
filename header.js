@@ -44,17 +44,27 @@ const CSS = `
 .lop-h-brand {
   display: flex; align-items: center;
   text-decoration: none;
+  /* Bez min-width:0 se flex položka nesmí zmenšit pod svůj obsah — logo
+     by pak při větším měřítku stránky vytlačilo tlačítka mimo obrazovku. */
+  min-width: 0; flex: 0 1 auto;
 }
 .lop-h-logo {
-  height: 36px; width: auto;
+  /* max-height místo height, aby se logo mohlo proporčně zmenšit;
+     samotné height + max-width by ho zploštilo. */
+  max-height: 36px; max-width: 100%;
+  width: auto; height: auto;
   display: block; object-fit: contain;
   margin-top: -4px;
 }
 @media (min-width: 400px) {
-  .lop-h-logo { height: 46px; margin-top: -8px; }
+  .lop-h-logo { max-height: 46px; margin-top: -8px; }
 }
 .lop-h-actions {
   display: flex; align-items: center; gap: 2px;
+  flex: 0 0 auto;   /* tlačítka se nikdy nezmenšují ani nezalamují */
+}
+@media (max-width: 360px) {
+  #lop-header { padding-left: 10px; padding-right: 10px; }
 }
 .lop-h-btn {
   appearance: none; background: transparent; border: none;
