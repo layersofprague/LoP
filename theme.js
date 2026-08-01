@@ -117,16 +117,22 @@
   /* ══════════════════════════════════════════════════════
      MĚŘÍTKO STRÁNKY
 
-     Obdoba Ctrl+kolečko na počítači. Na stránkách s vlastními gesty
-     (mapa, fullscreen fotek) je nativní zvětšování prsty vypnuté, aby
-     se gesta nepraly — tenhle přepínač je náhrada, která funguje všude
-     včetně PWA.
+     Obdoba Ctrl+kolečko na počítači. Nativní zvětšování prsty je na celém
+     webu vypnuté (`user-scalable=no`), protože by se pralo s vlastními
+     gesty na mapě a ve fullscreenu fotek — tenhle přepínač je náhrada,
+     která funguje jednotně všude včetně PWA.
+
+     Volba se ukládá do localStorage, takže platí i po přechodu na jinou
+     stránku a po zavření aplikace.
 
      Používá CSS `zoom`, ne velikost písma: projekt má rozměry v px,
      takže změna kořenového písma by na většinu prvků neměla vliv.
      ══════════════════════════════════════════════════════ */
   var SKEY = 'lop_scale';
-  var STEPS = [0.9, 1, 1.1, 1.25, 1.5];
+  /* 75–125 % po pěti procentech. Hodnoty jsou vypsané, ne dopočítávané —
+     sčítání 0.05 v plovoucí čárce dává 0.7500000000000001 a porovnání
+     přes indexOf by pak selhalo. */
+  var STEPS = [0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25];
 
   function _storedScale() {
     try {
