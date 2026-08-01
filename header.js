@@ -57,17 +57,16 @@ const CSS = `
   display: block; object-fit: contain;
   margin-top: -8px;
 }
-/* Úzký prostor (malý displej nebo měřítko 110–125 %): ubrat na mezerách
-   a velikosti tlačítek, ne na logu. Fyzická velikost tlačítek přitom
-   neklesne — při 125 % je 32 CSS px na displeji 40 px, tedy víc než
-   dnešních 38 px při 100 %. */
-@media (max-width: 400px) {
-  #lop-header { padding-left: 8px; padding-right: 8px; }
-  .lop-h-actions { gap: 0; }
-  .lop-h-btn { width: 32px; height: 34px; }
-  .lop-h-btn svg { width: 18px; height: 18px; }
-  .lop-h-btn .lop-h-dot { top: 6px; right: 5px; }
-}
+/* Úzký prostor: ubrat na mezerách a velikosti tlačítek, ne na logu.
+   Řízeno atributem z theme.js, ne media query — vlastnost zoom totiž
+   media queries nepřepočítává (viz komentář v theme.js).
+   Fyzická velikost tlačítek přitom neklesne: při 125 % je 32 CSS px
+   na displeji 40 px, tedy víc než dnešních 38 px při 100 %. */
+html[data-narrow] #lop-header { padding-left: 8px; padding-right: 8px; }
+html[data-narrow] .lop-h-actions { gap: 0; }
+html[data-narrow] .lop-h-btn { width: 32px; height: 34px; }
+html[data-narrow] .lop-h-btn svg { width: 18px; height: 18px; }
+html[data-narrow] .lop-h-btn .lop-h-dot { top: 6px; right: 5px; }
 .lop-h-actions {
   display: flex; align-items: center; gap: 2px;
   flex: 0 0 auto;   /* tlačítka se nikdy nezalamují */

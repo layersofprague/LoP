@@ -151,12 +151,29 @@
   window.lopScale = _scale;
   window.lopScaleSteps = STEPS;
 
+  /* ── Příznaky úzkého prostoru ──
+     CSS `zoom` NEPŘEPOČÍTÁVÁ media queries — ty se vyhodnocují proti
+     skutečné šířce okna, ne proti zvětšenému obsahu. Při 125 % na 412px
+     telefonu se tedy `@media (max-width: 400px)` nespustí, přestože
+     obsahu reálně zbývá jen ~330 px. Proto se šířka počítá tady a výsledek
+     se vystaví jako atribut na <html>, na který se pak dá cílit z CSS. */
+  function _syncWidthFlags() {
+    var eff = window.innerWidth / (window.lopScale || 1);
+    var r = document.documentElement;
+    r.toggleAttribute('data-narrow', eff <= 400);   // hlavička
+    r.toggleAttribute('data-tight',  eff <= 380);   // řádek akcí
+  }
+  _syncWidthFlags();
+  window.addEventListener('resize', _syncWidthFlags);
+  window.addEventListener('orientationchange', _syncWidthFlags);
+
   window.lopSetScale = function (v) {
     if (STEPS.indexOf(v) === -1) return;
     _scale = v;
     window.lopScale = v;
     try { localStorage.setItem(SKEY, String(v)); } catch (e) {}
     _applyScale(v);
+    _syncWidthFlags();
     // Leaflet si drží rozměry v paměti a po změně měřítka je má špatně
     document.dispatchEvent(new CustomEvent('lop:scalechange', { detail: { scale: v } }));
   };
