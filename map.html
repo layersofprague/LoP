@@ -3306,6 +3306,13 @@ function initMap() {
   });
   window._map = map;
 
+  /* Leaflet si drží rozměry kontejneru v paměti. Po změně měřítka stránky
+     (nastavení → Velikost stránky) by počítal se starými a mapa by se
+     vykreslila posunutá — proto přepočet. */
+  document.addEventListener('lop:scalechange', function () {
+    setTimeout(function () { if (window._map) window._map.invalidateSize(); }, 50);
+  });
+
   // Zorné kužely: plynulá opacity podle úrovně zoomu
   function _updateConeZoom() {
     const z = map.getZoom();

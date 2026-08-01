@@ -113,4 +113,55 @@
 
   /* Pro popisek v nastavení: kdy dnes vychází a zapadá slunce. */
   window.lopSunTimes = function () { return _sunTimes(new Date()); };
+
+  /* ══════════════════════════════════════════════════════
+     MĚŘÍTKO STRÁNKY
+
+     Obdoba Ctrl+kolečko na počítači. Na stránkách s vlastními gesty
+     (mapa, fullscreen fotek) je nativní zvětšování prsty vypnuté, aby
+     se gesta nepraly — tenhle přepínač je náhrada, která funguje všude
+     včetně PWA.
+
+     Používá CSS `zoom`, ne velikost písma: projekt má rozměry v px,
+     takže změna kořenového písma by na většinu prvků neměla vliv.
+     ══════════════════════════════════════════════════════ */
+  var SKEY = 'lop_scale';
+  var STEPS = [0.9, 1, 1.1, 1.25, 1.5];
+
+  function _storedScale() {
+    try {
+      var v = parseFloat(localStorage.getItem(SKEY));
+      return STEPS.indexOf(v) !== -1 ? v : null;
+    } catch (e) { return null; }
+  }
+
+  function _applyScale(v) {
+    // Při 100 % se vlastnost odstraní úplně, ať do vykreslování nezasahuje
+    document.documentElement.style.zoom = (v === 1) ? '' : String(v);
+  }
+
+  var _scale = _storedScale() || 1;
+  _applyScale(_scale);
+  window.lopScale = _scale;
+  window.lopScaleSteps = STEPS;
+
+  window.lopSetScale = function (v) {
+    if (STEPS.indexOf(v) === -1) return;
+    _scale = v;
+    window.lopScale = v;
+    try { localStorage.setItem(SKEY, String(v)); } catch (e) {}
+    _applyScale(v);
+    // Leaflet si drží rozměry v paměti a po změně měřítka je má špatně
+    document.dispatchEvent(new CustomEvent('lop:scalechange', { detail: { scale: v } }));
+  };
+
+  /* Posun o krok nahoru/dolů; vrací true, pokud se něco změnilo. */
+  window.lopScaleStep = function (dir) {
+    var i = STEPS.indexOf(window.lopScale);
+    if (i === -1) i = STEPS.indexOf(1);
+    var next = i + (dir > 0 ? 1 : -1);
+    if (next < 0 || next >= STEPS.length) return false;
+    window.lopSetScale(STEPS[next]);
+    return true;
+  };
 })();

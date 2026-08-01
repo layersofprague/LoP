@@ -264,6 +264,13 @@ function _injectSettingsMenu() {
           : 'Barvy přebarvuje sám prohlížeč a přebíjí tím tohle nastavení. Vypněte v něm nucený tmavý režim:<br><b>Menu (☰) → Nastavení → Tmavý režim → Vypnuto</b><br>V Samsung Internetu se volba jmenuje <i>Tmavý režim</i> nebo <i>Nucený tmavý režim pro webový obsah</i>.'}
       </div>
       <div class="lop-sm-divider"></div>
+      <div class="lop-sm-label">${window.lopLang === 'en' ? 'Page size' : 'Velikost stránky'}</div>
+      <div class="lop-sm-scale-row">
+        <button class="lop-sm-scale-btn" id="lopScaleMinus" onclick="window.lopScaleStep(-1);window.lopSyncScale()" aria-label="${window.lopLang === 'en' ? 'Smaller' : 'Zmenšit'}">−</button>
+        <span class="lop-sm-scale-val" id="lopScaleVal">100 %</span>
+        <button class="lop-sm-scale-btn" id="lopScalePlus" onclick="window.lopScaleStep(1);window.lopSyncScale()" aria-label="${window.lopLang === 'en' ? 'Larger' : 'Zvětšit'}">+</button>
+      </div>
+      <div class="lop-sm-divider"></div>
       <a class="lop-sm-item" href="${ROOT}updates.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
         ${window.lopLang === 'en' ? 'Updates' : 'Aktualizace'}
@@ -300,6 +307,21 @@ function _injectSettingsMenu() {
       : 'Podle denního světla v Praze — východ ' + f(t.rise) + ', západ ' + f(t.set) + '.';
   };
   window.lopSyncThemeBtns();
+
+  /* Zobrazená hodnota měřítka + zneaktivnění tlačítek na krajích rozsahu. */
+  window.lopSyncScale = function () {
+    var val = document.getElementById('lopScaleVal');
+    if (!val) return;
+    var steps = window.lopScaleSteps || [1];
+    var cur = window.lopScale || 1;
+    val.textContent = Math.round(cur * 100) + ' %';
+    var i = steps.indexOf(cur);
+    var minus = document.getElementById('lopScaleMinus');
+    var plus  = document.getElementById('lopScalePlus');
+    if (minus) minus.disabled = (i <= 0);
+    if (plus)  plus.disabled  = (i >= steps.length - 1);
+  };
+  window.lopSyncScale();
 
   /* Nápověda pro případ, že prohlížeč přebarvuje web sám a přepínač
      tím pádem nemá viditelný účinek (Samsung Internet, Chrome auto-dark). */

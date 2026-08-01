@@ -140,6 +140,26 @@ html[data-theme="dark"] .filter-modal-backdrop.open {
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 10px; line-height: 1.45; color: var(--ink-5, #BABAB6);
 }
+
+/* Měřítko stránky */
+.lop-sm-scale-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 10px 8px;
+}
+.lop-sm-scale-btn {
+  width: 34px; height: 30px; flex-shrink: 0; cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 1;
+  background: transparent; color: var(--ink-2, #333331);
+  border: 1.5px solid var(--rule, #E8E8E6); border-radius: 6px;
+  transition: border-color .15s, color .15s, opacity .15s;
+}
+.lop-sm-scale-btn:hover:not(:disabled) { border-color: var(--ink-4, #999994); }
+.lop-sm-scale-btn:disabled { opacity: .35; cursor: default; }
+.lop-sm-scale-val {
+  flex: 1; text-align: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--ink-2, #333331);
+}
 .lop-sm-theme-btn:hover { color: var(--ink, #111); }
 .lop-sm-theme-btn.active {
   border-color: var(--ink, #111); color: var(--ink, #111);
