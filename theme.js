@@ -83,6 +83,15 @@
   var _mode = _storedMode() || 'light';
   _apply(_effective(_mode));
 
+  /* Pojistka: kdyby byl skript v dokumentu omylem dřív než barevné meta
+     značky, _apply() by je nenašel a lišta prohlížeče by zůstala světlá.
+     Po naparsování dokumentu se proto nastaví znovu. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      _apply(_effective(_mode));
+    }, { once: true });
+  }
+
   window.lopThemeMode = _mode;                 // volba uživatele
   window.lopTheme     = _effective(_mode);     // co je právě vykreslené
 
