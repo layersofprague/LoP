@@ -2716,6 +2716,13 @@ function toggleWishBtn() {
     attributionControl: false
   });
 
+  /* Leaflet si drží rozměry kontejneru v paměti. Po změně měřítka stránky
+     (nastavení → Velikost stránky) by počítal se starými a mapa by se
+     vykreslila posunutá — proto přepočet. */
+  document.addEventListener('lop:scalechange', function () {
+    setTimeout(function () { map.invalidateSize(); }, 50);
+  });
+
   // Naše CARTO dlaždice
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19
