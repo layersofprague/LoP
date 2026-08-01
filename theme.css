@@ -81,6 +81,44 @@ html[data-theme="dark"] .rep-area {
 
 html[data-theme="dark"] .rep-static { background: var(--paper-3); }
 
+/* ── overview.html ── */
+html[data-theme="dark"] .controls-bar { background: var(--paper-2); }
+html[data-theme="dark"] .place-thumb  { background: var(--paper-3); color: rgba(255,255,255,.10); }
+html[data-theme="dark"] .ctrl-btn.active { background: var(--paper-3); color: var(--ink); }
+
+/* ── map.html ── */
+html[data-theme="dark"] #topbar,
+html[data-theme="dark"] #nav,
+html[data-theme="dark"] .map-search,
+html[data-theme="dark"] #topSearch .ts-field,
+html[data-theme="dark"] .filter-panel-inner,
+html[data-theme="dark"] .filter-bar,
+html[data-theme="dark"] .base-layer-btn,
+html[data-theme="dark"] .base-layer-dropdown,
+html[data-theme="dark"] .filter-puck,
+html[data-theme="dark"] .map-puck,
+html[data-theme="dark"] .leaflet-control-zoom a {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+html[data-theme="dark"] .base-layer-btn:hover,
+html[data-theme="dark"] .filter-puck:hover,
+html[data-theme="dark"] .map-puck:hover,
+html[data-theme="dark"] .bl-option:hover,
+html[data-theme="dark"] .leaflet-control-zoom a:hover {
+  background: var(--paper-3);
+}
+html[data-theme="dark"] .leaflet-container,
+html[data-theme="dark"] #map { background: var(--paper); }
+html[data-theme="dark"] .filter-timeline .ft-h { background: var(--paper-3); }
+
+/* Dlaždice mapy: invertovat jen je (.leaflet-tile-pane), ne celou mapu —
+   piny, kužely a popisky leží v jiných vrstvách a musí zůstat v původních
+   barvách, jinak by zčernaly a splynuly s podkladem. */
+html[data-theme="dark"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.9);
+}
+
 /* Piny v mapě zůstávají světlé záměrně — musí být čitelné proti mapě,
    která se v tmavém režimu nemění. */
 
@@ -104,8 +142,7 @@ html[data-theme="dark"] .gallery-thumb img,
 html[data-theme="dark"] .sl-base img,
 html[data-theme="dark"] .sl-top img,
 html[data-theme="dark"] .rv-fs-img,
-html[data-theme="dark"] .gl-img,
-html[data-theme="dark"] #miniMap {
+html[data-theme="dark"] .gl-img {
   filter: brightness(.88);
 }
 /* Ve fullscreenu naopak plná svítivost — tam je fotka hlavní obsah */
