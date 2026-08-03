@@ -110,12 +110,15 @@
 
   // ── prázdný / nezískaný slot ──
   function emptySVG(o) {
-    const ink = '#aeb1a8';
+    /* V tmavém režimu tmavší odstín — kroužek má jen naznačovat prázdné
+       místo, ne poutat pozornost. Světlá šedá by na tmavém pozadí svítila
+       víc než skutečná získaná razítka. */
+    const ink = (window.lopTheme === 'dark') ? '#565349' : '#aeb1a8';
     return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;overflow:visible">
       <circle cx="100" cy="100" r="92" fill="none" stroke="${ink}" stroke-width="1.4" stroke-dasharray="3 5" opacity="0.42"/>
       <circle cx="100" cy="100" r="82" fill="none" stroke="${ink}" stroke-width="0.8" stroke-dasharray="2 5" opacity="0.3"/>
       <text x="100" y="108" text-anchor="middle" font-family="${MONO}" font-size="22" font-weight="600" fill="${ink}" opacity="0.4" letter-spacing="1.5">${esc(o.code || '???')}</text>
-      <text x="100" y="132" text-anchor="middle" font-family="${MONO}" font-size="8" fill="${ink}" opacity="0.4" letter-spacing="3">NEZÍSKÁNO</text>
+      <text x="100" y="132" text-anchor="middle" font-family="${MONO}" font-size="8" fill="${ink}" opacity="0.4" letter-spacing="3">${esc((window.t ? t('collection.unearned') : 'Nezískáno').toUpperCase())}</text>
     </svg>`;
   }
 
