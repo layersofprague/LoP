@@ -1233,143 +1233,179 @@
   },
   "curator.stare-mesto.title": {
     "cs": "Měšťák a Hausknecht",
-    "en": "Burgher and Hausknecht"
+    "en": "‘Měšťák’ and ‘Hausknecht’"
   },
   "curator.stare-mesto.desc": {
-    "cs": "Měšťákům a Hausnknechtům se říkalo bohatým obchodníkům, ale také rázovitým rváčům a kočím z přístavních krčem.",
-    "en": "Burghers and Hausknechts meant both the wealthy merchants and the rough-and-ready brawlers and coachmen from the harbour taverns."
+    "cs": "Měšťák a Hausnknecht se říkalo bohatým obchodníkům, ale také rázovitým rváčům a kočím z přístavních krčem.",
+    "en": "‘Měšťák’ (City Dweller) and ‘Hausnknecht’ were terms used to refer to wealthy merchants, but also to rough-and-tumble brawlers and coachmen from the harbor taverns."
   },
   "curator.nove-mesto.title": {
     "cs": "Rachunbář a Františkán",
-    "en": "Rachunbář and Franciscan"
+    "en": "‘Rachunbář’ and Franciscan"
   },
   "curator.nove-mesto.desc": {
-    "cs": "Rachunbářům a Františkánům se říkalo chudším dělníkům, kteří pili v hospodách na dluh, a mnichům z místních klášterů.",
-    "en": "“Rachunbáři” and Franciscans were the poorer labourers who drank on credit in the pubs, and the monks from the local monasteries."
+    "cs": "Rachunbář a Františkán se říkalo chudším dělníkům, kteří pili v hospodách na dluh, a mnichům z místních klášterů.",
+    "en": "The terms ‘Rachunbář’ and ‘Franciscan’ were used to refer to poorer labourers who drank on credit in pubs, and to monks from local monasteries."
   },
   "curator.mala-strana.title": {
-    "cs": "Malostranský Špunt a Lokaj"
+    "cs": "Malostranský Špunt a Lokaj",
+    "en": "Shortie of Malá Strana and Servant"
   },
   "curator.mala-strana.desc": {
-    "cs": "Malostranským Špuntům a Lokajům se říkalo klukům z bojovných part na zamrzlé Vltavě a služebnictvu ze šlechtických paláců."
+    "cs": "Malostranský Špunt a Lokaj se říkalo klukům z bojovných part na zamrzlé Vltavě a služebnictvu ze šlechtických paláců.",
+    "en": "The terms ‘Shortie of Malá Strana’ and ‘Servant’ were used to refer to the lads from the rowdy gangs on the frozen Vltava and the servants in the aristocratic palaces."
   },
   "curator.hradcany.title": {
     "cs": "Kastelán a Kapucín",
     "en": "Castellan and Capuchin"
   },
   "curator.hradcany.desc": {
-    "cs": "Kastelánům a Kapucínům se říkalo chudině a řemeslníkům navázaným na Pražský hrad a klášterní život v okolí Lorety.",
-    "en": "Castellans and Capuchins were the poor and the craftsmen tied to Prague Castle, and the monks of the monastic life around Loreta."
+    "cs": "Kastelán a Kapucín se říkalo chudině a řemeslníkům navázaným na Pražský hrad a klášterní život v okolí Lorety.",
+    "en": "The terms ‘Castellan’ and ‘Capuchin’ were used to refer to the poor and craftsmen associated with Prague Castle and monastic life in the vicinity of Loreta."
   },
   "curator.josefov.title": {
-    "cs": "Meiselovec"
+    "cs": "Meiselovec",
+    "en": "‘Meiselovec’"
   },
   "curator.josefov.desc": {
-    "cs": "Meiselovecem se říkalo obyvateli židovského ghetta, pojmenovaným po nejslavnějším historickém starostovi Mordechaji Maiselovi."
+    "cs": "Meiselovec se říkalo obyvateli židovského ghetta, pojmenovaném po nejslavnějším historickém starostovi Mordechaji Maiselovi.",
+    "en": "The inhabitants of the Jewish ghetto, named after its most famous historical mayor, Mordechai Maisel, were known as ‘Meiselovec’."
   },
   "curator.zizkov.title": {
-    "cs": "Žižkovský Pepík"
+    "cs": "Žižkovský Pepík",
+    "en": "Pepík of Žižkov"
   },
   "curator.zizkov.desc": {
-    "cs": "Žižkovskými Pepíky se říkalo slavným pouličním frajerkům, dělníkům a bohémům s typickým stylem oblékání a vlastním slangem."
+    "cs": "Žižkovští Pepíci se říkalo slavným pouličním frajerům, dělníkům a bohémům s typickým stylem oblékání a vlastním slangem. Původní význam slova „Pepík“ měl v Praze lehce hanlivý nádech a označoval lidi z okraje společnosti. Postupně se však z drsných mladíků stala romantizovaná figurka pražské lidové kultury.",
+    "en": "The ‘Pepíci of Žižkov’ was the name given to famous street toughs, labourers and bohemians with a distinctive style of dress and their own slang. Originally, the word ‘Pepík’ had a slightly derogatory connotation in Prague and referred to people on the margins of society. Gradually, however, these rough young men became a romanticised figure in Prague’s folk culture."
   },
   "curator.smichov.title": {
-    "cs": "Smíchovský Baraba"
+    "cs": "Smíchovský Baraba",
+    "en": "Baraba of Smíchov"
   },
   "curator.smichov.desc": {
-    "cs": "Smíchovskými Barabami se říkalo drsným, hlučným a tvrdě pracujícím dělníkům z místních obřích továren a pivovaru."
+    "cs": "Smíchovští Barabi se říkalo drsným, hlučným a tvrdě pracujícím dělníkům z místních obřích továren a pivovaru. Slovo baraba (pocházející z italského barabba – taškář, rabiát, původně podle biblického Barabáše) označovalo od 19. století zahraniční i domácí dělníky, kteří stavěli železniční tunely, tratě a silnice.",
+    "en": "The ‘Barabi of Smíchov’ was the name given to the rough, boisterous and hard-working labourers from the local giant factories and the brewery. The word ‘baraba’ (derived from the Italian ‘barabba’ – a troublemaker or hooligan, originally referring to the biblical Barabbas) had been used since the 19th century to describe both foreign and domestic workers who built railway tunnels, tracks and roads."
   },
   "curator.holesovice.title": {
     "cs": "Holešovický Šupák",
-    "en": "Holešovice “Šupák”"
+    "en": "Šupák of Holešovice"
   },
   "curator.holesovice.desc": {
-    "cs": "Holešovickými Šupáky se říkalo přístavním dělníkům, kteří šupovali – tedy posouvali a vykládali sudy a bedny z lodí.",
-    "en": "“Šupáci” were the port workers of Holešovice — the name comes from šupovat, to shove: shifting and unloading barrels and crates from the boats."
+    "cs": "Holešovičtí Šupáci se říkalo přístavním dělníkům, kteří šupovali – tedy posouvali a vykládali sudy a bedny z lodí.",
+    "en": "The ‘Šupáci of Holešovice’ was the name given to the dockworkers who ‘šupovali’ – that is, moved and unloaded barrels and crates from ships."
   },
   "curator.karlin.title": {
-    "cs": "Karlínský kluk"
+    "cs": "Karlínský kluk",
+    "en": "Karlín Lad"
   },
   "curator.karlin.desc": {
-    "cs": "Karlínskými kluky se říkalo drsnějším dělnickým partám z první pravé průmyslové čtvrti Prahy."
+    "cs": "Karlínští kluci se říkalo drsnějším dělnickým partám z první pravé průmyslové čtvrti Prahy.",
+    "en": "The ‘Karlín lads’ was the name given to the tougher groups of labourers from Prague’s first true industrial district."
   },
   "curator.kosire.title": {
-    "cs": "Košířský rváč"
+    "cs": "Košířský rváč",
+    "en": "Brawler of Košíře"
   },
   "curator.kosire.desc": {
-    "cs": "Košířskými rváči se říkalo divokým partám z tehdejší periferie, které neustále bojovaly se sousedním Smíchovem."
+    "cs": "Košířští rváči se říkalo divokým partám z tehdejší periferie, které neustále bojovaly se sousedním Smíchovem.",
+    "en": "The ‘Brawlers of Košíře’ was the name given to the rowdy gangs from what was then the outskirts, who were constantly fighting with neighbouring Smíchov."
   },
   "curator.podskali.title": {
-    "cs": "Podskalák a Plavec"
+    "cs": "Podskalák a Plavec",
+    "en": "‘Podskalák’ and Raftsman"
   },
   "curator.podskali.desc": {
-    "cs": "Podskalákům a Plavcům se říkalo hrdé a uzavřené komunitě vorařů, ledařů a rybářů z oblasti dnešní Výtoně."
+    "cs": "Podskaláci a Plavci se říkalo hrdé a uzavřené komunitě vorařů, ledařů a rybářů z oblasti dnešní Výtoně.",
+    "en": "The ‘Podskaláci’ and ‘Raftsmen’ were the names given to a proud and close-knit community of raftsmen, ice-cutters and fishermen from the area that is now Výtoň."
   },
   "curator.kampa.title": {
-    "cs": "Kampán"
+    "cs": "Kampán",
+    "en": "‘Kampán’"
   },
   "curator.kampa.desc": {
-    "cs": "Kampány se říkalo obyvatelům polovenkovské izolované komunity pradlen, mlynářů a rybářů z vltavského ostrova."
+    "cs": "Kampáni se říkalo obyvatelům polovenkovské izolované komunity pradlen, mlynářů a rybářů z vltavského ostrova Kampa.",
+    "en": "The term ‘Kampáni’ was used to refer to the inhabitants of a semi-rural, isolated community of washerwomen, millers and fishermen on the Vltava island of Kampa."
   },
   "curator.branik.title": {
-    "cs": "Branský ledař"
+    "cs": "Branský ledař",
+    "en": "Ice-Cutter of Braník"
   },
   "curator.branik.desc": {
-    "cs": "Branskými ledaři se říkalo dělníkům, kteří v zimě sekali na zamrzlé Vltavě led a sváželi ho do branických ledáren."
+    "cs": "Braničtí ledaři se říkalo dělníkům, kteří v zimě sekali na zamrzlé Vltavě led a sváželi ho do branických ledáren.",
+    "en": "The term ‘Ice-cutters of Braník’ was used to refer to the workers who, in winter, cut ice from the frozen Vltava and transported it to the ice houses in Braník."
   },
   "curator.podoli.title": {
-    "cs": "Podolský cementárník"
+    "cs": "Podolský cementárník",
+    "en": "Cement Worker of Podolí"
   },
   "curator.podoli.desc": {
-    "cs": "Podolskými cementárníky se říkalo dělníkům z bývalé slavné podolské cementárny, kteří tvořili jádro tamní říční komunity."
+    "cs": "Jako podolští cementárníci se označovali dělníci z bývalé slavné podolské cementárny, kteří tvořili jádro tamní říční komunity.",
+    "en": "The term ‘Cement workers of Podolí’ referred to the labourers from the once-famous Podolí cement works, who formed the core of the local riverside community."
   },
   "curator.nusle.title": {
-    "cs": "Nuselský Kafemlejnek"
+    "cs": "Nuselský Kafemlejnek",
+    "en": "Coffee Grinder of Nusle"
   },
   "curator.nusle.desc": {
-    "cs": "Nuselskými Kafemlejnky se říkalo chudšímu pavlačovému obyvatelstvu, jehož sousedky neustále melely pantem a ráno mlely meltu."
+    "cs": "Nuselští Kafemlejnci se říkalo chudšímu pavlačovému obyvatelstvu, jehož sousedky neustále mlely pantem a ráno mlely meltu.",
+    "en": "‘Coffee Grinders of Nusle’ was the name given to the poorer residents of the balcony flats, whose female neighbours were constantly chattering away and grinding coffee in the mornings."
   },
   "curator.liben.title": {
-    "cs": "Libeňský Balonář"
+    "cs": "Libeňský Balonář",
+    "en": "Balloonist of Libeň"
   },
   "curator.liben.desc": {
-    "cs": "Libeňskými Balonáři se říkalo klukům, kteří fascinovaně sledovali vypouštění prvních pražských balonů v Libeni."
+    "cs": "Libeňští Balonáři se říkalo klukům, kteří fascinovaně sledovali vypouštění prvních pražských balonů v Libni.",
+    "en": "The ‘Balloonists of Libeň’ was the name given to the boys who watched with fascination as Prague’s first balloons were launched in Libeň."
   },
   "curator.vysehrad.title": {
-    "cs": "Vyšehradský Kanovník a Peckář"
+    "cs": "Vyšehradský Kanovník a Peckář",
+    "en": "Vyšehrad Canon and Fruit Pitter"
   },
   "curator.vysehrad.desc": {
-    "cs": "Vyšehradskými Kanovníky a Peckáři se říkalo kněžím z kapituly a pěstitelům třešní a švestek, které prodávali po celé Praze."
+    "cs": "Vyšehradští Kanovníci a Peckáři se říkalo kněžím z kapituly a pěstitelům třešní a švestek, které prodávali po celé Praze.",
+    "en": "The term ‘Vyšehrad Canons and Fruit pitters’ was used to refer to the priests of the chapter and the growers of cherries and plums, who sold their produce throughout Prague."
   },
   "curator.vrsovice.title": {
-    "cs": "Vršovický Koloběžkář"
+    "cs": "Vršovický Koloběžkář",
+    "en": "Scooter Rider of Vršovice"
   },
   "curator.vrsovice.desc": {
-    "cs": "Vršovickými Koloběžkáři se ironicky říkalo obyvatelům venkovského předměstí bez pořádné dopravy, kde se lidé museli neustále přesouvat."
+    "cs": "Jako Vršovičtí Koloběžkáři byli ironicky označováni obyvatelé tohoto tehdejšího venkovského předměstí bez pořádné dopravy, kde se lidé museli neustále přesouvat vlastními silami.",
+    "en": "The residents of the rural suburb of Vršovice, which lacked proper public transportation and where people had to get around under their own power, were ironically referred to as the ‘Scooter Riders of Vršovice’."
   },
   "curator.vinohrady.title": {
-    "cs": "Vinohradský paňáca"
+    "cs": "Vinohradský paňáca",
+    "en": "Fop of Vinohrady"
   },
   "curator.vinohrady.desc": {
-    "cs": "Vinohradskými paňácy se posměšně říkalo bohatším a elegantním měšťanům – a to zejména v ústech jejich žižkovských sousedů."
+    "cs": "Vinohradští paňáci se posměšně říkalo bohatším a elegantním měšťanům – a to zejména z úst jejich žižkovských sousedů.",
+    "en": "The term ‘Snobs or Fops of Vinohrady’ was used derisively to refer to the wealthier and more elegant townspeople — especially by their neighbors in Žižkov."
   },
   "curator.brevnov.title": {
-    "cs": "Břevnovský zelinář a Benediktin"
+    "cs": "Břevnovský zelinář a Benediktin",
+    "en": "Vegetable Grower of Břevnov and Benedictine"
   },
   "curator.brevnov.desc": {
-    "cs": "Břevnovskými zelináři a Benediktiny se říkalo pěstitelům a mnichům spjatým se zahradami, které historicky patřily Břevnovskému klášteru."
+    "cs": "Břevnovští zelináři a Benediktýni se říkalo pěstitelům a mnichům spjatým se zahradami, které historicky patřily Břevnovskému klášteru.",
+    "en": "The term ‘Vegetable growers of Břevnov and Benedictines’ was used to refer to the gardeners and monks associated with the gardens that historically belonged to Břevnov Abbey."
   },
   "curator.troja.title": {
-    "cs": "Trojský vinař"
+    "cs": "Trojský vinař",
+    "en": "Winegrower of Troja"
   },
   "curator.troja.desc": {
-    "cs": "Trojskými vinaři se říkalo obyvatelům svahů nad Vltavou, kteří po staletí udržovali tradici pěstování vinné révy."
+    "cs": "Trojští vinaři se říkalo obyvatelům trojských svahů nad Vltavou, kteří po staletí udržovali tradici pěstování vinné révy.",
+    "en": "The term ‘Winegrowers of Troja’ was used to refer to the inhabitants of the Troja slopes above the Vltava, who had maintained the tradition of vine-growing for centuries."
   },
   "curator.letna.title": {
-    "cs": "Sparťan"
+    "cs": "Sparťan",
+    "en": "‘Sparťan’"
   },
   "curator.letna.desc": {
-    "cs": "Sparťany se říkalo obyvatelům Letné – podle zdejšího fotbalového klubu AC Sparta Praha."
+    "cs": "Sparťani se říkalo obyvatelům Letné – podle zdejšího fotbalového klubu AC Sparta Praha.",
+    "en": "The residents of Letná were known as the ‘Sparťans’ – after the local football club, AC Sparta Prague."
   },
   "report.link": {
     "cs": "Nahlásit nesrovnalost na této stránce",
@@ -1554,5 +1590,25 @@
   "collection.footer_sub": {
     "cs": "... a třeba se i něco dozvědět =)",
     "en": "... and maybe learning something along the way =)"
+  },
+  "district.branik": {
+    "cs": "Braník",
+    "en": "Braník"
+  },
+  "district.kampa": {
+    "cs": "Kampa",
+    "en": "Kampa"
+  },
+  "district.kosire": {
+    "cs": "Košíře",
+    "en": "Košíře"
+  },
+  "district.letna": {
+    "cs": "Letná",
+    "en": "Letná"
+  },
+  "district.podskali": {
+    "cs": "Podskalí",
+    "en": "Podskalí"
   }
 }
