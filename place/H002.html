@@ -2396,7 +2396,7 @@ function toggleWishBtn() {
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
     places.filter(p => p.id !== PLACE_ID && p.lat && p.lng && haversine(LAT, LNG, p.lat, p.lng) <= 1).forEach(p => {
-      const color = CAT_COLOR[p.cat] || '#999';
+      const color = (window.lopCatColor && window.lopCatColor(p.cat)) || CAT_COLOR[p.cat] || '#999';
       const letter = p.id ? p.id.replace(/[0-9]/g,'').charAt(0) : '?';
       const pinHtml = `<div class="mini-pin" style="background:${color}">${letter}</div>`;
       L.marker([p.lat, p.lng], {
