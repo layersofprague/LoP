@@ -2737,10 +2737,15 @@ function toggleWishBtn() {
     setTimeout(function () { map.invalidateSize(); }, 50);
   });
 
-  // Naše CARTO dlaždice
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19
-  }).addTo(map);
+  /* CARTO dlaždice — v tmavém režimu noční varianta. Invertovat světlé
+     dlaždice filtrem by přebarvilo i piny a popisky, proto se mění zdroj. */
+  function _tileUrl() {
+    return 'https://{s}.basemaps.cartocdn.com/'
+      + (window.lopTheme === 'dark' ? 'dark_all' : 'light_all')
+      + '/{z}/{x}/{y}{r}.png';
+  }
+  var _tiles = L.tileLayer(_tileUrl(), { maxZoom: 19 }).addTo(map);
+  document.addEventListener('lop:themechange', function () { _tiles.setUrl(_tileUrl()); });
 
   // Šachovnicový praporek pro aktivní místo
   const flagHtml = '<div style="'
