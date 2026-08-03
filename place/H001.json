@@ -139,6 +139,24 @@
       },
       "thumb": "https://layersofprague.github.io/LoP/foto/H001d_h.jpg",
       "url": null
+    },
+    {
+      "id": "H001-zrizenci",
+      "cat": "hist",
+      "name": {
+        "cs": "Budova železničních zřízenců",
+        "en": "Railway Staff House"
+      },
+      "sub": {
+        "cs": "č. p. 788 · František Sander, 1906",
+        "en": "No. 788 · František Sander, 1906"
+      },
+      "lede": {
+        "cs": "Patrový dům tvořil severní hranici areálu při Jankovcově ulici a zároveň jeho služební vjezd. Byl vystavěn ve stejném kontrastu režného cihelného a omítaného zdiva v pěti okenních osách, z nichž krajní jsou sdružené. Vedle domu stávalo hradlo s bránou, kterou se vjíždělo na seřaďovací nádraží.",
+        "en": "A two-storey house that formed the northern edge of the complex along Jankovcova Street and doubled as its service entrance. It was built with the same contrast of exposed brick and plastered masonry, in five window axes, the outermost ones paired. Beside it stood a signal box with the gate through which trains entered the marshalling yard."
+      },
+      "thumb": "https://layersofprague.github.io/LoP/foto/H001k_h.jpg",
+      "url": null
     }
   ],
   "captions": {
