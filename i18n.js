@@ -38,7 +38,7 @@ let _T = {};
 
 /* Verze v dotazu — bez ní podává GitHub Pages starou translations.json
    z cache a chybějící klíče se vypisují doslova ("overview.geo_short"). */
-const LOP_DATA_VER = '20260826';
+const LOP_DATA_VER = '20260827';
 
 (function _load() {
   try {
