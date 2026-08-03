@@ -58,5 +58,75 @@
       "cs": "Opravena chybějící navigace na stránkách Trasy a Profil.",
       "en": "Fixed the missing navigation bar on the Routes and Profile pages."
     }
+  },
+  {
+    "date": "2026-08-03",
+    "page": "H001",
+    "url": "place/H001.html",
+    "kind": "new",
+    "text": {
+      "cs": "Přidána pátá stavba areálu — Budova železničních zřízenců (č. p. 788) včetně historické fotografie.",
+      "en": "A fifth building added to the port complex — the Railway Staff House (No. 788), with a historical photograph."
+    }
+  },
+  {
+    "date": "2026-08-03",
+    "page": "about.html, author.html",
+    "url": "about.html",
+    "kind": "change",
+    "text": {
+      "cs": "Sjednoceny adresy stránek: „O projektu“ je nyní about.html, profil autora author.html.",
+      "en": "Page addresses unified: “About the project” is now about.html and the author profile author.html."
+    }
+  },
+  {
+    "date": "2026-08-02",
+    "page": "celá aplikace",
+    "url": "index.html",
+    "kind": "new",
+    "text": {
+      "cs": "Tmavý režim. V nastavení (ozubené kolo) lze přepnout Světlý / Auto / Tmavý — automatický se řídí východem a západem slunce v Praze.",
+      "en": "Dark mode. In settings (the gear icon) you can switch Light / Auto / Dark — the automatic option follows sunrise and sunset in Prague."
+    }
+  },
+  {
+    "date": "2026-08-02",
+    "page": "map.html",
+    "url": "map.html",
+    "kind": "change",
+    "text": {
+      "cs": "V tmavém režimu se mapa přepne na noční podklad. Ruční volba vrstvy má vždy přednost.",
+      "en": "In dark mode the map switches to the night basemap. A manually chosen layer always takes precedence."
+    }
+  },
+  {
+    "date": "2026-08-02",
+    "page": "collections.html",
+    "url": "collections.html",
+    "kind": "fix",
+    "text": {
+      "cs": "Doplněny anglické verze kurátorských titulů všech čtvrtí a chybějící překlady v přehledu sbírky.",
+      "en": "English versions of the curator titles for every district added, along with missing translations in the collection overview."
+    }
+  },
+  {
+    "date": "2026-08-01",
+    "page": "nastavení",
+    "url": "index.html",
+    "kind": "new",
+    "text": {
+      "cs": "Volba velikosti stránky (75–125 %) v nastavení — pro případ, že je text příliš malý.",
+      "en": "A page size setting (75–125 %) — for when the text is too small to read comfortably."
+    }
+  },
+  {
+    "date": "2026-08-01",
+    "page": "updates.html",
+    "url": "updates.html",
+    "kind": "new",
+    "text": {
+      "cs": "Nová stránka Aktualizace v nastavení — přehled změn v aplikaci s vyznačením novinek od vaší poslední návštěvy.",
+      "en": "A new Updates page in settings — a list of changes with items added since your last visit highlighted."
+    }
   }
 ]
