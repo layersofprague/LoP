@@ -3361,7 +3361,15 @@ function initMap() {
   BASE_LAYERS.carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap © CARTO',
     subdomains: 'abcd', maxZoom: 20
-  }).addTo(map);
+  });
+
+  /* V tmavém režimu nastoupí rovnou noční podklad. Invertovat světlé
+     dlaždice by nešlo použít plošně — z noční mapy by udělalo denní
+     a z ortofota barevný nesmysl. Přes setBaseLayer(), aby se srovnal
+     i popisek a zvýrazněná položka v nabídce vrstev. */
+  var _initLayer = (window.lopTheme === 'dark') ? 'dark' : 'carto';
+  setBaseLayer(_initLayer,
+    document.querySelector('.bl-option[data-layer="' + _initLayer + '"]'), true);
 
   const rt = document.getElementById('rtTip');
   LOCATIONS.forEach(loc => {
@@ -3498,8 +3506,11 @@ function _getOrCreateLayer(key) {
   return BASE_LAYERS[key] || null;
 }
 
-function setBaseLayer(key, el) {
+let _baseLayerManual = false;   // uživatel si vrstvu vybral sám
+
+function setBaseLayer(key, el, auto) {
   if (!window._map) return;
+  if (!auto) _baseLayerManual = true;
   const newLayer = _getOrCreateLayer(key);
   if (!newLayer) return;
 
@@ -3523,6 +3534,16 @@ function setBaseLayer(key, el) {
   document.getElementById('baseLayerBtn')?.classList.remove('open');
   _baseLayerOpen = false;
 }
+
+/* Přepnutí světlý/tmavý mění i podklad — ale jen dokud si uživatel
+   vrstvu nezvolil ručně, jeho volba má vždycky přednost. */
+document.addEventListener('lop:themechange', function (e) {
+  if (_baseLayerManual || !window._map) return;
+  var want = (e.detail && e.detail.theme === 'dark') ? 'dark' : 'carto';
+  if (want === _currentBaseLayer) return;
+  var opt = document.querySelector('.bl-option[data-layer="' + want + '"]');
+  setBaseLayer(want, opt, true);
+});
 
 let _baseLayerOpen = false;
 function toggleBaseLayer() {

@@ -81,6 +81,16 @@ html[data-theme="dark"] .rep-area {
 
 html[data-theme="dark"] .rep-static { background: var(--paper-3); }
 
+/* Dlaždice podřazených staveb (H001 „Stavby přístavu") — bílé pozadí
+   a bílá pilulka kategorie by na tmavém pozadí svítily. */
+html[data-theme="dark"] #relatedList .place-card,
+html[data-theme="dark"] #relatedList .place-cat-pill { background: var(--paper-2); }
+html[data-theme="dark"] #relatedList .place-thumb    { background: var(--paper-3); }
+
+/* Přejetí myší nad kartou v přehledu ztmavovalo název na černou,
+   což je na tmavém pozadí nečitelné. */
+html[data-theme="dark"] .place-card:hover .place-name { color: #fff; }
+
 /* ── overview.html ── */
 html[data-theme="dark"] .controls-bar { background: var(--paper-2); }
 html[data-theme="dark"] .place-thumb  { background: var(--paper-3); color: rgba(255,255,255,.10); }
@@ -117,12 +127,9 @@ html[data-theme="dark"] .leaflet-container,
 html[data-theme="dark"] #map { background: var(--paper); }
 html[data-theme="dark"] .filter-timeline .ft-h { background: var(--paper-3); }
 
-/* Dlaždice mapy: invertovat jen je (.leaflet-tile-pane), ne celou mapu —
-   piny, kužely a popisky leží v jiných vrstvách a musí zůstat v původních
-   barvách, jinak by zčernaly a splynuly s podkladem. */
-html[data-theme="dark"] .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.9);
-}
+/* Podklad mapy se NEinvertuje — invertování by z noční mapy udělalo denní
+   a z ortofota nesmysl. Místo toho se v tmavém režimu přepne na noční
+   podkladovou vrstvu (viz map.html a mini mapa v detailu místa). */
 
 /* map.html má několik pravidel s !important (hlavička, ovládání přiblížení).
    Bez !important i tady by je nešlo přebít — vyšší specificita na ně nestačí. */
