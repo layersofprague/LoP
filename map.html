@@ -3506,6 +3506,12 @@ function _getOrCreateLayer(key) {
   return BASE_LAYERS[key] || null;
 }
 
+/* Popisky vrstev pro tlačítko nad mapou. Slovník dřív chyběl úplně —
+   setBaseLayer() na něj sahal, takže při každém přepnutí vrstvy padal
+   na ReferenceError. Projevovalo se to jen po kliknutí, dokud se funkce
+   nezačala volat i při startu mapy. */
+const LAYER_LABEL = { carto: 'Výchozí', osm: 'OSM', dark: 'Noční', orto: 'Ortofoto' };
+
 let _baseLayerManual = false;   // uživatel si vrstvu vybral sám
 
 function setBaseLayer(key, el, auto) {
