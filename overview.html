@@ -1341,6 +1341,12 @@ function locYear(p) {
 
 function applyFilter() { render(); }
 
+/* Barvy kategorií se liší podle motivu, ale karty a razítka se kreslí
+   v JavaScriptu — po přepnutí režimu je proto potřeba překreslit. */
+document.addEventListener('lop:themechange', function () {
+  if (typeof PLACES !== 'undefined' && PLACES.length) render();
+});
+
 document.addEventListener('click', e=>{
   const backdrop=document.getElementById('filterBackdrop');
   const modal=document.getElementById('filterModal');
@@ -1454,7 +1460,7 @@ function render() {
 }
 
 function cardHTML(p, visited, wished) {
-  const color   = CAT_COLOR[p.cat]  || '#4A4A48';
+  const color   = (window.lopCatColor && window.lopCatColor(p.cat)) || CAT_COLOR[p.cat] || '#4A4A48';
   const letter  = CAT_LETTER[p.cat] || 'H';
   const catName = CAT_NAME[p.cat]   || '';
   const vis     = visited.includes(String(p.id));

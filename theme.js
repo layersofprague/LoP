@@ -123,6 +123,16 @@
   /* Pro popisek v nastavení: kdy dnes vychází a zapadá slunce. */
   window.lopSunTimes = function () { return _sunTimes(new Date()); };
 
+  /* Barva kategorie podle aktuálního motivu.
+     Razítka a piny se kreslí v JavaScriptu, takže o proměnných z theme.css
+     samy nevědí — bez tohohle by v tmavém režimu zůstaly tmavé odstíny
+     ze světlé palety a splynuly by s pozadím. */
+  window.lopCatColor = function (cat) {
+    var v = getComputedStyle(document.documentElement)
+              .getPropertyValue('--cat-' + cat);
+    return v ? v.trim() : '';
+  };
+
   /* ══════════════════════════════════════════════════════
      MĚŘÍTKO STRÁNKY
 

@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="color-scheme" content="light"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#1a1a18"/>
+<script src="theme.js?v=20260801"></script>
 <title>Profil autora — LayersOfPrague</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +50,7 @@ a{color:inherit;text-decoration:none;}
 .place-row-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px;}
 .place-row-arrow{color:var(--ink-4);flex-shrink:0;}
 </style>
+<link rel="stylesheet" href="theme.css?v=20260801"/>
 </head>
 <body>
 <div id="lop-header"></div>
@@ -114,7 +117,7 @@ async function loadAutor(){
   const list=document.getElementById("placesList");
   if(places.length){
     list.innerHTML=places.map(p=>{
-      const color=CAT_COLOR[p.cat]||"#4A4A48";
+      const color=(window.lopCatColor&&window.lopCatColor(p.cat))||CAT_COLOR[p.cat]||"#4A4A48";
       const cat=CAT_NAME[p.cat]||"";
       const name=typeof p.name==="object"?(p.name.cs||Object.values(p.name)[0]):p.name;
       const sub=typeof p.sub==="object"?(p.sub.cs||Object.values(p.sub)[0]):(p.sub||"");

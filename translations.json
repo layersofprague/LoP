@@ -1514,5 +1514,45 @@
   "updates.fresh": {
     "cs": "nové od vaší poslední návštěvy",
     "en": "new since your last visit"
+  },
+  "collection.h1": {
+    "cs": "Sbírka <em>razítek</em>",
+    "en": "Stamp <em>collection</em>"
+  },
+  "collection.stamps_label": {
+    "cs": "razítek",
+    "en": "stamps"
+  },
+  "collection.intro": {
+    "cs": "Sleduj jak se plní tvoje sbírky v jednotlivých kategoriích. Každé místo, které navštívíš, zanechá razítko. Každé prolnutí přítomnosti s minulostí nebo zodpovězení otázky ti ho vylepší a přidá další body.",
+    "en": "Watch your collections fill up across the categories. Every place you visit leaves a stamp. Each blend of present and past, or a question answered, improves it and adds more points."
+  },
+  "collection.kicker_cats": {
+    "cs": "Kategorie",
+    "en": "Categories"
+  },
+  "collection.kicker_districts": {
+    "cs": "Čtvrti",
+    "en": "Districts"
+  },
+  "collection.cta_title": {
+    "cs": "Sleduj svůj postup",
+    "en": "Track your progress"
+  },
+  "collection.cta_btn": {
+    "cs": "Přihlásit se",
+    "en": "Sign in"
+  },
+  "collection.footer_a": {
+    "cs": "Není důležité vyhrát, ale",
+    "en": "Winning isn’t the point —"
+  },
+  "collection.footer_b": {
+    "cs": "pobavit se!",
+    "en": "having fun is!"
+  },
+  "collection.footer_sub": {
+    "cs": "... a třeba se i něco dozvědět =)",
+    "en": "... and maybe learning something along the way =)"
   }
 }

@@ -123,7 +123,7 @@
     o = o || {};
     if (o.locked || o.empty) return emptySVG(o);
     const cat = o.cat || 'hist';
-    const ink = CAT_COLOR[cat] || '#4A4A48';
+    const ink = (window.lopCatColor && window.lopCatColor(cat)) || CAT_COLOR[cat] || '#4A4A48';
     const code = o.code || 'H000';
     const name = o.name || '';
     const year = o.year || '';

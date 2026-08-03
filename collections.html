@@ -509,7 +509,7 @@ function buildSectionData(places, visited, scores) {
       kind: 'cat',
       key: cat,                 // stabilní klíč (nezávislý na jazyce) pro openState
       name: catName(cat),
-      color: CAT_COLOR[cat],
+      color: (window.lopCatColor && window.lopCatColor(cat)) || CAT_COLOR[cat],
       cat: cat,
       badge: catBadge(cat),
       items: items,
@@ -690,6 +690,12 @@ function toggleSection(idx, name) {
 }
 
 let _allSections = [];
+
+/* Barvy kategorií se liší podle motivu, ale razítka se kreslí v JavaScriptu —
+   po přepnutí režimu je proto potřeba překreslit. */
+document.addEventListener('lop:themechange', function () {
+  if (typeof _sections !== 'undefined' && _sections && _sections.length) renderAll();
+});
 
 function renderAll() {
   try {
