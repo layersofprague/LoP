@@ -108,12 +108,16 @@
     return `<image xlink:href="${CASTLE_SRC}" x="${CX - CW / 2}" y="${CY}" width="${CW}" height="${CH}" preserveAspectRatio="xMidYMid meet"/>`;
   }
 
+  /* Odstín vymezovacího kroužku („kde razítko bude"). V tmavém režimu
+     tmavší — má jen naznačovat pozici, ne poutat pozornost. Používá se
+     u nezískaných slotů i pod získanými razítky, aby byly stejné. */
+  function slotInk() {
+    return (window.lopTheme === 'dark') ? '#565349' : '#aeb1a8';
+  }
+
   // ── prázdný / nezískaný slot ──
   function emptySVG(o) {
-    /* V tmavém režimu tmavší odstín — kroužek má jen naznačovat prázdné
-       místo, ne poutat pozornost. Světlá šedá by na tmavém pozadí svítila
-       víc než skutečná získaná razítka. */
-    const ink = (window.lopTheme === 'dark') ? '#565349' : '#aeb1a8';
+    const ink = slotInk();
     return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;overflow:visible">
       <circle cx="100" cy="100" r="92" fill="none" stroke="${ink}" stroke-width="1.4" stroke-dasharray="3 5" opacity="0.42"/>
       <circle cx="100" cy="100" r="82" fill="none" stroke="${ink}" stroke-width="0.8" stroke-dasharray="2 5" opacity="0.3"/>
@@ -160,7 +164,7 @@
       rot = (style === 'skew' ? 1.7 : 0.7) * dir * miss;
     }
     // šedý kruh vymezení ("nezískané") vždy pod každým razítkem
-    const baseRing = `<circle cx="100" cy="100" r="94" fill="none" stroke="#aeb1a8" stroke-width="1.2" stroke-dasharray="2 6" opacity="0.5"/>`;
+    const baseRing = `<circle cx="100" cy="100" r="94" fill="none" stroke="${slotInk()}" stroke-width="1.2" stroke-dasharray="2 6" opacity="0.5"/>`;
 
     const filterMarkup = buildFilter(fid, style === 'skew' ? 'rough' : style, L, seed);
 
