@@ -3364,8 +3364,11 @@ function applyFilter() {
 
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
-    const wished  = JSON.parse(localStorage.getItem(WISH_KEY) ||'[]').map(String).includes(String(loc.id));
-    const visited = JSON.parse(localStorage.getItem(VISIT_KEY)||'[]').map(String).includes(String(loc.id));
+    // isWished/isVisited správně vrátí false, pokud uživatel není
+    // přihlášený — přímé čtení localStorage by "protáhlo" stará data
+    // z dřívějšího přihlášení i do nepřihlášené session (viz report v chatu).
+    const wished  = isWished(loc.id);
+    const visited = isVisited(loc.id);
 
     // Každý filtr relevantní pro tento pin hlasuje.
     // Výsledek = nejpříznivější hlas.
@@ -3389,10 +3392,13 @@ function applyFilter() {
     else if (wishState === 'hide' && wished)  { s = 'hide'; }
     else if (visState  === 'hide' && visited) { s = 'hide'; }
     else {
-      // Měkké skrytí — hlasování
+      // Měkké skrytí — hlasování. Výchozí 'full' u wished/visited (= nikdo
+      // se jimi nezabýval) nehlasuje vůbec — nemá se čím "zachraňovat".
+      // Jen aktivně nastavené dim (u wished/visited chipu) se do hlasování
+      // počítá; "vždy" (force) je vyřešeno o dva řádky výš, nezávisle.
       const votes = [catState];
-      if (wished)  votes.push(wishState);
-      if (visited) votes.push(visState);
+      if (wished  && wishState !== 'full') votes.push(wishState);
+      if (visited && visState  !== 'full') votes.push(visState);
       s = votes.reduce((best, v) => BETTER(best, v), 'hide');
     }
 
