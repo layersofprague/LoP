@@ -4409,6 +4409,7 @@ function alignPuck() {
   const zoomEl = document.querySelector('.leaflet-control-zoom');
   const puckEl = document.getElementById('mapPuckWrap');
   const filterWrap = document.getElementById('filterPuckWrap');
+  const closeWrap = document.getElementById('filterCloseWrap');
   if (!zoomEl || !puckEl) return;
   const zoomRect = zoomEl.getBoundingClientRect();
   const bottom = Math.round(window.innerHeight - zoomRect.bottom + zoomRect.height + 4);
@@ -4416,6 +4417,11 @@ function alignPuck() {
   puckEl.style.bottom = bottom + 'px';
   puckEl.style.right  = right  + 'px';
   if (filterWrap) filterWrap.style.right = right + 'px';
+  // Zavírací puck sedí na stejném místě jako ten hlavní — bez tohohle
+  // zůstával na statickém CSS right, který se od skutečné (JS dopočtené)
+  // pozice lišil a padal pod navbar (ten má vyšší z-index), takže nebyl
+  // vůbec vidět (viz report v chatu).
+  if (closeWrap) closeWrap.style.right = right + 'px';
   // Arch panel button — vlevo od filter pucku. Bere se skutečná levá
   // hrana filterWrapu (getBoundingClientRect), ne odhad jeho šířky —
   // fallback (dřívější `offsetWidth || 60`) se při prvním volání, než
