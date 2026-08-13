@@ -28,6 +28,7 @@ h1{font-size:14px;font-weight:600;margin-bottom:2px}
 .item-name{font-size:12px;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item-check{color:#16a34a;flex-shrink:0;font-size:13px;font-weight:700}
 .item-warn{color:#d97706;flex-shrink:0;font-size:13px;cursor:help}
+.item-cat{font-size:9px;color:#aaa;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
 
 #panel{padding:12px;display:flex;flex-direction:column;gap:9px;flex:1;overflow-y:auto;min-height:0}
 #cur-name{font-size:13px;font-weight:600;color:#1a1a18;line-height:1.35;min-height:18px}
@@ -79,7 +80,7 @@ hr{border:none;border-top:1px solid #eee;margin:2px 0}
   <div id="sidebar">
     <div id="topbar">
       <h1>Target editor — azimuty AR</h1>
-      <div id="subtitle">Kužel pohledu se kreslí jen u míst s <code>arHeading</code>/<code>arTarget</code> (dnes: historie).</div>
+      <div id="subtitle">Kužel se v map.html zobrazí jen s ověřeným <code>arTarget</code> — nezávisle na kategorii.</div>
       <div id="stats">0 / 0 s arTarget</div>
     </div>
     <div id="list"></div>
@@ -169,13 +170,14 @@ hr{border:none;border-top:1px solid #eee;margin:2px 0}
    Odlehčená kopie places-index.json — jen pole potřebná
    pro tenhle nástroj. Zdroj pravdy zůstává places-index.json,
    tenhle soubor se ručně přepisuje, když se seznam AR míst změní. */
-const ORIG_DATA = [{"id": "H101", "name": "Šítkovská věž", "lat": 50.0784, "lng": 14.4133, "cat": "hist", "arHeading": 180, "arRadius": 15, "arTarget": null}, {"id": "H102", "name": "Václavské náměstí", "lat": 50.0815, "lng": 14.4278, "cat": "hist", "arHeading": 200, "arRadius": 30, "arTarget": null}, {"id": "H201", "name": "Staroměstské náměstí", "lat": 50.0875, "lng": 14.4213, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H202", "name": "Národní divadlo", "lat": 50.0808, "lng": 14.4133, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H301", "name": "Pražský hrad", "lat": 50.0911, "lng": 14.4016, "cat": "fun", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H001", "name": "Holešovický přístav", "lat": 50.105164, "lng": 14.456314, "cat": "hist", "arHeading": 136, "arRadius": 12, "arTarget": null}, {"id": "H302", "name": "Letenské sady", "lat": 50.0939, "lng": 14.4224, "cat": "fun", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H203", "name": "Tančící dům", "lat": 50.0754, "lng": 14.4141, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H002", "name": "Bašta sv. Máří Magdalény (XIX)", "lat": 50.09305881760058, "lng": 14.411785293307434, "cat": "hist", "arHeading": 180, "arRadius": 15, "arTarget": null}, {"id": "A001", "name": "Budova Elektrických podniků", "lat": 50.098647, "lng": 14.436805, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}];
+const ORIG_DATA = [{"id": "H101", "name": "Šítkovská věž", "lat": 50.0784, "lng": 14.4133, "cat": "hist", "arHeading": 180, "arRadius": 15, "arTarget": null}, {"id": "H102", "name": "Václavské náměstí", "lat": 50.0815, "lng": 14.4278, "cat": "hist", "arHeading": 200, "arRadius": 30, "arTarget": null}, {"id": "H201", "name": "Staroměstské náměstí", "lat": 50.0875, "lng": 14.4213, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H202", "name": "Národní divadlo", "lat": 50.0808, "lng": 14.4133, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H301", "name": "Pražský hrad", "lat": 50.0911, "lng": 14.4016, "cat": "fun", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H001", "name": "Holešovický přístav", "lat": 50.105164, "lng": 14.456314, "cat": "hist", "arHeading": 352, "arRadius": 12, "arTarget": {"lat": 50.1074339, "lng": 14.4558138}}, {"id": "H302", "name": "Letenské sady", "lat": 50.0939, "lng": 14.4224, "cat": "fun", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H203", "name": "Tančící dům", "lat": 50.0754, "lng": 14.4141, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H002", "name": "Bašta sv. Máří Magdalény (XIX)", "lat": 50.09305881760058, "lng": 14.411785293307434, "cat": "hist", "arHeading": 180, "arRadius": 15, "arTarget": null}, {"id": "A001", "name": "Budova Elektrických podniků", "lat": 50.098647, "lng": 14.436805, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}];
 
-/* Filtr: zobrazit místa, která už kužel mají (arHeading) nebo mají
-   nastavený arTarget. Ostatní kategorie (arch, fun) AR kužel zatím
-   nemají — viz SESSION-VII.md, "AR jen u kategorie historie". */
-let data = ORIG_DATA.filter(p => p.arHeading != null || p.arTarget != null)
-  .map(p => ({...p}));
+/* Bez filtru podle kategorie/existujícího arHeading — gate na kužel je
+   teď jen "existuje ověřený arTarget" (viz map.html, viewConeHTML), ne
+   kategorie. Historicky bylo AR jen u `hist`, ale to bylo omezení dat
+   (arHeading se u arch/fun místa mazalo), ne kódu — kužel jde ověřit
+   u kteréhokoli místa: A(rch), H(ist), Z(ajímavosti/fun), U(mění/art). */
+let data = ORIG_DATA.map(p => ({...p}));
 
 let current = null;
 let targets = {};   // id -> {lat,lng} — pracovní arTarget (přepisuje ORIG_DATA.arTarget)
@@ -482,6 +484,7 @@ function updateStats(){
   document.getElementById('btnExport').disabled = n === 0;
 }
 function renderList(){
+  const CAT_LABEL = { hist:'historie', arch:'architektura', art:'umění', fun:'zajímavosti' };
   // Neověřená místa (bez arTarget) nahoru — ať se nezapomenou, dokud
   // jich je jen pár. Pořadí uvnitř každé skupiny zůstává jako ve zdroji.
   const sorted = [...data].sort((a, b) => {
@@ -497,6 +500,7 @@ function renderList(){
     return `<div class="item${done?' done':''}" data-id="${p.id}" onclick="selectItem('${p.id}')">
       <span class="item-code">${p.id}</span>
       <span class="item-name">${p.name}</span>
+      <span class="item-cat">${CAT_LABEL[p.cat] || p.cat || ''}</span>
       ${check}
     </div>`;
   }).join('');
