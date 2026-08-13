@@ -2973,8 +2973,13 @@ function pinLabel(num) {
 const CAT_HEX = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
 
 function viewConeHTML(loc) {
-  // Směr pohledu fotografa — z arHeading (0 = sever, po směru hodin)
-  const heading = loc.arHeading ?? loc.photos?.find(p => p.arAnchor)?.arHeading ?? null;
+  // Kužel se kreslí jen s ověřeným arTarget (viz target-editor.html) —
+  // syrové arHeading ve stupních bez ověřeného cíle bylo nespolehlivé
+  // (viz H001/H002 v POKRACOVANI.md, azimut o 100+° mimo realitu).
+  // Dokud cíl někdo neověří na mapě, kužel se raději nezobrazí vůbec,
+  // než aby ukazoval špatný směr.
+  if (!loc.arTarget) return '';
+  const heading = loc.arHeading;
   if (heading === null || heading === undefined) return '';
   const color = CAT_HEX[loc.cat] || '#4A4A48';
   // Kužel míří "nahoru" (=sever) v lokálním systému; natočíme celý wrapper

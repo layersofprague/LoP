@@ -27,6 +27,7 @@ h1{font-size:14px;font-weight:600;margin-bottom:2px}
 .item.active.done .item-code{background:#16a34a}
 .item-name{font-size:12px;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item-check{color:#16a34a;flex-shrink:0;font-size:13px;font-weight:700}
+.item-warn{color:#d97706;flex-shrink:0;font-size:13px;cursor:help}
 
 #panel{padding:12px;display:flex;flex-direction:column;gap:9px;flex:1;overflow-y:auto;min-height:0}
 #cur-name{font-size:13px;font-weight:600;color:#1a1a18;line-height:1.35;min-height:18px}
@@ -468,11 +469,12 @@ function applyTargetCoords(){
 
 /* ── Seznam / stav ────────────────────────────────────── */
 function updateItemEl(id){
-  const el = document.querySelector('.item[data-id="'+id+'"]');
-  if (!el) return;
-  const done = !!targets[id];
-  el.classList.toggle('done', done);
-  el.querySelector('.item-check').textContent = done ? '✓' : '';
+  // Verifikace mění pořadí v seznamu (neověřené jdou nahoru), takže
+  // nestačí přepsat jeden řádek — celý seznam se znovu vyrenderuje.
+  renderList();
+  if (current) {
+    document.querySelector('.item[data-id="'+current+'"]')?.classList.add('active');
+  }
 }
 function updateStats(){
   const n = Object.keys(targets).length;
@@ -480,12 +482,22 @@ function updateStats(){
   document.getElementById('btnExport').disabled = n === 0;
 }
 function renderList(){
-  const html = data.map(p => {
+  // Neověřená místa (bez arTarget) nahoru — ať se nezapomenou, dokud
+  // jich je jen pár. Pořadí uvnitř každé skupiny zůstává jako ve zdroji.
+  const sorted = [...data].sort((a, b) => {
+    const aDone = !!targets[a.id], bDone = !!targets[b.id];
+    if (aDone === bDone) return 0;
+    return aDone ? 1 : -1;
+  });
+  const html = sorted.map(p => {
     const done = !!targets[p.id];
+    const check = done
+      ? '<span class="item-check">✓</span>'
+      : '<span class="item-warn" title="Chybí ověřený arTarget — kužel se v map.html nezobrazí">⚠</span>';
     return `<div class="item${done?' done':''}" data-id="${p.id}" onclick="selectItem('${p.id}')">
       <span class="item-code">${p.id}</span>
       <span class="item-name">${p.name}</span>
-      <span class="item-check">${done?'✓':''}</span>
+      ${check}
     </div>`;
   }).join('');
   document.getElementById('list').innerHTML = html;
