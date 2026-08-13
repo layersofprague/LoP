@@ -344,34 +344,33 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   border-radius: 0 0 10px 10px;
 }
 .filter-row {
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--rule);
 }
 .filter-row:first-child { padding-top: 4px; }
 .filter-row:last-of-type { border-bottom: none; }
 .filter-lbl {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-family: 'Inter', sans-serif;
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-4);
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 .filter-lbl-val {
   color: var(--ink);
   letter-spacing: .04em;
-  font-size: 10px;
+  font-size: 11px;
 }
 .filter-chips {
-  display: flex; gap: 6px; flex-wrap: wrap;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end;
 }
 
 .filter-timeline {
   position: relative;
-  height: 70px;
-  padding: 0 4px;
+  height: 46px;
 }
 .filter-timeline .ft-track {
-  position: absolute; left: 4px; right: 4px; top: 20px;
+  position: absolute; left: 0; right: 0; top: 20px;
   height: 4px; background: var(--rule); border-radius: 2px;
 }
 .filter-timeline .ft-fill {
@@ -382,38 +381,21 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   position: absolute; top: 22px; transform: translate(-50%, -50%);
   width: 16px; height: 16px; border-radius: 50%;
   background: var(--paper); border: 2px solid var(--ink);
-  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
   cursor: grab; z-index: 3;
   touch-action: none;
 }
 .filter-timeline .ft-h:active { cursor: grabbing; }
-.filter-timeline .ft-div {
-  position: absolute; top: 14px;
-  width: 1px; height: 16px;
-  background: var(--rule-2);
-  pointer-events: none;
-}
-.filter-timeline .ft-lbl {
-  position: absolute; top: 36px;
-  transform: translateX(-50%);
-  font-size: 10px; font-weight: 400;
-  color: var(--ink-3);
-  white-space: nowrap;
-  pointer-events: none;
-  max-width: 90px;
-  overflow: hidden; text-overflow: ellipsis;
-}
-.filter-timeline .ft-lbl.off { color: var(--ink-4); opacity: .5; }
 .filter-timeline .ft-year {
-  position: absolute; top: 54px;
+  position: absolute; top: 32px;
   transform: translateX(-50%);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; color: var(--ink-4);
+  font-size: 10px; color: var(--ink-5);
   letter-spacing: .05em;
   pointer-events: none;
 }
 .filter-timeline .ft-year-tick {
-  position: absolute; top: 50px;
+  position: absolute; top: 27px;
   width: 1px; height: 3px; background: var(--rule-2);
   transform: translateX(-50%);
   pointer-events: none;
@@ -440,14 +422,23 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 
 .filter-footer {
-  display: flex; justify-content: flex-end;
-  padding-top: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
 }
+.filter-apply {
+  background: var(--ink); border: 1.5px solid var(--ink); border-radius: 7px;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--paper); cursor: pointer; padding: 6px 16px;
+  transition: box-shadow .15s, transform .15s;
+}
+.filter-apply:hover  { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
+.filter-apply:active { transform: translateY(0); box-shadow: none; }
 .filter-reset {
   background: transparent;
   border: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-4);
   cursor: pointer;
   padding: 4px 0;
@@ -456,20 +447,21 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .chip {
   flex-shrink: 0;
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 6px 12px;
+  padding: 4px 11px;
   background: #fff;
   border: 1.5px solid var(--rule);
-  border-radius: 6px;
+  border-radius: 7px;
   font-size: 12px; font-weight: 500;
   color: var(--ink-2);
   cursor: pointer;
-  transition: all .15s;
+  transition: box-shadow .15s, transform .15s, background .15s, color .15s, border-color .15s;
   white-space: nowrap;
   justify-content: flex-start;
 }
-.chip:hover { border-color: var(--ink-3); }
+.chip:hover { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
+.chip:active { transform: translateY(0); box-shadow: none; }
 .chip .chip-swatch {
-  width: 8px; height: 8px; border-radius: 50%;
+  width: 7px; height: 7px; border-radius: 2px;
   flex-shrink: 0;
 }
 .chip .chip-icon {
@@ -524,14 +516,13 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .chip.state-force .chip-icon-check { background: var(--paper) !important; }
 
 .chip.state-hide { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; opacity: 1; }
+.chip.state-hide:hover { box-shadow: 0 3px 10px rgba(26,24,20,.28); }
 .chip.state-hide .chip-swatch { background: var(--paper) !important; }
 .chip.state-hide:not(.chip-locked)::after { content: none; }
 .chip .chip-count {
-  font-family: 'Inter', sans-serif;
-  font-size: 10px; color: var(--ink-5);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--ink-5);
   margin-left: 2px;
-  min-width: 2ch;
-  display: inline-block; text-align: right;
 }
 .chip .chip-filter-icon {
   display: none;
@@ -564,6 +555,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 /* Chip wrapper se stavovým popiskem */
 .chip-wrap {
   display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  justify-content: flex-end;
 }
 .chip-state-lbl {
   font-family: 'Inter', sans-serif;
@@ -726,12 +718,12 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   position: absolute;
   top: 12px; left: 12px; right: 12px;
   bottom: 12px;
-  background: rgba(238,239,235,.96);
+  background: rgba(248,248,246,.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--rule);
+  border: 1.5px solid var(--rule);
   border-radius: 14px;
-  box-shadow: 0 8px 40px rgba(26,24,20,.16);
+  box-shadow: 0 8px 40px rgba(0,0,0,.14);
   opacity: 0; transform: scale(.97) translateY(-6px);
   transition: opacity .22s var(--ease), transform .22s var(--ease);
   pointer-events: none;
@@ -742,7 +734,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   opacity: 1; transform: none; pointer-events: auto;
 }
 .filter-modal-inner {
-  padding: 14px 16px 24px;
+  padding: 16px 16px 20px;
   flex: 1;
 }
 .filter-modal-header {
@@ -2064,6 +2056,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
             </div>
             <div class="filter-footer">
               <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
+              <button class="filter-apply" id="fmApply" onclick="toggleFilter()">Zobrazit místa</button>
             </div>
           </div>
         </div>
@@ -2925,7 +2918,7 @@ const ERAS = [
   { id:'sec', name:'Secese',      from: 1850, to: 1918 },
   { id:'mod', name:'Moderna',     from: 1918, to: 2000 },
 ];
-const ERA_START = 1000, ERA_END = 2000;
+const ERA_START = 1000, ERA_END = 2025;
 const ERA_STATE = { from: ERA_START, to: ERA_END };
 const DIST_STATE = { max: null };
 
@@ -3164,7 +3157,7 @@ function buildStyleChips() {
 }
 
 function updateChipLabels() {
-  const LABELS_CAT  = { auto: 'výchozí', on: 'chci', dim: 'chci, ale dim' };
+  const LABELS_CAT  = { auto: 'výchozí', on: 'zobrazit', dim: 'tlumené' };
   const LABELS_WISH = { full: 'výchozí', dim: 'utlumeno', hide: 'skryto', force: 'vždy' };
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   set('lbl-hist',    LABELS_CAT[FILTER.hist]    || '');
@@ -3175,27 +3168,30 @@ function updateChipLabels() {
   set('lbl-wished',  LABELS_WISH[FILTER.wished] || '');
 }
 
-const eraPct = (y) => ((y - ERA_START) / (ERA_END - ERA_START)) * 100;
-const pctToYear = (p) => Math.round(ERA_START + p * (ERA_END - ERA_START));
+/* Osa je progresivní, ne lineární — do roku 1000 spadá málo staveb, k
+   současnosti jich exponenciálně přibývá. ERA_CURVE > 1 komprimuje starší
+   roky do menší plochy táhla a dává víc místa (a tedy přesnosti) novější
+   historii. Sjednoceno s overview.html. */
+const ERA_CURVE = 2.2;
+const eraPct = (y) => {
+  const t = Math.max(0, Math.min(1, (y - ERA_START) / (ERA_END - ERA_START)));
+  return Math.pow(t, ERA_CURVE) * 100;
+};
+const pctToYear = (p) => {
+  const t = Math.pow(Math.max(0, Math.min(1, p)), 1 / ERA_CURVE);
+  return Math.round(ERA_START + t * (ERA_END - ERA_START));
+};
 
 function buildEraTimeline() {
   const el = document.getElementById('eraTimeline');
   if (!el) return;
-  const years = [1000, 1200, 1400, 1600, 1800, 2000];
+  const years = [1000, 1200, 1400, 1600, 1800, 1900, 2000];
   const html = [];
   html.push('<div class="ft-track"></div>');
   html.push(`<div class="ft-fill" id="eraFill"></div>`);
-  ERAS.slice(1).forEach(e => {
-    html.push(`<span class="ft-div" style="left:${eraPct(e.from)}%"></span>`);
-  });
-  ERAS.forEach(e => {
-    const mid = (e.from + e.to) / 2;
-    const w = eraPct(e.to) - eraPct(e.from);
-    html.push(`<span class="ft-lbl" data-era="${e.id}" style="left:${eraPct(mid)}%; max-width: calc(${w}% - 4px)">${e.name}</span>`);
-  });
   years.forEach(y => {
-    html.push(`<span class="ft-year-tick" style="left:${eraPct(y)}%"></span>`);
-    html.push(`<span class="ft-year" style="left:${eraPct(y)}%">${y}</span>`);
+    html.push(`<span class="ft-year-tick" style="left:calc(8px + (100% - 16px) * ${eraPct(y)/100})"></span>`);
+    html.push(`<span class="ft-year" style="left:calc(8px + (100% - 16px) * ${eraPct(y)/100})">${y === 2000 ? t('era.now') : y}</span>`);
   });
   html.push(`<div class="ft-h" id="eraHFrom" data-which="from"></div>`);
   html.push(`<div class="ft-h" id="eraHTo" data-which="to"></div>`);
@@ -3210,7 +3206,10 @@ function buildEraTimeline() {
       const rect = el.getBoundingClientRect();
       const onMove = (e) => {
         const cx = (e.touches ? e.touches[0].clientX : e.clientX);
-        const p = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+        // Táhlo jezdí od 8px do W−8px (poloměr táhla) — stejná logika
+        // jako overview.html, jinak by u krajů neseděla pozice kurzoru.
+        const usable = rect.width - 16;
+        const p = Math.max(0, Math.min(1, (cx - rect.left - 8) / usable));
         const y = pctToYear(p);
         if (which === 'from') {
           ERA_STATE.from = Math.min(y, ERA_STATE.to - 20);
@@ -3242,19 +3241,17 @@ function renderEra() {
   const fromH = document.getElementById('eraHFrom');
   const toH = document.getElementById('eraHTo');
   const fill = document.getElementById('eraFill');
-  if (fromH) fromH.style.left = fromP + '%';
-  if (toH) toH.style.left = toP + '%';
+  // Stejná matematika jako u nativního <input type=range> (a jako v
+  // overview.html) — střed táhla jede od 8px do W−8px, ne od 0 do 100 %.
+  const pos = (pct) => `calc(8px + (100% - 16px) * ${pct / 100})`;
+  if (fromH) fromH.style.left = pos(fromP);
+  if (toH) toH.style.left = pos(toP);
   if (fill) {
-    fill.style.left = fromP + '%';
-    fill.style.width = (toP - fromP) + '%';
+    fill.style.left = pos(fromP);
+    fill.style.width = `calc((100% - 16px) * ${(toP - fromP) / 100})`;
   }
   document.getElementById('eraFromV').textContent = ERA_STATE.from;
-  document.getElementById('eraToV').textContent = ERA_STATE.to;
-  document.querySelectorAll('.ft-lbl').forEach(lbl => {
-    const era = ERAS.find(e => e.id === lbl.dataset.era);
-    const overlap = era.to > ERA_STATE.from && era.from < ERA_STATE.to;
-    lbl.classList.toggle('off', !overlap);
-  });
+  document.getElementById('eraToV').textContent = ERA_STATE.to >= ERA_END ? '2000+' : ERA_STATE.to;
 }
 
 function initDistSlider() {
@@ -3433,7 +3430,23 @@ function applyFilter() {
   const badge = document.getElementById('filterBadge');
   if (badge) badge.innerHTML = '<span class="cnt-active">' + activeCount + '</span>/' + (_markers ? _markers.length : '—');
   updateFilterPuck();
+  updateApplyBtn(activeCount);
   refreshArchMarkers();
+}
+
+/* Text potvrzovacího tlačítka nese počet výsledků — stejný vzor jako
+   v overview.html, aby bylo hned zřejmé, co klik udělá. */
+let _lastFilterCount = 0;
+function updateApplyBtn(n) {
+  const ap = document.getElementById('fmApply');
+  if (!ap) return;
+  if (n == null) n = _lastFilterCount;
+  _lastFilterCount = n;
+  if (n === 0) { ap.textContent = t('overview.apply_0'); return; }
+  const w = window.lopPlural
+    ? window.lopPlural(n, t('overview.place_1'), t('overview.place_2'), t('overview.place_5'))
+    : t('overview.place_5');
+  ap.textContent = t('overview.apply_n', { n: n, w: w });
 }
 
 function initMap() {
