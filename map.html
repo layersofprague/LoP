@@ -516,6 +516,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .chip.state-force .chip-swatch { background: var(--paper) !important; }
 .chip.state-force .chip-icon-heart { background: var(--paper) !important; }
 .chip.state-force svg { color: var(--paper) !important; fill: var(--paper) !important; stroke: var(--paper) !important; }
+/* "Vždy, ale tlumené" — piny se zobrazí i přes skrytí kategorií (force),
+   ale ztlumeně, ne naplno. Musí být AŽ za .state-force, jinak by jeho
+   opacity:1 přebilo tenhle dim. */
+.chip.state-force.state-dim { opacity: .55; }
 .chip.chip-locked { cursor: pointer; position: relative; }
 .chip.chip-locked .chip-lock { opacity: .5; }
 .chip.chip-locked::before {
@@ -2932,8 +2936,8 @@ const STYLE_FILTER = new Set();
    "chci"/"dim", kategorie neomezují nic (viz "anyCatSelected" v applyFilter).
    Wished/visited mají vlastní cyklus (force = vždy zobrazit i přes výběr). */
 const CAT_NEXT = { auto:'on', on:'dim', dim:'auto' };
-const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
-const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
+const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'forcedim', forcedim:'full' };
+const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'forcedim', forcedim:'full' };
 const FILTER_OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
 const ERAS = [
@@ -3127,6 +3131,7 @@ function buildChips() {
       if (FILTER[f] === 'dim')   btn.classList.add('state-dim');
       else if (FILTER[f] === 'hide')  btn.classList.add('state-hide');
       else if (FILTER[f] === 'force') btn.classList.add('state-force');
+      else if (FILTER[f] === 'forcedim') btn.classList.add('state-force', 'state-dim');
       updateChipLabels();
       applyFilter();
     });
@@ -3156,6 +3161,7 @@ function syncChipStates() {
     if (s === 'dim') btn.classList.add('state-dim');
     else if (s === 'hide') btn.classList.add('state-hide');
     else if (s === 'force') btn.classList.add('state-force');
+    else if (s === 'forcedim') btn.classList.add('state-force', 'state-dim');
   });
 }
 
@@ -3191,7 +3197,7 @@ function buildStyleChips() {
 
 function updateChipLabels() {
   const LABELS_CAT  = { auto: t('filter.state_default'), on: t('filter.state_shown'), dim: t('filter.state_dimmed') };
-  const LABELS_WISH = { full: t('filter.state_default'), dim: t('filter.state_muted'), hide: t('filter.state_hidden'), force: t('filter.state_always') };
+  const LABELS_WISH = { full: t('filter.state_default'), dim: t('filter.state_muted'), hide: t('filter.state_hidden'), force: t('filter.state_always'), forcedim: t('filter.state_always_dim') };
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   set('lbl-hist',    LABELS_CAT[FILTER.hist]    || '');
   set('lbl-arch',    LABELS_CAT[FILTER.arch]    || '');
@@ -3471,9 +3477,12 @@ function applyFilter() {
     const visState  = FILTER.visited;
     let s = 'full';
 
-    // force = vždy zobrazit příznakové piny
+    // force = vždy zobrazit příznakové piny (bez ohledu na kategorii)
+    // forcedim = totéž, ale ztlumeně místo naplno
     if (wishState === 'force' && wished)   { s = 'full'; }
     else if (visState  === 'force' && visited) { s = 'full'; }
+    else if (wishState === 'forcedim' && wished)   { s = 'dim'; }
+    else if (visState  === 'forcedim' && visited) { s = 'dim'; }
     // Tvrdé skrytí — okamžitě hide bez hlasování
     else if (catState  === 'hide') { s = 'hide'; }
     else if (wishState === 'hide' && wished)  { s = 'hide'; }

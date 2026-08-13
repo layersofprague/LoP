@@ -1646,5 +1646,9 @@
   "map.arch_styles": {
     "cs": "Slohy",
     "en": "Styles"
+  },
+  "filter.state_always_dim": {
+    "cs": "vždy, tlumené",
+    "en": "always, dimmed"
   }
 }
