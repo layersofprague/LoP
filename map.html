@@ -2049,8 +2049,8 @@ body.lop-return .llo-bottom-placeholder { display: block; }
             </div>
             <div class="filter-row">
               <div class="filter-lbl">
-                <span>${t('overview.dist_from_you')}</span>
-                <span class="filter-lbl-val" id="distV">${t('overview.any_dist')}</span>
+                <span id="distLbl">Vzdálenost od tebe</span>
+                <span class="filter-lbl-val" id="distV">Kdekoli</span>
               </div>
               <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
             </div>
@@ -3222,6 +3222,12 @@ function initDistSlider() {
   const slider = document.getElementById('distSlider');
   const label = document.getElementById('distV');
   if (!slider) return;
+  // Statický CS text v HTML je jen záloha (konvence #9) — přepsat při
+  // inicializaci, jinak zůstane `${t(...)}` nevyhodnocené, dokud se
+  // uživatel poprvé nedotkne táhla.
+  const lbl = document.getElementById('distLbl');
+  if (lbl) lbl.textContent = t('overview.dist_from_you');
+  if (DIST_STATE.max == null) label.textContent = t('overview.any_dist');
   slider.addEventListener('input', () => {
     const v = +slider.value;
     if (v >= 100) {
@@ -4196,10 +4202,15 @@ function alignPuck() {
   puckEl.style.bottom = bottom + 'px';
   puckEl.style.right  = right  + 'px';
   if (filterWrap) filterWrap.style.right = right + 'px';
-  // Arch panel button — vlevo od filter pucku
+  // Arch panel button — vlevo od filter pucku. Bere se skutečná levá
+  // hrana filterWrapu (getBoundingClientRect), ne odhad jeho šířky —
+  // fallback (dřívější `offsetWidth || 60`) se při prvním volání, než
+  // je filterWrap rozměřený, sekal s reálnou šířkou pucku a piny se
+  // překrývaly (viz report v chatu).
   const archWrap = document.getElementById('archPanelWrap');
   if (archWrap && filterWrap) {
-    archWrap.style.right = (right + (filterWrap.offsetWidth || 60) + 6) + 'px';
+    const filterRect = filterWrap.getBoundingClientRect();
+    archWrap.style.right = Math.round(window.innerWidth - filterRect.left + 6) + 'px';
   }
 }
 window.addEventListener('resize', alignPuck);
