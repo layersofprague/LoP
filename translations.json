@@ -1610,5 +1610,41 @@
   "district.podskali": {
     "cs": "Podskalí",
     "en": "Podskalí"
+  },
+  "filter.state_shown": {
+    "cs": "zobrazit",
+    "en": "show"
+  },
+  "filter.state_dimmed": {
+    "cs": "tlumené",
+    "en": "dimmed"
+  },
+  "filter.state_muted": {
+    "cs": "utlumeno",
+    "en": "muted"
+  },
+  "filter.state_always": {
+    "cs": "vždy",
+    "en": "always"
+  },
+  "map.layer_default": {
+    "cs": "Výchozí",
+    "en": "Default"
+  },
+  "map.layer_osm": {
+    "cs": "OSM",
+    "en": "OSM"
+  },
+  "map.layer_night": {
+    "cs": "Noční",
+    "en": "Night"
+  },
+  "map.layer_aerial": {
+    "cs": "Ortofoto",
+    "en": "Aerial"
+  },
+  "map.arch_styles": {
+    "cs": "Slohy",
+    "en": "Styles"
   }
 }
