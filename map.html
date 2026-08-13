@@ -3443,11 +3443,10 @@ function initMap() {
     center: [50.0835, 14.4200],
     zoom: 14,
     zoomControl: false,
-    // Kolečko myši výchozí zoomuje k pozici kurzoru — při jiném měřítku
-    // stránky (CSS `zoom` v theme.js) se ale souřadnice myši vs. reálná
-    // pozice kontejneru v některých prohlížečích rozejdou a mapa při
-    // scrollu "skáče". Zoom k centru tuhle matematiku úplně obchází.
-    scrollWheelZoom: _scaled ? 'center' : true,
+    // Zoom k pozici kurzoru — zkoušeli jsme přepínat na 'center' při
+    // jiném měřítku (podezření na rozejité souřadnice myši), ale ukázalo
+    // se, že to nebyla příčina "skákání". Necháno tedy vždy stejné.
+    scrollWheelZoom: true,
     // Animovaný zoom (plynulé přiblížení) drží dlaždice a piny svázané
     // přes transform na společném rodiči — pod CSS `zoom` ale Leaflet
     // někdy špatně detekuje podporu 3D transformací (any3d) a piny se
@@ -3460,14 +3459,11 @@ function initMap() {
 
   /* Leaflet si drží rozměry kontejneru v paměti. Po změně měřítka stránky
      (nastavení → Velikost stránky) by počítal se starými a mapa by se
-     vykreslila posunutá — proto přepočet. Zároveň přepneme režim kolečka
-     myši a animace zoomu (viz komentáře výš). */
+     vykreslila posunutá — proto přepočet. Zároveň přepneme animaci zoomu
+     (viz komentář výš). */
   document.addEventListener('lop:scalechange', function (e) {
     setTimeout(function () { if (window._map) window._map.invalidateSize(); }, 50);
     const scaled = !!(e.detail && e.detail.scale !== 1);
-    map.scrollWheelZoom.disable();
-    map.options.scrollWheelZoom = scaled ? 'center' : true;
-    map.scrollWheelZoom.enable();
     map.options.zoomAnimation = !scaled;
   });
 
