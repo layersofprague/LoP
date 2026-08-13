@@ -403,10 +403,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 
 .filter-range-input {
   appearance: none; -webkit-appearance: none;
-  width: 100%; height: 4px; border-radius: 2px;
-  background: var(--rule);
-  outline: none;
-  margin-top: 2px;
+  width: 100%; height: 4px; border-radius: 2px; outline: none; margin-top: 2px;
+  background: linear-gradient(to right,
+    var(--ink) 0%, var(--ink) var(--fill, 100%),
+    var(--rule) var(--fill, 100%), var(--rule) 100%);
 }
 .filter-range-input::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
@@ -420,6 +420,18 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   background: var(--paper); border: 2px solid var(--ink);
   cursor: pointer;
 }
+.dist-note {
+  font-family: 'Inter', sans-serif; font-size: 11px; color: var(--ink-4);
+  margin-top: 7px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.dist-note[hidden] { display: none; }
+.dist-note button {
+  background: transparent; border: 1.5px solid var(--rule); border-radius: 7px;
+  padding: 3px 10px; cursor: pointer; font-family: inherit; font-size: 11px;
+  color: var(--ink-2);
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.dist-note button:hover { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
 
 .filter-footer {
   display: flex; align-items: center; justify-content: space-between;
@@ -550,7 +562,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    dorovnává barvu, aby chip i ztlumený vypadal jako "vybraný". */
 .chip[data-cat].state-on { background: #fff; border-color: var(--catcolor); color: var(--catcolor); }
 .chip[data-cat].state-on .chip-swatch { background: var(--catcolor) !important; }
-.chip[data-cat].state-on .chip-count { color: var(--catcolor); opacity: .7; }
+.chip[data-cat].state-on .chip-count { opacity: .7; }
 
 /* Chip wrapper se stavovým popiskem */
 .chip-wrap {
@@ -700,7 +712,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   top: var(--header-h, 52px);
   left: 0; right: 0;
   bottom: 0;
-  z-index: 450;
+  z-index: 550;
   display: none;
   pointer-events: none;
   background: transparent;
@@ -2053,6 +2065,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
                 <span class="filter-lbl-val" id="distV">Kdekoli</span>
               </div>
               <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
+              <div class="dist-note" id="distNote" hidden></div>
             </div>
             <div class="filter-footer">
               <button class="filter-reset" onclick="resetFilters()">Resetovat</button>
@@ -3254,6 +3267,45 @@ function renderEra() {
   document.getElementById('eraToV').textContent = ERA_STATE.to >= ERA_END ? '2000+' : ERA_STATE.to;
 }
 
+/* Stav oprávnění: 'prompt' | 'denied' | 'granted' | null (API nedostupné).
+   Po zamítnutí už prohlížeč výzvu znovu nezobrazí — je potřeba poradit jinak
+   (viz updateDistNote). Sjednoceno s overview.html. */
+let GEO_PERM = null;
+if (navigator.permissions && navigator.permissions.query) {
+  navigator.permissions.query({ name: 'geolocation' }).then(st => {
+    GEO_PERM = st.state;
+    updateDistNote();
+    st.onchange = () => {
+      GEO_PERM = st.state;
+      if (st.state === 'granted') locateMe(true);
+      updateDistNote();
+    };
+  }).catch(() => {});
+}
+
+function requestLoc(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => { window._userLatLng = [pos.coords.latitude, pos.coords.longitude]; updateDistNote(); applyFilter(); },
+    (err) => { if (err.code === 1) GEO_PERM = 'denied'; updateDistNote(); applyFilter(); },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+/* Poznámka pod táhlem vzdálenosti — poloha je buď zablokovaná natvrdo
+   (druhé okno prohlížeče se nezobrazí, takže je potřeba viditelná
+   odpověď rovnou na stránce), nebo se ještě jen o ni neřeklo. */
+function updateDistNote() {
+  const note = document.getElementById('distNote');
+  if (!note) return;
+  if (window._userLatLng || DIST_STATE.max == null) { note.hidden = true; return; }
+  note.hidden = false;
+  note.innerHTML = GEO_PERM === 'denied'
+    ? `<span>${t('overview.geo_blocked')}</span>`
+    : `<span>${t('overview.geo_needed')}</span>` +
+      `<button type="button" onclick="requestLoc(event)">${t('overview.geo_enable')}</button>`;
+}
+
 function initDistSlider() {
   const slider = document.getElementById('distSlider');
   const label = document.getElementById('distV');
@@ -3264,8 +3316,10 @@ function initDistSlider() {
   const lbl = document.getElementById('distLbl');
   if (lbl) lbl.textContent = t('overview.dist_from_you');
   if (DIST_STATE.max == null) label.textContent = t('overview.any_dist');
+  slider.style.setProperty('--fill', slider.value + '%');
   slider.addEventListener('input', () => {
     const v = +slider.value;
+    slider.style.setProperty('--fill', v + '%');
     if (v >= 100) {
       DIST_STATE.max = null;
       label.textContent = t('overview.any_dist');
@@ -3274,6 +3328,10 @@ function initDistSlider() {
       DIST_STATE.max = km;
       label.textContent = '< ' + km.toFixed(1) + ' km';
     }
+    // Bez polohy nemá filtr podle čeho měřit — požádat právě teď,
+    // kdy uživatel svůj záměr projevil posunutím táhla.
+    if (v < 100 && !window._userLatLng && GEO_PERM !== 'denied') requestLoc();
+    updateDistNote();
     applyFilter();
   });
 }
@@ -3306,8 +3364,9 @@ function resetFilters() {
   DIST_STATE.max = null;
   STYLE_FILTER.clear();
   document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force', 'state-on'));
-  const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
+  const ds = document.getElementById('distSlider'); if (ds) { ds.value = 100; ds.style.setProperty('--fill', '100%'); }
   const dv = document.getElementById('distV'); if (dv) dv.textContent = t('overview.any_dist');
+  updateDistNote();
   renderEra();
   applyFilter();
   updateFilterPuck();
@@ -3781,9 +3840,11 @@ function locateMe(silent = false) {
         setTimeout(() => window._map.invalidateSize(), 100);
       }
       applyFilter();
+      updateDistNote();
     },
     (err) => {
       if (btn) btn.style.opacity = '1';
+      if (err.code === 1) { GEO_PERM = 'denied'; updateDistNote(); }
       if (silent) return; // tiché selhání při auto-locate
       const msgs = {
         1: 'Přístup k poloze byl zamítnut. Zkontroluj oprávnění v prohlížeči.',
