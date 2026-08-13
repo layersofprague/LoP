@@ -897,7 +897,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 /* Srdce má vizuální těžiště níž než čtvercový box (hrot dole) — písmeno
    mírně posunout, ať sedí opticky uprostřed, ne jen matematicky. */
-.lop-pin-heart-fill span { margin-top: 5px; }
+.lop-pin-heart-fill span { margin-top: 2px; }
 .lop-pin.lop-pin-heart.visited::after { top: -4px; right: -4px; }
 
 .rt-tip {
@@ -3025,7 +3025,7 @@ function pinIconHTML(loc) {
   // (transform:scale), takže vznikne ostrý prstenec bílé mezi nimi,
   // stejně silný jako `border:2px` u kulatých pinů.
   if (wished) {
-    const wishedLbl = '<span style="font-size:11px;font-weight:700;line-height:1">' + catLetter + '</span>';
+    const wishedLbl = '<span style="font-size:13.4px;font-weight:700;line-height:1">' + catLetter + '</span>';
     return `${cone}<div class="lop-pin lop-pin-heart ${visited} wished"><div class="lop-pin-heart-fill">${wishedLbl}</div></div>`;
   }
   if (style === 'drop') {
