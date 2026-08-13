@@ -3041,42 +3041,42 @@ function buildChips() {
   el.innerHTML = `
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
-      <button class="chip" data-cat="hist" style="width:110px; --catcolor: var(--cat-hist)">
+      <button class="chip" data-cat="hist" style="--catcolor: var(--cat-hist)">
         <span class="chip-swatch" style="background: var(--cat-hist)"></span>
         ${t('cat.hist')} <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-arch">výchozí</span>
-      <button class="chip" data-cat="arch" style="width:145px; --catcolor: var(--cat-arch)">
+      <button class="chip" data-cat="arch" style="--catcolor: var(--cat-arch)">
         <span class="chip-swatch" style="background: var(--cat-arch)"></span>
         ${t('cat.arch')} <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-art">výchozí</span>
-      <button class="chip" data-cat="art" style="width:110px; --catcolor: var(--cat-art)">
+      <button class="chip" data-cat="art" style="--catcolor: var(--cat-art)">
         <span class="chip-swatch" style="background: var(--cat-art)"></span>
         ${t('cat.art')} <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
-      <button class="chip" data-cat="fun" style="width:130px; --catcolor: var(--cat-fun)">
+      <button class="chip" data-cat="fun" style="--catcolor: var(--cat-fun)">
         <span class="chip-swatch" style="background: var(--cat-fun)"></span>
         ${t('cat.fun')} <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
-      <button class="chip" id="chipVisited" data-filter="visited" style="width:130px" data-tooltip="${t('overview.login_tooltip')}">
+      <button class="chip" id="chipVisited" data-filter="visited" data-tooltip="${t('overview.login_tooltip')}">
         <span class="chip-swatch chip-icon chip-icon-check"></span>
         ${t('overview.visited')} <span id="ctVisitedWrap"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-wished">výchozí</span>
-      <button class="chip" id="chipWished" data-filter="wished" style="width:90px" data-tooltip="${t('overview.plan_tooltip')}">
+      <button class="chip" id="chipWished" data-filter="wished" data-tooltip="${t('overview.plan_tooltip')}">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="#b04020" stroke="#b04020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         ${t('place.plan')} <span id="ctWishedWrap"></span>
       </button>
