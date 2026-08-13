@@ -553,6 +553,14 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .chip.chip-style.state-on .chip-swatch { background: var(--cat-arch) !important; }
 .chip.chip-style.state-on .chip-count { color: var(--cat-arch); opacity: .7; }
 
+/* Chip kategorie — pozitivní výběr (klik = chci), barva podle vlastní
+   kategorie přes --catcolor nastavenou inline v buildChips(). "dim"
+   dědí zezdola existující .chip.state-dim (ztlumená opacity), tady jen
+   dorovnává barvu, aby chip i ztlumený vypadal jako "vybraný". */
+.chip[data-cat].state-on { background: #fff; border-color: var(--catcolor); color: var(--catcolor); }
+.chip[data-cat].state-on .chip-swatch { background: var(--catcolor) !important; }
+.chip[data-cat].state-on .chip-count { color: var(--catcolor); opacity: .7; }
+
 /* Chip wrapper se stavovým popiskem */
 .chip-wrap {
   display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
@@ -2893,13 +2901,17 @@ function showTooltip(loc, m, rt) {
 /* ═══════════════ MAP ═══════════════ */
 let _markers = [];
 window._markers = _markers;
-const FILTER = { hist:'full', arch:'full', art:'full', fun:'full', visited:'full', wished:'full' };
+const FILTER = { hist:'auto', arch:'auto', art:'auto', fun:'auto', visited:'full', wished:'full' };
 window.FILTER = FILTER;
-/* Sloh — binární výběr (na rozdíl od full/dim/hide u kategorií): prázdné
+/* Sloh — binární výběr (na rozdíl od kategorií): prázdné
    = bez omezení, neprázdné = logické NEBO přes .some() (viz applyFilter). */
 const STYLE_FILTER = new Set();
 (new URLSearchParams(location.search).getAll('style')).forEach(s => STYLE_FILTER.add(s));
-const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
+/* Kategorie — pozitivní výběr (sjednoceno s overview.html): klik = chci,
+   klik znovu = chci, ale dim, klik potřetí = výchozí. Dokud nikdo nemá
+   "chci"/"dim", kategorie neomezují nic (viz "anyCatSelected" v applyFilter).
+   Wished/visited mají vlastní cyklus (force = vždy zobrazit i přes výběr). */
+const CAT_NEXT = { auto:'on', on:'dim', dim:'auto' };
 const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const FILTER_OPACITY = { full: 1, dim: 0.3, hide: 0 };
@@ -2941,7 +2953,7 @@ function toggleFilter() {
 function updateFilterPuck() {
   const puck = document.getElementById('filterPuck');
   if (!puck) return;
-  const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.art !== 'full' || FILTER.fun !== 'full'
+  const active = FILTER.hist !== 'auto' || FILTER.arch !== 'auto' || FILTER.art !== 'auto' || FILTER.fun !== 'auto'
     || FILTER.visited !== 'full' || FILTER.wished !== 'full'
     || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
     || DIST_STATE.max !== null
@@ -3019,28 +3031,28 @@ function buildChips() {
   el.innerHTML = `
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
-      <button class="chip" data-cat="hist" style="width:110px">
+      <button class="chip" data-cat="hist" style="width:110px; --catcolor: var(--cat-hist)">
         <span class="chip-swatch" style="background: var(--cat-hist)"></span>
         Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-arch">výchozí</span>
-      <button class="chip" data-cat="arch" style="width:145px">
+      <button class="chip" data-cat="arch" style="width:145px; --catcolor: var(--cat-arch)">
         <span class="chip-swatch" style="background: var(--cat-arch)"></span>
         Architektura <span class="chip-count">${counts.arch}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-art">výchozí</span>
-      <button class="chip" data-cat="art" style="width:110px">
+      <button class="chip" data-cat="art" style="width:110px; --catcolor: var(--cat-art)">
         <span class="chip-swatch" style="background: var(--cat-art)"></span>
         Umění <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
-      <button class="chip" data-cat="fun" style="width:130px">
+      <button class="chip" data-cat="fun" style="width:130px; --catcolor: var(--cat-fun)">
         <span class="chip-swatch" style="background: var(--cat-fun)"></span>
         Zajímavosti <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
       </button>
@@ -3063,10 +3075,10 @@ function buildChips() {
   el.querySelectorAll('.chip[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;
-      FILTER[cat] = FILTER_NEXT[FILTER[cat]];
-      btn.classList.remove('state-dim', 'state-hide');
-      if (FILTER[cat] === 'dim')  btn.classList.add('state-dim');
-      else if (FILTER[cat] === 'hide') btn.classList.add('state-hide');
+      FILTER[cat] = CAT_NEXT[FILTER[cat]];
+      btn.classList.remove('state-on', 'state-dim');
+      if (FILTER[cat] === 'on')       btn.classList.add('state-on');
+      else if (FILTER[cat] === 'dim') btn.classList.add('state-on', 'state-dim');
       updateChipLabels();
       applyFilter();
     });
@@ -3079,7 +3091,7 @@ function buildChips() {
         return;
       }
       const f = btn.dataset.filter;
-      FILTER[f] = (f === 'wished' ? FILTER_NEXT_WISHED : f === 'visited' ? FILTER_NEXT_VISITED : FILTER_NEXT)[FILTER[f]];
+      FILTER[f] = (f === 'wished' ? FILTER_NEXT_WISHED : FILTER_NEXT_VISITED)[FILTER[f]];
       btn.classList.remove('state-dim', 'state-hide', 'state-force');
       if (FILTER[f] === 'dim')   btn.classList.add('state-dim');
       else if (FILTER[f] === 'hide')  btn.classList.add('state-hide');
@@ -3091,8 +3103,29 @@ function buildChips() {
   buildEraTimeline();
   initDistSlider();
   updateChipCounts();
+  syncChipStates();
   updateChipLabels();
   buildStyleChips();
+}
+
+/* buildChips() se volá opakovaně (po loadData, po přepnutí wishlistu ze
+   sheetu...) a pokaždé zahodí staré DOM elementy chipů i s jejich
+   state-* třídami. FILTER objekt přitom svůj stav drží dál — bez tohohle
+   by po rebuildu vypadaly chipy jako "výchozí", i když filtr dál platí. */
+function syncChipStates() {
+  document.querySelectorAll('.chip[data-cat]').forEach(btn => {
+    const s = FILTER[btn.dataset.cat];
+    btn.classList.remove('state-on', 'state-dim');
+    if (s === 'on') btn.classList.add('state-on');
+    else if (s === 'dim') btn.classList.add('state-on', 'state-dim');
+  });
+  document.querySelectorAll('.chip[data-filter]').forEach(btn => {
+    const s = FILTER[btn.dataset.filter];
+    btn.classList.remove('state-dim', 'state-hide', 'state-force');
+    if (s === 'dim') btn.classList.add('state-dim');
+    else if (s === 'hide') btn.classList.add('state-hide');
+    else if (s === 'force') btn.classList.add('state-force');
+  });
 }
 
 /* Chipy slohů — jen ty, které se v datech vyskytují (stejný vzor jako
@@ -3126,11 +3159,12 @@ function buildStyleChips() {
 }
 
 function updateChipLabels() {
-  const LABELS_CAT  = { full: 'výchozí', dim: 'utlumeno', hide: 'skryto' };
+  const LABELS_CAT  = { auto: 'výchozí', on: 'chci', dim: 'chci, ale dim' };
   const LABELS_WISH = { full: 'výchozí', dim: 'utlumeno', hide: 'skryto', force: 'vždy' };
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   set('lbl-hist',    LABELS_CAT[FILTER.hist]    || '');
   set('lbl-arch',    LABELS_CAT[FILTER.arch]    || '');
+  set('lbl-art',     LABELS_CAT[FILTER.art]     || '');
   set('lbl-fun',     LABELS_CAT[FILTER.fun]     || '');
   set('lbl-visited', LABELS_WISH[FILTER.visited]|| '');
   set('lbl-wished',  LABELS_WISH[FILTER.wished] || '');
@@ -3264,7 +3298,7 @@ function bearingDeg(lat1, lng1, lat2, lng2) {
 }
 
 function resetFilters() {
-  FILTER.hist = FILTER.arch = FILTER.art = FILTER.fun = 'full';
+  FILTER.hist = FILTER.arch = FILTER.art = FILTER.fun = 'auto';
   FILTER.visited = FILTER.wished = 'full';
   ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
   DIST_STATE.max = null;
@@ -3317,6 +3351,12 @@ function applyFilter() {
   const BETTER = (a, b) => RANK[a] <= RANK[b] ? a : b;
   const OPACITY = { full: 1, dim: 0.3, hide: 0 };
 
+  /* Kategorie — pozitivní výběr: dokud nikdo nemá "chci"/"chci, ale dim",
+     kategorie nic neomezují (auto = full pro všechny). Jakmile je aspoň
+     jedna vybraná, kategorie mimo výběr automaticky zmizí — přesně jako
+     v overview.html, jen navíc s mezikrokem "vybráno, ale dim". */
+  const anyCatSelected = ['hist', 'arch', 'art', 'fun'].some(c => FILTER[c] !== 'auto');
+
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
     const wished  = JSON.parse(localStorage.getItem(WISH_KEY) ||'[]').map(String).includes(String(loc.id));
@@ -3327,7 +3367,11 @@ function applyFilter() {
     // Relevantní filtry: kategorie vždy, wished pokud má příznak, visited pokud má příznak.
     // hide = tvrdé skrytí bez výjimek
     // dim = měkké skrytí, příznaky mohou zachránit (hlasování)
-    const catState  = FILTER[loc.cat];
+    const catRaw = FILTER[loc.cat];
+    const catState = !anyCatSelected ? 'full'
+      : catRaw === 'on'  ? 'full'
+      : catRaw === 'dim' ? 'dim'
+      : 'hide';
     const wishState = FILTER.wished;
     const visState  = FILTER.visited;
     let s = 'full';
