@@ -728,15 +728,15 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 /* Nav a header nejsou ovlivněné — jsou fixed s vyšším z-index */
 .filter-modal {
   position: absolute;
-  top: 12px; left: 12px; right: 12px;
-  bottom: 12px;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(248,248,246,.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid var(--rule);
-  border-radius: 14px;
-  box-shadow: 0 8px 40px rgba(0,0,0,.14);
-  opacity: 0; transform: scale(.97) translateY(-6px);
+  border: none;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+  box-shadow: none;
+  opacity: 0; transform: translateY(-6px);
   transition: opacity .22s var(--ease), transform .22s var(--ease);
   pointer-events: none;
   overflow-y: auto;
@@ -867,16 +867,22 @@ body.lop-return .llo-bottom-placeholder { display: block; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
   filter: drop-shadow(0 0 3px white) drop-shadow(0 0 3px white) drop-shadow(0 0 2px white) drop-shadow(0 1px 2px rgba(0,0,0,.3));
 }
-.lop-pin.wished::before {
-  content: '';
-  position: absolute;
-  top: -5px; left: -5px;
-  width: 14px; height: 14px;
+/* Místa v plánu — celý pin ve tvaru srdce (ne malý odznak navíc), stejná
+   výplň (--accent) a "kontura" jako mají kulaté piny (border zde nejde,
+   clip-path ho ořízne — simulováno přes drop-shadow ve stejné barvě jako
+   --paper, stejný trik jako u odznaků výše). Kategorie zůstává čitelná
+   přes bílé písmeno uvnitř. */
+.lop-pin.wished {
   background: var(--accent);
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>") center/contain no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z'/></svg>") center/contain no-repeat;
-  filter: drop-shadow(0 0 3px white) drop-shadow(0 0 3px white) drop-shadow(0 0 2px white) drop-shadow(0 1px 2px rgba(0,0,0,.3));
+  border: none;
+  border-radius: 0;
+  clip-path: path('M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z');
+  filter: drop-shadow(0 0 1.5px var(--paper)) drop-shadow(0 0 1.5px var(--paper)) drop-shadow(0 1px 2px rgba(0,0,0,.35));
 }
+/* Srdce má vizuální těžiště níž než čtvercový box (hrot dole) — písmeno
+   mírně posunout, ať sedí opticky uprostřed, ne jen matematicky. */
+.lop-pin.wished span { margin-top: 3px; }
+.lop-pin.wished.visited::after { top: -6px; right: -6px; }
 
 .rt-tip {
   position: fixed; z-index: 900;
@@ -1592,7 +1598,9 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   .map-puck-wrap { right: 78px; }
   .filter-puck-wrap { right: 78px; }
   .filter-modal {
-    top: 12px; left: 12px; right: 78px; bottom: 12px;
+    right: 64px;
+    border-top: none;
+    border-right: 1px solid var(--rule);
   }
 }
 @media (min-width: 820px) {
@@ -1645,13 +1653,15 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   .map-puck-wrap { right: 24px; bottom: 80px; }
   .filter-puck-wrap { right: 24px; }
   .filter-modal {
-    top: 12px; left: 12px; right: 108px; bottom: 12px;
+    right: 84px;
+    border-right: 1px solid var(--rule);
   }
 }
 /* Portrait mobil — modal nad navbarem */
 @media (max-width: 819px) and (orientation: portrait) {
   .filter-modal {
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 12px);
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    border-bottom: 1px solid var(--rule);
   }
 
   #routesView, #wishView { padding: 28px clamp(24px, 5vw, 64px) 40px; }
