@@ -547,6 +547,12 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .chip.all { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .chip.all .chip-count { color: rgba(255,255,255,.55); }
 
+/* Chip slohu — binární výběr (vybráno / nevybráno), na rozdíl od
+   3-stavových chipů kategorie/plán/navštíveno výše. */
+.chip.chip-style.state-on { background: #fff; border-color: var(--cat-arch); color: var(--cat-arch); }
+.chip.chip-style.state-on .chip-swatch { background: var(--cat-arch) !important; }
+.chip.chip-style.state-on .chip-count { color: var(--cat-arch); opacity: .7; }
+
 /* Chip wrapper se stavovým popiskem */
 .chip-wrap {
   display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
@@ -2030,6 +2036,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
               <div class="filter-lbl"><span>Kategorie</span></div>
               <div class="filter-chips" id="mapChips"></div>
             </div>
+            <div class="filter-row" id="styleRow" hidden>
+              <div class="filter-lbl"><span>Sloh</span></div>
+              <div class="filter-chips" id="styleChips"></div>
+            </div>
             <div class="filter-row">
               <div class="filter-lbl">
                 <span>Období</span>
@@ -2492,6 +2502,7 @@ function adaptPlace(p) {
     lat:       p.lat,
     lng:       p.lng,
     cat:       p.cat,
+    style:     Array.isArray(p.style) ? p.style : p.style ? [p.style] : [],
 
     // ── Stav uživatele ──
     visited:   p.visited  ?? false,
@@ -2525,7 +2536,11 @@ function adaptPlace(p) {
     photos:     p.photos         ?? [],
 
     // ── AR / navigace ──
-    arHeading:  p.arHeading  ?? null,
+    // arTarget {lat,lng} má přednost — azimut se dopočítá, jde ověřit
+    // proti mapě (target-editor.html). arHeading zůstává jako fallback
+    // pro místa, kde cíl ještě není zadaný.
+    arHeading:  p.arTarget ? bearingDeg(p.lat, p.lng, p.arTarget.lat, p.arTarget.lng) : (p.arHeading ?? null),
+    arTarget:   p.arTarget   ?? null,
     arRadius:   p.arRadius   ?? 15,
 
     // ── Trasy ──
@@ -2880,6 +2895,10 @@ let _markers = [];
 window._markers = _markers;
 const FILTER = { hist:'full', arch:'full', art:'full', fun:'full', visited:'full', wished:'full' };
 window.FILTER = FILTER;
+/* Sloh — binární výběr (na rozdíl od full/dim/hide u kategorií): prázdné
+   = bez omezení, neprázdné = logické NEBO přes .some() (viz applyFilter). */
+const STYLE_FILTER = new Set();
+(new URLSearchParams(location.search).getAll('style')).forEach(s => STYLE_FILTER.add(s));
 const FILTER_NEXT = { full:'dim', dim:'hide', hide:'full' };
 const FILTER_NEXT_WISHED  = { full:'dim', dim:'hide', hide:'force', force:'full' };
 const FILTER_NEXT_VISITED = { full:'dim', dim:'hide', hide:'force', force:'full' };
@@ -2925,7 +2944,8 @@ function updateFilterPuck() {
   const active = FILTER.hist !== 'full' || FILTER.arch !== 'full' || FILTER.art !== 'full' || FILTER.fun !== 'full'
     || FILTER.visited !== 'full' || FILTER.wished !== 'full'
     || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
-    || DIST_STATE.max !== null;
+    || DIST_STATE.max !== null
+    || STYLE_FILTER.size > 0;
   puck.classList.toggle('filtered', active);
 }
 
@@ -3072,6 +3092,37 @@ function buildChips() {
   initDistSlider();
   updateChipCounts();
   updateChipLabels();
+  buildStyleChips();
+}
+
+/* Chipy slohů — jen ty, které se v datech vyskytují (stejný vzor jako
+   overview.html). Binární výběr, ne 3-stavové full/dim/hide. */
+function buildStyleChips() {
+  const row = document.getElementById('styleRow');
+  const box = document.getElementById('styleChips');
+  if (!row || !box || !window.LOP_TAGS) return;
+
+  const counts = {};
+  LOCATIONS.forEach(l => (l.style || []).forEach(s => counts[s] = (counts[s] || 0) + 1));
+
+  const codes = Object.keys(window.LOP_TAGS.styles).filter(s => counts[s]);
+  if (!codes.length) { row.hidden = true; return; }
+  row.hidden = false;
+
+  box.innerHTML = codes.map(code =>
+    `<button class="chip chip-style${STYLE_FILTER.has(code) ? ' state-on' : ''}" data-style="${code}">` +
+      `<span class="chip-swatch" style="background:var(--ink-5)"></span>` +
+      `${window.LOP_TAGS.styleLabel(code)} <span class="chip-count">${counts[code]}</span>` +
+    `</button>`).join('');
+
+  box.querySelectorAll('.chip-style').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.style;
+      if (STYLE_FILTER.has(s)) STYLE_FILTER.delete(s); else STYLE_FILTER.add(s);
+      btn.classList.toggle('state-on', STYLE_FILTER.has(s));
+      applyFilter();
+    });
+  });
 }
 
 function updateChipLabels() {
@@ -3195,12 +3246,24 @@ function haversineKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
+/* Azimut mezi dvěma body (0 = sever, po směru hodin) — pro arTarget.
+   Viz POKRACOVANI.md: ukládat cílový bod místo stupňů, azimut dopočítat,
+   dá se ověřit očima na mapě (target-editor.html). */
+function bearingDeg(lat1, lng1, lat2, lng2) {
+  const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
+  const φ1 = toRad(lat1), φ2 = toRad(lat2), Δλ = toRad(lng2 - lng1);
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
 function resetFilters() {
   FILTER.hist = FILTER.arch = FILTER.art = FILTER.fun = 'full';
   FILTER.visited = FILTER.wished = 'full';
   ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
   DIST_STATE.max = null;
-  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force'));
+  STYLE_FILTER.clear();
+  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('state-hide', 'state-dim', 'state-force', 'state-on'));
   const ds = document.getElementById('distSlider'); if (ds) ds.value = 100;
   const dv = document.getElementById('distV'); if (dv) dv.textContent = t('overview.any_dist');
   renderEra();
@@ -3285,6 +3348,10 @@ function applyFilter() {
     }
     if (distActive) {
       if (haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) s = 'hide';
+    }
+    if (STYLE_FILTER.size) {
+      const st = loc.style || [];
+      if (!st.some(code => STYLE_FILTER.has(code))) s = 'hide';
     }
 
     const op = OPACITY[s];

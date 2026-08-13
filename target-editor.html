@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>target editor — azimuty AR</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:system-ui,sans-serif;font-size:13px;background:#f5f5f3}
+#app{display:flex;height:100vh}
+#sidebar{width:360px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid #ddd;background:#fff}
+#topbar{padding:10px 12px;border-bottom:1px solid #eee;flex-shrink:0}
+h1{font-size:14px;font-weight:600;margin-bottom:2px}
+#subtitle{font-size:11px;color:#999;margin-bottom:6px}
+#stats{font-size:11px;color:#888;margin-top:5px}
+#list{flex:0 0 auto;max-height:32vh;overflow-y:auto;border-bottom:1px solid #eee}
+.item{padding:7px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;align-items:center;gap:8px}
+.item:hover{background:#f7f7f5}
+.item.active{background:#eff6ff;border-left:3px solid #2563eb}
+.item.done{border-left:3px solid #16a34a}
+.item.active.done{background:#f0fdf4;border-left:3px solid #16a34a}
+.item-code{font-family:monospace;font-size:10px;font-weight:700;background:#1a1a18;color:#fff;border-radius:3px;padding:2px 5px;flex-shrink:0;min-width:38px;text-align:center}
+.item.active .item-code{background:#2563eb}
+.item.done .item-code{background:#16a34a}
+.item.active.done .item-code{background:#16a34a}
+.item-name{font-size:12px;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-check{color:#16a34a;flex-shrink:0;font-size:13px;font-weight:700}
+
+#panel{padding:12px;display:flex;flex-direction:column;gap:9px;flex:1;overflow-y:auto;min-height:0}
+#cur-name{font-size:13px;font-weight:600;color:#1a1a18;line-height:1.35;min-height:18px}
+#instruction{font-size:11px;color:#666;line-height:1.4}
+.sec-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#aaa;margin-top:2px}
+.label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#aaa;margin-bottom:1px}
+.row{display:flex;gap:6px;align-items:center}
+.field{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none;background:#fff;font-family:inherit}
+.field:focus{border-color:#2563eb}
+.field.mono{font-family:monospace;font-size:11px}
+hr{border:none;border-top:1px solid #eee;margin:2px 0}
+.btn{padding:8px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;border:1px solid;white-space:nowrap}
+.btn-dark{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.btn-dark:hover{background:#333}
+.btn-outline{background:#fff;color:#1a1a18;border-color:#ccc}
+.btn-outline:hover{background:#f5f5f3;border-color:#999}
+.btn-blue{background:#fff;color:#2563eb;border-color:#bfdbfe}
+.btn-blue:hover{background:#eff6ff}
+.btn-blue.active{background:#2563eb;color:#fff}
+.btn-amber{background:#fff;color:#d97706;border-color:#fcd34d}
+.btn-amber.active{background:#d97706;color:#fff}
+.btn-row{display:flex;gap:6px}
+.btn-row .btn{flex:1}
+
+.heading-box{background:#fafaf8;border:1px solid #eee;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.heading-num{font-family:monospace;font-size:26px;font-weight:700;color:#1a1a18;line-height:1.1}
+.heading-old{font-size:11px;color:#d97706}
+.heading-dist{font-size:11px;color:#888}
+
+#map{flex:1;position:relative}
+.leaflet-container{background:#e8e8e4}
+#layerToggle{position:absolute;top:10px;right:10px;z-index:1000;display:flex;gap:4px}
+#layerToggle button{padding:6px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #ccc;background:rgba(255,255,255,.92);cursor:pointer}
+#layerToggle button.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+#cur-label{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(26,26,24,.82);color:#fff;font-size:11px;padding:4px 10px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:1000;display:none;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+.legend{position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(255,255,255,.92);border-radius:6px;padding:7px 10px;font-size:10.5px;color:#555;line-height:1.7}
+.legend span{display:inline-block;width:16px;height:0;border-top:2px solid; margin-right:5px; vertical-align:middle}
+.legend .l-sight{border-color:#2563eb}
+.legend .l-plane{border-top-style:dashed;border-color:#d97706}
+.legend .l-cone{border-top-style:solid;border-color:#16a34a}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <div id="topbar">
+      <h1>Target editor — azimuty AR</h1>
+      <div id="subtitle">Kužel pohledu se kreslí jen u míst s <code>arHeading</code>/<code>arTarget</code> (dnes: historie).</div>
+      <div id="stats">0 / 0 s arTarget</div>
+    </div>
+    <div id="list"></div>
+
+    <div id="panel">
+      <div id="cur-name">← Vyber místo ze seznamu</div>
+      <div id="instruction" style="color:#aaa">Klikni na místo vlevo. Pak přetáhni pin nebo cíl na mapě, nebo zadej souřadnice ručně.</div>
+
+      <div class="heading-box" id="headingBox" style="display:none">
+        <div class="label">Vypočtený azimut (arTarget → arHeading)</div>
+        <div class="heading-num" id="headingNum">—</div>
+        <div class="heading-old" id="headingOld"></div>
+        <div class="heading-dist" id="headingDist"></div>
+      </div>
+
+      <div id="editFields" style="display:none">
+        <hr/>
+        <div class="sec-label">Pin místa</div>
+        <div class="row">
+          <input id="pin-coords" class="field mono" type="text" placeholder="50.1051640N, 14.4563140E"/>
+          <button class="btn btn-dark" onclick="applyPinCoords()">Použít</button>
+        </div>
+
+        <div class="sec-label" style="margin-top:8px">Cíl pohledu (arTarget)</div>
+        <div class="row">
+          <input id="target-coords" class="field mono" type="text" placeholder="50.1065N, 14.4590E"/>
+          <button class="btn btn-dark" onclick="applyTargetCoords()">Použít</button>
+        </div>
+        <div class="hint" style="font-size:10px;color:#999;margin-top:2px">
+          Klikni na mapě = přesune cíl. Oba body jdou i přetáhnout přímo.
+        </div>
+
+        <hr/>
+        <div class="sec-label">Kontrola</div>
+        <div class="btn-row">
+          <button class="btn btn-outline" id="btnSat" onclick="toggleSat()">🛰 Satelit</button>
+          <button class="btn btn-outline" onclick="clearTarget()">✕ Smazat cíl</button>
+        </div>
+      </div>
+
+      <hr/>
+      <div class="sec-label">Export</div>
+      <button class="btn btn-dark" id="btnExport" onclick="exportPatch()" disabled>⬇ Export patch (arTarget.json)</button>
+      <div style="font-size:10px;color:#999;line-height:1.4">
+        Exportuje jen změněná pole <code>{id, arHeading, arTarget}</code> —
+        ne celý <code>places-index.json</code>, aby se nepřepsala pole,
+        která tenhle nástroj nezná (teaser, thumb, routes…). Patch se
+        ručně zapíše do <code>places-index.json</code>.
+      </div>
+    </div>
+  </div>
+
+  <div id="map">
+    <div id="layerToggle">
+      <button id="tileLight" class="active" onclick="setTiles('light')">Mapa</button>
+      <button id="tileSat" onclick="setTiles('sat')">Satelit</button>
+    </div>
+    <div id="cur-label"></div>
+    <div class="legend">
+      <div><span class="l-sight"></span>směr pohledu (pin → cíl)</div>
+      <div><span class="l-plane"></span>rovina fotografie (⟂ ke směru)</div>
+      <div><span class="l-cone"></span>zorný kužel (± 24°)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Data ─────────────────────────────────────────────
+   Odlehčená kopie places-index.json — jen pole potřebná
+   pro tenhle nástroj. Zdroj pravdy zůstává places-index.json,
+   tenhle soubor se ručně přepisuje, když se seznam AR míst změní. */
+const ORIG_DATA = [{"id": "H101", "name": "Šítkovská věž", "lat": 50.0784, "lng": 14.4133, "cat": "hist", "arHeading": 180, "arRadius": 15, "arTarget": null}, {"id": "H102", "name": "Václavské náměstí", "lat": 50.0815, "lng": 14.4278, "cat": "hist", "arHeading": 200, "arRadius": 30, "arTarget": null}, {"id": "H201", "name": "Staroměstské náměstí", "lat": 50.0875, "lng": 14.4213, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H202", "name": "Národní divadlo", "lat": 50.0808, "lng": 14.4133, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H301", "name": "Pražský hrad", "lat": 50.0911, "lng": 14.4016, "cat": "fun", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H001", "name": "Holešovický přístav", "lat": 50.105164, "lng": 14.456314, "cat": "hist", "arHeading": 136, "arRadius": 12, "arTarget": null}, {"id": "H302", "name": "Letenské sady", "lat": 50.0939, "lng": 14.4224, "cat": "fun", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H203", "name": "Tančící dům", "lat": 50.0754, "lng": 14.4141, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}, {"id": "H002", "name": "Bašta sv. Máří Magdalény (XIX)", "lat": 50.09305881760058, "lng": 14.411785293307434, "cat": "hist", "arHeading": 180, "arRadius": 15, "arTarget": null}, {"id": "A001", "name": "Budova Elektrických podniků", "lat": 50.098647, "lng": 14.436805, "cat": "arch", "arHeading": null, "arRadius": null, "arTarget": null}];
+
+/* Filtr: zobrazit místa, která už kužel mají (arHeading) nebo mají
+   nastavený arTarget. Ostatní kategorie (arch, fun) AR kužel zatím
+   nemají — viz SESSION-VII.md, "AR jen u kategorie historie". */
+let data = ORIG_DATA.filter(p => p.arHeading != null || p.arTarget != null)
+  .map(p => ({...p}));
+
+let current = null;
+let targets = {};   // id -> {lat,lng} — pracovní arTarget (přepisuje ORIG_DATA.arTarget)
+let pins    = {};   // id -> {lat,lng} — pracovní pozice pinu (přepisuje ORIG_DATA lat/lng)
+let allMarkers = {}, allTargets = {}, sightLine, planeLine, coneLayer;
+
+data.forEach(p => { if (p.arTarget) targets[p.id] = {...p.arTarget}; });
+
+/* ── Geodetika ────────────────────────────────────────── */
+function toRad(d){ return d*Math.PI/180; }
+function toDeg(r){ return r*180/Math.PI; }
+
+function bearing(lat1, lng1, lat2, lng2){
+  const φ1=toRad(lat1), φ2=toRad(lat2), Δλ=toRad(lng2-lng1);
+  const y=Math.sin(Δλ)*Math.cos(φ2);
+  const x=Math.cos(φ1)*Math.sin(φ2)-Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+  return (toDeg(Math.atan2(y,x))+360)%360;
+}
+function destPoint(lat, lng, brngDeg, distM){
+  const R=6371000, δ=distM/R, θ=toRad(brngDeg);
+  const φ1=toRad(lat), λ1=toRad(lng);
+  const φ2=Math.asin(Math.sin(φ1)*Math.cos(δ)+Math.cos(φ1)*Math.sin(δ)*Math.cos(θ));
+  const λ2=λ1+Math.atan2(Math.sin(θ)*Math.sin(δ)*Math.cos(φ1), Math.cos(δ)-Math.sin(φ1)*Math.sin(φ2));
+  return [toDeg(φ2), ((toDeg(λ2))+540)%360-180];
+}
+function haversineM(lat1,lng1,lat2,lng2){
+  const R=6371000, φ1=toRad(lat1), φ2=toRad(lat2), dφ=toRad(lat2-lat1), dλ=toRad(lng2-lng1);
+  const h=Math.sin(dφ/2)**2+Math.cos(φ1)*Math.cos(φ2)*Math.sin(dλ/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+
+function curLatLng(id){
+  const orig = ORIG_DATA.find(i=>i.id===id);
+  return pins[id] || {lat:orig.lat, lng:orig.lng};
+}
+
+/* ── Mapa ─────────────────────────────────────────────── */
+const map = L.map('map',{center:[50.0950,14.4350],zoom:15});
+const TILE_LIGHT = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+const TILE_SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+let tileLayer = L.tileLayer(TILE_LIGHT, {attribution:'© OSM © CARTO', subdomains:'abcd', maxZoom:20}).addTo(map);
+
+function setTiles(kind){
+  map.removeLayer(tileLayer);
+  if (kind === 'sat') {
+    tileLayer = L.tileLayer(TILE_SAT, {attribution:'© Esri', maxZoom:20});
+    document.getElementById('tileSat').classList.add('active');
+    document.getElementById('tileLight').classList.remove('active');
+  } else {
+    tileLayer = L.tileLayer(TILE_LIGHT, {attribution:'© OSM © CARTO', subdomains:'abcd', maxZoom:20});
+    document.getElementById('tileLight').classList.add('active');
+    document.getElementById('tileSat').classList.remove('active');
+  }
+  tileLayer.addTo(map);
+  tileLayer.bringToBack();
+}
+function toggleSat(){
+  const isSat = document.getElementById('tileSat').classList.contains('active');
+  setTiles(isSat ? 'light' : 'sat');
+}
+
+/* Barevné tečky jako divIcon — na rozdíl od circleMarker umí L.marker
+   nativní draggable (funguje i na dotyk, bez ručního handleru). */
+function dotIcon(fill, stroke, active){
+  const size = active ? 20 : 14;
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${fill};border:2.5px solid ${stroke};box-shadow:0 1px 3px rgba(0,0,0,.35)"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+function pinIcon(id){
+  const active = id===current;
+  if (active) return dotIcon('#dbeafe', '#2563eb', true);
+  if (targets[id]) return dotIcon('#dcfce7', '#16a34a', false);
+  return dotIcon('#fff', '#1a1a18', false);
+}
+function targetIcon(id){
+  return dotIcon('#fde68a', '#d97706', id===current);
+}
+
+function addPinMarker(p){
+  const pos = curLatLng(p.id);
+  const m = L.marker([pos.lat,pos.lng], {icon: pinIcon(p.id), draggable: true}).addTo(map);
+  m.bindTooltip(p.id+': '+p.name, {direction:'top'});
+  m.on('click', e => { L.DomEvent.stopPropagation(e); selectItem(p.id); });
+  m.on('drag',  e => { const ll = e.target.getLatLng(); setPin(p.id, ll.lat, ll.lng); });
+  allMarkers[p.id] = m;
+  return m;
+}
+
+function addTargetMarker(p){
+  if (!targets[p.id]) return null;
+  const t = targets[p.id];
+  const m = L.marker([t.lat,t.lng], {icon: targetIcon(p.id), draggable: true}).addTo(map);
+  m.bindTooltip('cíl: '+p.id, {direction:'top'});
+  m.on('click', e => { L.DomEvent.stopPropagation(e); selectItem(p.id); });
+  m.on('drag',  e => { const ll = e.target.getLatLng(); setTarget(p.id, ll.lat, ll.lng); });
+  allTargets[p.id] = m;
+  return m;
+}
+
+function removeTargetMarker(id){
+  if (allTargets[id]) { allTargets[id].remove(); delete allTargets[id]; }
+}
+
+data.forEach(p => addPinMarker(p));
+data.forEach(p => addTargetMarker(p));
+
+/* Klik na volnou mapu = nastav/přesuň cíl vybraného místa — hlavní
+   pracovní tok (kliknu tam, kam se fotograf díval). Pin se upravuje
+   tažením jeho vlastního bodu nebo ručním zadáním souřadnic. */
+map.on('click', e => {
+  if (!current) return;
+  setTarget(current, e.latlng.lat, e.latlng.lng);
+});
+
+/* ── Kužel + čáry ─────────────────────────────────────── */
+const CONE_HALF_ANGLE = 24; // stejné jako viewConeHTML v map.html (~48° kužel)
+const PLANE_HALF_LEN = 35;  // metrů na každou stranu roviny fotografie
+
+function clearOverlays(){
+  if (sightLine) { sightLine.remove(); sightLine = null; }
+  if (planeLine) { planeLine.remove(); planeLine = null; }
+  if (coneLayer) { coneLayer.remove(); coneLayer = null; }
+}
+
+function redrawOverlays(id){
+  clearOverlays();
+  const pin = curLatLng(id);
+  const t = targets[id];
+  if (!t) return;
+
+  const brng = bearing(pin.lat, pin.lng, t.lat, t.lng);
+  const dist = haversineM(pin.lat, pin.lng, t.lat, t.lng);
+  const coneDist = Math.max(dist * 1.15, 80);
+
+  // Sightline pin → cíl
+  sightLine = L.polyline([[pin.lat,pin.lng],[t.lat,t.lng]], {color:'#2563eb', weight:2}).addTo(map);
+
+  // Rovina fotografie — kolmo na směr pohledu, prochází pinem
+  const p1 = destPoint(pin.lat, pin.lng, brng+90, PLANE_HALF_LEN);
+  const p2 = destPoint(pin.lat, pin.lng, brng-90, PLANE_HALF_LEN);
+  planeLine = L.polyline([p1, p2], {color:'#d97706', weight:2, dashArray:'6,5'}).addTo(map);
+
+  // Kužel — výseč ±24° kolem azimutu
+  const left  = destPoint(pin.lat, pin.lng, brng-CONE_HALF_ANGLE, coneDist);
+  const right = destPoint(pin.lat, pin.lng, brng+CONE_HALF_ANGLE, coneDist);
+  const arcPts = [];
+  const steps = 12;
+  for (let i=0;i<=steps;i++){
+    const a = brng - CONE_HALF_ANGLE + (2*CONE_HALF_ANGLE)*(i/steps);
+    arcPts.push(destPoint(pin.lat, pin.lng, a, coneDist));
+  }
+  coneLayer = L.polygon([[pin.lat,pin.lng], ...arcPts], {
+    color:'#16a34a', weight:1, fillColor:'#16a34a', fillOpacity:.12
+  }).addTo(map);
+
+  updateHeadingBox(id, brng, dist);
+}
+
+function updateHeadingBox(id, brng, dist){
+  const orig = ORIG_DATA.find(i=>i.id===id);
+  document.getElementById('headingBox').style.display = 'flex';
+  document.getElementById('headingNum').textContent = brng.toFixed(1) + '°';
+  const oldEl = document.getElementById('headingOld');
+  if (orig.arHeading != null && Math.round(orig.arHeading) !== Math.round(brng)) {
+    oldEl.textContent = 'původní arHeading v datech: ' + orig.arHeading + '°';
+    oldEl.style.display = 'block';
+  } else {
+    oldEl.style.display = 'none';
+  }
+  document.getElementById('headingDist').textContent = 'vzdálenost k cíli: ' + Math.round(dist) + ' m';
+}
+
+/* ── Akce ─────────────────────────────────────────────── */
+function setPin(id, lat, lng){
+  pins[id] = {lat, lng};
+  updateCoordsInputs(id);
+  refreshMarker(id);
+  redrawOverlays(id);
+  updateItemEl(id);
+  updateStats();
+}
+function setTarget(id, lat, lng){
+  targets[id] = {lat, lng};
+  if (!allTargets[id]) {
+    const p = data.find(d=>d.id===id);
+    addTargetMarker(p);
+  } else {
+    allTargets[id].setLatLng([lat,lng]);
+  }
+  updateCoordsInputs(id);
+  refreshMarker(id);
+  redrawOverlays(id);
+  updateItemEl(id);
+  updateStats();
+}
+function clearTarget(){
+  if (!current) return;
+  delete targets[current];
+  removeTargetMarker(current);
+  clearOverlays();
+  document.getElementById('headingBox').style.display = 'none';
+  document.getElementById('target-coords').value = '';
+  updateItemEl(current);
+  updateStats();
+}
+
+function refreshMarker(id){
+  if (allMarkers[id]) allMarkers[id].setIcon(pinIcon(id));
+  if (allTargets[id]) allTargets[id].setIcon(targetIcon(id));
+}
+
+function selectItem(id){
+  const prev = current;
+  current = id;
+  if (prev) refreshMarker(prev);
+  refreshMarker(id);
+  document.querySelectorAll('.item').forEach(el => el.classList.toggle('active', el.dataset.id===id));
+  document.querySelector('.item[data-id="'+id+'"]')?.scrollIntoView({block:'nearest', behavior:'smooth'});
+
+  const p = data.find(d=>d.id===id);
+  document.getElementById('cur-name').textContent = id + ' — ' + p.name;
+  document.getElementById('editFields').style.display = 'block';
+  document.getElementById('instruction').textContent = targets[id]
+    ? 'Přetáhni pin nebo cíl, nebo klikni na mapě pro přesun cíle.'
+    : 'Klikni na mapě, kam se díval fotograf — nastaví se cíl (arTarget).';
+  document.getElementById('instruction').style.color = '#666';
+
+  const pos = curLatLng(id);
+  map.flyTo([pos.lat,pos.lng], Math.max(map.getZoom(), 17), {duration:.5});
+
+  const lbl = document.getElementById('cur-label');
+  lbl.style.display = 'block';
+  lbl.textContent = id + ': ' + p.name;
+
+  updateCoordsInputs(id);
+  if (targets[id]) redrawOverlays(id);
+  else { clearOverlays(); document.getElementById('headingBox').style.display = 'none'; }
+}
+
+function updateCoordsInputs(id){
+  const pos = curLatLng(id);
+  document.getElementById('pin-coords').value = pos.lat.toFixed(7)+'N, '+pos.lng.toFixed(7)+'E';
+  const t = targets[id];
+  document.getElementById('target-coords').value = t ? (t.lat.toFixed(7)+'N, '+t.lng.toFixed(7)+'E') : '';
+}
+
+function parseCoords(str){
+  if (!str) return null;
+  str = str.trim().replace(/\s+/g,' ');
+  const m = str.match(/(-?[0-9]+\.?[0-9]*)\s*[NS]?\s*[,;\s]+(-?[0-9]+\.?[0-9]*)\s*[EW]?/i);
+  if (!m) return null;
+  const lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+  if (lat>49 && lat<51 && lng>13 && lng<16) return {lat,lng};
+  if (lng>49 && lng<51 && lat>13 && lat<16) return {lat:lng, lng:lat}; // prohozené
+  return null;
+}
+function applyPinCoords(){
+  if (!current) return;
+  const c = parseCoords(document.getElementById('pin-coords').value);
+  if (!c) { alert('Nerozpoznané souřadnice.'); return; }
+  setPin(current, c.lat, c.lng);
+}
+function applyTargetCoords(){
+  if (!current) return;
+  const c = parseCoords(document.getElementById('target-coords').value);
+  if (!c) { alert('Nerozpoznané souřadnice.'); return; }
+  setTarget(current, c.lat, c.lng);
+}
+
+/* ── Seznam / stav ────────────────────────────────────── */
+function updateItemEl(id){
+  const el = document.querySelector('.item[data-id="'+id+'"]');
+  if (!el) return;
+  const done = !!targets[id];
+  el.classList.toggle('done', done);
+  el.querySelector('.item-check').textContent = done ? '✓' : '';
+}
+function updateStats(){
+  const n = Object.keys(targets).length;
+  document.getElementById('stats').textContent = n + ' / ' + data.length + ' s arTarget';
+  document.getElementById('btnExport').disabled = n === 0;
+}
+function renderList(){
+  const html = data.map(p => {
+    const done = !!targets[p.id];
+    return `<div class="item${done?' done':''}" data-id="${p.id}" onclick="selectItem('${p.id}')">
+      <span class="item-code">${p.id}</span>
+      <span class="item-name">${p.name}</span>
+      <span class="item-check">${done?'✓':''}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('list').innerHTML = html;
+}
+
+/* ── Export ───────────────────────────────────────────── */
+function exportPatch(){
+  const out = {};
+  Object.entries(targets).forEach(([id, t]) => {
+    const pin = curLatLng(id);
+    const brng = Math.round(bearing(pin.lat, pin.lng, t.lat, t.lng) * 10) / 10;
+    out[id] = {
+      arTarget: { lat: Math.round(t.lat*1e7)/1e7, lng: Math.round(t.lng*1e7)/1e7 },
+      arHeading: brng
+    };
+    if (pins[id]) out[id].pin = { lat: Math.round(pin.lat*1e7)/1e7, lng: Math.round(pin.lng*1e7)/1e7 };
+  });
+  const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'arTarget-patch.json';
+  a.click();
+}
+
+renderList();
+updateStats();
+</script>
+</body>
+</html>
