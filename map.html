@@ -3372,6 +3372,7 @@ function applyFilter() {
   const badge = document.getElementById('filterBadge');
   if (badge) badge.innerHTML = '<span class="cnt-active">' + activeCount + '</span>/' + (_markers ? _markers.length : '—');
   updateFilterPuck();
+  refreshArchMarkers();
 }
 
 function initMap() {
@@ -3983,6 +3984,35 @@ const _archStyleState = {};
 let   _archMarkers    = [];
 let   _archPanelOpen  = false;
 
+/* Viditelnost pracovního pinu je průnik dvou nezávislých filtrů:
+   vlastní on/dim/off z archPanelu (pro terénní práci na a-map.json)
+   A hlavní STYLE_FILTER z filtru mapy (aby šlo slohem prosít obě vrstvy
+   najednou, ne jen publikovaná místa). */
+function _archMarkerVisible(code) {
+  if ((_archStyleState[code] || 'on') === 'off') return false;
+  if (STYLE_FILTER.size && !STYLE_FILTER.has(code)) return false;
+  return true;
+}
+function _archMarkerOpacity(code) {
+  return (_archStyleState[code] || 'on') === 'dim' ? 0.3 : 1;
+}
+function _refreshArchMarker(marker, code) {
+  if (!window._map) return;
+  if (_archMarkerVisible(code)) {
+    marker.addTo(window._map);
+    const el = marker.getElement();
+    if (el) el.style.opacity = _archMarkerOpacity(code);
+  } else {
+    marker.remove();
+  }
+}
+function refreshArchMarkers() {
+  _archMarkers.forEach(({ marker, item }) => {
+    const sc = item.id.replace(/\d+$/, '');
+    _refreshArchMarker(marker, sc);
+  });
+}
+
 function toggleArchPanel() {
   _archPanelOpen = !_archPanelOpen;
   const toggle = document.getElementById('archPanelToggle');
@@ -4014,14 +4044,7 @@ function _setStyleState(code, state) {
   _archMarkers.forEach(({ marker, item }) => {
     const sc = item.id.replace(/\d+$/, '');
     if (sc !== code) return;
-    if (!window._map) return;
-    if (state === 'off') {
-      marker.remove();
-    } else {
-      marker.addTo(window._map);
-      const el = marker.getElement();
-      if (el) el.style.opacity = state === 'dim' ? '0.3' : '1';
-    }
+    _refreshArchMarker(marker, sc);
   });
   // update row buttons
   const row = document.querySelector(`.arch-style-row[data-code="${code}"]`);
@@ -4120,7 +4143,7 @@ async function loadArchMap() {
         tip.classList.add('visible');
       }
 
-      const isVisible = () => (_archStyleState[styleCode] || 'on') !== 'off';
+      const isVisible = () => _archMarkerVisible(styleCode);
       m.on('mouseover', () => { if (isVisible()) showArchTip(m.getElement()); });
       m.on('mouseout',  () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
       m.on('click',     () => { if (isVisible()) window.open(item.wiki, '_blank', 'noopener'); });
@@ -4133,7 +4156,7 @@ async function loadArchMap() {
       });
 
       _archMarkers.push({ marker: m, item });
-      if (window._map) m.addTo(window._map);
+      _refreshArchMarker(m, styleCode);
     });
 
     tip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
