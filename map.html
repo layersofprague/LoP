@@ -3355,7 +3355,7 @@ function applyFilter() {
      kategorie nic neomezují (auto = full pro všechny). Jakmile je aspoň
      jedna vybraná, kategorie mimo výběr automaticky zmizí — přesně jako
      v overview.html, jen navíc s mezikrokem "vybráno, ale dim". */
-  const anyCatSelected = ['hist', 'arch', 'art', 'fun'].some(c => FILTER[c] !== 'auto');
+  const anyCatSel = anyCatSelected();
 
   let activeCount = 0;
   _markers.forEach(({ marker, loc }) => {
@@ -3368,7 +3368,7 @@ function applyFilter() {
     // hide = tvrdé skrytí bez výjimek
     // dim = měkké skrytí, příznaky mohou zachránit (hlasování)
     const catRaw = FILTER[loc.cat];
-    const catState = !anyCatSelected ? 'full'
+    const catState = !anyCatSel ? 'full'
       : catRaw === 'on'  ? 'full'
       : catRaw === 'dim' ? 'dim'
       : 'hide';
@@ -4038,13 +4038,32 @@ let   _archPanelOpen  = false;
    vlastní on/dim/off z archPanelu (pro terénní práci na a-map.json)
    A hlavní STYLE_FILTER z filtru mapy (aby šlo slohem prosít obě vrstvy
    najednou, ne jen publikovaná místa). */
+/* Kategorie 'arch' v hlavním filtru řídí i tuhle pracovní vrstvu — body
+   v a-map.json jsou architektonické tipy, takže "Architektura" v hlavním
+   filtru na ně musí mít stejný vliv jako na publikovaná místa. */
+function anyCatSelected() {
+  return ['hist', 'arch', 'art', 'fun'].some(c => FILTER[c] !== 'auto');
+}
+function _archCategoryState() {
+  if (!anyCatSelected()) return 'full';
+  if (FILTER.arch === 'on')  return 'full';
+  if (FILTER.arch === 'dim') return 'dim';
+  return 'hide';
+}
+const _ARCH_RANK = { full: 0, dim: 1, hide: 2 };
+function _archEffectiveState(code) {
+  const styleRaw = _archStyleState[code] || 'on';
+  const styleState = styleRaw === 'off' ? 'hide' : styleRaw; // 'on' zůstává 'on', normalizuje se níž
+  const styleFilterState = (STYLE_FILTER.size && !STYLE_FILTER.has(code)) ? 'hide' : 'full';
+  const states = [styleState === 'on' ? 'full' : styleState, styleFilterState, _archCategoryState()];
+  // Nejméně příznivý ze tří nezávislých filtrů (vlastní panel, sloh, kategorie) vyhrává.
+  return states.reduce((worst, s) => _ARCH_RANK[s] > _ARCH_RANK[worst] ? s : worst, 'full');
+}
 function _archMarkerVisible(code) {
-  if ((_archStyleState[code] || 'on') === 'off') return false;
-  if (STYLE_FILTER.size && !STYLE_FILTER.has(code)) return false;
-  return true;
+  return _archEffectiveState(code) !== 'hide';
 }
 function _archMarkerOpacity(code) {
-  return (_archStyleState[code] || 'on') === 'dim' ? 0.3 : 1;
+  return _archEffectiveState(code) === 'dim' ? 0.3 : 1;
 }
 function _refreshArchMarker(marker, code) {
   if (!window._map) return;
