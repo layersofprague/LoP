@@ -3441,15 +3441,25 @@ function initMap() {
   const map = L.map('map', {
     center: [50.0835, 14.4200],
     zoom: 14,
-    zoomControl: false
+    zoomControl: false,
+    // Kolečko myši výchozí zoomuje k pozici kurzoru — při jiném měřítku
+    // stránky (CSS `zoom` v theme.js) se ale souřadnice myši vs. reálná
+    // pozice kontejneru v některých prohlížečích rozejdou a mapa při
+    // scrollu "skáče". Zoom k centru tuhle matematiku úplně obchází.
+    scrollWheelZoom: (window.lopScale && window.lopScale !== 1) ? 'center' : true
   });
   window._map = map;
 
   /* Leaflet si drží rozměry kontejneru v paměti. Po změně měřítka stránky
      (nastavení → Velikost stránky) by počítal se starými a mapa by se
-     vykreslila posunutá — proto přepočet. */
-  document.addEventListener('lop:scalechange', function () {
+     vykreslila posunutá — proto přepočet. Zároveň přepneme režim kolečka
+     myši (viz komentář výš u scrollWheelZoom). */
+  document.addEventListener('lop:scalechange', function (e) {
     setTimeout(function () { if (window._map) window._map.invalidateSize(); }, 50);
+    const scaled = e.detail && e.detail.scale !== 1;
+    map.scrollWheelZoom.disable();
+    map.options.scrollWheelZoom = scaled ? 'center' : true;
+    map.scrollWheelZoom.enable();
   });
 
   // Zorné kužely: plynulá opacity podle úrovně zoomu
