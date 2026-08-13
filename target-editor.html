@@ -50,6 +50,10 @@ hr{border:none;border-top:1px solid #eee;margin:2px 0}
 .btn-amber.active{background:#d97706;color:#fff}
 .btn-row{display:flex;gap:6px}
 .btn-row .btn{flex:1}
+.stepper-row{display:flex;align-items:center;gap:8px}
+.stepper-row .btn{flex:0 0 auto;width:32px;padding:6px 0}
+.stepper-val{flex:1;text-align:center;font-family:monospace;font-size:12px;font-weight:600;color:#1a1a18}
+.working-note{font-size:10px;color:#999;line-height:1.4}
 
 .heading-box{background:#fafaf8;border:1px solid #eee;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
 .heading-num{font-family:monospace;font-size:26px;font-weight:700;color:#1a1a18;line-height:1.1}
@@ -112,6 +116,24 @@ hr{border:none;border-top:1px solid #eee;margin:2px 0}
         <div class="btn-row">
           <button class="btn btn-outline" id="btnSat" onclick="toggleSat()">🛰 Satelit</button>
           <button class="btn btn-outline" onclick="clearTarget()">✕ Smazat cíl</button>
+        </div>
+
+        <div class="sec-label" style="margin-top:8px">Úhel kuželu</div>
+        <div class="stepper-row">
+          <button class="btn btn-outline" onclick="adjustCone(-2)">−</button>
+          <span class="stepper-val" id="coneAngleVal">±24°</span>
+          <button class="btn btn-outline" onclick="adjustCone(2)">+</button>
+        </div>
+
+        <div class="sec-label" style="margin-top:8px">Posun roviny fotografie</div>
+        <div class="stepper-row">
+          <button class="btn btn-outline" onclick="adjustPlaneOffset(-5)">−</button>
+          <span class="stepper-val" id="planeOffsetVal">0 m</span>
+          <button class="btn btn-outline" onclick="adjustPlaneOffset(5)">+</button>
+        </div>
+        <div class="working-note">
+          Obojí je jen vizuální pomůcka pro kontrolu v tomhle nástroji —
+          neukládá se, neexportuje se a nijak neovlivňuje map.html.
         </div>
       </div>
 
@@ -272,7 +294,11 @@ map.on('click', e => {
 });
 
 /* ── Kužel + čáry ─────────────────────────────────────── */
-const CONE_HALF_ANGLE = 24; // stejné jako viewConeHTML v map.html (~48° kužel)
+/* Úhel kuželu a posun roviny fotografie jsou upravitelné jen tady, pro
+   vizuální kontrolu při zadávání cíle. Neukládají se, neexportují se
+   a nikam dál (do map.html) se nepropisují. */
+let coneHalfAngle = 24; // ± stupňů, výchozí odpovídá viewConeHTML v map.html
+let planeOffsetM  = 0;  // metrů od pinu ve směru pohledu; + k cíli, − za fotografa
 const PLANE_HALF_LEN = 35;  // metrů na každou stranu roviny fotografie
 
 function clearOverlays(){
@@ -294,18 +320,21 @@ function redrawOverlays(id){
   // Sightline pin → cíl
   sightLine = L.polyline([[pin.lat,pin.lng],[t.lat,t.lng]], {color:'#2563eb', weight:2}).addTo(map);
 
-  // Rovina fotografie — kolmo na směr pohledu, prochází pinem
-  const p1 = destPoint(pin.lat, pin.lng, brng+90, PLANE_HALF_LEN);
-  const p2 = destPoint(pin.lat, pin.lng, brng-90, PLANE_HALF_LEN);
+  // Rovina fotografie — kolmo na směr pohledu, posunutá o planeOffsetM
+  // od pinu (+ k cíli, − za fotografa). Střed roviny se posouvá po
+  // sightline, samotná rovina zůstává vždy kolmá na azimut.
+  const planeCenter = planeOffsetM !== 0
+    ? destPoint(pin.lat, pin.lng, brng, planeOffsetM)
+    : [pin.lat, pin.lng];
+  const p1 = destPoint(planeCenter[0], planeCenter[1], brng+90, PLANE_HALF_LEN);
+  const p2 = destPoint(planeCenter[0], planeCenter[1], brng-90, PLANE_HALF_LEN);
   planeLine = L.polyline([p1, p2], {color:'#d97706', weight:2, dashArray:'6,5'}).addTo(map);
 
-  // Kužel — výseč ±24° kolem azimutu
-  const left  = destPoint(pin.lat, pin.lng, brng-CONE_HALF_ANGLE, coneDist);
-  const right = destPoint(pin.lat, pin.lng, brng+CONE_HALF_ANGLE, coneDist);
+  // Kužel — výseč ± coneHalfAngle kolem azimutu
   const arcPts = [];
   const steps = 12;
   for (let i=0;i<=steps;i++){
-    const a = brng - CONE_HALF_ANGLE + (2*CONE_HALF_ANGLE)*(i/steps);
+    const a = brng - coneHalfAngle + (2*coneHalfAngle)*(i/steps);
     arcPts.push(destPoint(pin.lat, pin.lng, a, coneDist));
   }
   coneLayer = L.polygon([[pin.lat,pin.lng], ...arcPts], {
@@ -313,6 +342,17 @@ function redrawOverlays(id){
   }).addTo(map);
 
   updateHeadingBox(id, brng, dist);
+}
+
+function adjustCone(delta){
+  coneHalfAngle = Math.max(4, Math.min(70, coneHalfAngle + delta));
+  document.getElementById('coneAngleVal').textContent = '±' + coneHalfAngle + '°';
+  if (current && targets[current]) redrawOverlays(current);
+}
+function adjustPlaneOffset(delta){
+  planeOffsetM += delta;
+  document.getElementById('planeOffsetVal').textContent = (planeOffsetM > 0 ? '+' : '') + planeOffsetM + ' m';
+  if (current && targets[current]) redrawOverlays(current);
 }
 
 function updateHeadingBox(id, brng, dist){
