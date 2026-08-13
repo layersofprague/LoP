@@ -686,11 +686,13 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .filter-close-btn {
   appearance: none; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
-  background: #F8F8F6; border: 1.5px solid var(--rule); border-radius: 10px;
+  /* Bílá + zřetelný okraj/stín — pozadí modalu je téměř stejný odstín
+     jako F8F8F6, splývalo by to. */
+  background: #fff; border: 1.5px solid var(--ink-4); border-radius: 10px;
   padding: 5px 9px;
-  color: var(--ink-4);
+  color: var(--ink-2);
   font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  box-shadow: 0 3px 14px rgba(0,0,0,.18);
   transition: background .15s, color .15s;
 }
 .filter-close-btn:hover { background: var(--paper-2); color: var(--ink-2); }
@@ -710,10 +712,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   font-family: 'Inter', sans-serif;
 }
 .filter-puck:hover { background: #F0F0EE; color: var(--ink-2); }
-.filter-puck.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.filter-puck.active .filter-puck-badge-label { color: rgba(248,248,246,.7); }
-.filter-puck.active .filter-puck-badge-count { color: rgba(248,248,246,.5); }
-.filter-puck.active svg polygon { fill: var(--paper); stroke: var(--paper); }
 .filter-puck.filtered svg polygon { fill: var(--ink); stroke: var(--ink); }
 /* icon wrap — tečky nad ikonou */
 .filter-icon-wrap {
@@ -2964,7 +2962,6 @@ const DIST_STATE = { max: null };
 
 function toggleFilter() {
   const bd   = document.getElementById('filterBackdrop');
-  const puck = document.getElementById('filterPuck');
   const puckWrap = document.getElementById('mapPuckWrap');
   const closeWrap = document.getElementById('filterCloseWrap');
   if (!bd) return;
@@ -2972,13 +2969,11 @@ function toggleFilter() {
   const zoomCtrl = document.querySelector('.leaflet-control-zoom');
   if (isOpen) {
     bd.classList.remove('open');
-    if (puck) puck.classList.remove('active');
     if (puckWrap) puckWrap.style.visibility = '';
     if (zoomCtrl) zoomCtrl.style.visibility = '';
     if (closeWrap) closeWrap.hidden = true;
   } else {
     bd.classList.add('open');
-    if (puck) puck.classList.add('active');
     if (puckWrap) puckWrap.style.visibility = 'hidden';
     if (zoomCtrl) zoomCtrl.style.visibility = 'hidden';
     if (closeWrap) closeWrap.hidden = false;
@@ -3594,11 +3589,14 @@ function initMap() {
     const bd    = document.getElementById('filterBackdrop');
     const modal = document.getElementById('filterModal');
     const puck  = document.getElementById('filterPuck');
-    if (bd && bd.classList.contains('open') && modal && !modal.contains(e.target) && (!puck || !puck.contains(e.target))) {
+    const closeWrap = document.getElementById('filterCloseWrap');
+    if (bd && bd.classList.contains('open') && modal && !modal.contains(e.target)
+        && (!puck || !puck.contains(e.target))
+        && (!closeWrap || !closeWrap.contains(e.target))) {
       bd.classList.remove('open');
-      if (puck) puck.classList.remove('active');
       const pw = document.getElementById('mapPuckWrap'); if(pw) pw.style.visibility = '';
       const zc2 = document.querySelector('.leaflet-control-zoom'); if(zc2) zc2.style.visibility = '';
+      if (closeWrap) closeWrap.hidden = true;
     }
   }, true);
   // user location will be set by locateMe()
