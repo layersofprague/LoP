@@ -3438,42 +3438,18 @@ function applyFilter() {
 
 function initMap() {
   if (window._map) return; // ochrana před dvojitou inicializací
-  // CSS `zoom` (theme.js, měřítko stránky) je nestandardní vlastnost —
-  // Firefox ji podporuje nativně až od verze 126 (2024) a interně jinak
-  // než Chromium. Potvrzeno v praxi: stejná stránka je v Edge OK, ve
-  // Firefoxu "skáče" a piny se zpožďují za dlaždicemi při zoomu kolečkem.
-  // Cílíme obě opravy jen na tuhle kombinaci, ať se Edge/Chrome nedotkneme.
-  const _isFirefox = /firefox/i.test(navigator.userAgent);
-  const _scaled = !!(window.lopScale && window.lopScale !== 1);
-  const _ffScaled = _isFirefox && _scaled;
   const map = L.map('map', {
     center: [50.0835, 14.4200],
     zoom: 14,
-    zoomControl: false,
-    // Zoom k pozici kurzoru — ve Firefoxu + jiném měřítku se souřadnice
-    // myši vs. reálná pozice kontejneru rozejdou. Zoom k centru mapy tuhle
-    // matematiku obchází.
-    scrollWheelZoom: _ffScaled ? 'center' : true,
-    // Animovaný zoom drží dlaždice a piny svázané přes transform na
-    // společném rodiči — ve Firefoxu pod CSS `zoom` se ale piny neanimují
-    // spolu s dlaždicemi a "dojedou" až po zoomend. Bez animace k tomu
-    // nemůže dojít, protože není co rozjet asynchronně.
-    zoomAnimation: !_ffScaled
+    zoomControl: false
   });
   window._map = map;
 
   /* Leaflet si drží rozměry kontejneru v paměti. Po změně měřítka stránky
      (nastavení → Velikost stránky) by počítal se starými a mapa by se
-     vykreslila posunutá — proto přepočet. Zároveň přepneme kolečko myši
-     a animaci zoomu, pokud jsme ve Firefoxu (viz komentáře výš). */
-  document.addEventListener('lop:scalechange', function (e) {
+     vykreslila posunutá — proto přepočet. */
+  document.addEventListener('lop:scalechange', function () {
     setTimeout(function () { if (window._map) window._map.invalidateSize(); }, 50);
-    const scaled = !!(e.detail && e.detail.scale !== 1);
-    const ffScaled = _isFirefox && scaled;
-    map.scrollWheelZoom.disable();
-    map.options.scrollWheelZoom = ffScaled ? 'center' : true;
-    map.scrollWheelZoom.enable();
-    map.options.zoomAnimation = !ffScaled;
   });
 
   // Zorné kužely: plynulá opacity podle úrovně zoomu
