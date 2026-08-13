@@ -861,16 +861,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .lop-pin.cat-hist { background: var(--cat-hist); }
 .lop-pin.cat-arch { background: var(--cat-arch); }
 .lop-pin.cat-fun  { background: var(--cat-fun); }
-.lop-pin.visited::after {
-  content: '';
-  position: absolute;
-  top: -5px; right: -5px;
-  width: 14px; height: 14px;
-  background: var(--ok);
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>") center/contain no-repeat;
-  filter: drop-shadow(0 0 3px white) drop-shadow(0 0 3px white) drop-shadow(0 0 2px white) drop-shadow(0 1px 2px rgba(0,0,0,.3));
-}
+/* Fajfka "navštíveno" na pinu odstraněna — nadbytečná, jde vyfiltrovat
+   přes chip Navštíveno (viz POKRACOVANI.md, úkol 7). Třída `visited`
+   na pinu zůstává (filtrování/hlasování v applyFilter na ní závisí),
+   jen se vizuálně nic nezobrazuje. */
 /* Místa v plánu — celý pin ve tvaru srdce, ne malý odznak navíc.
    Bílá kontura řešena dvěma vrstvami stejného clip-path tvaru (blur přes
    drop-shadow byl na screenshotu prakticky neviditelný): venkovní box
@@ -902,7 +896,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 /* Srdce má vizuální těžiště níž než čtvercový box (hrot dole) — písmeno
    mírně posunout, ať sedí opticky uprostřed, ne jen matematicky. */
 .lop-pin-heart-fill span { margin-top: 2px; }
-.lop-pin.lop-pin-heart.visited::after { top: -4px; right: -4px; }
 
 .rt-tip {
   position: fixed; z-index: 900;
