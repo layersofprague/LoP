@@ -1,0 +1,119 @@
+{
+  "id": "A001",
+  "title": {
+    "cs": "Budova <em>Elektrických podniků</em>",
+    "en": "The <em>Electric Company</em> Building"
+  },
+  "pageTitle": {
+    "cs": "Budova Elektrických podniků — LayersOfPrague",
+    "en": "The Electric Company Building — LayersOfPrague"
+  },
+  "metaDesc": {
+    "cs": "Největší administrativní budova prvorepublikové Prahy. Adolf Benš a Josef Kříž, 1927–1935, keramický plášť a klimatizace Carrier. Dnes Bubenská 1.",
+    "en": "The largest office building in interwar Prague. Adolf Benš and Josef Kříž, 1927–1935, ceramic cladding and Carrier air conditioning. Today Bubenská 1."
+  },
+  "lede": {
+    "cs": "Soutěž v roce 1926 vyhráli dva začínající architekti — Adolf Benš a Josef Kříž. Navrhli budovu, která nebyla jen sídlem úřadu, ale ukázkou toho, co tehdejší technika umí: keramický plášť, klimatizace Carrier, teplo dálkově z holešovické elektrárny. Otevřela se v den Masarykových 85. narozenin.",
+    "en": "The 1926 competition was won by two architects at the start of their careers — Adolf Benš and Josef Kříž. What they designed was not merely an office block but a showcase of what technology could then do: a ceramic skin, Carrier air conditioning, heat piped in from the Holešovice power station. It opened on Masaryk’s 85th birthday."
+  },
+  "facts": [
+    {
+      "k": {
+        "cs": "Postaveno",
+        "en": "Built"
+      },
+      "v": "1927–1935"
+    },
+    {
+      "k": {
+        "cs": "Architekti",
+        "en": "Architects"
+      },
+      "v": "Adolf Benš, Josef Kříž"
+    },
+    {
+      "k": {
+        "cs": "Obestavěný prostor",
+        "en": "Built volume"
+      },
+      "v": "152 274 m³"
+    },
+    {
+      "k": {
+        "cs": "Kancelářské plochy",
+        "en": "Office space"
+      },
+      "v": "33 000 m²"
+    },
+    {
+      "k": {
+        "cs": "Fasáda",
+        "en": "Facade"
+      },
+      "v": "keramický obklad Rakodur"
+    },
+    {
+      "k": {
+        "cs": "Památková ochrana",
+        "en": "Heritage listing"
+      },
+      "v": "ÚSKP 40593/1-1559"
+    }
+  ],
+  "access": {
+    "exterior": "public",
+    "interior": "restricted",
+    "note": {
+      "cs": "Budova slouží jako kancelářský komplex, běžně tedy interiér přístupný není. Vstupní hala se schodištěm a páternostery se otevírá při Open House Praha.",
+      "en": "The building is in use as an office complex, so the interior is not normally accessible. The entrance hall with its staircase and paternoster lifts opens during Open House Prague."
+    }
+  },
+  "ranking": {
+    "author": "layersofprague",
+    "rankLabel": {
+      "cs": "—",
+      "en": "—"
+    }
+  },
+  "curatorStops": 6,
+  "galleryCount": 0,
+  "captions": {
+    "copyToday": {
+      "cs": "2026",
+      "en": "2026"
+    },
+    "copyHist": {
+      "cs": "1935",
+      "en": "1935"
+    }
+  },
+  "curiosityTeaser": {
+    "cs": "Věděli jste, že budova byla černá?",
+    "en": "Did you know the building used to be black?"
+  },
+  "curiosity": {
+    "cs": "Světlý keramický plášť byl za druhé světové války načerněn, aby při náletech neposloužil jako orientační bod. Po válce se čerň smývala louhem, který obklad <strong>nenávratně poškodil</strong> — a právě proto ho bylo nutné při rekonstrukci v letech 2018–2020 vyměnit. Fasáda, kterou dnes vidíte, je tedy nová, ale vychází z původních tvarů.",
+    "en": "During the Second World War the pale ceramic skin was painted black so that it would not serve as a landmark during air raids. After the war the black was washed off with lye, which damaged the cladding <strong>beyond repair</strong> — which is precisely why it had to be replaced during the 2018–2020 restoration. The facade you see today is therefore new, though it follows the original forms."
+  },
+  "insiderTeaser": {
+    "cs": "Všimli jste si, že budova je souměrná?",
+    "en": "Have you noticed the building is symmetrical?"
+  },
+  "insider": {
+    "p1": {
+      "cs": "Symetrie není estetické rozhodnutí. Podle vyjádření architektů odráží <strong>dvě rovnocenná oddělení</strong> — energii na jižní straně a dráhy na severní, jejichž úřadovny se rozkládaly kolem ústřední haly.",
+      "en": "The symmetry is not an aesthetic choice. According to the architects it reflects <strong>two equally weighted departments</strong> — energy on the south side and railways on the north, whose offices were arranged around the central hall."
+    },
+    "p2": {
+      "cs": "Ocelová kostra posledního patra měla umožnit jeho rozebrání a nadstavbu dalších podlaží, ke které nikdy nedošlo. V budově se nachází dva původní páternostery, které byly při rekonstrukci znovu zprovozněny.",
+      "en": "The steel frame of the top floor was meant to allow it to be dismantled and further storeys added — which never happened. The building has two original paternoster lifts, put back into service during the restoration."
+    }
+  },
+  "insiderLink": {
+    "url": "https://www.openhousepraha.cz/",
+    "label": {
+      "cs": "Open House Praha",
+      "en": "Open House Prague"
+    }
+  }
+}
