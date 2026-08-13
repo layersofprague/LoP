@@ -685,21 +685,23 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 .filter-close-btn {
   appearance: none; cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  /* Bílá + zřetelný okraj/stín — pozadí modalu je téměř stejný odstín
-     jako F8F8F6, splývalo by to. */
-  background: #fff; border: 1.5px solid var(--ink-4); border-radius: 10px;
+  display: flex; align-items: center; gap: 4px;
+  /* Přesně podle overview.html .ctrl-btn-filter — bez rámečku, jen
+     pozadím odlišené, box-shadow navíc (overview sedí v běžném obsahu
+     stránky, tenhle puck plave nad modalem, potřebuje aspoň nádech
+     odstupu, i když modal za ním je skoro stejný odstín). */
+  background: #F8F8F6; border: none; border-radius: 10px;
   padding: 5px 9px;
-  color: var(--ink-2);
-  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
-  box-shadow: 0 3px 14px rgba(0,0,0,.18);
+  color: var(--ink-4);
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
   transition: background .15s, color .15s;
 }
 .filter-close-btn:hover { background: var(--paper-2); color: var(--ink-2); }
 .filter-close-btn .filter-icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .filter-close-btn .filter-dots { display: flex; gap: 2px; align-items: center; }
 .filter-close-btn .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
-.filter-close-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.filter-close-btn svg { width: 14px; height: 14px; flex-shrink: 0; pointer-events: none; }
 .filter-close-btn .filter-cnt { font-size: 10px; color: var(--ink-5); }
 .filter-puck {
   display: flex; flex-direction: row; align-items: center; gap: 5px;
@@ -2045,6 +2047,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
             </span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           </span>
+          <span id="filterCloseLabel">Filtr</span>
           <span class="filter-cnt"><span id="filterCloseActive">—</span>/<span id="filterCloseTotal">—</span></span>
         </button>
       </div>
@@ -3343,6 +3346,7 @@ function applyFilterModalI18n() {
   setTxt('fmReset',    'overview.reset');
   const closeBtn = document.getElementById('filterCloseBtn');
   if (closeBtn) closeBtn.title = t('overview.close');
+  setTxt('filterCloseLabel', 'overview.filter');
 }
 
 function initDistSlider() {
