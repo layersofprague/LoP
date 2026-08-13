@@ -873,29 +873,32 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    (.lop-pin-heart) je bílé srdce v plné velikosti, vnitřní
    (.lop-pin-heart-fill) je červené srdce zmenšené přes transform:scale
    — mezi nimi vznikne ostrý prstenec bílé, vizuálně stejně silný jako
-   `border:2px` u kulatých pinů. O trochu větší než kulaté piny (28px
-   místo 24px), ať srdce nepůsobí drobně/namačkaně. */
+   `border:2px` u kulatých pinů. Box 32×32 (ne 24×24 jako originální
+   ikonka odznaku) — ta cesta má sama o sobě dost vnitřního odstupu
+   (navržená jako malá 14px ikonka, ne jako celý pin), takže i vycentrovaná
+   ve svém boxu vizuálně nevyplní stejnou plochu jako kruh s bordrem;
+   32×32 to vyrovnává (ověřeno výpočtem bounding boxu, ne odhadem). */
 .lop-pin.lop-pin-heart {
-  width: 28px; height: 28px;
+  width: 32px; height: 32px;
   background: var(--paper);
   border: none;
   border-radius: 0;
-  clip-path: path('M24.27 5.37a6.42 6.42 0 0 0-9.1 0L14 6.65l-1.17 -1.17a6.42 6.42 0 1 0-9.1 9.1l1.17 1.17l9.1 9.1l9.1 -9.1l1.17 -1.17a6.42 6.42 0 0 0 0-9.1z');
+  clip-path: path('M27.73 6.13a7.33 7.33 0 0 0-10.4 0L16 7.6l-1.33 -1.33a7.33 7.33 0 1 0-10.4 10.4l1.33 1.33l10.4 10.4l10.4 -10.4l1.33 -1.33a7.33 7.33 0 0 0 0-10.4z');
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
   overflow: visible;
 }
 .lop-pin-heart-fill {
   position: absolute; inset: 0;
   background: var(--accent);
-  clip-path: path('M24.27 5.37a6.42 6.42 0 0 0-9.1 0L14 6.65l-1.17 -1.17a6.42 6.42 0 1 0-9.1 9.1l1.17 1.17l9.1 9.1l9.1 -9.1l1.17 -1.17a6.42 6.42 0 0 0 0-9.1z');
-  transform: scale(.8);
+  clip-path: path('M27.73 6.13a7.33 7.33 0 0 0-10.4 0L16 7.6l-1.33 -1.33a7.33 7.33 0 1 0-10.4 10.4l1.33 1.33l10.4 10.4l10.4 -10.4l1.33 -1.33a7.33 7.33 0 0 0 0-10.4z');
+  transform: scale(.82);
   display: flex; align-items: center; justify-content: center;
   color: var(--paper);
 }
 /* Srdce má vizuální těžiště níž než čtvercový box (hrot dole) — písmeno
    mírně posunout, ať sedí opticky uprostřed, ne jen matematicky. */
-.lop-pin-heart-fill span { margin-top: 4px; }
-.lop-pin.lop-pin-heart.visited::after { top: -5px; right: -5px; }
+.lop-pin-heart-fill span { margin-top: 5px; }
+.lop-pin.lop-pin-heart.visited::after { top: -4px; right: -4px; }
 
 .rt-tip {
   position: fixed; z-index: 900;
@@ -3022,7 +3025,7 @@ function pinIconHTML(loc) {
   // (transform:scale), takže vznikne ostrý prstenec bílé mezi nimi,
   // stejně silný jako `border:2px` u kulatých pinů.
   if (wished) {
-    const wishedLbl = '<span style="font-size:10px;font-weight:700;line-height:1">' + catLetter + '</span>';
+    const wishedLbl = '<span style="font-size:11px;font-weight:700;line-height:1">' + catLetter + '</span>';
     return `${cone}<div class="lop-pin lop-pin-heart ${visited} wished"><div class="lop-pin-heart-fill">${wishedLbl}</div></div>`;
   }
   if (style === 'drop') {
