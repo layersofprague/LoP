@@ -359,5 +359,45 @@
     "paywall": false,
     "rating": null,
     "ratingCount": 0
+  },
+  {
+    "id": "A001",
+    "lat": 50.098647,
+    "lng": 14.436805,
+    "cat": "arch",
+    "thumb": "foto/A001_ove_thumb.jpg",
+    "name": {
+      "cs": "Budova Elektrických podniků",
+      "en": "The Electric Company Building"
+    },
+    "teaser": {
+      "cs": "Největší administrativní budova prvorepublikové Prahy a jedna z prvních plně klimatizovaných staveb v Československu. Poslední patro dostalo ocelovou kostru, aby se dalo nadstavět.",
+      "en": "The largest office building in interwar Prague and one of the first fully air-conditioned buildings in Czechoslovakia. Its top floor was given a steel frame so more storeys could be added later."
+    },
+    "district": "holesovice",
+    "prague": 7,
+    "tags": [
+      "building",
+      "palace"
+    ],
+    "style": [
+      "Fu"
+    ],
+    "people": [
+      "Adolf Benš",
+      "Josef Kříž"
+    ],
+    "yearBuilt": 1935,
+    "yearPhoto": 1935,
+    "routes": [],
+    "routeOrder": {},
+    "points": 60,
+    "difficulty": "easy",
+    "addedBy": "admin",
+    "addedAt": "2026-08-03",
+    "published": false,
+    "paywall": false,
+    "rating": 0,
+    "ratingCount": 0
   }
 ]
