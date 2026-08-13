@@ -38,10 +38,9 @@
   --cat-hist-soft: #c9c9c4;
   --cat-arch: #3B5F84;
   --cat-arch-soft: #c6d2df;
-  --cat-art:  #C0522A;
-  --cat-art-soft: #e8c4b4;
-  --cat-fun:  #E0A020;
-  --cat-fun-soft: #f0d8a0;
+  /* Umění zdědilo žlutou po zrušené kategorii Zajímavosti (viz zápis) */
+  --cat-art:  #E0A020;
+  --cat-art-soft: #f0d8a0;
 
   /* accents */
   --accent: #b04020;
@@ -860,7 +859,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 .lop-pin.rt-active { transform: scale(1.2); }
 .lop-pin.cat-hist { background: var(--cat-hist); }
 .lop-pin.cat-arch { background: var(--cat-arch); }
-.lop-pin.cat-fun  { background: var(--cat-fun); }
+.lop-pin.cat-art  { background: var(--cat-art); }
 /* Fajfka "navštíveno" na pinu odstraněna — nadbytečná, jde vyfiltrovat
    přes chip Navštíveno (viz POKRACOVANI.md, úkol 7). Třída `visited`
    na pinu zůstává (filtrování/hlasování v applyFilter na ní závisí),
@@ -926,7 +925,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 }
 .rt-tip-img[data-cat="arch"] { background: #EEF2F7; }
 .rt-tip-img[data-cat="art"]  { background: #F5EDE8; }
-.rt-tip-img[data-cat="fun"]  { background: #F5F2E8; }
 /* fallback písmeno ve foto */
 .rt-tip-fallback {
   position: absolute; inset: 0;
@@ -1207,7 +1205,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   color: var(--cat-hist);
 }
 .sheet-lede.cat-arch::first-letter { color: var(--cat-arch); }
-.sheet-lede.cat-fun::first-letter  { color: var(--cat-fun); }
+.sheet-lede.cat-art::first-letter  { color: var(--cat-art); }
 
 .sheet-section { margin-bottom: 22px; }
 .sec-head {
@@ -1248,7 +1246,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   letter-spacing: -.02em;
 }
 .cat-arch .step-num { color: var(--cat-arch); }
-.cat-fun  .step-num { color: var(--cat-fun); }
+.cat-art  .step-num { color: var(--cat-art); }
 .step-body h4 {
   font-family: 'Fraunces', serif;
   font-size: 16px; font-weight: 500; line-height: 1.25;
@@ -1264,13 +1262,13 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   margin: 20px 0;
   padding: 14px 16px 14px 18px;
   background: var(--paper-2);
-  border-left: 2px solid var(--cat-fun);
+  border-left: 2px solid var(--cat-art);
   border-radius: 0 10px 10px 0;
 }
 .tip-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
-  color: var(--cat-fun);
+  color: var(--cat-art);
   margin-bottom: 4px;
 }
 .tip-text {
@@ -1396,7 +1394,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   content: '';
   position: absolute; top: 0; right: -10%;
   width: 180px; height: 180px;
-  background: radial-gradient(circle, var(--cat-fun) 0%, transparent 65%);
+  background: radial-gradient(circle, var(--cat-art) 0%, transparent 65%);
   opacity: .35;
 }
 .pc-kick {
@@ -1432,7 +1430,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   background: rgba(243,237,225,.15);
   overflow: hidden;
 }
-.pc-bar-fill { height: 100%; background: var(--cat-fun); border-radius: 3px; transition: width .6s var(--ease); }
+.pc-bar-fill { height: 100%; background: var(--cat-art); border-radius: 3px; transition: width .6s var(--ease); }
 
 .rs-label {
   font-family: 'JetBrains Mono', monospace;
@@ -1747,7 +1745,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   pointer-events: auto;
 }
 #lop-snackbar a {
-  color: var(--cat-fun); font-weight: 500;
+  color: var(--cat-art); font-weight: 500;
   text-decoration: underline; text-underline-offset: 2px;
 }
 
@@ -2010,7 +2008,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
               <span style="background:var(--cat-hist)"></span>
               <span style="background:var(--cat-arch)"></span>
               <span style="background:var(--cat-art)"></span>
-              <span style="background:var(--cat-fun)"></span>
             </span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" fill="none"/></svg>
           </span>
@@ -2050,7 +2047,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
                       <span style="background:var(--cat-hist)"></span>
                       <span style="background:var(--cat-arch)"></span>
                       <span style="background:var(--cat-art)"></span>
-                      <span style="background:var(--cat-fun)"></span>
                     </span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                   </span>
@@ -2502,8 +2498,7 @@ function getText(val) {
 const CAT = {
   hist:   { name: 'Historie',      color: '#4A4A48', letter: 'H' },
   arch:   { name: 'Architektura',  color: '#3B5F84', letter: 'A' },
-  art:    { name: 'Umění',          color: '#C0522A', letter: 'U' },
-  fun:    { name: 'Zajímavosti',   color: '#E0A020', letter: 'Z' },
+  art:    { name: 'Umění',          color: '#E0A020', letter: 'U' },
   nature: { name: 'Příroda',       color: '#3a6e4a', letter: 'P' },
   legend: { name: 'Legendy',       color: '#6a3a6e', letter: 'L' }
 };
@@ -2834,13 +2829,13 @@ function showTooltip(loc, m, rt) {
       </div>`;
 
   // Foto
-  const catLetter = {hist:'H', arch:'A', art:'U', fun:'Z'}[loc.cat] || 'H';
+  const catLetter = {hist:'H', arch:'A', art:'U'}[loc.cat] || 'H';
   const imgHtml = loc.photoThumb
     ? `<img src="${loc.photoThumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
     : '';
 
   rt.innerHTML = `
-    <a href="place/${loc.id}.html" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${loc.cat==='arch'?'#EEF2F7':loc.cat==='fun'?'#F5F2E8':'#EFEFED'};" onclick="event.stopPropagation()">
+    <a href="place/${loc.id}.html" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${loc.cat==='arch'?'#EEF2F7':'#EFEFED'};" onclick="event.stopPropagation()">
       ${imgHtml}
       <div class="rt-tip-fallback">${catLetter}</div>
       <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${c.color};z-index:2;"></div>
@@ -2918,7 +2913,7 @@ function showTooltip(loc, m, rt) {
 /* ═══════════════ MAP ═══════════════ */
 let _markers = [];
 window._markers = _markers;
-const FILTER = { hist:'auto', arch:'auto', art:'auto', fun:'auto', visited:'full', wished:'full' };
+const FILTER = { hist:'auto', arch:'auto', art:'auto', visited:'full', wished:'full' };
 window.FILTER = FILTER;
 /* Sloh — binární výběr (na rozdíl od kategorií): prázdné
    = bez omezení, neprázdné = logické NEBO přes .some() (viz applyFilter). */
@@ -2967,7 +2962,7 @@ function toggleFilter() {
 function updateFilterPuck() {
   const puck = document.getElementById('filterPuck');
   if (!puck) return;
-  const active = FILTER.hist !== 'auto' || FILTER.arch !== 'auto' || FILTER.art !== 'auto' || FILTER.fun !== 'auto'
+  const active = FILTER.hist !== 'auto' || FILTER.arch !== 'auto' || FILTER.art !== 'auto'
     || FILTER.visited !== 'full' || FILTER.wished !== 'full'
     || ERA_STATE.from > ERA_START || ERA_STATE.to < ERA_END
     || DIST_STATE.max !== null
@@ -2984,7 +2979,7 @@ function pinLabel(num) {
   return s;
 }
 
-const CAT_HEX = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
+const CAT_HEX = { hist: '#4A4A48', arch: '#3B5F84', art: '#E0A020' };
 
 function viewConeHTML(loc) {
   // Kužel se kreslí jen s ověřeným arTarget (viz target-editor.html) —
@@ -3054,7 +3049,7 @@ function rebuildMarkers() {
 
 function buildChips() {
   const el = document.getElementById('mapChips');
-  const counts = { hist:0, arch:0, art:0, fun:0 };
+  const counts = { hist:0, arch:0, art:0 };
   LOCATIONS.forEach(l => { if (l.cat in counts) counts[l.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
@@ -3076,13 +3071,6 @@ function buildChips() {
       <button class="chip" data-cat="art" style="--catcolor: var(--cat-art)">
         <span class="chip-swatch" style="background: var(--cat-art)"></span>
         ${t('cat.art')} <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span>
-      </button>
-    </div>
-    <div class="chip-wrap">
-      <span class="chip-state-lbl" id="lbl-fun">výchozí</span>
-      <button class="chip" data-cat="fun" style="--catcolor: var(--cat-fun)">
-        <span class="chip-swatch" style="background: var(--cat-fun)"></span>
-        ${t('cat.fun')} <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span>
       </button>
     </div>
     <div class="chip-wrap">
@@ -3195,7 +3183,6 @@ function updateChipLabels() {
   set('lbl-hist',    LABELS_CAT[FILTER.hist]    || '');
   set('lbl-arch',    LABELS_CAT[FILTER.arch]    || '');
   set('lbl-art',     LABELS_CAT[FILTER.art]     || '');
-  set('lbl-fun',     LABELS_CAT[FILTER.fun]     || '');
   set('lbl-visited', LABELS_WISH[FILTER.visited]|| '');
   set('lbl-wished',  LABELS_WISH[FILTER.wished] || '');
 }
@@ -3388,7 +3375,7 @@ function bearingDeg(lat1, lng1, lat2, lng2) {
 }
 
 function resetFilters() {
-  FILTER.hist = FILTER.arch = FILTER.art = FILTER.fun = 'auto';
+  FILTER.hist = FILTER.arch = FILTER.art = 'auto';
   FILTER.visited = FILTER.wished = 'full';
   ERA_STATE.from = ERA_START; ERA_STATE.to = ERA_END;
   DIST_STATE.max = null;
@@ -4188,7 +4175,7 @@ let   _archPanelOpen  = false;
    v a-map.json jsou architektonické tipy, takže "Architektura" v hlavním
    filtru na ně musí mít stejný vliv jako na publikovaná místa. */
 function anyCatSelected() {
-  return ['hist', 'arch', 'art', 'fun'].some(c => FILTER[c] !== 'auto');
+  return ['hist', 'arch', 'art'].some(c => FILTER[c] !== 'auto');
 }
 function _archCategoryState() {
   if (!anyCatSelected()) return 'full';

@@ -159,7 +159,7 @@
     "id": "H301",
     "lat": 50.0911,
     "lng": 14.4016,
-    "cat": "fun",
+    "cat": "arch",
     "thumb": "foto/H301_ove_thumb.jpg",
     "name": {
       "cs": "Pražský hrad",
@@ -226,7 +226,10 @@
     "yearBuilt": 1894,
     "yearPhoto": 1930,
     "arHeading": 352,
-    "arTarget": { "lat": 50.1074339, "lng": 14.4558138 },
+    "arTarget": {
+      "lat": 50.1074339,
+      "lng": 14.4558138
+    },
     "arRadius": 12,
     "routes": [],
     "routeOrder": {},
@@ -245,7 +248,7 @@
     "id": "H302",
     "lat": 50.0939,
     "lng": 14.4224,
-    "cat": "fun",
+    "cat": "arch",
     "thumb": "foto/H302_ove_thumb.jpg",
     "name": {
       "cs": "Letenské sady",
@@ -348,7 +351,10 @@
     "yearBuilt": 1653,
     "yearPhoto": 1900,
     "arHeading": 244.2,
-    "arTarget": { "lat": 50.0893921, "lng": 14.3999648 },
+    "arTarget": {
+      "lat": 50.0893921,
+      "lng": 14.3999648
+    },
     "arRadius": 15,
     "routes": [],
     "points": 50,

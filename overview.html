@@ -29,8 +29,8 @@
   --ok:       #3d7a4a;
   --cat-hist: #4A4A48;
   --cat-arch: #3B5F84;
-  --cat-fun:  #E0A020;
-  --cat-art:  #C0522A;
+  /* Umění zdědilo žlutou po zrušené kategorii Zajímavosti */
+  --cat-art:  #E0A020;
   --ease:     cubic-bezier(.22,.8,.36,1);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -196,7 +196,6 @@ a { color: inherit; text-decoration: none; }
 .chip[data-cat="hist"].state-on { border-color: var(--cat-hist); color: var(--cat-hist); }
 .chip[data-cat="arch"].state-on { border-color: var(--cat-arch); color: var(--cat-arch); }
 .chip[data-cat="art"].state-on  { border-color: var(--cat-art);  color: var(--cat-art);  }
-.chip[data-cat="fun"].state-on  { border-color: var(--cat-fun);  color: var(--cat-fun);  }
 .chip[data-cat].state-on .chip-count { opacity: .7; }
 /* "jen tyto" u navštíveno a plánu — barevný obrys jako u kategorií */
 .chip[data-filter="wished"].state-on  { background:#fff; border-color: var(--accent); color: var(--accent); }
@@ -323,7 +322,6 @@ a { color: inherit; text-decoration: none; }
   background: #EFEFED;
 }
 .place-thumb[data-cat="arch"] { background: #EEF2F7; }
-.place-thumb[data-cat="fun"]  { background: #F5F2E8; }
 .place-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .place-thumb-fallback { position: relative; z-index: 1; pointer-events: none; }
 .place-cat-line { position: absolute; top: 0; left: 0; bottom: 0; width: 3px; z-index: 2; }
@@ -651,7 +649,6 @@ a { color: inherit; text-decoration: none; }
 .tax-banner .tb-chip[data-tone="cat-hist"] { background:#fff; border-color: var(--cat-hist); color: var(--cat-hist); }
 .tax-banner .tb-chip[data-tone="cat-arch"] { background:#fff; border-color: var(--cat-arch); color: var(--cat-arch); }
 .tax-banner .tb-chip[data-tone="cat-art"]  { background:#fff; border-color: var(--cat-art);  color: var(--cat-art);  }
-.tax-banner .tb-chip[data-tone="cat-fun"]  { background:#fff; border-color: var(--cat-fun);  color: var(--cat-fun);  }
 .tax-banner .tb-chip:hover { box-shadow: 0 3px 10px rgba(26,24,20,.28); transform: translateY(-1px); }
 .tax-banner .tb-chip:active { transform: translateY(0); box-shadow: none; }
 .tax-banner .tb-chip svg { opacity: .65; flex-shrink: 0; }
@@ -679,7 +676,6 @@ a { color: inherit; text-decoration: none; }
                 <span style="background:var(--cat-hist)"></span>
                 <span style="background:var(--cat-arch)"></span>
                 <span style="background:var(--cat-art)"></span>
-                <span style="background:var(--cat-fun)"></span>
               </span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             </span>
@@ -711,7 +707,6 @@ a { color: inherit; text-decoration: none; }
                   <span style="background:var(--cat-hist)"></span>
                   <span style="background:var(--cat-arch)"></span>
                   <span style="background:var(--cat-art)"></span>
-                  <span style="background:var(--cat-fun)"></span>
                 </span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
               </span>
@@ -768,8 +763,8 @@ a { color: inherit; text-decoration: none; }
   } catch(e) {}
 })();
 
-const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#C0522A', fun: '#E0A020' };
-const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U', fun: 'Z' };
+const CAT_COLOR  = { hist: '#4A4A48', arch: '#3B5F84', art: '#E0A020' };
+const CAT_LETTER = { hist: 'H', arch: 'A', art: 'U' };
 const CAT_NAME   = new Proxy({}, { get: (_, k) => t('cat.' + String(k)) });
 const VISIT_KEY  = 'lop_visited_v1';
 const WISH_KEY   = 'lop_wishlist_v2';
@@ -1214,7 +1209,7 @@ function buildStyleChips() {
 
 function buildChips() {
   const el = document.getElementById('mapChips'); if (!el) return;
-  const counts = { hist:0, arch:0, art:0, fun:0 };
+  const counts = { hist:0, arch:0, art:0 };
   PLACES.forEach(l => { if(counts[l.cat] !== undefined) counts[l.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
@@ -1225,9 +1220,6 @@ function buildChips() {
     </div>
     <div class="chip-wrap">
       <button class="chip" data-cat="art"><span class="chip-swatch" style="background:var(--cat-art)"></span>${t('cat.art')} <span class="chip-count">${counts.art}</span><span class="chip-filter-icon"></span></button>
-    </div>
-    <div class="chip-wrap">
-      <button class="chip" data-cat="fun"><span class="chip-swatch" style="background:var(--cat-fun)"></span>${t('cat.fun')} <span class="chip-count">${counts.fun}</span><span class="chip-filter-icon"></span></button>
     </div>
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-visited">výchozí</span>
@@ -1438,7 +1430,7 @@ function render() {
   }
 
   let html='';
-  ['hist','arch','fun'].forEach(cat=>{
+  ['hist','arch','art'].forEach(cat=>{
     const items=filtered.filter(p=>p.cat===cat); if(!items.length) return;
     html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
     html += `<div class="place-section-list">`;
