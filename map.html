@@ -366,6 +366,15 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   letter-spacing: .04em;
   font-size: 11px;
 }
+/* Informační počet vedle "Kategorie" — jen text, žádná funkce (stejně
+   jako v overview.html). Zavírání modalu řeší klik mimo nebo tlačítko
+   "Zobrazit místa" dole ve footeru. */
+.fm-cnt-wrap { display: flex; align-items: center; gap: 4px; }
+.fm-cnt-wrap svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ink-4); }
+.fm-cnt-wrap .filter-dots { display: flex; gap: 2px; align-items: center; }
+.fm-cnt-wrap .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
+.fm-cnt-wrap .filter-cnt { font-size: 10px; color: var(--ink-5); }
+.fm-cnt-wrap #fmCntActive { font-size: 12px; font-weight: 500; color: var(--ink-5); }
 .filter-chips {
   display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end;
 }
@@ -673,36 +682,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   z-index: 500;
   pointer-events: auto;
 }
-/* Druhý, samostatný puck jen pro zavření modalu — světlý design podle
-   overview.html (.ctrl-btn-filter), na stejné pozici jako ten tmavý,
-   zobrazí se přes něj až po otevření (viz toggleFilter()). Nesahá se
-   tím na originální puck (jeho vzhled/pozici řídí i alignPuck()). */
-.filter-close-wrap {
-  position: fixed;
-  top: calc(var(--header-h, 52px) + 8px);
-  right: 14px;
-  z-index: 560; /* nad modalem (550) */
-}
-.filter-close-btn {
-  appearance: none; cursor: pointer;
-  display: flex; align-items: center; gap: 4px;
-  /* Přesně podle overview.html .ctrl-btn-filter — bez rámečku, jen
-     pozadím odlišené, box-shadow navíc (overview sedí v běžném obsahu
-     stránky, tenhle puck plave nad modalem, potřebuje aspoň nádech
-     odstupu, i když modal za ním je skoro stejný odstín). */
-  background: #F8F8F6; border: none; border-radius: 10px;
-  padding: 5px 9px;
-  color: var(--ink-4);
-  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
-  box-shadow: 0 2px 10px rgba(0,0,0,.12);
-  transition: background .15s, color .15s;
-}
-.filter-close-btn:hover { background: var(--paper-2); color: var(--ink-2); }
-.filter-close-btn .filter-icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.filter-close-btn .filter-dots { display: flex; gap: 2px; align-items: center; }
-.filter-close-btn .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
-.filter-close-btn svg { width: 14px; height: 14px; flex-shrink: 0; pointer-events: none; }
-.filter-close-btn .filter-cnt { font-size: 10px; color: var(--ink-5); }
 .filter-puck {
   display: flex; flex-direction: row; align-items: center; gap: 5px;
   padding: 5px 10px;
@@ -1622,7 +1601,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   .map-hint   { left: 14px; right: 14px; bottom: 16px; }
   .map-puck-wrap { right: 78px; }
   .filter-puck-wrap { right: 78px; }
-  .filter-close-wrap { right: 78px; }
   .filter-modal {
     top: 12px; left: 12px; right: 78px; bottom: 12px;
   }
@@ -1676,7 +1654,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   .map-hint { left: 100px; right: 24px; bottom: 24px; }
   .map-puck-wrap { right: 24px; bottom: 80px; }
   .filter-puck-wrap { right: 24px; }
-  .filter-close-wrap { right: 24px; }
   .filter-modal {
     top: 12px; left: 12px; right: 108px; bottom: 12px;
   }
@@ -2035,23 +2012,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
         </button>
       </div>
 
-      <!-- Zavírací puck — jen když je modal otevřený, viz toggleFilter() -->
-      <div class="filter-close-wrap" id="filterCloseWrap" hidden>
-        <button class="filter-close-btn" id="filterCloseBtn" onclick="toggleFilter()" title="Zavřít">
-          <span class="filter-icon-wrap">
-            <span class="filter-dots">
-              <span style="background:var(--cat-hist)"></span>
-              <span style="background:var(--cat-arch)"></span>
-              <span style="background:var(--cat-art)"></span>
-              <span style="background:var(--cat-fun)"></span>
-            </span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          </span>
-          <span id="filterCloseLabel">Filtr</span>
-          <span class="filter-cnt"><span id="filterCloseActive">—</span>/<span id="filterCloseTotal">—</span></span>
-        </button>
-      </div>
-
       <!-- Arch layer panel -->
       <div class="arch-panel-wrap" id="archPanelWrap">
         <button class="arch-panel-toggle" id="archPanelToggle" onclick="toggleArchPanel()">
@@ -2073,7 +2033,21 @@ body.lop-return .llo-bottom-placeholder { display: block; }
         <div class="filter-modal" id="filterModal">
           <div class="filter-modal-inner">
             <div class="filter-row">
-              <div class="filter-lbl"><span id="fmCategory">Kategorie</span></div>
+              <div class="filter-lbl">
+                <span id="fmCategory">Kategorie</span>
+                <span class="fm-cnt-wrap">
+                  <span class="filter-icon-wrap">
+                    <span class="filter-dots">
+                      <span style="background:var(--cat-hist)"></span>
+                      <span style="background:var(--cat-arch)"></span>
+                      <span style="background:var(--cat-art)"></span>
+                      <span style="background:var(--cat-fun)"></span>
+                    </span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  </span>
+                  <span class="filter-cnt"><span id="fmCntActive">—</span><span id="fmCntTotal"></span></span>
+                </span>
+              </div>
               <div class="filter-chips" id="mapChips"></div>
             </div>
             <div class="filter-row" id="styleRow" hidden>
@@ -2966,7 +2940,6 @@ const DIST_STATE = { max: null };
 function toggleFilter() {
   const bd   = document.getElementById('filterBackdrop');
   const puckWrap = document.getElementById('mapPuckWrap');
-  const closeWrap = document.getElementById('filterCloseWrap');
   if (!bd) return;
   const isOpen = bd.classList.contains('open');
   const zoomCtrl = document.querySelector('.leaflet-control-zoom');
@@ -2974,12 +2947,10 @@ function toggleFilter() {
     bd.classList.remove('open');
     if (puckWrap) puckWrap.style.visibility = '';
     if (zoomCtrl) zoomCtrl.style.visibility = '';
-    if (closeWrap) closeWrap.hidden = true;
   } else {
     bd.classList.add('open');
     if (puckWrap) puckWrap.style.visibility = 'hidden';
     if (zoomCtrl) zoomCtrl.style.visibility = 'hidden';
-    if (closeWrap) closeWrap.hidden = false;
     requestAnimationFrame(() => buildEraTimeline());
   }
 }
@@ -3344,9 +3315,6 @@ function applyFilterModalI18n() {
   setTxt('fmEra',      'overview.era');
   setTxt('distLbl',    'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
-  const closeBtn = document.getElementById('filterCloseBtn');
-  if (closeBtn) closeBtn.title = t('overview.close');
-  setTxt('filterCloseLabel', 'overview.filter');
 }
 
 function initDistSlider() {
@@ -3530,10 +3498,13 @@ function applyFilter() {
   if (tot) tot.textContent = _markers ? _markers.length : '—';
   const badge = document.getElementById('filterBadge');
   if (badge) badge.innerHTML = '<span class="cnt-active">' + activeCount + '</span>/' + (_markers ? _markers.length : '—');
-  const closeActive = document.getElementById('filterCloseActive');
-  const closeTotal  = document.getElementById('filterCloseTotal');
-  if (closeActive) closeActive.textContent = activeCount;
-  if (closeTotal)  closeTotal.textContent  = _markers ? _markers.length : '—';
+  // Informační počet v řádku "Kategorie" uvnitř modalu — jen text, žádná
+  // funkce (stejně jako v overview.html; zavírání řeší klik mimo modal
+  // nebo tlačítko "Zobrazit místa" dole).
+  const fmA = document.getElementById('fmCntActive');
+  const fmT = document.getElementById('fmCntTotal');
+  if (fmA) fmA.textContent = activeCount;
+  if (fmT) fmT.textContent = '/' + (_markers ? _markers.length : '—');
   updateFilterPuck();
   updateApplyBtn(activeCount);
   refreshArchMarkers();
@@ -3593,14 +3564,11 @@ function initMap() {
     const bd    = document.getElementById('filterBackdrop');
     const modal = document.getElementById('filterModal');
     const puck  = document.getElementById('filterPuck');
-    const closeWrap = document.getElementById('filterCloseWrap');
     if (bd && bd.classList.contains('open') && modal && !modal.contains(e.target)
-        && (!puck || !puck.contains(e.target))
-        && (!closeWrap || !closeWrap.contains(e.target))) {
+        && (!puck || !puck.contains(e.target))) {
       bd.classList.remove('open');
       const pw = document.getElementById('mapPuckWrap'); if(pw) pw.style.visibility = '';
       const zc2 = document.querySelector('.leaflet-control-zoom'); if(zc2) zc2.style.visibility = '';
-      if (closeWrap) closeWrap.hidden = true;
     }
   }, true);
   // user location will be set by locateMe()
@@ -4413,7 +4381,6 @@ function alignPuck() {
   const zoomEl = document.querySelector('.leaflet-control-zoom');
   const puckEl = document.getElementById('mapPuckWrap');
   const filterWrap = document.getElementById('filterPuckWrap');
-  const closeWrap = document.getElementById('filterCloseWrap');
   if (!zoomEl || !puckEl) return;
   const zoomRect = zoomEl.getBoundingClientRect();
   const bottom = Math.round(window.innerHeight - zoomRect.bottom + zoomRect.height + 4);
@@ -4421,11 +4388,6 @@ function alignPuck() {
   puckEl.style.bottom = bottom + 'px';
   puckEl.style.right  = right  + 'px';
   if (filterWrap) filterWrap.style.right = right + 'px';
-  // Zavírací puck sedí na stejném místě jako ten hlavní — bez tohohle
-  // zůstával na statickém CSS right, který se od skutečné (JS dopočtené)
-  // pozice lišil a padal pod navbar (ten má vyšší z-index), takže nebyl
-  // vůbec vidět (viz report v chatu).
-  if (closeWrap) closeWrap.style.right = right + 'px';
   // Arch panel button — vlevo od filter pucku. Bere se skutečná levá
   // hrana filterWrapu (getBoundingClientRect), ne odhad jeho šířky —
   // fallback (dřívější `offsetWidth || 60`) se při prvním volání, než
