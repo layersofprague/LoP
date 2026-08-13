@@ -156,7 +156,12 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   display: flex;
   border-top: 1px solid var(--rule);
   background: #F8F8F6;
-  z-index: 500;
+  /* Nad modalem filtru (550) — jinak nav propadne pod poloprůhledný
+     zatmavený backdrop s blur(3px) a jeví se rozmazaný/ztlumený.
+     Layouty (portrait/landscape/desktop) mají modal už fyzicky
+     odsazený, aby nav nepřekrýval — tohle řeší jen malování backdropu,
+     který sahá přes celou obrazovku i tam, kde nav sedí. */
+  z-index: 700;
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .nav-item {
@@ -665,19 +670,35 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   position: fixed;
   top: calc(var(--header-h, 52px) + 8px);
   right: 14px;
-  /* Nad modalem filtru (550) — tenhle konkrétní puck slouží i jako
-     zavírací tlačítko, když je modal otevřený (viz .filter-puck.active
-     a toggleFilter()), takže musí zůstat viditelný a klikatelný nahoře.
-     Výchozí/Slohy pucky zůstávají pod modalem záměrně (z-index 500). */
-  z-index: 560;
+  z-index: 500;
   pointer-events: auto;
 }
-/* nav.js vkládá #lop-nav se z-index:90 — v overview.html to stačí (jejich
-   modal má z-index 80), ale map.html má modal na 550 kvůli plovoucím
-   puckům nad mapou. Bez přebití by navigace propadla pod modal a byla
-   by přes backdrop-filter rozmazaná. Scoped jen pro tuhle stránku,
-   nezasahuje do nav.js sdíleného napříč aplikací. */
-#lop-nav { z-index: 700 !important; }
+/* Druhý, samostatný puck jen pro zavření modalu — světlý design podle
+   overview.html (.ctrl-btn-filter), na stejné pozici jako ten tmavý,
+   zobrazí se přes něj až po otevření (viz toggleFilter()). Nesahá se
+   tím na originální puck (jeho vzhled/pozici řídí i alignPuck()). */
+.filter-close-wrap {
+  position: fixed;
+  top: calc(var(--header-h, 52px) + 8px);
+  right: 14px;
+  z-index: 560; /* nad modalem (550) */
+}
+.filter-close-btn {
+  appearance: none; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  background: #F8F8F6; border: 1.5px solid var(--rule); border-radius: 10px;
+  padding: 5px 9px;
+  color: var(--ink-4);
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  transition: background .15s, color .15s;
+}
+.filter-close-btn:hover { background: var(--paper-2); color: var(--ink-2); }
+.filter-close-btn .filter-icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.filter-close-btn .filter-dots { display: flex; gap: 2px; align-items: center; }
+.filter-close-btn .filter-dots span { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0; }
+.filter-close-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.filter-close-btn .filter-cnt { font-size: 10px; color: var(--ink-5); }
 .filter-puck {
   display: flex; flex-direction: row; align-items: center; gap: 5px;
   padding: 5px 10px;
@@ -1601,6 +1622,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   .map-hint   { left: 14px; right: 14px; bottom: 16px; }
   .map-puck-wrap { right: 78px; }
   .filter-puck-wrap { right: 78px; }
+  .filter-close-wrap { right: 78px; }
   .filter-modal {
     top: 12px; left: 12px; right: 78px; bottom: 12px;
   }
@@ -1654,6 +1676,7 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   .map-hint { left: 100px; right: 24px; bottom: 24px; }
   .map-puck-wrap { right: 24px; bottom: 80px; }
   .filter-puck-wrap { right: 24px; }
+  .filter-close-wrap { right: 24px; }
   .filter-modal {
     top: 12px; left: 12px; right: 108px; bottom: 12px;
   }
@@ -2009,6 +2032,22 @@ body.lop-return .llo-bottom-placeholder { display: block; }
             <span class="filter-puck-badge-label" id="filterPuckLabel">Filtr</span>
             <span class="filter-puck-badge-count" id="filterBadge"><span class="cnt-active">8</span>/8</span>
           </span>
+        </button>
+      </div>
+
+      <!-- Zavírací puck — jen když je modal otevřený, viz toggleFilter() -->
+      <div class="filter-close-wrap" id="filterCloseWrap" hidden>
+        <button class="filter-close-btn" id="filterCloseBtn" onclick="toggleFilter()" title="Zavřít">
+          <span class="filter-icon-wrap">
+            <span class="filter-dots">
+              <span style="background:var(--cat-hist)"></span>
+              <span style="background:var(--cat-arch)"></span>
+              <span style="background:var(--cat-art)"></span>
+              <span style="background:var(--cat-fun)"></span>
+            </span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          </span>
+          <span class="filter-cnt"><span id="filterCloseActive">—</span>/<span id="filterCloseTotal">—</span></span>
         </button>
       </div>
 
@@ -2927,6 +2966,7 @@ function toggleFilter() {
   const bd   = document.getElementById('filterBackdrop');
   const puck = document.getElementById('filterPuck');
   const puckWrap = document.getElementById('mapPuckWrap');
+  const closeWrap = document.getElementById('filterCloseWrap');
   if (!bd) return;
   const isOpen = bd.classList.contains('open');
   const zoomCtrl = document.querySelector('.leaflet-control-zoom');
@@ -2935,11 +2975,13 @@ function toggleFilter() {
     if (puck) puck.classList.remove('active');
     if (puckWrap) puckWrap.style.visibility = '';
     if (zoomCtrl) zoomCtrl.style.visibility = '';
+    if (closeWrap) closeWrap.hidden = true;
   } else {
     bd.classList.add('open');
     if (puck) puck.classList.add('active');
     if (puckWrap) puckWrap.style.visibility = 'hidden';
     if (zoomCtrl) zoomCtrl.style.visibility = 'hidden';
+    if (closeWrap) closeWrap.hidden = false;
     requestAnimationFrame(() => buildEraTimeline());
   }
 }
@@ -3304,6 +3346,8 @@ function applyFilterModalI18n() {
   setTxt('fmEra',      'overview.era');
   setTxt('distLbl',    'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
+  const closeBtn = document.getElementById('filterCloseBtn');
+  if (closeBtn) closeBtn.title = t('overview.close');
 }
 
 function initDistSlider() {
@@ -3487,6 +3531,10 @@ function applyFilter() {
   if (tot) tot.textContent = _markers ? _markers.length : '—';
   const badge = document.getElementById('filterBadge');
   if (badge) badge.innerHTML = '<span class="cnt-active">' + activeCount + '</span>/' + (_markers ? _markers.length : '—');
+  const closeActive = document.getElementById('filterCloseActive');
+  const closeTotal  = document.getElementById('filterCloseTotal');
+  if (closeActive) closeActive.textContent = activeCount;
+  if (closeTotal)  closeTotal.textContent  = _markers ? _markers.length : '—';
   updateFilterPuck();
   updateApplyBtn(activeCount);
   refreshArchMarkers();
