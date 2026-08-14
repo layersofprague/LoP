@@ -1560,15 +1560,21 @@ function render() {
     return true;
   });
 
-  /* kolik míst prošlo jen díky tomu, že nemají dataci */
-  const undatedCount = eraActive ? filtered.filter(p => locYear(p) == null).length : 0;
-  renderTaxBanner(filtered.length, undatedCount);
-  _lastCount = filtered.length; updateApplyBtn(filtered.length);
-
   // Pracovní vrstva prochází stejnými filtry jako publikovaná místa
   // (kategorie/sloh/éra/vzdálenost) — viz devMatches() výš. Force-only
   // je počítá pořád, jen navíc skryje publikovaná místa (items=[] níž).
   const devFiltered = _devLoaded ? DEV_PLACES.filter(p => devMatches(p, eraActive, distActive)) : [];
+
+  /* kolik míst prošlo jen díky tomu, že nemají dataci */
+  const undatedCount = eraActive ? filtered.filter(p => locYear(p) == null).length : 0;
+  renderTaxBanner(filtered.length, undatedCount);
+  // Dev místa (places-development.json) se počítají do stejného čísla
+  // jako publikovaná — filtr je fakticky zohledňoval už dřív, ale badge
+  // a tlačítko "Zobrazit N míst" počítaly jen filtered.length, takže
+  // třeba hlásily "0/3" a "Žádná místa", i když se 20 dev karet reálně
+  // zobrazovalo (report v chatu).
+  const totalCount = filtered.length + devFiltered.length;
+  _lastCount = totalCount; updateApplyBtn(totalCount);
 
   if(filtered.length===0 && devFiltered.length===0){
     /* Které filtry to způsobily, ukazuje banner hned nad seznamem —
@@ -1600,12 +1606,17 @@ function render() {
   const list=document.getElementById('placesList');
   list.innerHTML=html;
   list.classList.toggle('grid-mode', viewMode==='grid');
-  const _cnt=document.getElementById('filterHeadActive'); if(_cnt) _cnt.textContent=filtered.length;
-  const _tot=document.getElementById('filterHeadTotal'); if(_tot) _tot.textContent='/'+PLACES.length;
+  // Celkový počet zahrnuje i dev vrstvu, když je načtená — jinak by
+  // "X/Y" bylo zavádějící (Y by tvrdilo, že existuje jen pár míst,
+  // i když admin vidí přes 180 navíc). Aktivní počet stejně (totalCount
+  // výš) — badge i tlačítko mají odpovídat tomu, co se reálně zobrazuje.
+  const totalAll = PLACES.length + (_devLoaded ? DEV_PLACES.length : 0);
+  const _cnt=document.getElementById('filterHeadActive'); if(_cnt) _cnt.textContent=totalCount;
+  const _tot=document.getElementById('filterHeadTotal'); if(_tot) _tot.textContent='/'+totalAll;
   const _fbtn=document.getElementById('filterBtn');
-  if(_fbtn) _fbtn.classList.toggle('has-filter', filtered.length < PLACES.length);
-  const _mA=document.getElementById('fmCntActive'); if(_mA) _mA.textContent=filtered.length;
-  const _mT=document.getElementById('fmCntTotal');  if(_mT) _mT.textContent='/'+PLACES.length;
+  if(_fbtn) _fbtn.classList.toggle('has-filter', totalCount < totalAll);
+  const _mA=document.getElementById('fmCntActive'); if(_mA) _mA.textContent=totalCount;
+  const _mT=document.getElementById('fmCntTotal');  if(_mT) _mT.textContent='/'+totalAll;
   if (_devLoaded) loadDevPreviews();
 
   updateChipCounts();

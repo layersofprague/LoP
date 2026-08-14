@@ -3502,21 +3502,31 @@ function applyFilter() {
   });
 
   const cnt = document.getElementById('filterHeadActive');
+  // Dev piny (places-development.json) se počítají do stejných čísel jako
+  // publikovaná místa — filtr je fakticky zohledňoval už dřív (viz
+  // refreshDevMarkers), ale badge/tlačítko počítaly jen _markers, takže
+  // třeba hlásily "0/3" a "Žádná místa", i když se 20 dev pinů reálně
+  // zobrazovalo (report v chatu). refreshDevMarkers() teď vrací počet
+  // viditelných dev pinů, který se prostě přičte.
+  const devVisible = refreshDevMarkers();
+  const devTotal = _devLoaded ? _devMarkers.length : 0;
+  activeCount += devVisible;
+  const totalCount = (_markers ? _markers.length : 0) + devTotal;
+
   if (cnt) cnt.textContent = activeCount;
   const tot = document.getElementById('filterTotal');
-  if (tot) tot.textContent = _markers ? _markers.length : '—';
+  if (tot) tot.textContent = totalCount || '—';
   const badge = document.getElementById('filterBadge');
-  if (badge) badge.innerHTML = '<span class="cnt-active">' + activeCount + '</span>/' + (_markers ? _markers.length : '—');
+  if (badge) badge.innerHTML = '<span class="cnt-active">' + activeCount + '</span>/' + (totalCount || '—');
   // Informační počet v řádku "Kategorie" uvnitř modalu — jen text, žádná
   // funkce (stejně jako v overview.html; zavírání řeší klik mimo modal
   // nebo tlačítko "Zobrazit místa" dole).
   const fmA = document.getElementById('fmCntActive');
   const fmT = document.getElementById('fmCntTotal');
   if (fmA) fmA.textContent = activeCount;
-  if (fmT) fmT.textContent = '/' + (_markers ? _markers.length : '—');
+  if (fmT) fmT.textContent = '/' + (totalCount || '—');
   updateFilterPuck();
   updateApplyBtn(activeCount);
-  refreshDevMarkers();
 }
 
 /* Kategorie — pozitivní výběr: dokud nikdo nemá "chci"/"dim", kategorie
@@ -3535,11 +3545,16 @@ function anyCatSelected() {
    a taxonomie (tag/district/person) se netýkají — dev místa nejde
    označit jako navštívené/plánované a nemají štítky. Force-only kategorii
    ani ostatní filtry nepřebíjí, jen skryje publikovaná místa navíc —
-   viz report v chatu, filtry mají fungovat i pro pracovní vrstvu. */
+   viz report v chatu, filtry mají fungovat i pro pracovní vrstvu.
+   Vrací počet viditelných dev pinů — applyFilter() ho potřebuje pro
+   správný badge/tlačítko (viz další report: filtr fakticky fungoval
+   správně, ale čísla v UI dev piny nepočítala, takže hlásila "0/3"
+   a "Žádná místa" i když se 20 dev pinů reálně zobrazovalo). */
 function refreshDevMarkers() {
-  if (!_devLoaded) return;
+  if (!_devLoaded) return 0;
   const anyCatSel = anyCatSelected();
   const distActive = DIST_STATE.max !== null && window._userLatLng;
+  let visibleCount = 0;
   _devMarkers.forEach(({ marker, loc }) => {
     if (_devForceOnly) {
       // I ve force-only modu má smysl respektovat sloh a vzdálenost —
@@ -3554,6 +3569,7 @@ function refreshDevMarkers() {
       marker.addTo(window._map);
       const el = marker.getElement();
       if (el) el.style.opacity = 1;
+      visibleCount++;
       return;
     }
     const catRaw = FILTER[loc.cat];
@@ -3574,7 +3590,9 @@ function refreshDevMarkers() {
     marker.addTo(window._map);
     const el = marker.getElement();
     if (el) el.style.opacity = op;
+    visibleCount++;
   });
+  return visibleCount;
 }
 
 /* Text potvrzovacího tlačítka nese počet výsledků — stejný vzor jako
