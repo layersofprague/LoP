@@ -320,25 +320,34 @@ a { color: inherit; text-decoration: none; }
 /* Wrapper posunutý MIMO roh (ne flush s ním) — dává pásce rovné konce
    rovnoběžné s hranami karty (ne obyčejný obdélníkový konec), a
    zároveň zůstává vidět mírný přesah ven jako u vlaječky. */
+/* Wrapper posunutý MIMO roh, ale jen málo (6px) — dává pásce rovné
+   konce rovnoběžné s hranami karty a jen jemný přesah ven, ne velkou
+   vlaječku. */
 .dev-ribbon-wrap {
-  position: absolute; top: -14px; right: -14px;
-  width: 90px; height: 90px;
+  position: absolute; top: -6px; right: -6px;
+  width: 74px; height: 74px;
   overflow: hidden;
   z-index: 5;
   pointer-events: none;
 }
+/* Záhyby přesně v místech, kde páska protíná hrany karty — vodorovná
+   čára na výšce horní hrany, svislá na pozici pravé hrany. Nezávislé na
+   rotaci pásky (nejsou to potomci .dev-soon-ribbon), takže zůstávají
+   vodorovné/svislé, ne kolmé na diagonálu. */
+.dev-ribbon-wrap::before {
+  content: ''; position: absolute; top: 6px; left: 0; right: 0; height: 3px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.3), rgba(255,255,255,.2));
+  z-index: 6;
+}
+.dev-ribbon-wrap::after {
+  content: ''; position: absolute; right: 6px; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(to right, rgba(0,0,0,.3), rgba(255,255,255,.2));
+  z-index: 6;
+}
 .dev-soon-ribbon {
-  position: absolute; top: 23px; right: -23px;
-  width: 115px;
-  /* Záhyby v místech, kde páska protíná hrany karty — tmavý pruh
-     (stín ohybu) + hned vedle světlejší pruh (odlesk), aby to působilo
-     jako fyzicky obmotaná páska, ne plochá nálepka. */
-  background: linear-gradient(90deg,
-    #b04020 0%,
-    rgba(0,0,0,.3) 16%, rgba(255,255,255,.25) 19%, #b04020 24%,
-    #b04020 76%,
-    rgba(0,0,0,.3) 81%, rgba(255,255,255,.2) 84%, #b04020 89%,
-    #b04020 100%);
+  position: absolute; top: 20px; right: -18px;
+  width: 100px;
+  background: #b04020;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
