@@ -298,14 +298,7 @@ a { color: inherit; text-decoration: none; }
 .dev-check input { cursor: pointer; }
 /* Dev karty — teď klikatelné (vedou na coming-soon.html, viz devCardHTML),
    ale bez plné interaktivity skutečných karet (žádné hlasování/plán). */
-/* overflow:visible schválně — páska "Coming soon" musí přesahovat přes
-   thumb ven, ořízne ji až vnější .place-card (má overflow:hidden +
-   border-radius, dá to čistý roh). Kdyby byl hidden tady, ořízlo by ji
-   to moc brzo (viz report v chatu — text pásky "utíkal" mimo).
-   Platí jen pro grid mód (dlaždice) — v list módu je thumb jen 80px
-   úzký sloupec vlevo, přetékající páska by zasahovala do textu karty. */
 .place-card.dev-card .place-thumb { overflow: hidden; }
-#placesList.grid-mode .place-card.dev-card .place-thumb { overflow: visible; }
 /* Fotka z Wikipedie je jen "teaser" budoucího stavu — zešedlá a
    zesvětlená, ať je na první pohled jasné, že to není finální fotka. */
 .dev-card-photo {
@@ -315,9 +308,20 @@ a { color: inherit; text-decoration: none; }
 /* Stejná diagonální páska napříč aplikací. Umístěná jako přímé dítě
    .place-card (ne uvnitř .place-thumb, ta má overflow:hidden a ořezávala
    by ji dřív, než stihne "doletět" přes celý roh — viz report v chatu). */
+/* Stejná diagonální páska napříč aplikací. Klasický "corner ribbon"
+   recept: malý čtvercový roh s VLASTNÍM ostrým ořezem (ne navázaný na
+   zaoblený roh celé karty — to dělalo diagonálu nečistou, viz report
+   v chatu), páska uvnitř ho protíná úhlopříčně. */
+.dev-ribbon-wrap {
+  position: absolute; top: 0; right: 0;
+  width: 92px; height: 92px;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+}
 .dev-soon-ribbon {
-  position: absolute; top: 16px; right: -44px; z-index: 5;
-  width: 160px;
+  position: absolute; top: 18px; right: -28px;
+  width: 130px;
   background: #b04020; color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
@@ -325,7 +329,6 @@ a { color: inherit; text-decoration: none; }
   padding: 4px 0;
   transform: rotate(45deg);
   box-shadow: 0 2px 6px rgba(0,0,0,.2);
-  pointer-events: none;
 }
 /* Hlasy/plán u pracovní vrstvy jsou jen naznačené — žádná čísla, žádná
    interakce (nejsou to skutečně sledovaná místa, jen teaser). */
@@ -1622,7 +1625,7 @@ function devCardHTML(item) {
       <div class="place-thumb-fallback">${letter}</div>
       <div class="place-cat-line" style="background:${color}"></div>
       <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
-      <div class="dev-soon-ribbon">${t('admin.coming_soon')}</div>
+      <div class="dev-ribbon-wrap"><div class="dev-soon-ribbon">${t('admin.coming_soon')}</div></div>
     </div>
     <div class="place-body">
       <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>

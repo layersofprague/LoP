@@ -988,12 +988,20 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    první pohled jasné, že to není finální fotka místa. */
 .rt-tip-dev-photo { filter: grayscale(1) brightness(1.3) opacity(.55); }
 /* Stejná diagonální páska jako u dlaždic v overview.html (.dev-soon-ribbon)
-   — sjednocený vzhled "Coming soon" napříč aplikací. Umístěná jako přímé
-   dítě .rt-tip (ne uvnitř fotky, ta má overflow:hidden a ořezávala by ji
-   dřív, než stihne "doletět" přes celý roh — viz report v chatu). */
+   — sjednocený vzhled "Coming soon" napříč aplikací. Klasický "corner
+   ribbon" recept: malý čtvercový roh s VLASTNÍM ostrým ořezem (ne
+   navázaný na zaoblený roh celé karty — to dělalo diagonálu nečistou,
+   viz report v chatu), páska uvnitř ho protíná úhlopříčně. */
+.rt-tip-ribbon-wrap {
+  position: absolute; top: 0; right: 0;
+  width: 92px; height: 92px;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+}
 .rt-tip-soon-ribbon {
-  position: absolute; top: 16px; right: -44px; z-index: 5;
-  width: 160px;
+  position: absolute; top: 18px; right: -28px;
+  width: 130px;
   background: #b04020; color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
@@ -1001,7 +1009,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   padding: 4px 0;
   transform: rotate(45deg);
   box-shadow: 0 2px 6px rgba(0,0,0,.2);
-  pointer-events: none;
 }
 .rt-tip-footer-dev { justify-content: space-between; }
 /* Hlasy/plán jsou u pracovní vrstvy jen naznačené — bez čísel, bez
@@ -2785,7 +2792,7 @@ function showDevTooltip(loc, m, rt, c) {
         <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
       </div>
     </a>
-    <div class="rt-tip-soon-ribbon">${soonLbl}</div>
+    <div class="rt-tip-ribbon-wrap"><div class="rt-tip-soon-ribbon">${soonLbl}</div></div>
     <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
       <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;"></div>
