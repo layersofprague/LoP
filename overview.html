@@ -306,14 +306,21 @@ a { color: inherit; text-decoration: none; }
   filter: grayscale(1) brightness(1.3) opacity(.55);
 }
 .dev-soon-ribbon {
-  position: absolute; top: 10px; right: -28px;
+  position: absolute; top: 12px; right: -34px; z-index: 4;
+  width: 140px;
   background: #b04020; color: #fff;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-  padding: 3px 32px;
-  transform: rotate(35deg);
+  font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  text-align: center;
+  padding: 4px 0;
+  transform: rotate(45deg);
   box-shadow: 0 2px 6px rgba(0,0,0,.2);
 }
+/* Hlasy/plán u pracovní vrstvy jsou jen naznačené — žádná čísla, žádná
+   interakce (nejsou to skutečně sledovaná místa, jen teaser). */
+.dev-votes, .dev-wish-wrap { opacity: .45; pointer-events: none; }
+.dev-wish-wrap .place-wish-lbl { color: var(--ink-4) !important; }
+.dev-wish-wrap .place-wish-btn { color: var(--ink-4) !important; }
 
 /* ── SECTION LABEL ── */
 .section-label {
@@ -1515,9 +1522,11 @@ function render() {
 }
 
 /* ═══════════════ PRACOVNÍ VRSTVA (places-development.json) ═══════════════
-   Admin-only, na vyžádání — stejný princip jako v map.html. Karty nemají
-   detail stránku, takže nejsou klikatelné a mají štítek "Coming soon"
-   místo obsahu. */
+   Načítá se ve výchozím stavu úplně pro každého (viz volání loadDevPlaces()
+   za loadPlaces().then(...) dole) — karty se zobrazí jako "Coming soon",
+   klikatelné na coming-soon.html (detail stránku nemají). Admin panel ve
+   filtru zůstává admin-only a umožňuje ji odebrat, nebo naopak vynutit
+   zobrazení jen jí (force-only) — to je jediné, co je omezené na admina. */
 async function loadDevPlaces() {
   if (_devLoaded) { DEV_PLACES = []; _devLoaded = false; updateDevRowUI(); render(); return; }
   try {
@@ -1567,20 +1576,54 @@ function devSectionHTML() {
 function devCardHTML(item) {
   const color  = CAT_COLOR[item.cat]  || '#4A4A48';
   const letter = CAT_LETTER[item.cat] || 'H';
+  const catName = CAT_NAME[item.cat] || '';
   const detailUrl = 'coming-soon.html?name=' + encodeURIComponent(item.name)
     + (item.wiki ? '&wiki=' + encodeURIComponent(item.wiki) : '');
   const mediaId = 'devMedia_' + item.id;
   const ledeId  = 'devLede_' + item.id;
+
+  // Vzdálenost fungovat MŮŽE (dev místa mají lat/lng) — stejný výpočet
+  // jako u publikovaných míst, jen bez odkazu na kompas (ten patří
+  // k detail stránce, kterou tahle místa nemají).
+  const dist = userPos && item.lat && item.lng ? formatDist(haversineM(userPos[0], userPos[1], item.lat, item.lng)) : '';
+  const distHtml = dist
+    ? `<span class="place-dist">${dist}</span>`
+    : `<span class="place-dist-hint">${GEO_PERM === 'denied' ? t('place.geo_blocked') : t('sheet.enable_location')}</span>`;
+
+  // Hlasy a plán jsou jen naznačené — žádná čísla (nejsou to skutečně
+  // sledovaná/hlasovaná místa), žádná interakce (.dev-votes/.dev-wish-wrap
+  // mají pointer-events:none).
+  const arrowUp   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+  const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
+  const votesHtml = `<div class="place-votes dev-votes">
+    <span class="place-vote-btn up">${arrowUp}</span>
+    <span class="place-vote-btn down">${arrowDown}</span>
+  </div>`;
+  const wishHtml = `<div class="place-wish-wrap dev-wish-wrap" title="${t('admin.coming_soon')}">
+    <span class="place-wish-lbl">${t('place.plan_add')}</span>
+    <button class="place-wish-btn" tabindex="-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+    </button>
+  </div>`;
+
   return `<div class="place-card dev-card" data-cat="${item.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${item.cat}" id="${mediaId}">
       <div class="place-thumb-fallback">${letter}</div>
       <div class="place-cat-line" style="background:${color}"></div>
+      <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
       <div class="dev-soon-ribbon">${t('admin.coming_soon')}</div>
     </div>
     <div class="place-body">
-      <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${CAT_NAME[item.cat]}</span></div>
+      <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>
       <div class="place-name">${item.name}</div>
       <div class="place-sub" id="${ledeId}"></div>
+    </div>
+    <div class="place-meta">
+      ${distHtml}
+      <span class="meta-wish-list">${wishHtml}</span>
+      <span class="meta-dist-grid">${distHtml}</span>
+      <div class="place-meta-right">${votesHtml}</div>
+      <span class="meta-wish-grid">${wishHtml}</span>
     </div>
   </div>`;
 }
@@ -1825,6 +1868,7 @@ setView(viewMode);
 loadPlaces().then(()=>{
   buildChips(); buildStyleChips();
   updateDevRowVisibility();
+  loadDevPlaces();
   syncFromDB(()=>{
     updateCounts(); updateChipCounts();
     if(TAX){

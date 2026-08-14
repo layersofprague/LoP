@@ -988,17 +988,23 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    dotažený z Wikipedie), proto záměrně zešedlý a zesvětlený, ať je na
    první pohled jasné, že to není finální fotka místa. */
 .rt-tip-dev-photo { filter: grayscale(1) brightness(1.3) opacity(.55); }
-.rt-tip-soon-badge {
-  position: absolute; bottom: 8px; right: 8px; z-index: 3;
-  background: rgba(26,24,18,.78); color: #fff;
+/* Stejná diagonální páska jako u dlaždic v overview.html (.dev-soon-ribbon)
+   — sjednocený vzhled "Coming soon" napříč aplikací. */
+.rt-tip-soon-ribbon {
+  position: absolute; top: 12px; right: -34px; z-index: 4;
+  width: 140px;
+  background: #b04020; color: #fff;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .12em; text-transform: uppercase;
-  padding: 4px 8px; border-radius: 5px;
+  font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  text-align: center;
+  padding: 4px 0;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
 }
-.rt-tip-footer-dev { justify-content: flex-start; }
-.rt-tip-dev-note {
-  font-family: 'Inter', sans-serif; font-size: 10px; color: var(--ink-5);
-}
+.rt-tip-footer-dev { justify-content: space-between; }
+/* Hlasy/plán jsou u pracovní vrstvy jen naznačené — bez čísel, bez
+   interakce (nejsou to skutečně sledovaná/hlasovaná místa). */
+.rt-tip-dev-votes, .rt-tip-dev-wish { opacity: .45; pointer-events: none; }
 .rt-tip-dist {
   display: flex; flex-direction: row; align-items: center; gap: 4px;
   font-family: 'Inter', sans-serif; font-size: 10px; color: var(--ink-5);
@@ -2488,8 +2494,11 @@ async function loadData() {
 
   // Spustí zbytek aplikace až po načtení dat
   initMap();
-  // loadDevPlaces() se teď volá jen na vyžádání admina (viz tlačítko
-  // "Načíst pracovní" ve filtru), ne automaticky pro každého.
+  // Pracovní vrstva se teď načítá ve výchozím stavu úplně pro každého
+  // (dřív jen na vyžádání admina). Admin panel ve filtru zůstává —
+  // umožňuje ji odebrat nebo naopak zobrazit jen ji (viz devRow),
+  // ale samotné načtení už na tom nezávisí.
+  loadDevPlaces();
   // Automatická poloha při startu
   // Autocenter na polohu — přeskočit pokud hash odpovídá ID místa (navigace z detailu)
   const _gotoPlace = sessionStorage.getItem('lop_goto');
@@ -2744,6 +2753,28 @@ function showDevTooltip(loc, m, rt, c) {
   const soonLbl = t('admin.coming_soon');
   const bg = loc.cat === 'arch' ? '#EEF2F7' : loc.cat === 'art' ? '#F5EDE8' : '#EFEFED';
 
+  // Vzdálenost fungovat MŮŽE (dev místa mají lat/lng) — stejný výpočet
+  // jako u publikovaných míst.
+  let distHtml = '';
+  if (window._userLatLng && loc.lat && loc.lng) {
+    const km = haversineKm(window._userLatLng, [loc.lat, loc.lng]);
+    const distLabel = km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1).replace('.', ',') + ' km';
+    distHtml = `<span class="rt-tip-dist" style="pointer-events:none">${distLabel}</span>`;
+  } else {
+    distHtml = `<span class="rt-tip-dist-hint" onclick="locateMe();event.stopPropagation()">${t('sheet.enable_location')}</span>`;
+  }
+  // Hlasy a plán jsou jen naznačené — bez čísel, bez interakce.
+  const votesHtml = `<div class="rt-tip-votes rt-tip-dev-votes">
+    <span class="rt-tip-vote-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></span>
+    <span class="rt-tip-vote-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg></span>
+  </div>`;
+  const wishHtml = `<div class="rt-tip-wish-wrap rt-tip-dev-wish" title="${soonLbl}">
+    <span class="rt-tip-wish-lbl">${t('place.plan_add')}</span>
+    <button class="rt-tip-wish-btn" tabindex="-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+    </button>
+  </div>`;
+
   rt.innerHTML = `
     <a href="${detailUrl}" id="rtTipDevMedia" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${bg};" onclick="event.stopPropagation()">
       <div class="rt-tip-fallback">${catLetter}</div>
@@ -2751,14 +2782,16 @@ function showDevTooltip(loc, m, rt, c) {
       <div style="position:absolute;top:8px;left:8px;z-index:3;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 9px 4px 7px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-5);">
         <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
       </div>
-      <div class="rt-tip-soon-badge">${soonLbl}</div>
+      <div class="rt-tip-soon-ribbon">${soonLbl}</div>
     </a>
     <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
       <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;"></div>
     </a>
-    <div class="rt-tip-footer rt-tip-footer-dev">
-      <span class="rt-tip-dev-note">${soonLbl}${loc.wiki ? ' · Wikipedia' : ''}</span>
+    <div class="rt-tip-footer">
+      ${distHtml}
+      ${votesHtml}
+      ${wishHtml}
     </div>`;
   positionTip(loc, m, rt);
 
@@ -4121,15 +4154,17 @@ function renderRoutes() {
 }
 
 /* ═══════════════ PRACOVNÍ VRSTVA (places-development.json) ═══════════════
-   Dřív se načítalo automaticky pro každého, s vlastním on/dim/off
-   dropdownem podle slohu (odstraněno — "Slohy" pryč). Teď: jen pro admina,
-   na vyžádání tlačítkem v sekci filtru. Piny vypadají stejně jako
-   publikovaná místa (makeIcon) — kategorie podle ID: prefix "U" (Umění
-   ve veřejném prostoru) → art, cokoliv jiného → arch (viz rozhodnutí,
-   a-map ID kódují sloh, ne kategorii — jediná výjimka je právě "U").
-   Tooltip je sdílený s publikovanými místy (#rtTip, viz showTooltip() /
-   showDevTooltip()) — detail stránka pro tahle místa ale neexistuje,
-   proklik proto míří na coming-soon.html. */
+   Načítá se ve výchozím stavu úplně pro každého (viz volání
+   loadDevPlaces() v loadData()) — piny se zobrazí jako "Coming soon".
+   Admin panel ve filtru (#devRow, viz updateDevRowVisibility) zůstává
+   admin-only a umožňuje ji odebrat, nebo naopak vynutit zobrazení jen
+   jí (force-only) — to je jediné, co je omezené na admina, samotné
+   načtení dat ne. Piny vypadají stejně jako publikovaná místa (makeIcon)
+   — kategorie podle ID: prefix "U" (Umění ve veřejném prostoru) → art,
+   cokoliv jiného → arch (a-map ID kódují sloh, ne kategorii — jediná
+   výjimka je právě "U"). Tooltip je sdílený s publikovanými místy
+   (#rtTip, viz showTooltip() / showDevTooltip()) — detail stránka pro
+   tahle místa ale neexistuje, proklik proto míří na coming-soon.html. */
 let _devMarkers = [];
 let _devLoaded  = false;
 let _devForceOnly = false;
