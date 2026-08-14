@@ -1650,5 +1650,25 @@
   "filter.state_always_dim": {
     "cs": "vždy, tlumené",
     "en": "always, dimmed"
+  },
+  "admin.dev_section": {
+    "cs": "Pracovní vrstva (jen admin)",
+    "en": "Development layer (admin only)"
+  },
+  "admin.dev_load": {
+    "cs": "Načíst pracovní",
+    "en": "Load working set"
+  },
+  "admin.dev_unload": {
+    "cs": "Odebrat pracovní",
+    "en": "Unload working set"
+  },
+  "admin.dev_force": {
+    "cs": "Zobrazit jen pracovní",
+    "en": "Show only working set"
+  },
+  "admin.coming_soon": {
+    "cs": "Připravujeme",
+    "en": "Coming soon"
   }
 }

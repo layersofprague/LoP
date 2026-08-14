@@ -131,7 +131,7 @@ select.modal-field{appearance:auto}
 
       <hr/>
       <div class="sec-label">Výsledek</div>
-      <button class="btn btn-dark" id="btnExport" onclick="exportFinal()" disabled>⬇ Export a-map.json</button>
+      <button class="btn btn-dark" id="btnExport" onclick="exportFinal()" disabled>⬇ Export places-development.json</button>
     </div>
   </div>
 
@@ -458,7 +458,7 @@ function loadProgress(event){
         const n=Object.keys(fixed).length+Object.keys(added).length;
         alert('Načteno. '+n+' opravených/přidaných, '+deleted.size+' smazaných.');
       } else if(Array.isArray(d)){
-        // a-map.json s edited:true
+        // places-development.json s edited:true
         fixed={};
         d.forEach(item=>{
           if(item.edited&&allMarkers[item.id]){
@@ -469,7 +469,7 @@ function loadProgress(event){
           }
         });
         renderList(); updateStats();
-        alert('Načteno '+Object.keys(fixed).length+' opravených bodů z a-map.json.');
+        alert('Načteno '+Object.keys(fixed).length+' opravených bodů z places-development.json.');
       } else { alert('Neznámý formát.'); }
     } catch(err){ alert('Chyba: '+err.message); }
   };
@@ -494,7 +494,7 @@ function exportFinal(){
   Object.values(added).forEach(item=>out.push({...item,edited:true}));
   const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='a-map.json'; a.click();
+  a.download='places-development.json'; a.click();
 }
 
 /* ── UI helpers ──────────────────────────────────────── */
@@ -520,8 +520,8 @@ function updateStats(){
   const hasChanges=nFixed>0||nAdded>0||nDel>0;
   document.getElementById('btnExport').disabled=!hasChanges;
   document.getElementById('btnExport').textContent=hasChanges
-    ?'⬇ Export a-map.json ('+nFixed+'op/'+nAdded+'new/'+nDel+'del)'
-    :'⬇ Export a-map.json';
+    ?'⬇ Export places-development.json ('+nFixed+'op/'+nAdded+'new/'+nDel+'del)'
+    :'⬇ Export places-development.json';
 }
 
 function renderList(filter=''){

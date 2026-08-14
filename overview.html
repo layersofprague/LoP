@@ -281,6 +281,34 @@ a { color: inherit; text-decoration: none; }
 .filter-apply:active { transform: translateY(0); box-shadow: none; }
 .filter-reset { background: transparent; border: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); cursor: pointer; padding: 4px 0; }
 .filter-reset:hover { color: var(--ink); }
+/* Admin-only sekce — pracovní vrstva places-development.json. */
+#devRow { border-top: 1px dashed var(--rule); padding-top: 12px; }
+#devRow .filter-lbl { color: #b04020; }
+.dev-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.dev-btn {
+  appearance: none; cursor: pointer;
+  background: #fff; border: 1.5px solid var(--rule); border-radius: 7px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.dev-btn:hover { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
+.dev-check { display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--ink-2); cursor: pointer; }
+.dev-check input { cursor: pointer; }
+/* Dev karty — bez odkazu, bez interakce, jen náhled + "coming soon" */
+.place-card.dev-card { cursor: default; }
+.place-card.dev-card:hover { box-shadow: none; }
+.place-card.dev-card .place-thumb { overflow: hidden; }
+.dev-soon-ribbon {
+  position: absolute; top: 10px; right: -28px;
+  background: #b04020; color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 32px;
+  transform: rotate(35deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
 
 /* ── SECTION LABEL ── */
 .section-label {
@@ -734,6 +762,16 @@ a { color: inherit; text-decoration: none; }
           <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
           <div class="dist-note" id="distNote" hidden></div>
         </div>
+        <div class="filter-row" id="devRow" hidden>
+          <div class="filter-lbl"><span id="devSectionLbl">Pracovní vrstva (jen admin)</span></div>
+          <div class="dev-controls">
+            <button class="dev-btn" id="devLoadBtn" onclick="loadDevPlaces()">Načíst pracovní</button>
+            <label class="dev-check">
+              <input type="checkbox" id="devForceOnly" onchange="toggleDevForceOnly()"/>
+              <span id="devForceLbl">Zobrazit jen pracovní</span>
+            </label>
+          </div>
+        </div>
         <div class="filter-footer">
           <button class="filter-reset" id="fmReset" onclick="resetFilters()">Resetovat</button>
           <button class="filter-apply" id="fmApply" onclick="toggleFilter()">Zobrazit místa</button>
@@ -834,6 +872,8 @@ async function getValidSession() {
   } catch(e) { return null; }
 }
 function isLoggedIn() { try { const s = getSession(); return !!(s && s.access_token && s.user); } catch(e) { return false; } }
+function getUserRole() { return localStorage.getItem('lop_user_role') || 'member'; }
+function isAdmin()     { return isLoggedIn() && getUserRole() === 'admin'; }
 function getWished()  { try { return JSON.parse(localStorage.getItem(WISH_KEY)  || '[]').map(String); } catch(e) { return []; } }
 function getVisited() { try { return JSON.parse(localStorage.getItem(VISIT_KEY) || '[]').map(String); } catch(e) { return []; } }
 
@@ -850,6 +890,10 @@ function formatDist(m) { return m<1000?Math.round(m)+' m':(m/1000).toFixed(1).re
 
 let userPos = null;
 let PLACES  = [];
+let DEV_PLACES   = [];
+let _devLoaded   = false;
+let _devForceOnly = false;
+function _devCat(id) { return /^U\d/.test(id) ? 'art' : 'arch'; }
 const _urlFilter = new URLSearchParams(location.search).get('filter');
 
 const TAX = (() => {
@@ -938,6 +982,10 @@ function syncFilterUI() {
   setTxt('fmEra',      'overview.era');
   setTxt('fmDist',     'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
+  setTxt('devSectionLbl', 'admin.dev_section');
+  setTxt('devForceLbl',   'admin.dev_force');
+  const devLoadBtn = document.getElementById('devLoadBtn');
+  if (devLoadBtn) devLoadBtn.textContent = t(_devLoaded ? 'admin.dev_unload' : 'admin.dev_load');
   updateApplyBtn();
 
   const S_WISH = { full:'filter.state_default', add:'filter.state_selected', hide:'filter.state_hidden' };
@@ -1419,7 +1467,7 @@ function render() {
   renderTaxBanner(filtered.length, undatedCount);
   _lastCount = filtered.length; updateApplyBtn(filtered.length);
 
-  if(filtered.length===0){
+  if(filtered.length===0 && !(_devForceOnly && _devLoaded)){
     /* Které filtry to způsobily, ukazuje banner hned nad seznamem —
        nemá smysl je vypisovat podruhé. Stačí na něj odkázat. */
     const anyFilter = activeFilters(undatedCount).length > 0;
@@ -1430,13 +1478,16 @@ function render() {
   }
 
   let html='';
-  ['hist','arch','art'].forEach(cat=>{
-    const items=filtered.filter(p=>p.cat===cat); if(!items.length) return;
-    html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
-    html += `<div class="place-section-list">`;
-    html += items.map(p=>cardHTML(p,visited,wished)).join('');
-    html += `</div>`;
-  });
+  if (!_devForceOnly) {
+    ['hist','arch','art'].forEach(cat=>{
+      const items=filtered.filter(p=>p.cat===cat); if(!items.length) return;
+      html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
+      html += `<div class="place-section-list">`;
+      html += items.map(p=>cardHTML(p,visited,wished)).join('');
+      html += `</div>`;
+    });
+  }
+  html += devSectionHTML();
 
   const list=document.getElementById('placesList');
   list.innerHTML=html;
@@ -1449,6 +1500,66 @@ function render() {
   const _mT=document.getElementById('fmCntTotal');  if(_mT) _mT.textContent='/'+PLACES.length;
 
   updateChipCounts();
+}
+
+/* ═══════════════ PRACOVNÍ VRSTVA (places-development.json) ═══════════════
+   Admin-only, na vyžádání — stejný princip jako v map.html. Karty nemají
+   detail stránku, takže nejsou klikatelné a mají štítek "Coming soon"
+   místo obsahu. */
+async function loadDevPlaces() {
+  if (_devLoaded) { DEV_PLACES = []; _devLoaded = false; updateDevRowUI(); render(); return; }
+  try {
+    const res = await fetch('places-development.json');
+    if (!res.ok) return;
+    const data = await res.json();
+    DEV_PLACES = data.map(item => ({ ...item, cat: _devCat(item.id) }));
+    _devLoaded = true;
+    updateDevRowUI();
+    render();
+  } catch (e) { console.warn('places-development.json load error:', e); }
+}
+function toggleDevForceOnly() {
+  _devForceOnly = !_devForceOnly;
+  updateDevRowUI();
+  render();
+}
+function updateDevRowUI() {
+  const loadBtn  = document.getElementById('devLoadBtn');
+  const forceChk = document.getElementById('devForceOnly');
+  if (loadBtn) loadBtn.textContent = t(_devLoaded ? 'admin.dev_unload' : 'admin.dev_load');
+  if (forceChk) forceChk.checked = _devForceOnly;
+}
+function updateDevRowVisibility() {
+  const row = document.getElementById('devRow');
+  if (row) row.hidden = !isAdmin();
+}
+function devSectionHTML() {
+  if (!_devLoaded || !DEV_PLACES.length) return '';
+  let html = '';
+  ['arch', 'art'].forEach(cat => {
+    const items = DEV_PLACES.filter(p => p.cat === cat);
+    if (!items.length) return;
+    html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
+    html += `<div class="place-section-list">`;
+    html += items.map(devCardHTML).join('');
+    html += `</div>`;
+  });
+  return html;
+}
+function devCardHTML(item) {
+  const color  = CAT_COLOR[item.cat]  || '#4A4A48';
+  const letter = CAT_LETTER[item.cat] || 'H';
+  return `<div class="place-card dev-card" data-cat="${item.cat}">
+    <div class="place-thumb" data-cat="${item.cat}">
+      <div class="place-thumb-fallback">${letter}</div>
+      <div class="place-cat-line" style="background:${color}"></div>
+      <div class="dev-soon-ribbon">${t('admin.coming_soon')}</div>
+    </div>
+    <div class="place-body">
+      <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${CAT_NAME[item.cat]}</span></div>
+      <div class="place-name">${item.name}</div>
+    </div>
+  </div>`;
 }
 
 function cardHTML(p, visited, wished) {
@@ -1647,7 +1758,7 @@ async function syncFromDB(onDone) {
     _arScores = {};
     vRows.forEach(r => { _arScores[String(r.place_id)] = r.score ?? null; });
     fetch(SUPA_URL+'/rest/v1/profiles?user_id=eq.'+s.user.id+'&select=role',{headers:authHeaders()})
-      .then(r=>r.ok?r.json():[]).then(rows=>{if(rows[0]?.role) localStorage.setItem('lop_user_role',rows[0].role);}).catch(()=>{});
+      .then(r=>r.ok?r.json():[]).then(rows=>{if(rows[0]?.role) localStorage.setItem('lop_user_role',rows[0].role); updateDevRowVisibility();}).catch(()=>{});
     _showSyncSpinner(false); _showSyncBar(false); if(onDone) onDone();
   } catch(e) {
     _showSyncSpinner(false); _showSyncBar(true);
@@ -1661,6 +1772,7 @@ setView(viewMode);
 
 loadPlaces().then(()=>{
   buildChips(); buildStyleChips();
+  updateDevRowVisibility();
   syncFromDB(()=>{
     updateCounts(); updateChipCounts();
     if(TAX){
@@ -1691,7 +1803,13 @@ window.lopAuth.onLogin(()=>{
   if(window.lopHeader) window.lopHeader.refresh();
   if(window.lopNav)    window.lopNav.refresh();
 });
-window.lopAuth.onLogout(()=>{ render(); if(window.lopNav) window.lopNav.refresh(); });
+window.lopAuth.onLogout(()=>{
+  localStorage.removeItem('lop_user_role');
+  updateDevRowVisibility();
+  DEV_PLACES = []; _devLoaded = false; _devForceOnly = false;
+  render();
+  if(window.lopNav) window.lopNav.refresh();
+});
 </script>
 </body>
 </html>

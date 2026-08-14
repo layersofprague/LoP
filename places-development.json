@@ -1,0 +1,1506 @@
+[
+  {
+    "id": "Ro001",
+    "name": "Rotunda sv. Martina (Vyšehrad)",
+    "lat": 50.0636527,
+    "lng": 14.4215538,
+    "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_Martina_(Vy%C5%A1ehrad)",
+    "edited": true
+  },
+  {
+    "id": "Ro002",
+    "name": "Bazilika sv. Jiří (Pražský hrad)",
+    "lat": 50.0912186,
+    "lng": 14.4025358,
+    "wiki": "https://cs.wikipedia.org/wiki/Bazilika_svat%C3%A9ho_Ji%C5%99%C3%AD_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ro003",
+    "name": "Rotunda sv. Longina (Nové Město)",
+    "lat": 50.076515,
+    "lng": 14.425615,
+    "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_Longina",
+    "edited": true
+  },
+  {
+    "id": "Ro004",
+    "name": "Rotunda sv. Kříže Menšího (Staré Město)",
+    "lat": 50.082825,
+    "lng": 14.41472,
+    "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_K%C5%99%C3%AD%C5%BEe_Men%C5%A1%C3%ADho",
+    "edited": true
+  },
+  {
+    "id": "Ro006",
+    "name": "Strahovský klášter — románsko-gotické jádro",
+    "lat": 50.0861432,
+    "lng": 14.3892505,
+    "wiki": "https://cs.wikipedia.org/wiki/Strahovsk%C3%BD_kl%C3%A1%C5%A1ter",
+    "edited": true
+  },
+  {
+    "id": "Go001",
+    "name": "Katedrála sv. Víta (Pražský hrad)",
+    "lat": 50.0908571,
+    "lng": 14.4005608,
+    "wiki": "https://cs.wikipedia.org/wiki/Katedr%C3%A1la_svat%C3%A9ho_V%C3%ADta_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go002",
+    "name": "Karlův most",
+    "lat": 50.0864846,
+    "lng": 14.4113803,
+    "wiki": "https://cs.wikipedia.org/wiki/Karl%C5%AFv_most",
+    "edited": true
+  },
+  {
+    "id": "Go003",
+    "name": "Staroměstská radnice s orlojem",
+    "lat": 50.0870338,
+    "lng": 14.4207301,
+    "wiki": "https://cs.wikipedia.org/wiki/Starom%C4%9Bstsk%C3%A1_radnice_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go004",
+    "name": "Chrám Panny Marie před Týnem",
+    "lat": 50.0876738,
+    "lng": 14.4225276,
+    "wiki": "https://cs.wikipedia.org/wiki/Chr%C3%A1m_Panny_Marie_p%C5%99ed_T%C3%BDnem",
+    "edited": true
+  },
+  {
+    "id": "Go005",
+    "name": "Prašná brána",
+    "lat": 50.0872392,
+    "lng": 14.4277525,
+    "wiki": "https://cs.wikipedia.org/wiki/Pra%C5%A1n%C3%A1_br%C3%A1na",
+    "edited": true
+  },
+  {
+    "id": "Go006",
+    "name": "Anežský klášter",
+    "lat": 50.0923829,
+    "lng": 14.4238874,
+    "wiki": "https://cs.wikipedia.org/wiki/Ane%C5%BEsk%C3%BD_kl%C3%A1%C5%A1ter_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go007",
+    "name": "Staroměstská mostecká věž",
+    "lat": 50.0861645,
+    "lng": 14.4136132,
+    "wiki": "https://cs.wikipedia.org/wiki/Starom%C4%9Bstsk%C3%A1_mosteck%C3%A1_v%C4%9B%C5%BE",
+    "edited": true
+  },
+  {
+    "id": "Go008",
+    "name": "Bazilika sv. Petra a Pavla (Vyšehrad)",
+    "lat": 50.0644113,
+    "lng": 14.4178015,
+    "wiki": "https://cs.wikipedia.org/wiki/Bazilika_sv._Petra_a_Pavla_(Vy%C5%A1ehrad)",
+    "edited": true
+  },
+  {
+    "id": "Go009",
+    "name": "Malostranské mostecké věže",
+    "lat": 50.0872272,
+    "lng": 14.4068527,
+    "wiki": "https://cs.wikipedia.org/wiki/Malostranck%C3%A9_mosteck%C3%A9_v%C4%9B%C5%BEe",
+    "edited": true
+  },
+  {
+    "id": "Go010",
+    "name": "Kostel sv. Jakuba Většího",
+    "lat": 50.0883303,
+    "lng": 14.4250207,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Jakuba_V%C4%9Bt%C5%A1%C3%ADho_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go011",
+    "name": "Kostel sv. Apolináře (Nové Město)",
+    "lat": 50.0708606,
+    "lng": 14.4237775,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Apolin%C3%A1%C5%99e_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go012",
+    "name": "Kostel Panny Marie Sněžné",
+    "lat": 50.0830029,
+    "lng": 14.4236246,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_Panny_Marie_Sn%C4%9B%C5%BEn%C3%A9_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go013",
+    "name": "Vladislavský sál (Pražský hrad)",
+    "lat": 50.0906475,
+    "lng": 14.4019496,
+    "wiki": "https://cs.wikipedia.org/wiki/Vladislavsk%C3%BD_s%C3%A1l",
+    "edited": true
+  },
+  {
+    "id": "Go014",
+    "name": "Kostel sv. Štěpána (Nové Město)",
+    "lat": 50.0763486,
+    "lng": 14.4248249,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_%C5%A0t%C4%9Bp%C3%A1na_(Nov%C3%A9_M%C4%9Bsto)",
+    "edited": true
+  },
+  {
+    "id": "Go015",
+    "name": "Kostel sv. Jindřicha a Kunhuty",
+    "lat": 50.0848857,
+    "lng": 14.4305125,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Jind%C5%99icha_a_Kunhuty_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go016",
+    "name": "Vyšehradský Gorlice — gotické opevnění",
+    "lat": 50.0652801,
+    "lng": 14.4192047,
+    "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad",
+    "edited": true
+  },
+  {
+    "id": "Go017",
+    "name": "Kostel Nejsvětější Trojice (Podskalí)",
+    "lat": 50.0706377,
+    "lng": 14.4178055,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_Nejsv%C4%9Bt%C4%9Bj%C5%A1%C3%AD_Trojice_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Go018",
+    "name": "Klášter Na Slovanech (Emauzy)",
+    "lat": 50.0720777,
+    "lng": 14.4175266,
+    "wiki": "https://cs.wikipedia.org/wiki/Kl%C3%A1%C5%A1ter_Na_Slovan%C3%A9ch",
+    "edited": true
+  },
+  {
+    "id": "Re001",
+    "name": "Letohrádek královny Anny (Belvedere)",
+    "lat": 50.0937173,
+    "lng": 14.4053306,
+    "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_kr%C3%A1lovny_Anny",
+    "edited": true
+  },
+  {
+    "id": "Re002",
+    "name": "Míčovna (Pražský hrad — Královská zahrada)",
+    "lat": 50.0924353,
+    "lng": 14.4011528,
+    "wiki": "https://cs.wikipedia.org/wiki/M%C3%AD%C4%8Dovna_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Re003",
+    "name": "Schwarzenberský palác (Hradčanské nám.)",
+    "lat": 50.0890264,
+    "lng": 14.3967439,
+    "wiki": "https://cs.wikipedia.org/wiki/Schwarzenberk%C3%BD_pal%C3%A1c_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Re004",
+    "name": "Letohrádek Hvězda (Obora Hvězda, Liboc)",
+    "lat": 50.0833841,
+    "lng": 14.326192,
+    "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_Hv%C4%9Bzda",
+    "edited": true
+  },
+  {
+    "id": "Re005",
+    "name": "Dům U minuty",
+    "lat": 50.0867022,
+    "lng": 14.4200255,
+    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_minuty",
+    "edited": true
+  },
+  {
+    "id": "Re006",
+    "name": "Martinický palác (Hradčanské nám.)",
+    "lat": 50.0899849,
+    "lng": 14.3950725,
+    "wiki": "https://cs.wikipedia.org/wiki/Martinick%C3%BD_pal%C3%A1c_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Re007",
+    "name": "Lobkovický palác (Pražský hrad)",
+    "lat": 50.0916489,
+    "lng": 14.4050006,
+    "wiki": "https://cs.wikipedia.org/wiki/Lobkovick%C3%BD_pal%C3%A1c_(Pra%C5%BEsk%C3%BD_hrad)",
+    "edited": true
+  },
+  {
+    "id": "Re008",
+    "name": "Sněmovní palác (Sněmovna)",
+    "lat": 50.0895139,
+    "lng": 14.4041942,
+    "wiki": "https://cs.wikipedia.org/wiki/Budova_Poslaneck%C3%A9_sn%C4%9Bmovny",
+    "edited": true
+  },
+  {
+    "id": "Re009",
+    "name": "Dům Granovských (Týnský dvůr — Ungelt)",
+    "lat": 50.0880908,
+    "lng": 14.4233301,
+    "wiki": "https://cs.wikipedia.org/wiki/Ungelt",
+    "edited": true
+  },
+  {
+    "id": "Re011",
+    "name": "Vladislavský sál (Pražský hrad)",
+    "lat": 50.090638,
+    "lng": 14.4019537,
+    "wiki": "https://cs.wikipedia.org/wiki/Vladislavsk%C3%BD_s%C3%A1l",
+    "edited": true
+  },
+  {
+    "id": "Re012",
+    "name": "Ungelt (Týnský dvůr) — renesanční domy",
+    "lat": 50.0880085,
+    "lng": 14.4237372,
+    "wiki": "https://cs.wikipedia.org/wiki/Ungelt",
+    "edited": true
+  },
+  {
+    "id": "Ba001",
+    "name": "Kostel sv. Mikuláše (Malá Strana)",
+    "lat": 50.0879379,
+    "lng": 14.4031727,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Mikul%C3%A1%C5%A1e_(Mal%C3%A1_Strana)",
+    "edited": true
+  },
+  {
+    "id": "Ba002",
+    "name": "Valdštejnský palác (Malá Strana)",
+    "lat": 50.0900632,
+    "lng": 14.4054741,
+    "wiki": "https://cs.wikipedia.org/wiki/Vald%C5%A1tejnsk%C3%BD_pal%C3%A1c_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ba003",
+    "name": "Klementinum",
+    "lat": 50.0865543,
+    "lng": 14.4158086,
+    "wiki": "https://cs.wikipedia.org/wiki/Klementinum",
+    "edited": true
+  },
+  {
+    "id": "Ba004",
+    "name": "Černínský palác (Loretánské nám.)",
+    "lat": 50.0887347,
+    "lng": 14.3905288,
+    "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cern%C3%ADnsk%C3%BD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Ba005",
+    "name": "Kostel sv. Jakuba Většího — barokní průčelí",
+    "lat": 50.0883028,
+    "lng": 14.424613,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Jakuba_V%C4%9Bt%C5%A1%C3%ADho_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ba006",
+    "name": "Kostel sv. Františka z Assisi (Křižovníci)",
+    "lat": 50.0864149,
+    "lng": 14.4142959,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Franti%C5%A1ka_z_Assisi_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ba007",
+    "name": "Loreta Praha (Loretánské nám.)",
+    "lat": 50.0892725,
+    "lng": 14.3917854,
+    "wiki": "https://cs.wikipedia.org/wiki/Loreta_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ba008",
+    "name": "Kostel Nejsvětějšího Salvátora (Klementinum)",
+    "lat": 50.0861553,
+    "lng": 14.415035,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_Nejsv%C4%9Bt%C4%9Bj%C5%A1%C3%ADho_Salv%C3%A1tora_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ba009",
+    "name": "Šternberský palác (Hradčany)",
+    "lat": 50.090404,
+    "lng": 14.3965691,
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0ternberk%C3%BD_pal%C3%A1c_(Hrad%C4%8Dany)",
+    "edited": true
+  },
+  {
+    "id": "Ba010",
+    "name": "Letohrádek Kinských (Smíchov / Košíře)",
+    "lat": 50.07276,
+    "lng": 14.39002,
+    "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_Kinsk%C3%BDch",
+    "edited": true
+  },
+  {
+    "id": "Ba011",
+    "name": "Palác Thurn-Taxisů (Malá Strana)",
+    "lat": 50.0899101,
+    "lng": 14.4093525,
+    "wiki": "https://cs.wikipedia.org/wiki/Thunovsk%C3%BD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Ba012",
+    "name": "Morzinský palác (Nerudova)",
+    "lat": 50.0888,
+    "lng": 14.4028,
+    "wiki": "https://cs.wikipedia.org/wiki/Morzinsk%C3%BD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Ba013",
+    "name": "Kostel sv. Mikuláše (Staré Město)",
+    "lat": 50.0879044,
+    "lng": 14.4198748,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Mikul%C3%A1%C5%A1e_(Star%C3%A9_M%C4%9Bsto)",
+    "edited": true
+  },
+  {
+    "id": "Ba014",
+    "name": "Vrtbovská zahrada (Malá Strana)",
+    "lat": 50.0866438,
+    "lng": 14.4028991,
+    "wiki": "https://cs.wikipedia.org/wiki/Vrtbovsk%C3%A1_zahrada",
+    "edited": true
+  },
+  {
+    "id": "Ba015",
+    "name": "Vrtbovská zahrada — horní terasa",
+    "lat": 50.0868,
+    "lng": 14.40073,
+    "wiki": "https://cs.wikipedia.org/wiki/Vrtbovsk%C3%A1_zahrada",
+    "edited": true
+  },
+  {
+    "id": "Ba016",
+    "name": "Kostel Panny Marie Vítězné (Pražské Jezulátko)",
+    "lat": 50.0857179,
+    "lng": 14.4035429,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_Panny_Marie_V%C3%ADt%C4%9Bzn%C3%A9_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ba017",
+    "name": "Palác Nosticů (Nostický palác)",
+    "lat": 50.0854046,
+    "lng": 14.4058388,
+    "wiki": "https://cs.wikipedia.org/wiki/Nostick%C3%BD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Ba018",
+    "name": "Břevnovský klášter (Markétská)",
+    "lat": 50.0847007,
+    "lng": 14.356344,
+    "wiki": "https://cs.wikipedia.org/wiki/B%C5%99evnovsk%C3%BD_kl%C3%A1%C5%A1ter",
+    "edited": true
+  },
+  {
+    "id": "Ba019",
+    "name": "Kostel sv. Jana Nepomuckého (Hradčany)",
+    "lat": 50.0902474,
+    "lng": 14.3932727,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Jana_Nepomuck%C3%A9ho_(Hrad%C4%8Dany)",
+    "edited": true
+  },
+  {
+    "id": "Ba020",
+    "name": "Palác Šporků (Hybernská)",
+    "lat": 50.0873494,
+    "lng": 14.4308344,
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0pork%C5%AFv_pal%C3%A1c_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Kl001",
+    "name": "Stavovské divadlo",
+    "lat": 50.0859381,
+    "lng": 14.4236192,
+    "wiki": "https://cs.wikipedia.org/wiki/Stavovsk%C3%A9_divadlo",
+    "edited": true
+  },
+  {
+    "id": "Kl002",
+    "name": "Palác Kinských (Staroměstské nám.)",
+    "lat": 50.0879311,
+    "lng": 14.4215981,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Kinsk%C3%BDch_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Kl003",
+    "name": "Karolinum — průčelí empír",
+    "lat": 50.0864433,
+    "lng": 14.4235047,
+    "wiki": "https://cs.wikipedia.org/wiki/Karolinum",
+    "edited": true
+  },
+  {
+    "id": "Kl004",
+    "name": "Invalidovna (Karlín)",
+    "lat": 50.095279,
+    "lng": 14.4615765,
+    "wiki": "https://cs.wikipedia.org/wiki/Invalidovna",
+    "edited": true
+  },
+  {
+    "id": "Kl005",
+    "name": "Žofínský palác (přestavba)",
+    "lat": 50.0790419,
+    "lng": 14.4128501,
+    "wiki": "https://cs.wikipedia.org/wiki/Sof%C3%ADn",
+    "edited": true
+  },
+  {
+    "id": "Kl006",
+    "name": "Šlechtova restaurace (Stromovka)",
+    "lat": 50.1046955,
+    "lng": 14.4175145,
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0lechtova_restaurace",
+    "edited": true
+  },
+  {
+    "id": "Kl007",
+    "name": "Palác Sylva-Taroucca (Na Příkopě)",
+    "lat": 50.0847053,
+    "lng": 14.42526,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Sylva-Taroucca",
+    "edited": true
+  },
+  {
+    "id": "Kl009",
+    "name": "Kostel Nalezení sv. Kříže (Příčná ul.)",
+    "lat": 50.0854392,
+    "lng": 14.4260286,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_Nalezen%C3%AD_svat%C3%A9ho_K%C5%99%C3%AD%C5%BEe_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Hi001",
+    "name": "Národní divadlo",
+    "lat": 50.0810076,
+    "lng": 14.4135341,
+    "wiki": "https://cs.wikipedia.org/wiki/N%C3%A1rodn%C3%AD_divadlo",
+    "edited": true
+  },
+  {
+    "id": "Hi002",
+    "name": "Rudolfinum (Alšovo nábřeží)",
+    "lat": 50.0899278,
+    "lng": 14.4154408,
+    "wiki": "https://cs.wikipedia.org/wiki/Rudolfinum",
+    "edited": true
+  },
+  {
+    "id": "Hi003",
+    "name": "Národní muzeum (Václavské nám.)",
+    "lat": 50.0789265,
+    "lng": 14.4309202,
+    "wiki": "https://cs.wikipedia.org/wiki/N%C3%A1rodn%C3%AD_muzeum",
+    "edited": true
+  },
+  {
+    "id": "Hi004",
+    "name": "Obecní dům",
+    "lat": 50.0877025,
+    "lng": 14.4278598,
+    "wiki": "https://cs.wikipedia.org/wiki/Obecn%C3%AD_d%C5%AFm_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Hi005",
+    "name": "Palác Žofín",
+    "lat": 50.0790236,
+    "lng": 14.4128515,
+    "wiki": "https://cs.wikipedia.org/wiki/Sof%C3%ADn",
+    "edited": true
+  },
+  {
+    "id": "Hi006",
+    "name": "Kostel sv. Ludmily (náměstí Míru, Vinohrady)",
+    "lat": 50.0754752,
+    "lng": 14.4372542,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9_Ludmily_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Hi007",
+    "name": "Nová radnice (Mariánské nám.)",
+    "lat": 50.0872137,
+    "lng": 14.4184694,
+    "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A1_radnice_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Hi008",
+    "name": "UPM — Uměleckoprůmyslové muzeum",
+    "lat": 50.0898928,
+    "lng": 14.41644,
+    "wiki": "https://cs.wikipedia.org/wiki/Um%C4%9Bleckopr%C5%AFmyslov%C3%A9_muzeum_v_Praze",
+    "edited": true
+  },
+  {
+    "id": "Hi009",
+    "name": "Wiehlův dům (Václavské nám. 34)",
+    "lat": 50.0819221,
+    "lng": 14.425934,
+    "wiki": "https://cs.wikipedia.org/wiki/Wiehl%C5%AFv_d%C5%AFm",
+    "edited": true
+  },
+  {
+    "id": "Hi011",
+    "name": "Hanavský pavilon (Letenské sady)",
+    "lat": 50.0936582,
+    "lng": 14.4126034,
+    "wiki": "https://cs.wikipedia.org/wiki/Hanavsk%C3%BD_pavilon",
+    "edited": true
+  },
+  {
+    "id": "Hi012",
+    "name": "Praha Masarykovo nádraží",
+    "lat": 50.087675,
+    "lng": 14.4332886,
+    "wiki": "https://cs.wikipedia.org/wiki/Praha_Masarykovo_n%C3%A1dra%C5%BE%C3%AD",
+    "edited": true
+  },
+  {
+    "id": "Hi014",
+    "name": "Kostel sv. Václava (Smíchov)",
+    "lat": 50.0733803,
+    "lng": 14.4046855,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_V%C3%A1clava_(Sm%C3%ADchov)",
+    "edited": true
+  },
+  {
+    "id": "Hi015",
+    "name": "Palác Bellevue (Smetanovo nábřeží)",
+    "lat": 50.0843385,
+    "lng": 14.4136427,
+    "wiki": "https://cs.wikipedia.org/wiki/Historismus_v_architektu%C5%99e",
+    "edited": true
+  },
+  {
+    "id": "Hi016",
+    "name": "Palác Lanna (Mikulášská / Pařížská)",
+    "lat": 50.0873667,
+    "lng": 14.432331,
+    "wiki": "https://cs.wikipedia.org/wiki/Historismus_v_architektu%C5%99e",
+    "edited": true
+  },
+  {
+    "id": "Se001",
+    "name": "Obecní dům — secesní interiér",
+    "lat": 50.0877083,
+    "lng": 14.4278705,
+    "wiki": "https://cs.wikipedia.org/wiki/Obecn%C3%AD_d%C5%AFm_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Se002",
+    "name": "Praha hlavní nádraží (Fanta)",
+    "lat": 50.0831829,
+    "lng": 14.4352882,
+    "wiki": "https://cs.wikipedia.org/wiki/Praha_hlavn%C3%AD_n%C3%A1dra%C5%BE%C3%AD",
+    "edited": true
+  },
+  {
+    "id": "Se003",
+    "name": "Palác Koruna",
+    "lat": 50.0842364,
+    "lng": 14.4244346,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Koruna",
+    "edited": true
+  },
+  {
+    "id": "Se004",
+    "name": "Dům U Nováků",
+    "lat": 50.0808547,
+    "lng": 14.4247525,
+    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_Nov%C3%A1k%C5%AF",
+    "edited": true
+  },
+  {
+    "id": "Se005",
+    "name": "Hotel Evropa (Václavské nám.)",
+    "lat": 50.0821497,
+    "lng": 14.4271536,
+    "wiki": "https://cs.wikipedia.org/wiki/Hotel_Evropa_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Se006",
+    "name": "Palác Lucerna",
+    "lat": 50.0812536,
+    "lng": 14.4254512,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Lucerna",
+    "edited": true
+  },
+  {
+    "id": "Se007",
+    "name": "Topičův dům (Národní třída)",
+    "lat": 50.0816597,
+    "lng": 14.4154831,
+    "wiki": "https://cs.wikipedia.org/wiki/Topi%C4%8D%C5%AFv_d%C5%AFm",
+    "edited": true
+  },
+  {
+    "id": "Se013",
+    "name": "Průmyslový palác / Výstaviště Praha",
+    "lat": 50.1065567,
+    "lng": 14.4298553,
+    "wiki": "https://cs.wikipedia.org/wiki/Pr%C5%AFmyslov%C3%BD_pal%C3%A1c_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ku001",
+    "name": "Dům U Černé Matky Boží",
+    "lat": 50.0869984,
+    "lng": 14.4255048,
+    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_%C4%8Cern%C3%A9_Matky_Bo%C5%BE%C3%AD",
+    "edited": true
+  },
+  {
+    "id": "Ku002",
+    "name": "Obytný dům Diamant (Spálená ul.)",
+    "lat": 50.0793395,
+    "lng": 14.4199272,
+    "wiki": "https://cs.wikipedia.org/wiki/Diamant_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Ku003",
+    "name": "Trojdům Josefa Chochola (Neklanova, Vyšehrad)",
+    "lat": 50.0647291,
+    "lng": 14.4158193,
+    "wiki": "https://cs.wikipedia.org/wiki/Josef_Chochol",
+    "edited": true
+  },
+  {
+    "id": "Ku004",
+    "name": "Legiobanka (rondokubismus)",
+    "lat": 50.0896092,
+    "lng": 14.4337686,
+    "wiki": "https://cs.wikipedia.org/wiki/Legiobanka",
+    "edited": true
+  },
+  {
+    "id": "Ku005",
+    "name": "Palác Adria (rondokubismus)",
+    "lat": 50.082467,
+    "lng": 14.4220287,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Adria",
+    "edited": true
+  },
+  {
+    "id": "Ku007",
+    "name": "Vila Kovářovic (Libušina, Vyšehrad)",
+    "lat": 50.0667561,
+    "lng": 14.4156753,
+    "wiki": "https://cs.wikipedia.org/wiki/Vila_Kova%C5%99ovic",
+    "edited": true
+  },
+  {
+    "id": "Ku011",
+    "name": "Palác Peterka (Václavské nám. 12)",
+    "lat": 50.0832775,
+    "lng": 14.4242864,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Peterka",
+    "edited": true
+  },
+  {
+    "id": "Mo001",
+    "name": "Müllerova vila (Adolf Loos, Střešovice)",
+    "lat": 50.0925753,
+    "lng": 14.3784517,
+    "wiki": "https://cs.wikipedia.org/wiki/M%C3%BCllerova_vila",
+    "edited": true
+  },
+  {
+    "id": "Mo002",
+    "name": "Veletržní palác (Holešovice)",
+    "lat": 50.1011739,
+    "lng": 14.4323364,
+    "wiki": "https://cs.wikipedia.org/wiki/Veletr%C5%BEn%C3%AD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Mo004",
+    "name": "Palác Avion (Václavské nám.)",
+    "lat": 50.0814964,
+    "lng": 14.4281247,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Avion",
+    "edited": true
+  },
+  {
+    "id": "Mo005",
+    "name": "Kolonie Baba (Dejvice)",
+    "lat": 50.1148217,
+    "lng": 14.3862492,
+    "wiki": "https://cs.wikipedia.org/wiki/Kolonie_Baba",
+    "edited": true
+  },
+  {
+    "id": "Mo006",
+    "name": "Vila Winternitz (Karel Lhota / Loos)",
+    "lat": 50.0673486,
+    "lng": 14.3885089,
+    "wiki": "https://cs.wikipedia.org/wiki/Vila_Winternitz",
+    "edited": true
+  },
+  {
+    "id": "Mo007",
+    "name": "ARA obchodní dům (Jugoslávská)",
+    "lat": 50.0832714,
+    "lng": 14.4218394,
+    "wiki": "https://cs.wikipedia.org/wiki/Moderna_(architektura)",
+    "edited": true
+  },
+  {
+    "id": "Mo008",
+    "name": "Elektrické podniky — Holešovice (Bubenská)",
+    "lat": 50.0986292,
+    "lng": 14.4366065,
+    "wiki": "https://cs.wikipedia.org/wiki/Veletr%C5%BEn%C3%AD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Mo009",
+    "name": "Obchodní dům Bat'a (Václavské nám.)",
+    "lat": 50.0835961,
+    "lng": 14.4238108,
+    "wiki": "https://cs.wikipedia.org/wiki/Bat%27a_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Mo010",
+    "name": "Palác Fénix (Václavské nám. 56)",
+    "lat": 50.0801422,
+    "lng": 14.4284464,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_F%C3%A9nix",
+    "edited": true
+  },
+  {
+    "id": "Mo012",
+    "name": "Palác Broadway (Spálená 14)",
+    "lat": 50.0869169,
+    "lng": 14.4269597,
+    "wiki": "https://cs.wikipedia.org/wiki/Palác_Broadway",
+    "edited": true
+  },
+  {
+    "id": "Fu001",
+    "name": "Veletržní palác (Národní galerie)",
+    "lat": 50.1011583,
+    "lng": 14.4323659,
+    "wiki": "https://cs.wikipedia.org/wiki/Veletr%C5%BEn%C3%AD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Fu003",
+    "name": "Obchodní dům Máj (My)",
+    "lat": 50.0821658,
+    "lng": 14.4196147,
+    "wiki": "https://cs.wikipedia.org/wiki/My_(obchodn%C3%AD_d%C5%AFm)",
+    "edited": true
+  },
+  {
+    "id": "Fu005",
+    "name": "Ústřední pošta (Jindřišská)",
+    "lat": 50.0830664,
+    "lng": 14.4280989,
+    "wiki": "https://cs.wikipedia.org/wiki/Hlavní_po%C5%A1ta_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Fu006",
+    "name": "Budova Českého rozhlasu (Vinohradská)",
+    "lat": 50.0784178,
+    "lng": 14.4343628,
+    "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cesk%C3%BD_rozhlas",
+    "edited": true
+  },
+  {
+    "id": "Fu010",
+    "name": "Obchodní dům Lindt (Václavské nám.)",
+    "lat": 50.0836406,
+    "lng": 14.4237058,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Lindt",
+    "edited": true
+  },
+  {
+    "id": "Fu011",
+    "name": "Elektrické podniky — Holešovice",
+    "lat": 50.0986282,
+    "lng": 14.4365904,
+    "wiki": "https://cs.wikipedia.org/wiki/Veletr%C5%BEn%C3%AD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Fu012",
+    "name": "Kolonie Baba — funkcionalistické vily",
+    "lat": 50.114057,
+    "lng": 14.385248,
+    "wiki": "https://cs.wikipedia.org/wiki/Kolonie_Baba",
+    "edited": true
+  },
+  {
+    "id": "Fu014",
+    "name": "Autoklub (Opletalova / Washingtonova)",
+    "lat": 50.0836453,
+    "lng": 14.4324136,
+    "wiki": "https://cs.wikipedia.org/wiki/Funkcionalismus_v_%C4%8Ceskoslovensku",
+    "edited": true
+  },
+  {
+    "id": "So001",
+    "name": "Hotel International (Dejvice — sorely)",
+    "lat": 50.1093711,
+    "lng": 14.3934631,
+    "wiki": "https://cs.wikipedia.org/wiki/Hotel_International_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "So005",
+    "name": "Stadion E. Rošického (Strahov)",
+    "lat": 50.0804278,
+    "lng": 14.3836886,
+    "wiki": "https://cs.wikipedia.org/wiki/Stadion_Evžena_Ro%C5%A1ick%C3%A9ho",
+    "edited": true
+  },
+  {
+    "id": "Br001",
+    "name": "Budova Federálního shromáždění (Vinohradská)",
+    "lat": 50.0799797,
+    "lng": 14.432213,
+    "wiki": "https://cs.wikipedia.org/wiki/Budova_Federativn%C3%ADho_shrom%C3%A1%C5%BEd%C4%9Bn%C3%AD",
+    "edited": true
+  },
+  {
+    "id": "Br002",
+    "name": "Nuselský most",
+    "lat": 50.0652007,
+    "lng": 14.4304401,
+    "wiki": "https://cs.wikipedia.org/wiki/Nuselsk%C3%BD_most",
+    "edited": true
+  },
+  {
+    "id": "Br003",
+    "name": "Obchodní dům Kotva (náměstí Republiky)",
+    "lat": 50.0891839,
+    "lng": 14.4274977,
+    "wiki": "https://cs.wikipedia.org/wiki/Kotva_(obchodn%C3%AD_d%C5%AFm)",
+    "edited": true
+  },
+  {
+    "id": "Br004",
+    "name": "Televizní věž Žižkov",
+    "lat": 50.0810279,
+    "lng": 14.45114,
+    "wiki": "https://cs.wikipedia.org/wiki/Televizn%C3%AD_v%C4%9B%C5%BE_Praha",
+    "edited": true
+  },
+  {
+    "id": "Br005",
+    "name": "Kongresové centrum Praha (Kavčí hory)",
+    "lat": 50.0621324,
+    "lng": 14.4287074,
+    "wiki": "https://cs.wikipedia.org/wiki/Kongresov%C3%A9_centrum_Praha",
+    "edited": true
+  },
+  {
+    "id": "Br007",
+    "name": "Hotel InterContinental (Pařížská)",
+    "lat": 50.0917789,
+    "lng": 14.4188315,
+    "wiki": "https://cs.wikipedia.org/wiki/InterContinental_Praha",
+    "edited": true
+  },
+  {
+    "id": "Br008",
+    "name": "Dům odborových svazů (ROH)",
+    "lat": 50.0845303,
+    "lng": 14.4425905,
+    "wiki": "https://cs.wikipedia.org/wiki/Budova_ROH",
+    "edited": true
+  },
+  {
+    "id": "Br009",
+    "name": "Nová scéna Národního divadla",
+    "lat": 50.0811828,
+    "lng": 14.4143173,
+    "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A1_sc%C3%A9na_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Br012",
+    "name": "Jižní Město — paneláková sídliště",
+    "lat": 50.0302745,
+    "lng": 14.526211,
+    "wiki": "https://cs.wikipedia.org/wiki/Ji%C5%BEn%C3%AD_M%C4%9Bsto",
+    "edited": true
+  },
+  {
+    "id": "In001",
+    "name": "Holešovická tržnice (centrální haly)",
+    "lat": 50.099682,
+    "lng": 14.4456375,
+    "wiki": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%A1_tr%C5%BEnice",
+    "edited": true
+  },
+  {
+    "id": "In002",
+    "name": "Elektrárna Holešovice",
+    "lat": 50.1090509,
+    "lng": 14.4354129,
+    "wiki": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%A1_elektr%C3%A1rna",
+    "edited": true
+  },
+  {
+    "id": "In003",
+    "name": "Negrelliho viadukt",
+    "lat": 50.0974522,
+    "lng": 14.4407237,
+    "wiki": "https://cs.wikipedia.org/wiki/Negrelliho_viadukt",
+    "edited": true
+  },
+  {
+    "id": "In004",
+    "name": "Elektrárna Štvanice",
+    "lat": 50.0945134,
+    "lng": 14.4327629,
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0tvanice",
+    "edited": true
+  },
+  {
+    "id": "In005",
+    "name": "Ústřední plynárna Michle (plynojemy)",
+    "lat": 50.0560334,
+    "lng": 14.4635493,
+    "wiki": "https://cs.wikipedia.org/wiki/Plyn%C3%A1rna_Michle",
+    "edited": true
+  },
+  {
+    "id": "In007",
+    "name": "Pražský přístav Holešovice (skladiště)",
+    "lat": 50.105793,
+    "lng": 14.4564682,
+    "wiki": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%BD_p%C5%99%C3%ADstav",
+    "edited": true
+  },
+  {
+    "id": "In008",
+    "name": "Praha Smíchov — původní nádražní budova",
+    "lat": 50.0612544,
+    "lng": 14.4088697,
+    "wiki": "https://cs.wikipedia.org/wiki/Praha_Sm%C3%ADchov",
+    "edited": true
+  },
+  {
+    "id": "In009",
+    "name": "ČKD Vysočany — průmyslový areál",
+    "lat": 50.1113678,
+    "lng": 14.5095322,
+    "wiki": "https://cs.wikipedia.org/wiki/%C4%8CKD",
+    "edited": true
+  },
+  {
+    "id": "In011",
+    "name": "Průmyslový palác (Výstaviště Praha)",
+    "lat": 50.1065824,
+    "lng": 14.4298285,
+    "wiki": "https://cs.wikipedia.org/wiki/Pr%C5%AFmyslov%C3%BD_pal%C3%A1c_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "In012",
+    "name": "Vyšehradský železniční viadukt",
+    "lat": 50.0669535,
+    "lng": 14.413408,
+    "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehradsk%C3%BD_%C5%BEelezni%C4%8Dn%C3%AD_most",
+    "edited": true
+  },
+  {
+    "id": "De001",
+    "name": "Tančící dům (Rašínovo nábřeží)",
+    "lat": 50.0754527,
+    "lng": 14.4141497,
+    "wiki": "https://cs.wikipedia.org/wiki/Tan%C4%8D%C3%ADc%C3%AD_d%C5%AFm",
+    "edited": true
+  },
+  {
+    "id": "De002",
+    "name": "Zlatý anděl (Smíchov, Jean Nouvel)",
+    "lat": 50.0718006,
+    "lng": 14.4037588,
+    "wiki": "https://cs.wikipedia.org/wiki/Zlat%C3%BD_and%C4%9Bl",
+    "edited": true
+  },
+  {
+    "id": "De003",
+    "name": "Palác Myslbek (Na Příkopě / Ovocný trh)",
+    "lat": 50.0859439,
+    "lng": 14.4251311,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Myslbek",
+    "edited": true
+  },
+  {
+    "id": "De004",
+    "name": "City Empiria (Pankrác)",
+    "lat": 50.0627317,
+    "lng": 14.4320279,
+    "wiki": "https://cs.wikipedia.org/wiki/City_Empiria",
+    "edited": true
+  },
+  {
+    "id": "Sa005",
+    "name": "Flow Building (Václavské nám.)",
+    "lat": 50.0809797,
+    "lng": 14.4288012,
+    "wiki": "https://cs.wikipedia.org/wiki/Sou%C4%8Dasn%C3%A1_architektura",
+    "edited": true
+  },
+  {
+    "id": "Sa006",
+    "name": "Masaryčka — administrativní budova (Zaha Hadid)",
+    "lat": 50.0883923,
+    "lng": 14.4341952,
+    "wiki": "https://cs.wikipedia.org/wiki/Masary%C4%8Dka_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Sa008",
+    "name": "River City Prague (Holešovice)",
+    "lat": 50.0943034,
+    "lng": 14.44354,
+    "wiki": "https://cs.wikipedia.org/wiki/River_City_Prague",
+    "edited": true
+  },
+  {
+    "id": "U001",
+    "name": "Jezdecká socha sv. Václava (Václavské nám.)",
+    "lat": 50.0797783,
+    "lng": 14.4297266,
+    "wiki": "https://cs.wikipedia.org/wiki/Socha_svat%C3%A9ho_V%C3%A1clava_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "U002",
+    "name": "Sousoší Jana Husa (Ladislav Šaloun)",
+    "lat": 50.0877306,
+    "lng": 14.4211248,
+    "wiki": "https://cs.wikipedia.org/wiki/Sou%C5%A1os%C3%AD_Jana_Husa",
+    "edited": true
+  },
+  {
+    "id": "U003",
+    "name": "Krocínova kašna (Staroměstské nám.)",
+    "lat": 50.0877159,
+    "lng": 14.4211341,
+    "wiki": "https://cs.wikipedia.org/wiki/Krocínova_ka%C5%A1na",
+    "edited": true
+  },
+  {
+    "id": "U004",
+    "name": "Mariánský sloup (Staroměstské nám.)",
+    "lat": 50.0873689,
+    "lng": 14.4213117,
+    "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%BD_sloup_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "U005",
+    "name": "Pomník Franze Kafky (Dušní ul., Josefov)",
+    "lat": 50.0901156,
+    "lng": 14.420725,
+    "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Franze_Kafky_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "U006",
+    "name": "Děti na Žižkovské věži (David Černý)",
+    "lat": 50.0810262,
+    "lng": 14.4511548,
+    "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
+    "edited": true
+  },
+  {
+    "id": "U007",
+    "name": "Čurající postavy (David Černý, před Kafkovým muzeem)",
+    "lat": 50.0880903,
+    "lng": 14.4102308,
+    "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
+    "edited": true
+  },
+  {
+    "id": "U008",
+    "name": "Převrácený kůň (David Černý, Lucerna)",
+    "lat": 50.0811114,
+    "lng": 14.4257897,
+    "wiki": "https://cs.wikipedia.org/wiki/Kon%C4%9B_(David_%C4%8Cern%C3%BD)",
+    "edited": true
+  },
+  {
+    "id": "U009",
+    "name": "Hlava Franze Kafky — Metalmorphosis (Černý, Národní třída)",
+    "lat": 50.0816778,
+    "lng": 14.4208267,
+    "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
+    "edited": true
+  },
+  {
+    "id": "U010",
+    "name": "Sousoší na Vyšehradě — Libuše a Přemysl",
+    "lat": 50.0640367,
+    "lng": 14.4174494,
+    "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad",
+    "edited": true
+  },
+  {
+    "id": "U011",
+    "name": "Pomník Tomáše Masaryka (Hrad)",
+    "lat": 50.0894858,
+    "lng": 14.3979417,
+    "wiki": "https://cs.wikipedia.org/wiki/Tom%C3%A1%C5%A1_Garrigue_Masaryk",
+    "edited": true
+  },
+  {
+    "id": "U012",
+    "name": "Kašna na Mariánském náměstí",
+    "lat": 50.0866167,
+    "lng": 14.4195058,
+    "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%A9_n%C3%A1m%C4%9Bst%C3%AD_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "U013",
+    "name": "Sousoší na Karlově mostě — 30 barokních soch",
+    "lat": 50.0864958,
+    "lng": 14.411332,
+    "wiki": "https://cs.wikipedia.org/wiki/Karl%C5%AFv_most",
+    "edited": true
+  },
+  {
+    "id": "U015",
+    "name": "Jezdecká socha Jana Žižky (Vítkov, Žižkov)",
+    "lat": 50.0882426,
+    "lng": 14.4482258,
+    "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Jana_%C5%BDi%C5%BEky_na_V%C3%ADtkově",
+    "edited": true
+  },
+  {
+    "id": "U019",
+    "name": "Alegorie Vltavy a Labe (Čechův most)",
+    "lat": 50.092371,
+    "lng": 14.4175333,
+    "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cech%C5%AFv_most",
+    "edited": true
+  },
+  {
+    "id": "U021",
+    "name": "Socha Winstona Churchilla (Thunovská)",
+    "lat": 50.0891517,
+    "lng": 14.4028397,
+    "wiki": "https://cs.wikipedia.org/wiki/Winston_Churchill",
+    "edited": true
+  },
+  {
+    "id": "U025",
+    "name": "Sochy na průčelí Rudolfina",
+    "lat": 50.0895225,
+    "lng": 14.4152722,
+    "wiki": "https://cs.wikipedia.org/wiki/Rudolfinum",
+    "edited": true
+  },
+  {
+    "id": "U026",
+    "name": "Pomník Bedřicha Smetany (Novotného lávka)",
+    "lat": 50.0853098,
+    "lng": 14.4129333,
+    "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Bed%C5%99icha_Smetany_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "U028",
+    "name": "Pomník Karla IV. (Křižovnické nám.)",
+    "lat": 50.0863031,
+    "lng": 14.4139042,
+    "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Karla_IV._(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Op001",
+    "name": "Prašná brána",
+    "lat": 50.0872253,
+    "lng": 14.4277619,
+    "wiki": "https://cs.wikipedia.org/wiki/Pra%C5%A1n%C3%A1_br%C3%A1na",
+    "edited": true
+  },
+  {
+    "id": "Op002",
+    "name": "Leopoldova brána (Vyšehrad)",
+    "lat": 50.0631664,
+    "lng": 14.4217114,
+    "wiki": "https://cs.wikipedia.org/wiki/Leopoldova_br%C3%A1na_(Vy%C5%A1ehrad)",
+    "edited": true
+  },
+  {
+    "id": "Op003",
+    "name": "Táborská brána (Vyšehrad)",
+    "lat": 50.0617092,
+    "lng": 14.4241697,
+    "wiki": "https://cs.wikipedia.org/wiki/T%C3%A1borsk%C3%A1_br%C3%A1na_(Vy%C5%A1ehrad)",
+    "edited": true
+  },
+  {
+    "id": "Op004",
+    "name": "Cihelná brána (Vyšehrad)",
+    "lat": 50.0652686,
+    "lng": 14.4191003,
+    "wiki": "https://cs.wikipedia.org/wiki/Cihedn%C3%A1_br%C3%A1na_(Vy%C5%A1ehrad)",
+    "edited": true
+  },
+  {
+    "id": "Op005",
+    "name": "Staroměstská mostecká věž (opevnění mostu)",
+    "lat": 50.0861844,
+    "lng": 14.4135786,
+    "wiki": "https://cs.wikipedia.org/wiki/Starom%C4%9Bstsk%C3%A1_mosteck%C3%A1_v%C4%9B%C5%BE",
+    "edited": true
+  },
+  {
+    "id": "Op006",
+    "name": "Malostranské mostecké věže (gotická + románská)",
+    "lat": 50.0872378,
+    "lng": 14.4068444,
+    "wiki": "https://cs.wikipedia.org/wiki/Malostranck%C3%A9_mosteck%C3%A9_v%C4%9B%C5%BEe",
+    "edited": true
+  },
+  {
+    "id": "Op007",
+    "name": "Hradby Nového Města — dochovaný úsek (Vyšehradská ul.)",
+    "lat": 50.0675686,
+    "lng": 14.4262442,
+    "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A9_M%C4%9Bsto_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Op008",
+    "name": "Novoměstská věž (Slepá věž, Žitná)",
+    "lat": 50.0781619,
+    "lng": 14.4213152,
+    "wiki": "https://cs.wikipedia.org/wiki/Slep%C3%A1_v%C4%9B%C5%BE_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Op009",
+    "name": "Špička — gotická věž Nového Města",
+    "lat": 50.0623042,
+    "lng": 14.4230567,
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0pi%C4%8Dka_(v%C4%9B%C5%BE)",
+    "edited": true
+  },
+  {
+    "id": "Op010",
+    "name": "Vyšehradské kasematy — barokní opevnění",
+    "lat": 50.065235,
+    "lng": 14.4191961,
+    "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad#Opevn%C4%9Bn%C3%AD",
+    "edited": true
+  },
+  {
+    "id": "Op013",
+    "name": "Černá věž (Pražský hrad)",
+    "lat": 50.0919183,
+    "lng": 14.4050119,
+    "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cern%C3%A1_v%C4%9B%C5%BE_(Pra%C5%BEsk%C3%BD_hrad)",
+    "edited": true
+  },
+  {
+    "id": "Op014",
+    "name": "Bílá věž (Pražský hrad)",
+    "lat": 50.0919414,
+    "lng": 14.4033522,
+    "wiki": "https://cs.wikipedia.org/wiki/B%C3%ADl%C3%A1_v%C4%9B%C5%BE_(Pra%C5%BEsk%C3%BD_hrad)",
+    "edited": true
+  },
+  {
+    "id": "Op015",
+    "name": "Daliborka (Pražský hrad)",
+    "lat": 50.0923328,
+    "lng": 14.4049561,
+    "wiki": "https://cs.wikipedia.org/wiki/Daliborka",
+    "edited": true
+  },
+  {
+    "id": "Op016",
+    "name": "Mihulka — Prašná věž (Pražský hrad)",
+    "lat": 50.0913875,
+    "lng": 14.4004239,
+    "wiki": "https://cs.wikipedia.org/wiki/Mihu%C4%BCka",
+    "edited": true
+  },
+  {
+    "id": "Op022",
+    "name": "Písecká brána (Prašný most)",
+    "lat": 50.0952119,
+    "lng": 14.4058908,
+    "wiki": "https://cs.wikipedia.org/wiki/P%C3%ADseck%C3%A1_br%C3%A1na_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Op030",
+    "name": "Hladová zeď (Petřín)",
+    "lat": 50.0806803,
+    "lng": 14.4007817,
+    "wiki": "https://cs.wikipedia.org/wiki/Hladov%C3%A1_ze%C4%8F",
+    "edited": true
+  },
+  {
+    "id": "Ba021",
+    "name": "Hrzánský palác (Loretánské nám. 1)",
+    "lat": 50.0885664,
+    "lng": 14.3941086,
+    "wiki": "https://cs.wikipedia.org/wiki/Hrz%C3%A1nsk%C3%BD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Hi017",
+    "name": "Palác Živnostenské banky",
+    "lat": 50.0859389,
+    "lng": 14.427245,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_%C5%BDivnostensk%C3%A9_banky_(Na_P%C5%99%C3%ADkop%C4%9B_20)",
+    "edited": true
+  },
+  {
+    "id": "Kl010",
+    "name": "Thunovský palác",
+    "lat": 50.0894078,
+    "lng": 14.4039767,
+    "wiki": "https://cs.wikipedia.org/wiki/Thunovsk%C3%BD_pal%C3%A1c",
+    "edited": true
+  },
+  {
+    "id": "Hi018",
+    "name": "Kostel sv. Prokopa (Žižkov)",
+    "lat": 50.0840972,
+    "lng": 14.4506094,
+    "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Prokopa_(%C5%BDi%C5%BEkov)",
+    "edited": true
+  },
+  {
+    "id": "Hi010",
+    "name": "Stýblův dům",
+    "lat": 50.0823664,
+    "lng": 14.4256094,
+    "wiki": "https://cs.wikipedia.org/wiki/Praha",
+    "edited": true
+  },
+  {
+    "id": "Fu015",
+    "name": "Krematorium Strašnice",
+    "lat": 50.0762667,
+    "lng": 14.4848092,
+    "wiki": "https://cs.wikipedia.org/wiki/Krematorium_Stra%C5%A1nice",
+    "edited": true
+  },
+  {
+    "id": "Mo014",
+    "name": "Hlávkův most",
+    "lat": 50.0956025,
+    "lng": 14.4369928,
+    "wiki": "https://cs.wikipedia.org/wiki/Hl%C3%A1vk%C5%AFv_most",
+    "edited": true
+  },
+  {
+    "id": "Ku013",
+    "name": "činžovní dům Neklanova 30",
+    "lat": 50.0663519,
+    "lng": 14.4210303,
+    "wiki": "https://cs.wikipedia.org/wiki/Kubistick%C3%BD_d%C5%AFm_v_Neklanov%C4%9B_ulici",
+    "edited": true
+  },
+  {
+    "id": "Kl011",
+    "name": "Palác Platýz",
+    "lat": 50.0828469,
+    "lng": 14.4204744,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Plat%C3%BDz",
+    "edited": true
+  },
+  {
+    "id": "Se014",
+    "name": "První vzájemná česká pojišťovna",
+    "lat": 50.0806125,
+    "lng": 14.4200381,
+    "wiki": "https://cs.wikipedia.org/wiki/Soubor:Sp%C3%A1len%C3%A1,_Prvn%C3%AD_vz%C3%A1jemn%C3%A1_%C4%8Desk%C3%A1_poji%C5%A1%C5%A5ovna.jpg",
+    "edited": true
+  },
+  {
+    "id": "Fu016",
+    "name": "Dům módy",
+    "lat": 50.07977,
+    "lng": 14.42896,
+    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_m%C3%B3dy_(Praha)",
+    "edited": true
+  },
+  {
+    "id": "Fu004",
+    "name": "Molochov",
+    "lat": 50.0996483,
+    "lng": 14.4189883,
+    "wiki": "https://cs.wikipedia.org/wiki/Molochov",
+    "edited": true
+  },
+  {
+    "id": "So007",
+    "name": "Velký strahovský stadion",
+    "lat": 50.080336,
+    "lng": 14.387861,
+    "wiki": "https://cs.wikipedia.org/wiki/Velk%C3%BD_strahovsk%C3%BD_stadion",
+    "edited": true
+  },
+  {
+    "id": "Mo015",
+    "name": "Mánesův most",
+    "lat": 50.089522,
+    "lng": 14.412728,
+    "wiki": "https://cs.wikipedia.org/wiki/M%C3%A1nes%C5%AFv_most",
+    "edited": true
+  },
+  {
+    "id": "Se015",
+    "name": "Palác Akropolis",
+    "lat": 50.08225,
+    "lng": 14.448917,
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Akropolis",
+    "edited": true
+  },
+  {
+    "id": "Op031",
+    "name": "Bašta sv. Václava",
+    "lat": 50.0636269,
+    "lng": 14.4165178,
+    "wiki": "https://cs.wikipedia.org/wiki/Praha",
+    "edited": true
+  }
+]

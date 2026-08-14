@@ -469,6 +469,27 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   padding: 4px 0;
 }
 .filter-reset:hover { color: var(--ink); }
+/* Admin-only sekce — pracovní vrstva places-development.json. Vizuálně
+   odlišená (přerušovaný okraj), ať je jasné, že tohle je vývojářský
+   nástroj, ne běžná součást filtru. */
+#devRow { border-top: 1px dashed var(--rule); padding-top: 12px; }
+#devRow .filter-lbl { color: #b04020; }
+.dev-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.dev-btn {
+  appearance: none; cursor: pointer;
+  background: #fff; border: 1.5px solid var(--rule); border-radius: 7px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.dev-btn:hover { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
+.dev-check {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--ink-2);
+  cursor: pointer;
+}
+.dev-check input { cursor: pointer; }
 .chip {
   flex-shrink: 0;
   display: inline-flex; align-items: center; gap: 5px;
@@ -1766,145 +1787,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
 
-/* ═══════════════ ARCH PINS (a-map.json) ═══════════════ */
-.arch-pin {
-  background: #fff;
-  border: 1.5px solid #1a1a18;
-  border-radius: 3px;
-  box-shadow: 0 1px 5px rgba(26,24,20,.22);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 22px; height: 22px;
-  cursor: pointer;
-  line-height: 1;
-  transition: transform .15s, box-shadow .15s;
-  font-family: 'JetBrains Mono', monospace;
-  color: #1a1a18;
-  padding: 1px;
-  gap: 1px;
-}
-.arch-pin:hover { transform: scale(1.15); box-shadow: 0 3px 10px rgba(26,24,20,.28); }
-.arch-pin-style { font-size: 7px; font-weight: 700; letter-spacing: .01em; line-height: 1; }
-.arch-pin-num   { font-size: 5.5px; font-weight: 500; opacity: .65; line-height: 1; }
-.arch-pin.unedited { color: #aaa; border-color: #ccc; }
-
-/* Arch layer panel */
-.arch-panel-wrap {
-  position: fixed;
-  top: calc(var(--header-h, 52px) + 8px);
-  z-index: 500;
-  pointer-events: auto;
-}
-.arch-panel-toggle {
-  display: flex; align-items: center; gap: 5px;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 26px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ink-3);
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(26,24,20,.06);
-  transition: background .15s, color .15s;
-  white-space: nowrap;
-  width: 100%;
-}
-.arch-panel-toggle:hover { background: var(--paper-2); color: var(--ink); }
-.arch-panel-toggle.has-active { color: var(--ink); }
-.arch-panel-toggle svg { transition: transform .22s; flex-shrink: 0; }
-.arch-panel-toggle.open svg { transform: rotate(180deg); }
-.arch-panel-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  background: rgba(238,239,235,.97);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(26,24,20,.16);
-  padding: 8px 6px;
-  min-width: 210px;
-  max-height: min(70vh, calc(100vh - var(--header-h, 52px) - 130px - env(safe-area-inset-bottom, 0px)));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-}
-@media (min-width: 820px), (orientation: landscape) {
-  /* na desktopu / landscape není spodní navbar v cestě */
-  .arch-panel-dropdown { max-height: min(70vh, calc(100vh - var(--header-h, 52px) - 40px)); }
-}
-.arch-panel-dropdown.open { display: flex; }
-.arch-style-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background .12s;
-  gap: 8px;
-  user-select: none;
-}
-.arch-style-row:hover { background: var(--paper-2); }
-.arch-style-row-left {
-  display: flex; align-items: center; gap: 7px;
-  flex: 1; min-width: 0;
-}
-.arch-style-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; font-weight: 700; letter-spacing: .04em;
-  color: var(--ink);
-  background: #fff;
-  border: 1.5px solid var(--ink);
-  border-radius: 3px;
-  width: 26px; height: 20px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.arch-style-name {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px; color: var(--ink-2);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.arch-style-count {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; color: var(--ink-4);
-  flex-shrink: 0;
-}
-.arch-style-toggle {
-  display: flex; gap: 2px; flex-shrink: 0;
-}
-.arch-tog-btn {
-  border: none; cursor: pointer;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .04em;
-  border-radius: 3px;
-  padding: 2px 5px; height: 18px;
-  background: var(--paper-3); color: var(--ink-4);
-  transition: background .12s, color .12s;
-}
-.arch-tog-btn.active-on  { background: var(--ink);  color: var(--paper); }
-.arch-tog-btn.active-dim { background: var(--ink-3); color: var(--paper); }
-.arch-panel-footer {
-  margin-top: 4px;
-  padding: 4px 8px 2px;
-  border-top: 1px solid var(--rule);
-  display: flex; justify-content: flex-end; gap: 6px;
-}
-.arch-footer-btn {
-  border: none; cursor: pointer;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
-  background: transparent; color: var(--ink-3);
-  padding: 3px 0;
-  transition: color .12s;
-}
-.arch-footer-btn:hover { color: var(--ink); }
-
-/* Tooltip */
+/* Tooltip pro pracovní vrstvu (places-development.json) — piny samotné
+   teď používají stejný vzhled jako ostatní místa (makeIcon), tenhle
+   tooltip zůstává jako lehký náhled (jméno + wiki), protože dev místa
+   nemají vlastní detail stránku. */
 .arch-tip {
   position: fixed; z-index: 950;
   background: var(--paper);
@@ -2018,22 +1904,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
         </button>
       </div>
 
-      <!-- Arch layer panel -->
-      <div class="arch-panel-wrap" id="archPanelWrap">
-        <button class="arch-panel-toggle" id="archPanelToggle" onclick="toggleArchPanel()">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          <span id="archPanelLabel">Slohy</span>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="arch-panel-dropdown" id="archPanelDropdown">
-          <!-- filled by JS -->
-          <div class="arch-panel-footer">
-            <button class="arch-footer-btn" onclick="archSetAll('on')">vše on</button>
-            <button class="arch-footer-btn" onclick="archSetAll('dim')">vše dim</button>
-            <button class="arch-footer-btn" onclick="archSetAll('off')">vše off</button>
-          </div>
-        </div>
-      </div>
 
       <div class="filter-modal-backdrop" id="filterBackdrop">
         <div class="filter-modal" id="filterModal">
@@ -2073,6 +1943,16 @@ body.lop-return .llo-bottom-placeholder { display: block; }
               </div>
               <input type="range" id="distSlider" min="0" max="100" value="100" class="filter-range-input"/>
               <div class="dist-note" id="distNote" hidden></div>
+            </div>
+            <div class="filter-row" id="devRow" hidden>
+              <div class="filter-lbl"><span id="devSectionLbl">Pracovní vrstva (jen admin)</span></div>
+              <div class="dev-controls">
+                <button class="dev-btn" id="devLoadBtn" onclick="loadDevPlaces()">Načíst pracovní</button>
+                <label class="dev-check">
+                  <input type="checkbox" id="devForceOnly" onchange="toggleDevForceOnly()"/>
+                  <span id="devForceLbl">Zobrazit jen pracovní</span>
+                </label>
+              </div>
             </div>
             <div class="filter-footer">
               <button class="filter-reset" id="fmReset" onclick="resetFilters()">Resetovat</button>
@@ -2361,7 +2241,7 @@ async function syncFromDB(onDone) {
     localStorage.setItem('lop_wishlist_v2', JSON.stringify((await wRes.json()).map(r => String(r.place_id))));
     localStorage.setItem('lop_visited_v1',  JSON.stringify((await vRes.json()).map(r => String(r.place_id))));
     fetch(`${SUPA_URL}/rest/v1/profiles?user_id=eq.${s.user.id}&select=role`, { headers: authHeaders() })
-      .then(r => r.ok ? r.json() : []).then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); }).catch(() => {});
+      .then(r => r.ok ? r.json() : []).then(rows => { if (rows[0]?.role) localStorage.setItem('lop_user_role', rows[0].role); updateDevRowVisibility(); }).catch(() => {});
     _showSyncSpinner(false); _showSyncBar(false);
     if (onDone) onDone();
   } catch(e) {
@@ -2630,7 +2510,8 @@ async function loadData() {
 
   // Spustí zbytek aplikace až po načtení dat
   initMap();
-  loadArchMap();
+  // loadDevPlaces() se teď volá jen na vyžádání admina (viz tlačítko
+  // "Načíst pracovní" ve filtru), ne automaticky pro každého.
   // Automatická poloha při startu
   // Autocenter na polohu — přeskočit pokud hash odpovídá ID místa (navigace z detailu)
   const _gotoPlace = sessionStorage.getItem('lop_goto');
@@ -3322,6 +3203,10 @@ function applyFilterModalI18n() {
   setTxt('fmEra',      'overview.era');
   setTxt('distLbl',    'overview.dist_from_you');
   setTxt('fmReset',    'overview.reset');
+  setTxt('devSectionLbl', 'admin.dev_section');
+  setTxt('devForceLbl',   'admin.dev_force');
+  const loadBtn = document.getElementById('devLoadBtn');
+  if (loadBtn) loadBtn.textContent = t(_devLoaded ? 'admin.dev_unload' : 'admin.dev_load');
 }
 
 function initDistSlider() {
@@ -3517,7 +3402,40 @@ function applyFilter() {
   if (fmT) fmT.textContent = '/' + (_markers ? _markers.length : '—');
   updateFilterPuck();
   updateApplyBtn(activeCount);
-  refreshArchMarkers();
+  refreshDevMarkers();
+}
+
+/* Kategorie — pozitivní výběr: dokud nikdo nemá "chci"/"dim", kategorie
+   neomezují nic. Používá applyFilter() i refreshDevMarkers() (pracovní
+   vrstva places-development.json sdílí stejnou logiku kategorií). */
+function anyCatSelected() {
+  return ['hist', 'arch', 'art'].some(c => FILTER[c] !== 'auto');
+}
+
+/* Piny z places-development.json nejsou v LOCATIONS/_markers — mají
+   vlastní, jednodušší filtrování: kategorie (stejná logika jako u
+   publikovaných míst) a force-only, který kategorii přebije úplně. */
+function refreshDevMarkers() {
+  if (!_devLoaded) return;
+  _devMarkers.forEach(({ marker, loc }) => {
+    if (_devForceOnly) {
+      marker.addTo(window._map);
+      const el = marker.getElement();
+      if (el) el.style.opacity = 1;
+      return;
+    }
+    const anyCatSel = anyCatSelected();
+    const catRaw = FILTER[loc.cat];
+    const catState = !anyCatSel ? 'full'
+      : catRaw === 'on'  ? 'full'
+      : catRaw === 'dim' ? 'dim'
+      : 'hide';
+    const op = catState === 'hide' ? 0 : catState === 'dim' ? 0.3 : 1;
+    if (op === 0) { marker.remove(); return; }
+    marker.addTo(window._map);
+    const el = marker.getElement();
+    if (el) el.style.opacity = op;
+  });
 }
 
 /* Text potvrzovacího tlačítka nese počet výsledků — stejný vzor jako
@@ -3748,6 +3666,11 @@ const LAYER_LABEL = () => ({
 /* Statické CS popisky v HTML jsou jen záloha (konvence #9) — přepsat při
    startu, jinak zůstanou v EN verzi česky. Netýká se filter modalu
    (to řeší applyFilterModalI18n), jen okolní plovoucí ovládací prvky. */
+function updateDevRowVisibility() {
+  const row = document.getElementById('devRow');
+  if (row) row.hidden = !isAdmin();
+}
+
 function applyMapChromeI18n() {
   const setTxt = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
   setTxt('blLabelDefault', 'map.layer_default');
@@ -3756,7 +3679,6 @@ function applyMapChromeI18n() {
   setTxt('blLabelAerial',  'map.layer_aerial');
   setTxt('baseLayerLabel', 'map.layer_default'); // výchozí vrstva při startu je 'carto'
   setTxt('filterPuckLabel', 'overview.filter');
-  setTxt('archPanelLabel',  'map.arch_styles');
   const puck = document.getElementById('filterPuck');
   if (puck) puck.title = t('overview.filter');
 }
@@ -4141,232 +4063,122 @@ function renderRoutes() {
   `).join('');
 }
 
-/* ═══════════════ ARCH MAP (a-map.json) ═══════════════ */
-const STYLE_NAMES = {
-  Ro: 'Románský sloh',
-  Go: 'Gotika',
-  Op: 'Opevnění & brány',
-  Re: 'Renesance',
-  Ba: 'Baroko & Rokoko',
-  Kl: 'Klasicismus & Empír',
-  Hi: 'Historismus',
-  Se: 'Secese',
-  Ku: 'Kubismus & Rondokubismus',
-  Mo: 'Moderna',
-  Fu: 'Funkcionalismus',
-  So: 'Sorela',
-  Br: 'Brutalismus',
-  In: 'Industrial',
-  De: 'Dekonstruktivismus',
-  Sa: 'Současná architektura',
-  U:  'Umění ve veřejném prostoru'
-};
+/* ═══════════════ PRACOVNÍ VRSTVA (places-development.json) ═══════════════
+   Dřív se načítalo automaticky pro každého, s vlastním on/dim/off
+   dropdownem podle slohu (odstraněno — "Slohy" pryč). Teď: jen pro admina,
+   na vyžádání tlačítkem v sekci filtru. Piny vypadají stejně jako
+   publikovaná místa (makeIcon) — kategorie podle ID: prefix "U" (Umění
+   ve veřejném prostoru) → art, cokoliv jiného → arch (viz rozhodnutí,
+   a-map ID kódují sloh, ne kategorii — jediná výjimka je právě "U").
+   Detail stránka pro tahle místa neexistuje, klik/hover ukáže jméno
+   a odkaz na wiki v lehkém tooltipu (arch-tip, recyklovaný ze starého
+   systému). */
+let _devMarkers = [];
+let _devLoaded  = false;
+let _devForceOnly = false;
 
-// Per-style state: 'on' | 'dim' | 'off'
-const _archStyleState = {};
-let   _archMarkers    = [];
-let   _archPanelOpen  = false;
+function _devCat(id) {
+  return /^U\d/.test(id) ? 'art' : 'arch';
+}
 
-/* Viditelnost pracovního pinu je průnik dvou nezávislých filtrů:
-   vlastní on/dim/off z archPanelu (pro terénní práci na a-map.json)
-   A hlavní STYLE_FILTER z filtru mapy (aby šlo slohem prosít obě vrstvy
-   najednou, ne jen publikovaná místa). */
-/* Kategorie 'arch' v hlavním filtru řídí i tuhle pracovní vrstvu — body
-   v a-map.json jsou architektonické tipy, takže "Architektura" v hlavním
-   filtru na ně musí mít stejný vliv jako na publikovaná místa. */
-function anyCatSelected() {
-  return ['hist', 'arch', 'art'].some(c => FILTER[c] !== 'auto');
+function _devTipHTML(item, cat) {
+  const catName = cat === 'art' ? t('cat.art') : t('cat.arch');
+  return `
+    <div class="arch-tip-style">${catName} · ${item.id}</div>
+    <div class="arch-tip-name">${item.name}</div>
+    <a class="arch-tip-wiki" href="${item.wiki}" target="_blank" rel="noopener">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Otevřít zdroj
+    </a>`;
 }
-function _archCategoryState() {
-  if (!anyCatSelected()) return 'full';
-  if (FILTER.arch === 'on')  return 'full';
-  if (FILTER.arch === 'dim') return 'dim';
-  return 'hide';
+
+function _showDevTip(markerEl, item, cat, tip) {
+  if (!markerEl || !tip) return;
+  tip.innerHTML = _devTipHTML(item, cat);
+  const rect = markerEl.getBoundingClientRect();
+  const tipW = 260, margin = 8;
+  tip.style.left = '-9999px'; tip.style.top = '-9999px';
+  tip.classList.add('visible');
+  const tipH = tip.offsetHeight || 110;
+  tip.classList.remove('visible');
+  let left = rect.left + rect.width / 2 - tipW / 2;
+  let top  = rect.top - tipH - 8;
+  left = Math.max(margin, Math.min(window.innerWidth - tipW - margin, left));
+  if (top < margin) top = rect.bottom + 8;
+  tip.style.left = left + 'px';
+  tip.style.top  = top  + 'px';
+  tip._forId = item.id;
+  tip.classList.add('visible');
 }
-const _ARCH_RANK = { full: 0, dim: 1, hide: 2 };
-function _archEffectiveState(code) {
-  const styleRaw = _archStyleState[code] || 'on';
-  const styleState = styleRaw === 'off' ? 'hide' : styleRaw; // 'on' zůstává 'on', normalizuje se níž
-  const styleFilterState = (STYLE_FILTER.size && !STYLE_FILTER.has(code)) ? 'hide' : 'full';
-  const states = [styleState === 'on' ? 'full' : styleState, styleFilterState, _archCategoryState()];
-  // Nejméně příznivý ze tří nezávislých filtrů (vlastní panel, sloh, kategorie) vyhrává.
-  return states.reduce((worst, s) => _ARCH_RANK[s] > _ARCH_RANK[worst] ? s : worst, 'full');
+
+/* "Zobrazit jen pracovní" — vynutí skrytí publikovaných míst, ať admin
+   vidí jen obsah places-development.json bez rušení. Nezávislé na
+   běžném FILTER (kategorie na piny z devu ale pořád platí). */
+function toggleDevForceOnly() {
+  _devForceOnly = !_devForceOnly;
+  applyFilter();
+  updateDevToggleUI();
 }
-function _archMarkerVisible(code) {
-  return _archEffectiveState(code) !== 'hide';
-}
-function _archMarkerOpacity(code) {
-  return _archEffectiveState(code) === 'dim' ? 0.3 : 1;
-}
-function _refreshArchMarker(marker, code) {
-  if (!window._map) return;
-  if (_archMarkerVisible(code)) {
-    marker.addTo(window._map);
-    const el = marker.getElement();
-    if (el) el.style.opacity = _archMarkerOpacity(code);
-  } else {
-    marker.remove();
-  }
-}
-function refreshArchMarkers() {
-  _archMarkers.forEach(({ marker, item }) => {
-    const sc = item.id.replace(/\d+$/, '');
-    _refreshArchMarker(marker, sc);
+
+function updateDevToggleUI() {
+  const loadBtn  = document.getElementById('devLoadBtn');
+  const forceChk = document.getElementById('devForceOnly');
+  if (loadBtn) loadBtn.textContent = _devLoaded ? t('admin.dev_unload') : t('admin.dev_load');
+  if (forceChk) forceChk.checked = _devForceOnly;
+  // Publikovaná místa se skrývají/zobrazují přes obyčejný marker.remove()/addTo,
+  // ne přes applyFilter (ten řeší jen dim/hide logiku pro filtr) — force-only
+  // je nezávislý přepínač nad tím vším.
+  _markers.forEach(({ marker }) => {
+    if (_devForceOnly) marker.remove();
+    else marker.addTo(window._map);
   });
+  if (!_devForceOnly) applyFilter(); // vrátí správné opacity po znovu-přidání
 }
 
-function toggleArchPanel() {
-  _archPanelOpen = !_archPanelOpen;
-  const toggle = document.getElementById('archPanelToggle');
-  const dd     = document.getElementById('archPanelDropdown');
-  if (toggle) toggle.classList.toggle('open', _archPanelOpen);
-  if (dd)     dd.classList.toggle('open',     _archPanelOpen);
-  // Close on outside click
-  if (_archPanelOpen) {
-    setTimeout(() => {
-      document.addEventListener('click', _archOutsideClick, { capture: true, once: true });
-    }, 0);
+async function loadDevPlaces() {
+  if (_devLoaded) {
+    _devMarkers.forEach(({ marker }) => marker.remove());
+    _devMarkers = [];
+    _devLoaded = false;
+    updateDevToggleUI();
+    return;
   }
-}
-function _archOutsideClick(e) {
-  const wrap = document.getElementById('archPanelWrap');
-  if (wrap && !wrap.contains(e.target)) {
-    _archPanelOpen = false;
-    document.getElementById('archPanelToggle')?.classList.remove('open');
-    document.getElementById('archPanelDropdown')?.classList.remove('open');
-  } else if (_archPanelOpen) {
-    // re-attach if still open
-    setTimeout(() => document.addEventListener('click', _archOutsideClick, { capture: true, once: true }), 0);
-  }
-}
-
-function _setStyleState(code, state) {
-  _archStyleState[code] = state;
-  // update markers
-  _archMarkers.forEach(({ marker, item }) => {
-    const sc = item.id.replace(/\d+$/, '');
-    if (sc !== code) return;
-    _refreshArchMarker(marker, sc);
-  });
-  // update row buttons
-  const row = document.querySelector(`.arch-style-row[data-code="${code}"]`);
-  if (row) {
-    row.querySelectorAll('.arch-tog-btn').forEach(b => {
-      b.classList.remove('active-on', 'active-dim');
-      if (b.dataset.s === state && state !== 'off') b.classList.add('active-' + state);
-    });
-  }
-  // update toggle button appearance
-  const anyActive = Object.values(_archStyleState).some(s => s !== 'off');
-  document.getElementById('archPanelToggle')?.classList.toggle('has-active', anyActive);
-}
-
-function archSetAll(state) {
-  Object.keys(_archStyleState).forEach(code => _setStyleState(code, state));
-}
-
-function _buildArchPanel(counts) {
-  const dd = document.getElementById('archPanelDropdown');
-  if (!dd) return;
-  const footer = dd.querySelector('.arch-panel-footer');
-  const rows = Object.entries(STYLE_NAMES).map(([code, name]) => {
-    const n = counts[code] || 0;
-    const s = _archStyleState[code] || 'on';
-    return `<div class="arch-style-row" data-code="${code}">
-      <div class="arch-style-row-left">
-        <span class="arch-style-code">${code}</span>
-        <span class="arch-style-name">${name}</span>
-        <span class="arch-style-count">${n}</span>
-      </div>
-      <div class="arch-style-toggle">
-        <button class="arch-tog-btn${s==='on'?' active-on':''}" data-s="on" onclick="event.stopPropagation();_setStyleState('${code}','on')">on</button>
-        <button class="arch-tog-btn${s==='dim'?' active-dim':''}" data-s="dim" onclick="event.stopPropagation();_setStyleState('${code}','dim')">dim</button>
-        <button class="arch-tog-btn" data-s="off" onclick="event.stopPropagation();_setStyleState('${code}','off')">off</button>
-      </div>
-    </div>`;
-  }).join('');
-  dd.innerHTML = rows;
-  dd.appendChild(footer);
-}
-
-async function loadArchMap() {
   try {
-    const res = await fetch('a-map.json');
+    const res = await fetch('places-development.json');
     if (!res.ok) return;
     const data = await res.json();
     const tip = document.getElementById('archTip');
-    if (!tip) return;
     let hideTimer = null;
 
-    // Count per style & init states
-    const counts = {};
     data.forEach(item => {
-      const sc = item.id.replace(/\d+$/, '');
-      counts[sc] = (counts[sc] || 0) + 1;
-      if (!_archStyleState[sc]) _archStyleState[sc] = 'on';
-    });
-    _buildArchPanel(counts);
-
-    data.forEach(item => {
-      const styleCode = item.id.replace(/\d+$/, '');
-      const num = item.id.replace(/^[A-Za-z]+/, '');
-      const icon = L.divIcon({
-        html: `<div class="arch-pin${item.edited ? '' : ' unedited'}"><span class="arch-pin-style">${styleCode}</span><span class="arch-pin-num">${num}</span></div>`,
-        className: '',
-        iconSize: [22, 22],
-        iconAnchor: [11, 11]
-      });
+      const cat = _devCat(item.id);
+      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: [], isDev: true };
+      const icon = makeIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
 
-      function showArchTip(markerEl) {
-        clearTimeout(hideTimer);
-        if (!markerEl) return;
-        const styleName = STYLE_NAMES[styleCode] || styleCode;
-        tip.innerHTML = `
-          <div class="arch-tip-style">${styleName} · ${item.id}</div>
-          <div class="arch-tip-name">${item.name}</div>
-          <a class="arch-tip-wiki" href="${item.wiki}" target="_blank" rel="noopener">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Otevřít zdroj
-          </a>`;
-        const rect = markerEl.getBoundingClientRect();
-        const tipW = 260, margin = 8;
-        tip.style.left = '-9999px'; tip.style.top = '-9999px';
-        tip.classList.add('visible');
-        const tipH = tip.offsetHeight || 110;
-        tip.classList.remove('visible');
-        let left = rect.left + rect.width / 2 - tipW / 2;
-        let top  = rect.top - tipH - 8;
-        left = Math.max(margin, Math.min(window.innerWidth - tipW - margin, left));
-        if (top < margin) top = rect.bottom + 8;
-        tip.style.left = left + 'px';
-        tip.style.top  = top  + 'px';
-        tip._forId = item.id;
-        tip.classList.add('visible');
-      }
-
-      const isVisible = () => _archMarkerVisible(styleCode);
-      m.on('mouseover', () => { if (isVisible()) showArchTip(m.getElement()); });
-      m.on('mouseout',  () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
-      m.on('click',     () => { if (isVisible()) window.open(item.wiki, '_blank', 'noopener'); });
+      m.on('mouseover', () => { clearTimeout(hideTimer); _showDevTip(m.getElement(), item, cat, tip); });
+      m.on('mouseout',  () => { hideTimer = setTimeout(() => tip?.classList.remove('visible'), 150); });
+      m.on('click',     () => window.open(item.wiki, '_blank', 'noopener'));
       m.on('touchend',  (e) => {
         L.DomEvent.stopPropagation(e);
-        if (!isVisible()) return;
-        if (tip.classList.contains('visible') && tip._forId === item.id) {
+        if (tip?.classList.contains('visible') && tip._forId === item.id) {
           window.open(item.wiki, '_blank', 'noopener');
-        } else { showArchTip(m.getElement()); }
+        } else { _showDevTip(m.getElement(), item, cat, tip); }
       });
 
-      _archMarkers.push({ marker: m, item });
-      _refreshArchMarker(m, styleCode);
+      _devMarkers.push({ marker: m, loc, item });
+      if (window._map) m.addTo(window._map);
     });
 
-    tip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-    tip.addEventListener('mouseleave', () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
+    if (tip) {
+      tip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+      tip.addEventListener('mouseleave', () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
+    }
 
-    setTimeout(alignPuck, 300);
+    _devLoaded = true;
+    updateDevToggleUI();
   } catch(e) {
-    console.warn('a-map.json load error:', e);
+    console.warn('places-development.json load error:', e);
   }
 }
 
@@ -4398,16 +4210,6 @@ function alignPuck() {
   puckEl.style.bottom = bottom + 'px';
   puckEl.style.right  = right  + 'px';
   if (filterWrap) filterWrap.style.right = right + 'px';
-  // Arch panel button — vlevo od filter pucku. Bere se skutečná levá
-  // hrana filterWrapu (getBoundingClientRect), ne odhad jeho šířky —
-  // fallback (dřívější `offsetWidth || 60`) se při prvním volání, než
-  // je filterWrap rozměřený, sekal s reálnou šířkou pucku a piny se
-  // překrývaly (viz report v chatu).
-  const archWrap = document.getElementById('archPanelWrap');
-  if (archWrap && filterWrap) {
-    const filterRect = filterWrap.getBoundingClientRect();
-    archWrap.style.right = Math.round(window.innerWidth - filterRect.left + 6) + 'px';
-  }
 }
 window.addEventListener('resize', alignPuck);
 window.addEventListener('orientationchange', () => setTimeout(alignPuck, 400));
@@ -4430,10 +4232,11 @@ function adjustTopbarOffset() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { adjustTopbarOffset(); applyMapChromeI18n(); loadData(); });
+  document.addEventListener('DOMContentLoaded', () => { adjustTopbarOffset(); applyMapChromeI18n(); updateDevRowVisibility(); loadData(); });
 } else {
   adjustTopbarOffset();
   applyMapChromeI18n();
+  updateDevRowVisibility();
   loadData();
 }
 window.addEventListener('resize', adjustTopbarOffset);
@@ -4464,6 +4267,8 @@ window.lopAuth.onLogin(() => {
 });
 window.lopAuth.onLogout(() => {
   localStorage.removeItem('lop_user_role');
+  updateDevRowVisibility();
+  if (_devLoaded) { _devMarkers.forEach(({ marker }) => marker.remove()); _devMarkers = []; _devLoaded = false; }
   if (typeof applyFilter === 'function') applyFilter();
   if (typeof updateWishBadge === 'function') updateWishBadge();
 });
