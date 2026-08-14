@@ -995,12 +995,19 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    ribbon" recept: malý čtvercový roh s VLASTNÍM ostrým ořezem (ne
    navázaný na zaoblený roh celé karty — to dělalo diagonálu nečistou,
    viz report v chatu), páska uvnitř ho protíná úhlopříčně. */
-/* Páska mírně přesahuje přes roh ven (jako vlaječka) — .rt-tip musí mít
-   overflow:visible, fotka pod ní se ořezává sama (má vlastní inline
-   overflow:hidden), takže tohle jí nevadí. */
+/* Wrapper posunutý MIMO roh (ne flush s ním) — dává pásce rovné konce
+   rovnoběžné s hranami tooltipu (ne obyčejný obdélníkový konec), a
+   zároveň zůstává vidět mírný přesah ven jako u vlaječky. */
+.rt-tip-ribbon-wrap {
+  position: absolute; top: -14px; right: -14px;
+  width: 90px; height: 90px;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+}
 .rt-tip-soon-ribbon {
-  position: absolute; top: -6px; right: -10px; z-index: 5;
-  width: 128px;
+  position: absolute; top: 24px; right: -22px;
+  width: 115px;
   background: #b04020; color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
@@ -1008,7 +1015,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   padding: 4px 0;
   transform: rotate(45deg);
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
-  pointer-events: none;
 }
 .rt-tip-footer-dev { justify-content: space-between; }
 /* Hlasy/plán jsou u pracovní vrstvy jen naznačené — bez čísel, bez
@@ -2792,7 +2798,7 @@ function showDevTooltip(loc, m, rt, c) {
         <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
       </div>
     </a>
-    <div class="rt-tip-soon-ribbon">${soonLbl}</div>
+    <div class="rt-tip-ribbon-wrap"><div class="rt-tip-soon-ribbon">${soonLbl}</div></div>
     <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
       <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;"></div>
