@@ -4077,19 +4077,26 @@ let _devMarkers = [];
 let _devLoaded  = false;
 let _devForceOnly = false;
 
-function _devCat(id) {
-  return /^U\d/.test(id) ? 'art' : 'arch';
+function _devCat(item) {
+  // Přesunutá publikovaná místa (H101, H201...) mají explicitní cat —
+  // ID u nich nekóduje sloh jako u zbytku pracovní vrstvy, takže
+  // heuristika podle prefixu by je špatně zařadila (výchozí by bylo arch).
+  if (item.cat) return item.cat;
+  return /^U\d/.test(item.id) ? 'art' : 'arch';
 }
 
 function _devTipHTML(item, cat) {
-  const catName = cat === 'art' ? t('cat.art') : t('cat.arch');
+  const catName = cat === 'art' ? t('cat.art') : cat === 'hist' ? t('cat.hist') : t('cat.arch');
+  const wikiLink = item.wiki
+    ? `<a class="arch-tip-wiki" href="${item.wiki}" target="_blank" rel="noopener">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Otevřít zdroj
+      </a>`
+    : '';
   return `
     <div class="arch-tip-style">${catName} · ${item.id}</div>
     <div class="arch-tip-name">${item.name}</div>
-    <a class="arch-tip-wiki" href="${item.wiki}" target="_blank" rel="noopener">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      Otevřít zdroj
-    </a>`;
+    ${wikiLink}`;
 }
 
 function _showDevTip(markerEl, item, cat, tip) {
@@ -4151,18 +4158,18 @@ async function loadDevPlaces() {
     let hideTimer = null;
 
     data.forEach(item => {
-      const cat = _devCat(item.id);
+      const cat = _devCat(item);
       const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: [], isDev: true };
       const icon = makeIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
 
       m.on('mouseover', () => { clearTimeout(hideTimer); _showDevTip(m.getElement(), item, cat, tip); });
       m.on('mouseout',  () => { hideTimer = setTimeout(() => tip?.classList.remove('visible'), 150); });
-      m.on('click',     () => window.open(item.wiki, '_blank', 'noopener'));
+      m.on('click',     () => { if (item.wiki) window.open(item.wiki, '_blank', 'noopener'); });
       m.on('touchend',  (e) => {
         L.DomEvent.stopPropagation(e);
         if (tip?.classList.contains('visible') && tip._forId === item.id) {
-          window.open(item.wiki, '_blank', 'noopener');
+          if (item.wiki) window.open(item.wiki, '_blank', 'noopener');
         } else { _showDevTip(m.getElement(), item, cat, tip); }
       });
 

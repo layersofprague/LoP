@@ -1502,5 +1502,68 @@
     "lng": 14.4165178,
     "wiki": "https://cs.wikipedia.org/wiki/Praha",
     "edited": true
+  },
+  {
+    "id": "H101",
+    "name": "Šítkovská věž",
+    "lat": 50.0784,
+    "lng": 14.4133,
+    "wiki": "",
+    "edited": true,
+    "cat": "hist"
+  },
+  {
+    "id": "H102",
+    "name": "Václavské náměstí",
+    "lat": 50.0815,
+    "lng": 14.4278,
+    "wiki": "",
+    "edited": true,
+    "cat": "hist"
+  },
+  {
+    "id": "H201",
+    "name": "Staroměstské náměstí",
+    "lat": 50.0875,
+    "lng": 14.4213,
+    "wiki": "",
+    "edited": true,
+    "cat": "arch"
+  },
+  {
+    "id": "H202",
+    "name": "Národní divadlo",
+    "lat": 50.0808,
+    "lng": 14.4133,
+    "wiki": "",
+    "edited": true,
+    "cat": "arch"
+  },
+  {
+    "id": "H301",
+    "name": "Pražský hrad",
+    "lat": 50.0911,
+    "lng": 14.4016,
+    "wiki": "",
+    "edited": true,
+    "cat": "arch"
+  },
+  {
+    "id": "H302",
+    "name": "Letenské sady",
+    "lat": 50.0953028,
+    "lng": 14.4176489,
+    "wiki": "",
+    "edited": true,
+    "cat": "arch"
+  },
+  {
+    "id": "H203",
+    "name": "Tančící dům",
+    "lat": 50.0754,
+    "lng": 14.4141,
+    "wiki": "",
+    "edited": true,
+    "cat": "arch"
   }
 ]

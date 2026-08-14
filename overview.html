@@ -893,7 +893,12 @@ let PLACES  = [];
 let DEV_PLACES   = [];
 let _devLoaded   = false;
 let _devForceOnly = false;
-function _devCat(id) { return /^U\d/.test(id) ? 'art' : 'arch'; }
+function _devCat(item) {
+  // Přesunutá publikovaná místa (H101, H201...) mají explicitní cat —
+  // ID u nich nekóduje sloh jako u zbytku pracovní vrstvy.
+  if (item.cat) return item.cat;
+  return /^U\d/.test(item.id) ? 'art' : 'arch';
+}
 const _urlFilter = new URLSearchParams(location.search).get('filter');
 
 const TAX = (() => {
@@ -1512,7 +1517,7 @@ async function loadDevPlaces() {
     const res = await fetch('places-development.json');
     if (!res.ok) return;
     const data = await res.json();
-    DEV_PLACES = data.map(item => ({ ...item, cat: _devCat(item.id) }));
+    DEV_PLACES = data.map(item => ({ ...item, cat: _devCat(item) }));
     _devLoaded = true;
     updateDevRowUI();
     render();
@@ -1536,7 +1541,7 @@ function updateDevRowVisibility() {
 function devSectionHTML() {
   if (!_devLoaded || !DEV_PLACES.length) return '';
   let html = '';
-  ['arch', 'art'].forEach(cat => {
+  ['hist', 'arch', 'art'].forEach(cat => {
     const items = DEV_PLACES.filter(p => p.cat === cat);
     if (!items.length) return;
     html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
