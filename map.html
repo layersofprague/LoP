@@ -1006,9 +1006,18 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   pointer-events: none;
 }
 .rt-tip-soon-ribbon {
-  position: absolute; top: 24px; right: -22px;
+  position: absolute; top: 23px; right: -23px;
   width: 115px;
-  background: #b04020; color: #fff;
+  /* Záhyby v místech, kde páska protíná hrany krabice — tmavý pruh
+     (stín ohybu) + hned vedle světlejší pruh (odlesk), aby to působilo
+     jako fyzicky obmotaná páska, ne plochá nálepka. */
+  background: linear-gradient(90deg,
+    #b04020 0%,
+    rgba(0,0,0,.3) 16%, rgba(255,255,255,.25) 19%, #b04020 24%,
+    #b04020 76%,
+    rgba(0,0,0,.3) 81%, rgba(255,255,255,.2) 84%, #b04020 89%,
+    #b04020 100%);
+  color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
   text-align: center;
