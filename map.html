@@ -2797,6 +2797,7 @@ function showDevTooltip(loc, m, rt, c) {
 
   rt.innerHTML = `
     <a href="${detailUrl}" id="rtTipDevMedia" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;border-radius:10px 10px 0 0;background:${bg};" onclick="event.stopPropagation()">
+      ${loc.photo ? `<img class="rt-tip-dev-photo" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" src="${loc.photo}" onerror="this.remove()">` : ''}
       <div class="rt-tip-fallback">${catLetter}</div>
       <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${c.color};z-index:2;"></div>
       <div style="position:absolute;top:8px;left:8px;z-index:3;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 9px 4px 7px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-5);">
@@ -2806,7 +2807,7 @@ function showDevTooltip(loc, m, rt, c) {
     <div class="rt-tip-ribbon-wrap"><div class="rt-tip-soon-ribbon">${soonLbl}</div></div>
     <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
-      <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;"></div>
+      <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;">${loc.lede || ''}</div>
     </a>
     <div class="rt-tip-footer">
       ${distHtml}
@@ -4237,7 +4238,7 @@ async function loadDevPlaces() {
 
     data.forEach(item => {
       const cat = _devCat(item);
-      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: item.style || [], name: item.name, wiki: item.wiki, isDev: true };
+      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: item.style || [], name: item.name, wiki: item.wiki, photo: item.photo, lede: item.lede, isDev: true };
       const icon = makeDevIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
       const detailUrl = () => 'coming-soon.html?name=' + encodeURIComponent(item.name)

@@ -1639,6 +1639,7 @@ function devCardHTML(item) {
 
   return `<div class="place-card dev-card" data-cat="${item.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${item.cat}" id="${mediaId}">
+      ${item.photo ? `<img class="dev-card-photo" src="${item.photo}" loading="lazy" onerror="this.remove()">` : ''}
       <div class="place-thumb-fallback">${letter}</div>
       <div class="place-cat-line" style="background:${color}"></div>
       <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
@@ -1647,7 +1648,7 @@ function devCardHTML(item) {
     <div class="place-body">
       <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>
       <div class="place-name">${item.name}</div>
-      <div class="place-sub" id="${ledeId}"></div>
+      <div class="place-sub" id="${ledeId}">${item.lede || ''}</div>
     </div>
     <div class="place-meta">
       ${distHtml}

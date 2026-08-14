@@ -596,7 +596,9 @@
     "lat": 50.0843385,
     "lng": 14.4136427,
     "wiki": "",
-    "edited": true
+    "edited": true,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Praha%2C_Mal%C3%A1_Strana%2C_pohled_na_starom%C4%9Bstsk%C3%BD_b%C5%99eh_z_Kampy.jpg/1920px-Praha%2C_Mal%C3%A1_Strana%2C_pohled_na_starom%C4%9Bstsk%C3%BD_b%C5%99eh_z_Kampy.jpg",
+    "lede": "Bohatě zdobený dům v duchu nizozemské neorenesance z let 1893–1897 podle návrhu Konstantina Mráčka. Jméno „krásná vyhlídka“ mu dal výhled na Hradčany a Vltavu; sídlily tu ateliéry malířů Oskara Kokoschky a Jiřího Trnky."
   },
   {
     "id": "Hi016",
@@ -604,7 +606,9 @@
     "lat": 50.0873667,
     "lng": 14.432331,
     "wiki": "",
-    "edited": true
+    "edited": true,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Pal%C3%A1c_Lann%C5%AFv_%28Nov%C3%A9_M%C4%9Bsto%29_Hybernsk%C3%A1_11.jpg/1920px-Pal%C3%A1c_Lann%C5%AFv_%28Nov%C3%A9_M%C4%9Bsto%29_Hybernsk%C3%A1_11.jpg",
+    "lede": "Mohutný novogotický palác na rohu Hybernské a Havlíčkovy ulice naproti Masarykovu nádraží, postavený 1857–1859 pro podnikatele a zakladatele oceláren Vojtěcha Lannu."
   },
   {
     "id": "Se002",
@@ -1451,7 +1455,9 @@
     "lat": 50.0636269,
     "lng": 14.4165178,
     "wiki": "",
-    "edited": true
+    "edited": true,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Pevnost_Vy%C5%A1ehrad%2C_Praha_2-Vy%C5%A1ehrad_-_%C4%8D%C3%A1st_souboru_tzv_Libu%C5%A1ina_l%C3%A1ze%C5%88.JPG/1920px-Pevnost_Vy%C5%A1ehrad%2C_Praha_2-Vy%C5%A1ehrad_-_%C4%8D%C3%A1st_souboru_tzv_Libu%C5%A1ina_l%C3%A1ze%C5%88.JPG",
+    "lede": "Bastion XXXVII na západním okraji Vyšehradské pevnosti nad Vltavou, poslední ryze vojenská stavba vyšehradského opevnění z 19. století. Dnes stojí v místech letní scény, poblíž skalního útvaru zvaného Libušina lázeň."
   },
   {
     "id": "H101",
