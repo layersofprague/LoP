@@ -995,30 +995,30 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    ribbon" recept: malý čtvercový roh s VLASTNÍM ostrým ořezem (ne
    navázaný na zaoblený roh celé karty — to dělalo diagonálu nečistou,
    viz report v chatu), páska uvnitř ho protíná úhlopříčně. */
-/* Wrapper posunutý MIMO roh, jen málo (3px) — dává pásce rovné konce
-   rovnoběžné s hranami tooltipu a jen jemný přesah ven. Rozměry pásky
-   ověřené výpočtem (Playwright bounding_box), ať protíná ČISTĚ jen
-   horní a pravou hranu wrapperu — širší/delší páska mírně přesahovala
-   i přes levou hranu, což dělalo neplechu (schodovitý řez místo
-   jednoho čistého, viz report v chatu). */
+/* Wrapper posunutý MIMO roh — dává pásce rovné konce rovnoběžné
+   s hranami tooltipu a jemný přesah ven. Rozměry ověřené výpočtem
+   (Playwright bounding_box), ať protíná ČISTĚ jen horní a pravou hranu
+   wrapperu (jinde vznikal buď schodovitý řez navíc, nebo moc malá
+   páska s useknutým kouskem — viz report v chatu, oboje řešeno
+   současně touhle konkrétní kombinací čísel). */
 .rt-tip-ribbon-wrap {
-  position: absolute; top: -3px; right: -3px;
-  width: 60px; height: 60px;
+  position: absolute; top: -4px; right: -4px;
+  width: 90px; height: 90px;
   overflow: hidden;
   z-index: 5;
   pointer-events: none;
 }
 .rt-tip-soon-ribbon {
-  position: absolute; top: 18px; right: -10px;
-  width: 66px;
+  position: absolute; top: 27px; right: -15px;
+  width: 99px;
   background: #b04020;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 7px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase;
+  font-size: 9px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
   text-align: center;
-  padding: 3px 0;
+  padding: 4px 0;
   transform: rotate(45deg);
-  box-shadow: 0 2px 5px rgba(0,0,0,.25);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
 .rt-tip-footer-dev { justify-content: space-between; }
 /* Hlasy/plán jsou u pracovní vrstvy jen naznačené — bez čísel, bez
