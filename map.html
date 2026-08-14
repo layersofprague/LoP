@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="i18n.js"></script>
 <script src="tags.js"></script>
+<script src="wiki-preview.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ═══════════════ TOKENS ═══════════════ */
@@ -983,6 +984,21 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 3px 10px 4px; border-top: 1px solid var(--paper-2); position: relative;
 }
+/* Pracovní vrstva — obrázek je jen "teaser" budoucího stavu (živě
+   dotažený z Wikipedie), proto záměrně zešedlý a zesvětlený, ať je na
+   první pohled jasné, že to není finální fotka místa. */
+.rt-tip-dev-photo { filter: grayscale(1) brightness(1.3) opacity(.55); }
+.rt-tip-soon-badge {
+  position: absolute; bottom: 8px; right: 8px; z-index: 3;
+  background: rgba(26,24,18,.78); color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 5px;
+}
+.rt-tip-footer-dev { justify-content: flex-start; }
+.rt-tip-dev-note {
+  font-family: 'Inter', sans-serif; font-size: 10px; color: var(--ink-5);
+}
 .rt-tip-dist {
   display: flex; flex-direction: row; align-items: center; gap: 4px;
   font-family: 'Inter', sans-serif; font-size: 10px; color: var(--ink-5);
@@ -1787,43 +1803,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>") center/contain no-repeat;
 }
 
-/* Tooltip pro pracovní vrstvu (places-development.json) — piny samotné
-   teď používají stejný vzhled jako ostatní místa (makeIcon), tenhle
-   tooltip zůstává jako lehký náhled (jméno + wiki), protože dev místa
-   nemají vlastní detail stránku. */
-.arch-tip {
-  position: fixed; z-index: 950;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  padding: 10px 13px 12px;
-  box-shadow: 0 8px 28px rgba(26,24,20,.18);
-  width: 230px;
-  pointer-events: none;
-  opacity: 0; transition: opacity .14s;
-}
-.arch-tip.visible { opacity: 1; pointer-events: auto; }
-.arch-tip-style {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-4); margin-bottom: 4px;
-}
-.arch-tip-name {
-  font-family: 'Fraunces', serif;
-  font-size: 14px; font-weight: 500; line-height: 1.3;
-  color: var(--ink); margin-bottom: 8px;
-}
-.arch-tip-wiki {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
-  background: var(--ink); color: var(--paper);
-  border-radius: 5px; padding: 5px 9px;
-  text-decoration: none;
-  transition: opacity .15s;
-}
-.arch-tip-wiki:hover { opacity: .8; }
-
 /* Flag SVG styles */
 .llo-flag { width: 42px; height: 28px; display: block; flex-shrink: 0; filter: drop-shadow(0 1px 6px rgba(26,24,20,.22)); }
 </style>
@@ -1996,7 +1975,6 @@ body.lop-return .llo-bottom-placeholder { display: block; }
       </div>
 
       <div class="rt-tip" id="rtTip"></div>
-      <div class="arch-tip" id="archTip"></div>
     </section>
 
     <!-- SHEET (place detail) -->
@@ -2669,9 +2647,16 @@ function _resetPinScale() {
 function showTooltip(loc, m, rt) {
   clearTimeout(window._rtHideTimer);
   const c = CAT[loc.cat];
+  rt._forId = loc.id;
+
+  // Pracovní vrstva (places-development.json) — stejná kostra tooltipu,
+  // jen jiná patička (Coming soon místo hlasování/plánu) a živě dotažený
+  // obrázek+text z Wikipedie místo loc.photoThumb/loc.lede, které tahle
+  // místa nemají. Viz showDevTooltip níž.
+  if (loc.isDev) { showDevTooltip(loc, m, rt, c); return; }
+
   const compassUrl = `compass.html?id=${loc.id}&lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}${loc.photoThumb ? '&thumb=' + encodeURIComponent(loc.photoThumb) : ''}${loc.arRadius ? '&radius=' + loc.arRadius : ''}`;
   const wBtn = isWished(loc.id);
-  rt._forId = loc.id;
 
   // Vzdálenost
   const compassIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`;
@@ -2733,6 +2718,76 @@ function showTooltip(loc, m, rt) {
       ${votesHtml}
       ${wishFooterHtml}
     </div>`;
+  positionTip(loc, m, rt);
+  if (loc.photoThen) {
+    const imgEl = new Image();
+    imgEl.onload = () => {
+      const box = document.getElementById('rtTipImg');
+      if (box) { imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'; box.insertBefore(imgEl, box.firstChild); }
+    };
+    imgEl.src = loc.photoThumb || loc.photoThen;
+  }
+}
+
+/* Pracovní vrstva (places-development.json) — stejná vizuální kostra
+   jako showTooltip() u publikovaných míst (obrázek, cat pill, jméno,
+   krátký text), ale: patička je "Coming soon" místo hlasování/plánu,
+   proklik míří na coming-soon.html (žádná detail stránka neexistuje),
+   a obrázek+text se místo loc.photoThumb/loc.lede dotahují živě
+   z Wikipedie (window.lopWikiPreview, viz wiki-preview.js) — teaser
+   budoucího stavu, proto zešedlý+zesvětlený (.rt-tip-dev-photo). */
+function showDevTooltip(loc, m, rt, c) {
+  const catLetter = {hist:'H', arch:'A', art:'U'}[loc.cat] || 'A';
+  const name = locStr(loc, 'name');
+  const detailUrl = 'coming-soon.html?name=' + encodeURIComponent(name)
+    + (loc.wiki ? '&wiki=' + encodeURIComponent(loc.wiki) : '');
+  const soonLbl = t('admin.coming_soon');
+  const bg = loc.cat === 'arch' ? '#EEF2F7' : loc.cat === 'art' ? '#F5EDE8' : '#EFEFED';
+
+  rt.innerHTML = `
+    <a href="${detailUrl}" id="rtTipDevMedia" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${bg};" onclick="event.stopPropagation()">
+      <div class="rt-tip-fallback">${catLetter}</div>
+      <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${c.color};z-index:2;"></div>
+      <div style="position:absolute;top:8px;left:8px;z-index:3;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 9px 4px 7px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-5);">
+        <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
+      </div>
+      <div class="rt-tip-soon-badge">${soonLbl}</div>
+    </a>
+    <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
+      <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
+      <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;"></div>
+    </a>
+    <div class="rt-tip-footer rt-tip-footer-dev">
+      <span class="rt-tip-dev-note">${soonLbl}${loc.wiki ? ' · Wikipedia' : ''}</span>
+    </div>`;
+  positionTip(loc, m, rt);
+
+  if (loc.wiki && window.lopWikiPreview) {
+    window.lopWikiPreview(loc.wiki).then(info => {
+      if (!info || rt._forId !== loc.id) return; // mezitím se najelo jinam
+      const media = document.getElementById('rtTipDevMedia');
+      if (info.thumbnail && media) {
+        const img = document.createElement('img');
+        img.className = 'rt-tip-dev-photo';
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+        img.onerror = () => img.remove();
+        img.src = info.thumbnail;
+        media.insertBefore(img, media.firstChild);
+      }
+      const ledeBox = document.getElementById('rtTipDevLede');
+      if (info.extract && ledeBox) {
+        const short = info.extract.length > 140
+          ? info.extract.slice(0, 140).replace(/\s+\S*$/, '') + '…'
+          : info.extract;
+        ledeBox.textContent = short;
+      }
+    });
+  }
+}
+
+/* Pozicování tooltipu vůči pinu — sdílené mezi publikovanými místy
+   a pracovní vrstvou, ať se to nerozjede na dvou kopiích. */
+function positionTip(loc, m, rt) {
   const rect = m.getElement().getBoundingClientRect();
   const tipW = 260;
   const margin = 8;
@@ -2758,37 +2813,24 @@ function showTooltip(loc, m, rt) {
     if (tipTop + tipH > bottomLimit) tipTop = bottomLimit - tipH;
     if (tipTop < headerH + margin) tipTop = headerH + margin;
   } else if (isLandscapeMobile) {
-    // Landscape mobil — tooltip vedle pinu (vlevo nebo vpravo)
     tipTop  = Math.max(headerH + margin, Math.min(bottomLimit - tipH, rect.top + rect.height/2 - tipH/2));
     tipLeft = rect.left - tipW - 8;
     if (tipLeft < margin) tipLeft = rect.right + 8;
     tipLeft = Math.max(margin, Math.min(rightLimit - tipW, tipLeft));
   } else {
-    // Portrait mobil
     tipLeft = Math.max(margin, Math.min(rightLimit - tipW, rect.left + rect.width/2 - tipW/2));
     tipTop  = rect.top + rect.height/2 - 23 - tipH - 6;
     if (tipTop < headerH + margin) tipTop = rect.bottom + 2;
-    // Ořízni spodní hranu
     if (tipTop + tipH > bottomLimit) tipTop = bottomLimit - tipH;
   }
   rt.style.left = tipLeft + 'px';
   rt.style.top  = tipTop  + 'px';
-  // Zvětši aktivní pin
-  // Zvětši vnitřní .lop-pin element přes CSS třídu
   _resetPinScale();
   const markerEl = m.getElement();
   const pinEl = markerEl?.querySelector('.lop-pin');
   if (pinEl) { window._activePinEl = pinEl; pinEl.classList.add('rt-active'); }
   if (markerEl) { window._activeMarkerEl = markerEl; markerEl.style.zIndex = '1000'; }
   rt.classList.add('visible');
-  if (loc.photoThen) {
-    const imgEl = new Image();
-    imgEl.onload = () => {
-      const box = document.getElementById('rtTipImg');
-      if (box) { imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'; box.insertBefore(imgEl, box.firstChild); }
-    };
-    imgEl.src = loc.photoThumb || loc.photoThen;
-  }
 }
 
 /* ═══════════════ MAP ═══════════════ */
@@ -4085,9 +4127,9 @@ function renderRoutes() {
    publikovaná místa (makeIcon) — kategorie podle ID: prefix "U" (Umění
    ve veřejném prostoru) → art, cokoliv jiného → arch (viz rozhodnutí,
    a-map ID kódují sloh, ne kategorii — jediná výjimka je právě "U").
-   Detail stránka pro tahle místa neexistuje, klik/hover ukáže jméno
-   a odkaz na wiki v lehkém tooltipu (arch-tip, recyklovaný ze starého
-   systému). */
+   Tooltip je sdílený s publikovanými místy (#rtTip, viz showTooltip() /
+   showDevTooltip()) — detail stránka pro tahle místa ale neexistuje,
+   proklik proto míří na coming-soon.html. */
 let _devMarkers = [];
 let _devLoaded  = false;
 let _devForceOnly = false;
@@ -4098,39 +4140,6 @@ function _devCat(item) {
   // heuristika podle prefixu by je špatně zařadila (výchozí by bylo arch).
   if (item.cat) return item.cat;
   return /^U\d/.test(item.id) ? 'art' : 'arch';
-}
-
-function _devTipHTML(item, cat) {
-  const catName = cat === 'art' ? t('cat.art') : cat === 'hist' ? t('cat.hist') : t('cat.arch');
-  const wikiLink = item.wiki
-    ? `<a class="arch-tip-wiki" href="${item.wiki}" target="_blank" rel="noopener">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Otevřít zdroj
-      </a>`
-    : '';
-  return `
-    <div class="arch-tip-style">${catName} · ${item.id}</div>
-    <div class="arch-tip-name">${item.name}</div>
-    ${wikiLink}`;
-}
-
-function _showDevTip(markerEl, item, cat, tip) {
-  if (!markerEl || !tip) return;
-  tip.innerHTML = _devTipHTML(item, cat);
-  const rect = markerEl.getBoundingClientRect();
-  const tipW = 260, margin = 8;
-  tip.style.left = '-9999px'; tip.style.top = '-9999px';
-  tip.classList.add('visible');
-  const tipH = tip.offsetHeight || 110;
-  tip.classList.remove('visible');
-  let left = rect.left + rect.width / 2 - tipW / 2;
-  let top  = rect.top - tipH - 8;
-  left = Math.max(margin, Math.min(window.innerWidth - tipW - margin, left));
-  if (top < margin) top = rect.bottom + 8;
-  tip.style.left = left + 'px';
-  tip.style.top  = top  + 'px';
-  tip._forId = item.id;
-  tip.classList.add('visible');
 }
 
 /* "Zobrazit jen pracovní" — vynutí skrytí publikovaných míst, ať admin
@@ -4169,33 +4178,47 @@ async function loadDevPlaces() {
     const res = await fetch('places-development.json');
     if (!res.ok) return;
     const data = await res.json();
-    const tip = document.getElementById('archTip');
-    let hideTimer = null;
+    const rt = document.getElementById('rtTip');
 
     data.forEach(item => {
       const cat = _devCat(item);
-      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: [], isDev: true };
+      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: item.style || [], name: item.name, wiki: item.wiki, isDev: true };
       const icon = makeDevIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
+      const detailUrl = () => 'coming-soon.html?name=' + encodeURIComponent(item.name)
+        + (item.wiki ? '&wiki=' + encodeURIComponent(item.wiki) : '');
 
-      m.on('mouseover', () => { clearTimeout(hideTimer); _showDevTip(m.getElement(), item, cat, tip); });
-      m.on('mouseout',  () => { hideTimer = setTimeout(() => tip?.classList.remove('visible'), 150); });
-      m.on('click',     () => { if (item.wiki) window.open(item.wiki, '_blank', 'noopener'); });
-      m.on('touchend',  (e) => {
+      // Stejné chování jako u publikovaných míst (viz LOCATIONS.forEach
+      // v initMap) — jen místo openSheet() vede klik na coming-soon.html,
+      // protože dev místa nemají detail stránku.
+      m.on('click', (e) => {
+        const oe = e.originalEvent;
+        const isTouch = oe?.pointerType === 'touch' || oe?.pointerType === 'pen' || ('ontouchstart' in window);
+        if (isTouch) return;
+        if (rt.classList.contains('visible')) return;
+        location.href = detailUrl();
+      });
+      m.on('touchend', (e) => {
         L.DomEvent.stopPropagation(e);
-        if (tip?.classList.contains('visible') && tip._forId === item.id) {
-          if (item.wiki) window.open(item.wiki, '_blank', 'noopener');
-        } else { _showDevTip(m.getElement(), item, cat, tip); }
+        if (rt.classList.contains('visible') && rt._forId === loc.id) {
+          rt.classList.remove('visible');
+          rt._forId = null;
+          setTimeout(() => { location.href = detailUrl(); }, 50);
+        } else {
+          rt.classList.remove('visible');
+          showTooltip(loc, m, rt);
+          rt.classList.add('rt-blocked');
+          setTimeout(() => rt.classList.remove('rt-blocked'), 1000);
+        }
+      });
+      m.on('mouseover', () => { window._hasMouseOver = true; showTooltip(loc, m, rt); });
+      m.on('mouseout', () => {
+        window._rtHideTimer = setTimeout(() => { rt.classList.remove('visible'); _resetPinScale(); }, 120);
       });
 
       _devMarkers.push({ marker: m, loc, item });
       if (window._map) m.addTo(window._map);
     });
-
-    if (tip) {
-      tip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-      tip.addEventListener('mouseleave', () => { hideTimer = setTimeout(() => tip.classList.remove('visible'), 150); });
-    }
 
     _devLoaded = true;
     updateDevToggleUI();
