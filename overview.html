@@ -330,20 +330,6 @@ a { color: inherit; text-decoration: none; }
   z-index: 5;
   pointer-events: none;
 }
-/* Záhyby přesně v místech, kde páska protíná hrany karty — vodorovná
-   čára na výšce horní hrany, svislá na pozici pravé hrany. Nezávislé na
-   rotaci pásky (nejsou to potomci .dev-soon-ribbon), takže zůstávají
-   vodorovné/svislé, ne kolmé na diagonálu. */
-.dev-ribbon-wrap::before {
-  content: ''; position: absolute; top: 6px; left: 0; right: 0; height: 3px;
-  background: linear-gradient(to bottom, rgba(0,0,0,.3), rgba(255,255,255,.2));
-  z-index: 6;
-}
-.dev-ribbon-wrap::after {
-  content: ''; position: absolute; right: 6px; top: 0; bottom: 0; width: 3px;
-  background: linear-gradient(to right, rgba(0,0,0,.3), rgba(255,255,255,.2));
-  z-index: 6;
-}
 .dev-soon-ribbon {
   position: absolute; top: 20px; right: -18px;
   width: 100px;
