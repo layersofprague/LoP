@@ -924,7 +924,10 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   background: #fff;
   border: 1.5px solid var(--rule);
   border-radius: 10px;
-  overflow: hidden;
+  /* visible, ne hidden — páska "Coming soon" u pracovní vrstvy má mírně
+     přesahovat přes roh ven. Fotka pod ní se ořezává sama (vlastní
+     inline overflow:hidden), takže tohle jí nevadí. */
+  overflow: visible;
   box-shadow: 0 8px 32px rgba(26,24,20,.18);
   opacity: 0;
   transition: opacity .15s;
@@ -992,23 +995,20 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    ribbon" recept: malý čtvercový roh s VLASTNÍM ostrým ořezem (ne
    navázaný na zaoblený roh celé karty — to dělalo diagonálu nečistou,
    viz report v chatu), páska uvnitř ho protíná úhlopříčně. */
-.rt-tip-ribbon-wrap {
-  position: absolute; top: 0; right: 0;
-  width: 110px; height: 110px;
-  overflow: hidden;
-  z-index: 5;
-  pointer-events: none;
-}
+/* Páska mírně přesahuje přes roh ven (jako vlaječka) — .rt-tip musí mít
+   overflow:visible, fotka pod ní se ořezává sama (má vlastní inline
+   overflow:hidden), takže tohle jí nevadí. */
 .rt-tip-soon-ribbon {
-  position: absolute; top: 20px; right: -32px;
-  width: 155px;
+  position: absolute; top: -6px; right: -10px; z-index: 5;
+  width: 128px;
   background: #b04020; color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
   text-align: center;
   padding: 4px 0;
   transform: rotate(45deg);
-  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  pointer-events: none;
 }
 .rt-tip-footer-dev { justify-content: space-between; }
 /* Hlasy/plán jsou u pracovní vrstvy jen naznačené — bez čísel, bez
@@ -2719,7 +2719,7 @@ function showTooltip(loc, m, rt) {
     : '';
 
   rt.innerHTML = `
-    <a href="place/${loc.id}.html" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${loc.cat==='arch'?'#EEF2F7':'#EFEFED'};" onclick="event.stopPropagation()">
+    <a href="place/${loc.id}.html" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;border-radius:10px 10px 0 0;background:${loc.cat==='arch'?'#EEF2F7':'#EFEFED'};" onclick="event.stopPropagation()">
       ${imgHtml}
       <div class="rt-tip-fallback">${catLetter}</div>
       <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${c.color};z-index:2;"></div>
@@ -2785,14 +2785,14 @@ function showDevTooltip(loc, m, rt, c) {
   </div>`;
 
   rt.innerHTML = `
-    <a href="${detailUrl}" id="rtTipDevMedia" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:${bg};" onclick="event.stopPropagation()">
+    <a href="${detailUrl}" id="rtTipDevMedia" style="display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;border-radius:10px 10px 0 0;background:${bg};" onclick="event.stopPropagation()">
       <div class="rt-tip-fallback">${catLetter}</div>
       <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${c.color};z-index:2;"></div>
       <div style="position:absolute;top:8px;left:8px;z-index:3;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 9px 4px 7px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-5);">
         <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
       </div>
     </a>
-    <div class="rt-tip-ribbon-wrap"><div class="rt-tip-soon-ribbon">${soonLbl}</div></div>
+    <div class="rt-tip-soon-ribbon">${soonLbl}</div>
     <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
       <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;"></div>
