@@ -3523,25 +3523,50 @@ function anyCatSelected() {
   return ['hist', 'arch', 'art'].some(c => FILTER[c] !== 'auto');
 }
 
-/* Piny z places-development.json nejsou v LOCATIONS/_markers — mají
-   vlastní, jednodušší filtrování: kategorie (stejná logika jako u
-   publikovaných míst) a force-only, který kategorii přebije úplně. */
+/* Piny z places-development.json nejsou v LOCATIONS/_markers — sdílí
+   ale STEJNÉ filtry jako publikovaná místa: kategorie, sloh (STYLE_FILTER,
+   odvozený z prefixu ID přes _devStyle) a vzdálenost (DIST_STATE, mají
+   lat/lng). Éra se u nich chová jako u nedatovaných publikovaných míst —
+   applyFilter() taky nikdy neskrývá place bez known year, takže dev
+   piny (nedatované ze své podstaty) éru záměrně ignorují. Wished/visited
+   a taxonomie (tag/district/person) se netýkají — dev místa nejde
+   označit jako navštívené/plánované a nemají štítky. Force-only kategorii
+   ani ostatní filtry nepřebíjí, jen skryje publikovaná místa navíc —
+   viz report v chatu, filtry mají fungovat i pro pracovní vrstvu. */
 function refreshDevMarkers() {
   if (!_devLoaded) return;
+  const anyCatSel = anyCatSelected();
+  const distActive = DIST_STATE.max !== null && window._userLatLng;
   _devMarkers.forEach(({ marker, loc }) => {
     if (_devForceOnly) {
+      // I ve force-only modu má smysl respektovat sloh a vzdálenost —
+      // jen kategorie se přeskakuje, ať jde vidět celá pracovní vrstva.
+      let visible = true;
+      if (STYLE_FILTER.size) {
+        const st = loc.style || [];
+        if (!st.some(code => STYLE_FILTER.has(code))) visible = false;
+      }
+      if (visible && distActive && haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) visible = false;
+      if (!visible) { marker.remove(); return; }
       marker.addTo(window._map);
       const el = marker.getElement();
       if (el) el.style.opacity = 1;
       return;
     }
-    const anyCatSel = anyCatSelected();
     const catRaw = FILTER[loc.cat];
     const catState = !anyCatSel ? 'full'
       : catRaw === 'on'  ? 'full'
       : catRaw === 'dim' ? 'dim'
       : 'hide';
-    const op = catState === 'hide' ? 0 : catState === 'dim' ? 0.3 : 1;
+    let s = catState;
+    if (s !== 'hide' && STYLE_FILTER.size) {
+      const st = loc.style || [];
+      if (!st.some(code => STYLE_FILTER.has(code))) s = 'hide';
+    }
+    if (s !== 'hide' && distActive) {
+      if (haversineKm(window._userLatLng, [loc.lat, loc.lng]) > DIST_STATE.max) s = 'hide';
+    }
+    const op = s === 'hide' ? 0 : s === 'dim' ? 0.3 : 1;
     if (op === 0) { marker.remove(); return; }
     marker.addTo(window._map);
     const el = marker.getElement();
@@ -4198,6 +4223,18 @@ function _devCat(item) {
   return /^U\d/.test(item.id) ? 'art' : 'arch';
 }
 
+/* Prefix ID u pracovní vrstvy JE kód slohu ze STYLES (tags.js) —
+   "Ro001" → "Ro" (Ro001), "Ba011" → "Ba" atd. Přesunutá publikovaná
+   místa (H101, H201...) žádný sloh nekódují, ta vrátí prázdné pole
+   (nikdy neprojdou aktivním STYLE_FILTER, což je správně — jejich
+   sloh neznáme). Viz report v chatu: filtry v mapě/přehledu měly
+   začít fungovat i pro places-development.json. */
+function _devStyle(item) {
+  const m = /^[A-Za-z]+/.exec(item.id);
+  const code = m ? m[0] : '';
+  return (window.LOP_TAGS && window.LOP_TAGS.styles[code]) ? [code] : [];
+}
+
 /* "Zobrazit jen pracovní" — vynutí skrytí publikovaných míst, ať admin
    vidí jen obsah places-development.json bez rušení. Nezávislé na
    běžném FILTER (kategorie na piny z devu ale pořád platí). */
@@ -4238,7 +4275,7 @@ async function loadDevPlaces() {
 
     data.forEach(item => {
       const cat = _devCat(item);
-      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: item.style || [], name: item.name, wiki: item.wiki, photo: item.photo, lede: item.lede, isDev: true };
+      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: _devStyle(item), name: item.name, wiki: item.wiki, photo: item.photo, lede: item.lede, isDev: true };
       const icon = makeDevIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
       const detailUrl = () => 'coming-soon.html?name=' + encodeURIComponent(item.name)

@@ -951,6 +951,40 @@ function _devCat(item) {
   if (item.cat) return item.cat;
   return /^U\d/.test(item.id) ? 'art' : 'arch';
 }
+/* Prefix ID u pracovní vrstvy JE kód slohu ze STYLES (tags.js) —
+   "Ro001" → "Ro", "Ba011" → "Ba" atd. Přesunutá publikovaná místa
+   (H101, H201...) žádný sloh nekódují, ta vrátí prázdné pole (nikdy
+   neprojdou aktivním STYLE_FILTER — jejich sloh neznáme, což je
+   správně). Viz report v chatu: filtry mají fungovat i pro
+   places-development.json, ne jen pro publikovaná místa. */
+function _devStyle(item) {
+  const m = /^[A-Za-z]+/.exec(item.id);
+  const code = m ? m[0] : '';
+  return (window.LOP_TAGS && window.LOP_TAGS.styles[code]) ? [code] : [];
+}
+/* Prochází pracovní místo aktivními filtry? Sdílí kategorie/sloh/éru/
+   vzdálenost s publikovanými místy (viz filtered=PLACES.filter v
+   render()), ale ne wished/visited ani taxonomii (tag/district/person/
+   prague) — dev místa nejde označit jako navštívené/plánované a nemají
+   štítky, takže by pod aktivní tematickou kolekcí vždy mylně zmizela
+   nebo se nesprávně objevila; bezpečnější je je tam vůbec neukazovat. */
+function devMatches(item, eraActive, distActive) {
+  if (TAX) return false;
+  // Stejná "výběrová" logika jako u publikovaných míst: pokud je aktivní
+  // výběr (kategorie NEBO "jen plán"/"jen navštíveno"), dev místo musí
+  // spadat do vybrané kategorie — nikdy nemůže splnit plán/navštíveno
+  // podmínku (nejde ho tak označit), takže v tom případě bez shody
+  // kategorie zmizí, přesně jako by patřilo do nevybrané kategorie.
+  const selecting = CAT_FILTER.size || FILTER.wished==='add' || FILTER.visited==='add';
+  if (selecting && !CAT_FILTER.has(item.cat)) return false;
+  if (eraActive && !UNDATED.include) return false; // dev místa nemají dataci → chovají se jako nedatovaná
+  if (distActive && haversineKm([userPos[0],userPos[1]],[item.lat,item.lng]) > DIST_STATE.max) return false;
+  if (STYLE_FILTER.size) {
+    const st = item.style || [];
+    if (!st.some(s => STYLE_FILTER.has(s))) return false;
+  }
+  return true;
+}
 const _urlFilter = new URLSearchParams(location.search).get('filter');
 
 const TAX = (() => {
@@ -1524,7 +1558,12 @@ function render() {
   renderTaxBanner(filtered.length, undatedCount);
   _lastCount = filtered.length; updateApplyBtn(filtered.length);
 
-  if(filtered.length===0 && !(_devForceOnly && _devLoaded)){
+  // Pracovní vrstva prochází stejnými filtry jako publikovaná místa
+  // (kategorie/sloh/éra/vzdálenost) — viz devMatches() výš. Force-only
+  // je počítá pořád, jen navíc skryje publikovaná místa (items=[] níž).
+  const devFiltered = _devLoaded ? DEV_PLACES.filter(p => devMatches(p, eraActive, distActive)) : [];
+
+  if(filtered.length===0 && devFiltered.length===0){
     /* Které filtry to způsobily, ukazuje banner hned nad seznamem —
        nemá smysl je vypisovat podruhé. Stačí na něj odkázat. */
     const anyFilter = activeFilters(undatedCount).length > 0;
@@ -1542,7 +1581,7 @@ function render() {
   // na sousedních sekcích, takže vypadal jinak vysoký, viz report v chatu).
   ['hist','arch','art'].forEach(cat=>{
     const items    = _devForceOnly ? [] : filtered.filter(p=>p.cat===cat);
-    const devItems = _devLoaded ? DEV_PLACES.filter(p=>p.cat===cat) : [];
+    const devItems = devFiltered.filter(p=>p.cat===cat);
     if (!items.length && !devItems.length) return;
     html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length+devItems.length}</span></div>`;
     html += `<div class="place-section-list">`;
@@ -1577,7 +1616,7 @@ async function loadDevPlaces() {
     const res = await fetch('places-development.json');
     if (!res.ok) return;
     const data = await res.json();
-    DEV_PLACES = data.map(item => ({ ...item, cat: _devCat(item) }));
+    DEV_PLACES = data.map(item => ({ ...item, cat: _devCat(item), style: _devStyle(item) }));
     _devLoaded = true;
     updateDevRowUI();
     render();
