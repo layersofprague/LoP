@@ -2723,10 +2723,11 @@ function showTooltip(loc, m, rt) {
         </button>
       </div>`;
 
-  // Foto
+  // Foto — utlumené monochromatické, stejný filtr jako u pracovní
+  // vrstvy (.rt-tip-dev-photo), teď sjednoceně pro všechna místa.
   const catLetter = {hist:'H', arch:'A', art:'U'}[loc.cat] || 'H';
   const imgHtml = loc.photoThumb
-    ? `<img src="${loc.photoThumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+    ? `<img src="${loc.photoThumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(1.3) opacity(.55);" onerror="this.style.display='none'">`
     : '';
 
   rt.innerHTML = `
