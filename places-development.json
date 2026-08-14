@@ -260,14 +260,6 @@
     "edited": true
   },
   {
-    "id": "Re008",
-    "name": "Sněmovní palác (Sněmovna)",
-    "lat": 50.0895139,
-    "lng": 14.4041942,
-    "wiki": "https://cs.wikipedia.org/wiki/Budova_Poslaneck%C3%A9_sn%C4%9Bmovny",
-    "edited": true
-  },
-  {
     "id": "Re009",
     "name": "Dům Granovských (Týnský dvůr — Ungelt)",
     "lat": 50.0880908,
@@ -1351,7 +1343,11 @@
     "lat": 50.0894078,
     "lng": 14.4039767,
     "wiki": "https://cs.wikipedia.org/wiki/Thunovsk%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "style": [
+      "Kl",
+      "Re"
+    ]
   },
   {
     "id": "Hi018",
