@@ -1523,16 +1523,21 @@ function render() {
   }
 
   let html='';
-  if (!_devForceOnly) {
-    ['hist','arch','art'].forEach(cat=>{
-      const items=filtered.filter(p=>p.cat===cat); if(!items.length) return;
-      html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
-      html += `<div class="place-section-list">`;
-      html += items.map(p=>cardHTML(p,visited,wished)).join('');
-      html += `</div>`;
-    });
-  }
-  html += devSectionHTML();
+  // Publikovaná i pracovní místa stejné kategorie se teď renderují do
+  // JEDNÉ sekce (dřív měla pracovní vrstva vlastní duplicitní sekce za
+  // těmi skutečnými — kromě zmatku v UI to dělalo i vizuální nekonzistenci:
+  // krátký řádek jen s pracovními místy se v CSS gridu natahuje nezávisle
+  // na sousedních sekcích, takže vypadal jinak vysoký, viz report v chatu).
+  ['hist','arch','art'].forEach(cat=>{
+    const items    = _devForceOnly ? [] : filtered.filter(p=>p.cat===cat);
+    const devItems = _devLoaded ? DEV_PLACES.filter(p=>p.cat===cat) : [];
+    if (!items.length && !devItems.length) return;
+    html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length+devItems.length}</span></div>`;
+    html += `<div class="place-section-list">`;
+    html += items.map(p=>cardHTML(p,visited,wished)).join('');
+    html += devItems.map(devCardHTML).join('');
+    html += `</div>`;
+  });
 
   const list=document.getElementById('placesList');
   list.innerHTML=html;
@@ -1580,19 +1585,6 @@ function updateDevRowUI() {
 function updateDevRowVisibility() {
   const row = document.getElementById('devRow');
   if (row) row.hidden = !isAdmin();
-}
-function devSectionHTML() {
-  if (!_devLoaded || !DEV_PLACES.length) return '';
-  let html = '';
-  ['hist', 'arch', 'art'].forEach(cat => {
-    const items = DEV_PLACES.filter(p => p.cat === cat);
-    if (!items.length) return;
-    html += `<div class="section-label section-${cat}"><span class="sn">${CAT_NAME[cat]}</span><div class="sl"></div><span class="ct">${items.length}</span></div>`;
-    html += `<div class="place-section-list">`;
-    html += items.map(devCardHTML).join('');
-    html += `</div>`;
-  });
-  return html;
 }
 /* Sjednoceno s cardHTML() — stejná kostra (obrázek, cat pill, jméno,
    krátký text), jen patička/proklik jsou jiné: "Coming soon" místo
