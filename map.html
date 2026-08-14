@@ -2921,6 +2921,21 @@ function makeIcon(loc) {
   });
 }
 
+/* Piny pro places-development.json — bez .lop-pin-inner wrapperu (ten má
+   natvrdo 96×96px kvůli místu na kužel, který dev místa stejně nikdy
+   nemají — chybí jim arTarget). Menší, přesný hit-box (24×24, přesně
+   velikost .lop-pin) řeší matoucí hover u blízkých pinů: velký neviditelný
+   96×96 box by se u sousedních pinů překrýval a mouseover by se spouštěl
+   i mimo viditelný kruh (viz report v chatu). */
+function makeDevIcon(loc) {
+  return L.divIcon({
+    html: pinIconHTML(loc),
+    className: '',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+}
+
 function rebuildMarkers() {
   _markers.forEach(({ marker }) => {
     const loc = marker._loc;
@@ -4160,7 +4175,7 @@ async function loadDevPlaces() {
     data.forEach(item => {
       const cat = _devCat(item);
       const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: [], isDev: true };
-      const icon = makeIcon(loc);
+      const icon = makeDevIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
 
       m.on('mouseover', () => { clearTimeout(hideTimer); _showDevTip(m.getElement(), item, cat, tip); });
