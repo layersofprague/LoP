@@ -5,7 +5,11 @@
     "lat": 50.0636527,
     "lng": 14.4215538,
     "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_Martina_(Vy%C5%A1ehrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ro"
+    ]
   },
   {
     "id": "Ro002",
@@ -13,7 +17,11 @@
     "lat": 50.0912186,
     "lng": 14.4025358,
     "wiki": "https://cs.wikipedia.org/wiki/Bazilika_svat%C3%A9ho_Ji%C5%99%C3%AD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ro"
+    ]
   },
   {
     "id": "Ro003",
@@ -21,7 +29,11 @@
     "lat": 50.076515,
     "lng": 14.425615,
     "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_Longina",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ro"
+    ]
   },
   {
     "id": "Ro004",
@@ -29,7 +41,11 @@
     "lat": 50.082825,
     "lng": 14.41472,
     "wiki": "https://cs.wikipedia.org/wiki/Rotunda_svat%C3%A9ho_K%C5%99%C3%AD%C5%BEe_Men%C5%A1%C3%ADho",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ro"
+    ]
   },
   {
     "id": "Ro006",
@@ -37,7 +53,11 @@
     "lat": 50.0861432,
     "lng": 14.3892505,
     "wiki": "https://cs.wikipedia.org/wiki/Strahovsk%C3%BD_kl%C3%A1%C5%A1ter",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ro"
+    ]
   },
   {
     "id": "Go001",
@@ -45,7 +65,11 @@
     "lat": 50.0908571,
     "lng": 14.4005608,
     "wiki": "https://cs.wikipedia.org/wiki/Katedr%C3%A1la_svat%C3%A9ho_V%C3%ADta%2C_V%C3%A1clava_a_Vojt%C4%9Bcha",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go002",
@@ -53,7 +77,11 @@
     "lat": 50.0864846,
     "lng": 14.4113803,
     "wiki": "https://cs.wikipedia.org/wiki/Karl%C5%AFv_most",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go003",
@@ -61,7 +89,11 @@
     "lat": 50.0870338,
     "lng": 14.4207301,
     "wiki": "https://cs.wikipedia.org/wiki/Starom%C4%9Bstsk%C3%A1_radnice",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go004",
@@ -69,7 +101,11 @@
     "lat": 50.0876738,
     "lng": 14.4225276,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_Panny_Marie_p%C5%99ed_T%C3%BDnem",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go005",
@@ -79,9 +115,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Pra%C5%A1n%C3%A1_br%C3%A1na",
     "edited": true,
     "style": [
-      "Go",
-      "Op"
-    ]
+      "Go"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go006",
@@ -89,7 +125,11 @@
     "lat": 50.0923829,
     "lng": 14.4238874,
     "wiki": "https://cs.wikipedia.org/wiki/Ane%C5%BEsk%C3%BD_kl%C3%A1%C5%A1ter",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go007",
@@ -99,9 +139,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Starom%C4%9Bstsk%C3%A1_mosteck%C3%A1_v%C4%9B%C5%BE",
     "edited": true,
     "style": [
-      "Go",
-      "Op"
-    ]
+      "Go"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go008",
@@ -109,7 +149,11 @@
     "lat": 50.0644113,
     "lng": 14.4178015,
     "wiki": "https://cs.wikipedia.org/wiki/Bazilika_svat%C3%A9ho_Petra_a_Pavla",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go009",
@@ -119,9 +163,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Malostranck%C3%A9_mosteck%C3%A9_v%C4%9B%C5%BEe",
     "edited": true,
     "style": [
-      "Go",
-      "Op"
-    ]
+      "Go"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go010",
@@ -131,9 +175,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Bazilika_svat%C3%A9ho_Jakuba_V%C4%9Bt%C5%A1%C3%ADho_(Star%C3%A9_M%C4%9Bsto)",
     "edited": true,
     "style": [
-      "Go",
-      "Ba"
-    ]
+      "Go"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go011",
@@ -141,7 +185,11 @@
     "lat": 50.0708606,
     "lng": 14.4237775,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Apolin%C3%A1%C5%99e_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go012",
@@ -149,7 +197,11 @@
     "lat": 50.0830029,
     "lng": 14.4236246,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_Panny_Marie_Sn%C4%9B%C5%BEn%C3%A9_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go013",
@@ -159,9 +211,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Vladislavsk%C3%BD_s%C3%A1l",
     "edited": true,
     "style": [
-      "Go",
-      "Re"
-    ]
+      "Go"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go014",
@@ -169,7 +221,11 @@
     "lat": 50.0763486,
     "lng": 14.4248249,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_%C5%A0t%C4%9Bp%C3%A1na_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go015",
@@ -177,7 +233,11 @@
     "lat": 50.0848857,
     "lng": 14.4305125,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Jind%C5%99icha_a_svat%C3%A9_Kunhuty",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go016",
@@ -185,7 +245,11 @@
     "lat": 50.0652801,
     "lng": 14.4192047,
     "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go017",
@@ -193,7 +257,11 @@
     "lat": 50.0706377,
     "lng": 14.4178055,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_Nejsv%C4%9Bt%C4%9Bj%C5%A1%C3%AD_Trojice_(Praha%2C_Trojick%C3%A1_ulice)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Go018",
@@ -201,7 +269,11 @@
     "lat": 50.0720777,
     "lng": 14.4175266,
     "wiki": "https://cs.wikipedia.org/wiki/Kl%C3%A1%C5%A1ter_Na_Slovan%C3%A9ch",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Go"
+    ]
   },
   {
     "id": "Re001",
@@ -209,7 +281,11 @@
     "lat": 50.0937173,
     "lng": 14.4053306,
     "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_kr%C3%A1lovny_Anny",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re002",
@@ -217,7 +293,11 @@
     "lat": 50.0924353,
     "lng": 14.4011528,
     "wiki": "https://cs.wikipedia.org/wiki/M%C3%AD%C4%8Dovna_(Pra%C5%BEsk%C3%BD_hrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re003",
@@ -225,7 +305,11 @@
     "lat": 50.0890264,
     "lng": 14.3967439,
     "wiki": "https://cs.wikipedia.org/wiki/Schwarzenbersk%C3%BD_pal%C3%A1c_v_Praze",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re004",
@@ -233,7 +317,11 @@
     "lat": 50.0833841,
     "lng": 14.326192,
     "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_Hv%C4%9Bzda",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re005",
@@ -241,7 +329,11 @@
     "lat": 50.0867022,
     "lng": 14.4200255,
     "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_minuty",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re006",
@@ -249,7 +341,11 @@
     "lat": 50.0899849,
     "lng": 14.3950725,
     "wiki": "https://cs.wikipedia.org/wiki/Martinick%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re007",
@@ -257,7 +353,11 @@
     "lat": 50.0916489,
     "lng": 14.4050006,
     "wiki": "https://cs.wikipedia.org/wiki/Lobkovick%C3%BD_pal%C3%A1c_(Pra%C5%BEsk%C3%BD_hrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re009",
@@ -265,7 +365,11 @@
     "lat": 50.0880908,
     "lng": 14.4233301,
     "wiki": "https://cs.wikipedia.org/wiki/Ungelt",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Re012",
@@ -273,7 +377,11 @@
     "lat": 50.0880085,
     "lng": 14.4237372,
     "wiki": "https://cs.wikipedia.org/wiki/Ungelt",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Re"
+    ]
   },
   {
     "id": "Ba001",
@@ -281,7 +389,11 @@
     "lat": 50.0879379,
     "lng": 14.4031727,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Mikul%C3%A1%C5%A1e_(Mal%C3%A1_Strana)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba002",
@@ -289,7 +401,11 @@
     "lat": 50.0900632,
     "lng": 14.4054741,
     "wiki": "https://cs.wikipedia.org/wiki/Vald%C5%A1tejnsk%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba003",
@@ -297,7 +413,11 @@
     "lat": 50.0865543,
     "lng": 14.4158086,
     "wiki": "https://cs.wikipedia.org/wiki/Klementinum",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba004",
@@ -305,7 +425,11 @@
     "lat": 50.0887347,
     "lng": 14.3905288,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cern%C3%ADnsk%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba006",
@@ -313,7 +437,11 @@
     "lat": 50.0864149,
     "lng": 14.4142959,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Franti%C5%A1ka_z_Assisi_(Star%C3%A9_M%C4%9Bsto)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba007",
@@ -321,7 +449,11 @@
     "lat": 50.0892725,
     "lng": 14.3917854,
     "wiki": "https://cs.wikipedia.org/wiki/Pra%C5%BEsk%C3%A1_Loreta",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba008",
@@ -329,7 +461,11 @@
     "lat": 50.0861553,
     "lng": 14.415035,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_Nejsv%C4%9Bt%C4%9Bj%C5%A1%C3%ADho_Salv%C3%A1tora_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba009",
@@ -337,7 +473,11 @@
     "lat": 50.090404,
     "lng": 14.3965691,
     "wiki": "https://cs.wikipedia.org/wiki/%C5%A0ternbersk%C3%BD_pal%C3%A1c_(Hrad%C4%8Dany)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba010",
@@ -345,7 +485,11 @@
     "lat": 50.07276,
     "lng": 14.39002,
     "wiki": "https://cs.wikipedia.org/wiki/Letohr%C3%A1dek_Kinsk%C3%BDch",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba011",
@@ -353,7 +497,11 @@
     "lat": 50.0899101,
     "lng": 14.4093525,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Thurn-Taxis%C5%AF",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba012",
@@ -361,7 +509,11 @@
     "lat": 50.0888,
     "lng": 14.4028,
     "wiki": "https://cs.wikipedia.org/wiki/Morzinsk%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba013",
@@ -369,7 +521,11 @@
     "lat": 50.0879044,
     "lng": 14.4198748,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Mikul%C3%A1%C5%A1e_(Star%C3%A9_M%C4%9Bsto)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba014",
@@ -377,7 +533,11 @@
     "lat": 50.0866438,
     "lng": 14.4028991,
     "wiki": "https://cs.wikipedia.org/wiki/Vrtbovsk%C3%A1_zahrada",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba015",
@@ -385,7 +545,11 @@
     "lat": 50.0868,
     "lng": 14.40073,
     "wiki": "https://cs.wikipedia.org/wiki/Vrtbovsk%C3%A1_zahrada",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba016",
@@ -393,7 +557,11 @@
     "lat": 50.0857179,
     "lng": 14.4035429,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_Panny_Marie_V%C3%ADt%C4%9Bzn%C3%A9_a_svat%C3%A9ho_Anton%C3%ADna_Padu%C3%A1nsk%C3%A9ho",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba017",
@@ -401,7 +569,11 @@
     "lat": 50.0854046,
     "lng": 14.4058388,
     "wiki": "https://cs.wikipedia.org/wiki/Nostick%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba018",
@@ -409,7 +581,11 @@
     "lat": 50.0847007,
     "lng": 14.356344,
     "wiki": "https://cs.wikipedia.org/wiki/B%C5%99evnovsk%C3%BD_kl%C3%A1%C5%A1ter",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba019",
@@ -417,7 +593,11 @@
     "lat": 50.0902474,
     "lng": 14.3932727,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Jana_Nepomuck%C3%A9ho_(Hrad%C4%8Dany)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Ba020",
@@ -425,7 +605,11 @@
     "lat": 50.0873494,
     "lng": 14.4308344,
     "wiki": "https://cs.wikipedia.org/wiki/Sw%C3%A9erts-Sporck%C5%AFv_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Kl001",
@@ -433,7 +617,11 @@
     "lat": 50.0859381,
     "lng": 14.4236192,
     "wiki": "https://cs.wikipedia.org/wiki/Stavovsk%C3%A9_divadlo",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Kl002",
@@ -441,7 +629,11 @@
     "lat": 50.0879311,
     "lng": 14.4215981,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Kinsk%C3%BDch",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Kl003",
@@ -449,7 +641,11 @@
     "lat": 50.0864433,
     "lng": 14.4235047,
     "wiki": "https://cs.wikipedia.org/wiki/Karolinum",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Kl004",
@@ -457,7 +653,11 @@
     "lat": 50.095279,
     "lng": 14.4615765,
     "wiki": "https://cs.wikipedia.org/wiki/Invalidovna",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Kl006",
@@ -465,7 +665,11 @@
     "lat": 50.1046955,
     "lng": 14.4175145,
     "wiki": "https://cs.wikipedia.org/wiki/%C5%A0lechtova_restaurace",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Kl007",
@@ -473,7 +677,11 @@
     "lat": 50.0847053,
     "lng": 14.42526,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Sylva-Taroucca",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Kl009",
@@ -481,7 +689,11 @@
     "lat": 50.0854392,
     "lng": 14.4260286,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_K%C5%99%C3%AD%C5%BEe_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Hi001",
@@ -492,7 +704,8 @@
     "edited": true,
     "style": [
       "Hi"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Hi002",
@@ -500,7 +713,11 @@
     "lat": 50.0899278,
     "lng": 14.4154408,
     "wiki": "https://cs.wikipedia.org/wiki/Rudolfinum",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi003",
@@ -508,7 +725,11 @@
     "lat": 50.0789265,
     "lng": 14.4309202,
     "wiki": "https://cs.wikipedia.org/wiki/N%C3%A1rodn%C3%AD_muzeum",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi004",
@@ -518,9 +739,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Obecn%C3%AD_d%C5%AFm",
     "edited": true,
     "style": [
-      "Hi",
-      "Se"
-    ]
+      "Hi"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Hi005",
@@ -530,9 +751,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Sof%C3%ADn",
     "edited": true,
     "style": [
-      "Hi",
-      "Kl"
-    ]
+      "Hi"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Hi006",
@@ -540,7 +761,11 @@
     "lat": 50.0754752,
     "lng": 14.4372542,
     "wiki": "https://cs.wikipedia.org/wiki/Bazilika_svat%C3%A9_Ludmily",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi007",
@@ -548,7 +773,11 @@
     "lat": 50.0872137,
     "lng": 14.4184694,
     "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A1_radnice_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi008",
@@ -556,7 +785,11 @@
     "lat": 50.0898928,
     "lng": 14.41644,
     "wiki": "https://cs.wikipedia.org/wiki/Um%C4%9Bleckopr%C5%AFmyslov%C3%A9_muzeum_v_Praze",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi009",
@@ -564,7 +797,11 @@
     "lat": 50.0819221,
     "lng": 14.425934,
     "wiki": "https://cs.wikipedia.org/wiki/Wiehl%C5%AFv_d%C5%AFm",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi011",
@@ -572,7 +809,11 @@
     "lat": 50.0936582,
     "lng": 14.4126034,
     "wiki": "https://cs.wikipedia.org/wiki/Hanavsk%C3%BD_pavilon",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi012",
@@ -580,7 +821,11 @@
     "lat": 50.087675,
     "lng": 14.4332886,
     "wiki": "https://cs.wikipedia.org/wiki/Praha_Masarykovo_n%C3%A1dra%C5%BE%C3%AD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi014",
@@ -588,7 +833,11 @@
     "lat": 50.0733803,
     "lng": 14.4046855,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_V%C3%A1clava_(Sm%C3%ADchov)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi015",
@@ -598,7 +847,11 @@
     "wiki": "",
     "edited": true,
     "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Praha%2C_Mal%C3%A1_Strana%2C_pohled_na_starom%C4%9Bstsk%C3%BD_b%C5%99eh_z_Kampy.jpg/1920px-Praha%2C_Mal%C3%A1_Strana%2C_pohled_na_starom%C4%9Bstsk%C3%BD_b%C5%99eh_z_Kampy.jpg",
-    "lede": "Bohatě zdobený dům v duchu nizozemské neorenesance z let 1893–1897 podle návrhu Konstantina Mráčka. Jméno „krásná vyhlídka“ mu dal výhled na Hradčany a Vltavu; sídlily tu ateliéry malířů Oskara Kokoschky a Jiřího Trnky."
+    "lede": "Bohatě zdobený dům v duchu nizozemské neorenesance z let 1893–1897 podle návrhu Konstantina Mráčka. Jméno „krásná vyhlídka“ mu dal výhled na Hradčany a Vltavu; sídlily tu ateliéry malířů Oskara Kokoschky a Jiřího Trnky.",
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi016",
@@ -608,7 +861,11 @@
     "wiki": "",
     "edited": true,
     "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Pal%C3%A1c_Lann%C5%AFv_%28Nov%C3%A9_M%C4%9Bsto%29_Hybernsk%C3%A1_11.jpg/1920px-Pal%C3%A1c_Lann%C5%AFv_%28Nov%C3%A9_M%C4%9Bsto%29_Hybernsk%C3%A1_11.jpg",
-    "lede": "Mohutný novogotický palác na rohu Hybernské a Havlíčkovy ulice naproti Masarykovu nádraží, postavený 1857–1859 pro podnikatele a zakladatele oceláren Vojtěcha Lannu."
+    "lede": "Mohutný novogotický palác na rohu Hybernské a Havlíčkovy ulice naproti Masarykovu nádraží, postavený 1857–1859 pro podnikatele a zakladatele oceláren Vojtěcha Lannu.",
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Se002",
@@ -616,7 +873,11 @@
     "lat": 50.0831829,
     "lng": 14.4352882,
     "wiki": "https://cs.wikipedia.org/wiki/Praha_hlavn%C3%AD_n%C3%A1dra%C5%BE%C3%AD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Se003",
@@ -624,7 +885,11 @@
     "lat": 50.0842364,
     "lng": 14.4244346,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Koruna",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Se004",
@@ -632,7 +897,11 @@
     "lat": 50.0808547,
     "lng": 14.4247525,
     "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_Nov%C3%A1k%C5%AF",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Se005",
@@ -640,7 +909,11 @@
     "lat": 50.0821497,
     "lng": 14.4271536,
     "wiki": "https://cs.wikipedia.org/wiki/Hotel_Evropa",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Se006",
@@ -648,7 +921,11 @@
     "lat": 50.0812536,
     "lng": 14.4254512,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Lucerna",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Se007",
@@ -656,7 +933,11 @@
     "lat": 50.0816597,
     "lng": 14.4154831,
     "wiki": "https://cs.wikipedia.org/wiki/Topi%C4%8D%C5%AFv_d%C5%AFm",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Se013",
@@ -666,9 +947,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Pr%C5%AFmyslov%C3%BD_pal%C3%A1c",
     "edited": true,
     "style": [
-      "Se",
-      "In"
-    ]
+      "Se"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Ku001",
@@ -676,7 +957,11 @@
     "lat": 50.0869984,
     "lng": 14.4255048,
     "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_%C4%8Cern%C3%A9_Matky_Bo%C5%BE%C3%AD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Ku002",
@@ -684,7 +969,11 @@
     "lat": 50.0793395,
     "lng": 14.4199272,
     "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_Diamant",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Ku003",
@@ -692,7 +981,11 @@
     "lat": 50.0647291,
     "lng": 14.4158193,
     "wiki": "https://cs.wikipedia.org/wiki/Josef_Chochol",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Ku004",
@@ -700,7 +993,11 @@
     "lat": 50.0896092,
     "lng": 14.4337686,
     "wiki": "https://cs.wikipedia.org/wiki/Legiobanka",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Ku005",
@@ -708,7 +1005,11 @@
     "lat": 50.082467,
     "lng": 14.4220287,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Adria",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Ku007",
@@ -716,7 +1017,11 @@
     "lat": 50.0667561,
     "lng": 14.4156753,
     "wiki": "https://cs.wikipedia.org/wiki/Vila_Kova%C5%99ovic",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Ku011",
@@ -724,7 +1029,11 @@
     "lat": 50.0832775,
     "lng": 14.4242864,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Peterka",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Mo001",
@@ -732,7 +1041,11 @@
     "lat": 50.0925753,
     "lng": 14.3784517,
     "wiki": "https://cs.wikipedia.org/wiki/M%C3%BCllerova_vila",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo004",
@@ -740,7 +1053,11 @@
     "lat": 50.0814964,
     "lng": 14.4281247,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Avion",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo005",
@@ -748,7 +1065,11 @@
     "lat": 50.1148217,
     "lng": 14.3862492,
     "wiki": "https://cs.wikipedia.org/wiki/Kolonie_Baba",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo006",
@@ -756,7 +1077,11 @@
     "lat": 50.0673486,
     "lng": 14.3885089,
     "wiki": "https://cs.wikipedia.org/wiki/Vila_Winternitz",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo007",
@@ -764,7 +1089,11 @@
     "lat": 50.0832714,
     "lng": 14.4218394,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_ARA",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo009",
@@ -772,7 +1101,11 @@
     "lat": 50.0835961,
     "lng": 14.4238108,
     "wiki": "https://cs.wikipedia.org/wiki/Ba%C5%A5%C5%AFv_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo010",
@@ -780,7 +1113,11 @@
     "lat": 50.0801422,
     "lng": 14.4284464,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_F%C3%A9nix",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Mo012",
@@ -788,7 +1125,11 @@
     "lat": 50.0869169,
     "lng": 14.4269597,
     "wiki": "https://cs.wikipedia.org/wiki/Palác_Broadway",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Fu001",
@@ -798,9 +1139,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Veletr%C5%BEn%C3%AD_pal%C3%A1c",
     "edited": true,
     "style": [
-      "Fu",
-      "Mo"
-    ]
+      "Fu"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Fu003",
@@ -808,7 +1149,11 @@
     "lat": 50.0821658,
     "lng": 14.4196147,
     "wiki": "https://cs.wikipedia.org/wiki/Obchodn%C3%AD_d%C5%AFm_M%C3%A1j",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Fu005",
@@ -816,7 +1161,11 @@
     "lat": 50.0830664,
     "lng": 14.4280989,
     "wiki": "https://cs.wikipedia.org/wiki/Hlavn%C3%AD_po%C5%A1ta_v_Praze",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Fu006",
@@ -824,7 +1173,11 @@
     "lat": 50.0784178,
     "lng": 14.4343628,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cesk%C3%BD_rozhlas",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Fu010",
@@ -832,7 +1185,11 @@
     "lat": 50.0836406,
     "lng": 14.4237058,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Lindt",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Fu012",
@@ -840,7 +1197,11 @@
     "lat": 50.114057,
     "lng": 14.385248,
     "wiki": "https://cs.wikipedia.org/wiki/Kolonie_Baba",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Fu014",
@@ -848,7 +1209,11 @@
     "lat": 50.0836453,
     "lng": 14.4324136,
     "wiki": "https://cs.wikipedia.org/wiki/Autoklub_%C4%8Cesk%C3%A9_republiky",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "So001",
@@ -856,7 +1221,11 @@
     "lat": 50.1093711,
     "lng": 14.3934631,
     "wiki": "https://cs.wikipedia.org/wiki/International_(hotel_v_Praze)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "So"
+    ]
   },
   {
     "id": "So005",
@@ -864,7 +1233,11 @@
     "lat": 50.0804278,
     "lng": 14.3836886,
     "wiki": "https://cs.wikipedia.org/wiki/Stadion_Evžena_Ro%C5%A1ick%C3%A9ho",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "So"
+    ]
   },
   {
     "id": "Br001",
@@ -872,7 +1245,11 @@
     "lat": 50.0799797,
     "lng": 14.432213,
     "wiki": "https://cs.wikipedia.org/wiki/Budova_Federativn%C3%ADho_shrom%C3%A1%C5%BEd%C4%9Bn%C3%AD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br002",
@@ -880,7 +1257,11 @@
     "lat": 50.0652007,
     "lng": 14.4304401,
     "wiki": "https://cs.wikipedia.org/wiki/Nuselsk%C3%BD_most",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br003",
@@ -888,7 +1269,11 @@
     "lat": 50.0891839,
     "lng": 14.4274977,
     "wiki": "https://cs.wikipedia.org/wiki/Kotva_(obchodn%C3%AD_d%C5%AFm)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br004",
@@ -896,7 +1281,11 @@
     "lat": 50.0810279,
     "lng": 14.45114,
     "wiki": "https://cs.wikipedia.org/wiki/Televizn%C3%AD_v%C4%9B%C5%BE_Praha",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br005",
@@ -904,7 +1293,11 @@
     "lat": 50.0621324,
     "lng": 14.4287074,
     "wiki": "https://cs.wikipedia.org/wiki/Kongresov%C3%A9_centrum_Praha",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br007",
@@ -912,7 +1305,11 @@
     "lat": 50.0917789,
     "lng": 14.4188315,
     "wiki": "https://cs.wikipedia.org/wiki/InterContinental_Praha",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br008",
@@ -920,7 +1317,11 @@
     "lat": 50.0845303,
     "lng": 14.4425905,
     "wiki": "https://cs.wikipedia.org/wiki/Budova_ROH",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br009",
@@ -928,7 +1329,11 @@
     "lat": 50.0811828,
     "lng": 14.4143173,
     "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A1_sc%C3%A9na_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "Br012",
@@ -936,7 +1341,11 @@
     "lat": 50.0302745,
     "lng": 14.526211,
     "wiki": "https://cs.wikipedia.org/wiki/Ji%C5%BEn%C3%AD_M%C4%9Bsto",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Br"
+    ]
   },
   {
     "id": "In001",
@@ -944,7 +1353,11 @@
     "lat": 50.099682,
     "lng": 14.4456375,
     "wiki": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%A1_tr%C5%BEnice",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In002",
@@ -952,7 +1365,11 @@
     "lat": 50.1090509,
     "lng": 14.4354129,
     "wiki": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%A1_elektr%C3%A1rna",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In003",
@@ -960,7 +1377,11 @@
     "lat": 50.0974522,
     "lng": 14.4407237,
     "wiki": "https://cs.wikipedia.org/wiki/Negrelliho_viadukt",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In004",
@@ -968,7 +1389,11 @@
     "lat": 50.0945134,
     "lng": 14.4327629,
     "wiki": "https://cs.wikipedia.org/wiki/%C5%A0tvanice",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In005",
@@ -976,7 +1401,11 @@
     "lat": 50.0560334,
     "lng": 14.4635493,
     "wiki": "https://cs.wikipedia.org/wiki/Plyn%C3%A1rna_Michle",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In007",
@@ -984,7 +1413,11 @@
     "lat": 50.105793,
     "lng": 14.4564682,
     "wiki": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%BD_p%C5%99%C3%ADstav",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In008",
@@ -992,7 +1425,11 @@
     "lat": 50.0612544,
     "lng": 14.4088697,
     "wiki": "https://cs.wikipedia.org/wiki/Praha_Sm%C3%ADchov",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In009",
@@ -1000,7 +1437,11 @@
     "lat": 50.1113678,
     "lng": 14.5095322,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8CKD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "In012",
@@ -1008,7 +1449,11 @@
     "lat": 50.0669535,
     "lng": 14.413408,
     "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehradsk%C3%BD_%C5%BEelezni%C4%8Dn%C3%AD_most",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "In"
+    ]
   },
   {
     "id": "De001",
@@ -1019,7 +1464,8 @@
     "edited": true,
     "style": [
       "De"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "De002",
@@ -1027,7 +1473,11 @@
     "lat": 50.0718006,
     "lng": 14.4037588,
     "wiki": "https://cs.wikipedia.org/wiki/Zlat%C3%BD_and%C4%9Bl",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "De"
+    ]
   },
   {
     "id": "De003",
@@ -1035,7 +1485,11 @@
     "lat": 50.0859439,
     "lng": 14.4251311,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Myslbek",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "De"
+    ]
   },
   {
     "id": "De004",
@@ -1043,7 +1497,11 @@
     "lat": 50.0627317,
     "lng": 14.4320279,
     "wiki": "https://cs.wikipedia.org/wiki/City_Empiria",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "De"
+    ]
   },
   {
     "id": "Sa005",
@@ -1051,7 +1509,11 @@
     "lat": 50.0809797,
     "lng": 14.4288012,
     "wiki": "https://cs.wikipedia.org/wiki/The_Flow_Building",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Sa"
+    ]
   },
   {
     "id": "Sa006",
@@ -1059,7 +1521,11 @@
     "lat": 50.0883923,
     "lng": 14.4341952,
     "wiki": "https://cs.wikipedia.org/wiki/Central_Business_District_Praha",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Sa"
+    ]
   },
   {
     "id": "Sa008",
@@ -1067,7 +1533,11 @@
     "lat": 50.0943034,
     "lng": 14.44354,
     "wiki": "https://cs.wikipedia.org/wiki/River_City_Prague",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Sa"
+    ]
   },
   {
     "id": "U001",
@@ -1075,7 +1545,11 @@
     "lat": 50.0797783,
     "lng": 14.4297266,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_svat%C3%A9ho_V%C3%A1clava",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U002",
@@ -1083,7 +1557,11 @@
     "lat": 50.0877306,
     "lng": 14.4211248,
     "wiki": "https://cs.wikipedia.org/wiki/Sou%C5%A1os%C3%AD_Jana_Husa",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U003",
@@ -1091,7 +1569,11 @@
     "lat": 50.0877159,
     "lng": 14.4211341,
     "wiki": "https://cs.wikipedia.org/wiki/Krocínova_ka%C5%A1na",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U004",
@@ -1099,7 +1581,11 @@
     "lat": 50.0873689,
     "lng": 14.4213117,
     "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%BD_sloup_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U005",
@@ -1107,7 +1593,11 @@
     "lat": 50.0901156,
     "lng": 14.420725,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Franze_Kafky",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U006",
@@ -1115,7 +1605,11 @@
     "lat": 50.0810262,
     "lng": 14.4511548,
     "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U007",
@@ -1123,7 +1617,11 @@
     "lat": 50.0880903,
     "lng": 14.4102308,
     "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U008",
@@ -1131,7 +1629,11 @@
     "lat": 50.0811114,
     "lng": 14.4257897,
     "wiki": "https://cs.wikipedia.org/wiki/Quo_vadis_(David_%C4%8Cern%C3%BD)",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U009",
@@ -1139,7 +1641,11 @@
     "lat": 50.0816778,
     "lng": 14.4208267,
     "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U010",
@@ -1147,7 +1653,11 @@
     "lat": 50.0640367,
     "lng": 14.4174494,
     "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U011",
@@ -1155,7 +1665,11 @@
     "lat": 50.0894858,
     "lng": 14.3979417,
     "wiki": "https://cs.wikipedia.org/wiki/Tom%C3%A1%C5%A1_Garrigue_Masaryk",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U012",
@@ -1163,7 +1677,11 @@
     "lat": 50.0866167,
     "lng": 14.4195058,
     "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%A9_n%C3%A1m%C4%9Bst%C3%AD_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U013",
@@ -1171,7 +1689,11 @@
     "lat": 50.0864958,
     "lng": 14.411332,
     "wiki": "https://cs.wikipedia.org/wiki/Karl%C5%AFv_most",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U015",
@@ -1179,7 +1701,11 @@
     "lat": 50.0882426,
     "lng": 14.4482258,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Jana_%C5%BDi%C5%BEky_na_V%C3%ADtkově",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U019",
@@ -1187,7 +1713,11 @@
     "lat": 50.092371,
     "lng": 14.4175333,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cech%C5%AFv_most",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U021",
@@ -1195,7 +1725,11 @@
     "lat": 50.0891517,
     "lng": 14.4028397,
     "wiki": "https://cs.wikipedia.org/wiki/Winston_Churchill",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U025",
@@ -1203,7 +1737,11 @@
     "lat": 50.0895225,
     "lng": 14.4152722,
     "wiki": "https://cs.wikipedia.org/wiki/Rudolfinum",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U026",
@@ -1211,7 +1749,11 @@
     "lat": 50.0853098,
     "lng": 14.4129333,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Bed%C5%99icha_Smetany_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "U028",
@@ -1219,7 +1761,11 @@
     "lat": 50.0863031,
     "lng": 14.4139042,
     "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_Karla_IV._(Praha%2C_Star%C3%A9_M%C4%9Bsto)",
-    "edited": true
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ]
   },
   {
     "id": "Op002",
@@ -1227,7 +1773,11 @@
     "lat": 50.0631664,
     "lng": 14.4217114,
     "wiki": "https://cs.wikipedia.org/wiki/Leopoldova_br%C3%A1na_(Vy%C5%A1ehrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op003",
@@ -1235,7 +1785,11 @@
     "lat": 50.0617092,
     "lng": 14.4241697,
     "wiki": "https://cs.wikipedia.org/wiki/T%C3%A1borsk%C3%A1_br%C3%A1na_(Vy%C5%A1ehrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op004",
@@ -1243,7 +1797,11 @@
     "lat": 50.0652686,
     "lng": 14.4191003,
     "wiki": "https://cs.wikipedia.org/wiki/Ciheln%C3%A1_br%C3%A1na",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op007",
@@ -1251,7 +1809,11 @@
     "lat": 50.0675686,
     "lng": 14.4262442,
     "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A9_M%C4%9Bsto_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op009",
@@ -1259,7 +1821,11 @@
     "lat": 50.0623042,
     "lng": 14.4230567,
     "wiki": "https://cs.wikipedia.org/wiki/%C5%A0pi%C4%8Dka_(v%C4%9B%C5%BE)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op010",
@@ -1267,7 +1833,11 @@
     "lat": 50.065235,
     "lng": 14.4191961,
     "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad#Opevn%C4%9Bn%C3%AD",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op013",
@@ -1275,7 +1845,11 @@
     "lat": 50.0919183,
     "lng": 14.4050119,
     "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cern%C3%A1_v%C4%9B%C5%BE_(Pra%C5%BEsk%C3%BD_hrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op014",
@@ -1283,7 +1857,11 @@
     "lat": 50.0919414,
     "lng": 14.4033522,
     "wiki": "https://cs.wikipedia.org/wiki/B%C3%ADl%C3%A1_v%C4%9B%C5%BE_(Pra%C5%BEsk%C3%BD_hrad)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op015",
@@ -1291,7 +1869,11 @@
     "lat": 50.0923328,
     "lng": 14.4049561,
     "wiki": "https://cs.wikipedia.org/wiki/Daliborka",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op016",
@@ -1299,7 +1881,11 @@
     "lat": 50.0913875,
     "lng": 14.4004239,
     "wiki": "https://cs.wikipedia.org/wiki/Mihu%C4%BCka",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op022",
@@ -1307,7 +1893,11 @@
     "lat": 50.0952119,
     "lng": 14.4058908,
     "wiki": "https://cs.wikipedia.org/wiki/P%C3%ADseck%C3%A1_br%C3%A1na",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Op030",
@@ -1315,7 +1905,11 @@
     "lat": 50.0806803,
     "lng": 14.4007817,
     "wiki": "https://cs.wikipedia.org/wiki/Hladov%C3%A1_ze%C4%8F",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "Ba021",
@@ -1323,7 +1917,11 @@
     "lat": 50.0885664,
     "lng": 14.3941086,
     "wiki": "https://cs.wikipedia.org/wiki/Hrz%C3%A1nsk%C3%BD_pal%C3%A1c",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ba"
+    ]
   },
   {
     "id": "Hi017",
@@ -1331,7 +1929,11 @@
     "lat": 50.0859389,
     "lng": 14.427245,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_%C5%BDivnostensk%C3%A9_banky_(Na_P%C5%99%C3%ADkop%C4%9B_20)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Kl010",
@@ -1341,9 +1943,9 @@
     "wiki": "https://cs.wikipedia.org/wiki/Thunovsk%C3%BD_pal%C3%A1c",
     "edited": true,
     "style": [
-      "Kl",
-      "Re"
-    ]
+      "Kl"
+    ],
+    "cat": "arch"
   },
   {
     "id": "Hi018",
@@ -1351,7 +1953,11 @@
     "lat": 50.0840972,
     "lng": 14.4506094,
     "wiki": "https://cs.wikipedia.org/wiki/Kostel_svat%C3%A9ho_Prokopa_(%C5%BDi%C5%BEkov)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Hi010",
@@ -1359,7 +1965,11 @@
     "lat": 50.0823664,
     "lng": 14.4256094,
     "wiki": "https://cs.wikipedia.org/wiki/St%C3%BDbl%C5%AFv_d%C5%AFm",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Hi"
+    ]
   },
   {
     "id": "Fu015",
@@ -1367,7 +1977,11 @@
     "lat": 50.0762667,
     "lng": 14.4848092,
     "wiki": "https://cs.wikipedia.org/wiki/Krematorium_Stra%C5%A1nice",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Mo014",
@@ -1375,7 +1989,11 @@
     "lat": 50.0956025,
     "lng": 14.4369928,
     "wiki": "https://cs.wikipedia.org/wiki/Hl%C3%A1vk%C5%AFv_most",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Ku013",
@@ -1383,7 +2001,11 @@
     "lat": 50.0663519,
     "lng": 14.4210303,
     "wiki": "https://cs.wikipedia.org/wiki/Kubistick%C3%BD_d%C5%AFm_v_Neklanov%C4%9B_ulici",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Ku"
+    ]
   },
   {
     "id": "Kl011",
@@ -1391,7 +2013,11 @@
     "lat": 50.0828469,
     "lng": 14.4204744,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Plat%C3%BDz",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Kl"
+    ]
   },
   {
     "id": "Se014",
@@ -1399,7 +2025,11 @@
     "lat": 50.0806125,
     "lng": 14.4200381,
     "wiki": "https://cs.wikipedia.org/wiki/Soubor:Sp%C3%A1len%C3%A1,_Prvn%C3%AD_vz%C3%A1jemn%C3%A1_%C4%8Desk%C3%A1_poji%C5%A1%C5%A5ovna.jpg",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Fu016",
@@ -1407,7 +2037,11 @@
     "lat": 50.07977,
     "lng": 14.42896,
     "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_m%C3%B3dy_(Praha)",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "Fu004",
@@ -1415,7 +2049,11 @@
     "lat": 50.0996483,
     "lng": 14.4189883,
     "wiki": "https://cs.wikipedia.org/wiki/Molochov",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Fu"
+    ]
   },
   {
     "id": "So007",
@@ -1423,7 +2061,11 @@
     "lat": 50.080336,
     "lng": 14.387861,
     "wiki": "https://cs.wikipedia.org/wiki/Velk%C3%BD_strahovsk%C3%BD_stadion",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "So"
+    ]
   },
   {
     "id": "Mo015",
@@ -1431,7 +2073,11 @@
     "lat": 50.089522,
     "lng": 14.412728,
     "wiki": "https://cs.wikipedia.org/wiki/M%C3%A1nes%C5%AFv_most",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Mo"
+    ]
   },
   {
     "id": "Se015",
@@ -1439,7 +2085,11 @@
     "lat": 50.08225,
     "lng": 14.448917,
     "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Akropolis",
-    "edited": true
+    "edited": true,
+    "cat": "arch",
+    "style": [
+      "Se"
+    ]
   },
   {
     "id": "Op031",
@@ -1449,7 +2099,11 @@
     "wiki": "",
     "edited": true,
     "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Pevnost_Vy%C5%A1ehrad%2C_Praha_2-Vy%C5%A1ehrad_-_%C4%8D%C3%A1st_souboru_tzv_Libu%C5%A1ina_l%C3%A1ze%C5%88.JPG/1920px-Pevnost_Vy%C5%A1ehrad%2C_Praha_2-Vy%C5%A1ehrad_-_%C4%8D%C3%A1st_souboru_tzv_Libu%C5%A1ina_l%C3%A1ze%C5%88.JPG",
-    "lede": "Bastion XXXVII na západním okraji Vyšehradské pevnosti nad Vltavou, poslední ryze vojenská stavba vyšehradského opevnění z 19. století. Dnes stojí v místech letní scény, poblíž skalního útvaru zvaného Libušina lázeň."
+    "lede": "Bastion XXXVII na západním okraji Vyšehradské pevnosti nad Vltavou, poslední ryze vojenská stavba vyšehradského opevnění z 19. století. Dnes stojí v místech letní scény, poblíž skalního útvaru zvaného Libušina lázeň.",
+    "cat": "arch",
+    "style": [
+      "Op"
+    ]
   },
   {
     "id": "H101",
@@ -1458,7 +2112,8 @@
     "lng": 14.4133,
     "wiki": "",
     "edited": true,
-    "cat": "hist"
+    "cat": "hist",
+    "style": []
   },
   {
     "id": "H102",
@@ -1467,7 +2122,8 @@
     "lng": 14.4278,
     "wiki": "",
     "edited": true,
-    "cat": "hist"
+    "cat": "hist",
+    "style": []
   },
   {
     "id": "H201",
@@ -1476,7 +2132,8 @@
     "lng": 14.4213,
     "wiki": "",
     "edited": true,
-    "cat": "arch"
+    "cat": "arch",
+    "style": []
   },
   {
     "id": "H301",
@@ -1485,7 +2142,8 @@
     "lng": 14.4016,
     "wiki": "",
     "edited": true,
-    "cat": "arch"
+    "cat": "arch",
+    "style": []
   },
   {
     "id": "H302",
@@ -1494,7 +2152,8 @@
     "lng": 14.4176489,
     "wiki": "",
     "edited": true,
-    "cat": "arch"
+    "cat": "arch",
+    "style": []
   },
   {
     "id": "Fu17",
@@ -1505,7 +2164,8 @@
     "edited": true,
     "style": [
       "Fu"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Hi19",
@@ -1516,7 +2176,8 @@
     "edited": true,
     "style": [
       "Hi"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go19",
@@ -1527,7 +2188,8 @@
     "edited": true,
     "style": [
       "Go"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Ba22",
@@ -1538,7 +2200,8 @@
     "edited": true,
     "style": [
       "Ba"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Ba23",
@@ -1549,7 +2212,8 @@
     "edited": true,
     "style": [
       "Ba"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Go20",
@@ -1560,7 +2224,8 @@
     "edited": true,
     "style": [
       "Go"
-    ]
+    ],
+    "cat": "arch"
   },
   {
     "id": "Se16",
@@ -1570,8 +2235,8 @@
     "wiki": "https://cs.wikipedia.org/wiki/Jeruzal%C3%A9msk%C3%A1_synagoga",
     "edited": true,
     "style": [
-      "Se",
-      "Hi"
-    ]
+      "Se"
+    ],
+    "cat": "arch"
   }
 ]

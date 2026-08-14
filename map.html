@@ -3043,6 +3043,7 @@ function buildChips() {
   const el = document.getElementById('mapChips');
   const counts = { hist:0, arch:0, art:0 };
   LOCATIONS.forEach(l => { if (l.cat in counts) counts[l.cat]++; });
+  if (_devLoaded) _devMarkers.forEach(({loc}) => { if (loc.cat in counts) counts[loc.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
       <span class="chip-state-lbl" id="lbl-hist">výchozí</span>
@@ -3147,6 +3148,7 @@ function buildStyleChips() {
 
   const counts = {};
   LOCATIONS.forEach(l => (l.style || []).forEach(s => counts[s] = (counts[s] || 0) + 1));
+  if (_devLoaded) _devMarkers.forEach(({loc}) => (loc.style || []).forEach(s => counts[s] = (counts[s] || 0) + 1));
 
   const codes = Object.keys(window.LOP_TAGS.styles).filter(s => counts[s]);
   if (!codes.length) { row.hidden = true; return; }
@@ -4265,6 +4267,7 @@ async function loadDevPlaces() {
     _devMarkers = [];
     _devLoaded = false;
     updateDevToggleUI();
+    buildChips(); // volá i buildStyleChips() interně
     return;
   }
   try {
@@ -4274,8 +4277,8 @@ async function loadDevPlaces() {
     const rt = document.getElementById('rtTip');
 
     data.forEach(item => {
-      const cat = _devCat(item);
-      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: _devStyle(item), name: item.name, wiki: item.wiki, photo: item.photo, lede: item.lede, isDev: true };
+      const cat = item.cat || _devCat(item);
+      const loc = { id: item.id, lat: item.lat, lng: item.lng, cat, style: item.style || _devStyle(item), name: item.name, wiki: item.wiki, photo: item.photo, lede: item.lede, isDev: true };
       const icon = makeDevIcon(loc);
       const m = L.marker([item.lat, item.lng], { icon });
       const detailUrl = () => 'coming-soon.html?name=' + encodeURIComponent(item.name)
@@ -4315,6 +4318,7 @@ async function loadDevPlaces() {
 
     _devLoaded = true;
     updateDevToggleUI();
+    buildChips(); // volá i buildStyleChips() interně
   } catch(e) {
     console.warn('places-development.json load error:', e);
   }

@@ -1325,8 +1325,10 @@ function buildStyleChips() {
   if (!row || !box || !window.LOP_TAGS) return;
 
   const counts = {};
-  PLACES.forEach(p => (Array.isArray(p.style) ? p.style : p.style ? [p.style] : [])
-    .forEach(s => counts[s] = (counts[s] || 0) + 1));
+  const add = p => (Array.isArray(p.style) ? p.style : p.style ? [p.style] : [])
+    .forEach(s => counts[s] = (counts[s] || 0) + 1);
+  PLACES.forEach(add);
+  if (_devLoaded) DEV_PLACES.forEach(add);
 
   const codes = Object.keys(window.LOP_TAGS.styles).filter(s => counts[s]);
   if (!codes.length) { row.hidden = true; return; }
@@ -1350,6 +1352,7 @@ function buildChips() {
   const el = document.getElementById('mapChips'); if (!el) return;
   const counts = { hist:0, arch:0, art:0 };
   PLACES.forEach(l => { if(counts[l.cat] !== undefined) counts[l.cat]++; });
+  if (_devLoaded) DEV_PLACES.forEach(l => { if(counts[l.cat] !== undefined) counts[l.cat]++; });
   el.innerHTML = `
     <div class="chip-wrap">
       <button class="chip" data-cat="hist"><span class="chip-swatch" style="background:var(--cat-hist)"></span>Historie <span class="chip-count">${counts.hist}</span><span class="chip-filter-icon"></span></button>
@@ -1611,14 +1614,15 @@ function render() {
    filtru zůstává admin-only a umožňuje ji odebrat, nebo naopak vynutit
    zobrazení jen jí (force-only) — to je jediné, co je omezené na admina. */
 async function loadDevPlaces() {
-  if (_devLoaded) { DEV_PLACES = []; _devLoaded = false; updateDevRowUI(); render(); return; }
+  if (_devLoaded) { DEV_PLACES = []; _devLoaded = false; updateDevRowUI(); buildChips(); buildStyleChips(); syncFilterUI(); render(); return; }
   try {
     const res = await fetch('places-development.json');
     if (!res.ok) return;
     const data = await res.json();
-    DEV_PLACES = data.map(item => ({ ...item, cat: _devCat(item), style: _devStyle(item) }));
+    DEV_PLACES = data.map(item => ({ ...item, cat: item.cat || _devCat(item), style: item.style || _devStyle(item) }));
     _devLoaded = true;
     updateDevRowUI();
+    buildChips(); buildStyleChips(); syncFilterUI();
     render();
   } catch (e) { console.warn('places-development.json load error:', e); }
 }
