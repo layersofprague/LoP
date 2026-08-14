@@ -361,6 +361,13 @@ a { color: inherit; text-decoration: none; }
 /* ── LIST MODE ── */
 #placesList {
   display: flex; flex-direction: column; gap: 0;
+  /* Vodorovný ořez — páska u pracovních karet (.dev-soon-ribbon) mírně
+     přesahuje přes pravý okraj karty (~24px, kvůli "vlaječkovému" efektu
+     s rovnými konci). U prostředních sloupců to schová sousední karta,
+     ale u posledního sloupce by to jinak přeteklo až do prostoru
+     navbaru vpravo — viz report v chatu. Ořez řeší jen tohle, karty
+     samotné (šířka/layout) tím nejsou nijak omezené. */
+  overflow-x: hidden;
 }
 .place-section-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
 
@@ -550,12 +557,12 @@ a { color: inherit; text-decoration: none; }
 /* ── GRID MODE ── */
 #placesList.grid-mode {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   flex-direction: unset;
 }
 @media (max-width: 819px) {
-  #placesList.grid-mode { grid-template-columns: repeat(2, 1fr); }
+  #placesList.grid-mode { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* grid card overrides */
@@ -565,6 +572,11 @@ a { color: inherit; text-decoration: none; }
 #placesList.grid-mode .place-card {
   display: flex; flex-direction: column;
   grid-template-columns: unset;
+  /* Grid položky mají skrytě min-width:auto (podle obsahu) — i s
+     minmax(0,1fr) na sloupci by to mohlo bránit smrštění, kdyby uvnitř
+     bylo něco nezalomitelného (dlouhé slovo apod.), viz report v chatu
+     (nerovnoměrné šířky dlaždic, krajní sloupce širší než prostřední). */
+  min-width: 0;
 }
 #placesList.grid-mode .place-thumb {
   width: 100%; aspect-ratio: 3/2; min-height: unset;
@@ -638,7 +650,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 480px) {
-  #placesList.grid-mode { grid-template-columns: 1fr; }
+  #placesList.grid-mode { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 600px) {
   .page-intro { font-size: 13px; line-height: 1.5; }
