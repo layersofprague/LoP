@@ -996,27 +996,28 @@ body.lop-return .llo-bottom-placeholder { display: block; }
    navázaný na zaoblený roh celé karty — to dělalo diagonálu nečistou,
    viz report v chatu), páska uvnitř ho protíná úhlopříčně. */
 /* Wrapper posunutý MIMO roh — dává pásce rovné konce rovnoběžné
-   s hranami tooltipu a jemný přesah ven. Rozměry ověřené výpočtem
-   (Playwright bounding_box), ať protíná ČISTĚ jen horní a pravou hranu
-   wrapperu (jinde vznikal buď schodovitý řez navíc, nebo moc malá
-   páska s useknutým kouskem — viz report v chatu, oboje řešeno
-   současně touhle konkrétní kombinací čísel). */
+   s hranami tooltipu. Rozměry dopočítané numericky (ne odhadem):
+   hledal jsem konfiguraci, kde OBA rohy každého konce pásky (po
+   rotaci) leží čistě mimo příslušnou hranu wrapperu — jinak vzniká
+   malý diagonální zbytek navíc (viz report v chatu, ověřeno na
+   vysokém rozlišení). Zároveň musí zůstat dost viditelné délky pro
+   celý text "PŘIPRAVUJEME", jinak se ořízne i přes čisté rohy. */
 .rt-tip-ribbon-wrap {
-  position: absolute; top: -4px; right: -4px;
-  width: 90px; height: 90px;
+  position: absolute; top: -2px; right: -2px;
+  width: 110px; height: 110px;
   overflow: hidden;
   z-index: 5;
   pointer-events: none;
 }
 .rt-tip-soon-ribbon {
-  position: absolute; top: 27px; right: -15px;
-  width: 99px;
+  position: absolute; top: 29px; right: -22px;
+  width: 115px;
   background: #b04020;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+  font-size: 9px; font-weight: 600; letter-spacing: .01em; text-transform: uppercase;
   text-align: center;
-  padding: 4px 0;
+  padding: 1px 0;
   transform: rotate(45deg);
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
