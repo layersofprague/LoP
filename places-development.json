@@ -352,7 +352,7 @@
     "name": "Palác Thurn-Taxisů (Malá Strana)",
     "lat": 50.0899101,
     "lng": 14.4093525,
-    "wiki": "https://cs.wikipedia.org/wiki/Thunovsk%C3%BD_pal%C3%A1c",
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Thurn-Taxis%C5%AF",
     "edited": true
   },
   {
@@ -595,7 +595,7 @@
     "name": "Palác Bellevue (Smetanovo nábřeží)",
     "lat": 50.0843385,
     "lng": 14.4136427,
-    "wiki": "https://cs.wikipedia.org/wiki/Historismus_v_architektu%C5%99e",
+    "wiki": "",
     "edited": true
   },
   {
@@ -603,7 +603,7 @@
     "name": "Palác Lanna (Mikulášská / Pařížská)",
     "lat": 50.0873667,
     "lng": 14.432331,
-    "wiki": "https://cs.wikipedia.org/wiki/Historismus_v_architektu%C5%99e",
+    "wiki": "",
     "edited": true
   },
   {
@@ -759,7 +759,7 @@
     "name": "ARA obchodní dům (Jugoslávská)",
     "lat": 50.0832714,
     "lng": 14.4218394,
-    "wiki": "https://cs.wikipedia.org/wiki/Moderna_(architektura)",
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_ARA",
     "edited": true
   },
   {
@@ -843,7 +843,7 @@
     "name": "Autoklub (Opletalova / Washingtonova)",
     "lat": 50.0836453,
     "lng": 14.4324136,
-    "wiki": "https://cs.wikipedia.org/wiki/Funkcionalismus_v_%C4%8Ceskoslovensku",
+    "wiki": "https://cs.wikipedia.org/wiki/Autoklub_%C4%8Cesk%C3%A9_republiky",
     "edited": true
   },
   {
@@ -1046,7 +1046,7 @@
     "name": "Flow Building (Václavské nám.)",
     "lat": 50.0809797,
     "lng": 14.4288012,
-    "wiki": "https://cs.wikipedia.org/wiki/Sou%C4%8Dasn%C3%A1_architektura",
+    "wiki": "https://cs.wikipedia.org/wiki/The_Flow_Building",
     "edited": true
   },
   {
@@ -1362,7 +1362,7 @@
     "name": "Stýblův dům",
     "lat": 50.0823664,
     "lng": 14.4256094,
-    "wiki": "https://cs.wikipedia.org/wiki/Praha",
+    "wiki": "https://cs.wikipedia.org/wiki/St%C3%BDbl%C5%AFv_d%C5%AFm",
     "edited": true
   },
   {
@@ -1450,7 +1450,7 @@
     "name": "Bašta sv. Václava",
     "lat": 50.0636269,
     "lng": 14.4165178,
-    "wiki": "https://cs.wikipedia.org/wiki/Praha",
+    "wiki": "",
     "edited": true
   },
   {
