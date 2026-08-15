@@ -1081,7 +1081,7 @@
     "name": "Vila Winternitz (Karel Lhota / Loos)",
     "lat": 50.0673486,
     "lng": 14.3885089,
-    "wiki": "https://cs.wikipedia.org/wiki/Vila_Winternitz",
+    "wiki": "https://cs.wikipedia.org/wiki/Winternitzova_vila",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1177,7 +1177,7 @@
     "name": "Budova Českého rozhlasu (Vinohradská)",
     "lat": 50.0784178,
     "lng": 14.4343628,
-    "wiki": "https://cs.wikipedia.org/wiki/%C4%8Cesk%C3%BD_rozhlas",
+    "wiki": "https://cs.wikipedia.org/wiki/Budova_%C4%8Cesk%C3%A9ho_rozhlasu",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1189,7 +1189,7 @@
     "name": "Obchodní dům Lindt (Václavské nám.)",
     "lat": 50.0836406,
     "lng": 14.4237058,
-    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Lindt",
+    "wiki": "https://cs.wikipedia.org/wiki/Obchodn%C3%AD_d%C5%AFm_Lindt",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1249,7 +1249,7 @@
     "name": "Budova Federálního shromáždění (Vinohradská)",
     "lat": 50.0799797,
     "lng": 14.432213,
-    "wiki": "https://cs.wikipedia.org/wiki/Budova_Federativn%C3%ADho_shrom%C3%A1%C5%BEd%C4%9Bn%C3%AD",
+    "wiki": "https://cs.wikipedia.org/wiki/Nov%C3%A1_budova_N%C3%A1rodn%C3%ADho_muzea",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1285,7 +1285,7 @@
     "name": "Televizní věž Žižkov",
     "lat": 50.0810279,
     "lng": 14.45114,
-    "wiki": "https://cs.wikipedia.org/wiki/Televizn%C3%AD_v%C4%9B%C5%BE_Praha",
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%BDi%C5%BEkovsk%C3%BD_vys%C3%ADla%C4%8D",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1309,7 +1309,7 @@
     "name": "Hotel InterContinental (Pařížská)",
     "lat": 50.0917789,
     "lng": 14.4188315,
-    "wiki": "https://cs.wikipedia.org/wiki/InterContinental_Praha",
+    "wiki": "https://cs.wikipedia.org/wiki/Fairmont_Golden_Prague",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1321,7 +1321,7 @@
     "name": "Dům odborových svazů (ROH)",
     "lat": 50.0845303,
     "lng": 14.4425905,
-    "wiki": "https://cs.wikipedia.org/wiki/Budova_ROH",
+    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_Radost",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1393,7 +1393,7 @@
     "name": "Elektrárna Štvanice",
     "lat": 50.0945134,
     "lng": 14.4327629,
-    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0tvanice",
+    "wiki": "https://cs.wikipedia.org/wiki/Zdymadlo_%C5%A0tvanice",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1477,7 +1477,7 @@
     "name": "Zlatý anděl (Smíchov, Jean Nouvel)",
     "lat": 50.0718006,
     "lng": 14.4037588,
-    "wiki": "https://cs.wikipedia.org/wiki/Zlat%C3%BD_and%C4%9Bl",
+    "wiki": "https://cs.wikipedia.org/wiki/Zlat%C3%BD_And%C4%9Bl",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1537,7 +1537,7 @@
     "name": "River City Prague (Holešovice)",
     "lat": 50.0943034,
     "lng": 14.44354,
-    "wiki": "https://cs.wikipedia.org/wiki/River_City_Prague",
+    "wiki": "https://cs.wikipedia.org/wiki/River_City_Praha",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1561,7 +1561,7 @@
     "name": "Sousoší Jana Husa (Ladislav Šaloun)",
     "lat": 50.0877306,
     "lng": 14.4211248,
-    "wiki": "https://cs.wikipedia.org/wiki/Sou%C5%A1os%C3%AD_Jana_Husa",
+    "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_mistra_Jana_Husa",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1585,7 +1585,7 @@
     "name": "Mariánský sloup (Staroměstské nám.)",
     "lat": 50.0873689,
     "lng": 14.4213117,
-    "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%BD_sloup_(Praha)",
+    "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%BD_sloup_(Starom%C4%9Bstsk%C3%A9_n%C3%A1m%C4%9Bst%C3%AD)",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1609,7 +1609,7 @@
     "name": "Děti na Žižkovské věži (David Černý)",
     "lat": 50.0810262,
     "lng": 14.4511548,
-    "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
+    "wiki": "https://cs.wikipedia.org/wiki/Miminka",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1621,7 +1621,7 @@
     "name": "Čurající postavy (David Černý, před Kafkovým muzeem)",
     "lat": 50.0880903,
     "lng": 14.4102308,
-    "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
+    "wiki": "https://cs.wikipedia.org/wiki/%C4%8C%C5%AFraj%C3%ADc%C3%AD_postavy",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1633,7 +1633,7 @@
     "name": "Převrácený kůň (David Černý, Lucerna)",
     "lat": 50.0811114,
     "lng": 14.4257897,
-    "wiki": "https://cs.wikipedia.org/wiki/Quo_vadis_(David_%C4%8Cern%C3%BD)",
+    "wiki": "https://commons.wikimedia.org/wiki/File:Cheval_David_%C4%8Cern%C3%BD_Palais_Lucerna_Prague.jpg",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1645,7 +1645,7 @@
     "name": "Hlava Franze Kafky — Metalmorphosis (Černý, Národní třída)",
     "lat": 50.0816778,
     "lng": 14.4208267,
-    "wiki": "https://cs.wikipedia.org/wiki/David_%C4%8Cern%C3%BD",
+    "wiki": "https://cs.wikipedia.org/wiki/Hlava_Franze_Kafky",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1657,7 +1657,7 @@
     "name": "Sousoší na Vyšehradě — Libuše a Přemysl",
     "lat": 50.0640367,
     "lng": 14.4174494,
-    "wiki": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad",
+    "wiki": "https://en.wikipedia.org/wiki/Libu%C5%A1e_and_P%C5%99emysl",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1669,7 +1669,7 @@
     "name": "Pomník Tomáše Masaryka (Hrad)",
     "lat": 50.0894858,
     "lng": 14.3979417,
-    "wiki": "https://cs.wikipedia.org/wiki/Tom%C3%A1%C5%A1_Garrigue_Masaryk",
+    "wiki": "https://cs.wikipedia.org/wiki/Pomn%C3%ADk_T._G._Masaryka_(Praha,_Hrad%C4%8Dany)",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1678,15 +1678,16 @@
   },
   {
     "id": "U012",
-    "name": "Kašna na Mariánském náměstí",
+    "name": "Kašna na Malém náměstí",
     "lat": 50.0866167,
     "lng": 14.4195058,
-    "wiki": "https://cs.wikipedia.org/wiki/Mari%C3%A1nsk%C3%A9_n%C3%A1m%C4%9Bst%C3%AD_(Praha)",
+    "wiki": "https://cs.wikipedia.org/wiki/Mal%C3%A9_n%C3%A1m%C4%9Bst%C3%AD_(Praha)",
     "edited": true,
     "cat": "art",
     "style": [
       "U"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Praha%2C_Mal%C3%A9_n%C3%A1m%C4%9Bst%C3%AD%2C_ka%C5%A1na.jpg"
   },
   {
     "id": "U013",
@@ -1726,10 +1727,10 @@
   },
   {
     "id": "U021",
-    "name": "Socha Winstona Churchilla (Thunovská)",
-    "lat": 50.0891517,
-    "lng": 14.4028397,
-    "wiki": "https://cs.wikipedia.org/wiki/Winston_Churchill",
+    "name": "Socha Winstona Churchilla (nám. W. Churchilla, Žižkov)",
+    "lat": 50.0845303,
+    "lng": 14.4425905,
+    "wiki": "https://cs.wikipedia.org/wiki/N%C3%A1m%C4%9Bst%C3%AD_Winstona_Churchilla",
     "edited": true,
     "cat": "art",
     "style": [
@@ -1758,7 +1759,8 @@
     "cat": "art",
     "style": [
       "U"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/44/Bed%C5%99ich_Smetana_%28Novotn%C3%A9ho_l%C3%A1vka%29.jpg"
   },
   {
     "id": "U028",
@@ -1777,7 +1779,7 @@
     "name": "Leopoldova brána (Vyšehrad)",
     "lat": 50.0631664,
     "lng": 14.4217114,
-    "wiki": "https://cs.wikipedia.org/wiki/Leopoldova_br%C3%A1na_(Vy%C5%A1ehrad)",
+    "wiki": "https://cs.wikipedia.org/wiki/Leopoldova_br%C3%A1na",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1789,7 +1791,7 @@
     "name": "Táborská brána (Vyšehrad)",
     "lat": 50.0617092,
     "lng": 14.4241697,
-    "wiki": "https://cs.wikipedia.org/wiki/T%C3%A1borsk%C3%A1_br%C3%A1na_(Vy%C5%A1ehrad)",
+    "wiki": "https://cs.wikipedia.org/wiki/T%C3%A1borsk%C3%A1_br%C3%A1na",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1825,7 +1827,7 @@
     "name": "Špička — gotická věž Nového Města",
     "lat": 50.0623042,
     "lng": 14.4230567,
-    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0pi%C4%8Dka_(v%C4%9B%C5%BE)",
+    "wiki": "https://cs.wikipedia.org/wiki/%C5%A0pi%C4%8Dka_(br%C3%A1na)",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -1885,7 +1887,7 @@
     "name": "Mihulka — Prašná věž (Pražský hrad)",
     "lat": 50.0913875,
     "lng": 14.4004239,
-    "wiki": "https://cs.wikipedia.org/wiki/Mihu%C4%BCka",
+    "wiki": "https://cs.wikipedia.org/wiki/Mihulka",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -2034,7 +2036,8 @@
     "cat": "arch",
     "style": [
       "Se"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Sp%C3%A1len%C3%A1%2C_Prvn%C3%AD_vz%C3%A1jemn%C3%A1_%C4%8Desk%C3%A1_poji%C5%A1%C5%A5ovna.jpg"
   },
   {
     "id": "Fu016",
@@ -2070,7 +2073,9 @@
     "cat": "arch",
     "style": [
       "So"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Great_Strahov_Stadium%2C_Prague%2C_Czech_Republic_%28Unsplash%29.jpg/1920px-Great_Strahov_Stadium%2C_Prague%2C_Czech_Republic_%28Unsplash%29.jpg",
+    "lede": "Svou plochou největší stadion na světě, postavený 1926–1932 pro sokolské slety a spartakiády s kapacitou až 250 000 diváků. Betonové tribuny jsou od roku 2003 kulturní památkou; dnes slouží jako tréninkové centrum AC Sparta Praha."
   },
   {
     "id": "Mo015",
@@ -2135,7 +2140,7 @@
     "name": "Staroměstské náměstí",
     "lat": 50.0875,
     "lng": 14.4213,
-    "wiki": "",
+    "wiki": "https://cs.wikipedia.org/wiki/Starom%C4%9Bstsk%C3%A9_n%C3%A1m%C4%9Bst%C3%AD",
     "edited": true,
     "cat": "arch",
     "style": []
@@ -2145,17 +2150,17 @@
     "name": "Pražský hrad",
     "lat": 50.0911,
     "lng": 14.4016,
-    "wiki": "",
+    "wiki": "https://cs.wikipedia.org/wiki/Pra%C5%BEsk%C3%BD_hrad",
     "edited": true,
     "cat": "arch",
     "style": []
   },
   {
     "id": "H302",
-    "name": "Letenské sady",
+    "name": "Letenská pláň",
     "lat": 50.0953028,
     "lng": 14.4176489,
-    "wiki": "",
+    "wiki": "https://cs.wikipedia.org/wiki/Letn%C3%A1",
     "edited": true,
     "cat": "arch",
     "style": []
@@ -2243,5 +2248,18 @@
       "Se"
     ],
     "cat": "arch"
+  },
+  {
+    "id": "U029",
+    "name": "Pomník Milady Horákové (Sněmovní, Malá Strana)",
+    "lat": 50.0900714,
+    "lng": 14.4041103,
+    "wiki": "https://cs.wikipedia.org/wiki/Milada_Hor%C3%A1kov%C3%A1",
+    "edited": true,
+    "cat": "art",
+    "style": [
+      "U"
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Milada_Hor%C3%A1kov%C3%A1_Memorial_at_Sn%C4%9Bmovn%C3%AD%2C_Prague_3.jpg/1920px-Milada_Hor%C3%A1kov%C3%A1_Memorial_at_Sn%C4%9Bmovn%C3%AD%2C_Prague_3.jpg"
   }
 ]
