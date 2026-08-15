@@ -129,7 +129,8 @@
     "cat": "arch",
     "style": [
       "Go"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Ane%C5%BEsk%C3%BD_kl%C3%A1%C5%A1ter_zahrada_a_sv._Salv%C3%A1tor_2.jpg/960px-Ane%C5%BEsk%C3%BD_kl%C3%A1%C5%A1ter_zahrada_a_sv._Salv%C3%A1tor_2.jpg"
   },
   {
     "id": "Go007",
@@ -160,7 +161,7 @@
     "name": "Malostranské mostecké věže",
     "lat": 50.0872272,
     "lng": 14.4068527,
-    "wiki": "https://cs.wikipedia.org/wiki/Malostranck%C3%A9_mosteck%C3%A9_v%C4%9B%C5%BEe",
+    "wiki": "https://cs.wikipedia.org/wiki/Malostransk%C3%A9_mosteck%C3%A9_v%C4%9B%C5%BEe",
     "edited": true,
     "style": [
       "Go"
@@ -268,7 +269,7 @@
     "name": "Klášter Na Slovanech (Emauzy)",
     "lat": 50.0720777,
     "lng": 14.4175266,
-    "wiki": "https://cs.wikipedia.org/wiki/Kl%C3%A1%C5%A1ter_Na_Slovan%C3%A9ch",
+    "wiki": "https://cs.wikipedia.org/wiki/Emauzsk%C3%BD_kl%C3%A1%C5%A1ter",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -328,7 +329,7 @@
     "name": "Dům U minuty",
     "lat": 50.0867022,
     "lng": 14.4200255,
-    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_minuty",
+    "wiki": "https://cs.wikipedia.org/wiki/D%C5%AFm_U_Minuty",
     "edited": true,
     "cat": "arch",
     "style": [
@@ -652,12 +653,13 @@
     "name": "Invalidovna (Karlín)",
     "lat": 50.095279,
     "lng": 14.4615765,
-    "wiki": "https://cs.wikipedia.org/wiki/Invalidovna",
+    "wiki": "https://cs.wikipedia.org/wiki/Invalidovna_(Praha)",
     "edited": true,
     "cat": "arch",
     "style": [
       "Kl"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Invalidovna_%C4%8Delo_1.jpg/960px-Invalidovna_%C4%8Delo_1.jpg"
   },
   {
     "id": "Kl006",
@@ -748,7 +750,7 @@
     "name": "Palác Žofín",
     "lat": 50.0790236,
     "lng": 14.4128515,
-    "wiki": "https://cs.wikipedia.org/wiki/Sof%C3%ADn",
+    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_%C5%BDof%C3%ADn",
     "edited": true,
     "style": [
       "Hi"
@@ -801,7 +803,8 @@
     "cat": "arch",
     "style": [
       "Hi"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/M%C4%9B%C5%A1%C5%A5ansk%C3%BD_d%C5%AFm_%28Nov%C3%A9_M%C4%9Bsto%29%2C_Praha_1%2C_V%C3%A1clavsk%C3%A9_n%C3%A1m._792%2C_Nov%C3%A9_M%C4%9Bsto.JPG/960px-M%C4%9B%C5%A1%C5%A5ansk%C3%BD_d%C5%AFm_%28Nov%C3%A9_M%C4%9Bsto%29%2C_Praha_1%2C_V%C3%A1clavsk%C3%A9_n%C3%A1m._792%2C_Nov%C3%A9_M%C4%9Bsto.JPG"
   },
   {
     "id": "Hi011",
@@ -980,12 +983,13 @@
     "name": "Trojdům Josefa Chochola (Neklanova, Vyšehrad)",
     "lat": 50.0647291,
     "lng": 14.4158193,
-    "wiki": "https://cs.wikipedia.org/wiki/Josef_Chochol",
+    "wiki": "https://cs.wikipedia.org/wiki/Kubistick%C3%BD_trojd%C5%AFm_na_Ra%C5%A1%C3%ADnov%C4%9B_n%C3%A1b%C5%99e%C5%BE%C3%AD",
     "edited": true,
     "cat": "arch",
     "style": [
       "Ku"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Vy%C5%A1ehrad_Ra%C5%A1%C3%ADnovo_n%C3%A1b%C5%99e%C5%BE%C3%AD_2.jpg/960px-Vy%C5%A1ehrad_Ra%C5%A1%C3%ADnovo_n%C3%A1b%C5%99e%C5%BE%C3%AD_2.jpg"
   },
   {
     "id": "Ku004",
@@ -1013,22 +1017,23 @@
   },
   {
     "id": "Ku007",
-    "name": "Vila Kovářovic (Libušina, Vyšehrad)",
+    "name": "Kovařovicova vila (Libušina, Vyšehrad)",
     "lat": 50.0667561,
     "lng": 14.4156753,
-    "wiki": "https://cs.wikipedia.org/wiki/Vila_Kova%C5%99ovic",
+    "wiki": "https://cs.wikipedia.org/wiki/Kova%C5%99ovicova_vila",
     "edited": true,
     "cat": "arch",
     "style": [
       "Ku"
-    ]
+    ],
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Vy%C5%A1ehrad_Kova%C5%99ovicova_vila_1.jpg/960px-Vy%C5%A1ehrad_Kova%C5%99ovicova_vila_1.jpg"
   },
   {
     "id": "Ku011",
-    "name": "Palác Peterka (Václavské nám. 12)",
+    "name": "Peterkův dům (Václavské nám. 12)",
     "lat": 50.0832775,
     "lng": 14.4242864,
-    "wiki": "https://cs.wikipedia.org/wiki/Pal%C3%A1c_Peterka",
+    "wiki": "https://cs.wikipedia.org/wiki/Peterk%C5%AFv_d%C5%AFm",
     "edited": true,
     "cat": "arch",
     "style": [
