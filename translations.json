@@ -1670,5 +1670,9 @@
   "admin.coming_soon": {
     "cs": "Připravujeme",
     "en": "Coming soon"
+  },
+  "place.new_badge": {
+    "cs": "Novinka",
+    "en": "New"
   }
 }

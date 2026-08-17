@@ -47,7 +47,8 @@
     "published": true,
     "paywall": false,
     "rating": 4.6,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "publishedAt": "2026-08-15"
   },
   {
     "id": "H002",
@@ -91,7 +92,8 @@
     "published": true,
     "paywall": false,
     "rating": null,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "publishedAt": "2026-08-15"
   },
   {
     "id": "A001",
@@ -131,6 +133,7 @@
     "published": false,
     "paywall": false,
     "rating": 0,
-    "ratingCount": 0
+    "ratingCount": 0,
+    "publishedAt": "2026-08-15"
   }
 ]

@@ -40,6 +40,12 @@ let _T = {};
    z cache a chybějící klíče se vypisují doslova ("overview.geo_short"). */
 const LOP_DATA_VER = '20260881';
 
+/* Kolik dní po zveřejnění (publishedAt v places-index.json) se u místa
+   ukazuje páska "Novinka" — jedno místo pro změnu, používá map.html
+   i overview.html. Řešeno čistě datem (ne "od poslední návštěvy"),
+   viz rozhodnutí v chatu — jednodušší a předvídatelnější. */
+const LOP_NOVINKA_DAYS = 14;
+
 (function _load() {
   try {
     const xhr = new XMLHttpRequest();
@@ -117,6 +123,7 @@ window.lopSetLang = function (lang) {
 // cs: lopPlural(3, 'razítko', 'razítka', 'razítek') → 'razítka'
 // en: lopPlural(3, 'stamp', null, 'stamps') → 'stamps'
 window.lopDataVer = LOP_DATA_VER;
+window.LOP_NOVINKA_DAYS = LOP_NOVINKA_DAYS;
 
 window.lopPlural = function (n, one, few, many) {
   if (LANG === 'cs') {

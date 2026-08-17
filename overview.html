@@ -296,14 +296,14 @@ a { color: inherit; text-decoration: none; }
 .dev-btn:hover { border-color: var(--ink-4); box-shadow: 0 3px 10px rgba(26,24,20,.16); transform: translateY(-1px); }
 .dev-check { display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--ink-2); cursor: pointer; }
 .dev-check input { cursor: pointer; }
-/* Dev karty — teď klikatelné (vedou na coming-soon.html, viz devCardHTML),
-   ale bez plné interaktivity skutečných karet (žádné hlasování/plán).
-   Páska "Coming soon" má mírně přesahovat přes roh ven (jako vlaječka) —
-   proto overflow:visible na dev kartě samotné; v list módu (foto jen
-   80px sloupec vlevo) by přesahující páska zasahovala do textu, tam
-   zůstává bezpečněji ořezaná. */
-.place-card.dev-card { overflow: visible; }
-#placesList:not(.grid-mode) .place-card.dev-card { overflow: hidden; }
+/* Karty s páskou (dev "PŘIPRAVUJEME" i reálná "NOVINKA") potřebují
+   overflow:visible na kartě, ať páska smí přečnívat přes roh ven jako
+   vlaječka; v seznamovém módu se to zase bezpečně ořízne, ať nezasahuje
+   do textu sousední karty. */
+.place-card.dev-card,
+.place-card.has-ribbon { overflow: visible; }
+#placesList:not(.grid-mode) .place-card.dev-card,
+#placesList:not(.grid-mode) .place-card.has-ribbon { overflow: hidden; }
 /* Fotka z Wikipedie je jen "teaser" budoucího stavu — zešedlá a
    zesvětlená, ať je na první pohled jasné, že to není finální fotka. */
 .dev-card-photo {
@@ -313,40 +313,39 @@ a { color: inherit; text-decoration: none; }
 /* Páska se váže na FOTKU (.place-thumb), ne na celou kartu — v grid módu
    to vyjde nastejno (foto = celá horní část karty), ale v seznamovém
    módu (foto jen úzký 80px sloupec vlevo) díky tomu páska sedí přes roh
-   fotky místo přes pravý roh celé (mnohem širší) dlaždice — viz report
-   v chatu. Fotka samotná potřebuje ZAOBLENÝ OŘEZ (overflow:hidden), ale
-   páska musí smět přes roh fotky přečnívat ven (overflow:visible) — proto
-   .dev-thumb-clip odděluje ořez fotky od .place-thumb, který je jen
-   pozicovací kotva pro pásku a sám už nic neořezává. */
-.place-card.dev-card .place-thumb { overflow: visible; }
-.dev-thumb-clip {
+   fotky místo přes pravý roh celé (mnohem širší) dlaždice. Fotka
+   samotná potřebuje ZAOBLENÝ OŘEZ (overflow:hidden), ale páska musí
+   smět přes roh fotky přečnívat ven (overflow:visible) — proto
+   .thumb-clip odděluje ořez fotky od .place-thumb, který je jen
+   pozicovací kotva pro pásku a sám už nic neořezává. Sdíleno mezi
+   dev i reálnými kartami (obě mohou mít pásku). */
+.place-card.dev-card .place-thumb,
+.place-card.has-ribbon .place-thumb { overflow: visible; }
+.thumb-clip {
   position: absolute; inset: 0;
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
 }
-.place-card.dev-card .place-thumb .dev-thumb-clip {
+.place-card .place-thumb .thumb-clip {
   border-radius: 10px 0 0 10px; /* list mód — foto vlevo, zaoblená levá strana */
 }
-#placesList.grid-mode .place-card.dev-card .place-thumb .dev-thumb-clip {
+#placesList.grid-mode .place-card .place-thumb .thumb-clip {
   border-radius: 10px 10px 0 0; /* grid mód — foto nahoře, zaoblený horní okraj */
 }
-/* Wrapper posunutý MIMO roh (ne flush s ním) — dává pásce rovné konce
-   rovnoběžné s hranami karty (ne obyčejný obdélníkový konec), a
-   zároveň zůstává vidět mírný přesah ven jako u vlaječky. */
-/* Wrapper posunutý MIMO roh — dává pásce rovné konce rovnoběžné
-   s hranami karty. Rozměry dopočítané numericky, ať jsou oba rohy
-   každého konce pásky čistě mimo hranu wrapperu (viz map.html). */
-.dev-ribbon-wrap {
+/* ── ROHOVÁ PÁSKA — sdílená geometrie pro "Připravujeme" (dev, šedá)
+   i "Novinka" (reálná místa, červená). Rozměry/pozice numericky ověřené
+   (Session X), aby oba rohy pásky vyšly čistě mimo hranu wrapperu bez
+   "schodovitého" artefaktu — jen barva/text se liší podle varianty. */
+.ribbon-wrap {
   position: absolute; top: -2px; right: -2px;
   width: 110px; height: 110px;
   overflow: hidden;
   z-index: 5;
   pointer-events: none;
 }
-.dev-soon-ribbon {
+.ribbon {
   position: absolute; top: 29px; right: -22px;
   width: 115px;
-  background: #b04020;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: .01em; text-transform: uppercase;
@@ -355,6 +354,11 @@ a { color: inherit; text-decoration: none; }
   transform: rotate(45deg);
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
+/* Barevné varianty — geometrie stejná, liší se jen odstín a text.
+   BW (tmavě uhlová, ne čistě černá — měkčí) pro pracovní vrstvu,
+   červená vyhrazená pro "Novinka" u nově publikovaných míst. */
+.ribbon--bw { background: #3a3a38; }
+.ribbon--new { background: #b04020; }
 /* Hlasy/plán u pracovní vrstvy jsou jen naznačené — žádná čísla, žádná
    interakce (nejsou to skutečně sledovaná místa, jen teaser). */
 .dev-votes, .dev-wish-wrap { opacity: .45; pointer-events: none; }
@@ -374,7 +378,7 @@ a { color: inherit; text-decoration: none; }
 /* ── LIST MODE ── */
 #placesList {
   display: flex; flex-direction: column; gap: 0;
-  /* Vodorovný ořez — páska u pracovních karet (.dev-soon-ribbon) mírně
+  /* Vodorovný ořez — páska u pracovních karet (.ribbon) mírně
      přesahuje přes pravý okraj karty (~24px, kvůli "vlaječkovému" efektu
      s rovnými konci). U prostředních sloupců to schová sousední karta,
      ale u posledního sloupce by to jinak přeteklo až do prostoru
@@ -1644,7 +1648,7 @@ function render() {
 async function loadDevPlaces() {
   if (_devLoaded) { DEV_PLACES = []; _devLoaded = false; updateDevRowUI(); buildChips(); buildStyleChips(); syncFilterUI(); render(); return; }
   try {
-    const res = await fetch('places-development.json');
+    const res = await fetch('places-development.json?v=' + (window.lopDataVer||''));
     if (!res.ok) return;
     const data = await res.json();
     DEV_PLACES = data.map(item => ({ ...item, cat: item.cat || _devCat(item), style: item.style || _devStyle(item) }));
@@ -1710,13 +1714,13 @@ function devCardHTML(item) {
 
   return `<div class="place-card dev-card" data-cat="${item.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${item.cat}" id="${mediaId}">
-      <div class="dev-thumb-clip">
+      <div class="thumb-clip">
         ${item.photo ? `<img class="dev-card-photo" src="${item.photo}" loading="lazy" onerror="this.remove()">` : ''}
         <div class="place-thumb-fallback">${letter}</div>
         <div class="place-cat-line" style="background:${color}"></div>
         <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
       </div>
-      <div class="dev-ribbon-wrap"><div class="dev-soon-ribbon">${t('admin.coming_soon')}</div></div>
+      <div class="ribbon-wrap"><div class="ribbon ribbon--bw">${t('admin.coming_soon')}</div></div>
     </div>
     <div class="place-body">
       <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>
@@ -1743,7 +1747,7 @@ function loadDevPreviews() {
     window.lopWikiPreview(item.wiki).then(info => {
       if (!info) return;
       const media = document.getElementById('devMedia_' + item.id);
-      const clip = media ? media.querySelector('.dev-thumb-clip') : null;
+      const clip = media ? media.querySelector('.thumb-clip') : null;
       if (info.thumbnail && clip && !clip.querySelector('img')) {
         const img = document.createElement('img');
         img.className = 'dev-card-photo';
@@ -1774,6 +1778,15 @@ function cardHTML(p, visited, wished) {
   const detailUrl = 'place/' + p.id + '.html';
   const dist = userPos && p.lat && p.lng ? formatDist(haversineM(userPos[0],userPos[1],p.lat,p.lng)) : '';
   const loggedIn = isLoggedIn();
+
+  // "Novinka" — čistě podle data zveřejnění (publishedAt), ne podle
+  // poslední návštěvy uživatele (rozhodnuto v chatu — jednodušší a
+  // předvídatelnější). Práh LOP_NOVINKA_DAYS je v i18n.js, ať se dá
+  // změnit na jednom místě pro map.html i overview.html.
+  const isNew = p.publishedAt && (Date.now() - new Date(p.publishedAt).getTime()) < window.LOP_NOVINKA_DAYS * 86400000;
+  const newRibbonHtml = isNew
+    ? `<div class="ribbon-wrap"><div class="ribbon ribbon--new">${t('place.new_badge')}</div></div>`
+    : '';
 
   // Stamp pro navštívená místa — vždy přes pravý horní roh textu
   const arScore = _arScores[String(p.id)] ?? null;
@@ -1846,12 +1859,15 @@ function cardHTML(p, visited, wished) {
         </button>
       </div>`;
 
-  return `<div class="place-card" data-cat="${p.cat}" onclick="location.href='${detailUrl}'">
+  return `<div class="place-card${isNew?' has-ribbon':''}" data-cat="${p.cat}" onclick="location.href='${detailUrl}'">
     <div class="place-thumb" data-cat="${p.cat}">
-      ${thumb?`<img src="${thumb}" alt="${locStr(p,'name')}" onerror="this.style.display='none'"/>`:'' }
-      <div class="place-thumb-fallback">${letter}</div>
-      <div class="place-cat-line" style="background:${color}"></div>
-      <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
+      <div class="thumb-clip">
+        ${thumb?`<img src="${thumb}" alt="${locStr(p,'name')}" onerror="this.style.display='none'"/>`:'' }
+        <div class="place-thumb-fallback">${letter}</div>
+        <div class="place-cat-line" style="background:${color}"></div>
+        <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
+      </div>
+      ${newRibbonHtml}
     </div>
     <div class="place-body">
       <div class="place-kick">
