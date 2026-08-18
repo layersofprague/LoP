@@ -357,7 +357,11 @@ a { color: inherit; text-decoration: none; }
 /* Barevné varianty — geometrie stejná, liší se jen odstín a text.
    BW (tmavě uhlová, ne čistě černá — měkčí) pro pracovní vrstvu,
    červená vyhrazená pro "Novinka" u nově publikovaných míst. */
-.ribbon--bw { background: #3a3a38; }
+/* .ribbon--bw je bílá s ČERVENÝM textem (stejný odstín jako pozadí
+   .ribbon--new) — inverzní párování s "Novinka" (bílá/červený text vs
+   červené pozadí/bílý text), viz report v chatu. Dřív tmavý text na
+   bílé působilo moc neutrálně/nevýrazně vedle červené Novinky. */
+.ribbon--bw { background: #fff; color: #b04020; border: 1px solid rgba(0,0,0,.1); }
 .ribbon--new { background: #b04020; }
 /* Hlasy/plán u pracovní vrstvy jsou jen naznačené — žádná čísla, žádná
    interakce (nejsou to skutečně sledovaná místa, jen teaser). */
