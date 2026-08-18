@@ -357,11 +357,11 @@ a { color: inherit; text-decoration: none; }
 /* Barevné varianty — geometrie stejná, liší se jen odstín a text.
    BW (tmavě uhlová, ne čistě černá — měkčí) pro pracovní vrstvu,
    červená vyhrazená pro "Novinka" u nově publikovaných míst. */
-/* .ribbon--bw je bílá s ČERVENÝM textem (stejný odstín jako pozadí
-   .ribbon--new) — inverzní párování s "Novinka" (bílá/červený text vs
-   červené pozadí/bílý text), viz report v chatu. Dřív tmavý text na
-   bílé působilo moc neutrálně/nevýrazně vedle červené Novinky. */
-.ribbon--bw { background: #fff; color: #b04020; border: 1px solid rgba(0,0,0,.1); }
+/* .ribbon--bw je bílá, barva textu se nastavuje inline podle barvy
+   kategorie (stejná jako .place-cat-line/pill) — viz report v chatu,
+   pevný odstín (nejdřív tmavý, pak červený) nedával smysl napříč
+   různými kategoriemi míst. */
+.ribbon--bw { background: #fff; border: 1px solid rgba(0,0,0,.1); }
 .ribbon--new { background: #b04020; }
 /* Hlasy/plán u pracovní vrstvy jsou jen naznačené — žádná čísla, žádná
    interakce (nejsou to skutečně sledovaná místa, jen teaser). */
@@ -1724,7 +1724,7 @@ function devCardHTML(item) {
         <div class="place-cat-line" style="background:${color}"></div>
         <div class="place-cat-pill"><span class="dot" style="background:${color}"></span>${catName}</div>
       </div>
-      <div class="ribbon-wrap"><div class="ribbon ribbon--bw">${t('admin.coming_soon')}</div></div>
+      <div class="ribbon-wrap"><div class="ribbon ribbon--bw" style="color:${color}">${t('admin.coming_soon')}</div></div>
     </div>
     <div class="place-body">
       <div class="place-kick"><span class="dot" style="background:${color}"></span><span>${catName}</span></div>

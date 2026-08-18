@@ -1023,10 +1023,9 @@ body.lop-return .llo-bottom-placeholder { display: block; }
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
 /* Barevné varianty — geometrie stejná, liší se jen odstín a text.
-   .ribbon--bw je bílá s ČERVENÝM textem (stejný odstín jako pozadí
-   .ribbon--new) — inverzní párování s "Novinka" (bílá/červený text vs
-   červené pozadí/bílý text), viz report v chatu. */
-.ribbon--bw { background: #fff; color: #b04020; border: 1px solid rgba(0,0,0,.1); }
+   .ribbon--bw je bílá, barva textu se nastavuje inline podle barvy
+   kategorie (stejná jako u cat-pill) — viz report v chatu. */
+.ribbon--bw { background: #fff; border: 1px solid rgba(0,0,0,.1); }
 .ribbon--new { background: #b04020; }
 .rt-tip-footer-dev { justify-content: space-between; }
 /* Hlasy/plán jsou u pracovní vrstvy jen naznačené — bez čísel, bez
@@ -2821,7 +2820,7 @@ function showDevTooltip(loc, m, rt, c) {
         <span style="width:5px;height:5px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}
       </div>
     </a>
-    <div class="ribbon-wrap"><div class="ribbon ribbon--bw">${soonLbl}</div></div>
+    <div class="ribbon-wrap"><div class="ribbon ribbon--bw" style="color:${c.color}">${soonLbl}</div></div>
     <a href="${detailUrl}" onclick="event.stopPropagation()" class="rt-tip-body" style="display:block;text-decoration:none;">
       <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;line-height:1.2;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px;">${name}</div>
       <div id="rtTipDevLede" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-4);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;">${loc.lede || ''}</div>
