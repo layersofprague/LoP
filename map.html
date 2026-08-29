@@ -19,6 +19,15 @@
 <script src="tags.js"></script>
 <script src="wiki-preview.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- MapLibre GL JS + Leaflet binding — pro vektorové dlaždice OpenFreeMap
+     (styl "positron", stejná vizuální rodina jako dřívější CARTO Positron,
+     ale trvale zdarma bez API klíče — viz report v chatu o CARTO
+     "API KEY REQUIRED"). Prostý L.tileLayer to neumí, vektorové dlaždice
+     potřebují vykreslovač (MapLibre), tenhle plugin ho zapojí do Leafletu
+     jako běžnou vrstvu. -->
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet"/>
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
 <style>
 /* ═══════════════ TOKENS ═══════════════ */
 :root {
@@ -3685,14 +3694,15 @@ function initMap() {
   /* CARTO odchází od rastrových dlaždic zdarma (basemaps.cartocdn.com) —
      bez API klíče teď vrací "API KEY REQUIRED" watermark místo mapy
      (trvalá změna byznys modelu, ne výpadek — viz report v chatu).
-     Esriho stará "Gray Canvas" varianta je z podobného důvodu označená
-     jako "(Retiring)", riskantní sázet na ni znovu. Přecházíme na čistý
-     OpenStreetMap standard (tile.openstreetmap.org) — jediná spolehlivě
-     trvale zdarma varianta bez klíče, provozovaná neziskovou nadací
-     přímo za tímhle účelem. */
-  BASE_LAYERS.carto = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    maxZoom: 19
+     OpenFreeMap nabízí styl "positron" — vychází ze STEJNÉ kartografie
+     jako CartoDB Positron (jen jako otevřené vektorové dlaždice), takže
+     vzhled zůstává prakticky identický s tím, co bylo předtím — a na
+     rozdíl od CARTO/Esri je to trvale zdarma bez klíče a bez limitů
+     (žádná firma, co může politiku zase změnit). Vektorové dlaždice
+     potřebují MapLibre GL (L.maplibreGL z pluginu), ne prostý L.tileLayer. */
+  BASE_LAYERS.carto = L.maplibreGL({
+    style: 'https://tiles.openfreemap.org/styles/positron',
+    attribution: '© OpenStreetMap contributors © OpenFreeMap',
   });
 
   /* V tmavém režimu nastoupí rovnou noční podklad. Invertovat světlé
@@ -3890,7 +3900,10 @@ function setBaseLayer(key, el, auto) {
 
   // Přidej novou jako spodní vrstvu
   newLayer.addTo(window._map);
-  newLayer.bringToBack();
+  // MapLibre GL vrstva (přes leaflet binding) nemusí bringToBack()
+  // implementovat stejně jako běžný L.tileLayer — nekritické (samotné
+  // pořadí přidání do mapy ji už staví jako spodní), ale ať to nepadá.
+  if (typeof newLayer.bringToBack === 'function') newLayer.bringToBack();
   _currentBaseLayer = key;
 
   // Aktualizuj UI
