@@ -3691,17 +3691,21 @@ function _forceLocalLabels(glMap) {
    zelená/modrá), ne barvy vlastního designu webu (--accent apod.) — to by
    na mapě působilo rušivě/nekonzistentně se zbytkem stylu. */
 function _boostContrast(glMap) {
+  /* Druhé kolo — první bylo přes okraj (report v chatu: "trochu uber").
+     Zeleň/voda/silnice/koleje zmírněny blíž k originálu, ale BUDOVY
+     naopak zvýrazněny víc — tmavší výplň + výrazně tmavší obrys, ať
+     jsou to ony, co na mapě vynikají nejvíc (o to šlo hlavně). */
   const paint = {
-    building:            { 'fill-color': 'rgb(214,210,199)', 'fill-outline-color': 'rgb(188,183,170)' },
-    landuse_residential: { 'fill-color': 'rgb(226,222,209)' },
-    park:                { 'fill-color': 'rgb(198,215,190)' },
-    landcover_wood:      { 'fill-color': 'rgb(174,199,168)' },
-    water:               { 'fill-color': 'rgb(168,190,201)' },
-    waterway:            { 'line-color': 'hsl(200,45%,58%)' },
-    highway_minor:       { 'line-color': 'hsl(0,0%,64%)' },
-    highway_path:        { 'line-color': 'rgb(195,195,195)' },
-    railway:             { 'line-color': '#8c8c8c' },
-    railway_service:     { 'line-color': '#8c8c8c' },
+    building:            { 'fill-color': 'rgb(206,201,187)', 'fill-outline-color': 'rgb(163,157,142)' },
+    landuse_residential: { 'fill-color': 'rgb(230,227,216)' },
+    park:                { 'fill-color': 'rgb(208,220,201)' },
+    landcover_wood:      { 'fill-color': 'rgb(190,209,184)' },
+    water:               { 'fill-color': 'rgb(180,198,207)' },
+    waterway:            { 'line-color': 'hsl(200,38%,62%)' },
+    highway_minor:       { 'line-color': 'hsl(0,0%,72%)' },
+    highway_path:        { 'line-color': 'rgb(205,205,205)' },
+    railway:             { 'line-color': '#999999' },
+    railway_service:     { 'line-color': '#999999' },
   };
   Object.entries(paint).forEach(([id, props]) => {
     if (!glMap.getLayer(id)) return;
