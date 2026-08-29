@@ -3691,19 +3691,17 @@ function _forceLocalLabels(glMap) {
    zelená/modrá), ne barvy vlastního designu webu (--accent apod.) — to by
    na mapě působilo rušivě/nekonzistentně se zbytkem stylu. */
 function _boostContrast(glMap) {
-  /* Čtvrté kolo (report v chatu):
-     - vedlejší silnice ještě blíž bílé
-     - chodníky (highway_path) víc potlačit — nižší opacita navíc k bledší barvě
-     - voda a zeleň méně sytá
-     - budovy víc do neutrální šedé, míň teplý/hnědavý odstín */
+  /* Páté kolo (report v chatu): zeleň/voda/budovy o 25 % blíž originálu
+     Positron (matematicky: nová = předchozí + 0.25×(originál−předchozí)),
+     vedlejší silnice ještě o kousek blíž bílé. */
   const paint = {
-    building:            { 'fill-color': 'rgb(206,204,199)', 'fill-outline-color': 'rgb(174,171,164)' },
+    building:            { 'fill-color': 'rgb(213,212,207)', 'fill-outline-color': 'rgb(185,183,178)' },
     landuse_residential: { 'fill-color': 'rgb(233,230,220)' },
-    park:                { 'fill-color': 'rgb(221,227,216)' },
-    landcover_wood:      { 'fill-color': 'rgb(208,219,204)' },
-    water:               { 'fill-color': 'rgb(197,207,212)' },
-    waterway:            { 'line-color': 'hsl(200,25%,70%)' },
-    highway_minor:       { 'line-color': 'hsl(0,0%,97%)' },
+    park:                { 'fill-color': 'rgb(223,229,219)' },
+    landcover_wood:      { 'fill-color': 'rgb(211,220,208)' },
+    water:               { 'fill-color': 'rgb(196,205,210)' },
+    waterway:            { 'line-color': 'hsl(199,23%,72%)' },
+    highway_minor:       { 'line-color': 'hsl(0,0%,98.5%)' },
     highway_path:        { 'line-color': 'rgb(222,222,222)', 'line-opacity': 0.55 },
     railway:             { 'line-color': '#a8a8a8' },
     railway_service:     { 'line-color': '#a8a8a8' },
