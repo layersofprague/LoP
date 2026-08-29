@@ -3751,7 +3751,16 @@ function initMap() {
   const map = L.map('map', {
     center: [50.0835, 14.4200],
     zoom: 14,
-    zoomControl: false
+    zoomControl: false,
+    /* Omezení na katastr Prahy + malá rezerva do okolí — nemá smysl umožnit
+       odzoomovat na celou ČR/svět, aplikace je jen o Praze (report v chatu).
+       Souřadnice katastru Prahy zhruba 49.942–50.178 / 14.225–14.706,
+       s rezervou navíc na obě strany. maxBoundsViscosity:1 = pevná hranice
+       (bez "gumového" doražení), minZoom odpovídá zoomu, na kterém se
+       celá Praha i s rezervou vejde na obrazovku. */
+    maxBounds: [[49.90, 14.15], [50.22, 14.75]],
+    maxBoundsViscosity: 1.0,
+    minZoom: 11,
   });
   window._map = map;
 
