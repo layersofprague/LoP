@@ -257,11 +257,12 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 #topSearch .ts-hint span { cursor: pointer; }
 #topSearch .ts-hint span:hover { color: var(--ink); }
 .leaflet-container { background: var(--paper-2); font-family: 'Inter', sans-serif; }
-/* Noční podklad = běžné OSM dlaždice invertované CSS filtrem, ne
-   samostatný "dark" tile provider (CARTO dark_all teď vyžaduje API
-   klíč, viz report v chatu). className na L.tileLayer aplikuje tohle
-   jen na TUHLE konkrétní vrstvu, ne plošně na celou mapu (piny,
-   ortofoto atd. zůstávají nedotčené). */
+/* Noční podklad = stejný vektorový styl Positron jako denní vrstva,
+   jen invertovaný CSS filtrem (aplikuje se na kontejner MapLibre mapy,
+   viz _getOrCreateLayer('dark') — L.maplibreGL nemá className opci).
+   Dřív invertovaly obyčejné OSM rastrové dlaždice, ale ty mají čísla
+   silnic a spoustu detailů napečené v bitmapě, po invertaci to vypadalo
+   špinavě (viz report v chatu). Positron je čistý, invertuje se hezky. */
 .lop-dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
 .leaflet-control-zoom {
   border: 1px solid var(--rule) !important;
@@ -3640,6 +3641,31 @@ function updateApplyBtn(n) {
   ap.textContent = t('overview.apply_n', { n: n, w: w });
 }
 
+/* Styl Positron (OpenFreeMap) na rozdíl od původního CARTO rastru
+   zobrazuje čísla silnic (dálniční/silniční štítky typu "MO", "241",
+   "7") — u vektorových dlaždic to jde na rozdíl od rastru vypnout,
+   stačí schovat konkrétní vrstvy stylu. Zjištěno ze zdrojového JSON
+   (github.com/hyperknot/openfreemap-styles, styly/positron/style.json)
+   — v Praze/ČR relevantní je hlavně "highway-shield-non-us", ale
+   schované jsou všechny 3 US/non-US varianty pro jistotu. Viz report
+   v chatu (čísla silnic se hýbala při zoomu = potvrzeno, že jde o
+   vektorová, ne rastrová data). Top-level funkce, ne lokální uvnitř
+   initMap() — potřebuje je i _getOrCreateLayer() pro 'dark' vrstvu,
+   která vzniká později, mimo initMap()'s scope. */
+function _hideRoadShields(glMap) {
+  ['highway-shield-non-us', 'highway-shield-us-interstate', 'road_shield_us'].forEach(id => {
+    if (glMap.getLayer(id)) glMap.setLayoutProperty(id, 'visibility', 'none');
+  });
+}
+function _onMaplibreReady(leafletGLLayer, cb) {
+  leafletGLLayer.on('add', function () {
+    const glMap = leafletGLLayer.getMaplibreMap && leafletGLLayer.getMaplibreMap();
+    if (!glMap) return;
+    if (glMap.isStyleLoaded()) cb(glMap);
+    else glMap.once('load', () => cb(glMap));
+  });
+}
+
 function initMap() {
   if (window._map) return; // ochrana před dvojitou inicializací
   const map = L.map('map', {
@@ -3704,6 +3730,7 @@ function initMap() {
     style: 'https://tiles.openfreemap.org/styles/positron',
     attribution: '© OpenStreetMap contributors © OpenFreeMap',
   });
+  _onMaplibreReady(BASE_LAYERS.carto, _hideRoadShields);
 
   /* V tmavém režimu nastoupí rovnou noční podklad. Invertovat světlé
      dlaždice by nešlo použít plošně — z noční mapy by udělalo denní
@@ -3836,15 +3863,24 @@ function _getOrCreateLayer(key) {
     });
   } else if (key === 'dark') {
     /* Stejný důvod jako u výchozí vrstvy — CARTO dark_all bez klíče
-       vrací jen "API KEY REQUIRED" watermark. Noční vzhled teď vzniká
-       CSS invertací běžných OSM dlaždic (jen na téhle vrstvě přes
-       className, ne plošně na celé mapě — to by pokazilo ortofoto
-       i piny, viz komentář výš u _initLayer). Osvědčený, spolehlivě
-       klíč-prostý trik, žádná závislost na dalším externím poskytovateli. */
-    BASE_LAYERS.dark = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, attribution: '© OpenStreetMap',
-      className: 'lop-dark-tiles',
+       vrací jen "API KEY REQUIRED" watermark. Původně řešeno invertací
+       obyčejných OSM rastrových dlaždic, ale ty mají čísla silnic
+       (MO, 241...) a spoustu detailů napečené přímo v bitmapě — po
+       invertaci to vypadalo rušivě/špinavě (viz report v chatu).
+       Teď invertujeme STEJNÝ čistý vektorový styl Positron, co má
+       výchozí denní vrstva — mnohem méně detailů ke zkreslení, žádná
+       čísla silnic. L.maplibreGL nemá "className" opci jako L.tileLayer,
+       proto se třída přidává ručně na kontejner po vytvoření mapy. */
+    BASE_LAYERS.dark = L.maplibreGL({
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      attribution: '© OpenStreetMap contributors © OpenFreeMap',
     });
+    BASE_LAYERS.dark.on('add', function () {
+      const glMap = BASE_LAYERS.dark.getMaplibreMap && BASE_LAYERS.dark.getMaplibreMap();
+      const el = glMap ? glMap.getContainer() : null;
+      if (el) el.classList.add('lop-dark-tiles');
+    });
+    _onMaplibreReady(BASE_LAYERS.dark, _hideRoadShields);
   } else if (key === 'orto') {
     BASE_LAYERS.orto = L.tileLayer.wms(
       'https://gs-pub.praha.eu/arcgis/services/ort/ortofotomapa_archiv/MapServer/WmsServer', {
