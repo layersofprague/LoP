@@ -3657,13 +3657,33 @@ function _hideRoadShields(glMap) {
     if (glMap.getLayer(id)) glMap.setLayoutProperty(id, 'visibility', 'none');
   });
 }
+/* Poll misto tichého vzdání se — na 'add' eventu nemusí být podkladová
+   maplibre-gl mapa ještě vytvořená (plugin ji staví asynchronně), takže
+   getMaplibreMap() může chvíli vracet null/undefined. Dřívější verze
+   v tom případě jen potichu skončila přes "if (!glMap) return;" — takže
+   se nikdy nespustilo ani schování čísel silnic, ani invertovaný filtr
+   nočního režimu (viz report v chatu: tmavý režim vybraný v nastavení,
+   ale mapa zůstala světlá i s viditelnými čísly silnic). Zkouší to znovu
+   po 50 ms, max 4 sekundy, než to vzdá.
+
+   resize() navíc řeší další možnou příčinu stejného příznaku — běžná
+   neduha WebGL vrstev (MapLibre): nová instance vzniklá při přepnutí
+   mezi vrstvami (světlá→tmavá) může zdědit špatné rozměry canvasu, dokud
+   se explicitně nepřepočítá. Leafletové dlaždice by se samy překreslily
+   správně, MapLibre ne vždy. */
 function _onMaplibreReady(leafletGLLayer, cb) {
-  leafletGLLayer.on('add', function () {
+  function waitForGlMap(triesLeft) {
     const glMap = leafletGLLayer.getMaplibreMap && leafletGLLayer.getMaplibreMap();
-    if (!glMap) return;
-    if (glMap.isStyleLoaded()) cb(glMap);
-    else glMap.once('load', () => cb(glMap));
-  });
+    if (glMap) {
+      glMap.resize();
+      if (glMap.isStyleLoaded()) cb(glMap);
+      else glMap.once('load', () => cb(glMap));
+      return;
+    }
+    if (triesLeft <= 0) { console.warn('MapLibre mapa se nepodařilo získat včas.'); return; }
+    setTimeout(() => waitForGlMap(triesLeft - 1), 50);
+  }
+  leafletGLLayer.on('add', () => waitForGlMap(80)); // 80 × 50 ms = 4 s
 }
 
 function initMap() {
@@ -3870,17 +3890,21 @@ function _getOrCreateLayer(key) {
        Teď invertujeme STEJNÝ čistý vektorový styl Positron, co má
        výchozí denní vrstva — mnohem méně detailů ke zkreslení, žádná
        čísla silnic. L.maplibreGL nemá "className" opci jako L.tileLayer,
-       proto se třída přidává ručně na kontejner po vytvoření mapy. */
+       proto se třída přidává ručně na kontejner — přes _onMaplibreReady
+       (stejný "styl je načtený" checkpoint jako schování čísel silnic),
+       ne přes prostý 'add' event, který mohl mít problém s timingem
+       (report v chatu: tmavý režim v nastavení, ale mapa zůstala
+       světlá — 'add' se spouští hned po přidání vrstvy, kdy kontejner
+       nemusí být ještě spolehlivě k dispozici; 'load' je jistota). */
     BASE_LAYERS.dark = L.maplibreGL({
       style: 'https://tiles.openfreemap.org/styles/positron',
       attribution: '© OpenStreetMap contributors © OpenFreeMap',
     });
-    BASE_LAYERS.dark.on('add', function () {
-      const glMap = BASE_LAYERS.dark.getMaplibreMap && BASE_LAYERS.dark.getMaplibreMap();
-      const el = glMap ? glMap.getContainer() : null;
+    _onMaplibreReady(BASE_LAYERS.dark, function (glMap) {
+      _hideRoadShields(glMap);
+      const el = glMap.getContainer();
       if (el) el.classList.add('lop-dark-tiles');
     });
-    _onMaplibreReady(BASE_LAYERS.dark, _hideRoadShields);
   } else if (key === 'orto') {
     BASE_LAYERS.orto = L.tileLayer.wms(
       'https://gs-pub.praha.eu/arcgis/services/ort/ortofotomapa_archiv/MapServer/WmsServer', {

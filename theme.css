@@ -50,7 +50,15 @@ html[data-theme="dark"] {
   --cat-hist: #ADADA7;
   --cat-hist-soft: #3A3A36;
   --cat-arch: #6E95BE;
-  --cat-art:  #E07A4E;
+  /* --cat-art a --cat-fun jsou VE SVĚTLÉM režimu na všech stránkách
+     stejná barva (#E0A020) — jde o tutéž kategorii "Umění" pod dvěma
+     názvy proměnné (--cat-fun je starší, z doby před přejmenováním
+     "Zajímavosti" → "Umění", přežil v mnoha dalších souborech). Tady
+     ale dřív měly OMYLEM každá jinou hodnotu (--cat-art cihlová/
+     terakotová #E07A4E, --cat-fun žlutá #E8B84B) — piny kategorie
+     Umění tak byly v tmavém režimu cihlové místo žluté (report v
+     chatu). Sjednoceno na jednu žlutou hodnotu pro obě jména. */
+  --cat-art:  #E8B84B;
   --cat-fun:  #E8B84B;
 }
 
