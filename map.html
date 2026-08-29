@@ -3657,6 +3657,30 @@ function _hideRoadShields(glMap) {
     if (glMap.getLayer(id)) glMap.setLayoutProperty(id, 'visibility', 'none');
   });
 }
+
+/* Styl Positron kombinuje na popiscích (vodní plochy, silnice, obce,
+   čtvrti) výraz "coalesce(name_en, name)" — pokud OSM data mají u
+   místa vyplněný anglický název (name:en), přednostně se použije PŘED
+   místním, jinak se zobrazí místní. Odtud nekonzistentní míchání
+   češtiny a angličtiny na mapě (viz report v chatu — "Malá Strana" má
+   anglický název "Lesser Town" vyplněný, tak vyhraje, sousední ulice
+   ho nemají, tak zůstanou česky). Přepsáno na prosté "name" všude —
+   jde jen o mírně jinou variantu stejného triku jako u čísel silnic
+   (setLayoutProperty, ne visibility ale samotné text-field). Vedlejší
+   dopad: světové velkoměsta z jiných písem (Tokio, Moskva...) ztratí
+   svůj přepis do latinky vedle původního jména — u mapy zaměřené na
+   Prahu a okolí zanedbatelné. */
+function _forceLocalLabels(glMap) {
+  const layerIds = [
+    'waterway_line_label', 'water_name_point_label', 'water_name_line_label',
+    'highway-name-path', 'highway-name-minor', 'highway-name-major',
+    'airport', 'label_other', 'label_village', 'label_town', 'label_state',
+    'label_city', 'label_city_capital', 'label_country_3', 'label_country_2', 'label_country_1',
+  ];
+  layerIds.forEach(id => {
+    if (glMap.getLayer(id)) glMap.setLayoutProperty(id, 'text-field', ['get', 'name']);
+  });
+}
 /* Poll misto tichého vzdání se — na 'add' eventu nemusí být podkladová
    maplibre-gl mapa ještě vytvořená (plugin ji staví asynchronně), takže
    getMaplibreMap() může chvíli vracet null/undefined. Dřívější verze
@@ -3750,7 +3774,10 @@ function initMap() {
     style: 'https://tiles.openfreemap.org/styles/positron',
     attribution: '© OpenStreetMap contributors © OpenFreeMap',
   });
-  _onMaplibreReady(BASE_LAYERS.carto, _hideRoadShields);
+  _onMaplibreReady(BASE_LAYERS.carto, function (glMap) {
+    _hideRoadShields(glMap);
+    _forceLocalLabels(glMap);
+  });
 
   /* V tmavém režimu nastoupí rovnou noční podklad. Invertovat světlé
      dlaždice by nešlo použít plošně — z noční mapy by udělalo denní
@@ -3902,6 +3929,7 @@ function _getOrCreateLayer(key) {
     });
     _onMaplibreReady(BASE_LAYERS.dark, function (glMap) {
       _hideRoadShields(glMap);
+      _forceLocalLabels(glMap);
       const el = glMap.getContainer();
       if (el) el.classList.add('lop-dark-tiles');
     });
