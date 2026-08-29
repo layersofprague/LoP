@@ -3681,6 +3681,33 @@ function _forceLocalLabels(glMap) {
     if (glMap.getLayer(id)) glMap.setLayoutProperty(id, 'text-field', ['get', 'name']);
   });
 }
+
+/* Positron je navržený jako extrémně tlumený podklad pro datové vizualizace
+   (budovy/vedlejší ulice/zeleň/koleje jsou skoro stejný odstín šedé —
+   rgb(234,234,229/230) budovy i rezidenční plocha, hsl(0,0%,88%) vedlejší
+   ulice) — na slunci to splývá (report v chatu). setPaintProperty() na
+   konkrétních vrstvách zesytí/ztmaví barvy, ne jen viditelnost/text jako
+   předchozí dvě úpravy. Zámerně zůstáváme v NEUTRÁLNÍCH odstínech (šedá/
+   zelená/modrá), ne barvy vlastního designu webu (--accent apod.) — to by
+   na mapě působilo rušivě/nekonzistentně se zbytkem stylu. */
+function _boostContrast(glMap) {
+  const paint = {
+    building:            { 'fill-color': 'rgb(214,210,199)', 'fill-outline-color': 'rgb(188,183,170)' },
+    landuse_residential: { 'fill-color': 'rgb(226,222,209)' },
+    park:                { 'fill-color': 'rgb(198,215,190)' },
+    landcover_wood:      { 'fill-color': 'rgb(174,199,168)' },
+    water:               { 'fill-color': 'rgb(168,190,201)' },
+    waterway:            { 'line-color': 'hsl(200,45%,58%)' },
+    highway_minor:       { 'line-color': 'hsl(0,0%,64%)' },
+    highway_path:        { 'line-color': 'rgb(195,195,195)' },
+    railway:             { 'line-color': '#8c8c8c' },
+    railway_service:     { 'line-color': '#8c8c8c' },
+  };
+  Object.entries(paint).forEach(([id, props]) => {
+    if (!glMap.getLayer(id)) return;
+    Object.entries(props).forEach(([prop, val]) => glMap.setPaintProperty(id, prop, val));
+  });
+}
 /* Poll misto tichého vzdání se — na 'add' eventu nemusí být podkladová
    maplibre-gl mapa ještě vytvořená (plugin ji staví asynchronně), takže
    getMaplibreMap() může chvíli vracet null/undefined. Dřívější verze
@@ -3777,6 +3804,7 @@ function initMap() {
   _onMaplibreReady(BASE_LAYERS.carto, function (glMap) {
     _hideRoadShields(glMap);
     _forceLocalLabels(glMap);
+    _boostContrast(glMap);
   });
 
   /* V tmavém režimu nastoupí rovnou noční podklad. Invertovat světlé
