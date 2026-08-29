@@ -248,6 +248,12 @@ body.lop-return .llo-bottom-placeholder { display: block; }
 #topSearch .ts-hint span { cursor: pointer; }
 #topSearch .ts-hint span:hover { color: var(--ink); }
 .leaflet-container { background: var(--paper-2); font-family: 'Inter', sans-serif; }
+/* Noční podklad = běžné OSM dlaždice invertované CSS filtrem, ne
+   samostatný "dark" tile provider (CARTO dark_all teď vyžaduje API
+   klíč, viz report v chatu). className na L.tileLayer aplikuje tohle
+   jen na TUHLE konkrétní vrstvu, ne plošně na celou mapu (piny,
+   ortofoto atd. zůstávají nedotčené). */
+.lop-dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
 .leaflet-control-zoom {
   border: 1px solid var(--rule) !important;
   box-shadow: 0 2px 10px rgba(26,24,20,.06) !important;
@@ -3676,9 +3682,17 @@ function initMap() {
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   setTimeout(alignPuck, 100);
 
-  BASE_LAYERS.carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap © CARTO',
-    subdomains: 'abcd', maxZoom: 20
+  /* CARTO odchází od rastrových dlaždic zdarma (basemaps.cartocdn.com) —
+     bez API klíče teď vrací "API KEY REQUIRED" watermark místo mapy
+     (trvalá změna byznys modelu, ne výpadek — viz report v chatu).
+     Esriho stará "Gray Canvas" varianta je z podobného důvodu označená
+     jako "(Retiring)", riskantní sázet na ni znovu. Přecházíme na čistý
+     OpenStreetMap standard (tile.openstreetmap.org) — jediná spolehlivě
+     trvale zdarma varianta bez klíče, provozovaná neziskovou nadací
+     přímo za tímhle účelem. */
+  BASE_LAYERS.carto = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19
   });
 
   /* V tmavém režimu nastoupí rovnou noční podklad. Invertovat světlé
@@ -3811,8 +3825,15 @@ function _getOrCreateLayer(key) {
       maxZoom: 19, attribution: '© OpenStreetMap',
     });
   } else if (key === 'dark') {
-    BASE_LAYERS.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19, attribution: '© CARTO',
+    /* Stejný důvod jako u výchozí vrstvy — CARTO dark_all bez klíče
+       vrací jen "API KEY REQUIRED" watermark. Noční vzhled teď vzniká
+       CSS invertací běžných OSM dlaždic (jen na téhle vrstvě přes
+       className, ne plošně na celé mapě — to by pokazilo ortofoto
+       i piny, viz komentář výš u _initLayer). Osvědčený, spolehlivě
+       klíč-prostý trik, žádná závislost na dalším externím poskytovateli. */
+    BASE_LAYERS.dark = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap',
+      className: 'lop-dark-tiles',
     });
   } else if (key === 'orto') {
     BASE_LAYERS.orto = L.tileLayer.wms(
