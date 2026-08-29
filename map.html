@@ -3691,21 +3691,23 @@ function _forceLocalLabels(glMap) {
    zelená/modrá), ne barvy vlastního designu webu (--accent apod.) — to by
    na mapě působilo rušivě/nekonzistentně se zbytkem stylu. */
 function _boostContrast(glMap) {
-  /* Druhé kolo — první bylo přes okraj (report v chatu: "trochu uber").
-     Zeleň/voda/silnice/koleje zmírněny blíž k originálu, ale BUDOVY
-     naopak zvýrazněny víc — tmavší výplň + výrazně tmavší obrys, ať
-     jsou to ony, co na mapě vynikají nejvíc (o to šlo hlavně). */
+  /* Třetí kolo (report v chatu):
+     1) celkově ještě trochu utlumit sytost
+     2) highway_minor byla omylem tmavší než hlavní silnice (ty renderuje
+        Positron jako skoro čisté #fff — highway_major_inner), takže vedlejší
+        ulice vizuálně "vyhrávaly" nad hlavními. Posunuto blízko bílé,
+        jen s nepatrným odstínem pro čitelnost na bílém pozadí budov. */
   const paint = {
-    building:            { 'fill-color': 'rgb(206,201,187)', 'fill-outline-color': 'rgb(163,157,142)' },
-    landuse_residential: { 'fill-color': 'rgb(230,227,216)' },
-    park:                { 'fill-color': 'rgb(208,220,201)' },
-    landcover_wood:      { 'fill-color': 'rgb(190,209,184)' },
-    water:               { 'fill-color': 'rgb(180,198,207)' },
-    waterway:            { 'line-color': 'hsl(200,38%,62%)' },
-    highway_minor:       { 'line-color': 'hsl(0,0%,72%)' },
-    highway_path:        { 'line-color': 'rgb(205,205,205)' },
-    railway:             { 'line-color': '#999999' },
-    railway_service:     { 'line-color': '#999999' },
+    building:            { 'fill-color': 'rgb(212,207,194)', 'fill-outline-color': 'rgb(178,172,157)' },
+    landuse_residential: { 'fill-color': 'rgb(233,230,220)' },
+    park:                { 'fill-color': 'rgb(213,223,207)' },
+    landcover_wood:      { 'fill-color': 'rgb(197,213,192)' },
+    water:               { 'fill-color': 'rgb(186,202,210)' },
+    waterway:            { 'line-color': 'hsl(200,33%,66%)' },
+    highway_minor:       { 'line-color': 'hsl(0,0%,94%)' },
+    highway_path:        { 'line-color': 'rgb(212,212,212)' },
+    railway:             { 'line-color': '#a8a8a8' },
+    railway_service:     { 'line-color': '#a8a8a8' },
   };
   Object.entries(paint).forEach(([id, props]) => {
     if (!glMap.getLayer(id)) return;
