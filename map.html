@@ -3693,7 +3693,12 @@ function _forceLocalLabels(glMap) {
 function _boostContrast(glMap) {
   /* Páté kolo (report v chatu): zeleň/voda/budovy o 25 % blíž originálu
      Positron (matematicky: nová = předchozí + 0.25×(originál−předchozí)),
-     vedlejší silnice ještě o kousek blíž bílé. */
+     vedlejší silnice ještě o kousek blíž bílé.
+
+     Šesté kolo: tramvajové tratě (railway_transit — trať i s obvyklou
+     "class":"transit" v OpenMapTiles schématu, pokrývá tramvaj/metro/
+     light-rail) měly stejnou barvu jako obyčejné koleje (#dddddd) a
+     splývaly. Tmavší, výraznější barva + o něco silnější čára. */
   const paint = {
     building:            { 'fill-color': 'rgb(213,212,207)', 'fill-outline-color': 'rgb(185,183,178)' },
     landuse_residential: { 'fill-color': 'rgb(233,230,220)' },
@@ -3705,6 +3710,7 @@ function _boostContrast(glMap) {
     highway_path:        { 'line-color': 'rgb(222,222,222)', 'line-opacity': 0.55 },
     railway:             { 'line-color': '#a8a8a8' },
     railway_service:     { 'line-color': '#a8a8a8' },
+    railway_transit:     { 'line-color': '#6e6e6e', 'line-width': 3.5 },
   };
   Object.entries(paint).forEach(([id, props]) => {
     if (!glMap.getLayer(id)) return;
